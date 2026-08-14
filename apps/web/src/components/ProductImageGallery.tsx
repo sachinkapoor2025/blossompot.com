@@ -71,7 +71,7 @@ export function ProductImageGallery({ images, alt }: ProductImageGalleryProps) {
   const imgRef = useRef<HTMLImageElement>(null);
   const isDesktop = useDesktopHoverZoom();
 
-  const resolved = useMemo(() => resolveImageUrls(images), [images]);
+  const resolved = useMemo(() => resolveImageUrls(images).slice(0, 4), [images]);
   // Show the full list immediately so multi-image PDPs never look like a single photo
   // while size filtering runs (or if remote probes fail).
   const imgs = displayImgs.length > 0 ? displayImgs : resolved;
@@ -88,8 +88,9 @@ export function ProductImageGallery({ images, alt }: ProductImageGalleryProps) {
 
     const finish = () => {
       if (cancelled) return;
-      const picked = selectDisplayableProductImages(measured);
-      setDisplayImgs(picked.length > 0 ? picked : resolved.slice(0, 1));
+      const picked = selectDisplayableProductImages(measured).slice(0, 4);
+      // Keep all resolved frames if probes fail — blank main image is worse than a retry.
+      setDisplayImgs(picked.length > 0 ? picked : resolved);
     };
 
     resolved.forEach((url) => {

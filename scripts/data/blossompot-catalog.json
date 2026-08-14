@@ -9,7 +9,10 @@
       "currency": "USD",
       "categorySlug": "flowers",
       "images": [
-        "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=800&q=80"
+        "https://images.unsplash.com/photo-1508610048659-a06b669e3321?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://picsum.photos/seed/classic-red-rose-bouquet-2/800/800",
+        "https://picsum.photos/seed/classic-red-rose-bouquet-3/800/800"
       ],
       "inventory": 100,
       "tags": [
@@ -41,7 +44,10 @@
       "currency": "USD",
       "categorySlug": "flowers",
       "images": [
-        "https://images.unsplash.com/photo-1561181286-d3fee7f33730?w=800&q=80"
+        "https://images.unsplash.com/photo-1470506028280-a011fb34b6f7?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://picsum.photos/seed/premium-red-roses-2/800/800",
+        "https://picsum.photos/seed/premium-red-roses-3/800/800"
       ],
       "inventory": 100,
       "tags": [
@@ -73,7 +79,10 @@
       "currency": "USD",
       "categorySlug": "flowers",
       "images": [
-        "https://images.unsplash.com/photo-1496060151317-51f9dae2a7d0?w=800&q=80"
+        "https://images.unsplash.com/photo-1591886960571-74d43a9d4166?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1462275646964-a0e3386b89fa?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://picsum.photos/seed/pink-rose-bouquet-2/800/800",
+        "https://picsum.photos/seed/pink-rose-bouquet-3/800/800"
       ],
       "inventory": 100,
       "tags": [
@@ -101,7 +110,10 @@
       "currency": "USD",
       "categorySlug": "flower-bouquets",
       "images": [
-        "https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=800&q=80"
+        "https://images.unsplash.com/photo-1487530811176-3780de880c2d?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://picsum.photos/seed/mixed-flower-bouquet-2/800/800",
+        "https://picsum.photos/seed/mixed-flower-bouquet-3/800/800"
       ],
       "inventory": 100,
       "tags": [
@@ -130,7 +142,10 @@
       "currency": "USD",
       "categorySlug": "flowers",
       "images": [
-        "https://images.unsplash.com/photo-1468327768560-75b778cbb551?w=800&q=80"
+        "https://images.unsplash.com/photo-1457089328109-e5d9bd499191?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://picsum.photos/seed/elegant-white-roses-2/800/800",
+        "https://picsum.photos/seed/elegant-white-roses-3/800/800"
       ],
       "inventory": 100,
       "tags": [
@@ -158,7 +173,10 @@
       "currency": "USD",
       "categorySlug": "flower-bouquets",
       "images": [
-        "https://images.unsplash.com/photo-1561181286-d3fee7f33730?w=800&q=80"
+        "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1446071103084-c257b5f70672?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://picsum.photos/seed/luxury-premium-bouquet-2/800/800",
+        "https://picsum.photos/seed/luxury-premium-bouquet-3/800/800"
       ],
       "inventory": 100,
       "tags": [
@@ -190,7 +208,10 @@
       "currency": "USD",
       "categorySlug": "flowers",
       "images": [
-        "https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?w=800&q=80"
+        "https://images.unsplash.com/photo-1468327768560-75b778cbb551?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1465146633011-14f8e0781093?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://picsum.photos/seed/sunny-tulip-bunch-2/800/800",
+        "https://picsum.photos/seed/sunny-tulip-bunch-3/800/800"
       ],
       "inventory": 100,
       "tags": [
@@ -218,7 +239,10 @@
       "currency": "USD",
       "categorySlug": "flower-bouquets",
       "images": [
-        "https://images.unsplash.com/photo-1597848212624-e5938b0e6e8e?w=800&q=80"
+        "https://images.unsplash.com/photo-1508610048659-a06b669e3321?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://picsum.photos/seed/sunshine-sunflower-bouquet-2/800/800",
+        "https://picsum.photos/seed/sunshine-sunflower-bouquet-3/800/800"
       ],
       "inventory": 100,
       "tags": [
@@ -245,7 +269,10 @@
       "currency": "USD",
       "categorySlug": "plants",
       "images": [
-        "https://images.unsplash.com/photo-1566511867658-0f1dd5dbab48?w=800&q=80"
+        "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1509423350716-97f9360b4e09?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -273,7 +300,10 @@
       "currency": "USD",
       "categorySlug": "cakes",
       "images": [
-        "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&q=80"
+        "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1481391319762-47dff72954d9?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1621303837174-89787a7d4729?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1535141192574-5d4897c12636?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -305,7 +335,10 @@
       "currency": "USD",
       "categorySlug": "cakes",
       "images": [
-        "https://images.unsplash.com/photo-1616541823720-00cb778e0e0b?w=800&q=80"
+        "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1486427944299-d1955d23e34d?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1614707267537-b85aaf00c4b7?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -333,7 +366,10 @@
       "currency": "USD",
       "categorySlug": "cakes",
       "images": [
-        "https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=800&q=80"
+        "https://images.unsplash.com/photo-1535141192574-5d4897c12636?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1571115177098-24ec42ed204d?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -361,7 +397,10 @@
       "currency": "USD",
       "categorySlug": "cakes",
       "images": [
-        "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=800&q=80"
+        "https://images.unsplash.com/photo-1614707267537-b85aaf00c4b7?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1481391319762-47dff72954d9?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -388,7 +427,10 @@
       "currency": "USD",
       "categorySlug": "cakes",
       "images": [
-        "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=800&q=80"
+        "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1486427944299-d1955d23e34d?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -420,7 +462,10 @@
       "currency": "USD",
       "categorySlug": "cakes",
       "images": [
-        "https://images.unsplash.com/photo-1558301211-0018f0a9a4f5?w=800&q=80"
+        "https://images.unsplash.com/photo-1481391319762-47dff72954d9?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1621303837174-89787a7d4729?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1535141192574-5d4897c12636?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -452,7 +497,10 @@
       "currency": "USD",
       "categorySlug": "gift-hampers",
       "images": [
-        "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=800&q=80"
+        "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1607344645866-009c320b63e0?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -481,7 +529,10 @@
       "currency": "USD",
       "categorySlug": "anniversary-gifts",
       "images": [
-        "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&q=80"
+        "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -509,7 +560,10 @@
       "currency": "USD",
       "categorySlug": "birthday-gifts",
       "images": [
-        "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=800&q=80"
+        "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1607344645866-009c320b63e0?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -537,7 +591,10 @@
       "currency": "USD",
       "categorySlug": "personalized-gifts",
       "images": [
-        "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&q=80"
+        "https://images.unsplash.com/photo-1607344645866-009c320b63e0?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -566,7 +623,10 @@
       "currency": "USD",
       "categorySlug": "celebration-gifts",
       "images": [
-        "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=800&q=80"
+        "https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1607344645866-009c320b63e0?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -595,7 +655,10 @@
       "currency": "USD",
       "categorySlug": "birthday-gifts",
       "images": [
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"
+        "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1607344645866-009c320b63e0?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -623,7 +686,10 @@
       "currency": "USD",
       "categorySlug": "valentines-day-gifts",
       "images": [
-        "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=800&q=80"
+        "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -652,7 +718,10 @@
       "currency": "USD",
       "categorySlug": "mothers-day-gifts",
       "images": [
-        "https://images.unsplash.com/photo-1496060151317-51f9dae2a7d0?w=800&q=80"
+        "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1607344645866-009c320b63e0?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -679,7 +748,10 @@
       "currency": "USD",
       "categorySlug": "wedding-gifts",
       "images": [
-        "https://images.unsplash.com/photo-1468327768560-75b778cbb551?w=800&q=80"
+        "https://images.unsplash.com/photo-1607344645866-009c320b63e0?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -707,7 +779,10 @@
       "currency": "USD",
       "categorySlug": "same-day-gifts",
       "images": [
-        "https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=800&q=80"
+        "https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1607344645866-009c320b63e0?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -736,7 +811,10 @@
       "currency": "USD",
       "categorySlug": "same-day-gifts",
       "images": [
-        "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&q=80"
+        "https://images.unsplash.com/photo-1614707267537-b85aaf00c4b7?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1481391319762-47dff72954d9?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -764,7 +842,10 @@
       "currency": "USD",
       "categorySlug": "plants",
       "images": [
-        "https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=800&q=80"
+        "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1509423350716-97f9360b4e09?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -792,7 +873,10 @@
       "currency": "USD",
       "categorySlug": "plants",
       "images": [
-        "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=800&q=80"
+        "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1509423350716-97f9360b4e09?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -820,7 +904,10 @@
       "currency": "USD",
       "categorySlug": "celebration-gifts",
       "images": [
-        "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&q=80"
+        "https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -848,7 +935,10 @@
       "currency": "USD",
       "categorySlug": "gift-hampers",
       "images": [
-        "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=800&q=80"
+        "https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1607344645866-009c320b63e0?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -876,7 +966,10 @@
       "currency": "USD",
       "categorySlug": "flower-bouquets",
       "images": [
-        "https://images.unsplash.com/photo-1496060151317-51f9dae2a7d0?w=800&q=80"
+        "https://images.unsplash.com/photo-1591886960571-74d43a9d4166?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1462275646964-a0e3386b89fa?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://picsum.photos/seed/blush-bouquet-deluxe-2/800/800",
+        "https://picsum.photos/seed/blush-bouquet-deluxe-3/800/800"
       ],
       "inventory": 100,
       "tags": [
@@ -904,7 +997,10 @@
       "currency": "USD",
       "categorySlug": "flowers",
       "images": [
-        "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=800&q=80"
+        "https://images.unsplash.com/photo-1487530811176-3780de880c2d?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://picsum.photos/seed/red-rose-dozen-plus-2/800/800",
+        "https://picsum.photos/seed/red-rose-dozen-plus-3/800/800"
       ],
       "inventory": 100,
       "tags": [
@@ -932,7 +1028,10 @@
       "currency": "USD",
       "categorySlug": "birthday-gifts",
       "images": [
-        "https://images.unsplash.com/photo-1558301211-0018f0a9a4f5?w=800&q=80"
+        "https://images.unsplash.com/photo-1621303837174-89787a7d4729?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1535141192574-5d4897c12636?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1571115177098-24ec42ed204d?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -960,7 +1059,10 @@
       "currency": "USD",
       "categorySlug": "celebration-gifts",
       "images": [
-        "https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=800&q=80"
+        "https://images.unsplash.com/photo-1607344645866-009c320b63e0?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -988,7 +1090,10 @@
       "currency": "USD",
       "categorySlug": "anniversary-gifts",
       "images": [
-        "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=800&q=80"
+        "https://images.unsplash.com/photo-1571115177098-24ec42ed204d?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [
@@ -1018,7 +1123,10 @@
       "currency": "USD",
       "categorySlug": "celebration-gifts",
       "images": [
-        "https://images.unsplash.com/photo-1496060151317-51f9dae2a7d0?w=800&q=80"
+        "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&w=800&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1607344645866-009c320b63e0?auto=format&w=800&h=880&fit=crop&crop=entropy&q=80",
+        "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&w=800&h=800&fit=crop&crop=edges&q=80",
+        "https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&w=840&h=800&fit=crop&crop=faces&q=80"
       ],
       "inventory": 100,
       "tags": [

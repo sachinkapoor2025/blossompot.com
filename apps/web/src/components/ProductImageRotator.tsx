@@ -7,7 +7,8 @@ import {
   type SizedProductImage,
 } from "@blossompot/shared";
 
-const ROTATE_MS = 4000;
+const ROTATE_MS = 3000;
+const MAX_FRAMES = 4;
 
 /**
  * Auto-rotates through a product's gallery images on listing cards.
@@ -30,7 +31,7 @@ export function ProductImageRotator({
   priority?: boolean;
 }) {
   const resolved = useMemo(
-    () => [...new Set(images.map(resolveImageUrl).filter(Boolean))],
+    () => [...new Set(images.map(resolveImageUrl).filter(Boolean))].slice(0, MAX_FRAMES),
     [images]
   );
   const [urls, setUrls] = useState<string[]>([]);
@@ -50,8 +51,10 @@ export function ProductImageRotator({
 
     const finish = () => {
       if (cancelled) return;
-      const picked = selectDisplayableProductImages(measured);
-      setUrls(picked.length > 0 ? picked : resolved.slice(0, 1));
+      const picked = selectDisplayableProductImages(measured).slice(0, MAX_FRAMES);
+      // Prefer measured frames; if every probe failed, still show resolved URLs
+      // so cards are not blank while Unsplash/CDN recovers.
+      setUrls(picked.length > 0 ? picked : resolved.slice(0, MAX_FRAMES));
     };
 
     resolved.forEach((url) => {

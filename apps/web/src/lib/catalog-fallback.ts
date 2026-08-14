@@ -38,6 +38,8 @@ export function getCatalogProducts(): Product[] {
   const bySlug = new Map<string, Product>();
   for (const product of [
     ...loadCatalogFile("blossompot-catalog.json"),
+    // 1,000+ sample gift products (flowers/cakes/hampers) until DynamoDB seed lands
+    ...loadCatalogFile("sample-marketplace-catalog.json"),
   ]) {
     // Never expose vendorCost / vendorSlug to the browser via SSR props.
     const allowsAddons = productAllowsAddons(product);
