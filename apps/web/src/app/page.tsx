@@ -3,6 +3,7 @@ import Link from "next/link";
 import { categoryHref } from "@/lib/category-urls";
 import { api } from "@/lib/api";
 import { HomeHero } from "@/components/HomeHero";
+import { HomeBrandTaglines } from "@/components/HomeBrandTaglines";
 import { GoogleReviews } from "@/components/GoogleReviews";
 import { getGoogleReviews } from "@/lib/google-reviews";
 import { HomeProductCard } from "@/components/HomeProductCard";
@@ -96,6 +97,7 @@ export default async function HomePage() {
       <JsonLd data={[faqJsonLd(faqs)]} />
 
       <HomeHero banners={[...homeBanners]} />
+      <HomeBrandTaglines />
 
       <section className="max-w-7xl mx-auto px-4 py-10">
         <div className="text-center mb-8">

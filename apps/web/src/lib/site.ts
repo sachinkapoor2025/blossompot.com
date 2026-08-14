@@ -27,7 +27,7 @@ export const site = {
   domain: "blossompot.com",
   legalName: "Divit Global Ventures",
   foundingDate: "2024",
-  tagline: "Flowers, cakes & thoughtful gifts for every celebration",
+  tagline: "Flowers ♥ Cakes ♥ Gifts — Delivering Smiles",
   description:
     "BlossomPot.com — premium online gifting for flowers, bouquets, cakes, and curated gifts with fast USA delivery. Same-day options in select cities, elegant designs for birthdays, anniversaries, Valentine's Day, Mother's Day, and more.",
   supportEmail: "support@blossompot.com",
@@ -36,9 +36,9 @@ export const site = {
   whatsappDisplay: SUPPORT_PHONE_DISPLAY,
   whatsappGroupInviteUrl: "",
   logoSrc: "/logo.png",
-  /** Square mark for app icons / schema when a compact asset is preferred. */
+  /** Square B+flowerpot mark for favicons / app icons (no wordmark, no taglines). */
   logoMarkSrc: "/icon-512.png",
-  /** Full logo on black — Open Graph / social share (1200×630). */
+  /** Full B+Blossompot logo on white — Open Graph / social share (1200×630). */
   logoPngSrc: "/logo-og.png",
   primaryColor: "#C23A6B",
   navBlue: "#E07A9A",
