@@ -26,13 +26,17 @@ export type GeoLocation = {
   majorCities?: string[];
   cityPageSlugs?: string[];
   censusRegion?: string;
+  primaryKeyword?: string;
 };
 
 /**
  * State pages: "California". City pages: "San Jose, CA".
  * This is the only allowed place to format a location display name.
+ * `type` is preferred; `region` is optional legacy fallback.
  */
-export function locationLabel(loc: Pick<GeoLocation, "type" | "name" | "stateAbbr" | "region">): string {
+export function locationLabel(
+  loc: Pick<GeoLocation, "type" | "name" | "stateAbbr"> & Partial<Pick<GeoLocation, "region">>
+): string {
   const kind = loc.type ?? loc.region;
   return kind === "state" ? loc.name : `${loc.name}, ${loc.stateAbbr}`;
 }
