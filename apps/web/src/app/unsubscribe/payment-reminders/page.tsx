@@ -7,6 +7,7 @@ export const metadata: Metadata = pageMetadata({
   description:
     "Stop daily emails about unpaid BlossomPot checkout orders. You will still receive order updates after payment.",
   path: "/unsubscribe/payment-reminders",
+  noIndex: true,
 });
 
 export default async function PendingPaymentUnsubscribePage({

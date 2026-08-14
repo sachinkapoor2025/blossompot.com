@@ -62,6 +62,12 @@ export const productSchema = z.object({
    * Filter/delete with `isSampleProduct = true` when real inventory replaces samples.
    */
   isSampleProduct: z.boolean().optional(),
+  /**
+   * Explicit search-index gate. Defaults to indexable when omitted.
+   * Set `false` for draft/demo SKUs that must not appear in Google/sitemaps.
+   * Sample products are also gated by SAMPLE_PRODUCT_INDEXABLE (default off).
+   */
+  indexable: z.boolean().optional(),
   shortDescription: z.string().max(320).optional(),
   subcategory: z.string().max(80).optional(),
   occasion: z.string().max(80).optional(),

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { api } from "@/lib/api";
-import type { Product } from "@blossompot/shared";
+import { isProductSearchIndexable, type Product } from "@blossompot/shared";
 import { siteUrl } from "@/lib/env";
 import { categoryHref } from "@/lib/category-urls";
 import { getCatalogProducts } from "@/lib/catalog-fallback";
@@ -17,7 +17,7 @@ function mergeProducts(apiProducts: Product[]): Product[] {
   for (const p of getCatalogProducts()) {
     if (!bySlug.has(p.slug)) bySlug.set(p.slug, p);
   }
-  return [...bySlug.values()];
+  return [...bySlug.values()].filter((p) => isProductSearchIndexable(p));
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -40,6 +40,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/press`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: `${siteUrl}/editorial-policy`, lastModified: now, changeFrequency: "monthly", priority: 0.45 },
     { url: `${siteUrl}/delivery-locations`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${siteUrl}/occasions`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${siteUrl}/gifts`, lastModified: now, changeFrequency: "weekly", priority: 0.78 },
+    { url: `${siteUrl}/become-a-vendor`, lastModified: now, changeFrequency: "monthly", priority: 0.65 },
     { url: `${siteUrl}/llms.txt`, lastModified: now, changeFrequency: "weekly", priority: 0.5 },
     { url: `${siteUrl}/llms-full.txt`, lastModified: now, changeFrequency: "daily", priority: 0.5 },
     { url: `${siteUrl}/humans.txt`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
@@ -52,12 +55,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.85,
   }));
 
-  const locationRoutes = publishedGeoLocations().map((g) => ({
-    url: `${siteUrl}${locationPublicPath(g.slug)}`,
-    lastModified: now,
-    changeFrequency: "weekly" as const,
-    priority: g.type === "state" ? 0.8 : 0.72,
-  }));
+  // City geo URLs live in /sitemap-geo.xml; keep state hubs here for discovery.
+  const locationRoutes = publishedGeoLocations()
+    .filter((g) => g.type === "state")
+    .map((g) => ({
+      url: `${siteUrl}${locationPublicPath(g.slug)}`,
+      lastModified: now,
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    }));
 
   const occasionRoutes = allOccasionSlugs().map((slug) => ({
     url: `${siteUrl}/occasions/${slug}`,

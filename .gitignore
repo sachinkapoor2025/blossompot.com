@@ -17,6 +17,7 @@ out/
 # Local secrets notes (never commit)
 *.local.md
 docs/*.local.md
+docs/seo-audit-latest.json
 
 # IDE
 .idea/

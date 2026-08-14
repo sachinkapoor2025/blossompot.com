@@ -10,7 +10,7 @@ import { loadProduct, loadRelatedProducts, getStaticProductSlugs } from "@/lib/p
 import { api } from "@/lib/api";
 import { categoryHref } from "@/lib/category-urls";
 import { getCategoryPageSeo } from "@/lib/content/category-seo";
-import type { Product } from "@blossompot/shared";
+import { isProductSearchIndexable, type Product } from "@blossompot/shared";
 
 function categoryBreadcrumbLabel(categorySlug: string): string {
   const seo = getCategoryPageSeo(categorySlug);
@@ -53,7 +53,10 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const p = await loadProduct(slug);
-  if (!p) return { title: "Product" };
+  if (!p) return { title: "Product", robots: { index: false, follow: false } };
+  if (!isProductSearchIndexable(p)) {
+    return { title: p.name, robots: { index: false, follow: false } };
+  }
 
   return productPageMetadata({
     title: p.seoTitle ?? p.name,
@@ -70,6 +73,7 @@ export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
   const product = await loadProduct(slug);
   if (!product) notFound();
+  if (!isProductSearchIndexable(product)) notFound();
 
   const relatedProducts = await loadRelatedProducts(product.categorySlug, product.slug);
   const faqs = productFaqsForCategory(product.categorySlug);

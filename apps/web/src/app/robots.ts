@@ -3,7 +3,7 @@ import { siteUrl } from "@/lib/env";
 
 /**
  * Next.js storefront robots — no WordPress/WooCommerce paths.
- * sitemap.rss is not generated; only /sitemap.xml is advertised.
+ * Private areas are disallowed; public catalog/category/geo remain crawlable.
  */
 export default function robots(): MetadataRoute.Robots {
   const host = siteUrl.replace(/^https?:\/\//, "");
@@ -15,17 +15,22 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
         disallow: [
           "/admin/",
+          "/vendor/",
           "/api/",
           "/checkout",
           "/account",
           "/cart",
+          "/wishlist",
           "/orders/",
           "/email/",
+          "/unsubscribe/",
+          "/ses-email/",
           "/*?*sort=",
           "/*?*orderby=",
+          "/*?*search=",
         ],
       },
-      // AI / LLM crawlers — explicitly allowed for discoverability
+      // AI / LLM crawlers — explicitly allowed for discoverability of public content
       { userAgent: "GPTBot", allow: "/" },
       { userAgent: "ChatGPT-User", allow: "/" },
       { userAgent: "OAI-SearchBot", allow: "/" },

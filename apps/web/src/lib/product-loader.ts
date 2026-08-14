@@ -1,4 +1,5 @@
 import type { Product } from "@blossompot/shared";
+import { isProductSearchIndexable } from "@blossompot/shared";
 import { api } from "./api";
 import {
   getCatalogProduct,
@@ -7,6 +8,10 @@ import {
   mergeProductsPreferExisting,
 } from "./catalog-fallback";
 import { isRakhiRelatedCategorySlug, isRakhiRelatedProduct } from "./rakhi-filter";
+
+function isStorefrontVisible(product: Product): boolean {
+  return !isRakhiRelatedProduct(product) && isProductSearchIndexable(product);
+}
 
 /**
  * Prefer last good API price over bundled catalog when the API blips.
@@ -54,22 +59,24 @@ function isProductMissingError(err: unknown): boolean {
 export async function loadProduct(slug: string): Promise<Product | null> {
   try {
     const data = await api<{ product: Product }>(`/products/${slug}`, FRESH_PRODUCT_FETCH);
-    if (isRakhiRelatedProduct(data.product)) return null;
+    if (!isStorefrontVisible(data.product)) return null;
     return rememberProduct(data.product);
   } catch (err) {
     const stale = memoryProduct(slug);
     if (stale) {
-      if (isRakhiRelatedProduct(stale)) return null;
+      if (!isStorefrontVisible(stale)) return null;
       return stale;
     }
 
     const catalog = getCatalogProduct(slug);
-    if (catalog && isRakhiRelatedProduct(catalog)) return null;
+    if (catalog && !isStorefrontVisible(catalog)) return null;
     if (catalog && (allowCatalogFallback(catalog) || isProductMissingError(err))) {
       return catalog;
     }
 
-    if (process.env.NODE_ENV !== "production") return catalog ?? null;
+    if (process.env.NODE_ENV !== "production") {
+      return catalog && isStorefrontVisible(catalog) ? catalog : null;
+    }
     return null;
   }
 }
@@ -88,12 +95,12 @@ export async function loadProducts(params?: {
 
   try {
     const data = await api<{ products: Product[] }>(`/products${qs}`, FRESH_PRODUCT_FETCH);
-    return rememberProducts(data.products.filter((p) => !isRakhiRelatedProduct(p)));
+    return rememberProducts(data.products.filter(isStorefrontVisible));
   } catch {
     if (params?.category) {
-      return getCatalogProductsByCategory(params.category);
+      return getCatalogProductsByCategory(params.category).filter(isStorefrontVisible);
     }
-    return getCatalogProducts();
+    return getCatalogProducts().filter(isStorefrontVisible);
   }
 }
 
@@ -108,7 +115,9 @@ export async function loadProductsByCategory(categorySlug: string): Promise<Prod
   } catch {
     products = [];
   }
-  return mergeProductsPreferExisting(products, getCatalogProductsByCategory(categorySlug));
+  return mergeProductsPreferExisting(products, getCatalogProductsByCategory(categorySlug)).filter(
+    isStorefrontVisible
+  );
 }
 
 export async function loadFeaturedProducts(limit = 10): Promise<Product[]> {
@@ -123,7 +132,9 @@ export async function loadRelatedProducts(categorySlug: string, excludeSlug: str
 
 /** Prefer catalog slugs at build time — avoids CI/API rate-limit prerender failures. */
 export function getStaticProductSlugs(): string[] {
-  const fromCatalog = getCatalogProducts().map((p) => p.slug);
+  const fromCatalog = getCatalogProducts()
+    .filter(isStorefrontVisible)
+    .map((p) => p.slug);
   if (fromCatalog.length > 0) return fromCatalog;
   return [];
 }

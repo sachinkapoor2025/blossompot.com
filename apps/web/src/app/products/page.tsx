@@ -61,10 +61,12 @@ const CATEGORY_SEO: Record<string, { title: string; description: string }> = {
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const params = await searchParams;
   if (params.search) {
+    // Search result URLs stay usable but are noindexed; canonical points at the shop hub.
     return pageMetadata({
       title: `Search: ${params.search} — Flowers & Gifts USA`,
       description: `Search results for "${params.search}" — flowers, cakes, and gifts with USA delivery from BlossomPot.`,
-      path: `/products?search=${encodeURIComponent(params.search)}`,
+      path: "/products",
+      noIndex: true,
     });
   }
   if (params.category && CATEGORY_SEO[params.category]) {
@@ -73,6 +75,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
       title: seo.title,
       description: seo.description,
       path: `/products?category=${params.category}`,
+      noIndex: true,
     });
   }
   return pageMetadata({

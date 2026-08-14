@@ -3,7 +3,7 @@ import { site, navItems, faqs, giftSetsMenu } from "@/lib/site";
 import { siteUrl } from "@/lib/env";
 import { getCatalogProducts } from "@/lib/catalog-fallback";
 import { stripHtml } from "@/lib/html-text";
-import type { Product } from "@blossompot/shared";
+import { isProductSearchIndexable, type Product } from "@blossompot/shared";
 
 /**
  * llms-full.txt — detailed product catalog for AI assistants (GEO).
@@ -22,7 +22,7 @@ export async function GET() {
   for (const p of getCatalogProducts()) {
     if (!bySlug.has(p.slug)) bySlug.set(p.slug, p);
   }
-  products = [...bySlug.values()];
+  products = [...bySlug.values()].filter((p) => isProductSearchIndexable(p));
 
   const categories = [
     ...giftSetsMenu.items.map((n) => `- ${n.label}: ${siteUrl}${n.href}`),

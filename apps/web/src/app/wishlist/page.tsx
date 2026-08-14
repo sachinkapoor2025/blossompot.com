@@ -4,6 +4,7 @@ import { loadFeaturedProducts } from "@/lib/product-loader";
 
 export const metadata: Metadata = {
   title: "Wish List",
+  robots: { index: false, follow: false },
 };
 
 export default async function WishlistPage() {

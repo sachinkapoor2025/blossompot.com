@@ -262,7 +262,10 @@ Every form blur or debounced keystroke can POST to `/leads`:
 - Next.js `generateMetadata` per product/category page
 - `/sitemap.xml`, `/sitemap-geo.xml`, `/robots.txt` dynamic routes
 - JSON-LD Product schema on product pages
-- Canonical URLs, Open Graph tags
+- Canonical URLs, Open Graph tags (www host)
+- **Sample products:** `isSampleProduct` + `SAMPLE_PRODUCT_INDEXABLE` (default off) — excluded from public list/sitemap/PDP until real inventory
+- **Private:** `/admin`, `/vendor`, cart/checkout/account/wishlist noindex + robots disallow
+- **Audit:** `npm run audit:seo` — see `docs/SEARCH_READINESS.md`
 - **Nationwide geo:** SoT is `apps/web/src/lib/content/geo/locations.data.json` (52 states/territories + 639 cities). Public URLs `/gifts-to-{slug}` rewrite to `/locations/[slug]`. Publish wave via `GEO_PUBLISH_WAVE` (`states` | `cities-200` | `all`). Content: `npm run geo:generate` / `npm run geo:validate`. Index: `/delivery-locations`. Display labels only via `locationLabel()` — never concatenate name+state.
 
 ## Multi-Developer + Cursor Workflow

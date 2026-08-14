@@ -67,6 +67,8 @@ export function productPageMetadata(opts: {
   price: number;
   currency: string;
   ogImage?: string;
+  /** When true, emit noindex (sample / non-purchasable SKUs). */
+  noIndex?: boolean;
 }): Metadata {
   const description = productMetaDescription(opts.seoDescription, opts.description);
   const url = canonical(opts.path);
@@ -96,8 +98,11 @@ export function productPageMetadata(opts: {
     other: {
       "product:price:amount": price,
       "product:price:currency": currency,
+      "og:type": "product",
     },
-    robots: { index: true, follow: true },
+    robots: opts.noIndex
+      ? { index: false, follow: false }
+      : { index: true, follow: true },
   };
 }
 

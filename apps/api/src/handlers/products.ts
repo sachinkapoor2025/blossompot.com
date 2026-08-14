@@ -12,6 +12,7 @@ import {
   isRakhiSetSizeCategory,
   productMatchesRakhiSetCategory,
   resolveProductImagesForUpsert,
+  isProductSearchIndexable,
   isSampleCatalogProduct,
   type Product,
 } from "@blossompot/shared";
@@ -155,7 +156,9 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
     items = await scanAllProducts();
   }
 
-  items = items.filter((p) => p.published !== false && (p.inventory ?? 0) > 0);
+  items = items.filter(
+    (p) => p.published !== false && (p.inventory ?? 0) > 0 && isProductSearchIndexable(p)
+  );
   if (search) {
     items = items.filter(
       (p) =>
@@ -200,6 +203,8 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
   if (!item) return notFound("Product not found");
   const product = item;
   if (product.published === false) return notFound("Product not found");
+  // Sample / non-indexable SKUs stay out of the public storefront until converted or enabled.
+  if (!isProductSearchIndexable(product)) return notFound("Product not found");
   productGetCache.set(slug, { at: nowMs, product });
   return okCached({ product: forStorefront(product) }, 10);
 }

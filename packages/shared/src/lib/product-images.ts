@@ -132,3 +132,26 @@ export function isSampleCatalogProduct(product: { isSampleProduct?: boolean; tag
   if (product.isSampleProduct === true) return true;
   return (product.tags ?? []).includes("sample-product");
 }
+
+/**
+ * When false (default), sample products stay out of sitemaps, public listings,
+ * and search-engine indexes until real inventory replaces them.
+ * Set SAMPLE_PRODUCT_INDEXABLE=1 only on demo environments that intentionally want samples indexed.
+ */
+export function sampleProductsAreIndexable(): boolean {
+  const v = (typeof process !== "undefined" ? process.env?.SAMPLE_PRODUCT_INDEXABLE : undefined) ?? "";
+  return v === "1" || v.toLowerCase() === "true";
+}
+
+/** Whether a product should appear in sitemaps / Google / AI catalog feeds. */
+export function isProductSearchIndexable(product: {
+  isSampleProduct?: boolean;
+  tags?: string[];
+  indexable?: boolean;
+  published?: boolean;
+}): boolean {
+  if (product.published === false) return false;
+  if (product.indexable === false) return false;
+  if (isSampleCatalogProduct(product) && !sampleProductsAreIndexable()) return false;
+  return true;
+}
