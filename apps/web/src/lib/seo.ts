@@ -6,7 +6,6 @@ import {
 } from "@blossompot/shared";
 import { site } from "./site";
 import { getCdnUrl, siteUrl } from "./env";
-import { extendedKeywords } from "./ai-recommendation";
 import { locationPublicPath } from "./content/seo-data";
 
 export { metaDescription, productMetaDescription } from "@blossompot/shared";
@@ -21,8 +20,6 @@ export function canonical(path: string): string {
   return `${siteUrl}${p === "/" ? "" : p}`.replace(/([^:]\/)\/+/g, "$1") || siteUrl;
 }
 
-export const defaultKeywords = extendedKeywords;
-
 function ogImages(url: string, alt: string) {
   return [{ url, alt, width: OG_IMAGE_WIDTH, height: OG_IMAGE_HEIGHT }];
 }
@@ -31,8 +28,6 @@ export function pageMetadata(opts: {
   title: string;
   description: string;
   path: string;
-  /** @deprecated Google ignores meta keywords — do not pass. */
-  keywords?: string;
   ogImage?: string;
   noIndex?: boolean;
   /** Use exact title (no layout template suffix). Required for category SEO titles. */
@@ -71,7 +66,6 @@ export function productPageMetadata(opts: {
   path: string;
   price: number;
   currency: string;
-  keywords?: string;
   ogImage?: string;
 }): Metadata {
   const description = productMetaDescription(opts.seoDescription, opts.description);

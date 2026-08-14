@@ -36,7 +36,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       content?.metaExtra ??
       `Send Rakhi to ${city.label}, USA with ${site.name}. Premium rakhis, 5–7 day delivery, roli chawal included. Order from India worldwide.`,
     path: `/send-rakhi-to-${slug}`,
-    keywords: `send rakhi to ${city.label}, rakhi delivery ${city.label}, rakhi USA ${city.label}, online rakhi ${city.label}, raksha bandhan ${city.label}, BlossomPot`,
   });
 }
 

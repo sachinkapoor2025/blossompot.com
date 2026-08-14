@@ -32,7 +32,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: collection.title,
     description: collection.description,
     path: `/collections/${slug}`,
-    keywords: `${collection.h1}, send rakhi to usa, BlossomPot`,
   });
 }
 

@@ -20,7 +20,6 @@ import {
   organizationJsonLd,
   webSiteJsonLd,
   onlineStoreJsonLd,
-  defaultKeywords,
   canonical,
 } from "@/lib/seo";
 
@@ -55,7 +54,6 @@ export const metadata: Metadata = {
     template: "%s | BlossomPot",
   },
   description: site.description,
-  keywords: defaultKeywords,
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },

@@ -74,7 +74,7 @@ export default async function OccasionSlugPage({ params }: Props) {
 
   const crumbs = [
     { label: "Home", href: "/" },
-    { label: "Occasions", href: "/products" },
+    { label: "Occasions", href: "/occasions" },
     { label: occasion.h1 },
   ];
 

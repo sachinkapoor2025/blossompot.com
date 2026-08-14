@@ -79,7 +79,7 @@ export default async function GiftSlugPage({ params }: Props) {
 
   const crumbs = [
     { label: "Home", href: "/" },
-    { label: "Gifts", href: "/products" },
+    { label: "Gifts", href: "/gifts" },
     { label: page.h1 },
   ];
 
