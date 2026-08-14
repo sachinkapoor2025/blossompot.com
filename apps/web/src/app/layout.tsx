@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Source_Sans_3 } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { CartProvider } from "@/lib/cart-context";
@@ -24,16 +24,24 @@ import {
   canonical,
 } from "@/lib/seo";
 
-const display = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
+/** Self-hosted — CI must not fetch Google Fonts at build time (fonts.gstatic.com flakes). */
+const display = localFont({
+  src: [
+    { path: "../fonts/cormorant-garamond-latin-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/cormorant-garamond-latin-600-normal.woff2", weight: "600", style: "normal" },
+    { path: "../fonts/cormorant-garamond-latin-700-normal.woff2", weight: "700", style: "normal" },
+  ],
   variable: "--font-display",
   display: "swap",
 });
 
-const sans = Source_Sans_3({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+const sans = localFont({
+  src: [
+    { path: "../fonts/source-sans-3-latin-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/source-sans-3-latin-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/source-sans-3-latin-600-normal.woff2", weight: "600", style: "normal" },
+    { path: "../fonts/source-sans-3-latin-700-normal.woff2", weight: "700", style: "normal" },
+  ],
   variable: "--font-sans",
   display: "swap",
 });
