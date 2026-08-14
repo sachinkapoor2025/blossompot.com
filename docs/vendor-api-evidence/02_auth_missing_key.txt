@@ -1,0 +1,15 @@
+=== FEATURE: 02_auth_missing_key ===
+Verified (UTC): 2026-08-05T04:49:29Z
+Command:
+  curl -sS https://orange-county.usarakhi.com/vendors/orange-county/orders?days=15&limit=1
+
+--- Response ---
+HTTP 401
+
+HTTP/2 401 
+date: Wed, 05 Aug 2026 04:49:31 GMT
+content-type: application/json
+
+{
+    "error": "Valid X-Vendor-Api-Key required"
+}

@@ -1,0 +1,97 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+:root {
+  --foreground: #111827;
+  --background: #ffffff;
+  --primary: #183a68;
+  --nav: #4876e8;
+  --accent: #e11d48;
+  --muted: #6b7280;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+@layer components {
+  .btn-nav {
+    @apply inline-flex items-center justify-center rounded-full bg-nav text-white font-semibold text-sm px-4 py-2 hover:bg-blue-600 transition whitespace-nowrap;
+  }
+  .btn-nav-active {
+    @apply bg-primary;
+  }
+  .btn-cart {
+    @apply inline-flex items-center justify-center rounded-full bg-nav text-white font-semibold text-sm px-5 py-2.5 hover:bg-blue-600 transition disabled:opacity-50;
+  }
+}
+
+/* hero-slide-in removed — opacity:0 intro animation delayed LCP paint */
+
+@keyframes early-bird-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes early-bird-claim-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.22), 0 6px 16px rgba(225, 29, 72, 0.35);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(225, 29, 72, 0.12), 0 8px 22px rgba(225, 29, 72, 0.45);
+    transform: scale(1.03);
+  }
+}
+
+@keyframes early-bird-hot-glow {
+  0%,
+  100% {
+    text-shadow: 0 0 0 transparent, 0 1px 1px rgba(0, 0, 0, 0.35);
+  }
+  50% {
+    text-shadow: 0 0 12px rgba(252, 211, 77, 0.85), 0 1px 1px rgba(0, 0, 0, 0.35);
+  }
+}
+
+.early-bird-marquee {
+  animation: early-bird-marquee 22s linear infinite;
+}
+
+.early-bird-marquee:hover {
+  animation-play-state: paused;
+}
+
+.early-bird-claim-btn {
+  animation: early-bird-claim-pulse 1.8s ease-in-out infinite;
+}
+
+.early-bird-hot {
+  animation: early-bird-hot-glow 1.6s ease-in-out infinite;
+}
+
+.early-bird-emphasis {
+  font-size: 1.2em;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.mask-fade-x {
+  mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .early-bird-marquee,
+  .early-bird-claim-btn,
+  .early-bird-hot {
+    animation: none !important;
+  }
+}

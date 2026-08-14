@@ -1,0 +1,1284 @@
+{
+  "generatedAt": "2026-07-14T16:17:30.995Z",
+  "byType": {
+    "hershey": 17,
+    "none": 44,
+    "lindor": 27,
+    "assorted": 17,
+    "ferrero": 13
+  },
+  "updates": 90,
+  "report": [
+    {
+      "slug": "designer-rakhi-for-men-with-hersheys-chocolates",
+      "chocolate": "hershey",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Designer-Rakhi-for-Men-with-HERSHEYS-Chocolates-1-e1779530898669.webp",
+      "changed": true,
+      "appended": [
+        "Includes 2 Hershey's chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 748,
+      "afterLen": 869
+    },
+    {
+      "slug": "om-single-rakhi",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Om-Single-Rakhi-1-e1779466859856.png",
+      "changed": true,
+      "appended": [
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 829,
+      "afterLen": 917
+    },
+    {
+      "slug": "chhota-bheem-kids-rakhi-with-skateboard",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/kids-rakhi-1-e1775488861809.jpg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 1000,
+      "afterLen": 1000
+    },
+    {
+      "slug": "pink-rakhi-combo-set",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/Pink-Rakhi-Combo-Set-e1775831845913.jpg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 743,
+      "afterLen": 743
+    },
+    {
+      "slug": "bro-kids-rakhi-for-little-brother",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/BRO-Kids-Rakhi-e1775564401163.jpg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 847,
+      "afterLen": 847
+    },
+    {
+      "slug": "blue-stone-rakhi-with-lindor-chocolates",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Blue-Rakhi-with-Lindor-Truffle-2.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates."
+      ],
+      "beforeLen": 646,
+      "afterLen": 676
+    },
+    {
+      "slug": "blue-stone-rakhi-with-5-chocolates",
+      "chocolate": "assorted",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Blue-Stone-Rakhi-with-5-Chocolates-Copy-1-e1775491604375.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 assorted chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 710,
+      "afterLen": 830
+    },
+    {
+      "slug": "designer-pink-thread-rakhi",
+      "chocolate": "assorted",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Designer-Pink-Thread-Rakhi-with-Multi-Stones-Chocolates-Copy-1-1.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 assorted chocolates."
+      ],
+      "beforeLen": 713,
+      "afterLen": 745
+    },
+    {
+      "slug": "divine-rudraksha-rakhi",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Divine-Rudraksha-Rakhi-with-Roli-Chawal-Copy-1-1-e1779531424279.webp",
+      "changed": true,
+      "appended": [
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 704,
+      "afterLen": 792
+    },
+    {
+      "slug": "rakhi-set-of-2-with-chocolates-combo-pack",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Rakhi-Set-of-2-with-Chocolates-Combo-1-e1779541539932.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 946,
+      "afterLen": 1064
+    },
+    {
+      "slug": "ganesh-rakhi-chocolate-combo-with-roli-chawal",
+      "chocolate": "hershey",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Ganesh-Rakhi-Chocolate-Combo-with-Roli-Chawal.webp",
+      "changed": true,
+      "appended": [
+        "Includes 2 Hershey's chocolates."
+      ],
+      "beforeLen": 562,
+      "afterLen": 595
+    },
+    {
+      "slug": "elegant-red-rakhi-gift-set",
+      "chocolate": "assorted",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Elegant-Red-Rakhi-Gift-Set-with-Chocolates-1-1-e1779536866631.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 assorted chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 765,
+      "afterLen": 885
+    },
+    {
+      "slug": "red-designer-rakhi-with-lindor-chocolates",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Red-Designer-Rakhi-with-Lindor-Truffle-Combo-1-e1779548391850.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates."
+      ],
+      "beforeLen": 681,
+      "afterLen": 711
+    },
+    {
+      "slug": "blue-beads-pearl-single-rakhi",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/50dada5d-eb61-454a-8fe4-51eb5e420753-e1775488586506.webp",
+      "changed": true,
+      "appended": [
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 789,
+      "afterLen": 877
+    },
+    {
+      "slug": "classic-red-rakhi-with-lindor-chocolates",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/red-rakhi-1-e1775491908425.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates."
+      ],
+      "beforeLen": 724,
+      "afterLen": 754
+    },
+    {
+      "slug": "rudraksha-single-rakhi",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/WhatsApp-Image-2026-03-16-at-2.01.21-PM-1-e1779467586352.webp",
+      "changed": true,
+      "appended": [
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 859,
+      "afterLen": 947
+    },
+    {
+      "slug": "blue-pearl-rakhi-with-chocolates",
+      "chocolate": "ferrero",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Blue-Pearl-Rakhi-with-Chocolates-e1775491257968.webp",
+      "changed": true,
+      "appended": [
+        "Includes 3 Ferrero Rocher chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 645,
+      "afterLen": 771
+    },
+    {
+      "slug": "rakhi-with-ferrero-rocher-chocolates-roli-chawal",
+      "chocolate": "ferrero",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/05/fercho.png",
+      "changed": true,
+      "appended": [
+        "Includes 3 Ferrero Rocher chocolates."
+      ],
+      "beforeLen": 1166,
+      "afterLen": 1204
+    },
+    {
+      "slug": "doraemon-kids-single-rakhi",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/WhatsApp-Image-2026-03-16-at-2.01.21-PM-2-e1775566106915.webp",
+      "changed": true,
+      "appended": [
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 739,
+      "afterLen": 827
+    },
+    {
+      "slug": "gold-and-crystal-single-rakhi",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/rakhi-e1775489903860.webp",
+      "changed": true,
+      "appended": [
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 760,
+      "afterLen": 848
+    },
+    {
+      "slug": "blue-stone-rakhi-with-5-hersheys-chocolates",
+      "chocolate": "hershey",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Blue-Stone-Rakhi-with-5-HERSHEYS-Chocolates-1-e1775491430497.webp",
+      "changed": true,
+      "appended": [
+        "Includes 2 Hershey's chocolates."
+      ],
+      "beforeLen": 844,
+      "afterLen": 877
+    },
+    {
+      "slug": "cute-doraemon-kids-rakhi-combo",
+      "chocolate": "assorted",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Cute-Doraemon-Kids-Rakhi-Combo-with-5-Chocolates-Copy-1-1-e1775740138167.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 assorted chocolates."
+      ],
+      "beforeLen": 612,
+      "afterLen": 645
+    },
+    {
+      "slug": "mickey-mouse-bro-rakhi-combo-with-hersheys-chocolates",
+      "chocolate": "hershey",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/Mickey-Mouse-BRO-Rakhi-Combo-with-HERSHEYS-Chocolates-e1775740716514.jpg",
+      "changed": true,
+      "appended": [
+        "Includes 2 Hershey's chocolates."
+      ],
+      "beforeLen": 656,
+      "afterLen": 689
+    },
+    {
+      "slug": "lumba-rakhi-for-bhabhi-with-roli-chawal",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/05/pink-peak.2-e1779470309613.jpg",
+      "changed": true,
+      "appended": [
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 804,
+      "afterLen": 892
+    },
+    {
+      "slug": "gold-and-crystal-rakhi-with-chocolate",
+      "chocolate": "ferrero",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Gold-and-Crystal-Rakhi-with-Chocolate-e1779539302778.webp",
+      "changed": true,
+      "appended": [
+        "Includes 3 Ferrero Rocher chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 732,
+      "afterLen": 858
+    },
+    {
+      "slug": "kids-rakhi-with-hersheys-chocolates",
+      "chocolate": "hershey",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/Cute-KIds-Rakhi-with-HERSHEYS-Choclate-e1775566310119.jpeg",
+      "changed": true,
+      "appended": [
+        "Includes 2 Hershey's chocolates."
+      ],
+      "beforeLen": 820,
+      "afterLen": 853
+    },
+    {
+      "slug": "designer-rakhi-for-men",
+      "chocolate": "assorted",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Designer-Rakhi-for-Men-with-5-Chocolates-Roli-Chawal-1-1-e1779529791920.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 assorted chocolates."
+      ],
+      "beforeLen": 787,
+      "afterLen": 820
+    },
+    {
+      "slug": "peach-lumba-rakhi-with-hersheys-milk-chocolates",
+      "chocolate": "hershey",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/Peach-Lumba-Rakhi-with-HERSHEYS-Milk-Chocolates-e1775832044349.jpg",
+      "changed": true,
+      "appended": [
+        "Includes 2 Hershey's chocolates."
+      ],
+      "beforeLen": 740,
+      "afterLen": 773
+    },
+    {
+      "slug": "stone-pearl-rakhi",
+      "chocolate": "assorted",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Stylish-Stone-Pearl-Rakhi-with-Sweet-Chocolate-1-1.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 assorted chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 902,
+      "afterLen": 1022
+    },
+    {
+      "slug": "ek-omkar-designer-rakhi-for-brother-with-roli-chawal",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/05/Ek-Omkar-Designer-Rakhi-for-Brother-with-Roli-Chawal.jpg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 683,
+      "afterLen": 683
+    },
+    {
+      "slug": "fancy-multi-stone-rakhi-with-hersheys-chocolates",
+      "chocolate": "hershey",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Fancy-Multi-Stone-Rakhi-with-HERSHEYS-Chocolates-1-e1779537800255.webp",
+      "changed": true,
+      "appended": [
+        "Includes 2 Hershey's chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 921,
+      "afterLen": 1042
+    },
+    {
+      "slug": "white-gold-stone-rakhi-with-lindor-chocolates",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/White-glod-stone-Rakhi-with-Lindor-Truffle-Combo-1.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates."
+      ],
+      "beforeLen": 710,
+      "afterLen": 740
+    },
+    {
+      "slug": "pearl-rakhi-with-gold-single-rakhi",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Pearl-Rakhi-with-Gold-Single-e1779466657774.webp",
+      "changed": true,
+      "appended": [
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 794,
+      "afterLen": 882
+    },
+    {
+      "slug": "unique-lumba-rakhi-for-bhabhi-with-lindt-lindor-chocolates",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/Unique-Lumba-Rakhi-for-Bhabhi-with-Lindt-Lindor-Chocolates-e1775828176792.jpg",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 766,
+      "afterLen": 884
+    },
+    {
+      "slug": "single-rakhi-with-roli-chawal-for-brother",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/05/pink-multi-stone-rakhi-to-usa.jpeg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 945,
+      "afterLen": 945
+    },
+    {
+      "slug": "evil-eye-rakhi-with-roli-chawal-for-brother",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/05/evil-rakhi-1-e1779537111778.jpg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 1418,
+      "afterLen": 1418
+    },
+    {
+      "slug": "shree-rakhi-for-brother-with-roli-chawal",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/05/shree-rakhi-for-brother-to-usa-e1779467759548.jpeg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 675,
+      "afterLen": 675
+    },
+    {
+      "slug": "om-rakhi-with-chocolate-and-roli-chawal",
+      "chocolate": "assorted",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/om-rakhi-1-1.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 assorted chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 724,
+      "afterLen": 845
+    },
+    {
+      "slug": "omkar-rakhi-with-hersheys-milk-chocolates",
+      "chocolate": "hershey",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/74161-e1776345978238.jpg",
+      "changed": true,
+      "appended": [
+        "Includes 2 Hershey's chocolates."
+      ],
+      "beforeLen": 677,
+      "afterLen": 711
+    },
+    {
+      "slug": "chhota-bheem-kids-rakhi-with-assorted-chocolates",
+      "chocolate": "assorted",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/Chhota-Bheem-Kids-Rakhi-with-Assorted-Chocolates-e1775565435556.jpg",
+      "changed": true,
+      "appended": [
+        "Includes 5 assorted chocolates."
+      ],
+      "beforeLen": 850,
+      "afterLen": 882
+    },
+    {
+      "slug": "shree-rakhi-with-roli-chawal",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Shree-Rakhi-with-Roli-Chawal-1-1.webp",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 510,
+      "afterLen": 510
+    },
+    {
+      "slug": "bro-rakhi-with-lindt-lindor-chocolates-combo",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/BRO-Rakhi-with-Lindt-Lindor-Chocolates-Combo-e1775564798686.jpg",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 672,
+      "afterLen": 790
+    },
+    {
+      "slug": "pearl-single-rakhi",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/pearl-single-rakhi-e1779467005952.webp",
+      "changed": true,
+      "appended": [
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 950,
+      "afterLen": 1038
+    },
+    {
+      "slug": "pink-floral-lumba-rakhi-with-chocolates",
+      "chocolate": "assorted",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/Pink-Floral-Lumba-Rakhi-with-Chocolates-e1775826892674.jpg",
+      "changed": true,
+      "appended": [
+        "Includes 5 assorted chocolates."
+      ],
+      "beforeLen": 986,
+      "afterLen": 1018
+    },
+    {
+      "slug": "rakhi-combo-for-bhai-bhabhi-with-premium-chocolates-gift-set",
+      "chocolate": "assorted",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/Rakhi-Combo-for-Bhai-Bhabhi-with-Premium-Chocolates-Gift-Set-e1776083321568.jpg",
+      "changed": true,
+      "appended": [
+        "Includes 5 assorted chocolates."
+      ],
+      "beforeLen": 1054,
+      "afterLen": 1086
+    },
+    {
+      "slug": "peach-lumba-rakhi-with-assorted-chocolate-combo",
+      "chocolate": "assorted",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/Peach-Lumba-Rakhi-with-Assorted-Chocolate-Combo-e1775828035319.jpg",
+      "changed": true,
+      "appended": [
+        "Includes 5 assorted chocolates."
+      ],
+      "beforeLen": 919,
+      "afterLen": 952
+    },
+    {
+      "slug": "om-rakhi-with-ferrero-rocher-chocolate-box",
+      "chocolate": "ferrero",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/74540.jpg",
+      "changed": true,
+      "appended": [
+        "Includes 3 Ferrero Rocher chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 955,
+      "afterLen": 1081
+    },
+    {
+      "slug": "mutiple-stone-single-rakhi",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Muticolour-stone-single-rakhi-e1775490341282.webp",
+      "changed": true,
+      "appended": [
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 681,
+      "afterLen": 769
+    },
+    {
+      "slug": "mickey-mouse-kids-rakhi",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/Mickey-Mouse-Kids-Rakhi-e1775743449207.jpg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 650,
+      "afterLen": 650
+    },
+    {
+      "slug": "premium-bro-charm-rakhi",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/Premium-BRO-Charm-Rakhi-e1775750158671.jpg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 1010,
+      "afterLen": 1010
+    },
+    {
+      "slug": "peech-pearl-rakhi-combo-with-hersheys-chocolates",
+      "chocolate": "hershey",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Orange2-1-e1779549204279.webp",
+      "changed": true,
+      "appended": [
+        "Includes 2 Hershey's chocolates."
+      ],
+      "beforeLen": 1205,
+      "afterLen": 1238
+    },
+    {
+      "slug": "simple-elegant-rakhi-with-chocolates",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Simple-Elegant-White-Rakhi-with-chocaltesCombo-for-Brother-1.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 962,
+      "afterLen": 1081
+    },
+    {
+      "slug": "designer-peach-lumba-rakhi-for-bhabhi",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/Designer-Peach-Lumba-Rakhi-for-Bhabhi-1-e1775832500515.jpg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 813,
+      "afterLen": 813
+    },
+    {
+      "slug": "multicolour-stone-rakhi-with-lindor-chocolates",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Multicolour-Stone-Rakhi-with-Lindor-Truffle-Combo-Copy-Copy-1-e1779540465366.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates."
+      ],
+      "beforeLen": 673,
+      "afterLen": 703
+    },
+    {
+      "slug": "rudraksha-rakhi-with-lindor-chocolates",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Rudraksha-Rakhi-with-Lindor-Truffle-Combo-1-e1779540885946.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates."
+      ],
+      "beforeLen": 675,
+      "afterLen": 705
+    },
+    {
+      "slug": "designer-rakhi-with-chocolates-roli-chawal-for-brother",
+      "chocolate": "assorted",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/05/Gemini_Generated_Image_s6eb7gs6eb7gs6eb.png",
+      "changed": true,
+      "appended": [
+        "Includes 5 assorted chocolates."
+      ],
+      "beforeLen": 731,
+      "afterLen": 763
+    },
+    {
+      "slug": "chhota-bheem-rakhi-with-lindor-chocolate",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/Chhota-Bheem-Rakhi-with-Lindor-Chocolates-e1775565733293.jpg",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates."
+      ],
+      "beforeLen": 744,
+      "afterLen": 775
+    },
+    {
+      "slug": "peach-bhaiya-bhabhi-rakhi-set",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/Peach-Bhaiya-Bhabhi-Rakhi-Set-e1775741043357.jpg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 862,
+      "afterLen": 862
+    },
+    {
+      "slug": "om-rakhi-with-ferrero-rocher-chocolate-roli-chawal-for-brother",
+      "chocolate": "ferrero",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/05/om-rakhi.jpg",
+      "changed": true,
+      "appended": [
+        "Includes 3 Ferrero Rocher chocolates."
+      ],
+      "beforeLen": 896,
+      "afterLen": 934
+    },
+    {
+      "slug": "orange-pearl-rakhi-combo",
+      "chocolate": "assorted",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Orange-Pearl-Rakhi-with-Chocolates-Gift-Combo-1-1-e1779548590510.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 assorted chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 1161,
+      "afterLen": 1281
+    },
+    {
+      "slug": "om-rakhi-with-roli-chawal-for-brother",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/05/WhatsApp-Image-2026-05-06-at-10.36.39-PM-2.jpeg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 1340,
+      "afterLen": 1340
+    },
+    {
+      "slug": "cartoon-kids-rakhi-with-chocolates",
+      "chocolate": "assorted",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/Mickey-Mouse-Kids-Rakhi-1-e1775566932681.jpg",
+      "changed": true,
+      "appended": [
+        "Includes 5 assorted chocolates."
+      ],
+      "beforeLen": 977,
+      "afterLen": 1009
+    },
+    {
+      "slug": "blue-sapphire-pearl-single-rakhi",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/eecdbc61-da5a-4470-b8d8-5333b07a3f55-e1775488275697.webp",
+      "changed": true,
+      "appended": [
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 753,
+      "afterLen": 841
+    },
+    {
+      "slug": "doraemon-rakhi-with-chocolates",
+      "chocolate": "ferrero",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/WhatsApp-Image-2026-03-16-at-5.15.32-PM-1-e1775750833140.webp",
+      "changed": true,
+      "appended": [
+        "Includes 3 Ferrero Rocher chocolates."
+      ],
+      "beforeLen": 928,
+      "afterLen": 966
+    },
+    {
+      "slug": "ek-omkar-rakhi-with-lindt-lindor-chocolates-combo",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/Omkar-Rakhi-with-Lindtor-chocolates--e1775742843499.jpeg",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 545,
+      "afterLen": 663
+    },
+    {
+      "slug": "evil-eye-beaded-rakhi-for-brother-with-roli-chawal",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/05/Evil-Eye-Beaded-Rakhi-for-Brother-with-Roli-Chawal.jpg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 696,
+      "afterLen": 696
+    },
+    {
+      "slug": "red-rakhi-combo-with-hersheys-chocolates",
+      "chocolate": "hershey",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Red-Rakhi-Combo-with-HERSHEYS-Chocolates-1-e1779541173528.webp",
+      "changed": true,
+      "appended": [
+        "Includes 2 Hershey's chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 961,
+      "afterLen": 1082
+    },
+    {
+      "slug": "evil-eye-rakhi-for-brother-2",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/05/Gemini_Generated_Image_r6hk2r6hk2r6hk2r.png",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 1291,
+      "afterLen": 1291
+    },
+    {
+      "slug": "pink-designer-rakhi",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/Pink-Designer-Rakhi-e1775747245108.jpg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 1012,
+      "afterLen": 1012
+    },
+    {
+      "slug": "ganesh-rakhi-with-lindor-chocolates",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Ganesh-Rakhi-with-Lindor-Truffle-Combo-1-e1779539166446.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates."
+      ],
+      "beforeLen": 650,
+      "afterLen": 680
+    },
+    {
+      "slug": "divine-rudraksha-rakhi-with-hersheys-chocolates",
+      "chocolate": "hershey",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Divine-Rudraksha-Rakhi-with-HERSHEYS-Chocolates-e1779531575896.webp",
+      "changed": true,
+      "appended": [
+        "Includes 2 Hershey's chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 796,
+      "afterLen": 917
+    },
+    {
+      "slug": "red-rakhi-combo",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/red-rakhi-2-1-e1779541362105.webp",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 1037,
+      "afterLen": 1037
+    },
+    {
+      "slug": "pink-stone-rakhi-with-chocolates",
+      "chocolate": "ferrero",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/bd4f3c0e-1408-43cb-a7bd-63908ed9400c-e1775751229978.jpeg",
+      "changed": true,
+      "appended": [
+        "Includes 3 Ferrero Rocher chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 840,
+      "afterLen": 966
+    },
+    {
+      "slug": "elegant-designer-rakhi",
+      "chocolate": "assorted",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Elegant-Designer-Rakhi-with-Roli-Chawal-5-Chocolates-1-1-e1779532636909.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 assorted chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 765,
+      "afterLen": 885
+    },
+    {
+      "slug": "bhaiya-bhabhi-rakhi-set-with-lumba-rakhi-roli-chawal-designer-couple-rakhi-for-raksha-bandhan",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/05/Ek-omer-rakhi-4jpg-e1779529030166.jpg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 969,
+      "afterLen": 969
+    },
+    {
+      "slug": "cartoon-rakhi-for-kids-with-roli-chawal-cute-designer-rakhi-for-brother",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/05/Ek-omer-rakhi-3-e1779529326531.jpg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 944,
+      "afterLen": 944
+    },
+    {
+      "slug": "bhai-bhabhi-rakhi-set-with-chocolates",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/74513-e1776347248990.jpg",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 672,
+      "afterLen": 790
+    },
+    {
+      "slug": "omkar-rakhi-with-roli-chawal-for-brother-traditional-om-raksha-bandhan-rakhi-thread",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/05/Ek-omer-rakhi-1-e1779551493818.jpg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 1079,
+      "afterLen": 1079
+    },
+    {
+      "slug": "shree-silver-rakhi-with-lindor-chocolates",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Shree-Silver-Rakhi-with-Lindor-Truffle-Combo-1.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates."
+      ],
+      "beforeLen": 937,
+      "afterLen": 967
+    },
+    {
+      "slug": "divine-ganesh-rakhi-combo",
+      "chocolate": "assorted",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Divine-Ganesh-Rakhi-Combo-with-5-Chocolates-Copy-1-1.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 assorted chocolates."
+      ],
+      "beforeLen": 784,
+      "afterLen": 816
+    },
+    {
+      "slug": "evil-eye-rakhi-for-brother",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/Evil-Chocaltes-e1775743219808.jpg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 713,
+      "afterLen": 713
+    },
+    {
+      "slug": "peach-lumba-rakhi-with-ferrero-rocher-chocolate",
+      "chocolate": "ferrero",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/05/peech-lumba-rakhi-1-e1779548761607.jpg",
+      "changed": true,
+      "appended": [
+        "Includes 3 Ferrero Rocher chocolates."
+      ],
+      "beforeLen": 829,
+      "afterLen": 867
+    },
+    {
+      "slug": "unique-pink-lumba-rakhi",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/Unique-pink-Lumba-Rakhi-e1779468035922.jpg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 763,
+      "afterLen": 763
+    },
+    {
+      "slug": "shree-rakhi-with-hersheys-chocolates",
+      "chocolate": "hershey",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Shree-Rakhi-with-HERSHEYS-Chocolates-1-e1779538965741.webp",
+      "changed": true,
+      "appended": [
+        "Includes 2 Hershey's chocolates."
+      ],
+      "beforeLen": 1353,
+      "afterLen": 1386
+    },
+    {
+      "slug": "elegant-designer-rakhi-with-2-hersheys-chocolates",
+      "chocolate": "hershey",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Elegant-Designer-Rakhi-with-2-HERSHEYS-Chocolates-1-e1779532428113.webp",
+      "changed": true,
+      "appended": [
+        "Includes 2 Hershey's chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 807,
+      "afterLen": 928
+    },
+    {
+      "slug": "shree-silver-rakhi-chocolate-combo",
+      "chocolate": "ferrero",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/74549-e1776353296734.png",
+      "changed": true,
+      "appended": [
+        "Includes 3 Ferrero Rocher chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 689,
+      "afterLen": 815
+    },
+    {
+      "slug": "blue-beaded-rakhi-for-bhaiya-and-bhabhi",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/05/bhaiya-bhabhi-rakhi-to-usa-e1779468666580.jpeg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 846,
+      "afterLen": 846
+    },
+    {
+      "slug": "pink-lumba-rakhi-with-ferrero-rocher-chocolate-roli-chawal-for-bhabhi-designer-bhaiya-bhabhi-rakhi-gift-set",
+      "chocolate": "ferrero",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/05/pink-e1779550585223.jpg",
+      "changed": true,
+      "appended": [
+        "Includes 3 Ferrero Rocher chocolates."
+      ],
+      "beforeLen": 1051,
+      "afterLen": 1089
+    },
+    {
+      "slug": "rakhi-combo-with-ferrero-rocher-chocolates",
+      "chocolate": "ferrero",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Brother-Rakhi-Combo-–-Set-of-2-with-Ferrero-Rocher-Chocolates-1-e1775491765457.webp",
+      "changed": true,
+      "appended": [
+        "Includes 3 Ferrero Rocher chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 1030,
+      "afterLen": 1157
+    },
+    {
+      "slug": "white-pearl-rakhi",
+      "chocolate": "assorted",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Premium-White-Pearl-Rakhi-with-Roli-Chawal-5-Chocolates-1-1.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 assorted chocolates."
+      ],
+      "beforeLen": 1439,
+      "afterLen": 1471
+    },
+    {
+      "slug": "pearl-designer-rakhi-with-lindor-chocolates",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Pearl-White-Rakhi-with-Lindor-Truffle-1-e1779549045457.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates."
+      ],
+      "beforeLen": 200,
+      "afterLen": 230
+    },
+    {
+      "slug": "lindor-chocolate-rakhi-with-roli-chawal-for-brother",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/05/Gemini_Generated_Image_2jxv502jxv502jxv.png",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates."
+      ],
+      "beforeLen": 1061,
+      "afterLen": 1091
+    },
+    {
+      "slug": "festive-om-shree-rakhi-chocolate-gift-set",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Festive-Om-Shree-Rakhi-Chocolate-Gift-Set-1-e1779538390938.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates."
+      ],
+      "beforeLen": 1012,
+      "afterLen": 1042
+    },
+    {
+      "slug": "chhota-bheem-rakhi-for-kids-with-roli-chawal",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/05/Ek-omer-rakhi-2.jpg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 1231,
+      "afterLen": 1231
+    },
+    {
+      "slug": "pink-lumba-rakhi-with-beaded",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/Elegant-Pink-Lumba-Rakhi-with-Beaded-Tassels-Roli-Chawal-Set-e1775749362461.jpg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 1072,
+      "afterLen": 1072
+    },
+    {
+      "slug": "multistone-designer-rakhi-with-lindor-chocolates",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Multi-Stone-Rakhi-with-Lindor-Truffle-Combo-1-e1779540287265.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 707,
+      "afterLen": 825
+    },
+    {
+      "slug": "bhai-bhabhi-lumba-rakhi-set",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/Bhai-Bhabhi-Lumba-Rakhi-Set-e1776082926101.jpg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 811,
+      "afterLen": 811
+    },
+    {
+      "slug": "peach-lumba-rakhi-with-lindor-chocolate",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/pink-lubma-rakhi-with-Lindor-Truffle-Combo-multicolor-e1775830271531.jpg",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates."
+      ],
+      "beforeLen": 1028,
+      "afterLen": 1059
+    },
+    {
+      "slug": "ganesh-single-rakhi",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Ganesh-single-rakhi-e1775489480917.webp",
+      "changed": true,
+      "appended": [
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 881,
+      "afterLen": 969
+    },
+    {
+      "slug": "spiritual-om-rakhi-with-lindor-chocolates",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/om-rakhi-with-lindor-truffle-1.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates."
+      ],
+      "beforeLen": 776,
+      "afterLen": 806
+    },
+    {
+      "slug": "designer-multicolor-rakhi-pair-with-chocolates",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Designer-Multicolor-Rakhi-Pair-with-Chocolates-1-e1775492294993.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates."
+      ],
+      "beforeLen": 1356,
+      "afterLen": 1386
+    },
+    {
+      "slug": "kids-doraemon-rakhi-with-chocolates",
+      "chocolate": "hershey",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/72840-e1775914505861.jpg",
+      "changed": true,
+      "appended": [
+        "Includes 2 Hershey's chocolates."
+      ],
+      "beforeLen": 789,
+      "afterLen": 822
+    },
+    {
+      "slug": "mickey-mouse-rakhi-combo-linder-chococaltes",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/72397-e1775824250660.jpg",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates."
+      ],
+      "beforeLen": 729,
+      "afterLen": 759
+    },
+    {
+      "slug": "om-rakhi-with-hersheys-chocolates-roli-chawal",
+      "chocolate": "hershey",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Om-Rakhi-with-Hersheys-Chocolates-Roli-Chawal-1-e1779551034951.webp",
+      "changed": true,
+      "appended": [
+        "Includes 2 Hershey's chocolates."
+      ],
+      "beforeLen": 1204,
+      "afterLen": 1237
+    },
+    {
+      "slug": "designer-pink-thread-rakhi-with-hersheys-chocolates",
+      "chocolate": "hershey",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Designer-Pink-Thread-Rakhi-with-HERSHEYS-Chocolates-1.webp",
+      "changed": true,
+      "appended": [
+        "Includes 2 Hershey's chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 876,
+      "afterLen": 997
+    },
+    {
+      "slug": "bhaiya-bhabhi-rakhi-set",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/2-set-of-bhaiya-bhabhi-rakhi-1-e1775741213552.jpg",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 824,
+      "afterLen": 824
+    },
+    {
+      "slug": "elegant-rakhi-with-decorative-tassels",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/04/Elegant-Rakhi-with-Decorative-Tassels-e1775828486832.jpg",
+      "changed": true,
+      "appended": [
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 732,
+      "afterLen": 820
+    },
+    {
+      "slug": "doremon-kids-rakhi-with-lindor-chocolates",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Doremon-Kids-Rakhi-with-Lindor-Truffle-Combo-1-e1775750570178.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates."
+      ],
+      "beforeLen": 634,
+      "afterLen": 664
+    },
+    {
+      "slug": "single-rakhi-with-roli-chawal-for-brother-to-usa",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/05/Gemini_Generated_Image_jtxd3sjtxd3sjtxd.png",
+      "changed": false,
+      "appended": [],
+      "beforeLen": 1167,
+      "afterLen": 1167
+    },
+    {
+      "slug": "white-pearl-rakhi-with-hersheys-chocolates",
+      "chocolate": "hershey",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/White-Pearl-Rakhi-with-HERSHEYS-Chocolates-2.webp",
+      "changed": true,
+      "appended": [
+        "Includes 2 Hershey's chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 890,
+      "afterLen": 1011
+    },
+    {
+      "slug": "white-pearl-rakhi-with-lindor-chocolates",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/White-Pearl-Rakhi-with-Lindor-Truffle-1.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates."
+      ],
+      "beforeLen": 652,
+      "afterLen": 682
+    },
+    {
+      "slug": "red-blue-rakhi-set-of-2",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Red-Blue-Rakhi-Set-of-2-with-Roli-Chawal-1-e1779541707956.webp",
+      "changed": true,
+      "appended": [
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 964,
+      "afterLen": 1052
+    },
+    {
+      "slug": "multi-stone-rakhi-combo",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Multi-Stone-Rakhi-Combo-for-Brother-1-1-e1779540080577.webp",
+      "changed": true,
+      "appended": [
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 687,
+      "afterLen": 775
+    },
+    {
+      "slug": "red-rubi-single-stone-rakhi",
+      "chocolate": null,
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/ec34d0c6-c4e4-4f31-9f9b-958bc2b4a96d-e1776002916322.jpeg",
+      "changed": true,
+      "appended": [
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 909,
+      "afterLen": 997
+    },
+    {
+      "slug": "ganesh-rakhi-with-chocolates",
+      "chocolate": "ferrero",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Ganesh-Rakhi-with-Chocolates-e1779538762594.webp",
+      "changed": true,
+      "appended": [
+        "Includes 3 Ferrero Rocher chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 732,
+      "afterLen": 858
+    },
+    {
+      "slug": "rudraksha-ganesh-rakhi-combo",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Rudraksha-Ganesh-Rakhi-Combo-with-Chocolates-Set-of-2-1.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 994,
+      "afterLen": 1112
+    },
+    {
+      "slug": "beads-rakhi-with-ferrero-box",
+      "chocolate": "ferrero",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/Beads-Rakhi-with-Ferrero-Box-e1775491103608.webp",
+      "changed": true,
+      "appended": [
+        "Includes 3 Ferrero Rocher chocolates."
+      ],
+      "beforeLen": 1062,
+      "afterLen": 1101
+    },
+    {
+      "slug": "men-rakhi-set-of-2-with-chocolates-combo",
+      "chocolate": "lindor",
+      "primaryImage": "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/MenRakhi-Set-of-2-with-Chocolates-Combo-Pack-1-e1779539654252.webp",
+      "changed": true,
+      "appended": [
+        "Includes 5 Lindor chocolates.",
+        "Includes complimentary Roli & Chawal for the traditional Raksha Bandhan tilak ceremony."
+      ],
+      "beforeLen": 966,
+      "afterLen": 1085
+    }
+  ]
+}

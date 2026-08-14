@@ -1,0 +1,178 @@
+[
+  {
+    "slug": "classic-maroon-designer-single-rakhi",
+    "sku": "TFPRD00312",
+    "includes": ["1 Designer Om Rakhi with red thread"],
+    "hasRoliChawal": false,
+    "rakhiCount": 1,
+    "designSummary": "gold-tone circular Om (ॐ) medallion with geometric openwork, flanked by rudraksha-style and textured gold beads on a vibrant red thread"
+  },
+  {
+    "slug": "elegant-pearl-designer-single-rakhi",
+    "sku": "TFPRD00306",
+    "includes": [
+      "1 Designer Om Rakhi with pearl and crystal accents",
+      "Complimentary Roli",
+      "Complimentary Chawal (Rice)"
+    ],
+    "hasRoliChawal": true,
+    "rakhiCount": 1,
+    "designSummary": "gold-tone Om (ॐ) medallion accented with red stones, cream pearls, gold beads, and crystal details on a red thread"
+  },
+  {
+    "slug": "emerald-charm-designer-single-rakhi",
+    "sku": "TFPRD00311",
+    "includes": ["1 Designer Rakhi with rudraksha and gold accents"],
+    "hasRoliChawal": false,
+    "rakhiCount": 1,
+    "designSummary": "paired dark rudraksha-style beads with light wooden beads, golden teardrop accents, and a vibrant red thread"
+  },
+  {
+    "slug": "festive-ruby-designer-single-rakhi",
+    "sku": "TFPRD00316",
+    "includes": ["1 Designer Shiva Rakhi with red thread"],
+    "hasRoliChawal": false,
+    "rakhiCount": 1,
+    "designSummary": "gold-tone centerpiece with Shiva motifs (Trishul, Damru, and Devanagari script), rudraksha-style beads, cream pearls, and a red thread"
+  },
+  {
+    "slug": "golden-thread-traditional-single-rakhi",
+    "sku": "TFPRD00310",
+    "includes": ["1 Traditional Designer Rakhi with red thread"],
+    "hasRoliChawal": false,
+    "rakhiCount": 1,
+    "designSummary": "central dark rudraksha bead with grooved wooden beads, rows of tan wooden beads, and a vibrant red thread"
+  },
+  {
+    "slug": "royal-blue-stone-designer-single-rakhi",
+    "sku": "TFPRD00307",
+    "includes": ["1 Designer Rakhi with gold floral metalwork"],
+    "hasRoliChawal": false,
+    "rakhiCount": 1,
+    "designSummary": "antique gold floral/petal metal charms with textured gold beads and tapered end-caps on a bright red thread"
+  },
+  {
+    "slug": "sacred-om-designer-single-rakhi",
+    "sku": "TFPRD00317",
+    "includes": ["1 Designer Rakhi with gold accents and textured center bead"],
+    "hasRoliChawal": false,
+    "rakhiCount": 1,
+    "designSummary": "granulated gold floral caps with a textured center bead, disc spacers, and tapered gold tips on a red multi-strand thread"
+  },
+  {
+    "slug": "silver-bead-traditional-single-rakhi",
+    "sku": "TFPRD00313",
+    "includes": ["1 Designer BR #1 Rakhi with red thread"],
+    "hasRoliChawal": false,
+    "rakhiCount": 1,
+    "designSummary": "gold-tone BR #1 center charm with silver and gold ribbed beads plus rudraksha-style accents on a red braided thread"
+  },
+  {
+    "slug": "set-of-2-traditional-designer-rakhis-for-brother",
+    "sku": "TFPRD00312-338",
+    "includes": [
+      "Set of 2 Designer Om Rakhis",
+      "Complimentary Roli",
+      "Complimentary Chawal (Rice)"
+    ],
+    "hasRoliChawal": true,
+    "rakhiCount": 2,
+    "designSummary": "two distinct gold-tone Om (ॐ) rakhis — one with a geometric star medallion and one with a sunburst edge — each with rudraksha-style and gold beads on red threads"
+  },
+  {
+    "slug": "twin-designer-rakhi-set-of-2-premium-gift",
+    "sku": "TFPRD00315-337",
+    "includes": [
+      "Set of 2 Designer Rakhis",
+      "Complimentary Roli",
+      "Complimentary Chawal (Rice)"
+    ],
+    "hasRoliChawal": true,
+    "rakhiCount": 2,
+    "designSummary": "two complementary designer rakhis with antique-gold flower charms, multi-color beads, and textured gold metalwork on red threads"
+  },
+  {
+    "slug": "crystal-drop-designer-single-rakhi",
+    "sku": "TFPRD00298",
+    "includes": [
+      "Set of 2 Matching Designer Rakhis",
+      "Complimentary Roli",
+      "Complimentary Chawal (Rice)"
+    ],
+    "hasRoliChawal": true,
+    "rakhiCount": 2,
+    "designSummary": "matching pair with antique-gold square floral centerpieces, red and champagne pearl beads, and multi-color braided cords in red, cream, and brown"
+  },
+  {
+    "slug": "heritage-motif-designer-single-rakhi",
+    "sku": "TFPRD00370",
+    "includes": [
+      "Set of 2 Matching Designer Rakhis",
+      "Complimentary Roli",
+      "Complimentary Chawal (Rice)"
+    ],
+    "hasRoliChawal": true,
+    "rakhiCount": 2,
+    "designSummary": "matching pair with rudraksha-style beads, white pearl accents, and gold spacers on vibrant red threads"
+  },
+  {
+    "slug": "elegant-pearl-designer-single-rakhi-style-13",
+    "sku": "TFPRD0082",
+    "includes": [
+      "Set of 3 Designer Rakhis",
+      "Complimentary Roli",
+      "Complimentary Chawal (Rice)"
+    ],
+    "hasRoliChawal": true,
+    "rakhiCount": 3,
+    "designSummary": "three distinct designs with pearl, crystal, red, and rudraksha-style beads on red-yellow and multi-color braided threads"
+  },
+  {
+    "slug": "royal-blue-stone-designer-single-rakhi-style-14",
+    "sku": "TFPRD0083",
+    "includes": [
+      "Set of 3 Designer Rakhis",
+      "Complimentary Roli",
+      "Complimentary Chawal (Rice)"
+    ],
+    "hasRoliChawal": true,
+    "rakhiCount": 3,
+    "designSummary": "three complementary designs featuring cream pearls, red beads, clear accents, and gold spacers on red threads"
+  },
+  {
+    "slug": "golden-thread-traditional-single-rakhi-style-15",
+    "sku": "TFPRD0285",
+    "includes": [
+      "Set of 3 Traditional Designer Rakhis",
+      "Complimentary Roli",
+      "Complimentary Chawal (Rice)"
+    ],
+    "hasRoliChawal": true,
+    "rakhiCount": 3,
+    "designSummary": "three traditional styles with gold bead clusters, wire-wrapped accents, and multi-color braided threads in red, yellow, orange, and green"
+  },
+  {
+    "slug": "classic-maroon-designer-single-rakhi-style-17",
+    "sku": "TFPRD0284",
+    "includes": [
+      "Set of 5 Designer Rakhis",
+      "Complimentary Roli",
+      "Complimentary Chawal (Rice)"
+    ],
+    "hasRoliChawal": true,
+    "rakhiCount": 5,
+    "designSummary": "five unique gold-motif rakhis including elephant and turtle centerpieces plus ornate gold beads, each with white pearls and gold spacers on red and yellow braided threads"
+  },
+  {
+    "slug": "silver-bead-traditional-single-rakhi-style-18",
+    "sku": "TFPRD0068",
+    "includes": [
+      "Set of 5 Designer Rakhis",
+      "Complimentary Roli",
+      "Complimentary Chawal (Rice)"
+    ],
+    "hasRoliChawal": true,
+    "rakhiCount": 5,
+    "designSummary": "five designer rakhis with gold-tone metalwork, crystal accents, and pearl details on red and tan threads"
+  }
+]

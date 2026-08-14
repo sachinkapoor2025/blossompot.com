@@ -1,0 +1,31 @@
+{
+  "vendorSlug": "orange-county",
+  "count": 1,
+  "limit": 1,
+  "days": 15,
+  "hasMore": true,
+  "nextCursor": "eyJQSyI6Ik9SREVSI2QyNmVk\u2026",
+  "orders": [
+    {
+      "orderNumber": "D26EDAB5",
+      "internalOrderId": "d26edab5-5662-426b-b48a-ae1e39790e25",
+      "status": "shipped",
+      "orderValue": 9.75,
+      "orderValueCurrency": "USD",
+      "senderName": "Sonam",
+      "recipientName": "Abhishek Singh ",
+      "city": "Sparks",
+      "state": "NV",
+      "zipCode": "89431",
+      "itemCount": 1,
+      "items": [
+        {
+          "sku": "TFPRD00313",
+          "productName": "Silver Bead Traditional Single Rakhi",
+          "quantity": 1,
+          "price": 9.75
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+=== FEATURE: 06b_get_order_by_uuid ===
+Verified (UTC): 2026-08-04T19:28:02Z
+Command:
+  curl -sS -H X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673 https://orange-county.usarakhi.com/vendors/orange-county/orders/e647d630-1322-4a1c-aa7b-ecdbb65cc5f6
+
+--- Response ---
+HTTP 200
+
+HTTP/2 200 
+date: Tue, 04 Aug 2026 19:28:11 GMT
+content-type: application/json
+
+{
+    "order": {
+        "orderId": "OC10011",
+        "orderNumber": "OC10011",
+        "internalOrderId": "e647d630-1322-4a1c-aa7b-ecdbb65cc5f6",
+        "orderDate": "2026-08-04T12:23:44.493Z",
+        "createdAt": "2026-08-04T12:23:44.493Z",
+        "updatedAt": "2026-08-04T12:25:15.610Z",
+        "status": "paid",
+        "senderName": "vandana sharma",
+        "recipientName": "Puneet Bhardwaj",
+        "recipientAddressLine1": "44 Murphy Dr., Hillsborough, NJ.",
+        "recipientAddressLine2": "44 Murphy Dr., Hillsborough, NJ.",
+        "city": "Hillsborough",
+        "state": "NJ",
+        "country": "US",
+        "zipCode": "08844",
+        "recipientPhoneNumber": "+9112013601417",
+        "recipientEmail": "puneet.puneet@gmail.com",
+        "orderValue": 9.75,
+        "orderValueCurrency": "USD",
+        "deliveryDate": "2026-08-18T16:00:00.000Z",
+        "giftMessage": "Although we are far away from each other, this distance will not affect the strong bond of our relation. Happy Raksha Bandhan! This package is filled with Rakhi as well as overloaded with our emotions. Please accept this bundle of love and emotions.",
+        "trackingNumber": null,
+        "carrier": null,
+        "shippingServiceName": null,
+        "items": [
+            {
+                "sku": "TFPRD00306",
+                "productCode": "TFPRD00306",
+                "productName": "Elegant Pearl Designer Single Rakhi",
+                "productSlug": "elegant-pearl-designer-single-rakhi",
+                "price": 9.75,
+                "quantity": 1,
+                "productImageUrl": "https://d301af4ndyn9qx.cloudfront.net/uploads/orange-county/TFPRD00306/TFPRD00306.jpg",
+                "weight": 6,
+                "weightUnit": "oz"
+            }
+        ]
+    }
+}

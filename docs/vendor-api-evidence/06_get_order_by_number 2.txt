@@ -1,0 +1,53 @@
+=== FEATURE: 06_get_order_by_number ===
+Verified (UTC): 2026-08-01T11:48:07Z
+Command:
+  curl -sS -H X-Vendor-Api-Key:\ YOUR_API_KEY https://xp9lzxeg40.execute-api.us-east-1.amazonaws.com/prod/vendors/orange-county/orders/OC10003 
+
+--- Response ---
+HTTP 200
+
+HTTP/2 200 
+date: Sat, 01 Aug 2026 11:49:45 GMT
+content-type: application/json
+
+{
+    "order": {
+        "orderId": "OC10003",
+        "orderNumber": "OC10003",
+        "internalOrderId": "7d4e5e74-e89a-477a-bd12-dab8ce979cd2",
+        "orderDate": "2026-07-26T07:29:12.458Z",
+        "createdAt": "2026-07-26T07:29:12.458Z",
+        "updatedAt": "2026-07-29T08:10:38.951Z",
+        "status": "paid",
+        "senderName": "Viara Shori",
+        "recipientName": "Mohit Shori",
+        "recipientAddressLine1": "44584 state route 20 concrete",
+        "recipientAddressLine2": null,
+        "city": "Concrete",
+        "state": "WA",
+        "country": "US",
+        "zipCode": "98237",
+        "recipientPhoneNumber": "+112532414302",
+        "recipientEmail": "vishu_saini87@yahoo.co.in",
+        "orderValue": 28.95,
+        "orderValueCurrency": "USD",
+        "deliveryDate": null,
+        "giftMessage": "Although we are far away from each other, this distance will not affect the strong bond of our relation. Happy Raksha Bandhan! This package is filled with Rakhi as well as overloaded with our emotions. Please accept this bundle of love and emotions.",
+        "trackingNumber": null,
+        "carrier": null,
+        "shippingServiceName": null,
+        "items": [
+            {
+                "sku": "TFUSRH2026-16",
+                "productCode": "TFUSRH2026-16",
+                "productName": "Set of 2 Traditional Designer Rakhis with Kaju, Pistachios & Besan Laddu Gift Hamper for Brother | Premium Raksha Bandhan Gift Set",
+                "productSlug": "classic-rakhi-double-delight-box",
+                "price": 28.95,
+                "quantity": 1,
+                "productImageUrl": "https://d301af4ndyn9qx.cloudfront.net/uploads/orange-county/TFUSRH2026-16/TFUSRH2026-16.jpg",
+                "weight": 32,
+                "weightUnit": "oz"
+            }
+        ]
+    }
+}

@@ -1,0 +1,15 @@
+=== FEATURE: 09_tracking_body_validation ===
+Verified (UTC): 2026-08-05T04:49:29Z
+Command:
+  curl -sS -H X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673 -H Content-Type: application/json -d {} -X POST https://orange-county.usarakhi.com/vendors/orange-county/tracking
+
+--- Response ---
+HTTP 400
+
+HTTP/2 400 
+date: Wed, 05 Aug 2026 04:49:40 GMT
+content-type: application/json
+
+{
+    "error": "orderNumber is required"
+}

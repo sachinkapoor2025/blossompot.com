@@ -1,0 +1,15 @@
+=== FEATURE: 06c_get_order_by_short_id ===
+Verified (UTC): 2026-08-01T11:48:07Z
+Command:
+  curl -sS -H X-Vendor-Api-Key:\ YOUR_API_KEY https://xp9lzxeg40.execute-api.us-east-1.amazonaws.com/prod/vendors/orange-county/orders/D26EDAB5 
+
+--- Response ---
+HTTP 403
+
+HTTP/2 403 
+date: Sat, 01 Aug 2026 11:49:47 GMT
+content-type: application/json
+
+{
+    "error": "Order not found for this vendor"
+}

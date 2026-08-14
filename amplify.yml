@@ -1,0 +1,65 @@
+version: 1
+applications:
+  - appRoot: apps/web
+    frontend:
+      buildPath: /
+      phases:
+        preBuild:
+          commands:
+            - nvm use 22
+            - npm ci
+            - npm run build -w @blossompot/shared
+        build:
+          commands:
+            - |
+              STACK_NAME=${STACK_NAME:-blossompot-prod}
+              ENV_FILE="apps/web/.env.production"
+              if [ ! -d "apps/web" ]; then ENV_FILE=".env.production"; fi
+              if command -v aws >/dev/null 2>&1; then
+                output() {
+                  aws cloudformation describe-stacks \
+                    --stack-name "$STACK_NAME" \
+                    --query "Stacks[0].Outputs[?OutputKey=='$1'].OutputValue | [0]" \
+                    --output text 2>/dev/null
+                }
+                USER_POOL_ID=$(output UserPoolId || true)
+                USER_POOL_CLIENT_ID=$(output UserPoolClientId || true)
+                API_URL=$(output ApiUrl || true)
+                CLOUDFRONT_DOMAIN=$(output CloudFrontDomain || true)
+                if [ -n "$USER_POOL_ID" ] && [ "$USER_POOL_ID" != "None" ] && [ -n "$USER_POOL_CLIENT_ID" ] && [ "$USER_POOL_CLIENT_ID" != "None" ]; then
+                  {
+                    echo "NEXT_PUBLIC_COGNITO_USER_POOL_ID=$USER_POOL_ID"
+                    echo "NEXT_PUBLIC_COGNITO_CLIENT_ID=$USER_POOL_CLIENT_ID"
+                    echo "NEXT_PUBLIC_COGNITO_REGION=${AWS_REGION:-us-east-1}"
+                    if [ -n "$API_URL" ] && [ "$API_URL" != "None" ]; then echo "NEXT_PUBLIC_API_URL=$API_URL"; fi
+                    if [ -n "$CLOUDFRONT_DOMAIN" ] && [ "$CLOUDFRONT_DOMAIN" != "None" ]; then echo "NEXT_PUBLIC_CDN_URL=https://$CLOUDFRONT_DOMAIN"; fi
+                  } >> "$ENV_FILE"
+                fi
+              fi
+            - npm run build -w @blossompot/web
+      artifacts:
+        baseDirectory: apps/web/.next
+        files:
+          - "**/*"
+      cache:
+        paths:
+          - node_modules/**/*
+          - apps/web/.next/cache/**/*
+    environment:
+      variables:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+        NEXT_PUBLIC_COGNITO_USER_POOL_ID: ${NEXT_PUBLIC_COGNITO_USER_POOL_ID}
+        NEXT_PUBLIC_COGNITO_CLIENT_ID: ${NEXT_PUBLIC_COGNITO_CLIENT_ID}
+        NEXT_PUBLIC_COGNITO_REGION: ${NEXT_PUBLIC_COGNITO_REGION}
+        NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+        NEXT_PUBLIC_RAZORPAY_KEY_ID: ${RAZOR_KEY_ID}
+        NEXT_PUBLIC_CDN_URL: ${NEXT_PUBLIC_CDN_URL}
+        NEXT_PUBLIC_USD_INR_RATE: ${NEXT_PUBLIC_USD_INR_RATE}
+        NEXT_PUBLIC_GTM_ID: ${NEXT_PUBLIC_GTM_ID}
+        NEXT_PUBLIC_GA4_ID: ${NEXT_PUBLIC_GA4_ID}
+        NEXT_PUBLIC_META_PIXEL_ID: ${NEXT_PUBLIC_META_PIXEL_ID}
+        NEXT_PUBLIC_CLARITY_ID: ${NEXT_PUBLIC_CLARITY_ID}
+        NEXT_PUBLIC_BING_SITE_VERIFICATION: ${NEXT_PUBLIC_BING_SITE_VERIFICATION}
+        NEXT_PUBLIC_BING_UET_ID: ${NEXT_PUBLIC_BING_UET_ID}
+        NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: ${NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION}

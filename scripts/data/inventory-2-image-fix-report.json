@@ -1,0 +1,161 @@
+{
+  "at": "2026-07-29T05:54:23.825Z",
+  "report": [
+    {
+      "sku": "MD005SET5",
+      "before": 1,
+      "after": 1,
+      "files": [
+        "MD005SET5.jpg"
+      ]
+    },
+    {
+      "sku": "TFPRD00298",
+      "before": 1,
+      "after": 3,
+      "files": [
+        "TFPRD00298QT2-(1).jpg",
+        "TFPRD00298QT2.jpg",
+        "TFPRD00298.jpg"
+      ]
+    },
+    {
+      "sku": "TFPRD00306",
+      "before": 3,
+      "after": 3,
+      "files": [
+        "TFPRD00306.jpg",
+        "TFPRD00306a.jpg",
+        "TFPRD00306b.jpg"
+      ]
+    },
+    {
+      "sku": "TFPRD00307",
+      "before": 2,
+      "after": 2,
+      "files": [
+        "TFPRD00307.jpg",
+        "TFPRD00307A.jpg"
+      ]
+    },
+    {
+      "sku": "TFPRD00310",
+      "before": 2,
+      "after": 2,
+      "files": [
+        "TFPRD00310.jpg",
+        "TFPRD00310A.jpg"
+      ]
+    },
+    {
+      "sku": "TFPRD00311",
+      "before": 1,
+      "after": 1,
+      "files": [
+        "TFPRD00311.jpg"
+      ]
+    },
+    {
+      "sku": "TFPRD00312",
+      "before": 2,
+      "after": 2,
+      "files": [
+        "TFPRD00312a.jpg",
+        "TFPRD00312.jpg"
+      ]
+    },
+    {
+      "sku": "TFPRD00312-338",
+      "before": 2,
+      "after": 2,
+      "files": [
+        "TFPRD00312-338.jpg",
+        "TFPRD00312-338-SETof2a.jpg"
+      ]
+    },
+    {
+      "sku": "TFPRD00313",
+      "before": 2,
+      "after": 2,
+      "files": [
+        "TFPRD00313.jpg",
+        "TFPRD00313B.jpg"
+      ]
+    },
+    {
+      "sku": "TFPRD00315-337",
+      "before": 2,
+      "after": 2,
+      "files": [
+        "TFPRD00315-337.jpg",
+        "TFPRD00315-337-SETOF2.jpg"
+      ]
+    },
+    {
+      "sku": "TFPRD00316",
+      "before": 2,
+      "after": 2,
+      "files": [
+        "TFPRD00316.jpg",
+        "TFPRD00316A.jpg"
+      ]
+    },
+    {
+      "sku": "TFPRD00317",
+      "before": 2,
+      "after": 2,
+      "files": [
+        "TFPRD00317.jpg",
+        "TFPRD00317A.jpg"
+      ]
+    },
+    {
+      "sku": "TFPRD00370",
+      "before": 1,
+      "after": 1,
+      "files": [
+        "TFPRD00370.jpg"
+      ]
+    },
+    {
+      "sku": "TFPRD0068",
+      "before": 1,
+      "after": 1,
+      "files": [
+        "TFPRD0068.jpg"
+      ]
+    },
+    {
+      "sku": "TFPRD0082",
+      "before": 1,
+      "after": 1,
+      "files": [
+        "TFPRD0082.jpg"
+      ]
+    },
+    {
+      "sku": "TFPRD0083",
+      "before": 1,
+      "after": 1,
+      "files": [
+        "TFPRD0083.jpg"
+      ]
+    },
+    {
+      "sku": "TFPRD0284",
+      "before": 1,
+      "after": 1,
+      "files": [
+        "TFPRD0284.jpg"
+      ]
+    },
+    {
+      "sku": "TFPRD0285",
+      "before": 1,
+      "after": 1,
+      "files": [
+        "TFPRD0285.jpg"
+      ]
+    }
+  ]
+}

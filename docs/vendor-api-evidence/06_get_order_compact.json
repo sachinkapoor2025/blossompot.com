@@ -1,0 +1,29 @@
+{
+  "orderNumber": "OC10011",
+  "orderId": "OC10011",
+  "internalOrderId": "e647d630-1322-4a1c-aa7b-ecdbb65cc5f6",
+  "status": "paid",
+  "orderDate": "2026-08-04T12:23:44.493Z",
+  "senderName": "vandana sharma",
+  "recipientName": "Puneet Bhardwaj",
+  "recipientAddressLine1": "44 Murphy Dr., Hillsborough, NJ.",
+  "recipientAddressLine2": "44 Murphy Dr., Hillsborough, NJ.",
+  "city": "Hillsborough",
+  "state": "NJ",
+  "zipCode": "08844",
+  "country": "US",
+  "recipientPhoneNumber": "+9112013601417",
+  "orderValue": 9.75,
+  "orderValueCurrency": "USD",
+  "giftMessage": "Although we are far away from each other, this distance will not affect the stro",
+  "items": [
+    {
+      "sku": "TFPRD00306",
+      "productName": "Elegant Pearl Designer Single Rakhi",
+      "quantity": 1,
+      "price": 9.75,
+      "weight": 6,
+      "weightUnit": "oz"
+    }
+  ]
+}

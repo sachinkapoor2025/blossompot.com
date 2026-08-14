@@ -1,0 +1,141 @@
+=== FEATURE: 03_list_orders_page1 ===
+Verified (UTC): 2026-08-04T19:28:02Z
+Command:
+  curl -sS -H X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673 https://orange-county.usarakhi.com/vendors/orange-county/orders?days=15&limit=50
+
+--- Response ---
+HTTP 200
+
+HTTP/2 200 
+date: Tue, 04 Aug 2026 19:28:07 GMT
+content-type: application/json
+
+{
+    "vendorSlug": "orange-county",
+    "count": 3,
+    "limit": 50,
+    "since": "2026-07-20T19:28:06.980Z",
+    "days": 15,
+    "updatedSince": null,
+    "hasMore": false,
+    "nextCursor": null,
+    "orders": [
+        {
+            "orderId": "OC10011",
+            "orderNumber": "OC10011",
+            "internalOrderId": "e647d630-1322-4a1c-aa7b-ecdbb65cc5f6",
+            "orderDate": "2026-08-04T12:23:44.493Z",
+            "createdAt": "2026-08-04T12:23:44.493Z",
+            "updatedAt": "2026-08-04T12:25:15.610Z",
+            "status": "paid",
+            "senderName": "vandana sharma",
+            "recipientName": "Puneet Bhardwaj",
+            "recipientAddressLine1": "44 Murphy Dr., Hillsborough, NJ.",
+            "recipientAddressLine2": "44 Murphy Dr., Hillsborough, NJ.",
+            "city": "Hillsborough",
+            "state": "NJ",
+            "country": "US",
+            "zipCode": "08844",
+            "recipientPhoneNumber": "+9112013601417",
+            "recipientEmail": "puneet.puneet@gmail.com",
+            "orderValue": 9.75,
+            "orderValueCurrency": "USD",
+            "deliveryDate": "2026-08-18T16:00:00.000Z",
+            "giftMessage": "Although we are far away from each other, this distance will not affect the strong bond of our relation. Happy Raksha Bandhan! This package is filled with Rakhi as well as overloaded with our emotions. Please accept this bundle of love and emotions.",
+            "trackingNumber": null,
+            "carrier": null,
+            "shippingServiceName": null,
+            "items": [
+                {
+                    "sku": "TFPRD00306",
+                    "productCode": "TFPRD00306",
+                    "productName": "Elegant Pearl Designer Single Rakhi",
+                    "productSlug": "elegant-pearl-designer-single-rakhi",
+                    "price": 9.75,
+                    "quantity": 1,
+                    "productImageUrl": "https://d301af4ndyn9qx.cloudfront.net/uploads/orange-county/TFPRD00306/TFPRD00306.jpg",
+                    "weight": 6,
+                    "weightUnit": "oz"
+                }
+            ]
+        },
+        {
+            "orderId": "D26EDAB5",
+            "orderNumber": "D26EDAB5",
+            "internalOrderId": "d26edab5-5662-426b-b48a-ae1e39790e25",
+            "orderDate": "2026-08-01T05:04:53.726Z",
+            "createdAt": "2026-08-01T05:04:53.726Z",
+            "updatedAt": "2026-08-04T17:19:14.825Z",
+            "status": "shipped",
+            "senderName": "Sonam",
+            "recipientName": "Abhishek Singh ",
+            "recipientAddressLine1": "955 Avenue of the oaks ",
+            "recipientAddressLine2": "624",
+            "city": "Sparks",
+            "state": "NV",
+            "country": "US",
+            "zipCode": "89431",
+            "recipientPhoneNumber": "+16207040858",
+            "recipientEmail": "abhisingh021994@gmail.com",
+            "orderValue": 9.75,
+            "orderValueCurrency": "USD",
+            "deliveryDate": "2026-08-22T00:00:00.000Z",
+            "giftMessage": "Although we are far away from each other, this distance will not affect the strong bond of our relation. Happy Raksha Bandhan! This package is filled with Rakhi as well as overloaded with our emotions. Please accept this bundle of love and emotions.",
+            "trackingNumber": "9400150105796092529141",
+            "carrier": null,
+            "shippingServiceName": null,
+            "items": [
+                {
+                    "sku": "TFPRD00313",
+                    "productCode": "TFPRD00313",
+                    "productName": "Silver Bead Traditional Single Rakhi",
+                    "productSlug": "silver-bead-traditional-single-rakhi",
+                    "price": 9.75,
+                    "quantity": 1,
+                    "productImageUrl": "https://d301af4ndyn9qx.cloudfront.net/uploads/orange-county/TFPRD00313/TFPRD00313.jpg",
+                    "weight": 6,
+                    "weightUnit": "oz"
+                }
+            ]
+        },
+        {
+            "orderId": "OC10003",
+            "orderNumber": "OC10003",
+            "internalOrderId": "7d4e5e74-e89a-477a-bd12-dab8ce979cd2",
+            "orderDate": "2026-07-26T07:29:12.458Z",
+            "createdAt": "2026-07-26T07:29:12.458Z",
+            "updatedAt": "2026-08-04T17:18:01.335Z",
+            "status": "shipped",
+            "senderName": "Viara Shori",
+            "recipientName": "Mohit Shori",
+            "recipientAddressLine1": "44584 state route 20 concrete",
+            "recipientAddressLine2": null,
+            "city": "Concrete",
+            "state": "WA",
+            "country": "US",
+            "zipCode": "98237",
+            "recipientPhoneNumber": "+112532414302",
+            "recipientEmail": "vishu_saini87@yahoo.co.in",
+            "orderValue": 28.95,
+            "orderValueCurrency": "USD",
+            "deliveryDate": "2026-08-04T00:00:00.000Z",
+            "giftMessage": "Although we are far away from each other, this distance will not affect the strong bond of our relation. Happy Raksha Bandhan! This package is filled with Rakhi as well as overloaded with our emotions. Please accept this bundle of love and emotions.",
+            "trackingNumber": "9434650105796031788433",
+            "carrier": null,
+            "shippingServiceName": null,
+            "items": [
+                {
+                    "sku": "TFUSRH2026-16",
+                    "productCode": "TFUSRH2026-16",
+                    "productName": "Set of 2 Traditional Designer Rakhis with Kaju, Pistachios & Besan Laddu Gift Hamper for Brother | Premium Raksha Bandhan Gift Set",
+                    "productSlug": "classic-rakhi-double-delight-box",
+                    "price": 28.95,
+                    "quantity": 1,
+                    "productImageUrl": "https://d301af4ndyn9qx.cloudfront.net/uploads/orange-county/TFUSRH2026-16/TFUSRH2026-16.jpg",
+                    "weight": 32,
+                    "weightUnit": "oz"
+                }
+            ]
+        }
+    ]
+}

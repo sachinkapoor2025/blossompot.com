@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>BlossomPot — Orange County Vendor API (Shareable Guide + Live Evidence)</title>
+<style>
+  @page { size: A4; margin: 14mm 12mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 10.5px; line-height: 1.45; color: #0f172a; margin: 0;
+  }
+  .cover {
+    background: linear-gradient(135deg, #0b2748 0%, #183a68 55%, #245a8d 100%);
+    color: #fff; padding: 28px 24px; border-radius: 10px; margin-bottom: 16px;
+  }
+  .cover h1 { margin: 0 0 6px; font-size: 22px; letter-spacing: -0.02em; }
+  .cover .tag { opacity: 0.9; font-size: 12px; margin: 0 0 14px; }
+  .cover-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 18px; font-size: 10.5px; }
+  .cover-grid strong {
+    display: block; opacity: 0.75; font-weight: 600; font-size: 9px;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .pill {
+    display: inline-block; background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25); border-radius: 999px;
+    padding: 3px 10px; font-size: 10px; margin-right: 6px;
+  }
+  h2 {
+    font-size: 13.5px; color: #183a68; margin: 18px 0 8px;
+    border-bottom: 2px solid #dbeafe; padding-bottom: 4px; page-break-after: avoid;
+  }
+  h3 { font-size: 11.5px; color: #0f172a; margin: 14px 0 6px; page-break-after: avoid; }
+  p { margin: 0 0 8px; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 12px; }
+  th, td { border: 1px solid #e2e8f0; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #f1f5f9; color: #183a68; width: 26%; }
+  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 9px; }
+  pre.cmdblock {
+    background: #0b1220; color: #e2e8f0; padding: 10px 12px; border-radius: 8px;
+    white-space: pre-wrap; word-break: break-all; margin: 6px 0 10px;
+  }
+  ul, ol { margin: 4px 0 10px 18px; padding: 0; }
+  li { margin-bottom: 3px; }
+  .ok { background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 8px 10px; margin: 8px 0 12px; }
+  .note { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 8px 10px; margin: 8px 0 12px; }
+  .info { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 8px 10px; margin: 8px 0 12px; }
+  .feat {
+    border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; margin: 0 0 12px;
+    page-break-inside: avoid;
+  }
+  .feat .num {
+    display: inline-block; background: #183a68; color: #fff; font-weight: 700;
+    font-size: 9px; padding: 2px 7px; border-radius: 4px; margin-right: 6px;
+  }
+  .shot {
+    border-radius: 10px; overflow: hidden; margin: 8px 0 6px;
+    border: 1px solid #1e293b; box-shadow: 0 8px 20px rgba(15,23,42,0.12);
+    page-break-inside: avoid;
+  }
+  .shot-bar {
+    background: #1e293b; color: #cbd5e1; padding: 7px 10px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .dots i {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    margin-right: 4px; background: #64748b;
+  }
+  .dots i:nth-child(1) { background: #f87171; }
+  .dots i:nth-child(2) { background: #fbbf24; }
+  .dots i:nth-child(3) { background: #34d399; }
+  .shot-title { flex: 1; font-size: 9.5px; font-weight: 600; }
+  .http { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 999px; }
+  .http.ok { background: #065f46; color: #d1fae5; }
+  .http.warn { background: #92400e; color: #fef3c7; }
+  .http.err { background: #991b1b; color: #fee2e2; }
+  .shot-body { background: #0b1220; color: #e2e8f0; padding: 10px 12px; }
+  .shot-body .cmd {
+    color: #93c5fd; margin-bottom: 8px; white-space: pre-wrap; word-break: break-all;
+    font-family: ui-monospace, Menlo, monospace; font-size: 8.5px;
+  }
+  .shot-body pre {
+    margin: 0; white-space: pre-wrap; word-break: break-word; font-size: 8.5px; color: #d1fae5;
+  }
+  .ev-note { margin: 6px 0 0; color: #475569; font-size: 9.5px; }
+  .footer {
+    margin-top: 18px; padding-top: 8px; border-top: 1px solid #cbd5e1;
+    color: #64748b; font-size: 9.5px;
+  }
+  .checklist li { margin-bottom: 4px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 8px 0 12px; }
+  .gallery img { width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; }
+  @media print {
+    .cover, .shot, .shot-bar, .shot-body, .http, .feat .num {
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="pill">Vendor shareable</div>
+  <div class="pill">Live API verified</div>
+  <div class="pill">Orange County</div>
+  <h1>BlossomPot → Orange County Vendor API</h1>
+  <p class="tag">Integration guide with live curl commands and response evidence for every feature.</p>
+  <div class="cover-grid">
+    <div><strong>Base URL</strong><code style="color:#fff">https://orange-county.blossompot.com</code></div>
+    <div><strong>Verified (UTC)</strong>2026-08-05T04:49:29Z</div>
+    <div><strong>Auth header</strong>X-Vendor-Api-Key</div>
+    <div><strong>Service</strong>orange-county-vendor-api (dedicated)</div>
+  </div>
+</div>
+
+<div class="ok"><strong>Dedicated Vendor API only.</strong> Do not use the website/storefront API host.
+All examples below were executed against production Vendor API and captured for this document.</div>
+
+<h2>1. Credentials</h2>
+<table>
+  <tr><th>Base URL</th><td><code>https://orange-county.blossompot.com</code></td></tr>
+  <tr><th>API Key</th><td><code>4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673</code></td></tr>
+  <tr><th>Header</th><td><code>X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673</code></td></tr>
+</table>
+<div class="note">Keep this key private to Orange County fulfillment systems.
+Rotate with BlossomPot if exposed publicly outside this partner channel.
+Every curl below is a full copy-paste command (no export / variables required).</div>
+
+<h2>2. Feature map (what you can do)</h2>
+<table>
+  <tr><th>Feature</th><td>Endpoint</td></tr>
+  <tr><th>Health check</th><td><code>GET /health</code></td></tr>
+  <tr><th>Import orders (15 days default)</th><td><code>GET /vendors/orange-county/orders</code></td></tr>
+  <tr><th>Pagination (&gt;50 / custom page size)</th><td><code>?limit=1..200&amp;cursor=...</code></td></tr>
+  <tr><th>Get one order</th><td><code>GET /vendors/orange-county/orders/{orderNumber|uuid}</code></td></tr>
+  <tr><th>Post AWB when shipped</th><td><code>POST /vendors/orange-county/shipment</code> (also path style)</td></tr>
+  <tr><th>Post tracking status</th><td><code>POST /vendors/orange-county/tracking</code> (also path style)</td></tr>
+</table>
+
+<div class="info">
+<strong>Fulfillment notes:</strong> <code>orderValue</code> / item <code>price</code> are vendor cost (not website retail).
+Match products by <code>sku</code> / <code>productCode</code>.
+Store <code>orderNumber</code> (e.g. <code>OC10003</code>) as your external reference.
+List and get both return full <code>recipientPhoneNumber</code> and <code>country</code> (never masked — required for USPS).
+</div>
+
+<h2>3. End-to-end workflow</h2>
+<ol>
+  <li>Poll <strong>list orders</strong> every N minutes (<code>days=15</code>, use <code>updatedSince</code> for incremental sync).</li>
+  <li>Paginate with <code>nextCursor</code> while <code>hasMore=true</code>.</li>
+  <li>Import / pick / pack using recipient address + gift message + SKUs.</li>
+  <li>When courier assigned — <strong>POST shipment</strong> with <code>orderNumber</code>, <code>courierName</code>, <code>awb</code>.</li>
+  <li>When status changes — <strong>POST tracking</strong> with <code>currentShipmentStatus</code>.</li>
+  <li>Skip duplicates by remembering imported <code>orderNumber</code>s.</li>
+</ol>
+
+<h2>4. Live evidence — curl + response screenshots</h2>
+<p>Each panel below is a live capture from production (2026-08-05T04:49:29Z UTC).
+Green = success path; amber = expected validation / auth error proving the route is live.</p>
+
+<div class="feat"><h3><span class="num">A</span> Health check</h3>
+<p>Confirms the dedicated Vendor API is up (custom domain).</p>
+<pre class="cmdblock">curl -sS \
+  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot; \
+  &quot;https://orange-county.blossompot.com/health&quot;</pre>
+
+  <div class="shot">
+    <div class="shot-bar">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="shot-title">Terminal — Health</span>
+      <span class="http ok">HTTP 200</span>
+    </div>
+    <div class="shot-body">
+      <div class="cmd">$ curl -sS  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot;  &quot;https://orange-county.blossompot.com/health&quot;</div>
+      <pre>{
+  &quot;ok&quot;: true,
+  &quot;service&quot;: &quot;orange-county-vendor-api&quot;
+}</pre>
+    </div>
+    
+  </div>
+</div>
+<div class="feat"><h3><span class="num">B</span> Auth required</h3>
+<p>Missing API key is rejected (same path without the header).</p>
+<pre class="cmdblock">curl -sS \
+  &quot;https://orange-county.blossompot.com/vendors/orange-county/orders?days=15&amp;limit=1&quot;</pre>
+
+  <div class="shot">
+    <div class="shot-bar">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="shot-title">Terminal — Auth (no key)</span>
+      <span class="http warn">HTTP 401</span>
+    </div>
+    <div class="shot-body">
+      <div class="cmd">$ curl -sS  &quot;https://orange-county.blossompot.com/vendors/orange-county/orders?days=15&amp;limit=1&quot;</div>
+      <pre>{
+  &quot;error&quot;: &quot;Valid X-Vendor-Api-Key required&quot;
+}</pre>
+    </div>
+    
+  </div>
+</div>
+<div class="feat"><h3><span class="num">C</span> List orders (import feed)</h3>
+<p>Default window = last <strong>15 days</strong>. Page size default 50, max 200.</p>
+<pre class="cmdblock">curl -sS \
+  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot; \
+  &quot;https://orange-county.blossompot.com/vendors/orange-county/orders?days=15&amp;limit=50&quot;</pre>
+
+  <div class="shot">
+    <div class="shot-bar">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="shot-title">Terminal — List orders (page 1, compact preview)</span>
+      <span class="http ok">HTTP 200</span>
+    </div>
+    <div class="shot-body">
+      <div class="cmd">$ curl -sS  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot;  &quot;https://orange-county.blossompot.com/vendors/orange-county/orders?days=15&amp;limit=2&quot;</div>
+      <pre>{
+  &quot;vendorSlug&quot;: &quot;orange-county&quot;,
+  &quot;count&quot;: 1,
+  &quot;limit&quot;: 50,
+  &quot;days&quot;: 15,
+  &quot;hasMore&quot;: false,
+  &quot;nextCursor&quot;: null,
+  &quot;orders&quot;: [
+    {
+      &quot;orderNumber&quot;: &quot;OC10011&quot;,
+      &quot;internalOrderId&quot;: &quot;e647d630-1322-4a1c-aa7b-ecdbb65cc5f6&quot;,
+      &quot;status&quot;: &quot;paid&quot;,
+      &quot;orderValue&quot;: 9.75,
+      &quot;orderValueCurrency&quot;: &quot;USD&quot;,
+      &quot;senderName&quot;: &quot;vandana sharma&quot;,
+      &quot;recipientName&quot;: &quot;Puneet Bhardwaj&quot;,
+      &quot;recipientAddressLine1&quot;: &quot;44 Murphy Dr., Hillsborough, NJ.&quot;,
+      &quot;recipientAddressLine2&quot;: &quot;44 Murphy Dr., Hillsborough, NJ.&quot;,
+      &quot;city&quot;: &quot;Hillsborough&quot;,
+      &quot;state&quot;: &quot;NJ&quot;,
+      &quot;country&quot;: &quot;US&quot;,
+      &quot;zipCode&quot;: &quot;08844&quot;,
+      &quot;recipientPhoneNumber&quot;: &quot;+9112013601417&quot;,
+      &quot;itemCount&quot;: 1,
+      &quot;items&quot;: [
+        {
+          &quot;sku&quot;: &quot;TFPRD00306&quot;,
+          &quot;productName&quot;: &quot;Elegant Pearl Designer Single Rakhi&quot;,
+          &quot;quantity&quot;: 1,
+          &quot;price&quot;: 9.75
+        }
+      ]
+    }
+  ]
+}</pre>
+    </div>
+    <p class="ev-note">Full response includes full address, gift message, items[], weights, and image URLs.</p>
+  </div>
+</div>
+<div class="feat"><h3><span class="num">D</span> Pagination (more than one page)</h3>
+<p>Use <code>nextCursor</code> from the previous response. Keep calling while <code>hasMore === true</code>.</p>
+<pre class="cmdblock"># Page 1
+curl -sS \
+  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot; \
+  &quot;https://orange-county.blossompot.com/vendors/orange-county/orders?days=15&amp;limit=1&quot;
+
+# Page 2
+curl -sS \
+  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot; \
+  &quot;https://orange-county.blossompot.com/vendors/orange-county/orders?days=15&amp;limit=1&amp;cursor=eyJQSyI6Ik9SREVSI2U2NDdkNjMwLTEzMjItNGExYy1hYTdiLWVjZGJiNjVjYzVmNiIsIlNLIjoiTUVUQSIsIkdTSTJQSyI6IkVOVElUWSNPUkRFUiIsIkdTSTJTSyI6IjIwMjYtMDgtMDRUMTI6MjM6NDQuNDkzWiJ9&quot;</pre>
+
+  <div class="shot">
+    <div class="shot-bar">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="shot-title">Terminal — Page 1 (limit=1)</span>
+      <span class="http ok">HTTP 200</span>
+    </div>
+    <div class="shot-body">
+      <div class="cmd">$ curl -sS  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot;  &quot;https://orange-county.blossompot.com/vendors/orange-county/orders?days=15&amp;limit=1&quot;</div>
+      <pre>{
+  &quot;vendorSlug&quot;: &quot;orange-county&quot;,
+  &quot;count&quot;: 1,
+  &quot;limit&quot;: 1,
+  &quot;days&quot;: 15,
+  &quot;hasMore&quot;: true,
+  &quot;nextCursor&quot;: &quot;eyJQSyI6Ik9SREVSI2U2NDdk\u2026&quot;,
+  &quot;orders&quot;: [
+    {
+      &quot;orderNumber&quot;: &quot;OC10011&quot;,
+      &quot;internalOrderId&quot;: &quot;e647d630-1322-4a1c-aa7b-ecdbb65cc5f6&quot;,
+      &quot;status&quot;: &quot;paid&quot;,
+      &quot;orderValue&quot;: 9.75,
+      &quot;orderValueCurrency&quot;: &quot;USD&quot;,
+      &quot;senderName&quot;: &quot;vandana sharma&quot;,
+      &quot;recipientName&quot;: &quot;Puneet Bhardwaj&quot;,
+      &quot;recipientAddressLine1&quot;: &quot;44 Murphy Dr., Hillsborough, NJ.&quot;,
+      &quot;recipientAddressLine2&quot;: &quot;44 Murphy Dr., Hillsborough, NJ.&quot;,
+      &quot;city&quot;: &quot;Hillsborough&quot;,
+      &quot;state&quot;: &quot;NJ&quot;,
+      &quot;country&quot;: &quot;US&quot;,
+      &quot;zipCode&quot;: &quot;08844&quot;,
+      &quot;recipientPhoneNumber&quot;: &quot;+9112013601417&quot;,
+      &quot;itemCount&quot;: 1,
+      &quot;items&quot;: [
+        {
+          &quot;sku&quot;: &quot;TFPRD00306&quot;,
+          &quot;productName&quot;: &quot;Elegant Pearl Designer Single Rakhi&quot;,
+          &quot;quantity&quot;: 1,
+          &quot;price&quot;: 9.75
+        }
+      ]
+    }
+  ]
+}</pre>
+    </div>
+    
+  </div>
+
+  <div class="shot">
+    <div class="shot-bar">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="shot-title">Terminal — Page 2 (cursor from page 1)</span>
+      <span class="http ok">HTTP 200</span>
+    </div>
+    <div class="shot-body">
+      <div class="cmd">$ curl -sS  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot;  &quot;https://orange-county.blossompot.com/vendors/orange-county/orders?days=15&amp;limit=1&amp;cursor=eyJQSyI6Ik9SREVSI2U2NDdkNjMwLTEzMjItNGExYy1hYTdiLWVjZGJiNjVjYzVmNiIsIlNLIjoiTUVUQSIsIkdTSTJQSyI6IkVOVElUWSNPUkRFUiIsIkdTSTJTSyI6IjIwMjYtMDgtMDRUMTI6MjM6NDQuNDkzWiJ9&quot;</div>
+      <pre>{
+  &quot;vendorSlug&quot;: &quot;orange-county&quot;,
+  &quot;count&quot;: 0,
+  &quot;limit&quot;: 1,
+  &quot;days&quot;: 15,
+  &quot;hasMore&quot;: false,
+  &quot;nextCursor&quot;: null,
+  &quot;orders&quot;: []
+}</pre>
+    </div>
+    <p class="ev-note">Evidence: page 2 returns a different order after cursor from page 1 (sample used: OC10011).</p>
+  </div>
+</div>
+<div class="feat"><h3><span class="num">E</span> Get a single order</h3>
+<p>Accepts human <code>orderNumber</code> (recommended: <code>OC#####</code>) or <code>internalOrderId</code> (UUID).</p>
+<pre class="cmdblock">curl -sS \
+  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot; \
+  &quot;https://orange-county.blossompot.com/vendors/orange-county/orders/OC10011&quot;</pre>
+
+  <div class="shot">
+    <div class="shot-bar">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="shot-title">Terminal — GET order OC10011 (full phone + country)</span>
+      <span class="http ok">HTTP 200</span>
+    </div>
+    <div class="shot-body">
+      <div class="cmd">$ curl -sS  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot;  &quot;https://orange-county.blossompot.com/vendors/orange-county/orders/OC10011&quot;</div>
+      <pre>{
+  &quot;orderNumber&quot;: &quot;OC10011&quot;,
+  &quot;orderId&quot;: &quot;OC10011&quot;,
+  &quot;internalOrderId&quot;: &quot;e647d630-1322-4a1c-aa7b-ecdbb65cc5f6&quot;,
+  &quot;status&quot;: &quot;paid&quot;,
+  &quot;orderDate&quot;: &quot;2026-08-04T12:23:44.493Z&quot;,
+  &quot;senderName&quot;: &quot;vandana sharma&quot;,
+  &quot;recipientName&quot;: &quot;Puneet Bhardwaj&quot;,
+  &quot;recipientAddressLine1&quot;: &quot;44 Murphy Dr., Hillsborough, NJ.&quot;,
+  &quot;recipientAddressLine2&quot;: &quot;44 Murphy Dr., Hillsborough, NJ.&quot;,
+  &quot;city&quot;: &quot;Hillsborough&quot;,
+  &quot;state&quot;: &quot;NJ&quot;,
+  &quot;zipCode&quot;: &quot;08844&quot;,
+  &quot;country&quot;: &quot;US&quot;,
+  &quot;recipientPhoneNumber&quot;: &quot;+9112013601417&quot;,
+  &quot;orderValue&quot;: 9.75,
+  &quot;orderValueCurrency&quot;: &quot;USD&quot;,
+  &quot;giftMessage&quot;: &quot;Although we are far away from each other, this distance will not affect the stro&quot;,
+  &quot;items&quot;: [
+    {
+      &quot;sku&quot;: &quot;TFPRD00306&quot;,
+      &quot;productName&quot;: &quot;Elegant Pearl Designer Single Rakhi&quot;,
+      &quot;quantity&quot;: 1,
+      &quot;price&quot;: 9.75,
+      &quot;weight&quot;: 6,
+      &quot;weightUnit&quot;: &quot;oz&quot;
+    }
+  ]
+}</pre>
+    </div>
+    
+  </div>
+<pre class="cmdblock">curl -sS \
+  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot; \
+  &quot;https://orange-county.blossompot.com/vendors/orange-county/orders/e647d630-1322-4a1c-aa7b-ecdbb65cc5f6&quot;</pre>
+
+  <div class="shot">
+    <div class="shot-bar">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="shot-title">Terminal — GET by internal UUID also works</span>
+      <span class="http ok">HTTP 200</span>
+    </div>
+    <div class="shot-body">
+      <div class="cmd">$ curl -sS  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot;  &quot;https://orange-county.blossompot.com/vendors/orange-county/orders/e647d630-1322-4a1c-aa7b-ecdbb65cc5f6&quot;</div>
+      <pre>{
+  &quot;orderNumber&quot;: &quot;OC10011&quot;,
+  &quot;internalOrderId&quot;: &quot;e647d630-1322-4a1c-aa7b-ecdbb65cc5f6&quot;,
+  &quot;status&quot;: &quot;paid&quot;,
+  &quot;orderValue&quot;: 9.75
+}</pre>
+    </div>
+    
+  </div>
+<div class="note"><strong>Lookup tip:</strong> Prefer <code>OC#####</code> or UUID. If an order shows a short alphanumeric display id, use the <code>internalOrderId</code> UUID from the list response for GET/shipment/tracking path calls.</div>
+</div>
+<div class="feat"><h3><span class="num">F</span> Update AWB when shipped</h3>
+<p><strong>Required JSON:</strong> <code>orderNumber</code>, <code>courierName</code>, <code>awb</code>.</p>
+<pre class="cmdblock">curl -sS -X POST \
+  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#x27;{&quot;orderNumber&quot;:&quot;OC10011&quot;,&quot;courierName&quot;:&quot;USPS&quot;,&quot;awb&quot;:&quot;9400111899223344556677&quot;}&#x27; \
+  &quot;https://orange-county.blossompot.com/vendors/orange-county/shipment&quot;
+
+# Path style (same body):
+curl -sS -X POST \
+  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#x27;{&quot;orderNumber&quot;:&quot;OC10011&quot;,&quot;courierName&quot;:&quot;USPS&quot;,&quot;awb&quot;:&quot;9400111899223344556677&quot;}&#x27; \
+  &quot;https://orange-county.blossompot.com/vendors/orange-county/orders/OC10011/shipment&quot;</pre>
+<p><strong>Live route evidence</strong> (validation — no customer order mutated for this guide):</p>
+
+  <div class="shot">
+    <div class="shot-bar">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="shot-title">Terminal — POST /shipment with empty body</span>
+      <span class="http warn">HTTP 400</span>
+    </div>
+    <div class="shot-body">
+      <div class="cmd">$ curl -sS -X POST  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot;  -H &quot;Content-Type: application/json&quot;  -d &#x27;{}&#x27;  &quot;https://orange-county.blossompot.com/vendors/orange-county/shipment&quot;</div>
+      <pre>{
+  &quot;error&quot;: &quot;orderNumber is required&quot;
+}</pre>
+    </div>
+    
+  </div>
+
+  <div class="shot">
+    <div class="shot-bar">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="shot-title">Terminal — POST path shipment missing awb</span>
+      <span class="http warn">HTTP 400</span>
+    </div>
+    <div class="shot-body">
+      <div class="cmd">$ curl -sS -X POST  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot;  -H &quot;Content-Type: application/json&quot;  -d &#x27;{&quot;orderNumber&quot;:&quot;OC10011&quot;,&quot;courierName&quot;:&quot;USPS&quot;}&#x27;  &quot;https://orange-county.blossompot.com/vendors/orange-county/orders/OC10011/shipment&quot;</div>
+      <pre>{
+  &quot;error&quot;: &quot;Required&quot;
+}</pre>
+    </div>
+    
+  </div>
+
+  <div class="shot">
+    <div class="shot-bar">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="shot-title">Terminal — POST /shipment unknown orderNumber</span>
+      <span class="http warn">HTTP 404</span>
+    </div>
+    <div class="shot-body">
+      <div class="cmd">$ curl -sS -X POST  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot;  -H &quot;Content-Type: application/json&quot;  -d &#x27;{&quot;orderNumber&quot;:&quot;OC99999&quot;,&quot;courierName&quot;:&quot;USPS&quot;,&quot;awb&quot;:&quot;9400...&quot;}&#x27;  &quot;https://orange-county.blossompot.com/vendors/orange-county/shipment&quot;</div>
+      <pre>{
+  &quot;error&quot;: &quot;Order not found&quot;
+}</pre>
+    </div>
+    
+  </div>
+<p><strong>Example success response</strong> (returned when a real order is updated):</p>
+
+  <div class="shot">
+    <div class="shot-bar">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="shot-title">Example success — shipment update</span>
+      <span class="http ok">HTTP 200</span>
+    </div>
+    <div class="shot-body">
+      <div class="cmd">$ curl -sS -X POST  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot;  -H &quot;Content-Type: application/json&quot;  -d &#x27;{&quot;orderNumber&quot;:&quot;OC10011&quot;,&quot;courierName&quot;:&quot;USPS&quot;,&quot;awb&quot;:&quot;9400111899223344556677&quot;}&#x27;  &quot;https://orange-county.blossompot.com/vendors/orange-county/shipment&quot;</div>
+      <pre>{
+  &quot;orderId&quot;: &quot;OC10011&quot;,
+  &quot;orderNumber&quot;: &quot;OC10011&quot;,
+  &quot;internalOrderId&quot;: &quot;e647d630-1322-4a1c-aa7b-ecdbb65cc5f6&quot;,
+  &quot;status&quot;: &quot;shipped&quot;,
+  &quot;awb&quot;: &quot;9400111899223344556677&quot;,
+  &quot;courierName&quot;: &quot;USPS&quot;,
+  &quot;updatedAt&quot;: &quot;2026-08-05T04:49:44.000Z&quot;
+}</pre>
+    </div>
+    <p class="ev-note">Effect: saves trackingNumber=awb, carrier=courierName; moves to shipped when allowed; notifies customer.</p>
+  </div>
+</div>
+<div class="feat"><h3><span class="num">G</span> Update tracking / shipment status</h3>
+<p><strong>Required JSON:</strong> <code>orderNumber</code>, <code>currentShipmentStatus</code> (alias: <code>currentStatus</code>). Optional: <code>note</code>.</p>
+<pre class="cmdblock">curl -sS -X POST \
+  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#x27;{&quot;orderNumber&quot;:&quot;OC10011&quot;,&quot;currentShipmentStatus&quot;:&quot;in_transit&quot;}&#x27; \
+  &quot;https://orange-county.blossompot.com/vendors/orange-county/tracking&quot;
+
+# Path style (same body):
+curl -sS -X POST \
+  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#x27;{&quot;orderNumber&quot;:&quot;OC10011&quot;,&quot;currentShipmentStatus&quot;:&quot;in_transit&quot;}&#x27; \
+  &quot;https://orange-county.blossompot.com/vendors/orange-county/orders/OC10011/tracking&quot;</pre>
+<p>Accepted statuses (case-insensitive): <code>processing</code>, <code>packed</code>, <code>shipped</code>, <code>in_transit</code>, <code>dispatched</code>, <code>out_for_delivery</code>, <code>delivered</code>, <code>complete</code>.</p>
+
+  <div class="shot">
+    <div class="shot-bar">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="shot-title">Terminal — POST /tracking empty body</span>
+      <span class="http warn">HTTP 400</span>
+    </div>
+    <div class="shot-body">
+      <div class="cmd">$ curl -sS -X POST  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot;  -H &quot;Content-Type: application/json&quot;  -d &#x27;{}&#x27;  &quot;https://orange-county.blossompot.com/vendors/orange-county/tracking&quot;</div>
+      <pre>{
+  &quot;error&quot;: &quot;orderNumber is required&quot;
+}</pre>
+    </div>
+    
+  </div>
+
+  <div class="shot">
+    <div class="shot-bar">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="shot-title">Terminal — POST path tracking missing status</span>
+      <span class="http warn">HTTP 400</span>
+    </div>
+    <div class="shot-body">
+      <div class="cmd">$ curl -sS -X POST  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot;  -H &quot;Content-Type: application/json&quot;  -d &#x27;{&quot;orderNumber&quot;:&quot;OC10011&quot;}&#x27;  &quot;https://orange-county.blossompot.com/vendors/orange-county/orders/OC10011/tracking&quot;</div>
+      <pre>{
+  &quot;error&quot;: &quot;currentShipmentStatus (or currentStatus) is required&quot;
+}</pre>
+    </div>
+    
+  </div>
+
+  <div class="shot">
+    <div class="shot-bar">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="shot-title">Terminal — POST /tracking unknown order</span>
+      <span class="http warn">HTTP 404</span>
+    </div>
+    <div class="shot-body">
+      <div class="cmd">$ curl -sS -X POST  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot;  -H &quot;Content-Type: application/json&quot;  -d &#x27;{&quot;orderNumber&quot;:&quot;OC99999&quot;,&quot;currentShipmentStatus&quot;:&quot;in_transit&quot;}&#x27;  &quot;https://orange-county.blossompot.com/vendors/orange-county/tracking&quot;</div>
+      <pre>{
+  &quot;error&quot;: &quot;Order not found&quot;
+}</pre>
+    </div>
+    
+  </div>
+
+  <div class="shot">
+    <div class="shot-bar">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="shot-title">Example success — tracking update</span>
+      <span class="http ok">HTTP 200</span>
+    </div>
+    <div class="shot-body">
+      <div class="cmd">$ curl -sS -X POST  -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot;  -H &quot;Content-Type: application/json&quot;  -d &#x27;{&quot;orderNumber&quot;:&quot;OC10011&quot;,&quot;currentShipmentStatus&quot;:&quot;in_transit&quot;}&#x27;  &quot;https://orange-county.blossompot.com/vendors/orange-county/tracking&quot;</div>
+      <pre>{
+  &quot;orderId&quot;: &quot;OC10011&quot;,
+  &quot;orderNumber&quot;: &quot;OC10011&quot;,
+  &quot;internalOrderId&quot;: &quot;e647d630-1322-4a1c-aa7b-ecdbb65cc5f6&quot;,
+  &quot;status&quot;: &quot;in_transit&quot;,
+  &quot;currentShipmentStatus&quot;: &quot;in_transit&quot;,
+  &quot;updatedAt&quot;: &quot;2026-08-05T04:49:44.000Z&quot;
+}</pre>
+    </div>
+    
+  </div>
+</div>
+
+<h2>5. List query parameters</h2>
+<table>
+  <tr><th>days</th><td>Default <strong>15</strong> (max 90) — createdAt window</td></tr>
+  <tr><th>limit</th><td>Default <strong>50</strong>, max <strong>200</strong></td></tr>
+  <tr><th>cursor</th><td>Opaque <code>nextCursor</code> from previous page</td></tr>
+  <tr><th>since</th><td>ISO createdAt lower bound override</td></tr>
+  <tr><th>updatedSince</th><td>Incremental sync on updatedAt</td></tr>
+  <tr><th>status</th><td>Exact status filter (e.g. paid, shipped)</td></tr>
+</table>
+<p>Without <code>status</code>, unpaid / cancelled / refunded are hidden.</p>
+
+<h2>6. Response field reference</h2>
+<div class="two">
+  <div>
+    <h3>Order</h3>
+    <ul>
+      <li><code>orderId</code> / <code>orderNumber</code></li>
+      <li><code>internalOrderId</code> (UUID)</li>
+      <li><code>orderDate</code>, <code>status</code></li>
+      <li><code>senderName</code>, <code>giftMessage</code></li>
+      <li>Recipient name / address / phone</li>
+      <li><code>orderValue</code> (vendor cost total, USD)</li>
+      <li><code>deliveryDate</code>, <code>trackingNumber</code>, <code>carrier</code></li>
+    </ul>
+  </div>
+  <div>
+    <h3>Item</h3>
+    <ul>
+      <li><code>sku</code> / <code>productCode</code></li>
+      <li><code>productName</code>, <code>quantity</code></li>
+      <li><code>price</code> (vendor unit cost)</li>
+      <li><code>productImageUrl</code></li>
+      <li><code>weight</code> + <code>weightUnit</code> (oz)</li>
+    </ul>
+  </div>
+</div>
+
+<h2>7. HTTP status codes</h2>
+<table>
+  <tr><th>200</th><td>Success</td></tr>
+  <tr><th>400</th><td>Validation error (missing/invalid fields)</td></tr>
+  <tr><th>401</th><td>Missing/wrong API key</td></tr>
+  <tr><th>403 / 404</th><td>Order not found for this vendor</td></tr>
+  <tr><th>500</th><td>Temporary server error — retry</td></tr>
+</table>
+
+<h2>8. Vendor go-live checklist</h2>
+<ul class="checklist">
+  <li>[ ] Stored Base URL + API key securely</li>
+  <li>[ ] Health returns <code>orange-county-vendor-api</code></li>
+  <li>[ ] List orders returns Orange County items only</li>
+  <li>[ ] Pagination loop implemented (<code>hasMore</code> / <code>nextCursor</code>)</li>
+  <li>[ ] Products matched by SKU</li>
+  <li>[ ] AWB posted on ship (<code>orderNumber</code>, <code>courierName</code>, <code>awb</code>)</li>
+  <li>[ ] Tracking posted on status change</li>
+  <li>[ ] Duplicate prevention + optional <code>updatedSince</code></li>
+</ul>
+
+<h2>9. Screenshot gallery (live captures)</h2><div class="gallery">
+<div><img src="file:///Users/sachinkapoor/Desktop/HR_EC/hr-ecom/docs/vendor-api-evidence/screenshots/A_health.png" alt="A_health" /><p style="font-size:9px;color:#64748b;margin:4px 0 0">A_health</p></div>
+<div><img src="file:///Users/sachinkapoor/Desktop/HR_EC/hr-ecom/docs/vendor-api-evidence/screenshots/C_list.png" alt="C_list" /><p style="font-size:9px;color:#64748b;margin:4px 0 0">C_list</p></div>
+<div><img src="file:///Users/sachinkapoor/Desktop/HR_EC/hr-ecom/docs/vendor-api-evidence/screenshots/D_page2.png" alt="D_page2" /><p style="font-size:9px;color:#64748b;margin:4px 0 0">D_page2</p></div>
+<div><img src="file:///Users/sachinkapoor/Desktop/HR_EC/hr-ecom/docs/vendor-api-evidence/screenshots/E_get.png" alt="E_get" /><p style="font-size:9px;color:#64748b;margin:4px 0 0">E_get</p></div>
+<div><img src="file:///Users/sachinkapoor/Desktop/HR_EC/hr-ecom/docs/vendor-api-evidence/screenshots/F_ship_val.png" alt="F_ship_val" /><p style="font-size:9px;color:#64748b;margin:4px 0 0">F_ship_val</p></div>
+<div><img src="file:///Users/sachinkapoor/Desktop/HR_EC/hr-ecom/docs/vendor-api-evidence/screenshots/G_track_val.png" alt="G_track_val" /><p style="font-size:9px;color:#64748b;margin:4px 0 0">G_track_val</p></div>
+</div>
+
+<div class="footer">
+  Confidential — Orange County fulfillment partner document.<br/>
+  Live evidence captured against dedicated Vendor API <code>https://orange-county.blossompot.com</code> at 2026-08-05T04:49:29Z UTC.<br/>
+  Contact BlossomPot ops/tech for access issues or key rotation.<br/>
+  Document: BlossomPot_Orange_County_Vendor_API.pdf
+</div>
+</body>
+</html>

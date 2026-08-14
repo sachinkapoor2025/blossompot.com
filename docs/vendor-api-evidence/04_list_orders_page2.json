@@ -1,0 +1,11 @@
+{
+    "vendorSlug": "orange-county",
+    "count": 0,
+    "limit": 1,
+    "since": "2026-07-21T04:49:35.186Z",
+    "days": 15,
+    "updatedSince": null,
+    "hasMore": false,
+    "nextCursor": null,
+    "orders": []
+}

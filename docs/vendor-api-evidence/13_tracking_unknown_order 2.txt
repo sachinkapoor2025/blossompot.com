@@ -1,0 +1,15 @@
+=== FEATURE: 13_tracking_unknown_order ===
+Verified (UTC): 2026-08-04T19:28:02Z
+Command:
+  curl -sS -H X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673 -H Content-Type: application/json -d {"orderNumber":"OC99999","currentShipmentStatus":"in_transit"} -X POST https://orange-county.usarakhi.com/vendors/orange-county/tracking
+
+--- Response ---
+HTTP 404
+
+HTTP/2 404 
+date: Tue, 04 Aug 2026 19:28:18 GMT
+content-type: application/json
+
+{
+    "error": "Order not found"
+}

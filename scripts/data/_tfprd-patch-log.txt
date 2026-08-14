@@ -1,0 +1,173 @@
+FAIL classic-maroon-designer-single-rakhi: aws.exe : 
+At C:\Users\dell\OneDrive\Desktop\usarakhi.com\hr-ecom\scripts\apply-tfprd-image-content.ps1:32 char:10
++   $out = & $aws dynamodb update-item `
++          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Error parsing parameter '--expression-attribute-values': Unable to load paramfile (C:/Users/dell/OneDrive/Desktop/usara
+khi.com/hr-ecom/scripts/data/_ddb_patch_tmp/val-classic-maroon-designer-single-rakhi.json), text contents could not be 
+decoded.  If this is a binary file, please use the fileb:// prefix instead of the file:// prefix.
+
+FAIL elegant-pearl-designer-single-rakhi: aws.exe : 
+At C:\Users\dell\OneDrive\Desktop\usarakhi.com\hr-ecom\scripts\apply-tfprd-image-content.ps1:32 char:10
++   $out = & $aws dynamodb update-item `
++          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Error parsing parameter '--expression-attribute-values': Unable to load paramfile (C:/Users/dell/OneDrive/Desktop/usara
+khi.com/hr-ecom/scripts/data/_ddb_patch_tmp/val-elegant-pearl-designer-single-rakhi.json), text contents could not be 
+decoded.  If this is a binary file, please use the fileb:// prefix instead of the file:// prefix.
+
+FAIL emerald-charm-designer-single-rakhi: aws.exe : 
+At C:\Users\dell\OneDrive\Desktop\usarakhi.com\hr-ecom\scripts\apply-tfprd-image-content.ps1:32 char:10
++   $out = & $aws dynamodb update-item `
++          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+An error occurred (UnrecognizedClientException) when calling the UpdateItem operation: The security token included in 
+the request is invalid.
+
+FAIL festive-ruby-designer-single-rakhi: aws.exe : 
+At C:\Users\dell\OneDrive\Desktop\usarakhi.com\hr-ecom\scripts\apply-tfprd-image-content.ps1:32 char:10
++   $out = & $aws dynamodb update-item `
++          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+An error occurred (UnrecognizedClientException) when calling the UpdateItem operation: The security token included in 
+the request is invalid.
+
+FAIL golden-thread-traditional-single-rakhi: aws.exe : 
+At C:\Users\dell\OneDrive\Desktop\usarakhi.com\hr-ecom\scripts\apply-tfprd-image-content.ps1:32 char:10
++   $out = & $aws dynamodb update-item `
++          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+An error occurred (UnrecognizedClientException) when calling the UpdateItem operation: The security token included in 
+the request is invalid.
+
+FAIL royal-blue-stone-designer-single-rakhi: aws.exe : 
+At C:\Users\dell\OneDrive\Desktop\usarakhi.com\hr-ecom\scripts\apply-tfprd-image-content.ps1:32 char:10
++   $out = & $aws dynamodb update-item `
++          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+An error occurred (UnrecognizedClientException) when calling the UpdateItem operation: The security token included in 
+the request is invalid.
+
+FAIL sacred-om-designer-single-rakhi: aws.exe : 
+At C:\Users\dell\OneDrive\Desktop\usarakhi.com\hr-ecom\scripts\apply-tfprd-image-content.ps1:32 char:10
++   $out = & $aws dynamodb update-item `
++          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+An error occurred (UnrecognizedClientException) when calling the UpdateItem operation: The security token included in 
+the request is invalid.
+
+FAIL silver-bead-traditional-single-rakhi: aws.exe : 
+At C:\Users\dell\OneDrive\Desktop\usarakhi.com\hr-ecom\scripts\apply-tfprd-image-content.ps1:32 char:10
++   $out = & $aws dynamodb update-item `
++          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+An error occurred (UnrecognizedClientException) when calling the UpdateItem operation: The security token included in 
+the request is invalid.
+
+FAIL set-of-2-traditional-designer-rakhis-for-brother: aws.exe : 
+At C:\Users\dell\OneDrive\Desktop\usarakhi.com\hr-ecom\scripts\apply-tfprd-image-content.ps1:32 char:10
++   $out = & $aws dynamodb update-item `
++          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Error parsing parameter '--expression-attribute-values': Unable to load paramfile (C:/Users/dell/OneDrive/Desktop/usara
+khi.com/hr-ecom/scripts/data/_ddb_patch_tmp/val-set-of-2-traditional-designer-rakhis-for-brother.json), text contents 
+could not be decoded.  If this is a binary file, please use the fileb:// prefix instead of the file:// prefix.
+
+FAIL twin-designer-rakhi-set-of-2-premium-gift: aws.exe : 
+At C:\Users\dell\OneDrive\Desktop\usarakhi.com\hr-ecom\scripts\apply-tfprd-image-content.ps1:32 char:10
++   $out = & $aws dynamodb update-item `
++          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+An error occurred (UnrecognizedClientException) when calling the UpdateItem operation: The security token included in 
+the request is invalid.
+
+FAIL crystal-drop-designer-single-rakhi: aws.exe : 
+At C:\Users\dell\OneDrive\Desktop\usarakhi.com\hr-ecom\scripts\apply-tfprd-image-content.ps1:32 char:10
++   $out = & $aws dynamodb update-item `
++          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+An error occurred (UnrecognizedClientException) when calling the UpdateItem operation: The security token included in 
+the request is invalid.
+
+FAIL heritage-motif-designer-single-rakhi: aws.exe : 
+At C:\Users\dell\OneDrive\Desktop\usarakhi.com\hr-ecom\scripts\apply-tfprd-image-content.ps1:32 char:10
++   $out = & $aws dynamodb update-item `
++          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+An error occurred (UnrecognizedClientException) when calling the UpdateItem operation: The security token included in 
+the request is invalid.
+
+FAIL elegant-pearl-designer-single-rakhi-style-13: aws.exe : 
+At C:\Users\dell\OneDrive\Desktop\usarakhi.com\hr-ecom\scripts\apply-tfprd-image-content.ps1:32 char:10
++   $out = & $aws dynamodb update-item `
++          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+An error occurred (UnrecognizedClientException) when calling the UpdateItem operation: The security token included in 
+the request is invalid.
+
+FAIL royal-blue-stone-designer-single-rakhi-style-14: aws.exe : 
+At C:\Users\dell\OneDrive\Desktop\usarakhi.com\hr-ecom\scripts\apply-tfprd-image-content.ps1:32 char:10
++   $out = & $aws dynamodb update-item `
++          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+An error occurred (UnrecognizedClientException) when calling the UpdateItem operation: The security token included in 
+the request is invalid.
+
+FAIL golden-thread-traditional-single-rakhi-style-15: aws.exe : 
+At C:\Users\dell\OneDrive\Desktop\usarakhi.com\hr-ecom\scripts\apply-tfprd-image-content.ps1:32 char:10
++   $out = & $aws dynamodb update-item `
++          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+An error occurred (UnrecognizedClientException) when calling the UpdateItem operation: The security token included in 
+the request is invalid.
+
+FAIL classic-maroon-designer-single-rakhi-style-17: aws.exe : 
+At C:\Users\dell\OneDrive\Desktop\usarakhi.com\hr-ecom\scripts\apply-tfprd-image-content.ps1:32 char:10
++   $out = & $aws dynamodb update-item `
++          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+An error occurred (UnrecognizedClientException) when calling the UpdateItem operation: The security token included in 
+the request is invalid.
+
+FAIL silver-bead-traditional-single-rakhi-style-18: aws.exe : 
+At C:\Users\dell\OneDrive\Desktop\usarakhi.com\hr-ecom\scripts\apply-tfprd-image-content.ps1:32 char:10
++   $out = & $aws dynamodb update-item `
++          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+An error occurred (UnrecognizedClientException) when calling the UpdateItem operation: The security token included in 
+the request is invalid.
+

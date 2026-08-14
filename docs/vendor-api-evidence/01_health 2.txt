@@ -1,0 +1,16 @@
+=== FEATURE: 01_health ===
+Verified (UTC): 2026-08-04T19:28:02Z
+Command:
+  curl -sS https://orange-county.usarakhi.com/health
+
+--- Response ---
+HTTP 200
+
+HTTP/2 200 
+date: Tue, 04 Aug 2026 19:28:03 GMT
+content-type: application/json
+
+{
+    "ok": true,
+    "service": "orange-county-vendor-api"
+}

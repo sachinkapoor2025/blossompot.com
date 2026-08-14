@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build
+dist/
+.next/
+out/
+.aws-sam/
+*.tsbuildinfo
+
+# Env
+.env
+.env*.local
+
+# Local secrets notes (never commit)
+*.local.md
+docs/*.local.md
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Debug
+npm-debug.log*
+
+apps/api/uploads/
+
+# Large vendor catalogue assets (import locally; do not commit binaries)
+USA Rakhi Images Catalouge  2026i/
+Rakhi Hamper Images/

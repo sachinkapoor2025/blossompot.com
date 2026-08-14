@@ -1,0 +1,27 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "blossompot-dev"
+resolve_s3 = true
+s3_prefix = "blossompot"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "Environment=dev"
+confirm_changeset = true
+
+[staging.deploy.parameters]
+stack_name = "blossompot-staging"
+resolve_s3 = true
+s3_prefix = "blossompot"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "Environment=staging LoadTestMode=true"
+
+[prod.deploy.parameters]
+stack_name = "blossompot-prod"
+resolve_s3 = true
+s3_prefix = "blossompot"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "Environment=prod"
+confirm_changeset = true

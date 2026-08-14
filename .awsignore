@@ -1,0 +1,11 @@
+.git
+.github
+.cursor
+apps/web
+**/.next
+**/node_modules
+**/*.md
+docs
+scripts
+docker-compose.yml
+amplify.yml

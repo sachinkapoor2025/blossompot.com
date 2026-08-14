@@ -1,0 +1,22 @@
+<!DOCTYPE html><html><head><meta charset=utf-8>
+<style>
+body{margin:0;background:#0b1220;font-family:ui-monospace,Menlo,monospace;color:#e2e8f0}
+.bar{background:#1e293b;padding:10px 14px;display:flex;gap:10px;align-items:center}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:4px}
+.t{flex:1;font-size:12px;font-weight:600;color:#cbd5e1}
+.h{background:#92400e;color:#fff;border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700}
+.main{padding:14px 16px}
+.cmd{color:#93c5fd;font-size:11px;white-space:pre-wrap;word-break:break-all;margin-bottom:10px}
+pre{margin:0;white-space:pre-wrap;word-break:break-word;font-size:11px;color:#d1fae5}
+</style></head><body>
+<div class=bar>
+<span><i class=dot style=background:#f87171></i><i class=dot style=background:#fbbf24></i><i class=dot style=background:#34d399></i></span>
+<span class=t>G_track_val — live capture</span>
+<span class=h>HTTP 400</span>
+</div>
+<div class=main>
+<div class=cmd>$ curl -sS -X POST -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot; -H &quot;Content-Type: application/json&quot; -d &#x27;{}&#x27; &quot;https://orange-county.blossompot.com/vendors/orange-county/tracking&quot;</div>
+<pre>{
+  &quot;error&quot;: &quot;orderNumber is required&quot;
+}</pre>
+</div></body></html>

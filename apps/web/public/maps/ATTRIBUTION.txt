@@ -1,0 +1,5 @@
+world.svg — Simple World Map
+Source: https://github.com/flekschas/simple-world-map
+License: Creative Commons Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0)
+Original author: Al MacDonald; editor: Fritz Lekschas
+Country paths annotated with ISO 3166-1 alpha-2 ids.

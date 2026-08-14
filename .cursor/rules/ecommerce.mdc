@@ -1,0 +1,38 @@
+---
+description: HR E-Commerce platform conventions for AI-assisted development
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+# HR E-Commerce — Cursor Rules
+
+## Stack
+- Monorepo: `apps/web` (Next.js 15), `apps/api` (Lambda), `packages/shared`
+- Database: DynamoDB single-table — use key builders from `@blossompot/shared`
+- Auth: AWS Cognito (admin group = `admin`)
+- Payments: Stripe (US), Razorpay (IN) — never store card data
+
+## When Adding Features
+1. Types/schemas first in `packages/shared`
+2. API handler in `apps/api/src/handlers/`
+3. Register route in `apps/api/src/router.ts`
+4. UI in `apps/web/src/app/`
+5. Update `docs/ARCHITECTURE.md` if adding public API routes
+
+## Code Style
+- TypeScript strict mode
+- Zod for all API input validation
+- Use existing `api()` client in web app
+- SEO: add `generateMetadata` on new public pages
+- Lead capture: call `/leads` on form interactions for sales outreach
+
+## Do NOT
+- Add RDS or always-on servers without explicit request
+- Commit secrets or `.env` files
+- Break single-table DynamoDB key patterns
+- Add Docker unless explicitly requested
+
+## Multi-Developer
+- Feature branches; shared types in `packages/shared`
+- Admin auth required for `/admin/*` routes (wire Cognito when prompted)

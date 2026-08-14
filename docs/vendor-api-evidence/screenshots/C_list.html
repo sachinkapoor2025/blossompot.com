@@ -1,0 +1,71 @@
+<!DOCTYPE html><html><head><meta charset=utf-8>
+<style>
+body{margin:0;background:#0b1220;font-family:ui-monospace,Menlo,monospace;color:#e2e8f0}
+.bar{background:#1e293b;padding:10px 14px;display:flex;gap:10px;align-items:center}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:4px}
+.t{flex:1;font-size:12px;font-weight:600;color:#cbd5e1}
+.h{background:#065f46;color:#fff;border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700}
+.main{padding:14px 16px}
+.cmd{color:#93c5fd;font-size:11px;white-space:pre-wrap;word-break:break-all;margin-bottom:10px}
+pre{margin:0;white-space:pre-wrap;word-break:break-word;font-size:11px;color:#d1fae5}
+</style></head><body>
+<div class=bar>
+<span><i class=dot style=background:#f87171></i><i class=dot style=background:#fbbf24></i><i class=dot style=background:#34d399></i></span>
+<span class=t>C_list — live capture</span>
+<span class=h>HTTP 200</span>
+</div>
+<div class=main>
+<div class=cmd>$ curl -sS -H &quot;X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673&quot; &quot;https://orange-county.blossompot.com/vendors/orange-county/orders?days=15&amp;limit=50&quot;</div>
+<pre>{
+  &quot;vendorSlug&quot;: &quot;orange-county&quot;,
+  &quot;count&quot;: 3,
+  &quot;limit&quot;: 50,
+  &quot;days&quot;: 15,
+  &quot;hasMore&quot;: false,
+  &quot;nextCursor&quot;: null,
+  &quot;orders&quot;: [
+    {
+      &quot;orderNumber&quot;: &quot;OC10011&quot;,
+      &quot;internalOrderId&quot;: &quot;e647d630-1322-4a1c-aa7b-ecdbb65cc5f6&quot;,
+      &quot;status&quot;: &quot;paid&quot;,
+      &quot;orderValue&quot;: 9.75,
+      &quot;orderValueCurrency&quot;: &quot;USD&quot;,
+      &quot;senderName&quot;: &quot;vandana sharma&quot;,
+      &quot;recipientName&quot;: &quot;Puneet Bhardwaj&quot;,
+      &quot;city&quot;: &quot;Hillsborough&quot;,
+      &quot;state&quot;: &quot;NJ&quot;,
+      &quot;zipCode&quot;: &quot;08844&quot;,
+      &quot;itemCount&quot;: 1,
+      &quot;items&quot;: [
+        {
+          &quot;sku&quot;: &quot;TFPRD00306&quot;,
+          &quot;productName&quot;: &quot;Elegant Pearl Designer Single Rakhi&quot;,
+          &quot;quantity&quot;: 1,
+          &quot;price&quot;: 9.75
+        }
+      ]
+    },
+    {
+      &quot;orderNumber&quot;: &quot;D26EDAB5&quot;,
+      &quot;internalOrderId&quot;: &quot;d26edab5-5662-426b-b48a-ae1e39790e25&quot;,
+      &quot;status&quot;: &quot;shipped&quot;,
+      &quot;orderValue&quot;: 9.75,
+      &quot;orderValueCurrency&quot;: &quot;USD&quot;,
+      &quot;senderName&quot;: &quot;Sonam&quot;,
+      &quot;recipientName&quot;: &quot;Abhishek Singh &quot;,
+      &quot;city&quot;: &quot;Sparks&quot;,
+      &quot;state&quot;: &quot;NV&quot;,
+      &quot;zipCode&quot;: &quot;89431&quot;,
+      &quot;itemCount&quot;: 1,
+      &quot;items&quot;: [
+        {
+          &quot;sku&quot;: &quot;TFPRD00313&quot;,
+          &quot;productName&quot;: &quot;Silver Bead Traditional Single Rakhi&quot;,
+          &quot;quantity&quot;: 1,
+          &quot;price&quot;: 9.75
+        }
+      ]
+    }
+  ]
+}</pre>
+</div></body></html>

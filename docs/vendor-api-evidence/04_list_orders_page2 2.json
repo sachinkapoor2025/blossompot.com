@@ -1,0 +1,51 @@
+{
+    "vendorSlug": "orange-county",
+    "count": 1,
+    "limit": 1,
+    "since": "2026-07-20T19:28:09.696Z",
+    "days": 15,
+    "updatedSince": null,
+    "hasMore": true,
+    "nextCursor": "eyJQSyI6Ik9SREVSI2QyNmVkYWI1LTU2NjItNDI2Yi1iNDhhLWFlMWUzOTc5MGUyNSIsIlNLIjoiTUVUQSIsIkdTSTJQSyI6IkVOVElUWSNPUkRFUiIsIkdTSTJTSyI6IjIwMjYtMDgtMDFUMDU6MDQ6NTMuNzI2WiJ9",
+    "orders": [
+        {
+            "orderId": "D26EDAB5",
+            "orderNumber": "D26EDAB5",
+            "internalOrderId": "d26edab5-5662-426b-b48a-ae1e39790e25",
+            "orderDate": "2026-08-01T05:04:53.726Z",
+            "createdAt": "2026-08-01T05:04:53.726Z",
+            "updatedAt": "2026-08-04T17:19:14.825Z",
+            "status": "shipped",
+            "senderName": "Sonam",
+            "recipientName": "Abhishek Singh ",
+            "recipientAddressLine1": "955 Avenue of the oaks ",
+            "recipientAddressLine2": "624",
+            "city": "Sparks",
+            "state": "NV",
+            "country": "US",
+            "zipCode": "89431",
+            "recipientPhoneNumber": "+16207040858",
+            "recipientEmail": "abhisingh021994@gmail.com",
+            "orderValue": 9.75,
+            "orderValueCurrency": "USD",
+            "deliveryDate": "2026-08-22T00:00:00.000Z",
+            "giftMessage": "Although we are far away from each other, this distance will not affect the strong bond of our relation. Happy Raksha Bandhan! This package is filled with Rakhi as well as overloaded with our emotions. Please accept this bundle of love and emotions.",
+            "trackingNumber": "9400150105796092529141",
+            "carrier": null,
+            "shippingServiceName": null,
+            "items": [
+                {
+                    "sku": "TFPRD00313",
+                    "productCode": "TFPRD00313",
+                    "productName": "Silver Bead Traditional Single Rakhi",
+                    "productSlug": "silver-bead-traditional-single-rakhi",
+                    "price": 9.75,
+                    "quantity": 1,
+                    "productImageUrl": "https://d301af4ndyn9qx.cloudfront.net/uploads/orange-county/TFPRD00313/TFPRD00313.jpg",
+                    "weight": 6,
+                    "weightUnit": "oz"
+                }
+            ]
+        }
+    ]
+}

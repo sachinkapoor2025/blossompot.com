@@ -1,0 +1,15 @@
+=== FEATURE: 07_get_order_not_found ===
+Verified (UTC): 2026-08-04T19:28:02Z
+Command:
+  curl -sS -H X-Vendor-Api-Key: 4bf361b07a50b6346046b8b446fbbe6f5151c404bad6e46431c94bd1172d2673 https://orange-county.usarakhi.com/vendors/orange-county/orders/OC99999
+
+--- Response ---
+HTTP 403
+
+HTTP/2 403 
+date: Tue, 04 Aug 2026 19:28:12 GMT
+content-type: application/json
+
+{
+    "error": "Order not found for this vendor"
+}

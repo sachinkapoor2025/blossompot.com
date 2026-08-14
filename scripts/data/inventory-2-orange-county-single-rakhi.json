@@ -1,0 +1,156 @@
+{
+  "inventoryBatch": "inventory-2",
+  "label": "Inventory 2 — Orange County USA Single Rakhi catalogue 2026",
+  "vendorSlug": "orange-county",
+  "categorySlug": "single-rakhi",
+  "markup": "sale = vendorCost × 1.6 (60% profit)",
+  "importedAt": "2026-07-29",
+  "skus": [
+    "TFPRD00306",
+    "TFPRD00307",
+    "TFPRD00310",
+    "TFPRD00311",
+    "TFPRD00312",
+    "TFPRD00313",
+    "TFPRD00316",
+    "TFPRD00317",
+    "TFPRD00312-338",
+    "TFPRD00315-337",
+    "TFPRD00298",
+    "TFPRD00370",
+    "TFPRD0082",
+    "TFPRD0083",
+    "TFPRD0285",
+    "MD005SET5",
+    "TFPRD0284",
+    "TFPRD0068"
+  ],
+  "products": [
+    {
+      "sku": "TFPRD00306",
+      "slug": "elegant-pearl-designer-single-rakhi",
+      "name": "Elegant Pearl Designer Single Rakhi",
+      "vendorCost": 9.75,
+      "price": 4.34
+    },
+    {
+      "sku": "TFPRD00307",
+      "slug": "royal-blue-stone-designer-single-rakhi",
+      "name": "Royal Blue Stone Designer Single Rakhi",
+      "vendorCost": 9.75,
+      "price": 15.6
+    },
+    {
+      "sku": "TFPRD00310",
+      "slug": "golden-thread-traditional-single-rakhi",
+      "name": "Golden Thread Traditional Single Rakhi",
+      "vendorCost": 9.75,
+      "price": 15.6
+    },
+    {
+      "sku": "TFPRD00311",
+      "slug": "emerald-charm-designer-single-rakhi",
+      "name": "Emerald Charm Designer Single Rakhi",
+      "vendorCost": 9.75,
+      "price": 15.6
+    },
+    {
+      "sku": "TFPRD00312",
+      "slug": "classic-maroon-designer-single-rakhi",
+      "name": "Classic Maroon Designer Single Rakhi",
+      "vendorCost": 9.75,
+      "price": 15.6
+    },
+    {
+      "sku": "TFPRD00313",
+      "slug": "silver-bead-traditional-single-rakhi",
+      "name": "Silver Bead Traditional Single Rakhi",
+      "vendorCost": 9.75,
+      "price": 15.6
+    },
+    {
+      "sku": "TFPRD00316",
+      "slug": "festive-ruby-designer-single-rakhi",
+      "name": "Festive Ruby Designer Single Rakhi",
+      "vendorCost": 9.75,
+      "price": 4.34
+    },
+    {
+      "sku": "TFPRD00317",
+      "slug": "sacred-om-designer-single-rakhi",
+      "name": "Sacred Om Designer Single Rakhi",
+      "vendorCost": 9.75,
+      "price": 15.6
+    },
+    {
+      "sku": "TFPRD00312-338",
+      "slug": "set-of-2-traditional-designer-rakhis-for-brother",
+      "name": "Set of 2 Traditional Designer Rakhis for Brother",
+      "vendorCost": 10.75,
+      "price": 17.2
+    },
+    {
+      "sku": "TFPRD00315-337",
+      "slug": "twin-designer-rakhi-set-of-2-premium-gift",
+      "name": "Twin Designer Rakhi Set of 2 — Premium Gift",
+      "vendorCost": 10.75,
+      "price": 17.2
+    },
+    {
+      "sku": "TFPRD00298",
+      "slug": "crystal-drop-designer-single-rakhi",
+      "name": "Crystal Drop Designer Single Rakhi",
+      "vendorCost": 10.75,
+      "price": 17.2
+    },
+    {
+      "sku": "TFPRD00370",
+      "slug": "heritage-motif-designer-single-rakhi",
+      "name": "Heritage Motif Designer Single Rakhi",
+      "vendorCost": 10.75,
+      "price": 17.2
+    },
+    {
+      "sku": "TFPRD0082",
+      "slug": "elegant-pearl-designer-single-rakhi-style-13",
+      "name": "Elegant Pearl Designer Single Rakhi — Style 13",
+      "vendorCost": 11.75,
+      "price": 18.8
+    },
+    {
+      "sku": "TFPRD0083",
+      "slug": "royal-blue-stone-designer-single-rakhi-style-14",
+      "name": "Royal Blue Stone Designer Single Rakhi — Style 14",
+      "vendorCost": 11.75,
+      "price": 18.8
+    },
+    {
+      "sku": "TFPRD0285",
+      "slug": "golden-thread-traditional-single-rakhi-style-15",
+      "name": "Golden Thread Traditional Single Rakhi — Style 15",
+      "vendorCost": 11.75,
+      "price": 18.8
+    },
+    {
+      "sku": "MD005SET5",
+      "slug": "premium-designer-rakhi-gift-set-of-5-for-brother",
+      "name": "Premium Designer Rakhi Gift Set of 5 for Brother",
+      "vendorCost": 12.75,
+      "price": 20.4
+    },
+    {
+      "sku": "TFPRD0284",
+      "slug": "classic-maroon-designer-single-rakhi-style-17",
+      "name": "Classic Maroon Designer Single Rakhi — Style 17",
+      "vendorCost": 12.75,
+      "price": 20.4
+    },
+    {
+      "sku": "TFPRD0068",
+      "slug": "silver-bead-traditional-single-rakhi-style-18",
+      "name": "Silver Bead Traditional Single Rakhi — Style 18",
+      "vendorCost": 12.75,
+      "price": 20.4
+    }
+  ]
+}
