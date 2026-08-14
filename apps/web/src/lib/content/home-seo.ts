@@ -78,16 +78,17 @@ export const homeSeoContent = {
   },
   cities: {
     heading: "Popular Gift Delivery Destinations",
-    intro: "Send flowers and gifts to major US cities and metro areas.",
+    intro:
+      "Delivering to all 50 states, DC and Puerto Rico — start with a state hub or browse the full index.",
     links: [
       { label: "Gifts to California", href: locationPublicPath("california") },
-      { label: "Gifts to New York", href: locationPublicPath("new-york") },
       { label: "Gifts to Texas", href: locationPublicPath("texas") },
       { label: "Gifts to Florida", href: locationPublicPath("florida") },
-      { label: "Gifts to New Jersey", href: locationPublicPath("new-jersey") },
-      { label: "Gifts to Los Angeles", href: locationPublicPath("los-angeles") },
-      { label: "Gifts to Chicago", href: locationPublicPath("chicago") },
-      { label: "Gifts to Houston", href: locationPublicPath("houston") },
+      { label: "Gifts to New York", href: locationPublicPath("new-york") },
+      { label: "Gifts to Illinois", href: locationPublicPath("illinois") },
+      { label: "Gifts to Pennsylvania", href: locationPublicPath("pennsylvania") },
+      { label: "Gifts to Georgia", href: locationPublicPath("georgia") },
+      { label: "All delivery locations", href: "/delivery-locations" },
     ],
   },
   faqs: {

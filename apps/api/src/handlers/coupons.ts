@@ -32,7 +32,7 @@ function generateCode(): string {
   const bytes = randomBytes(6);
   let suffix = "";
   for (let i = 0; i < 6; i++) suffix += chars[bytes[i]! % chars.length];
-  return `RAKHI-${suffix}`;
+  return `GIFT-${suffix}`;
 }
 
 function welcomeExpiresAt(from = new Date()): string {

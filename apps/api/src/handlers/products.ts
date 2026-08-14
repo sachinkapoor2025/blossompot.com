@@ -12,11 +12,12 @@ import {
   isRakhiSetSizeCategory,
   productMatchesRakhiSetCategory,
   resolveProductImagesForUpsert,
+  isSampleCatalogProduct,
   type Product,
 } from "@blossompot/shared";
 import { docClient, PRODUCTS_TABLE, now, slugify } from "../lib/db";
 import { ok, okCached, created, badRequest, notFound, forbidden } from "../lib/response";
-import { getAuth } from "../lib/auth";
+import { getAuth, requireAdmin } from "../lib/auth";
 import { withResolvedProductImages, resolveProductImageUrl } from "../lib/images";
 import { syncInventoryAlertState } from "../lib/inventory";
 import { ensureProductInDb } from "../lib/ensure-product";
@@ -281,10 +282,12 @@ export async function updateProduct(event: APIGatewayProxyEventV2) {
   return ok({ product: updated });
 }
 
-/** Admin: list all products including unpublished. */
+/** Admin: list all products including unpublished. Query `?sample=all|true|false`. */
 export async function listAdminProducts(event: APIGatewayProxyEventV2) {
   const auth = getAuth(event);
   if (!auth?.isAdmin) return forbidden();
+
+  const sampleFilter = (event.queryStringParameters?.sample ?? "all").toLowerCase();
 
   const result = await docClient.send(
     new ScanCommand({
@@ -294,10 +297,116 @@ export async function listAdminProducts(event: APIGatewayProxyEventV2) {
     })
   );
 
-  const items = ((result.Items ?? []) as Product[]).sort(
+  let items = ((result.Items ?? []) as Product[]).sort(
     (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
   );
-  return ok({ products: items.map(withResolvedProductImages) });
+
+  if (sampleFilter === "true" || sampleFilter === "sample") {
+    items = items.filter((p) => isSampleCatalogProduct(p));
+  } else if (sampleFilter === "false" || sampleFilter === "real") {
+    items = items.filter((p) => !isSampleCatalogProduct(p));
+  }
+
+  const sampleCount = ((result.Items ?? []) as Product[]).filter((p) =>
+    isSampleCatalogProduct(p)
+  ).length;
+
+  return ok({
+    products: items.map(withResolvedProductImages),
+    meta: {
+      totalScanned: result.Items?.length ?? 0,
+      returned: items.length,
+      sampleCount,
+      realCount: (result.Items?.length ?? 0) - sampleCount,
+      sampleFilter,
+    },
+  });
+}
+
+/** Admin: permanently delete all isSampleProduct rows (+ sample reviews on those slugs). */
+export async function deleteAllSampleProducts(event: APIGatewayProxyEventV2) {
+  if (!requireAdmin(event)) return forbidden();
+  const body = JSON.parse(event.body ?? "{}") as { confirm?: string };
+  if (body.confirm !== "REMOVE_ALL_SAMPLE_PRODUCTS") {
+    return badRequest('Pass confirm: "REMOVE_ALL_SAMPLE_PRODUCTS" to proceed');
+  }
+
+  const result = await docClient.send(
+    new ScanCommand({
+      TableName: PRODUCTS_TABLE,
+      FilterExpression: "begins_with(PK, :prefix)",
+      ExpressionAttributeValues: { ":prefix": "PRODUCT#" },
+    })
+  );
+
+  const items = result.Items ?? [];
+  const sampleMetas = items.filter(
+    (i) => i.SK === "META" && isSampleCatalogProduct(i as Product)
+  ) as Product[];
+  const sampleSlugs = new Set(sampleMetas.map((p) => p.slug));
+
+  let deletedProducts = 0;
+  let deletedReviews = 0;
+  for (const item of items) {
+    const pk = String(item.PK ?? "");
+    const sk = String(item.SK ?? "");
+    const slug = pk.replace(/^PRODUCT#/, "");
+    const isSampleMeta = sk === "META" && sampleSlugs.has(slug);
+    const isSampleReview =
+      sk.startsWith("REVIEW#") &&
+      sampleSlugs.has(slug) &&
+      (item.isSampleReview === true || String(item.reviewId ?? "").startsWith("sample-"));
+    if (!isSampleMeta && !isSampleReview) continue;
+    await docClient.send(
+      new DeleteCommand({
+        TableName: PRODUCTS_TABLE,
+        Key: { PK: pk, SK: sk },
+      })
+    );
+    if (isSampleMeta) deletedProducts++;
+    else deletedReviews++;
+  }
+
+  invalidateProductListCache();
+  return ok({ deletedProducts, deletedReviews, confirm: body.confirm });
+}
+
+/** Admin: mark a sample product as real (clears sample flag; keeps images/data). */
+export async function convertSampleProductToReal(event: APIGatewayProxyEventV2) {
+  if (!requireAdmin(event)) return forbidden();
+  const slug = event.pathParameters?.slug;
+  if (!slug) return badRequest("Slug required");
+  const existing = await docClient.send(
+    new GetCommand({
+      TableName: PRODUCTS_TABLE,
+      Key: { PK: productKeys.pk(slug), SK: productKeys.sk() },
+    })
+  );
+  if (!existing.Item) return notFound("Product not found");
+  const product = existing.Item as Product;
+  if (!isSampleCatalogProduct(product)) {
+    return badRequest("Product is not a sample product");
+  }
+  const tags = (product.tags ?? []).filter((t) => t !== "sample-product");
+  const body = JSON.parse(event.body ?? "{}") as {
+    vendorSlug?: string;
+    fulfilledByName?: string;
+  };
+  await docClient.send(
+    new PutCommand({
+      TableName: PRODUCTS_TABLE,
+      Item: {
+        ...product,
+        isSampleProduct: false,
+        tags,
+        vendorSlug: body.vendorSlug ?? product.vendorSlug,
+        fulfilledByName: body.fulfilledByName ?? product.fulfilledByName,
+        updatedAt: now(),
+      },
+    })
+  );
+  invalidateProductListCache();
+  return ok({ slug, isSampleProduct: false });
 }
 
 export async function deleteProduct(event: APIGatewayProxyEventV2) {

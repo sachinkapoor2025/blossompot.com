@@ -21,6 +21,8 @@ export default function AdminProductsPage() {
   const [categories, setCategories] = useState<{ slug: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [sampleFilter, setSampleFilter] = useState<"all" | "sample" | "real">("all");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
   const [editing, setEditing] = useState<Product | null>(null);
@@ -50,17 +52,22 @@ export default function AdminProductsPage() {
 
   const load = useCallback(() => {
     setLoading(true);
+    const qs =
+      sampleFilter === "all" ? "" : `?sample=${sampleFilter === "sample" ? "true" : "false"}`;
     Promise.all([
-      apiClient<{ products: Product[] }>("/admin/products"),
+      apiClient<{ products: Product[]; meta?: { sampleCount: number; realCount: number } }>(
+        `/admin/products${qs}`
+      ),
       apiClient<{ categories: { slug: string; name: string }[] }>("/categories"),
     ])
       .then(([p, c]) => {
         setProducts(p.products);
         setCategories(c.categories);
+        setSelected(new Set());
       })
       .catch(() => setProducts([]))
       .finally(() => setLoading(false));
-  }, [apiClient]);
+  }, [apiClient, sampleFilter]);
 
   useEffect(() => {
     load();
@@ -287,6 +294,53 @@ export default function AdminProductsPage() {
       load();
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Bulk upload failed");
+    }
+  };
+
+  const removeAllSampleProducts = async () => {
+    const okConfirm = window.confirm(
+      "Permanently delete ALL sample products and their sample reviews?\n\nType confirmation will be sent as REMOVE_ALL_SAMPLE_PRODUCTS."
+    );
+    if (!okConfirm) return;
+    const typed = window.prompt('Type REMOVE_ALL_SAMPLE_PRODUCTS to confirm:');
+    if (typed !== "REMOVE_ALL_SAMPLE_PRODUCTS") {
+      setMessage("Cancelled — confirmation phrase did not match.");
+      return;
+    }
+    try {
+      const result = await apiClient<{ deletedProducts: number; deletedReviews: number }>(
+        "/admin/products/sample",
+        {
+          method: "DELETE",
+          body: JSON.stringify({ confirm: "REMOVE_ALL_SAMPLE_PRODUCTS" }),
+        }
+      );
+      setMessage(
+        `Removed ${result.deletedProducts} sample products and ${result.deletedReviews} sample reviews.`
+      );
+      load();
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Failed to remove sample products");
+    }
+  };
+
+  const convertSelectedToReal = async () => {
+    const slugs = [...selected];
+    if (slugs.length === 0) {
+      setMessage("Select sample products first.");
+      return;
+    }
+    try {
+      for (const slug of slugs) {
+        await apiClient(`/admin/products/${slug}/convert-from-sample`, {
+          method: "POST",
+          body: JSON.stringify({}),
+        });
+      }
+      setMessage(`Converted ${slugs.length} sample product(s) to real.`);
+      load();
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Convert failed");
     }
   };
 
@@ -559,6 +613,43 @@ export default function AdminProductsPage() {
 
       {tab === "list" && (
         <>
+          <div className="flex flex-wrap gap-2 items-center">
+            {(
+              [
+                ["all", "All Products"],
+                ["real", "Real Products"],
+                ["sample", "Sample Products"],
+              ] as const
+            ).map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => {
+                  setSampleFilter(key);
+                  setPage(1);
+                }}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                  sampleFilter === key ? "bg-nav text-white" : "border bg-white text-slate-700"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={convertSelectedToReal}
+              className="rounded-lg border px-3 py-1.5 text-xs font-medium"
+            >
+              Convert selected → real
+            </button>
+            <button
+              type="button"
+              onClick={removeAllSampleProducts}
+              className="rounded-lg border border-red-300 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-800"
+            >
+              Remove all sample products
+            </button>
+          </div>
           <input
             type="search"
             placeholder="Search by name, slug, SKU…"
@@ -581,6 +672,24 @@ export default function AdminProductsPage() {
               <table className="w-full text-sm min-w-[800px]">
                 <thead className="bg-slate-50">
                   <tr className="text-left">
+                    <th className="py-3 px-3 w-8">
+                      <input
+                        type="checkbox"
+                        aria-label="Select page"
+                        checked={
+                          pageItems.length > 0 &&
+                          pageItems.every((p) => selected.has(p.slug))
+                        }
+                        onChange={(e) => {
+                          setSelected((prev) => {
+                            const next = new Set(prev);
+                            if (e.target.checked) pageItems.forEach((p) => next.add(p.slug));
+                            else pageItems.forEach((p) => next.delete(p.slug));
+                            return next;
+                          });
+                        }}
+                      />
+                    </th>
                     <th className="py-3 px-4">Product</th>
                     <th className="py-3 px-4">SKU</th>
                     <th className="py-3 px-4">Category</th>
@@ -594,9 +703,28 @@ export default function AdminProductsPage() {
                 <tbody>
                   {pageItems.map((p) => (
                     <tr key={p.slug} className="border-t align-top">
+                      <td className="py-3 px-3">
+                        <input
+                          type="checkbox"
+                          checked={selected.has(p.slug)}
+                          onChange={(e) => {
+                            setSelected((prev) => {
+                              const next = new Set(prev);
+                              if (e.target.checked) next.add(p.slug);
+                              else next.delete(p.slug);
+                              return next;
+                            });
+                          }}
+                        />
+                      </td>
                       <td className="py-3 px-4">
                         <div className="font-medium flex items-center gap-1.5 flex-wrap">
                           {p.name}
+                          {p.isSampleProduct ? (
+                            <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-violet-100 text-violet-900">
+                              Sample
+                            </span>
+                          ) : null}
                           {!productHasShippingDims(p) && (
                             <span
                               className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-900"

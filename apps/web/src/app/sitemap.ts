@@ -7,7 +7,8 @@ import { getCatalogProducts } from "@/lib/catalog-fallback";
 import { categoryOrder } from "@/lib/site";
 import { listAllBlogPosts } from "@/lib/content/blog-posts";
 import { allCollectionSlugs } from "@/lib/collections";
-import { allSeoLocationSlugs, locationPublicPath } from "@/lib/content/seo-data";
+import { publishedGeoLocations } from "@/lib/content/geo/locations";
+import { locationPublicPath } from "@/lib/content/seo-data";
 import { allOccasionSlugs } from "@/lib/content/occasions";
 import { allGiftGuideSlugs } from "@/lib/content/recipients";
 
@@ -38,6 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/returns`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: `${siteUrl}/press`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: `${siteUrl}/editorial-policy`, lastModified: now, changeFrequency: "monthly", priority: 0.45 },
+    { url: `${siteUrl}/delivery-locations`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${siteUrl}/llms.txt`, lastModified: now, changeFrequency: "weekly", priority: 0.5 },
     { url: `${siteUrl}/llms-full.txt`, lastModified: now, changeFrequency: "daily", priority: 0.5 },
     { url: `${siteUrl}/humans.txt`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
@@ -50,11 +52,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.85,
   }));
 
-  const locationRoutes = allSeoLocationSlugs().map((slug) => ({
-    url: `${siteUrl}${locationPublicPath(slug)}`,
+  const locationRoutes = publishedGeoLocations().map((g) => ({
+    url: `${siteUrl}${locationPublicPath(g.slug)}`,
     lastModified: now,
     changeFrequency: "weekly" as const,
-    priority: slug.includes("los-angeles") || slug.includes("san-") ? 0.8 : 0.72,
+    priority: g.type === "state" ? 0.8 : 0.72,
   }));
 
   const occasionRoutes = allOccasionSlugs().map((slug) => ({

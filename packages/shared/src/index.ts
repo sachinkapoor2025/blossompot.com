@@ -21,6 +21,8 @@ export * from "./schemas/expense";
 export * from "./schemas/payment-ledger";
 export * from "./schemas/payment-reconciliation";
 export * from "./schemas/vendor-payments";
+export * from "./schemas/marketplace-vendor";
+export * from "./lib/vendor-commission";
 export * from "./schemas/live-visitors";
 export * from "./schemas/product-sales-intelligence";
 export * from "./schemas/attribution";

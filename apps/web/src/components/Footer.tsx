@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { site, navItems, cityLinks, cityNavHref, giftSetsMenu, whatsappChatUrl } from "@/lib/site";
+import { site, navItems, giftSetsMenu, whatsappChatUrl } from "@/lib/site";
 import { PaymentMethodIcons } from "@/components/PaymentMethodIcons";
 import { SiteLogoLink } from "@/components/SiteLogo";
 import { trustFacts } from "@/lib/trust";
+import { footerGeoLinks } from "@/lib/content/geo/locations";
 
 const FACEBOOK_URL = "https://www.facebook.com/blossompot/";
 const INSTAGRAM_URL = "https://www.instagram.com/blossompot/";
@@ -111,22 +112,28 @@ export function Footer() {
               <li><Link href="/faq" className="hover:text-white hover:underline">FAQ</Link></li>
               <li><Link href="/reviews" className="hover:text-white hover:underline">Customer Reviews</Link></li>
               <li><Link href="/about" className="hover:text-white hover:underline">About Us</Link></li>
+              <li><Link href="/become-a-vendor" className="hover:text-white hover:underline">Become a Vendor</Link></li>
               <li><Link href="/returns" className="hover:text-white hover:underline">Returns &amp; Guarantee</Link></li>
               <li><Link href="/contact" className="hover:text-white hover:underline">Contact Us</Link></li>
             </ul>
           </div>
 
-          {/* Cities — 3 columns so footer height stays balanced */}
+          {/* Geo hubs — top states + index */}
           <div className="col-span-2 lg:col-span-5 min-w-0">
             <p className="font-semibold text-white mb-3 sm:mb-4">Deliver to</p>
             <ul className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2 text-white/80">
-              {cityLinks.map((c) => (
-                <li key={c.slug}>
-                  <Link href={cityNavHref(c)} className="hover:text-white hover:underline">
+              {footerGeoLinks(12).map((c) => (
+                <li key={c.href}>
+                  <Link href={c.href} className="hover:text-white hover:underline">
                     {c.label}
                   </Link>
                 </li>
               ))}
+              <li className="col-span-2 sm:col-span-3">
+                <Link href="/delivery-locations" className="hover:text-white hover:underline font-medium">
+                  All delivery locations →
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

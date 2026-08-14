@@ -58,6 +58,12 @@ the Lambda via env vars (`PRODUCTS_TABLE`, `ORDERS_TABLE`, `CARTS_TABLE`,
 | events | `SESSION#<sessionId>` | `<ts>#<eventId>` | GSI1 byTypeDay (`<type>#<yyyy-mm-dd>`); TTL `expiresAt` (90d). Rollups: PK `ROLLUP#<yyyy-mm-dd>`. Product sales: PK `PRODUCT_SALES#<yyyy-mm-dd>` / SK `META` or `PRODUCT#<slug>` |
 | config | `CONFIG#PAYMENTS` | `META` | Stripe/Razorpay settings |
 | config | `CONFIG#SHIPPING` | `META` | USPS rate-shopping, origin address, festival mode |
+| config | `CONFIG#VENDOR_COMMISSIONS` | `META` | Marketplace commission rules (global / category / vendor) |
+| config | `MVENDOR#<vendorId>` | `META` | Marketplace partner profile + status; lookups `MVENDOREMAIL#` / `MVENDORSLUG#`; sessions `MVENDORSESSION#`; ledger `MVENDORLEDGER#` |
+
+**Marketplace multi-vendor model:** BlossomPot acquires the customer → customer pays BlossomPot → local vendor fulfills → BlossomPot keeps margin → vendor receives payout. Applications are never auto-published (`pending` → `under_review` → `approved`/`active` → `suspended`/`rejected`). Vendor products require admin approval (`draft` / `pending_approval` → `approved` → published). Public storefront keeps `vendorSlug`/`vendorCost` private; optional `fulfilledByName` shows “Fulfilled by / Local Partner”. ZIP coverage: `GET /marketplace/coverage?zip=`. UI: `/become-a-vendor`, `/vendor/*`, `/admin/marketplace-vendors`. Orange County machine API (`/vendors/orange-county/*`) remains separate.
+
+**Sample marketplace catalog (dev/demo):** `npm run seed:sample-products` generates 1,000+ `isSampleProduct=true` SKUs with 4 Unsplash-licensed images each, SAMPLE VENDOR accounts, and `isSampleReview` reviews. Admin filters: All / Real / Sample; `DELETE /admin/products/sample` with confirm phrase removes all samples. Convert via `POST /admin/products/{slug}/convert-from-sample`. Validate: `npm run validate:sample-products`.
 
 Order status lifecycle: `pending_payment → paid → (accepted/on_hold) → processing → shipped → in_transit → out_for_delivery → delivered → complete`
 (plus `delivery_exception`, `cancelled` / `refunded`), with a `statusHistory[]` audit trail and tracking number.
@@ -127,6 +133,23 @@ When admin (or Orange County vendor tracking) changes order status (accepted, pr
 | POST | `/admin/vendor-payouts` | Super admin: record payment to vendor (`amount`, `paidDate`, `paymentMethod`, optional `orderIds` / `notes`) |
 | PUT | `/admin/vendor-payouts/{payoutId}` | Super admin: update payout |
 | DELETE | `/admin/vendor-payouts/{payoutId}` | Super admin: delete payout |
+| GET | `/marketplace/vendor-agreement` | Public: current vendor agreement version + summary |
+| GET | `/marketplace/coverage?zip=` | Public: whether active marketplace vendors serve a ZIP |
+| POST | `/marketplace/vendors/apply` | Public: vendor partnership application (Pending status) |
+| POST | `/marketplace/vendors/login` | Vendor portal session (Bearer token) |
+| POST | `/marketplace/vendors/logout` | End vendor session |
+| GET | `/marketplace/vendors/me` | Vendor: own profile |
+| GET | `/marketplace/vendors/dashboard` | Vendor: order/product KPIs + health score |
+| GET/POST | `/marketplace/vendors/products` | Vendor: list / upsert products (draft or pending_approval; unpublished until admin approves) |
+| GET | `/marketplace/vendors/orders` | Vendor: orders containing this vendorSlug (fulfillment fields only) |
+| POST | `/marketplace/vendors/orders/{orderId}/action` | Vendor: accept/reject/preparing/ready/out_for_delivery/delivered |
+| POST | `/marketplace/vendors/pricing/preview` | Vendor/admin: server-side margin/fee breakdown |
+| GET | `/admin/marketplace/vendors` | Admin: list/filter marketplace vendor applications. UI: `/admin/marketplace-vendors` |
+| GET | `/admin/marketplace/vendors/{vendorId}` | Admin: vendor detail |
+| PATCH | `/admin/marketplace/vendors/{vendorId}/status` | Admin: pending→under_review→approved/active→suspended/rejected (+ optional temp password) |
+| GET | `/admin/marketplace/products` | Admin: vendor-submitted products (`?approvalStatus=`) |
+| PATCH | `/admin/marketplace/products/{slug}/approval` | Admin: approve/reject/pause + set customer sell price |
+| GET/PUT | `/admin/marketplace/commissions` | Admin get / Super-admin put configurable commission rules (`CONFIG#VENDOR_COMMISSIONS`) |
 | GET | `/admin/vendor-api/health` | Admin: Orange County Vendor API health console (UI: `/admin/vendor-management` → Vendor API) |
 | GET | `/admin/vendor-api/auth-check` | Admin: prove missing vendor key returns 401 |
 | GET | `/admin/vendor-api/orders` | Admin: proxy list/search vendor orders (`days`/`limit`/`cursor`/`status`/`updatedSince`) |
@@ -237,9 +260,10 @@ Every form blur or debounced keystroke can POST to `/leads`:
 ## SEO
 
 - Next.js `generateMetadata` per product/category page
-- `/sitemap.xml`, `/robots.txt` dynamic routes
+- `/sitemap.xml`, `/sitemap-geo.xml`, `/robots.txt` dynamic routes
 - JSON-LD Product schema on product pages
 - Canonical URLs, Open Graph tags
+- **Nationwide geo:** SoT is `apps/web/src/lib/content/geo/locations.data.json` (52 states/territories + 639 cities). Public URLs `/gifts-to-{slug}` rewrite to `/locations/[slug]`. Publish wave via `GEO_PUBLISH_WAVE` (`states` | `cities-200` | `all`). Content: `npm run geo:generate` / `npm run geo:validate`. Index: `/delivery-locations`. Display labels only via `locationLabel()` — never concatenate name+state.
 
 ## Multi-Developer + Cursor Workflow
 

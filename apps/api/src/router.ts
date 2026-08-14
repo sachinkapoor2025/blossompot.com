@@ -26,6 +26,7 @@ import * as expenses from "./handlers/expenses";
 import * as paymentLedger from "./handlers/payment-ledger";
 import * as paymentReconciliation from "./handlers/payment-reconciliation";
 import * as vendorManagement from "./handlers/vendor-management";
+import * as marketplaceVendors from "./handlers/marketplace-vendors";
 import * as reviews from "./handlers/reviews";
 import { stripeWebhook } from "./handlers/payments/stripe";
 import {
@@ -63,6 +64,13 @@ const routes: Route[] = [
   { method: "PUT", pattern: /^\/products\/([^/]+)$/, handler: products.updateProduct, params: ["slug"] },
   { method: "DELETE", pattern: /^\/products\/([^/]+)$/, handler: products.deleteProduct, params: ["slug"] },
   { method: "GET", pattern: /^\/admin\/products$/, handler: products.listAdminProducts },
+  { method: "DELETE", pattern: /^\/admin\/products\/sample$/, handler: products.deleteAllSampleProducts },
+  {
+    method: "POST",
+    pattern: /^\/admin\/products\/([^/]+)\/convert-from-sample$/,
+    handler: products.convertSampleProductToReal,
+    params: ["slug"],
+  },
   { method: "POST", pattern: /^\/products\/bulk$/, handler: products.bulkUploadProducts },
   { method: "GET", pattern: /^\/categories$/, handler: categories.listCategories },
   { method: "GET", pattern: /^\/categories\/([^/]+)$/, handler: categories.getCategory, params: ["slug"] },
@@ -149,6 +157,46 @@ const routes: Route[] = [
     handler: vendorManagement.deleteVendorPayout,
     params: ["payoutId"],
   },
+  // Marketplace vendor partners (signup, portal, admin review)
+  { method: "GET", pattern: /^\/marketplace\/vendor-agreement$/, handler: marketplaceVendors.getVendorAgreement },
+  { method: "GET", pattern: /^\/marketplace\/coverage$/, handler: marketplaceVendors.marketplaceCoverageByZip },
+  { method: "POST", pattern: /^\/marketplace\/vendors\/apply$/, handler: marketplaceVendors.applyMarketplaceVendor },
+  { method: "POST", pattern: /^\/marketplace\/vendors\/login$/, handler: marketplaceVendors.vendorLogin },
+  { method: "POST", pattern: /^\/marketplace\/vendors\/logout$/, handler: marketplaceVendors.vendorLogout },
+  { method: "GET", pattern: /^\/marketplace\/vendors\/me$/, handler: marketplaceVendors.vendorMe },
+  { method: "GET", pattern: /^\/marketplace\/vendors\/dashboard$/, handler: marketplaceVendors.vendorDashboard },
+  { method: "GET", pattern: /^\/marketplace\/vendors\/products$/, handler: marketplaceVendors.vendorListProducts },
+  { method: "POST", pattern: /^\/marketplace\/vendors\/products$/, handler: marketplaceVendors.vendorUpsertProduct },
+  { method: "GET", pattern: /^\/marketplace\/vendors\/orders$/, handler: marketplaceVendors.vendorListOrders },
+  {
+    method: "POST",
+    pattern: /^\/marketplace\/vendors\/orders\/([^/]+)\/actions$/,
+    handler: marketplaceVendors.vendorUpdateOrder,
+    params: ["orderId"],
+  },
+  { method: "POST", pattern: /^\/marketplace\/vendors\/pricing\/preview$/, handler: marketplaceVendors.previewVendorPricing },
+  { method: "GET", pattern: /^\/admin\/marketplace\/vendors$/, handler: marketplaceVendors.listMarketplaceVendorsAdmin },
+  {
+    method: "GET",
+    pattern: /^\/admin\/marketplace\/vendors\/([^/]+)$/,
+    handler: marketplaceVendors.getMarketplaceVendorAdmin,
+    params: ["vendorId"],
+  },
+  {
+    method: "PATCH",
+    pattern: /^\/admin\/marketplace\/vendors\/([^/]+)\/status$/,
+    handler: marketplaceVendors.updateMarketplaceVendorStatusAdmin,
+    params: ["vendorId"],
+  },
+  { method: "GET", pattern: /^\/admin\/marketplace\/products$/, handler: marketplaceVendors.adminListVendorProducts },
+  {
+    method: "PATCH",
+    pattern: /^\/admin\/marketplace\/products\/([^/]+)\/approval$/,
+    handler: marketplaceVendors.adminApproveVendorProduct,
+    params: ["slug"],
+  },
+  { method: "GET", pattern: /^\/admin\/marketplace\/commissions$/, handler: marketplaceVendors.getVendorCommissionsAdmin },
+  { method: "PUT", pattern: /^\/admin\/marketplace\/commissions$/, handler: marketplaceVendors.putVendorCommissionsAdmin },
   // Admin console for Orange County Vendor API (proxies vendor handlers; key stays server-side).
   { method: "GET", pattern: /^\/admin\/vendor-api\/health$/, handler: adminVendorApi.adminVendorHealth },
   { method: "GET", pattern: /^\/admin\/vendor-api\/auth-check$/, handler: adminVendorApi.adminVendorAuthCheck },

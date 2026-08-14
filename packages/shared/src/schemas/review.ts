@@ -11,6 +11,8 @@ export const productReviewSchema = z.object({
   source: z.enum(["site", "trustpilot", "judgeme", "yotpo", "import"]).default("site"),
   published: z.boolean().default(false),
   verifiedPurchase: z.boolean().optional(),
+  /** Demo reviews — delete with sample catalog before launch. */
+  isSampleReview: z.boolean().optional(),
 });
 
 export type ProductReview = z.infer<typeof productReviewSchema> & {

@@ -16,7 +16,7 @@ function HeaderFallback() {
 
 export function HeaderShell() {
   const pathname = usePathname();
-  if (pathname.startsWith("/admin") || pathname.startsWith("/ses-email")) return null;
+  if (pathname.startsWith("/admin") || pathname.startsWith("/ses-email") || pathname.startsWith("/vendor")) return null;
 
   return (
     <Suspense fallback={<HeaderFallback />}>

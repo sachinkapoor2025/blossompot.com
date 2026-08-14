@@ -45,6 +45,61 @@ export const productSchema = z.object({
    * Kept in sync when reviews are published under PRODUCT#slug / REVIEW#id.
    */
   ratingAggregate: productRatingAggregateSchema.optional(),
+  /**
+   * Marketplace vendor product approval (vendor-submitted catalog).
+   * BlossomPot-owned SKUs omit this field.
+   */
+  vendorApprovalStatus: z
+    .enum(["draft", "pending_approval", "approved", "rejected", "paused"])
+    .optional(),
+  suggestedRetailPrice: z.number().positive().optional(),
+  minSellPrice: z.number().positive().optional(),
+  prepTimeHours: z.number().int().min(0).max(168).optional(),
+  /** Public local-partner label (safe for storefront; vendorSlug stays private). */
+  fulfilledByName: z.string().min(1).max(120).optional(),
+  /**
+   * Temporary catalog filler for demos/SEO/vendor onboarding.
+   * Filter/delete with `isSampleProduct = true` when real inventory replaces samples.
+   */
+  isSampleProduct: z.boolean().optional(),
+  shortDescription: z.string().max(320).optional(),
+  subcategory: z.string().max(80).optional(),
+  occasion: z.string().max(80).optional(),
+  recipient: z.string().max(80).optional(),
+  featured: z.boolean().optional(),
+  sameDayAvailable: z.boolean().optional(),
+  nextDayAvailable: z.boolean().optional(),
+  deliveryFee: z.number().min(0).optional(),
+  /** Optional size/style choices (label + relative price). Flat SKU remains primary. */
+  variants: z
+    .array(
+      z.object({
+        label: z.string().min(1).max(80),
+        sku: z.string().max(80).optional(),
+        price: z.number().positive().optional(),
+        inventory: z.number().int().min(0).optional(),
+      })
+    )
+    .max(20)
+    .optional(),
+  /** Sample/demo image provenance (Unsplash etc.). Not required for real vendor photos. */
+  imageAssets: z
+    .array(
+      z.object({
+        url: z.string().url(),
+        role: z.enum(["main", "side", "detail", "lifestyle"]).optional(),
+        source: z.string().max(80).optional(),
+        license: z.string().max(120).optional(),
+        attribution: z.string().max(200).optional(),
+        isSampleImage: z.boolean().optional(),
+        alt: z.string().max(200).optional(),
+      })
+    )
+    .max(12)
+    .optional(),
+  /** City/state hints for marketplace demo coverage (not a hard geo filter yet). */
+  sampleCity: z.string().max(80).optional(),
+  sampleState: z.string().max(40).optional(),
   /** Shipping weight in ounces (recommended for accurate USPS rates). */
   weightOz: z.number().positive().optional(),
   /** Package dimensions in inches (recommended for accurate USPS rates). */

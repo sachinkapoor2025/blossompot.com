@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { EXPLORE_MORE_GROUPS } from "@/lib/explore-more-links";
+import { exploreMoreGroupsForProduct } from "@/lib/explore-more-links";
 
 /**
  * FNP-style multi-column Explore More links for product pages.
- * Crawlable semantic nav — strengthens internal linking for cities, types, and collections.
+ * Location links rotate deterministically by product slug from the nationwide geo SoT.
  */
-export function ExploreMoreSection() {
+export function ExploreMoreSection({ productSlug }: { productSlug?: string }) {
+  const groups = exploreMoreGroupsForProduct(productSlug);
   return (
     <nav
       className="mt-10 pt-8 border-t border-slate-200"
@@ -15,11 +16,12 @@ export function ExploreMoreSection() {
         Explore More
       </h2>
       <p className="text-sm text-slate-600 mb-6 max-w-3xl">
-        Browse gifts by city, category, and occasion — fast links to help you find the right flowers, cakes, and hampers for USA delivery.
+        Browse gifts by location, category, and occasion — fast links for flowers, cakes, and hampers
+        with delivery across all 50 states, DC and Puerto Rico.
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
-        {EXPLORE_MORE_GROUPS.map((group) => (
+        {groups.map((group) => (
           <section key={group.heading} aria-labelledby={`explore-${slugify(group.heading)}`}>
             <h3
               id={`explore-${slugify(group.heading)}`}

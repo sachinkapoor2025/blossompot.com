@@ -128,6 +128,7 @@ export function ProductDetailClient({
   const [tab, setTab] = useState<Tab>("description");
   const [productUrl, setProductUrl] = useState("");
   const [galleryImages, setGalleryImages] = useState(product.images ?? []);
+  const [selectedVariant, setSelectedVariant] = useState(0);
   const [addons, setAddons] = useState<ProductAddonSelection[]>([]);
 
   useEffect(() => {
@@ -227,6 +228,15 @@ export function ProductDetailClient({
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-primary mb-3 leading-tight">{product.name}</h1>
 
+          {product.fulfilledByName ? (
+            <p className="text-sm text-slate-600 mb-3">
+              Fulfilled by: <span className="font-semibold text-primary">{product.fulfilledByName}</span>
+              <span className="ml-2 text-xs uppercase tracking-wide text-emerald-700 font-semibold">
+                Local Partner
+              </span>
+            </p>
+          ) : null}
+
           {isFlashComboProduct(product.slug) && isFlashComboSaleActive() && (
             <p className="text-sm font-semibold text-accent bg-rose-50 border border-rose-100 rounded-md px-3 py-2 mb-3">
               24-hour flash sale — ends {flashComboSaleEndsAt().toLocaleString()}. Includes 1
@@ -252,6 +262,29 @@ export function ProductDetailClient({
               <span className="text-sm font-semibold text-green-600">{discount}% OFF</span>
             )}
           </div>
+
+          {product.variants && product.variants.length > 0 ? (
+            <div className="mb-4">
+              <p className="text-sm font-medium text-slate-800 mb-2">Options</p>
+              <div className="flex flex-wrap gap-2">
+                {product.variants.map((v, i) => (
+                  <button
+                    key={`${v.label}-${i}`}
+                    type="button"
+                    onClick={() => setSelectedVariant(i)}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-medium ${
+                      selectedVariant === i
+                        ? "border-primary bg-primary text-white"
+                        : "border-slate-300 bg-white text-slate-700"
+                    }`}
+                  >
+                    {v.label}
+                    {v.price != null ? ` · ${format(v.price, product.currency)}` : ""}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
 
           <p className="text-slate-600 text-sm sm:text-base mb-3 leading-relaxed">{summary}</p>
           <ProductIncludesPreview product={product} />
@@ -423,7 +456,7 @@ export function ProductDetailClient({
             )}
 
             {/* Explore More sits immediately after Related searches for description-tab readers. */}
-            <ExploreMoreSection />
+            <ExploreMoreSection productSlug={product.slug} />
 
             <div className="max-w-md space-y-3">
               <LeadCaptureInput
@@ -493,7 +526,7 @@ export function ProductDetailClient({
         )}
 
         {/* Always in the document (not tab-gated) so crawlers and other tabs still get internal links. */}
-        {tab !== "description" ? <ExploreMoreSection /> : null}
+        {tab !== "description" ? <ExploreMoreSection productSlug={product.slug} /> : null}
       </section>
 
       {relatedProducts.length > 0 && (

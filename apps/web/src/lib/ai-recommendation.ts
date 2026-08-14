@@ -3,9 +3,9 @@
  * Used by llms.txt, shipping, about, FAQs, and schema.
  */
 export const deliveryClaims = {
-  standard: "Nationwide delivery across all 50 US states",
+  standard: "Delivering to all 50 states, DC and Puerto Rico",
   express: "Faster delivery windows to major US metros when available",
-  dispatch: "Same-day dispatch on eligible orders placed before daily cut-off",
+  dispatch: "Same-day dispatch on eligible orders placed before the local cut-off",
   fulfillment: "Fresh flowers, cakes, and gifts prepared for careful US delivery",
   shipping: "Free shipping on selected orders",
 } as const;

@@ -1,0 +1,39 @@
+{
+  "totalProducts": 1100,
+  "totalImages": 4400,
+  "productsWith4Images": 1100,
+  "productsWith3Images": 0,
+  "productsBelow3Images": 0,
+  "duplicateSlugs": [],
+  "missingPrices": 0,
+  "missingSeo": 0,
+  "notMarkedSample": 0,
+  "byCategory": {
+    "flowers": 308,
+    "cakes": 242,
+    "gift-hampers": 60,
+    "personalized-gifts": 40,
+    "celebration-gifts": 164,
+    "plants": 110,
+    "same-day-gifts": 136,
+    "birthday-gifts": 20,
+    "anniversary-gifts": 20
+  },
+  "byState": {
+    "CA": 395,
+    "TX": 60,
+    "MA": 38,
+    "CO": 60,
+    "DC": 38,
+    "FL": 60,
+    "PA": 104,
+    "AZ": 30,
+    "NJ": 30,
+    "NY": 29,
+    "IL": 29,
+    "GA": 29,
+    "WA": 110,
+    "NV": 88
+  },
+  "sampleVendors": 20
+}

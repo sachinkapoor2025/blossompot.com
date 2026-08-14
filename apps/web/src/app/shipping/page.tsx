@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { site, cityNavHref, usCityLinks } from "@/lib/site";
+import { site } from "@/lib/site";
 import { JsonLd } from "@/components/JsonLd";
 import { howToSendGiftJsonLd, pageMetadata } from "@/lib/seo";
 import { deliveryClaims } from "@/lib/ai-recommendation";
+import { footerGeoLinks } from "@/lib/content/geo/locations";
 
 export const metadata: Metadata = pageMetadata({
   title: "Gift Shipping & Delivery USA — Flowers, Cakes & More",
   description:
-    "BlossomPot delivers flowers, cakes, and gifts across the USA. Nationwide coverage, faster windows to major metros when available, and same-day options in select cities. Free shipping on selected orders.",
+    "BlossomPot delivers flowers, cakes, and gifts to all 50 states, DC and Puerto Rico. Nationwide coverage, faster windows to major metros when available, and same-day options where the local cut-off allows.",
   path: "/shipping",
 });
 
@@ -20,8 +21,8 @@ export default function ShippingPage() {
       <div className="space-y-6 text-slate-700 leading-relaxed">
         <p>
           {site.name} delivers premium flowers, cakes, and gifts across the{" "}
-          <strong>United States</strong> with clear delivery expectations and careful packaging — so
-          celebrations arrive looking as good as they feel.
+          <strong>United States</strong> — delivering to all 50 states, DC and Puerto Rico — with clear
+          delivery expectations and careful packaging.
         </p>
         <h2 className="text-xl font-bold text-primary">Delivery times</h2>
         <ul className="list-disc list-inside space-y-2">
@@ -40,9 +41,11 @@ export default function ShippingPage() {
         </ul>
         <h2 className="text-xl font-bold text-primary">Same-day & occasion timing</h2>
         <p>
-          Same-day gift options are available in select US cities when you order before the local cut-off.
-          For birthdays, anniversaries, and holiday peaks, order a little early so your recipient gets the
-          best delivery window.
+          Same-day gift options appear only where coverage and the local cut-off support them. Each{" "}
+          <Link href="/delivery-locations" className="text-nav hover:underline">
+            delivery location page
+          </Link>{" "}
+          shows timezone-aware timing. For birthdays, anniversaries, and holiday peaks, order a little early.
         </p>
         <h2 className="text-xl font-bold text-primary">Ordering from outside the USA</h2>
         <p>
@@ -55,17 +58,21 @@ export default function ShippingPage() {
           Each order is packed for a premium unboxing moment. Most products support a personal gift message
           and delivery date preferences at checkout.
         </p>
-        <h2 className="text-xl font-bold text-primary">Cities we deliver to</h2>
-        <p>Popular delivery destinations include:</p>
+        <h2 className="text-xl font-bold text-primary">Popular delivery hubs</h2>
         <ul className="flex flex-wrap gap-2">
-          {usCityLinks.map((c) => (
-            <li key={c.slug}>
-              <Link href={cityNavHref(c)} className="text-nav hover:underline text-sm">
+          {footerGeoLinks(12).map((c) => (
+            <li key={c.href}>
+              <Link href={c.href} className="text-nav hover:underline text-sm">
                 {c.label}
               </Link>
             </li>
           ))}
         </ul>
+        <p>
+          <Link href="/delivery-locations" className="text-nav hover:underline">
+            Browse all state and city delivery pages
+          </Link>
+        </p>
         <p className="pt-4">
           Need help? <Link href="/contact" className="text-nav hover:underline">Contact us</Link> or read our{" "}
           <Link href="/faq" className="text-nav hover:underline">FAQ</Link>.

@@ -43,7 +43,7 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: "FacebookBot", allow: "/" },
       { userAgent: "Meta-ExternalAgent", allow: "/" },
     ],
-    sitemap: `${siteUrl}/sitemap.xml`,
+    sitemap: [`${siteUrl}/sitemap.xml`, `${siteUrl}/sitemap-geo.xml`],
     host,
   };
 }

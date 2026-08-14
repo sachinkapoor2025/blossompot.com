@@ -454,6 +454,14 @@ export function Header() {
                   </div>
                 )}
               </div>
+
+              <Link
+                href="/become-a-vendor"
+                onClick={closeMenu}
+                className="block rounded-lg px-4 py-3 text-sm font-semibold text-primary hover:bg-rose-50"
+              >
+                Become a Vendor
+              </Link>
             </nav>
           </aside>
         </>

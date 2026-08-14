@@ -152,6 +152,28 @@ export const vendorPayoutKeys = {
   pkPrefix: () => "VENDORPAY#" as const,
 };
 
+/** Marketplace vendor partners (config table). */
+export const marketplaceVendorKeys = {
+  pk: (vendorId: string) => `MVENDOR#${vendorId}`,
+  sk: () => "META" as const,
+  pkPrefix: () => "MVENDOR#" as const,
+  /** Email uniqueness lookup */
+  emailPk: (email: string) => `MVENDOREMAIL#${email.trim().toLowerCase()}`,
+  emailSk: () => "META" as const,
+  /** Slug uniqueness lookup */
+  slugPk: (slug: string) => `MVENDORSLUG#${slug}`,
+  slugSk: () => "META" as const,
+  sessionPk: (token: string) => `MVENDORSESSION#${token}`,
+  sessionSk: () => "META" as const,
+  ledgerPk: (entryId: string) => `MVENDORLEDGER#${entryId}`,
+  ledgerSk: () => "META" as const,
+  ledgerPrefix: () => "MVENDORLEDGER#" as const,
+  commissionsPk: () => "CONFIG#VENDOR_COMMISSIONS" as const,
+  commissionsSk: () => "META" as const,
+  agreementPk: () => "CONFIG#VENDOR_AGREEMENT" as const,
+  agreementSk: () => "META" as const,
+};
+
 // ---- email campaigns table (SES bulk marketing) ----
 export const sesEmailKeys = {
   campaignPk: (campaignId: string) => `CAMPAIGN#${campaignId}`,

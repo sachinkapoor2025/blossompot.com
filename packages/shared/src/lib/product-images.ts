@@ -109,3 +109,26 @@ export function selectDisplayableProductImages(entries: SizedProductImage[]): st
   for (const e of valid) best = Math.max(best, e.width * e.height);
   return valid.filter((e) => e.width * e.height === best).map((e) => e.url);
 }
+
+/**
+ * Gallery fallback: prefer image[0]…[n], then any remaining URLs, then category placeholder.
+ * Listing pages should still only request the primary URL for cards.
+ */
+export function resolveProductGalleryWithFallback(
+  images: string[] | undefined,
+  categoryFallbackUrl?: string
+): string[] {
+  const cleaned = (images ?? []).map((u) => u.trim()).filter(Boolean);
+  if (cleaned.length >= 3) return cleaned;
+  if (cleaned.length > 0 && categoryFallbackUrl && !cleaned.includes(categoryFallbackUrl)) {
+    return [...cleaned, categoryFallbackUrl];
+  }
+  if (cleaned.length > 0) return cleaned;
+  return categoryFallbackUrl ? [categoryFallbackUrl] : [];
+}
+
+/** True when a product is part of the temporary sample marketplace catalog. */
+export function isSampleCatalogProduct(product: { isSampleProduct?: boolean; tags?: string[] }): boolean {
+  if (product.isSampleProduct === true) return true;
+  return (product.tags ?? []).includes("sample-product");
+}
