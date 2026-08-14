@@ -1,0 +1,1136 @@
+{
+  "products": [
+    {
+      "slug": "classic-red-rose-bouquet",
+      "name": "Classic Red Rose Bouquet",
+      "description": "A timeless dozen of premium red roses arranged with fresh greens and elegant wrapping \u2014 perfect for anniversaries and I-love-you moments.",
+      "price": 49.99,
+      "compareAtPrice": 64.99,
+      "currency": "USD",
+      "categorySlug": "flowers",
+      "images": [
+        "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "roses",
+        "flowers",
+        "bestseller",
+        "bestseller"
+      ],
+      "published": true,
+      "seoTitle": "Classic Red Rose Bouquet | BlossomPot USA Delivery",
+      "seoDescription": "A timeless dozen of premium red roses arranged with fresh greens and elegant wrapping \u2014 perfect for anniversaries and I-love-you moments.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z",
+      "additionalCategorySlugs": [
+        "same-day-gifts"
+      ]
+    },
+    {
+      "slug": "premium-red-roses",
+      "name": "Premium Red Roses",
+      "description": "Long-stem premium red roses in a deluxe presentation. Hand-selected blooms for a luxury gifting experience.",
+      "price": 69.99,
+      "compareAtPrice": 89.99,
+      "currency": "USD",
+      "categorySlug": "flowers",
+      "images": [
+        "https://images.unsplash.com/photo-1561181286-d3fee7f33730?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "roses",
+        "premium",
+        "flowers",
+        "bestseller"
+      ],
+      "published": true,
+      "seoTitle": "Premium Red Roses | BlossomPot USA Delivery",
+      "seoDescription": "Long-stem premium red roses in a deluxe presentation. Hand-selected blooms for a luxury gifting experience.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z",
+      "additionalCategorySlugs": [
+        "same-day-gifts"
+      ]
+    },
+    {
+      "slug": "pink-rose-bouquet",
+      "name": "Pink Rose Bouquet",
+      "description": "Soft pink roses celebrating grace and gratitude \u2014 ideal for birthdays, Mother's Day, and thank-you gifts.",
+      "price": 44.99,
+      "compareAtPrice": 58.99,
+      "currency": "USD",
+      "categorySlug": "flowers",
+      "images": [
+        "https://images.unsplash.com/photo-1496060151317-51f9dae2a7d0?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "roses",
+        "pink",
+        "flowers"
+      ],
+      "published": true,
+      "seoTitle": "Pink Rose Bouquet | BlossomPot USA Delivery",
+      "seoDescription": "Soft pink roses celebrating grace and gratitude \u2014 ideal for birthdays, Mother's Day, and thank-you gifts.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "mixed-flower-bouquet",
+      "name": "Mixed Flower Bouquet",
+      "description": "A cheerful seasonal mix of fresh blooms in vibrant tones. Everyday elegance for any celebration.",
+      "price": 39.99,
+      "compareAtPrice": 52.99,
+      "currency": "USD",
+      "categorySlug": "flower-bouquets",
+      "images": [
+        "https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "mixed",
+        "bouquet",
+        "flowers",
+        "new"
+      ],
+      "published": true,
+      "seoTitle": "Mixed Flower Bouquet | BlossomPot USA Delivery",
+      "seoDescription": "A cheerful seasonal mix of fresh blooms in vibrant tones. Everyday elegance for any celebration.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "elegant-white-roses",
+      "name": "Elegant White Roses",
+      "description": "Pure white roses with soft filler flowers \u2014 a refined choice for weddings, sympathy, and sophisticated gifting.",
+      "price": 54.99,
+      "compareAtPrice": 69.99,
+      "currency": "USD",
+      "categorySlug": "flowers",
+      "images": [
+        "https://images.unsplash.com/photo-1468327768560-75b778cbb551?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "roses",
+        "white",
+        "wedding"
+      ],
+      "published": true,
+      "seoTitle": "Elegant White Roses | BlossomPot USA Delivery",
+      "seoDescription": "Pure white roses with soft filler flowers \u2014 a refined choice for weddings, sympathy, and sophisticated gifting.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "luxury-premium-bouquet",
+      "name": "Luxury Premium Bouquet",
+      "description": "Designer arrangement of premium blooms with luxe wrapping and ribbon. Our signature statement bouquet.",
+      "price": 89.99,
+      "compareAtPrice": 119.99,
+      "currency": "USD",
+      "categorySlug": "flower-bouquets",
+      "images": [
+        "https://images.unsplash.com/photo-1561181286-d3fee7f33730?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "luxury",
+        "bouquet",
+        "premium",
+        "bestseller"
+      ],
+      "published": true,
+      "seoTitle": "Luxury Premium Bouquet | BlossomPot USA Delivery",
+      "seoDescription": "Designer arrangement of premium blooms with luxe wrapping and ribbon. Our signature statement bouquet.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z",
+      "additionalCategorySlugs": [
+        "same-day-gifts"
+      ]
+    },
+    {
+      "slug": "sunny-tulip-bunch",
+      "name": "Sunny Tulip Bunch",
+      "description": "Fresh tulips in bright seasonal colors \u2014 light, modern, and perfect for spring celebrations.",
+      "price": 36.99,
+      "compareAtPrice": 46.99,
+      "currency": "USD",
+      "categorySlug": "flowers",
+      "images": [
+        "https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "tulips",
+        "spring",
+        "flowers"
+      ],
+      "published": true,
+      "seoTitle": "Sunny Tulip Bunch | BlossomPot USA Delivery",
+      "seoDescription": "Fresh tulips in bright seasonal colors \u2014 light, modern, and perfect for spring celebrations.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "sunshine-sunflower-bouquet",
+      "name": "Sunshine Sunflower Bouquet",
+      "description": "Cheerful sunflowers with complementary greens. A bright pick-me-up gift for birthdays and congratulations.",
+      "price": 42.99,
+      "compareAtPrice": 54.99,
+      "currency": "USD",
+      "categorySlug": "flower-bouquets",
+      "images": [
+        "https://images.unsplash.com/photo-1597848212624-e5938b0e6e8e?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "sunflower",
+        "bouquet"
+      ],
+      "published": true,
+      "seoTitle": "Sunshine Sunflower Bouquet | BlossomPot USA Delivery",
+      "seoDescription": "Cheerful sunflowers with complementary greens. A bright pick-me-up gift for birthdays and congratulations.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "orchid-elegance",
+      "name": "Orchid Elegance Plant Gift",
+      "description": "A graceful potted orchid presented as a lasting gift \u2014 elegant for desks, homes, and thank-you moments.",
+      "price": 59.99,
+      "compareAtPrice": 74.99,
+      "currency": "USD",
+      "categorySlug": "plants",
+      "images": [
+        "https://images.unsplash.com/photo-1566511867658-0f1dd5dbab48?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "orchid",
+        "plants",
+        "lasting"
+      ],
+      "published": true,
+      "seoTitle": "Orchid Elegance Plant Gift | BlossomPot USA Delivery",
+      "seoDescription": "A graceful potted orchid presented as a lasting gift \u2014 elegant for desks, homes, and thank-you moments.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "chocolate-truffle-cake",
+      "name": "Chocolate Truffle Cake",
+      "description": "Rich chocolate sponge layered with silky truffle cream. A crowd-pleasing celebration cake for birthdays.",
+      "price": 48.99,
+      "compareAtPrice": 59.99,
+      "currency": "USD",
+      "categorySlug": "cakes",
+      "images": [
+        "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "cake",
+        "chocolate",
+        "birthday",
+        "bestseller"
+      ],
+      "published": true,
+      "seoTitle": "Chocolate Truffle Cake | BlossomPot USA Delivery",
+      "seoDescription": "Rich chocolate sponge layered with silky truffle cream. A crowd-pleasing celebration cake for birthdays.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z",
+      "additionalCategorySlugs": [
+        "birthday-gifts"
+      ]
+    },
+    {
+      "slug": "red-velvet-cake",
+      "name": "Red Velvet Cake",
+      "description": "Classic red velvet with cream cheese frosting \u2014 romantic and festive for anniversaries and Valentine's Day.",
+      "price": 46.99,
+      "compareAtPrice": 58.99,
+      "currency": "USD",
+      "categorySlug": "cakes",
+      "images": [
+        "https://images.unsplash.com/photo-1616541823720-00cb778e0e0b?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "cake",
+        "red-velvet",
+        "anniversary"
+      ],
+      "published": true,
+      "seoTitle": "Red Velvet Cake | BlossomPot USA Delivery",
+      "seoDescription": "Classic red velvet with cream cheese frosting \u2014 romantic and festive for anniversaries and Valentine's Day.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "vanilla-celebration-cake",
+      "name": "Vanilla Celebration Cake",
+      "description": "Light vanilla layers with buttercream finish. Customize with a gift message for birthdays and milestones.",
+      "price": 42.99,
+      "compareAtPrice": 54.99,
+      "currency": "USD",
+      "categorySlug": "cakes",
+      "images": [
+        "https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "cake",
+        "vanilla",
+        "celebration"
+      ],
+      "published": true,
+      "seoTitle": "Vanilla Celebration Cake | BlossomPot USA Delivery",
+      "seoDescription": "Light vanilla layers with buttercream finish. Customize with a gift message for birthdays and milestones.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "black-forest-cake",
+      "name": "Black Forest Cake",
+      "description": "Chocolate cake with cherries and cream \u2014 a beloved classic for celebrations across the USA.",
+      "price": 49.99,
+      "compareAtPrice": 62.99,
+      "currency": "USD",
+      "categorySlug": "cakes",
+      "images": [
+        "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "cake",
+        "black-forest"
+      ],
+      "published": true,
+      "seoTitle": "Black Forest Cake | BlossomPot USA Delivery",
+      "seoDescription": "Chocolate cake with cherries and cream \u2014 a beloved classic for celebrations across the USA.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "strawberry-cream-cake",
+      "name": "Strawberry Cream Cake",
+      "description": "Fresh strawberry and cream layers for a bright, photogenic birthday centerpiece.",
+      "price": 47.99,
+      "compareAtPrice": 59.99,
+      "currency": "USD",
+      "categorySlug": "cakes",
+      "images": [
+        "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "cake",
+        "strawberry",
+        "birthday",
+        "new"
+      ],
+      "published": true,
+      "seoTitle": "Strawberry Cream Cake | BlossomPot USA Delivery",
+      "seoDescription": "Fresh strawberry and cream layers for a bright, photogenic birthday centerpiece.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z",
+      "additionalCategorySlugs": [
+        "birthday-gifts"
+      ]
+    },
+    {
+      "slug": "designer-birthday-cake",
+      "name": "Designer Birthday Cake",
+      "description": "Beautifully finished designer cake ready for birthday celebrations. Add a personal message at checkout.",
+      "price": 64.99,
+      "compareAtPrice": 79.99,
+      "currency": "USD",
+      "categorySlug": "cakes",
+      "images": [
+        "https://images.unsplash.com/photo-1558301211-0018f0a9a4f5?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "cake",
+        "birthday",
+        "designer",
+        "bestseller"
+      ],
+      "published": true,
+      "seoTitle": "Designer Birthday Cake | BlossomPot USA Delivery",
+      "seoDescription": "Beautifully finished designer cake ready for birthday celebrations. Add a personal message at checkout.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z",
+      "additionalCategorySlugs": [
+        "birthday-gifts"
+      ]
+    },
+    {
+      "slug": "luxury-gift-hamper",
+      "name": "Luxury Gift Hamper",
+      "description": "A curated hamper of gourmet treats and keepsakes in premium packaging \u2014 ideal for corporate and personal gifting.",
+      "price": 79.99,
+      "compareAtPrice": 99.99,
+      "currency": "USD",
+      "categorySlug": "gift-hampers",
+      "images": [
+        "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "hamper",
+        "luxury",
+        "gift",
+        "bestseller"
+      ],
+      "published": true,
+      "seoTitle": "Luxury Gift Hamper | BlossomPot USA Delivery",
+      "seoDescription": "A curated hamper of gourmet treats and keepsakes in premium packaging \u2014 ideal for corporate and personal gifting.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "anniversary-gift-box",
+      "name": "Anniversary Gift Box",
+      "description": "Romantic gift box pairing keepsakes and sweets for couples celebrating another year together.",
+      "price": 69.99,
+      "compareAtPrice": 89.99,
+      "currency": "USD",
+      "categorySlug": "anniversary-gifts",
+      "images": [
+        "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "anniversary",
+        "gift",
+        "romantic"
+      ],
+      "published": true,
+      "seoTitle": "Anniversary Gift Box | BlossomPot USA Delivery",
+      "seoDescription": "Romantic gift box pairing keepsakes and sweets for couples celebrating another year together.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "birthday-gift-hamper",
+      "name": "Birthday Gift Hamper",
+      "description": "Festive birthday hamper with treats and celebration accents. Ready to surprise someone special.",
+      "price": 74.99,
+      "compareAtPrice": 94.99,
+      "currency": "USD",
+      "categorySlug": "birthday-gifts",
+      "images": [
+        "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "birthday",
+        "hamper",
+        "gift"
+      ],
+      "published": true,
+      "seoTitle": "Birthday Gift Hamper | BlossomPot USA Delivery",
+      "seoDescription": "Festive birthday hamper with treats and celebration accents. Ready to surprise someone special.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "personalized-gift-box",
+      "name": "Personalized Gift Box",
+      "description": "Customizable gift box experience \u2014 add a message and choose delivery timing for a personal touch.",
+      "price": 59.99,
+      "compareAtPrice": 74.99,
+      "currency": "USD",
+      "categorySlug": "personalized-gifts",
+      "images": [
+        "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "personalized",
+        "gift",
+        "custom",
+        "new"
+      ],
+      "published": true,
+      "seoTitle": "Personalized Gift Box | BlossomPot USA Delivery",
+      "seoDescription": "Customizable gift box experience \u2014 add a message and choose delivery timing for a personal touch.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "chocolate-flower-combo",
+      "name": "Chocolate & Flower Combo",
+      "description": "Fresh flowers paired with gourmet chocolates \u2014 a dual delight for birthdays and romance.",
+      "price": 72.99,
+      "compareAtPrice": 92.99,
+      "currency": "USD",
+      "categorySlug": "celebration-gifts",
+      "images": [
+        "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "combo",
+        "flowers",
+        "chocolate",
+        "bestseller"
+      ],
+      "published": true,
+      "seoTitle": "Chocolate & Flower Combo | BlossomPot USA Delivery",
+      "seoDescription": "Fresh flowers paired with gourmet chocolates \u2014 a dual delight for birthdays and romance.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "teddy-flower-combo",
+      "name": "Teddy & Flower Combo",
+      "description": "Soft plush teddy with a cheerful flower bouquet \u2014 a sweet birthday or get-well surprise.",
+      "price": 66.99,
+      "compareAtPrice": 84.99,
+      "currency": "USD",
+      "categorySlug": "birthday-gifts",
+      "images": [
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "teddy",
+        "flowers",
+        "birthday"
+      ],
+      "published": true,
+      "seoTitle": "Teddy & Flower Combo | BlossomPot USA Delivery",
+      "seoDescription": "Soft plush teddy with a cheerful flower bouquet \u2014 a sweet birthday or get-well surprise.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "valentines-rose-box",
+      "name": "Valentine's Rose Box",
+      "description": "Signature rose arrangement designed for Valentine's Day \u2014 romantic, photo-ready, and gift-wrapped.",
+      "price": 79.99,
+      "compareAtPrice": 99.99,
+      "currency": "USD",
+      "categorySlug": "valentines-day-gifts",
+      "images": [
+        "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "valentine",
+        "roses",
+        "romantic",
+        "bestseller"
+      ],
+      "published": true,
+      "seoTitle": "Valentine's Rose Box | BlossomPot USA Delivery",
+      "seoDescription": "Signature rose arrangement designed for Valentine's Day \u2014 romantic, photo-ready, and gift-wrapped.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "mothers-day-blush-bouquet",
+      "name": "Mother's Day Blush Bouquet",
+      "description": "Blush and soft pastel blooms celebrating moms \u2014 thoughtful for Mother's Day and everyday appreciation.",
+      "price": 54.99,
+      "compareAtPrice": 69.99,
+      "currency": "USD",
+      "categorySlug": "mothers-day-gifts",
+      "images": [
+        "https://images.unsplash.com/photo-1496060151317-51f9dae2a7d0?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "mothers-day",
+        "bouquet"
+      ],
+      "published": true,
+      "seoTitle": "Mother's Day Blush Bouquet | BlossomPot USA Delivery",
+      "seoDescription": "Blush and soft pastel blooms celebrating moms \u2014 thoughtful for Mother's Day and everyday appreciation.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "wedding-white-elegance",
+      "name": "Wedding White Elegance",
+      "description": "White floral arrangement suited for weddings, engagements, and formal celebrations.",
+      "price": 84.99,
+      "compareAtPrice": 109.99,
+      "currency": "USD",
+      "categorySlug": "wedding-gifts",
+      "images": [
+        "https://images.unsplash.com/photo-1468327768560-75b778cbb551?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "wedding",
+        "white",
+        "elegant"
+      ],
+      "published": true,
+      "seoTitle": "Wedding White Elegance | BlossomPot USA Delivery",
+      "seoDescription": "White floral arrangement suited for weddings, engagements, and formal celebrations.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "same-day-cheer-bouquet",
+      "name": "Same-Day Cheer Bouquet",
+      "description": "Bright mixed bouquet available for same-day delivery windows in select cities when ordered before cut-off.",
+      "price": 49.99,
+      "compareAtPrice": 64.99,
+      "currency": "USD",
+      "categorySlug": "same-day-gifts",
+      "images": [
+        "https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "same-day",
+        "bouquet",
+        "express",
+        "bestseller"
+      ],
+      "published": true,
+      "seoTitle": "Same-Day Cheer Bouquet | BlossomPot USA Delivery",
+      "seoDescription": "Bright mixed bouquet available for same-day delivery windows in select cities when ordered before cut-off.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "same-day-chocolate-cake",
+      "name": "Same-Day Chocolate Cake",
+      "description": "Chocolate celebration cake with same-day delivery options in select metros.",
+      "price": 52.99,
+      "compareAtPrice": 66.99,
+      "currency": "USD",
+      "categorySlug": "same-day-gifts",
+      "images": [
+        "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "same-day",
+        "cake",
+        "express"
+      ],
+      "published": true,
+      "seoTitle": "Same-Day Chocolate Cake | BlossomPot USA Delivery",
+      "seoDescription": "Chocolate celebration cake with same-day delivery options in select metros.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "peace-lily-plant",
+      "name": "Peace Lily Plant",
+      "description": "Easy-care peace lily in a stylish planter \u2014 a lasting green gift for homes and offices.",
+      "price": 39.99,
+      "compareAtPrice": 49.99,
+      "currency": "USD",
+      "categorySlug": "plants",
+      "images": [
+        "https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "plants",
+        "green",
+        "home"
+      ],
+      "published": true,
+      "seoTitle": "Peace Lily Plant | BlossomPot USA Delivery",
+      "seoDescription": "Easy-care peace lily in a stylish planter \u2014 a lasting green gift for homes and offices.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "succulent-garden-gift",
+      "name": "Succulent Garden Gift",
+      "description": "Charming succulent arrangement for desks and windowsills \u2014 low maintenance, high smile factor.",
+      "price": 34.99,
+      "compareAtPrice": 44.99,
+      "currency": "USD",
+      "categorySlug": "plants",
+      "images": [
+        "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "succulent",
+        "plants",
+        "gift"
+      ],
+      "published": true,
+      "seoTitle": "Succulent Garden Gift | BlossomPot USA Delivery",
+      "seoDescription": "Charming succulent arrangement for desks and windowsills \u2014 low maintenance, high smile factor.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "celebration-balloon-bundle",
+      "name": "Celebration Balloon Bundle",
+      "description": "Festive balloon set to elevate birthdays and parties \u2014 pairs beautifully with cakes and flowers.",
+      "price": 29.99,
+      "compareAtPrice": 39.99,
+      "currency": "USD",
+      "categorySlug": "celebration-gifts",
+      "images": [
+        "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "balloons",
+        "celebration",
+        "party"
+      ],
+      "published": true,
+      "seoTitle": "Celebration Balloon Bundle | BlossomPot USA Delivery",
+      "seoDescription": "Festive balloon set to elevate birthdays and parties \u2014 pairs beautifully with cakes and flowers.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "gourmet-wine-gift-set",
+      "name": "Gourmet Celebration Set",
+      "description": "Premium celebration set with gourmet pairings in elegant packaging (alcohol-free presentation options available by region).",
+      "price": 94.99,
+      "compareAtPrice": 119.99,
+      "currency": "USD",
+      "categorySlug": "gift-hampers",
+      "images": [
+        "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "hamper",
+        "gourmet",
+        "premium"
+      ],
+      "published": true,
+      "seoTitle": "Gourmet Celebration Set | BlossomPot USA Delivery",
+      "seoDescription": "Premium celebration set with gourmet pairings in elegant packaging (alcohol-free presentation options available by region).",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "blush-bouquet-deluxe",
+      "name": "Blush Bouquet Deluxe",
+      "description": "Layered blush and cream blooms with designer wrapping \u2014 a favorite for romantic and thank-you gifting.",
+      "price": 62.99,
+      "compareAtPrice": 78.99,
+      "currency": "USD",
+      "categorySlug": "flower-bouquets",
+      "images": [
+        "https://images.unsplash.com/photo-1496060151317-51f9dae2a7d0?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "blush",
+        "bouquet",
+        "deluxe"
+      ],
+      "published": true,
+      "seoTitle": "Blush Bouquet Deluxe | BlossomPot USA Delivery",
+      "seoDescription": "Layered blush and cream blooms with designer wrapping \u2014 a favorite for romantic and thank-you gifting.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "red-rose-dozen-plus",
+      "name": "Red Rose Dozen Plus",
+      "description": "A generous dozen-plus red roses with premium filler and satin ribbon finishing.",
+      "price": 58.99,
+      "compareAtPrice": 74.99,
+      "currency": "USD",
+      "categorySlug": "flowers",
+      "images": [
+        "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "roses",
+        "dozen",
+        "classic"
+      ],
+      "published": true,
+      "seoTitle": "Red Rose Dozen Plus | BlossomPot USA Delivery",
+      "seoDescription": "A generous dozen-plus red roses with premium filler and satin ribbon finishing.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "kids-birthday-cake-fun",
+      "name": "Kids Birthday Fun Cake",
+      "description": "Playful birthday cake perfect for kids' parties \u2014 colorful finish with room for a custom message.",
+      "price": 44.99,
+      "compareAtPrice": 56.99,
+      "currency": "USD",
+      "categorySlug": "birthday-gifts",
+      "images": [
+        "https://images.unsplash.com/photo-1558301211-0018f0a9a4f5?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "kids",
+        "birthday",
+        "cake"
+      ],
+      "published": true,
+      "seoTitle": "Kids Birthday Fun Cake | BlossomPot USA Delivery",
+      "seoDescription": "Playful birthday cake perfect for kids' parties \u2014 colorful finish with room for a custom message.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "thank-you-mixed-posy",
+      "name": "Thank-You Mixed Posy",
+      "description": "Compact mixed posy for thank-you notes, hostess gifts, and everyday kindness.",
+      "price": 32.99,
+      "compareAtPrice": 42.99,
+      "currency": "USD",
+      "categorySlug": "celebration-gifts",
+      "images": [
+        "https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "thank-you",
+        "posy",
+        "flowers"
+      ],
+      "published": true,
+      "seoTitle": "Thank-You Mixed Posy | BlossomPot USA Delivery",
+      "seoDescription": "Compact mixed posy for thank-you notes, hostess gifts, and everyday kindness.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "anniversary-roses-and-cake",
+      "name": "Anniversary Roses & Cake",
+      "description": "Combo of premium roses and a celebration cake \u2014 complete anniversary gifting in one order.",
+      "price": 99.99,
+      "compareAtPrice": 129.99,
+      "currency": "USD",
+      "categorySlug": "anniversary-gifts",
+      "images": [
+        "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "anniversary",
+        "combo",
+        "roses",
+        "cake",
+        "bestseller"
+      ],
+      "published": true,
+      "seoTitle": "Anniversary Roses & Cake | BlossomPot USA Delivery",
+      "seoDescription": "Combo of premium roses and a celebration cake \u2014 complete anniversary gifting in one order.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    },
+    {
+      "slug": "new-baby-soft-bouquet",
+      "name": "New Baby Soft Bouquet",
+      "description": "Soft pastel bouquet welcoming a new baby \u2014 gentle colors and thoughtful presentation.",
+      "price": 48.99,
+      "compareAtPrice": 61.99,
+      "currency": "USD",
+      "categorySlug": "celebration-gifts",
+      "images": [
+        "https://images.unsplash.com/photo-1496060151317-51f9dae2a7d0?w=800&q=80"
+      ],
+      "inventory": 100,
+      "tags": [
+        "baby",
+        "pastel",
+        "bouquet"
+      ],
+      "published": true,
+      "seoTitle": "New Baby Soft Bouquet | BlossomPot USA Delivery",
+      "seoDescription": "Soft pastel bouquet welcoming a new baby \u2014 gentle colors and thoughtful presentation.",
+      "ratingAggregate": {
+        "average": 4.8,
+        "count": 42
+      },
+      "unitsSold": 126,
+      "createdAt": "2026-08-14T06:43:25.000Z",
+      "updatedAt": "2026-08-14T06:43:25.000Z"
+    }
+  ],
+  "generatedAt": "2026-08-14T06:43:25.000Z",
+  "brand": "BlossomPot",
+  "categories": [
+    {
+      "name": "Flowers",
+      "slug": "flowers",
+      "description": "Fresh flower arrangements for every celebration.",
+      "sortOrder": 0,
+      "published": true
+    },
+    {
+      "name": "Flower Bouquets",
+      "slug": "flower-bouquets",
+      "description": "Signature bouquets designed for premium gifting.",
+      "sortOrder": 1,
+      "published": true
+    },
+    {
+      "name": "Cakes",
+      "slug": "cakes",
+      "description": "Celebration cakes for birthdays, anniversaries, and parties.",
+      "sortOrder": 2,
+      "published": true
+    },
+    {
+      "name": "Birthday Gifts",
+      "slug": "birthday-gifts",
+      "description": "Flowers, cakes, and hampers for birthday joy.",
+      "sortOrder": 3,
+      "published": true
+    },
+    {
+      "name": "Anniversary Gifts",
+      "slug": "anniversary-gifts",
+      "description": "Romantic roses, cakes, and keepsake gift boxes.",
+      "sortOrder": 4,
+      "published": true
+    },
+    {
+      "name": "Valentine's Day Gifts",
+      "slug": "valentines-day-gifts",
+      "description": "Romantic flowers and gifts for Valentine's Day.",
+      "sortOrder": 5,
+      "published": true
+    },
+    {
+      "name": "Mother's Day Gifts",
+      "slug": "mothers-day-gifts",
+      "description": "Thoughtful flowers and plants for Mother's Day.",
+      "sortOrder": 6,
+      "published": true
+    },
+    {
+      "name": "Wedding Gifts",
+      "slug": "wedding-gifts",
+      "description": "Elegant florals, cakes, and hampers for couples.",
+      "sortOrder": 7,
+      "published": true
+    },
+    {
+      "name": "Personalized Gifts",
+      "slug": "personalized-gifts",
+      "description": "Custom messages and curated keepsake boxes.",
+      "sortOrder": 8,
+      "published": true
+    },
+    {
+      "name": "Gift Hampers",
+      "slug": "gift-hampers",
+      "description": "Luxury curated gift boxes with treats and blooms.",
+      "sortOrder": 9,
+      "published": true
+    },
+    {
+      "name": "Plants",
+      "slug": "plants",
+      "description": "Living green gifts that last beyond the celebration.",
+      "sortOrder": 10,
+      "published": true
+    },
+    {
+      "name": "Same-Day Gifts",
+      "slug": "same-day-gifts",
+      "description": "Eligible gifts for same-day delivery in select cities.",
+      "sortOrder": 11,
+      "published": true
+    },
+    {
+      "name": "Celebration Gifts",
+      "slug": "celebration-gifts",
+      "description": "Congratulations and thank-you gifts for every milestone.",
+      "sortOrder": 12,
+      "published": true
+    }
+  ]
+}

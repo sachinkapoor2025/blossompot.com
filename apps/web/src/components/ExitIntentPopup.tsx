@@ -253,7 +253,7 @@ export function ExitIntentPopup() {
         <div className="relative h-28 sm:h-32 overflow-hidden">
           <Image
             src="/banners/banner-2-connecting-hearts.png"
-            alt="Premium Rakhi for USA delivery"
+            alt="Premium flowers and gifts for USA delivery"
             fill
             className="object-cover object-center"
             sizes="512px"
@@ -271,10 +271,10 @@ export function ExitIntentPopup() {
             </svg>
           </button>
           <div className="absolute inset-x-0 bottom-0 px-5 pb-4 text-white">
-            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-amber-200">Rakhi offer · Today only</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-amber-200">Gift offer · Today only</p>
             <h2 className="text-2xl font-bold leading-tight mt-0.5">Discount of the Day</h2>
             <p className="text-xs sm:text-sm text-white/90 mt-1">
-              Spin for a mystery Rakhi discount · 1 spin / mobile / day · valid {WELCOME_COUPON_HOURS}h
+              Spin for a mystery gift discount · 1 spin / mobile / day · valid {WELCOME_COUPON_HOURS}h
             </p>
           </div>
         </div>
@@ -306,7 +306,7 @@ export function ExitIntentPopup() {
               <p className="text-sm text-slate-600 mb-3">
                 {coupon.reused
                   ? "Here’s your active Discount of the Day code:"
-                  : `Your Rakhi discount is valid for ${WELCOME_COUPON_HOURS} hour — use it at checkout:`}
+                  : `Your gift discount is valid for ${WELCOME_COUPON_HOURS} hour — use it at checkout:`}
               </p>
               <div className="rounded-xl border-2 border-dashed border-nav bg-gradient-to-b from-slate-50 to-amber-50/40 px-4 py-3 mb-3">
                 <div className="flex items-center justify-center gap-2">
@@ -331,7 +331,7 @@ export function ExitIntentPopup() {
                 onClick={close}
                 className="inline-block rounded-lg bg-accent text-white font-semibold text-sm px-5 py-2.5 hover:opacity-90 shadow-sm"
               >
-                Shop Rakhi with my discount
+                Shop gifts with my discount
               </Link>
             </div>
           ) : showWheel ? (

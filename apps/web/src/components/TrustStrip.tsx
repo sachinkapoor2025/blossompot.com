@@ -4,7 +4,7 @@ export function TrustStrip() {
   return (
     <div
       className="bg-primary/5 border-y border-primary/10"
-      aria-label="Why sisters trust BlossomPot"
+      aria-label="Why customers trust BlossomPot"
     >
       <div className="max-w-7xl mx-auto px-4 py-3">
         <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs sm:text-sm text-slate-700">

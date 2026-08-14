@@ -11,15 +11,15 @@ import { api } from "@/lib/api";
 const STORAGE_KEY = "blossompot_chat_messages";
 
 const QUICK_PROMPTS = [
-  "What Rakhi types do you sell?",
+  "What gifts do you sell?",
   "How long is USA delivery?",
-  "When is Raksha Bandhan 2026?",
-  "Can I order from India?",
+  "Do you offer same-day options?",
+  "Can I add a gift message?",
 ] as const;
 
 const WELCOME: ChatMessage = {
   role: "assistant",
-  content: `Hi! I'm the BlossomPot Assistant. I can help you choose the perfect Rakhi, explain USA delivery, shipping times, and payment options.\n\nWhat would you like to know?`,
+  content: `Hi! I'm the BlossomPot Assistant. I can help you choose flowers, cakes, and gifts, explain USA delivery windows, and answer shipping or payment questions.\n\nWhat would you like to know?`,
 };
 
 function loadStoredMessages(): ChatMessage[] {
@@ -190,7 +190,7 @@ export function ChatWidget() {
           <div className="flex items-center justify-between gap-2 bg-primary px-4 py-3 border-b border-white/10">
             <div className="min-w-0">
               <p className="font-semibold text-white text-sm">BlossomPot Assistant</p>
-              <p className="text-xs text-white/60 truncate">Rakhi delivery help · USA shipping</p>
+              <p className="text-xs text-white/60 truncate">Gift delivery help · USA shipping</p>
             </div>
             <div className="flex items-center gap-1 shrink-0">
               <button
@@ -287,7 +287,7 @@ export function ChatWidget() {
                     void sendMessage(input);
                   }
                 }}
-                placeholder="Ask about Rakhi, shipping, payment…"
+                placeholder="Ask about flowers, cakes, shipping…"
                 rows={1}
                 maxLength={500}
                 disabled={loading}

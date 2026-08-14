@@ -2,44 +2,48 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { categoryHref } from "@/lib/category-urls";
 import { api } from "@/lib/api";
-import { applyInlineLinks } from "@/lib/inline-links";
-import { homepageInlineLinks } from "@/lib/content/page-inline-links";
 import { HomeHero } from "@/components/HomeHero";
 import { GoogleReviews } from "@/components/GoogleReviews";
 import { getGoogleReviews } from "@/lib/google-reviews";
 import { HomeProductCard } from "@/components/HomeProductCard";
 import { FastSellingSection } from "@/components/FastSellingSection";
-import { FlashSaleSection } from "@/components/FlashSaleSection";
-import { HomeSeoSection } from "@/components/HomeSeoSection";
-import { HomeRakshaBandhan2026Section } from "@/components/HomeRakshaBandhan2026Section";
 import { TrustStrip } from "@/components/TrustStrip";
-import { IndiaBuyerBanner } from "@/components/IndiaBuyerBanner";
 import { WhyTrustUsSection } from "@/components/WhyTrustUsSection";
+import { HomeSeoSection } from "@/components/HomeSeoSection";
 import { JsonLd } from "@/components/JsonLd";
-import { site, homeCategoryOrder, faqs } from "@/lib/site";
-import { getHomeBanners } from "@/lib/independence-day-hero";
+import { site, homeCategoryOrder, faqs, homeBanners } from "@/lib/site";
 import {
-  getCatalogProduct,
   getCatalogProductsByCategory,
   mergeProductsPreferExisting,
+  getCatalogProducts,
 } from "@/lib/catalog-fallback";
 import { pickHomeCategoryProducts } from "@/lib/home-category-products";
 import { loadProducts } from "@/lib/product-loader";
-import { faqJsonLd, howToSendRakhiJsonLd, pageMetadata } from "@/lib/seo";
-import { FLASH_COMBO_SALE_SLUG, isFlashComboSaleActive, type Product, type Category } from "@blossompot/shared";
+import { faqJsonLd, pageMetadata } from "@/lib/seo";
+import type { Product, Category } from "@blossompot/shared";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Send Rakhi to USA Online | Rakhi Delivery USA | BlossomPot",
+  title: "BlossomPot — Flowers, Cakes & Gifts | USA Delivery",
   description:
-    "Send rakhi to USA with domestic delivery — order from India with INR/UPI, or buy rakhi online USA. Designer rakhis, combos, 5–7 day nationwide shipping from our California warehouse.",
+    "Shop flowers, bouquets, cakes, and curated gifts at BlossomPot. Premium online gifting with fast USA delivery, same-day options, and elegant packaging.",
   path: "/",
   keywords:
-    "send rakhi to usa, rakhi delivery usa, buy rakhi online usa, send rakhi to usa from india, order rakhi from india to usa, rakhi store usa, usa rakhi shop online, rakhi gifts to usa, nationwide rakhi delivery usa, pay inr rakhi usa",
+    "send flowers usa, buy cakes online, gift hampers, birthday gifts, anniversary flowers, same day delivery gifts, blossompot",
 });
 
-/** Same as PDP: always render from live product API so listing prices cannot drift. */
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+const FEATURED_CATEGORIES = [
+  { slug: "flowers", label: "Flowers", href: "/flowers", blurb: "Roses, tulips & fresh blooms" },
+  { slug: "flower-bouquets", label: "Bouquets", href: "/bouquets", blurb: "Designer arrangements" },
+  { slug: "cakes", label: "Cakes", href: "/cakes", blurb: "Celebration-ready cakes" },
+  { slug: "birthday-gifts", label: "Birthday", href: "/birthday-gifts", blurb: "Hampers & combos" },
+  { slug: "anniversary-gifts", label: "Anniversary", href: "/anniversary-gifts", blurb: "Romantic gifts" },
+  { slug: "gift-hampers", label: "Hampers", href: "/gift-hampers", blurb: "Curated gift boxes" },
+  { slug: "same-day-gifts", label: "Same-Day", href: "/same-day-delivery", blurb: "When it matters today" },
+  { slug: "personalized-gifts", label: "Personalized", href: "/personalized-gifts", blurb: "Add a personal touch" },
+] as const;
 
 export default async function HomePage() {
   let products: Product[] = [];
@@ -53,143 +57,185 @@ export default async function HomePage() {
     products = liveProducts;
     categories = categoriesData.categories;
   } catch {
-    products = [];
+    products = getCatalogProducts();
     categories = [];
   }
 
-  // Orange County hampers (and other catalog fallbacks) may not be in API yet.
-  // Prefer live API prices — catalog JSON can be stale for shared slugs.
   for (const slug of homeCategoryOrder) {
     products = mergeProductsPreferExisting(products, getCatalogProductsByCategory(slug));
   }
-  if (!categories.some((c) => c.slug === "rakhi-hampers")) {
-    const now = new Date().toISOString();
-    categories = [
-      ...categories,
-      {
-        name: "Rakhi Hamper",
-        slug: "rakhi-hampers",
-        description: "Premium Rakhi gift hampers for USA delivery.",
-        published: true,
-        sortOrder: 15,
-        createdAt: now,
-        updatedAt: now,
-      },
-    ];
+
+  if (products.length === 0) {
+    products = getCatalogProducts();
   }
 
-  // Home-page-only display labels under category product sections.
-  // Does not change category names, URLs, slugs, nav, or SEO elsewhere.
   const homeCategoryDisplayNames: Record<(typeof homeCategoryOrder)[number], string> = {
-    "single-rakhi": "Single Rakhi To USA",
-    "rakhi-combo": "Rakhi Combo To USA",
-    "rakhi-hampers": "Rakhi Hamper To USA",
-    "bhaiya-bhabhi-rakhi": "Bhaiya Bhabhi Rakhi To USA",
-    "kids-rakhi": "Kids Rakhi To USA",
-    "lumba-rakhi": "Lumba Rakhi To USA",
+    flowers: "Fresh Flowers",
+    "flower-bouquets": "Signature Bouquets",
+    cakes: "Celebration Cakes",
+    "birthday-gifts": "Birthday Gifts",
+    "anniversary-gifts": "Anniversary Gifts",
+    "gift-hampers": "Gift Hampers",
+    "personalized-gifts": "Personalized Gifts",
+    "same-day-gifts": "Same-Day Gifts",
   };
 
-  // Home-only curated lists + order (does not change category/shop/search pages).
   const productsByCategory = homeCategoryOrder.map((slug) => ({
     slug,
     name: homeCategoryDisplayNames[slug],
     products: pickHomeCategoryProducts(products, slug),
   }));
+
+  const bestsellers = [...products]
+    .filter((p) => p.published !== false)
+    .sort((a, b) => (b.unitsSold ?? 0) - (a.unitsSold ?? 0))
+    .slice(0, 8);
+
   const googleReviews = await getGoogleReviews();
-  const flashCombo = isFlashComboSaleActive()
-    ? products.find((p) => p.slug === FLASH_COMBO_SALE_SLUG && p.published !== false) ??
-      getCatalogProduct(FLASH_COMBO_SALE_SLUG) ??
-      null
-    : null;
 
   return (
     <div>
-      <JsonLd data={[faqJsonLd(faqs), howToSendRakhiJsonLd()]} />
-      <HomeHero banners={getHomeBanners()} />
-      <FlashSaleSection product={flashCombo} />
-      <TrustStrip />
-      <IndiaBuyerBanner />
+      <JsonLd data={[faqJsonLd(faqs)]} />
 
-      <FastSellingSection products={products} />
+      <HomeHero banners={[...homeBanners]} />
 
-      {productsByCategory.map((section) =>
-        section.products.length > 0 ? (
-          <section key={section.slug} className="max-w-7xl mx-auto px-4 py-8">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-xl md:text-2xl font-bold text-primary capitalize">{section.name}</h2>
-              <Link href={categoryHref(section.slug)} className="text-nav font-semibold text-sm hover:underline">
-                View All →
+      <section className="max-w-7xl mx-auto px-4 py-10">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-primary">Shop by occasion</h2>
+          <p className="mt-2 text-sm text-slate-600">Flowers, cakes, and gifts for every celebration</p>
+        </div>
+        <ul className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 list-none p-0 m-0">
+          {FEATURED_CATEGORIES.map((c) => (
+            <li key={c.slug}>
+              <Link
+                href={c.href}
+                className="block rounded-2xl border border-[#eadfd8] bg-white p-4 hover:border-nav hover:shadow-md transition"
+              >
+                <p className="font-semibold text-primary">{c.label}</p>
+                <p className="text-xs text-slate-500 mt-1">{c.blurb}</p>
               </Link>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-stretch">
-              {section.products.map((p) => (
-                <HomeProductCard key={p.slug} product={p} />
-              ))}
-            </div>
-          </section>
-        ) : null
-      )}
-
-      {products.length === 0 && (
-        <p className="text-center text-slate-500 py-12">
-          Products could not be loaded. Confirm Amplify env var{" "}
-          <code className="bg-slate-100 px-1 rounded">NEXT_PUBLIC_API_URL</code> is set and redeploy.
-        </p>
-      )}
-
-      <section className="max-w-4xl mx-auto px-4 py-10 text-center">
-        <h1 className="text-2xl md:text-3xl font-bold text-primary mb-4">
-          Send Rakhi to USA — Free Shipping | Premium Online Rakhi Delivery
-        </h1>
-        <p className="text-slate-600 leading-relaxed mb-4">
-          {applyInlineLinks(
-            `${site.name} helps sisters in India, UK, Canada, Australia, and worldwide send rakhi to USA with reliable rakhi delivery USA across all 50 states. Shop 140+ designer rakhis — Single Rakhi, Combos with chocolates, rakhi gift hamper boxes with sweets and dry fruits, Kids Rakhi, Bhaiya Bhabhi sets, and Lumba Rakhi — delivered in 5–7 business days with roli chawal included. Order rakhi to USA from India in minutes at our online rakhi store USA.`,
-            homepageInlineLinks
-          )}
-        </p>
-        <div className="flex flex-wrap justify-center gap-3 text-sm">
-          <Link href="/raksha-bandhan" className="text-nav font-semibold hover:underline">
-            Raksha Bandhan 2026 →
+            </li>
+          ))}
+        </ul>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Link href="/flowers" className="btn-nav">
+            Shop Flowers
           </Link>
-          <Link href="/send-rakhi-from-india" className="text-nav font-semibold hover:underline">
-            Order from India (INR/UPI) →
+          <Link href="/same-day-delivery" className="btn-nav bg-primary">
+            Same-Day Delivery
           </Link>
-          <Link href="/blog/send-rakhi-to-usa-from-india" className="text-nav font-semibold hover:underline">
-            Send from India guide →
-          </Link>
-          <Link href={categoryHref("rakhi-hampers")} className="text-nav font-semibold hover:underline">
-            Rakhi Hampers →
-          </Link>
-          <Link href="/shipping" className="text-nav font-semibold hover:underline">
-            Shipping info →
+          <Link href="/gift-hampers" className="btn-nav">
+            Explore Hampers
           </Link>
         </div>
       </section>
 
-      <HomeRakshaBandhan2026Section />
+      <TrustStrip />
+
+      {bestsellers.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 py-10">
+          <div className="flex items-end justify-between gap-4 mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-primary">Best sellers</h2>
+              <p className="text-sm text-slate-600 mt-1">Customer favorites across flowers, cakes & gifts</p>
+            </div>
+            <Link href="/products" className="text-sm font-semibold text-nav hover:underline">
+              View all
+            </Link>
+          </div>
+          <ul className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 list-none p-0 m-0">
+            {bestsellers.map((product) => (
+              <li key={product.slug}>
+                <HomeProductCard product={product} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <FastSellingSection products={products} />
+
+      {productsByCategory.map(
+        (section) =>
+          section.products.length > 0 && (
+            <section key={section.slug} className="max-w-7xl mx-auto px-4 py-10 border-t border-[#eadfd8]">
+              <div className="flex items-end justify-between gap-4 mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-primary">{section.name}</h2>
+                  <p className="text-sm text-slate-600 mt-1">Handpicked for {site.name} shoppers</p>
+                </div>
+                <Link
+                  href={categoryHref(section.slug)}
+                  className="text-sm font-semibold text-nav hover:underline"
+                >
+                  Shop {section.name}
+                </Link>
+              </div>
+              <ul className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 list-none p-0 m-0">
+                {section.products.slice(0, 8).map((product) => (
+                  <li key={product.slug}>
+                    <HomeProductCard product={product} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )
+      )}
 
       <WhyTrustUsSection />
+
+      <section className="max-w-7xl mx-auto px-4 py-12">
+        <div className="rounded-3xl bg-gradient-to-br from-primary to-[#9a3d58] text-white p-8 sm:p-12 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold">Send a gift that feels personal</h2>
+          <p className="mt-3 text-white/90 max-w-2xl mx-auto">
+            From same-day bouquets to anniversary hampers, BlossomPot helps you celebrate across the USA.
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Link
+              href="/anniversary-gifts"
+              className="inline-flex rounded-full bg-white text-primary font-semibold text-sm px-5 py-2.5 hover:bg-orange-50"
+            >
+              Shop Anniversary Gifts
+            </Link>
+            <Link
+              href="/birthday-gifts"
+              className="inline-flex rounded-full border border-white/70 text-white font-semibold text-sm px-5 py-2.5 hover:bg-white/10"
+            >
+              Shop Birthday Gifts
+            </Link>
+          </div>
+        </div>
+      </section>
 
       <GoogleReviews data={googleReviews} />
 
       <HomeSeoSection />
 
-      <section className="max-w-7xl mx-auto px-4 py-12">
-        <h2 className="text-2xl font-bold text-primary text-center mb-2">More Questions?</h2>
-        <p className="text-center text-sm text-slate-500 mb-6">
-          Quick answers below — or{" "}
-          <Link href="/faq" className="text-nav hover:underline">
-            read our full FAQ page
+      <section className="max-w-7xl mx-auto px-4 py-12 border-t border-[#eadfd8]">
+        <div className="max-w-xl mx-auto text-center">
+          <h2 className="text-2xl font-bold text-primary">Stay in bloom</h2>
+          <p className="mt-2 text-sm text-slate-600">
+            Occasion ideas, delivery tips, and seasonal collections — join the BlossomPot list.
+          </p>
+          <Link href="/contact" className="btn-nav mt-5">
+            Get gifting updates
           </Link>
-        </p>
-        <div className="grid md:grid-cols-2 gap-4">
-          {faqs.slice(0, 6).map((f) => (
-            <details key={f.q} className="border border-slate-200 rounded-xl p-5 bg-white">
-              <summary className="font-semibold text-primary cursor-pointer text-sm">{f.q}</summary>
-              <p className="text-slate-600 text-sm mt-2 leading-relaxed">{f.a}</p>
-            </details>
+        </div>
+      </section>
+
+      <section className="max-w-3xl mx-auto px-4 pb-16">
+        <h2 className="text-xl font-bold text-primary mb-4">Frequently asked questions</h2>
+        <div className="space-y-4">
+          {faqs.map((f) => (
+            <div key={f.q}>
+              <h3 className="font-semibold text-primary text-sm">{f.q}</h3>
+              <p className="text-sm text-slate-600 mt-1">{f.a}</p>
+            </div>
           ))}
         </div>
+        {categories.length > 0 && (
+          <p className="text-xs text-slate-400 mt-8">{categories.length} categories available in catalog</p>
+        )}
       </section>
     </div>
   );

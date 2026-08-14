@@ -148,19 +148,20 @@ export function organizationJsonLd() {
     ],
     audience: {
       "@type": "Audience",
-      audienceType: "Sisters and families ordering Rakhi from India and worldwide for delivery in the United States",
+      audienceType:
+        "Customers ordering flowers, cakes, bouquets, and gifts for delivery across the United States",
     },
     knowsAbout: [
-      "Raksha Bandhan",
-      "Rakhi delivery to USA",
-      "Online Rakhi shopping",
-      "Indian festival gifts USA",
-      "Send rakhi from India to USA",
-      "Order rakhi online from India with INR UPI",
-      "Rakhi combo with chocolates",
-      "Bhaiya Bhabhi Rakhi",
-      "Kids Rakhi USA",
-      "Lumba Rakhi",
+      "Flower delivery USA",
+      "Birthday cake delivery",
+      "Anniversary flowers and gifts",
+      "Valentine's Day flower delivery",
+      "Mother's Day gifts and bouquets",
+      "Send flowers and gifts across the USA",
+      "Order flowers, cakes, and gifts online",
+      "Gift hampers USA",
+      "Same-day flower delivery",
+      "Personalized gifts USA",
     ],
     aggregateRating: {
       "@type": "AggregateRating",
@@ -221,7 +222,7 @@ export function californiaWarehouseJsonLd() {
     "@id": `${siteUrl}/#california-warehouse`,
     name: `${site.name} California Fulfillment`,
     description:
-      "BlossomPot California warehouse for domestic USA Rakhi shipping — no international customs delays.",
+      "BlossomPot California warehouse supporting careful USA gift fulfillment for flowers, cakes, and curated gifts.",
     url: siteUrl,
     image: canonical(site.logoSrc),
     parentOrganization: { "@id": `${siteUrl}/#organization` },
@@ -414,33 +415,33 @@ export function itemListJsonLd(name: string, items: { name: string; path: string
   };
 }
 
-export function howToSendRakhiJsonLd() {
+export function howToSendGiftJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "HowTo",
-    name: "How to send Rakhi to USA online",
+    name: "How to send flowers, cakes & gifts online in the USA",
     description:
-      "Order Rakhi for delivery anywhere in the United States from India, UK, Canada, or worldwide using BlossomPot.",
+      "Order flowers, cakes, bouquets, and curated gifts for delivery across the United States with BlossomPot.",
     totalTime: "P7D",
     step: [
       {
         "@type": "HowToStep",
         position: 1,
-        name: "Browse Rakhi collections",
-        text: "Visit BlossomPot.com and choose Single Rakhi, Rakhi Combo, Kids Rakhi, Bhaiya Bhabhi, or Lumba Rakhi.",
+        name: "Browse gift collections",
+        text: "Visit BlossomPot.com and choose flowers, bouquets, cakes, gift hampers, or occasion collections.",
         url: canonical("/products"),
       },
       {
         "@type": "HowToStep",
         position: 2,
         name: "Add to cart",
-        text: "Select your Rakhi. Most include complimentary roli and chawal for the Raksha Bandhan tilak.",
+        text: "Select your gift. Most products support a personal message and delivery preferences at checkout.",
       },
       {
         "@type": "HowToStep",
         position: 3,
         name: "Enter US delivery address",
-        text: "At checkout, enter your brother's full US address — city, state, and ZIP code.",
+        text: "At checkout, enter the recipient's full US address — city, state, and ZIP code.",
         url: canonical("/shipping"),
       },
       {
@@ -453,20 +454,23 @@ export function howToSendRakhiJsonLd() {
         "@type": "HowToStep",
         position: 5,
         name: "Receive delivery in USA",
-        text: "BlossomPot delivers domestically within America in 5–7 business days to all 50 states.",
+        text: "BlossomPot delivers across America with nationwide coverage and faster windows to major metros when available.",
       },
     ],
   };
 }
 
+/** @deprecated Use howToSendGiftJsonLd */
+export const howToSendRakhiJsonLd = howToSendGiftJsonLd;
+
 export function rakshaBandhanEventJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "Event",
-    name: "Raksha Bandhan 2026",
+    name: "Celebration gifting with BlossomPot",
     description:
-      "Hindu festival celebrating the bond between brothers and sisters. Send Rakhi to USA with BlossomPot.",
-    startDate: "2026-08-28",
+      "Send flowers, cakes, and thoughtful gifts across the USA with BlossomPot for birthdays, anniversaries, and every celebration.",
+    startDate: "2026-01-01",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     eventStatus: "https://schema.org/EventScheduled",
     location: {
@@ -474,7 +478,7 @@ export function rakshaBandhanEventJsonLd() {
       name: "United States",
     },
     organizer: { "@id": `${siteUrl}/#organization` },
-    url: canonical("/raksha-bandhan"),
+    url: canonical("/flowers"),
   };
 }
 
@@ -484,7 +488,7 @@ export function contactPageJsonLd() {
     "@type": "ContactPage",
     name: `Contact ${site.name}`,
     url: canonical("/contact"),
-    description: `Contact ${site.name} for Rakhi delivery support and Raksha Bandhan order help.`,
+    description: `Contact ${site.name} for flower, cake, and gift delivery support across the USA.`,
     mainEntity: { "@id": `${siteUrl}/#organization` },
   };
 }
@@ -494,8 +498,8 @@ export function serviceAreaJsonLd(city: { label: string; slug: string; state?: s
   return {
     "@context": "https://schema.org",
     "@type": "Service",
-    name: `Rakhi Delivery to ${city.label}, USA`,
-    description: `Send Rakhi to ${city.label} with ${site.name}. Premium rakhis delivered in 5–7 business days across the United States.`,
+    name: `Gift Delivery to ${city.label}, USA`,
+    description: `Send flowers, cakes, and gifts to ${city.label} with ${site.name}. Premium gifting with clear USA delivery windows.`,
     url: canonical(path),
     provider: { "@id": `${siteUrl}/#organization` },
     areaServed: {
@@ -503,7 +507,7 @@ export function serviceAreaJsonLd(city: { label: string; slug: string; state?: s
       name: city.state ? `${city.label}, ${city.state}` : city.label,
       containedInPlace: { "@type": "Country", name: "United States" },
     },
-    serviceType: "Rakhi delivery",
+    serviceType: "Flower, cake, and gift delivery",
     offers: {
       "@type": "Offer",
       priceCurrency: "USD",

@@ -8,9 +8,9 @@ import { pageMetadata } from "@/lib/seo";
 export const revalidate = 60;
 
 export const metadata: Metadata = pageMetadata({
-  title: "Rakhi Blog — Guides, Tips & Raksha Bandhan USA",
+  title: "Gifting Blog — Flowers, Cakes & Celebration Ideas",
   description:
-    "Raksha Bandhan guides: send Rakhi to USA from India, best Rakhi combos, Bhaiya Bhabhi sets, and 2026 festival tips from BlossomPot.",
+    "Guides and ideas for sending flowers, cakes, and thoughtful gifts across the USA — birthdays, anniversaries, Valentine's Day, and more from BlossomPot.",
   path: "/blog",
 });
 
@@ -18,10 +18,10 @@ export default async function BlogPage() {
   const posts = await loadBlogPostsWithImages();
   return (
     <div className="max-w-5xl mx-auto px-4 py-12 overflow-x-hidden">
-      <h1 className="text-3xl font-bold text-primary mb-2">Rakhi Guides & Blog</h1>
+      <h1 className="text-3xl font-bold text-primary mb-2">Gifting Guides & Blog</h1>
       <p className="text-slate-600 mb-8">
-        Expert guides on sending Rakhi to USA, Raksha Bandhan traditions, and choosing the perfect Rakhi for your
-        brother.
+        Ideas and tips for sending flowers, cakes, and thoughtful gifts across the USA — for birthdays,
+        anniversaries, and everyday celebrations.
       </p>
       <div className="grid gap-6 sm:grid-cols-2">
         {posts.map((post) => (

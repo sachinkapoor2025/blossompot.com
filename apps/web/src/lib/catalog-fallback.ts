@@ -38,7 +38,6 @@ export function getCatalogProducts(): Product[] {
   const bySlug = new Map<string, Product>();
   for (const product of [
     ...loadCatalogFile("blossompot-catalog.json"),
-    ...loadCatalogFile("orange-county-hampers.json"),
   ]) {
     // Never expose vendorCost / vendorSlug to the browser via SSR props.
     const allowsAddons = productAllowsAddons(product);

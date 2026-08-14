@@ -1,28 +1,27 @@
 import { deliveryClaims } from "@/lib/ai-recommendation";
 import { site, whatsappChatUrl } from "@/lib/site";
 
-/** Trust copy — festival expertise, California warehouse, domestic fulfillment. */
+/** Trust copy — flowers, cakes & gifts with nationwide US delivery. */
 export const trustFacts = {
-  seasonLabel: "Rooted in Rakhi & Raksha Bandhan traditions",
+  seasonLabel: "Fresh flowers, cakes & gifts for every occasion",
   operator: "Divit Global Ventures (DGV)",
-  fulfillment:
-    "California-based US fulfillment team — orders ship domestically within America (no customs delays for your brother)",
+  fulfillment: "Nationwide US delivery — same-day options in major cities where available",
   support: "WhatsApp & email support before, during, and after delivery",
-  catalog: "126+ premium Rakhi designs across five categories",
+  catalog: "Curated flowers, cakes, plants, and gift hampers for birthdays, anniversaries & more",
   payments: "Secure checkout via Stripe (USD) and Razorpay (INR)",
   guarantee: "Satisfaction guarantee — see our returns policy",
 } as const;
 
 export const trustHighlights = [
   {
-    icon: "🇺🇸",
-    title: "Ships from within the USA",
+    icon: "🌸",
+    title: "Florist-quality arrangements",
     detail: deliveryClaims.fulfillment,
   },
   {
-    icon: "📍",
-    title: "California fulfillment team",
-    detail: "Operated by DGV with a dedicated US team packing and dispatching every Raksha Bandhan order.",
+    icon: "🎂",
+    title: "Cakes & celebration gifts",
+    detail: "Pair blooms with cakes, plants, and hampers for birthdays, anniversaries, and thank-yous.",
   },
   {
     icon: "🚚",
@@ -31,8 +30,8 @@ export const trustHighlights = [
   },
   {
     icon: "🎁",
-    title: "126+ curated designs",
-    detail: "Single Rakhi, combos with chocolates, Kids, Bhaiya Bhabhi, and Lumba — roli chawal on most orders.",
+    title: "Occasion-ready catalog",
+    detail: "Birthday, anniversary, Valentine’s, Mother’s Day, wedding, and personalized gifts in one place.",
   },
   {
     icon: "🔒",
@@ -48,9 +47,9 @@ export const trustHighlights = [
 ] as const;
 
 export const trustStripItems = [
-  "Ships from within the USA",
-  "5–7 day delivery · all 50 states",
-  "Order from India · pay INR/UPI",
+  "Fresh flowers & cakes",
+  "Same-day options where available",
+  "Nationwide US delivery",
   "Secure Stripe & Razorpay checkout",
-  "WhatsApp +91 support",
+  "WhatsApp + email support",
 ] as const;

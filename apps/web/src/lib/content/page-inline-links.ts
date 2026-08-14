@@ -1,35 +1,52 @@
 import { categoryHref } from "@/lib/category-urls";
 
-/** Homepage: keep "send rakhi to USA" / "buy rakhi online USA from India" as plain text (no category deep-links). */
+/** Homepage SEO inline links for BlossomPot gifting copy. */
 export const homepageInlineLinks = [
-  { phrase: "rakhi gift hamper", href: categoryHref("rakhi-hampers") },
+  { phrase: "gift hampers", href: categoryHref("gift-hampers") },
+  { phrase: "same-day", href: categoryHref("same-day-gifts") },
 ] as const;
 
 export const categoryPageInlineLinks: Record<string, readonly { phrase: string; href: string }[]> = {
-  "single-rakhi": [{ phrase: "buy designer rakhi online usa", href: categoryHref("lumba-rakhi") }],
-  "bhaiya-bhabhi-rakhi": [{ phrase: "send rakhi to USA", href: "/" }],
-  "kids-rakhi": [{ phrase: "sending rakhi to USA from India", href: "/" }],
-  "lumba-rakhi": [{ phrase: "buy rakhi online USA", href: "/" }],
-  "rakhi-combo": [{ phrase: "rakhi gift hamper", href: categoryHref("rakhi-hampers") }],
-  "rakhi-hampers": [
-    { phrase: "Rakhi Combos", href: categoryHref("rakhi-combo") },
-    { phrase: "Single Rakhi", href: categoryHref("single-rakhi") },
-    { phrase: "Kids Rakhi", href: categoryHref("kids-rakhi") },
+  flowers: [
+    { phrase: "flower bouquets", href: categoryHref("flower-bouquets") },
+    { phrase: "anniversary gifts", href: categoryHref("anniversary-gifts") },
   ],
-  "2-set-rakhi": [
-    { phrase: "Set of 3 Rakhis", href: categoryHref("3-set-rakhi") },
-    { phrase: "Set of 4 Rakhis", href: categoryHref("4-set-rakhi") },
+  "flower-bouquets": [
+    { phrase: "flowers", href: categoryHref("flowers") },
+    { phrase: "Valentine's Day", href: categoryHref("valentines-day-gifts") },
   ],
-  "3-set-rakhi": [
-    { phrase: "Set of 2 Rakhis", href: categoryHref("2-set-rakhi") },
-    { phrase: "Set of 4 Rakhis", href: categoryHref("4-set-rakhi") },
+  cakes: [
+    { phrase: "birthday gifts", href: categoryHref("birthday-gifts") },
+    { phrase: "gift hampers", href: categoryHref("gift-hampers") },
   ],
-  "4-set-rakhi": [
-    { phrase: "Set of 2 Rakhis", href: categoryHref("2-set-rakhi") },
-    { phrase: "Set of 3 Rakhis", href: categoryHref("3-set-rakhi") },
+  "birthday-gifts": [
+    { phrase: "cakes", href: categoryHref("cakes") },
+    { phrase: "flowers", href: categoryHref("flowers") },
   ],
+  "anniversary-gifts": [
+    { phrase: "flowers", href: categoryHref("flowers") },
+    { phrase: "gift hampers", href: categoryHref("gift-hampers") },
+  ],
+  "valentines-day-gifts": [{ phrase: "flower bouquets", href: categoryHref("flower-bouquets") }],
+  "mothers-day-gifts": [
+    { phrase: "flowers", href: categoryHref("flowers") },
+    { phrase: "plants", href: categoryHref("plants") },
+  ],
+  "wedding-gifts": [{ phrase: "gift hampers", href: categoryHref("gift-hampers") }],
+  "personalized-gifts": [{ phrase: "gift hampers", href: categoryHref("gift-hampers") }],
+  "gift-hampers": [
+    { phrase: "birthday gifts", href: categoryHref("birthday-gifts") },
+    { phrase: "cakes", href: categoryHref("cakes") },
+  ],
+  plants: [{ phrase: "Mother's Day", href: categoryHref("mothers-day-gifts") }],
+  "same-day-gifts": [
+    { phrase: "flowers", href: categoryHref("flowers") },
+    { phrase: "cakes", href: categoryHref("cakes") },
+  ],
+  "celebration-gifts": [{ phrase: "gift hampers", href: categoryHref("gift-hampers") }],
 };
 
-export const rakshaBandhanInlineLinks = [
-  { phrase: "sending a Rakhi to USA", href: "/shop" },
+export const cityPageInlineLinks = [
+  { phrase: "flowers", href: categoryHref("flowers") },
+  { phrase: "cakes", href: categoryHref("cakes") },
 ] as const;

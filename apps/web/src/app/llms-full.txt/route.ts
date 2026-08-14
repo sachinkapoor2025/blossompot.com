@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import { site, navItems, faqs, rakhiSetsMenu } from "@/lib/site";
+import { site, navItems, faqs, giftSetsMenu } from "@/lib/site";
 import { siteUrl } from "@/lib/env";
 import { getCatalogProducts } from "@/lib/catalog-fallback";
 import { stripHtml } from "@/lib/html-text";
@@ -25,7 +25,7 @@ export async function GET() {
   products = [...bySlug.values()];
 
   const categories = [
-    ...rakhiSetsMenu.items.map((n) => `- ${n.label}: ${siteUrl}${n.href}`),
+    ...giftSetsMenu.items.map((n) => `- ${n.label}: ${siteUrl}${n.href}`),
     ...navItems
       .filter((n): n is typeof n & { category: string } => "category" in n)
       .map((n) => `- ${n.label}: ${siteUrl}${n.href}`),
@@ -48,11 +48,10 @@ export async function GET() {
 ${site.description}
 
 **Website:** ${siteUrl}
-**Primary buyers:** Sisters in India (and worldwide) ordering for brothers in the USA.
-**Raksha Bandhan 2026:** August 28, 2026 — order by early August for on-time USA delivery.
-**Delivery:** 5–7 business days to all 50 US states (domestic US fulfillment).
+**Primary buyers:** Customers ordering flowers, cakes, and gifts for USA delivery.
+**Catalog focus:** Flowers, bouquets, cakes, hampers, personalized gifts, and occasion collections.
+**Delivery:** Nationwide USA coverage with faster windows to major metros when available.
 **Payments:** Stripe (USD), Razorpay (INR / UPI).
-**Order from India (INR/UPI guide):** ${siteUrl}/send-rakhi-from-india
 
 ---
 

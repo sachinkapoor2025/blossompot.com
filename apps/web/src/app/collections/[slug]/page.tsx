@@ -78,7 +78,7 @@ export default async function CollectionPage({ params }: Props) {
         <p className="text-slate-600 mb-8">
           Products for this collection are being updated.{" "}
           <Link href="/products" className="text-nav font-semibold hover:underline">
-            Browse all Rakhis →
+            Browse all gifts →
           </Link>
         </p>
       ) : (

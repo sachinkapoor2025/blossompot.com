@@ -1,61 +1,85 @@
-/** Title, meta description, and H1 for public category landing pages (`/*-to-usa`). */
+/** Title, meta description, and H1 for public category landing pages. */
 export const categoryPageSeo: Record<
   string,
   { title: string; description: string; h1: string }
 > = {
-  "lumba-rakhi": {
-    title: "Send Lumba Rakhi to USA | Free Shipping | USA Rakhi",
+  flowers: {
+    title: "Send Flowers Online USA | Fresh Arrangements | BlossomPot",
     description:
-      "Send Lumba Rakhi to USA with premium designer Lumba Rakhis for your bhabhi. Fast USA delivery, secure payment, and complimentary roli chawal included.",
-    h1: "Send Lumba Rakhi to USA",
+      "Order fresh flowers for USA delivery. Birthdays, anniversaries, thank-yous, and everyday celebrations with premium packaging and clear shipping.",
+    h1: "Send Flowers Online — USA Delivery",
   },
-  "bhaiya-bhabhi-rakhi": {
-    title: "Send Bhaiya Bhabhi Rakhi to USA | Free Shipping | USA Rakhi",
+  "flower-bouquets": {
+    title: "Flower Bouquets USA Delivery | Signature Arrangements | BlossomPot",
     description:
-      "Shop Bhaiya Bhabhi Rakhi to USA with elegant Rakhi pairs and premium designs. Fast delivery across the USA with secure online ordering.",
-    h1: "Send Bhaiya Bhabhi Rakhi to USA",
+      "Shop signature flower bouquets for doorstep surprises across the USA. Elegant presentation and gift-message options.",
+    h1: "Flower Bouquets for USA Delivery",
   },
-  "single-rakhi": {
-    title: "Send Single Rakhi to USA | Free Shipping | USA Rakhi",
+  cakes: {
+    title: "Order Cakes Online USA | Birthday & Celebration Cakes | BlossomPot",
     description:
-      "Buy Single Rakhi to USA from our exclusive collection of traditional and designer Rakhis. Fast USA delivery with festive packaging and roli chawal.",
-    h1: "Send Single Rakhi to USA",
+      "Order celebration cakes online for birthdays, anniversaries, and parties. Chocolate, red velvet, designer cakes with USA delivery.",
+    h1: "Celebration Cakes — USA Delivery",
   },
-  "2-set-rakhi": {
-    title: "Send Set of 2 Rakhis to USA | Free Shipping | USA Rakhi",
+  "birthday-gifts": {
+    title: "Birthday Gifts USA | Flowers, Cakes & Combos | BlossomPot",
     description:
-      "Shop Set of 2 Rakhis to USA — two-piece designer rakhi sets for brothers. Fast USA delivery with festive packaging and roli chawal.",
-    h1: "Send Set of 2 Rakhis to USA",
+      "Birthday gifts that feel complete — flowers, cakes, hampers, and combos curated for joyful celebrations across the USA.",
+    h1: "Birthday Gifts for USA Delivery",
   },
-  "3-set-rakhi": {
-    title: "Send Set of 3 Rakhis to USA | Free Shipping | USA Rakhi",
+  "anniversary-gifts": {
+    title: "Anniversary Gifts USA | Roses, Cakes & More | BlossomPot",
     description:
-      "Shop Set of 3 Rakhis to USA — three-piece designer rakhi sets for multiple brothers. Fast USA delivery with festive packaging.",
-    h1: "Send Set of 3 Rakhis to USA",
+      "Romantic anniversary gifts including roses, cakes, and curated boxes for couples celebrating across the USA.",
+    h1: "Anniversary Gifts — USA Delivery",
   },
-  "4-set-rakhi": {
-    title: "Send Set of 4 Rakhis to USA | Free Shipping | USA Rakhi",
+  "valentines-day-gifts": {
+    title: "Valentine's Day Gifts USA | Flowers & Chocolates | BlossomPot",
     description:
-      "Shop Set of 4 Rakhis to USA — four-piece designer rakhi sets for larger families. Fast USA delivery with festive packaging.",
-    h1: "Send Set of 4 Rakhis to USA",
+      "Valentine's Day flowers, chocolates, and romantic gift sets designed for memorable February celebrations.",
+    h1: "Valentine's Day Gifts — USA Delivery",
   },
-  "kids-rakhi": {
-    title: "Send Kids Rakhi to USA | Free Shipping | USA Rakhi",
+  "mothers-day-gifts": {
+    title: "Mother's Day Gifts USA | Flowers & Plants | BlossomPot",
     description:
-      "Send Kids Rakhi to USA featuring cartoon, superhero, and colorful Rakhi designs. Fast delivery across the USA with premium quality.",
-    h1: "Send Kids Rakhi to USA",
+      "Mother's Day flowers, plants, and thoughtful gifts to show appreciation with elegance and warmth.",
+    h1: "Mother's Day Gifts — USA Delivery",
   },
-  "rakhi-combo": {
-    title: "Send Rakhi Combo to USA | Free Shipping | USA Rakhi",
+  "wedding-gifts": {
+    title: "Wedding Gifts USA | Florals, Cakes & Hampers | BlossomPot",
     description:
-      "Order Rakhi with chocolates to USA with chocolates, sweets, dry fruits, and premium Rakhi sets. Fast USA delivery and secure online shopping.",
-    h1: "Send Rakhi with Chocolates to USA",
+      "Wedding and engagement gifting — elegant florals, celebration cakes, and premium hampers for couples.",
+    h1: "Wedding Gifts — USA Delivery",
   },
-  "rakhi-hampers": {
-    title: "Send Rakhi Hamper to USA | Free Shipping | USA Rakhi",
+  "gift-hampers": {
+    title: "Gift Hampers USA Delivery | Curated Boxes | BlossomPot",
     description:
-      "Order Rakhi hamper gift boxes to USA with designer rakhis, kaju katli, dry fruits, and festive sweets. Fast domestic USA delivery, clear what's-included lists, and secure online shopping.",
-    h1: "Send Rakhi Hamper to USA",
+      "Order curated gift hampers online with sweets, treats, and thoughtful extras. Premium packaging and USA delivery.",
+    h1: "Gift Hampers — USA Delivery",
+  },
+  "personalized-gifts": {
+    title: "Personalized Gifts USA | Custom Messages | BlossomPot",
+    description:
+      "Personalized gifts with custom messages for birthdays, anniversaries, and thank-yous — delivered across the USA.",
+    h1: "Personalized Gifts — USA Delivery",
+  },
+  "same-day-gifts": {
+    title: "Same-Day Gifts USA | Select Cities | BlossomPot",
+    description:
+      "Same-day gift options in select US cities when you order before the local cut-off. Flowers, cakes, and more.",
+    h1: "Same-Day Gifts — Select Cities",
+  },
+  plants: {
+    title: "Plants Delivery USA | Green Gifts | BlossomPot",
+    description:
+      "Send plants as thoughtful green gifts across the USA — perfect for thank-yous, housewarmings, and Mother's Day.",
+    h1: "Plants for USA Delivery",
+  },
+  "celebration-gifts": {
+    title: "Celebration Gifts USA | Congrats & Thank You | BlossomPot",
+    description:
+      "Celebration gifts for promotions, housewarmings, congratulations, and every reason to send something special.",
+    h1: "Celebration Gifts — USA Delivery",
   },
 };
 

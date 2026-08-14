@@ -1,16 +1,11 @@
 import Link from "next/link";
-import { site, navItems, cityLinks, cityNavHref, rakhiSetsMenu, whatsappChatUrl } from "@/lib/site";
+import { site, navItems, cityLinks, cityNavHref, giftSetsMenu, whatsappChatUrl } from "@/lib/site";
 import { PaymentMethodIcons } from "@/components/PaymentMethodIcons";
 import { SiteLogoLink } from "@/components/SiteLogo";
 import { trustFacts } from "@/lib/trust";
 
 const FACEBOOK_URL = "https://www.facebook.com/blossompot/";
 const INSTAGRAM_URL = "https://www.instagram.com/blossompot/";
-
-/** Footer Shop Rakhi labels only — append "to USA" without changing shared nav/URLs. */
-function shopRakhiFooterLabel(label: string): string {
-  return /to\s+usa$/i.test(label.trim()) ? label : `${label} to USA`;
-}
 
 export function Footer() {
   return (
@@ -21,8 +16,7 @@ export function Footer() {
           <div className="col-span-2 lg:col-span-3">
             <SiteLogoLink size="desktop" className="mb-5" />
             <p className="text-white/80 leading-relaxed mb-4 max-w-xs">
-              Send Rakhi to USA from India, UK, Canada &amp; worldwide. Premium Rakhis delivered to all 50 US
-              states.
+              Flowers, cakes, and thoughtful gifts delivered across the USA. Premium online gifting for every celebration.
             </p>
             <div className="space-y-2 text-white/90">
               <p>
@@ -80,12 +74,12 @@ export function Footer() {
 
           {/* Shop */}
           <div className="min-w-0 lg:col-span-2">
-            <p className="font-semibold text-white mb-3 sm:mb-4">Shop Rakhi</p>
+            <p className="font-semibold text-white mb-3 sm:mb-4">Shop Gifts</p>
             <ul className="space-y-2 text-white/80">
-              {rakhiSetsMenu.items.map((n) => (
+              {giftSetsMenu.items.map((n) => (
                 <li key={n.href}>
                   <Link href={n.href} className="hover:text-white hover:underline">
-                    {shopRakhiFooterLabel(n.label)}
+                    {n.label}
                   </Link>
                 </li>
               ))}
@@ -94,7 +88,7 @@ export function Footer() {
                 .map((n) => (
                   <li key={n.href}>
                     <Link href={n.href} className="hover:text-white hover:underline">
-                      {shopRakhiFooterLabel(n.label)}
+                      {n.label}
                     </Link>
                   </li>
                 ))}
@@ -110,8 +104,8 @@ export function Footer() {
           <div className="min-w-0 lg:col-span-2">
             <p className="font-semibold text-white mb-3 sm:mb-4">Help &amp; Info</p>
             <ul className="space-y-2 text-white/80">
-              <li><Link href="/send-rakhi-from-india" className="hover:text-white hover:underline">Send Rakhi from India</Link></li>
-              <li><Link href="/raksha-bandhan" className="hover:text-white hover:underline">Raksha Bandhan 2026</Link></li>
+              <li><Link href="/same-day-delivery" className="hover:text-white hover:underline">Same-Day Delivery</Link></li>
+              <li><Link href="/flowers" className="hover:text-white hover:underline">Send Flowers</Link></li>
               <li><Link href="/blog" className="hover:text-white hover:underline">Blog &amp; Guides</Link></li>
               <li><Link href="/shipping" className="hover:text-white hover:underline">Shipping &amp; Delivery</Link></li>
               <li><Link href="/faq" className="hover:text-white hover:underline">FAQ</Link></li>
@@ -168,7 +162,7 @@ export function Footer() {
           </p>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <p>
-              © {new Date().getFullYear()} {site.name}.com. All rights reserved. Celebrating sibling love across
+              © {new Date().getFullYear()} {site.name}.com. All rights reserved. Premium gifting across
               every mile.
             </p>
             <p className="flex flex-wrap gap-x-3 gap-y-1">

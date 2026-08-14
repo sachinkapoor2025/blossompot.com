@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import { categoryHref } from "@/lib/category-urls";
-import { navItems, cityLinks, cityNavHref, cityNavMenuLabel, rakhiSetsMenu } from "@/lib/site";
+import { navItems, cityLinks, cityNavHref, cityNavMenuLabel, giftSetsMenu } from "@/lib/site";
 import { SearchBar } from "@/components/SearchBar";
 import { SiteLogoLink } from "@/components/SiteLogo";
 
@@ -51,7 +51,7 @@ function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-function RakhiSetsMenu({
+function GiftSetsMenu({
   active,
   onNavigate,
 }: {
@@ -73,13 +73,13 @@ function RakhiSetsMenu({
         aria-haspopup="true"
         className={`btn-nav gap-1 ${active || open ? "btn-nav-active" : ""}`}
       >
-        {rakhiSetsMenu.label}
+        {giftSetsMenu.label}
         <span className={`text-xs transition-transform ${open ? "rotate-180" : ""}`}>▼</span>
       </button>
       {open && (
         <div className="absolute top-full left-0 pt-1.5 z-[100]">
           <div className="min-w-[200px] rounded-lg border border-slate-200 bg-white py-1 shadow-xl">
-            {rakhiSetsMenu.items.map((item) => (
+            {giftSetsMenu.items.map((item) => (
               <Link
                 key={item.category}
                 href={item.href}
@@ -204,7 +204,7 @@ export function Header() {
   const activeCategory = searchParams.get("category");
   const [menuOpen, setMenuOpen] = useState(false);
   const [citiesOpen, setCitiesOpen] = useState(false);
-  const [rakhiSetsOpen, setRakhiSetsOpen] = useState(false);
+  const [giftSetsOpen, setGiftSetsOpen] = useState(false);
 
   const isActive = (href: string, category?: string) => {
     if (href === "/") return pathname === "/" && !activeCategory;
@@ -217,18 +217,18 @@ export function Header() {
     return pathname.startsWith(href.split("?")[0]) && href !== "/";
   };
 
-  const isRakhiSetsActive = rakhiSetsMenu.items.some((item) => isActive(item.href, item.category));
+  const isGiftSetsActive = giftSetsMenu.items.some((item) => isActive(item.href, item.category));
 
   const closeMenu = () => {
     setMenuOpen(false);
     setCitiesOpen(false);
-    setRakhiSetsOpen(false);
+    setGiftSetsOpen(false);
   };
 
   useEffect(() => {
     setMenuOpen(false);
     setCitiesOpen(false);
-    setRakhiSetsOpen(false);
+    setGiftSetsOpen(false);
   }, [pathname, activeCategory]);
 
   useEffect(() => {
@@ -314,7 +314,7 @@ export function Header() {
                     >
                       {item.label}
                     </Link>
-                    <RakhiSetsMenu active={isRakhiSetsActive} />
+                    <GiftSetsMenu active={isGiftSetsActive} />
                   </span>
                 );
               }
@@ -376,23 +376,23 @@ export function Header() {
                       <div>
                         <button
                           type="button"
-                          onClick={() => setRakhiSetsOpen((v) => !v)}
+                          onClick={() => setGiftSetsOpen((v) => !v)}
                           className={`w-full flex items-center justify-between rounded-lg px-4 py-3 text-sm font-semibold ${
-                            isRakhiSetsActive || rakhiSetsOpen
+                            isGiftSetsActive || giftSetsOpen
                               ? "bg-nav text-white"
                               : "text-primary hover:bg-blue-50 hover:text-nav"
                           }`}
                         >
-                          {rakhiSetsMenu.label}
+                          {giftSetsMenu.label}
                           <span
-                            className={`text-xs transition-transform ${rakhiSetsOpen ? "rotate-180" : ""}`}
+                            className={`text-xs transition-transform ${giftSetsOpen ? "rotate-180" : ""}`}
                           >
                             ▼
                           </span>
                         </button>
-                        {rakhiSetsOpen && (
+                        {giftSetsOpen && (
                           <div className="mt-1 ml-2 border-l-2 border-slate-100 pl-2 space-y-1">
-                            {rakhiSetsMenu.items.map((setItem) => (
+                            {giftSetsMenu.items.map((setItem) => (
                               <Link
                                 key={setItem.category}
                                 href={setItem.href}

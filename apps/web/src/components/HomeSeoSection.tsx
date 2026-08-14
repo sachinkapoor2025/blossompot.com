@@ -2,16 +2,15 @@ import Link from "next/link";
 import { applyInlineLinks } from "@/lib/inline-links";
 import { homepageInlineLinks } from "@/lib/content/page-inline-links";
 import { whatsappChatUrl } from "@/lib/site";
-import { homeCityLinks, homeSeoContent } from "@/lib/content/home-seo";
+import { homeSeoContent } from "@/lib/content/home-seo";
 
 export function HomeSeoSection() {
-  const { intro, categories, delivery, howItWorks, tradition, whyUs, faqs } = homeSeoContent;
+  const { intro, categories, delivery, howItWorks, cities, faqs } = homeSeoContent;
 
   return (
     <section className="bg-slate-50 border-y border-slate-200" aria-labelledby="home-seo-heading">
       <div className="max-w-7xl mx-auto px-4 py-12 sm:py-16">
         <div className="grid lg:grid-cols-2 gap-10 xl:gap-14">
-          {/* Left — editorial */}
           <article className="space-y-8 text-slate-700 leading-relaxed">
             <header>
               <h2 id="home-seo-heading" className="text-2xl font-bold text-primary mb-4">
@@ -25,15 +24,6 @@ export function HomeSeoSection() {
             </header>
 
             <section>
-              <h3 className="text-xl font-semibold text-primary mb-3">{tradition.heading}</h3>
-              {tradition.paragraphs.map((para, i) => (
-                <p key={i} className="mb-4">
-                  {para}
-                </p>
-              ))}
-            </section>
-
-            <section>
               <h3 className="text-xl font-semibold text-primary mb-3">{delivery.heading}</h3>
               {delivery.paragraphs.map((para, i) => (
                 <p key={i} className="mb-4">
@@ -41,33 +31,20 @@ export function HomeSeoSection() {
                 </p>
               ))}
               <div className="flex flex-wrap gap-2 mt-2">
-                {homeCityLinks.map((city) => (
+                {cities.links.map((city) => (
                   <Link
-                    key={city.slug}
+                    key={city.href}
                     href={city.href}
                     className="text-xs sm:text-sm px-2.5 py-1 rounded-full border border-slate-200 bg-white text-slate-600 hover:border-nav hover:text-nav transition"
                   >
-                    Send rakhi to {city.label}
+                    Gifts to {city.label}
                   </Link>
                 ))}
               </div>
             </section>
           </article>
 
-          {/* Right — sidebar cards */}
           <aside className="space-y-6">
-            <section className="bg-white border border-slate-200 rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-primary mb-4">{whyUs.heading}</h3>
-              <ul className="space-y-2 text-sm">
-                {whyUs.bullets.map((b) => (
-                  <li key={b} className="flex items-start gap-2">
-                    <span className="text-accent font-bold">•</span>
-                    {b}
-                  </li>
-                ))}
-              </ul>
-            </section>
-
             <section className="bg-white border border-slate-200 rounded-xl p-6">
               <h3 className="text-lg font-semibold text-primary mb-2">{categories.heading}</h3>
               <p className="text-slate-600 text-sm mb-4">{categories.intro}</p>
@@ -83,7 +60,7 @@ export function HomeSeoSection() {
               </ul>
               <p className="mt-4 text-sm">
                 <Link href="/products" className="text-nav font-semibold hover:underline">
-                  View all rakhis →
+                  View all gifts →
                 </Link>
               </p>
             </section>
@@ -91,9 +68,11 @@ export function HomeSeoSection() {
             <section className="bg-white border border-slate-200 rounded-xl p-6">
               <h3 className="text-lg font-semibold text-primary mb-4">{howItWorks.heading}</h3>
               <ol className="space-y-3 text-sm list-decimal list-inside marker:font-semibold marker:text-nav">
-                {howItWorks.steps.map((step, i) => (
-                  <li key={i} className="pl-1">
-                    {step}
+                {howItWorks.steps.map((step) => (
+                  <li key={step.title} className="pl-1">
+                    <span className="font-semibold text-primary">{step.title.replace(/^\d+\.\s*/, "")}</span>
+                    {" — "}
+                    {step.text}
                   </li>
                 ))}
               </ol>
@@ -101,29 +80,29 @@ export function HomeSeoSection() {
                 <Link href="/shipping" className="text-nav font-semibold hover:underline">
                   Shipping details →
                 </Link>
-                <Link href="/send-rakhi-from-india" className="text-nav font-semibold hover:underline">
-                  Order from India →
+                <Link href="/flowers" className="text-nav font-semibold hover:underline">
+                  Shop flowers →
                 </Link>
-                <Link href="/blog/send-rakhi-to-usa-from-india" className="text-nav font-semibold hover:underline">
-                  India guide →
+                <Link href="/cakes" className="text-nav font-semibold hover:underline">
+                  Shop cakes →
                 </Link>
               </p>
             </section>
 
             <section className="bg-nav text-white rounded-xl p-6">
-              <h3 className="text-lg font-semibold mb-2">Ready to send rakhi to the USA?</h3>
+              <h3 className="text-lg font-semibold mb-2">Ready to send a gift across the USA?</h3>
               <p className="text-sm text-white/90 mb-4">
-                Browse our collections above or reach out — we help sisters worldwide place Raksha Bandhan orders.
+                Browse flowers, cakes, and hampers above — or reach out and we&apos;ll help you pick the right surprise.
               </p>
               <div className="flex flex-wrap gap-3 text-sm">
                 <Link
                   href="/products"
                   className="bg-white text-nav px-4 py-2 rounded-lg font-medium hover:bg-slate-100"
                 >
-                  Shop all rakhis
+                  Shop all gifts
                 </Link>
                 <a
-                  href={whatsappChatUrl("Hi BlossomPot, I want to send rakhi to the USA.")}
+                  href={whatsappChatUrl("Hi BlossomPot, I want to send a gift in the USA.")}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="border border-white/60 px-4 py-2 rounded-lg hover:bg-white/10"
@@ -135,16 +114,15 @@ export function HomeSeoSection() {
           </aside>
         </div>
 
-        {/* Full-width FAQ */}
         <section className="mt-12 pt-10 border-t border-slate-200">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-            <h3 className="text-xl font-semibold text-primary">Frequently Asked Questions</h3>
+            <h3 className="text-xl font-semibold text-primary">{faqs.heading}</h3>
             <Link href="/faq" className="text-sm text-nav font-semibold hover:underline">
               View all FAQs →
             </Link>
           </div>
           <div className="grid md:grid-cols-2 gap-6">
-            {faqs.map((faq) => (
+            {faqs.items.map((faq) => (
               <div key={faq.q} className="bg-white border border-slate-100 rounded-xl p-5">
                 <h4 className="font-semibold text-primary text-sm mb-2">{faq.q}</h4>
                 <p className="text-sm text-slate-600 leading-relaxed">{faq.a}</p>

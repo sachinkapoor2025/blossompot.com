@@ -1,129 +1,110 @@
 import { categoryHref } from "@/lib/category-urls";
 import { locationPublicPath } from "@/lib/content/seo-data";
 
-/** SEO-rich homepage copy — Rakhi / USA delivery keywords, internal link targets. */
+/** SEO-rich homepage copy — flowers, cakes & gifts. */
 export const homeSeoContent = {
   intro: {
-    heading: "Send Rakhi to USA Online — Trusted Rakhi Delivery USA for Raksha Bandhan",
+    heading: "Send Flowers, Cakes & Gifts Online — BlossomPot USA Delivery",
     paragraphs: [
-      "Raksha Bandhan celebrates the lifelong bond between brothers and sisters. When your brother lives in America, tying a rakhi in person is not always possible — but the emotion behind the festival does not have to wait. BlossomPot is a dedicated rakhi store USA sisters trust to send rakhi to USA with premium designs, reliable domestic delivery, and thoughtful packaging that honors Indian tradition.",
-      "Whether you buy rakhi online USA from India, the United Kingdom, Canada, Australia, or anywhere else, we ship inside the United States to your brother's doorstep. Order rakhi to USA from India in minutes — sisters worldwide use our online rakhi store for fast rakhi delivery USA in 5–7 business days, with complimentary roli and chawal included on most rakhis for the tilak ceremony.",
-      "Shop 140+ designer rakhis across Single Rakhi, Rakhi Combo, rakhi gift hamper boxes with sweets and dry fruits, Kids Rakhi, Bhaiya Bhabhi sets, and Lumba Rakhi — your one-stop rakhi shop USA for sending rakhi gifts to USA before Raksha Bandhan 2026 (August 28).",
+      "BlossomPot is an online gifting destination for flowers, bouquets, cakes, plants, and thoughtful gift hampers. Whether you are celebrating a birthday, anniversary, Valentine’s Day, Mother’s Day, or a simple thank-you, shop premium gifts with clear delivery expectations across the United States.",
+      "Browse florist-quality roses and mixed bouquets, celebration cakes, personalized boxes, and curated hampers — all in one marketplace-style experience designed for modern US gifting.",
+      "From same-day eligible gifts in select areas to nationwide delivery options, BlossomPot helps you send something beautiful without the guesswork.",
     ],
   },
   categories: {
-    heading: "Shop Rakhi by Category — Buy Rakhi Online USA",
+    heading: "Shop Gifts by Category",
     intro:
-      "Browse curated collections for every sibling — from traditional single rakhis to chocolate combos and full Rakhi hamper gift boxes with sweets and dry fruits. Nationwide rakhi delivery USA on every order.",
+      "Explore curated collections for every celebration — fresh flowers, designer bouquets, cakes, occasion gifts, and premium hampers.",
     links: [
       {
-        label: "Single Rakhi to USA",
-        href: categoryHref("single-rakhi"),
-        text: "Buy designer rakhi, Om, pearl, silver, and traditional rakhis for your brother.",
+        label: "Flowers",
+        href: categoryHref("flowers"),
+        text: "Classic roses, mixed blooms, and elegant floral arrangements.",
       },
       {
-        label: "Bhaiya Bhabhi Rakhi to USA",
-        href: categoryHref("bhaiya-bhabhi-rakhi"),
-        text: "Send rakhi pair for Bhaiya Bhabhi — matching sets with Lumba rakhis.",
+        label: "Flower Bouquets",
+        href: categoryHref("flower-bouquets"),
+        text: "Signature bouquets designed for birthdays, romance, and celebrations.",
       },
       {
-        label: "Kids Rakhi to USA",
-        href: categoryHref("kids-rakhi"),
-        text: "Cartoon and superhero rakhis made for little brothers.",
+        label: "Cakes",
+        href: categoryHref("cakes"),
+        text: "Chocolate, red velvet, black forest, and designer birthday cakes.",
       },
       {
-        label: "Lumba Rakhi to USA",
-        href: categoryHref("lumba-rakhi"),
-        text: "Elegant bracelet-style Lumba rakhis for your sister-in-law.",
+        label: "Birthday Gifts",
+        href: categoryHref("birthday-gifts"),
+        text: "Hampers, combos, and festive gifts made for birthday joy.",
       },
       {
-        label: "Rakhi Combos to USA",
-        href: categoryHref("rakhi-combo"),
-        text: "Send rakhi with chocolates — Ferrero Rocher, Lindt, Hershey's gift sets.",
+        label: "Anniversary Gifts",
+        href: categoryHref("anniversary-gifts"),
+        text: "Romantic flowers, cakes, and keepsake gift boxes.",
       },
       {
-        label: "Rakhi Hampers to USA",
-        href: categoryHref("rakhi-hampers"),
-        text: "Premium gift boxes with rakhi, kaju katli, dry fruits, and festive sweets.",
+        label: "Gift Hampers",
+        href: categoryHref("gift-hampers"),
+        text: "Luxury curated boxes with treats, blooms, and thoughtful extras.",
       },
     ],
   },
   delivery: {
-    heading: "Rakhi Delivery Across USA — California Warehouse + Nationwide",
+    heading: "Gift Delivery Across the USA",
     paragraphs: [
-      "We deliver rakhi across California, New York, Texas, Florida, New Jersey, Illinois, and every other US state. Domestic fulfillment from our India + California warehouse means your brother receives his rakhi quickly — without international customs delays. Rakhi home delivery USA with tracking on every order.",
-      "Planning ahead for Raksha Bandhan 2026 (August 28)? Order today for standard nationwide delivery to avoid the last-minute rush. California metro areas (Los Angeles, San Jose, San Francisco, Irvine, and more) often ship faster from our US warehouse team.",
+      "BlossomPot supports nationwide gift delivery messaging with faster windows to major metros when available. Choose flowers, cakes, or hampers and enter the recipient’s US address at checkout.",
+      "Looking for urgency? Shop same-day eligible gifts and check delivery guidance on each product page before you order.",
     ],
   },
   howItWorks: {
-    heading: "How to Send Rakhi to Your Brother in the USA",
+    heading: "How to Send a Gift with BlossomPot",
     steps: [
-      "Choose a rakhi or combo from our rakhi online shopping USA store and add it to your cart.",
-      "Enter your brother's US shipping address at checkout — send rakhi to USA from India or anywhere abroad.",
-      "Pay securely with Stripe (USD) or Razorpay (INR / UPI from India).",
-      "We pack your order with care and deliver rakhi in USA within 5–7 business days (faster from California).",
-      "Your brother receives a beautifully packed rakhi ready for Raksha Bandhan.",
+      {
+        title: "1. Pick an occasion",
+        text: "Start with flowers, cakes, birthday, anniversary, Valentine’s, or hampers.",
+      },
+      {
+        title: "2. Choose your gift",
+        text: "Select size, flavor, or add-ons where available, then add a gift message.",
+      },
+      {
+        title: "3. Enter delivery details",
+        text: "Add the recipient address and preferred delivery timing at checkout.",
+      },
+      {
+        title: "4. Checkout securely",
+        text: "Pay with Stripe (USD) or Razorpay (INR) and track your order updates.",
+      },
     ],
   },
-  tradition: {
-    heading: "The Meaning of Rakhi & Raksha Bandhan",
-    paragraphs: [
-      "On Raksha Bandhan, a sister ties a sacred thread (rakhi) on her brother's wrist as a symbol of love, protection, and blessings. The brother, in turn, promises to support and care for his sister. The ritual often includes applying roli and chawal on the forehead — which is why BlossomPot includes these essentials with most orders.",
-      "Today, millions of Indian families live across continents. Send rakhi online USA to keep the tradition alive when siblings cannot meet in person. A thoughtfully chosen rakhi — whether simple, designer, or paired with chocolates — carries the same warmth as being there on the day of the festival.",
+  cities: {
+    heading: "Popular Gift Delivery Destinations",
+    intro: "Send flowers and gifts to major US cities and metro areas.",
+    links: [
+      { label: "California", href: locationPublicPath("california") },
+      { label: "New York", href: locationPublicPath("new-york") },
+      { label: "Texas", href: locationPublicPath("texas") },
+      { label: "Florida", href: locationPublicPath("florida") },
+      { label: "New Jersey", href: locationPublicPath("new-jersey") },
+      { label: "Los Angeles", href: locationPublicPath("los-angeles") },
+      { label: "Chicago", href: locationPublicPath("chicago") },
+      { label: "Houston", href: locationPublicPath("houston") },
     ],
   },
-  whyUs: {
-    heading: "Why Sisters Choose BlossomPot — USA Rakhi Shop Online",
-    bullets: [
-      "Domestic USA shipping — rakhi India to USA delivery without customs hassle for your brother",
-      "Order from India with INR / UPI (Razorpay) or USD (Stripe)",
-      "140+ premium rakhis across all major categories including gift hampers",
-      "Roli and chawal included on most orders",
-      "Pay in USD (Stripe) or INR (Razorpay) from anywhere",
-      "5–7 business day rakhi delivery USA to all 50 states",
-      "California warehouse + India fulfillment (DGV) for faster western US dispatch",
-      "Trusted rakhi website USA for sisters sending rakhi gifts to USA",
+  faqs: {
+    heading: "BlossomPot FAQ",
+    items: [
+      {
+        q: "What can I order on BlossomPot?",
+        a: "Flowers, bouquets, cakes, plants, personalized gifts, celebration gifts, and gift hampers for birthdays, anniversaries, and more.",
+      },
+      {
+        q: "Do you offer same-day delivery?",
+        a: "Same-day options may be available for eligible gifts in select areas. Check the product page and checkout delivery guidance.",
+      },
+      {
+        q: "Can I add a gift message?",
+        a: "Yes — most gifts support a personalized message during checkout or on the product page.",
+      },
     ],
   },
-  faqs: [
-    {
-      q: "How long does rakhi delivery take in the USA?",
-      a: "Most orders arrive in 5–7 business days after dispatch to any of the 50 US states. California metro deliveries from our US warehouse are often faster.",
-    },
-    {
-      q: "Can I send rakhi from India to the USA?",
-      a: "Yes — buy rakhi to USA from India on BlossomPot.com. Enter your brother's US address at checkout. We accept orders worldwide and ship domestically within America.",
-    },
-    {
-      q: "When is Raksha Bandhan 2026?",
-      a: "Raksha Bandhan 2026 falls on Friday, August 28, 2026. To avoid the last-minute rush and ensure timely delivery to the USA, order today for standard shipping.",
-    },
-    {
-      q: "Do rakhis include roli and chawal?",
-      a: "Most single rakhis and many combos include complimentary roli and chawal for the tilak ceremony.",
-    },
-    {
-      q: "Do you sell Rakhi hampers with sweets and dry fruits?",
-      a: "Yes. Shop our Rakhi Hamper collection for complete gift boxes with designer rakhis, kaju katli, dry fruits, and festive sweets — delivered domestically across the USA.",
-    },
-    {
-      q: "What is the best rakhi to send to USA?",
-      a: "Designer single rakhis, rakhi with chocolates combos, and Bhaiya Bhabhi sets are our most popular. Browse all five categories — each ships with domestic USA delivery.",
-    },
-  ],
-  topCities: [
-    { slug: "los-angeles", label: "Los Angeles" },
-    { slug: "san-jose", label: "San Jose" },
-    { slug: "san-francisco", label: "San Francisco" },
-    { slug: "new-york", label: "New York" },
-    { slug: "new-jersey", label: "New Jersey" },
-    { slug: "texas", label: "Texas" },
-    { slug: "chicago", label: "Chicago" },
-    { slug: "houston", label: "Houston" },
-  ],
 } as const;
-
-export const homeCityLinks = homeSeoContent.topCities.map((c) => ({
-  ...c,
-  href: locationPublicPath(c.slug),
-}));

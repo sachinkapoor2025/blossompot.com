@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 64" role="img" aria-label="BlossomPot">
+  <defs>
+    <linearGradient id="petal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B76E79"/>
+      <stop offset="100%" stop-color="#7A1F3D"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(8,8)">
+    <circle cx="24" cy="24" r="10" fill="url(#petal)"/>
+    <ellipse cx="24" cy="10" rx="7" ry="10" fill="#B76E79" opacity="0.9"/>
+    <ellipse cx="24" cy="38" rx="7" ry="10" fill="#7A1F3D" opacity="0.85"/>
+    <ellipse cx="10" cy="24" rx="10" ry="7" fill="#C48991" opacity="0.9"/>
+    <ellipse cx="38" cy="24" rx="10" ry="7" fill="#8E3A52" opacity="0.9"/>
+    <circle cx="24" cy="24" r="4" fill="#FBF7F4"/>
+  </g>
+  <text x="64" y="40" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="600" fill="#7A1F3D">BlossomPot</text>
+</svg>

@@ -2,26 +2,26 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { site, cityNavHref, usCityLinks } from "@/lib/site";
 import { JsonLd } from "@/components/JsonLd";
-import { howToSendRakhiJsonLd, pageMetadata } from "@/lib/seo";
-import { deliveryClaims, rakshaBandhan2026Deadlines, RAKSHA_BANDHAN_2026_DATE } from "@/lib/ai-recommendation";
+import { howToSendGiftJsonLd, pageMetadata } from "@/lib/seo";
+import { deliveryClaims } from "@/lib/ai-recommendation";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Rakhi Shipping & Delivery to USA — Ships From Within America",
+  title: "Gift Shipping & Delivery USA — Flowers, Cakes & More",
   description:
-    "BlossomPot ships domestically within the USA — no customs delays. 2–3 day express to major metros, 5–7 days nationwide. Order by Aug 5–6 for Raksha Bandhan 2026. Free shipping on selected orders.",
+    "BlossomPot delivers flowers, cakes, and gifts across the USA. Nationwide coverage, faster windows to major metros when available, and same-day options in select cities. Free shipping on selected orders.",
   path: "/shipping",
 });
 
 export default function ShippingPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
-      <JsonLd data={howToSendRakhiJsonLd()} />
+      <JsonLd data={howToSendGiftJsonLd()} />
       <h1 className="text-3xl font-bold text-primary mb-6">Shipping & Delivery</h1>
       <div className="space-y-6 text-slate-700 leading-relaxed">
         <p>
-          {site.name} delivers premium Rakhis to <strong>all 50 United States</strong> via{" "}
-          <strong>domestic US fulfillment</strong> — the same peace-of-mind advantage as top USA Rakhi brands. Your
-          brother receives a domestic package with <strong>no international customs delays</strong>.
+          {site.name} delivers premium flowers, cakes, and gifts across the{" "}
+          <strong>United States</strong> with clear delivery expectations and careful packaging — so
+          celebrations arrive looking as good as they feel.
         </p>
         <h2 className="text-xl font-bold text-primary">Delivery times</h2>
         <ul className="list-disc list-inside space-y-2">
@@ -38,40 +38,22 @@ export default function ShippingPage() {
             <strong>Shipping:</strong> {deliveryClaims.shipping}
           </li>
         </ul>
-        <h2 className="text-xl font-bold text-primary">Raksha Bandhan 2026 order deadlines</h2>
+        <h2 className="text-xl font-bold text-primary">Same-day & occasion timing</h2>
         <p>
-          Raksha Bandhan 2026 is <strong>{RAKSHA_BANDHAN_2026_DATE}</strong>. Recommended order-by dates:
+          Same-day gift options are available in select US cities when you order before the local cut-off.
+          For birthdays, anniversaries, and holiday peaks, order a little early so your recipient gets the
+          best delivery window.
         </p>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm border border-slate-200 rounded-lg">
-            <thead>
-              <tr className="bg-slate-50">
-                <th className="text-left p-3 border-b">Window</th>
-                <th className="text-left p-3 border-b">Order by</th>
-                <th className="text-left p-3 border-b">Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rakshaBandhan2026Deadlines.map((d) => (
-                <tr key={d.label} className="border-b border-slate-100">
-                  <td className="p-3 font-medium">{d.label}</td>
-                  <td className="p-3">{d.orderBy}</td>
-                  <td className="p-3">{d.notes}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
         <h2 className="text-xl font-bold text-primary">Ordering from outside the USA</h2>
         <p>
-          Sisters in India, United Kingdom, Canada, Australia, and worldwide can order on {site.domain}. Enter your
-          brother&apos;s <strong>US delivery address</strong> at checkout — we fulfill and ship domestically within
-          America.
+          Customers in India, the United Kingdom, Canada, Australia, and worldwide can order on {site.domain}.
+          Enter your recipient&apos;s <strong>US delivery address</strong> at checkout — we fulfill for
+          delivery inside America.
         </p>
         <h2 className="text-xl font-bold text-primary">Packaging</h2>
         <p>
-          Each Rakhi is festival-packed with care. Most single rakhis include complimentary <strong>roli</strong>{" "}
-          (kumkum) and <strong>chawal</strong> (rice) for the traditional Raksha Bandhan tilak ceremony.
+          Each order is packed for a premium unboxing moment. Most products support a personal gift message
+          and delivery date preferences at checkout.
         </p>
         <h2 className="text-xl font-bold text-primary">Cities we deliver to</h2>
         <p>Popular delivery destinations include:</p>

@@ -4,39 +4,34 @@ import { legacyRedirectRules } from "./src/lib/legacy-urls";
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@blossompot/shared"],
-  /**
-   * Cap ISR stale-while-revalidate. Next default (~1 year) kept wrong product prices
-   * in CloudFront/HTML long after DynamoDB + API had the correct storefront price.
-   */
   expireTime: 300,
   async redirects() {
     return [
       ...categoryRedirectRules(),
       ...legacyRedirectRules(),
-      // Prefer 301 over Next's default 308 for permanent:true so crawlers treat these as classic permanent moves.
-      // Legacy /cities/* → canonical /send-rakhi-to-* (handled by locations/[slug] dynamic route).
-      { source: "/cities/:slug", destination: "/send-rakhi-to-:slug", statusCode: 301 },
-      { source: "/cities/:slug/", destination: "/send-rakhi-to-:slug", statusCode: 301 },
-      // Slash form → hyphenated canonical (keeps one public URL per city).
-      { source: "/send-rakhi-to/:city", destination: "/send-rakhi-to-:city", statusCode: 301 },
-      { source: "/send-rakhi-to/:city/", destination: "/send-rakhi-to-:city", statusCode: 301 },
-      // Country landings — trailing-slash → canonical (not US city /send-rakhi-to-* pages).
-      { source: "/rakhi-from-uk/", destination: "/rakhi-from-uk", statusCode: 301 },
-      { source: "/rakhi-from-canada/", destination: "/rakhi-from-canada", statusCode: 301 },
+      { source: "/cities/:slug", destination: "/gifts-to-:slug", statusCode: 301 },
+      { source: "/cities/:slug/", destination: "/gifts-to-:slug", statusCode: 301 },
+      { source: "/send-rakhi-to-:city", destination: "/gifts-to-:city", statusCode: 301 },
+      { source: "/send-rakhi-to-:city/", destination: "/gifts-to-:city", statusCode: 301 },
+      { source: "/raksha-bandhan", destination: "/flowers", statusCode: 301 },
+      { source: "/raksha-bandhan/", destination: "/flowers", statusCode: 301 },
+      { source: "/send-rakhi-from-india", destination: "/", statusCode: 301 },
+      { source: "/send-rakhi-from-india/", destination: "/", statusCode: 301 },
+      { source: "/rakhi-from-canada", destination: "/flowers", statusCode: 301 },
+      { source: "/rakhi-from-canada/", destination: "/flowers", statusCode: 301 },
+      { source: "/rakhi-from-uk", destination: "/flowers", statusCode: 301 },
+      { source: "/rakhi-from-uk/", destination: "/flowers", statusCode: 301 },
       { source: "/sitemap.rss", destination: "/sitemap.xml", statusCode: 301 },
     ];
   },
   async rewrites() {
     return [
       ...categoryRewriteRules(),
-      // All city/state landings (express + secondary + other) → one dynamic handler.
-      { source: "/send-rakhi-to-:slug", destination: "/locations/:slug" },
+      { source: "/gifts-to-:slug", destination: "/locations/:slug" },
     ];
   },
   images: {
-    remotePatterns: [
-      { protocol: "https", hostname: "**" },
-    ],
+    remotePatterns: [{ protocol: "https", hostname: "**" }],
   },
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,

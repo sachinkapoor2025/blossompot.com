@@ -8,12 +8,11 @@ export function WhyTrustUsSection() {
         <div className="text-center max-w-2xl mx-auto mb-10">
           <p className="text-xs font-bold uppercase tracking-widest text-nav mb-2">{trustFacts.seasonLabel}</p>
           <h2 id="why-trust-heading" className="text-2xl md:text-3xl font-bold text-primary mb-3">
-            Why sisters trust BlossomPot for USA delivery
+            Why customers trust BlossomPot
           </h2>
           <p className="text-slate-600 text-sm md:text-base leading-relaxed">
-            Built with deep care for Rakhi and Raksha Bandhan traditions, BlossomPot offers{" "}
-            {trustFacts.catalog.toLowerCase()} and the same domestic US shipping advantage sisters expect for
-            festival day. {trustFacts.fulfillment}.
+            BlossomPot delivers {trustFacts.catalog.toLowerCase()}. {trustFacts.fulfillment}.{" "}
+            {trustFacts.support}.
           </p>
         </div>
 

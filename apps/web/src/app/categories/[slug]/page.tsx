@@ -14,12 +14,7 @@ import { categoryHref } from "@/lib/category-urls";
 import { loadProductsByCategory } from "@/lib/product-loader";
 import { categoryOrder } from "@/lib/site";
 import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, pageMetadata } from "@/lib/seo";
-import {
-  isRakhiSetSizeCategory,
-  rakhiSetCategoryLabel,
-  type Product,
-  type Category,
-} from "@blossompot/shared";
+import { type Product, type Category } from "@blossompot/shared";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -62,18 +57,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const data = await api<{ category: Category }>(`/categories/${slug}`, { revalidate: 3600 });
     const c = data.category;
     return pageMetadata({
-      title: `${c.name} — Send to USA | Free Shipping`,
+      title: `${c.name} | USA Delivery | BlossomPot`,
       description:
         c.seoDescription ??
         c.description?.slice(0, 160) ??
-        `Shop ${c.name} with fast USA delivery from BlossomPot. Premium designs, roli chawal included.`,
+        `Shop ${c.name} with fast USA delivery from BlossomPot — flowers, cakes, and thoughtful gifts.`,
       path,
     });
   } catch {
-    const setLabel = rakhiSetCategoryLabel(slug);
+    const label = slug.replace(/-/g, " ");
     return pageMetadata({
-      title: `${setLabel ?? slug.replace(/-/g, " ")} Rakhi USA`,
-      description: `Shop ${setLabel ?? slug.replace(/-/g, " ")} with USA delivery from BlossomPot.`,
+      title: `${label} | BlossomPot`,
+      description: `Shop ${label} with USA delivery from BlossomPot.`,
       path,
     });
   }
@@ -88,41 +83,23 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   let category: Category | null = null;
   let products: Product[] = [];
 
-  if (isRakhiSetSizeCategory(slug)) {
+  try {
+    const [catData, categoryProducts] = await Promise.all([
+      api<{ category: Category }>(`/categories/${slug}`, { revalidate: false }),
+      loadProductsByCategory(slug),
+    ]);
+    category = catData.category;
+    products = categoryProducts;
+  } catch {
     products = await loadProductsByCategory(slug);
-    const label = rakhiSetCategoryLabel(slug) ?? slug;
-    const now = new Date().toISOString();
-    category = {
-      slug,
-      name: label,
-      description: `Shop ${label} collections for brothers in the USA — multi-piece designer rakhi sets with fast domestic delivery.`,
-      sortOrder: 0,
-      published: true,
-      createdAt: now,
-      updatedAt: now,
-    };
-  } else {
-    try {
-      const [catData, categoryProducts] = await Promise.all([
-        api<{ category: Category }>(`/categories/${slug}`, { revalidate: false }),
-        loadProductsByCategory(slug),
-      ]);
-      category = catData.category;
-      products = categoryProducts;
-    } catch {
-      products = await loadProductsByCategory(slug);
-    }
   }
 
-  const name =
-    category?.name ??
-    rakhiSetCategoryLabel(slug) ??
-    (slug === "rakhi-hampers" ? "Rakhi Hamper" : slug.replace(/-/g, " "));
+  const name = category?.name ?? slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   const pageSeo = getCategoryPageSeo(slug);
-  const h1 = pageSeo?.h1 ?? `${name} — Send to USA`;
+  const h1 = pageSeo?.h1 ?? `${name} — USA Delivery`;
   const baseDescription =
     category?.description?.trim() ||
-    `Browse our ${name} collection — premium Rakhis delivered to all 50 US states. Order online from India, UK, Canada, or anywhere worldwide.`;
+    `Browse our ${name} collection — flowers, cakes, and thoughtful gifts with USA delivery from BlossomPot.`;
   const extra = getCategoryContent(slug);
   const rich = getCategoryRichContent(slug);
 
@@ -153,7 +130,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         <p className="text-slate-500">
           Products loading soon.{" "}
           <Link href="/products" className="text-nav hover:underline">
-            Browse all Rakhis
+            Browse all gifts
           </Link>
         </p>
       )}
@@ -197,15 +174,15 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             <ul className="grid sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-2 text-sm text-slate-600">
               <li className="flex gap-2">
                 <span className="text-nav shrink-0">✓</span>
-                Fast Rakhi delivery to all 50 US states (5–7 business days)
+                Nationwide USA delivery with clear shipping windows
               </li>
               <li className="flex gap-2">
                 <span className="text-nav shrink-0">✓</span>
-                Order from India, UK, Canada, Australia — we deliver inside USA
+                Order from the USA or abroad — we deliver to US addresses
               </li>
               <li className="flex gap-2">
                 <span className="text-nav shrink-0">✓</span>
-                Complimentary roli and chawal with most rakhis
+                Gift messages available on most products
               </li>
               <li className="flex gap-2">
                 <span className="text-nav shrink-0">✓</span>

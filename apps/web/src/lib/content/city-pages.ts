@@ -1,4 +1,4 @@
-/** SEO + LLM-friendly copy for USA city/state Rakhi delivery landing pages. */
+/** SEO + LLM-friendly copy for USA city/state gift delivery landing pages. */
 
 import { categoryHref } from "@/lib/category-urls";
 
@@ -20,29 +20,29 @@ export interface CityPageContent {
 
 const sharedCategories = [
   {
-    label: "Single Rakhi",
-    href: categoryHref("single-rakhi"),
-    text: "Traditional thread, Om, pearl, and designer rakhis with roli chawal.",
+    label: "Flowers",
+    href: categoryHref("flowers"),
+    text: "Fresh arrangements for birthdays, thank-yous, and everyday celebrations.",
   },
   {
-    label: "Rakhi Combo",
-    href: categoryHref("rakhi-combo"),
-    text: "Rakhi with Ferrero Rocher, Lindt, Hershey's, and gift sets.",
+    label: "Flower Bouquets",
+    href: categoryHref("flower-bouquets"),
+    text: "Signature bouquets designed for doorstep surprises.",
   },
   {
-    label: "Rakhi Hamper",
-    href: categoryHref("rakhi-hampers"),
-    text: "Gift boxes with rakhi, sweets, dry fruits, and festive packaging.",
+    label: "Cakes",
+    href: categoryHref("cakes"),
+    text: "Chocolate, red velvet, and designer celebration cakes.",
   },
   {
-    label: "Bhaiya Bhabhi Rakhi",
-    href: categoryHref("bhaiya-bhabhi-rakhi"),
-    text: "Matching sets for brother and sister-in-law including Lumba.",
+    label: "Gift Hampers",
+    href: categoryHref("gift-hampers"),
+    text: "Curated boxes with treats, sweets, and thoughtful extras.",
   },
   {
-    label: "Kids Rakhi",
-    href: categoryHref("kids-rakhi"),
-    text: "Cartoon and colorful designs for younger brothers.",
+    label: "Birthday Gifts",
+    href: categoryHref("birthday-gifts"),
+    text: "Flowers, cakes, and combos made for birthday moments.",
   },
 ] as const;
 
@@ -56,17 +56,17 @@ function stateContent(
     slug,
     label,
     region: "state",
-    headline: `Send Rakhi to ${label}, USA — Online Delivery for Raksha Bandhan`,
-    metaExtra: `Premium rakhi delivery to ${label} in 5–7 business days. Order from India, UK, Canada worldwide.`,
+    headline: `Send Gifts to ${label}, USA — Flowers, Cakes & More`,
+    metaExtra: `Premium flower, cake, and gift delivery to ${label}. Order online for USA delivery.`,
     intro: [
-      `Celebrating Raksha Bandhan when your brother lives in ${label}? BlossomPot delivers premium rakhis across every city and town in ${label} — from major metros to suburban neighborhoods. Sisters in India, the UK, Canada, Australia, and worldwide order on our site; we ship domestically within the United States so your brother receives his rakhi without international customs delays.`,
-      `Choose single rakhis, designer sets, kids rakhis, Bhaiya Bhabhi pairs, Lumba rakhis, and chocolate combos. Most orders include complimentary roli (kumkum) and chawal (rice) for the traditional tilak ceremony. ${extraIntro ?? ""}`.trim(),
+      `Looking to send flowers, cakes, or thoughtful gifts to ${label}? BlossomPot delivers celebration-ready gifts across every city and town in ${label} — from major metros to suburban neighborhoods.`,
+      `Choose fresh flowers, signature bouquets, celebration cakes, gift hampers, and occasion collections. Most products support a personal gift message at checkout. ${extraIntro ?? ""}`.trim(),
     ],
     delivery: {
-      heading: `Rakhi Delivery Across ${label}`,
+      heading: `Gift Delivery Across ${label}`,
       paragraphs: [
-        `BlossomPot ships to all addresses in ${label} — home, apartment, office, or university dorm. Standard delivery takes 5–7 business days after dispatch. Orders placed before our daily cut-off ship the same business day when inventory allows.`,
-        `We use trusted US carriers for tracking and reliable last-mile delivery. You'll receive order confirmation by email, and our support team can help with address verification or delivery questions before Raksha Bandhan.`,
+        `BlossomPot ships to homes, apartments, offices, and university addresses across ${label}. Nationwide delivery covers all ZIP codes; faster windows may be available to major metros.`,
+        `You'll receive order confirmation by email, and our support team can help with address verification or delivery questions before the celebration.`,
       ],
     },
     areas: {
@@ -74,42 +74,42 @@ function stateContent(
       items: areas,
     },
     whyUs: {
-      heading: `Why Sisters Choose BlossomPot for ${label} Delivery`,
+      heading: `Why Customers Choose BlossomPot for ${label} Delivery`,
       bullets: [
-        "Domestic USA shipping — no customs hold for your brother",
-        "Premium packaging with roli chawal on most rakhis",
+        "Flowers, cakes, and hampers in one marketplace",
+        "Clear USA delivery expectations",
         "Pay in USD (Stripe) or INR (Razorpay) from anywhere",
-        "Rakhi combos with Ferrero Rocher, Lindt, and Hershey's",
+        "Gift messages and occasion-ready packaging",
         "WhatsApp and email support for order help",
-        "Trusted by sisters sending rakhi from India to USA",
+        "Trusted for birthday, anniversary, and everyday gifting",
       ],
     },
     howTo: {
-      heading: `How to Send Rakhi to Your Brother in ${label}`,
+      heading: `How to Send a Gift to Someone in ${label}`,
       steps: [
-        "Browse rakhis above or shop by category — Single, Combo, Kids, Bhaiya Bhabhi, Lumba.",
-        "Add to cart and enter your brother's full US address in " + label + " at checkout.",
+        "Browse gifts above or shop by category — Flowers, Cakes, Bouquets, Hampers.",
+        "Add to cart and enter the recipient's full US address in " + label + " at checkout.",
         "Pay securely with Stripe (USD) or Razorpay (INR).",
-        "We pack and ship within the USA — delivery in 5–7 business days.",
-        "Your brother receives a beautifully packed rakhi ready for Raksha Bandhan.",
+        "We pack carefully and ship for USA delivery.",
+        "Your recipient receives a beautifully presented gift ready to celebrate.",
       ],
     },
     faqs: [
       {
-        q: `How long does rakhi delivery take in ${label}?`,
-        a: `Most orders reach ${label} addresses in 5–7 business days after dispatch. Order early for Raksha Bandhan 2026 (August 28, 2026) to allow extra time.`,
+        q: `How long does gift delivery take in ${label}?`,
+        a: `Most orders reach ${label} addresses within standard nationwide windows after dispatch. Same-day options may be available in select cities when you order before the local cut-off.`,
       },
       {
-        q: `Can I send rakhi to ${label} from India?`,
-        a: `Yes. Enter your brother's ${label} shipping address at checkout. We accept orders worldwide and deliver domestically within the United States.`,
+        q: `Can I send gifts to ${label} from outside the USA?`,
+        a: `Yes. Enter the recipient's ${label} shipping address at checkout. We accept orders worldwide and deliver within the United States.`,
       },
       {
         q: `Do you deliver to all cities in ${label}?`,
         a: `Yes. We deliver to every city, town, and ZIP code in ${label} as part of our all-50-states USA coverage.`,
       },
       {
-        q: `Is roli and chawal included?`,
-        a: "Most single rakhis and many combos include complimentary roli and chawal for the Raksha Bandhan tilak ritual.",
+        q: `Can I add a gift message?`,
+        a: "Yes. Most products support a personal gift message and delivery date preferences at checkout.",
       },
     ],
     relatedCategories: [...sharedCategories],
@@ -117,38 +117,44 @@ function stateContent(
 }
 
 const cityPages: CityPageContent[] = [
-  stateContent("california", "California", [
-    "Los Angeles",
-    "San Francisco Bay Area",
-    "San Diego",
-    "San Jose",
-    "Sacramento",
-    "Fresno",
-    "Irvine",
-    "Oakland",
-    "Long Beach",
-    "Silicon Valley",
-  ], "California has one of the largest Indian-American communities in the USA — perfect for sending rakhi to brothers in LA, the Bay Area, or San Diego."),
-  stateContent("new-york", "New York", [
-    "New York City (Manhattan, Brooklyn, Queens)",
-    "Buffalo",
-    "Rochester",
-    "Albany",
-    "Syracuse",
-    "Yonkers",
-    "Long Island",
-    "Westchester",
-  ], "From NYC boroughs to upstate communities, we deliver rakhi across New York State."),
-  stateContent("texas", "Texas", [
-    "Houston",
-    "Dallas",
-    "Austin",
-    "San Antonio",
-    "Fort Worth",
-    "Plano",
-    "Irving",
-    "Arlington",
-  ], "Texas siblings stay connected on Raksha Bandhan with reliable rakhi delivery to Houston, Dallas, Austin, and beyond."),
+  stateContent(
+    "california",
+    "California",
+    [
+      "Los Angeles",
+      "San Francisco Bay Area",
+      "San Diego",
+      "San Jose",
+      "Sacramento",
+      "Fresno",
+      "Irvine",
+      "Oakland",
+      "Long Beach",
+      "Silicon Valley",
+    ],
+    "California is one of our most popular delivery states — perfect for sending flowers and cakes to LA, the Bay Area, or San Diego."
+  ),
+  stateContent(
+    "new-york",
+    "New York",
+    [
+      "New York City (Manhattan, Brooklyn, Queens)",
+      "Buffalo",
+      "Rochester",
+      "Albany",
+      "Syracuse",
+      "Yonkers",
+      "Long Island",
+      "Westchester",
+    ],
+    "From NYC boroughs to upstate communities, we deliver gifts across New York State."
+  ),
+  stateContent(
+    "texas",
+    "Texas",
+    ["Houston", "Dallas", "Austin", "San Antonio", "Fort Worth", "Plano", "Irving", "Arlington"],
+    "Send flowers, cakes, and hampers to Houston, Dallas, Austin, and beyond."
+  ),
   stateContent("florida", "Florida", [
     "Miami",
     "Orlando",
@@ -158,32 +164,28 @@ const cityPages: CityPageContent[] = [
     "West Palm Beach",
     "Tallahassee",
   ]),
-  stateContent("new-jersey", "New Jersey", [
-    "Newark",
-    "Jersey City",
-    "Edison",
-    "Princeton",
-    "Hoboken",
-    "Woodbridge",
-    "Iselin",
-    "Fort Lee",
-  ], "Many sisters in India send rakhi to brothers in New Jersey's vibrant Indian-American communities — Edison, Iselin, and Jersey City are popular delivery areas."),
+  stateContent(
+    "new-jersey",
+    "New Jersey",
+    ["Newark", "Jersey City", "Edison", "Princeton", "Hoboken", "Woodbridge", "Iselin", "Fort Lee"],
+    "Popular delivery areas include Edison, Jersey City, and Hoboken."
+  ),
   {
     slug: "los-angeles",
     label: "Los Angeles",
     region: "city",
     state: "California",
-    headline: "Send Rakhi to Los Angeles, California — USA Delivery",
-    metaExtra: "Send rakhi to LA, Hollywood, Pasadena, Irvine & all of Los Angeles County. 5–7 day USA delivery.",
+    headline: "Send Gifts to Los Angeles, California — Flowers & Cakes",
+    metaExtra: "Send flowers, cakes, and gifts to LA, Hollywood, Pasadena, Irvine & Los Angeles County.",
     intro: [
-      "Los Angeles is home to one of America's largest Indian diaspora communities. If your brother lives in LA — whether in Downtown, the San Fernando Valley, West LA, or Orange County nearby — BlossomPot makes Raksha Bandhan feel close despite the distance.",
-      "Order from India, the UK, Canada, or anywhere in the world. We ship domestically within the USA, delivering premium rakhis to Los Angeles addresses in 5–7 business days with tracking and careful packaging.",
+      "Los Angeles celebrations deserve beautiful gifts. If your recipient lives in LA — Downtown, the San Fernando Valley, West LA, or nearby Orange County — BlossomPot makes flower and cake delivery easy.",
+      "Order from anywhere in the world. We fulfill for USA delivery to Los Angeles addresses with careful packaging and clear tracking.",
     ],
     delivery: {
-      heading: "Rakhi Delivery in Los Angeles & Southern California",
+      heading: "Gift Delivery in Los Angeles & Southern California",
       paragraphs: [
-        "We deliver to all Los Angeles neighborhoods, LA County cities, and nearby Southern California areas. Standard shipping is 5–7 business days. Same-day dispatch applies to orders placed before our daily cut-off.",
-        "Whether your brother is in an apartment near UCLA, a home in Pasadena, or an office in Downtown LA, enter the complete US address at checkout for reliable delivery.",
+        "We deliver to Los Angeles neighborhoods, LA County cities, and nearby Southern California areas. Same-day options may appear when you order before the local cut-off.",
+        "Whether the destination is an apartment near UCLA, a home in Pasadena, or an office in Downtown LA, enter the complete US address at checkout.",
       ],
     },
     areas: {
@@ -198,37 +200,37 @@ const cityPages: CityPageContent[] = [
       ],
     },
     whyUs: {
-      heading: "Why LA Sisters & Brothers Trust BlossomPot",
+      heading: "Why LA Customers Trust BlossomPot",
       bullets: [
-        "Fast domestic USA shipping to Los Angeles",
-        "Designer rakhis and chocolate combos",
-        "Roli chawal included on most orders",
-        "Order from India with INR payment via Razorpay",
+        "Flowers, cakes, and gift hampers for every occasion",
+        "Clear delivery messaging for Southern California",
+        "Gift messages on most products",
+        "USD or INR checkout",
         "Dedicated WhatsApp support",
       ],
     },
     howTo: {
-      heading: "Send Rakhi to Los Angeles in 5 Easy Steps",
+      heading: "Send a Gift to Los Angeles in 5 Easy Steps",
       steps: [
-        "Pick a rakhi from our LA collection above.",
-        "Add to cart and enter your brother's Los Angeles address.",
+        "Pick flowers, cakes, or a hamper from the collection above.",
+        "Add to cart and enter the Los Angeles delivery address.",
         "Choose USD or INR payment at checkout.",
-        "We ship within the USA — no international customs.",
-        "Brother receives rakhi in 5–7 business days.",
+        "We pack carefully for a premium unboxing.",
+        "Recipient receives the gift ready to celebrate.",
       ],
     },
     faqs: [
       {
-        q: "Do you deliver rakhi to Los Angeles from India?",
-        a: "Yes. Order on BlossomPot.com from India, enter the LA delivery address, and pay in INR. We ship domestically within America.",
+        q: "Do you deliver gifts to Los Angeles from outside the USA?",
+        a: "Yes. Order on BlossomPot.com, enter the LA delivery address, and pay in USD or INR. We fulfill for delivery inside America.",
       },
       {
-        q: "How fast is rakhi delivery to LA?",
-        a: "Typically 5–7 business days after dispatch to Los Angeles and most Southern California addresses.",
+        q: "How fast is gift delivery to LA?",
+        a: "Nationwide windows apply after dispatch; same-day options may be available in select LA areas when ordered before cut-off.",
       },
       {
-        q: "Can I send rakhi with chocolates to Los Angeles?",
-        a: "Yes. Browse our Rakhi Combo collection for sets with Ferrero Rocher, Lindt, and Hershey's.",
+        q: "Can I send flowers with cakes to Los Angeles?",
+        a: "Yes. Browse flowers, cakes, and combo-style gifts to build a complete celebration package.",
       },
     ],
     relatedCategories: [...sharedCategories],
@@ -238,17 +240,17 @@ const cityPages: CityPageContent[] = [
     label: "San Francisco",
     region: "city",
     state: "California",
-    headline: "Send Rakhi to San Francisco & Bay Area — USA Delivery",
-    metaExtra: "Rakhi delivery to San Francisco, Oakland, San Jose & Bay Area. Order from India worldwide.",
+    headline: "Send Gifts to San Francisco & Bay Area — USA Delivery",
+    metaExtra: "Flower, cake, and gift delivery to San Francisco, Oakland, San Jose & Bay Area.",
     intro: [
-      "The San Francisco Bay Area — including San Francisco, Oakland, San Jose, and Silicon Valley — has a thriving Indian-American community. BlossomPot helps sisters send rakhi to brothers across the Bay Area with premium designs and dependable US delivery.",
-      "Order from anywhere worldwide. We fulfill and ship within the United States, so your Bay Area delivery avoids international shipping uncertainty.",
+      "The San Francisco Bay Area — including San Francisco, Oakland, San Jose, and Silicon Valley — is a popular destination for celebration gifts. BlossomPot helps you send flowers and cakes with premium presentation.",
+      "Order from anywhere worldwide. We fulfill for United States delivery so Bay Area recipients get a smooth domestic experience.",
     ],
     delivery: {
-      heading: "Bay Area Rakhi Delivery",
+      heading: "Bay Area Gift Delivery",
       paragraphs: [
-        "We deliver to San Francisco city, the Peninsula, East Bay (Oakland, Fremont), and South Bay (San Jose, Sunnyvale). Delivery takes 5–7 business days after dispatch.",
-        "Tech professionals and students in the Bay Area often receive rakhis from sisters abroad — we pack orders carefully for a festival-ready unboxing.",
+        "We deliver to San Francisco city, the Peninsula, East Bay (Oakland, Fremont), and South Bay (San Jose, Sunnyvale).",
+        "Professionals and students in the Bay Area often receive birthday and thank-you gifts — we pack orders carefully for a premium unboxing.",
       ],
     },
     areas: {
@@ -258,21 +260,21 @@ const cityPages: CityPageContent[] = [
     whyUs: {
       heading: "Why Choose BlossomPot for San Francisco Delivery",
       bullets: [
-        "Bay Area delivery in 5–7 business days",
-        "Premium designer and traditional rakhis",
-        "Combos with premium chocolates",
+        "Bay Area coverage with clear delivery expectations",
+        "Premium flowers, bouquets, and cakes",
+        "Combos with chocolates and curated hampers",
         "INR and USD checkout",
         "Email and WhatsApp order support",
       ],
     },
     howTo: {
-      heading: "How to Send Rakhi to San Francisco",
+      heading: "How to Send a Gift to San Francisco",
       steps: [
-        "Select a rakhi from our shop.",
+        "Select flowers, cakes, or a gift set from our shop.",
         "Enter the Bay Area US address at checkout.",
         "Pay with Stripe or Razorpay.",
-        "We ship domestically within the USA.",
-        "Delivery in 5–7 business days.",
+        "We fulfill for USA delivery.",
+        "Recipient enjoys a celebration-ready gift.",
       ],
     },
     faqs: [
@@ -281,8 +283,8 @@ const cityPages: CityPageContent[] = [
         a: "Yes. We deliver to San Jose, Sunnyvale, Mountain View, Palo Alto, and all Bay Area cities.",
       },
       {
-        q: "Can I order rakhi for my brother in SF from Delhi?",
-        a: "Yes. BlossomPot accepts orders from India and worldwide with delivery to San Francisco addresses.",
+        q: "Can I order gifts for someone in SF from abroad?",
+        a: "Yes. BlossomPot accepts orders worldwide with delivery to San Francisco addresses.",
       },
     ],
     relatedCategories: [...sharedCategories],
@@ -292,17 +294,17 @@ const cityPages: CityPageContent[] = [
     label: "Chicago",
     region: "city",
     state: "Illinois",
-    headline: "Send Rakhi to Chicago, Illinois — USA Online Delivery",
-    metaExtra: "Send rakhi to Chicago, Naperville, Schaumburg & Chicagoland. Fast USA delivery from BlossomPot.",
+    headline: "Send Gifts to Chicago, Illinois — Flowers & Cakes Online",
+    metaExtra: "Send flowers, cakes, and gifts to Chicago, Naperville, Schaumburg & Chicagoland.",
     intro: [
-      "Chicago and the greater Chicagoland area — including Naperville, Schaumburg, and Evanston — have strong Indian-American communities. Send rakhi to your brother in Chicago with BlossomPot's premium collection and reliable domestic US shipping.",
-      "Sisters across India and the diaspora order here for Raksha Bandhan. We deliver to Illinois addresses in 5–7 business days.",
+      "Chicago and greater Chicagoland — including Naperville, Schaumburg, and Evanston — are popular gift destinations. Send flowers, cakes, and hampers with BlossomPot.",
+      "Customers across the USA and abroad order here for birthdays and anniversaries. We deliver to Illinois addresses with careful packaging.",
     ],
     delivery: {
-      heading: "Chicago & Illinois Rakhi Delivery",
+      heading: "Chicago & Illinois Gift Delivery",
       paragraphs: [
-        "We ship to Chicago proper, suburban Cook County, DuPage County, and greater Illinois. Orders dispatch quickly and arrive in 5–7 business days.",
-        "Winter or summer, your rakhi arrives beautifully packed with roli chawal on most designs — ready for the Raksha Bandhan ceremony.",
+        "We ship to Chicago proper, suburban Cook County, DuPage County, and greater Illinois.",
+        "Your gift arrives beautifully packed and ready for the celebration — add a personal message at checkout.",
       ],
     },
     areas: {
@@ -312,27 +314,27 @@ const cityPages: CityPageContent[] = [
     whyUs: {
       heading: "Why Chicago Families Choose BlossomPot",
       bullets: [
-        "Illinois delivery in 5–7 business days",
-        "Wide range of rakhis and gift combos",
-        "Order from India with ease",
+        "Illinois delivery with clear expectations",
+        "Wide range of flowers, cakes, and gift combos",
+        "Order from the USA or abroad with ease",
         "Secure online payment",
-        "Festival-ready packaging",
+        "Celebration-ready packaging",
       ],
     },
     howTo: {
-      heading: "Send Rakhi to Chicago",
+      heading: "Send a Gift to Chicago",
       steps: [
-        "Browse and add rakhis to cart.",
+        "Browse and add gifts to cart.",
         "Enter Chicago-area US address.",
         "Checkout with USD or INR.",
-        "Domestic US shipping — tracked delivery.",
-        "Brother receives rakhi before or on Raksha Bandhan.",
+        "Tracked USA delivery.",
+        "Recipient receives a celebration-ready gift.",
       ],
     },
     faqs: [
       {
-        q: "How long to deliver rakhi to Chicago?",
-        a: "Typically 5–7 business days after dispatch to Chicago and most Illinois addresses.",
+        q: "How long to deliver gifts to Chicago?",
+        a: "Standard nationwide windows apply after dispatch to Chicago and most Illinois addresses.",
       },
       {
         q: "Do you deliver to Chicago suburbs?",
@@ -346,17 +348,17 @@ const cityPages: CityPageContent[] = [
     label: "Houston",
     region: "city",
     state: "Texas",
-    headline: "Send Rakhi to Houston, Texas — USA Rakhi Delivery",
-    metaExtra: "Rakhi delivery to Houston, Sugar Land, Katy & Greater Houston. Order from India to USA.",
+    headline: "Send Gifts to Houston, Texas — Flowers & Cakes",
+    metaExtra: "Flower, cake, and gift delivery to Houston, Sugar Land, Katy & Greater Houston.",
     intro: [
-      "Houston is one of the fastest-growing Indian-American hubs in Texas. Whether your brother lives in Sugar Land, Katy, the Energy Corridor, or central Houston, BlossomPot delivers premium rakhis for Raksha Bandhan with dependable US shipping.",
-      "Order from India, the UK, Canada, or anywhere — we ship domestically within America to Houston addresses in 5–7 business days.",
+      "Houston is one of Texas's busiest celebration cities. Whether your recipient lives in Sugar Land, Katy, the Energy Corridor, or central Houston, BlossomPot delivers flowers and cakes with dependable USA shipping.",
+      "Order from anywhere — we fulfill for delivery inside America to Houston addresses.",
     ],
     delivery: {
       heading: "Houston & Greater Texas Delivery",
       paragraphs: [
-        "We deliver throughout Houston, Harris County, and nearby Texas communities. Standard delivery is 5–7 business days with email confirmation.",
-        "Popular for sisters sending rakhi from India to brothers working in Houston's tech, medical, and energy sectors.",
+        "We deliver throughout Houston, Harris County, and nearby Texas communities with email confirmation.",
+        "Popular for birthdays, anniversaries, and thank-you gifts to Houston's tech, medical, and energy communities.",
       ],
     },
     areas: {
@@ -366,21 +368,21 @@ const cityPages: CityPageContent[] = [
     whyUs: {
       heading: "Why Houston Orders BlossomPot",
       bullets: [
-        "Texas delivery in 5–7 business days",
-        "Kids, Bhaiya Bhabhi, and combo rakhis",
-        "Roli chawal on most orders",
-        "INR payment for India-based sisters",
+        "Texas delivery with clear timelines",
+        "Flowers, cakes, and gift hampers",
+        "Gift messages on most products",
+        "INR payment for international shoppers",
         "Responsive customer support",
       ],
     },
     howTo: {
-      heading: "How to Send Rakhi to Houston",
+      heading: "How to Send a Gift to Houston",
       steps: [
-        "Choose rakhis from our Houston collection.",
+        "Choose flowers, cakes, or a hamper.",
         "Enter Houston US address at checkout.",
         "Pay securely online.",
-        "We ship within the USA.",
-        "Delivery in 5–7 business days.",
+        "We fulfill for USA delivery.",
+        "Recipient enjoys a celebration-ready gift.",
       ],
     },
     faqs: [
@@ -389,8 +391,8 @@ const cityPages: CityPageContent[] = [
         a: "Yes. We deliver to all Houston suburbs including Sugar Land, Katy, Pearland, and The Woodlands.",
       },
       {
-        q: "Can I send rakhi from Mumbai to Houston?",
-        a: "Yes. Order on BlossomPot.com, enter the Houston address, and pay in INR via Razorpay.",
+        q: "Can I send gifts from abroad to Houston?",
+        a: "Yes. Order on BlossomPot.com, enter the Houston address, and pay in USD or INR.",
       },
     ],
     relatedCategories: [...sharedCategories],

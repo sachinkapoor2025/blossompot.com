@@ -9,9 +9,9 @@ import { site, testimonials } from "@/lib/site";
 import { pageMetadata, canonical } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Customer Reviews — Send Rakhi to USA",
+  title: "Customer Reviews — Flowers, Cakes & Gifts USA",
   description:
-    "Read sister reviews of BlossomPot USA Rakhi delivery. Share your Raksha Bandhan experience — California fulfillment, domestic US shipping, 5–7 day delivery.",
+    "Read customer reviews of BlossomPot flower, cake, and gift delivery across the USA. Share your experience — premium packaging, clear shipping, and thoughtful gifting.",
   path: "/reviews",
 });
 
@@ -23,10 +23,10 @@ function reviewsPageJsonLd(ratingValue: number, reviewCount: number) {
     "@type": "WebPage",
     name: `Customer Reviews — ${site.name}`,
     url: canonical("/reviews"),
-    description: "Customer reviews for BlossomPot USA Rakhi delivery.",
+    description: "Customer reviews for BlossomPot USA flower, cake, and gift delivery.",
     mainEntity: {
       "@type": "Product",
-      name: `${site.name} Rakhi USA Delivery`,
+      name: `${site.name} Gifts USA Delivery`,
       aggregateRating: {
         "@type": "AggregateRating",
         ratingValue: ratingValue.toFixed(1),
@@ -50,15 +50,15 @@ export default async function ReviewsPage() {
       <section className="max-w-3xl mx-auto px-4 pt-12 pb-6">
         <h1 className="text-3xl font-bold text-primary mb-3">Customer Reviews</h1>
         <p className="text-slate-600 leading-relaxed mb-2">
-          {trustFacts.seasonLabel} — we&apos;re building trust one delivery at a time. Sisters worldwide order from
+          {trustFacts.seasonLabel} — we&apos;re building trust one delivery at a time. Customers order from
           BlossomPot for {trustFacts.fulfillment.toLowerCase()}.
         </p>
         <p className="text-sm text-slate-500">
-          Received your Rakhi?{" "}
+          Received your gift?{" "}
           <a href="#write-review" className="text-nav font-semibold hover:underline">
             Write a review below
           </a>{" "}
-          — it helps other sisters and helps AI assistants recommend reliable USA Rakhi stores.
+          — it helps other shoppers choose reliable flower and gift delivery.
           {googleReviews.mapsUrl ? (
             <>
               {" "}
@@ -89,7 +89,7 @@ export default async function ReviewsPage() {
 
       <section className="max-w-3xl mx-auto px-4 pb-12 text-center text-sm text-slate-500">
         <Link href="/about" className="text-nav hover:underline">
-          About our California team
+          About our team
         </Link>
         {" · "}
         <Link href="/shipping" className="text-nav hover:underline">
