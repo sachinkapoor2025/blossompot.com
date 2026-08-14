@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Product } from "@blossompot/shared";
 import { HomeProductCard } from "@/components/HomeProductCard";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
@@ -13,15 +14,13 @@ import {
   geoPageTitle,
   getGeoLocation,
   allGeoLocations,
+  locationLabel,
 } from "@/lib/content/geo/locations";
 import { getCatalogProducts, mergeProductsPreferExisting } from "@/lib/catalog-fallback";
 import { shuffleForCity } from "@/lib/city-products";
 import { loadProducts } from "@/lib/product-loader";
 import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, pageMetadata, serviceAreaJsonLd } from "@/lib/seo";
 import { categoryHref } from "@/lib/category-urls";
-import { site } from "@/lib/site";
-import type { Product } from "@blossompot/shared";
-import { getDeliveryPromise } from "@blossompot/shared";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -45,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const path = locationPublicPath(slug);
   return pageMetadata({
     title: geoPageTitle(geo),
-    description: geoPageDescription(geo).slice(0, 155),
+    description: geoPageDescription(geo),
     path,
     absoluteTitle: true,
   });
@@ -64,14 +63,14 @@ export default async function SeoLocationPage({ params }: Props) {
   }
   products = mergeProductsPreferExisting(products, getCatalogProducts());
   const cityProducts = shuffleForCity(products, slug);
-  const promise = getDeliveryPromise(null, null);
   const path = locationPublicPath(slug);
-  const place = geo.state ? `${geo.city}, ${geo.state}` : geo.city;
+  const place = locationLabel(geo);
+  const tzShort = geo.timezone.replace(/^America\//, "").replace(/_/g, " ");
 
   const crumbs = [
     { label: "Home", href: "/" },
     { label: "Shop", href: "/products" },
-    { label: `Gifts to ${geo.city}` },
+    { label: `Gifts to ${place}` },
   ];
 
   const categoryLinks = [
@@ -86,12 +85,40 @@ export default async function SeoLocationPage({ params }: Props) {
   const nearbyLinks = geo.nearbyAreas
     .map((name) => {
       const match = allGeoLocations().find(
-        (g) => g.city.toLowerCase() === name.toLowerCase() && g.slug !== slug
+        (g) => g.name.toLowerCase() === name.toLowerCase() && g.slug !== slug
       );
-      return match ? { label: match.city, href: locationPublicPath(match.slug) } : null;
+      return match ? { label: locationLabel(match), href: locationPublicPath(match.slug) } : null;
     })
     .filter(Boolean)
     .slice(0, 8) as { label: string; href: string }[];
+
+  // #region agent log
+  fetch("http://127.0.0.1:7653/ingest/6a11505c-4ea4-4815-8ca6-62fe058b4e02", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "388539" },
+    body: JSON.stringify({
+      sessionId: "388539",
+      runId: "geo-hotfix",
+      hypothesisId: "H2",
+      location: "locations/[slug]/page.tsx",
+      message: "page render labels",
+      data: {
+        slug,
+        type: geo.type,
+        place,
+        title: geoPageTitle(geo),
+        h1: geoPageH1(geo),
+        description: geoPageDescription(geo),
+        hasCaliforniaCalifornia: /California,\s*California/i.test(
+          `${place} ${geoPageTitle(geo)} ${geoPageH1(geo)} ${geoPageDescription(geo)}`
+        ),
+        hasEstDate: /Est\.\s*[A-Z][a-z]{2}\s+\d/.test(geoPageDescription(geo)),
+        rakhiFooterRemoved: true,
+      },
+      timestamp: Date.now(),
+    }),
+  }).catch(() => {});
+  // #endregion
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
@@ -101,9 +128,9 @@ export default async function SeoLocationPage({ params }: Props) {
             crumbs.map((c) => ({ name: c.label, path: c.href ?? path }))
           ),
           faqJsonLd(geo.localFaqs),
-          serviceAreaJsonLd({ label: geo.city, slug, state: geo.state || undefined }),
+          serviceAreaJsonLd({ label: place, slug, state: geo.type === "city" ? geo.state : undefined }),
           itemListJsonLd(
-            `Gifts to ${geo.city}`,
+            `Gifts to ${place}`,
             cityProducts.slice(0, 24).map((p) => ({
               name: p.name,
               path: `/products/${p.slug}`,
@@ -117,11 +144,10 @@ export default async function SeoLocationPage({ params }: Props) {
 
       <div className="mb-8 rounded-xl border border-primary/15 bg-petal/80 px-4 py-3 text-sm text-slate-800">
         <p className="font-semibold text-primary">
-          Order by {geo.cutoffTimeLocal} local ({geo.timezone.replace("America/", "")}) for
-          same-day eligible ZIPs in {geo.city}
+          Order by {geo.cutoffTimeLocal} local ({tzShort}) for same-day eligible ZIPs in {place}
         </p>
         <p className="mt-1 text-slate-600">
-          Delivery window: {geo.deliveryWindow}. Standard USA estimate: {promise.copy.label}.
+          Delivery window: {geo.deliveryWindow}. Standard USA shipping typically 5–7 business days.
         </p>
         {geo.nearbyAreas.length > 0 && (
           <p className="mt-1 text-slate-600">
@@ -174,7 +200,7 @@ export default async function SeoLocationPage({ params }: Props) {
 
       <section className="mt-12">
         <h2 className="text-xl font-bold text-primary mb-4">
-          Frequently asked questions — {geo.city}
+          Frequently asked questions — {place}
         </h2>
         <div className="space-y-4">
           {geo.localFaqs.map((f) => (
@@ -182,14 +208,6 @@ export default async function SeoLocationPage({ params }: Props) {
           ))}
         </div>
       </section>
-
-      <p className="mt-10 text-sm text-slate-500">
-        Looking for seasonal Raksha Bandhan gifts? Visit our{" "}
-        <Link href="/flowers" className="text-nav hover:underline">
-          flowers collection
-        </Link>{" "}
-        or contact {site.name} support.
-      </p>
     </div>
   );
 }

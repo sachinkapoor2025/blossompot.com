@@ -1,31 +1,23 @@
 /**
  * Geo config for /gifts-to-{slug} pages.
- * Every published location must have nearbyAreas, cutoffTimeLocal, and localFaqs
- * (enriched from seo-locations.data.json + regional defaults).
+ * Display strings MUST go through locationLabel() — never `${name}, ${state}`.
  */
 import {
   getSeoLocation,
   seoLocations,
   type SeoLocation,
 } from "@/lib/content/seo-data";
-import { getDeliveryPromise } from "@blossompot/shared";
+import {
+  type GeoFaq,
+  type GeoLocation,
+  geoPageDescription,
+  geoPageH1,
+  geoPageTitle,
+  locationLabel,
+} from "./location-label";
 
-export type GeoFaq = { q: string; a: string };
-
-export type GeoLocation = {
-  slug: string;
-  city: string;
-  state: string;
-  stateAbbr: string;
-  timezone: string;
-  cutoffTimeLocal: string;
-  deliveryWindow: string;
-  nearbyAreas: string[];
-  zipPrefixes: string[];
-  localFaqs: GeoFaq[];
-  introParagraph: string;
-  region: "city" | "state";
-};
+export type { GeoFaq, GeoLocation };
+export { geoPageDescription, geoPageH1, geoPageTitle, locationLabel };
 
 const STATE_ABBR: Record<string, string> = {
   Alabama: "AL",
@@ -79,6 +71,7 @@ const STATE_ABBR: Record<string, string> = {
   Wisconsin: "WI",
   Wyoming: "WY",
   "District of Columbia": "DC",
+  "Puerto Rico": "PR",
 };
 
 const STATE_TZ: Record<string, string> = {
@@ -143,8 +136,8 @@ const ZIP_PREFIX: Record<string, string[]> = {
 };
 
 function stateAbbr(state: string | null | undefined, name: string): string {
-  if (state && STATE_ABBR[state]) return STATE_ABBR[state];
-  if (STATE_ABBR[name]) return STATE_ABBR[name];
+  if (state && STATE_ABBR[state]) return STATE_ABBR[state]!;
+  if (STATE_ABBR[name]) return STATE_ABBR[name]!;
   return "";
 }
 
@@ -152,33 +145,35 @@ function timezoneFor(state: string | null | undefined, name: string): string {
   return STATE_TZ[state ?? ""] || STATE_TZ[name] || "America/New_York";
 }
 
-function buildFaqs(city: string, state: string, cutoff: string, nearby: string[]): GeoFaq[] {
-  const place = state ? `${city}, ${state}` : city;
+function buildFaqs(geo: Pick<GeoLocation, "type" | "name" | "stateAbbr" | "cutoffTimeLocal">, nearby: string[]): GeoFaq[] {
+  const place = locationLabel(geo);
   const nearbyText = nearby.slice(0, 3).join(", ");
   return [
     {
-      q: `What is the same-day cut-off for gifts to ${city}?`,
-      a: `For same-day eligible ZIP codes in and around ${place}, order by ${cutoff} local time. Standard USA orders outside same-day coverage typically arrive in 5–7 business days.`,
+      q: `What is the same-day cut-off for gifts to ${geo.name}?`,
+      a: `For same-day eligible ZIP codes in and around ${place}, order by ${geo.cutoffTimeLocal} local time. Standard USA orders outside same-day coverage typically arrive in 5–7 business days.`,
     },
     {
-      q: `Which nearby areas do you serve around ${city}?`,
+      q: `Which nearby areas do you serve around ${geo.name}?`,
       a: nearbyText
         ? `We deliver gifts across ${place} and commonly serve nearby areas including ${nearbyText}. Enter the recipient ZIP at checkout to confirm timing.`
         : `We deliver gifts across ${place}. Enter the recipient ZIP at checkout to confirm timing for that address.`,
     },
     {
-      q: `Can I send flowers and cakes to ${city}?`,
+      q: `Can I send flowers and cakes to ${geo.name}?`,
       a: `Yes — BlossomPot ships flowers, bouquets, cakes, and curated gift hampers to ${place} with domestic USA fulfillment and a gift message option at checkout.`,
     },
   ];
 }
 
 function enrich(loc: SeoLocation): GeoLocation {
-  const city = loc.name;
-  const state = loc.region === "state" ? loc.name : loc.state ?? "";
+  const type = loc.region === "state" ? ("state" as const) : ("city" as const);
+  const name = loc.name;
+  // Parent state name for cities; for state pages keep the state name (not duplicated in labels).
+  const stateName = type === "state" ? loc.name : loc.state ?? "";
   const abbr = stateAbbr(loc.state, loc.name);
   const tz = timezoneFor(loc.state, loc.name);
-  const cutoff = loc.isCaliforniaWarehouse || state === "California" ? "1:00 PM" : "2:00 PM";
+  const cutoff = loc.isCaliforniaWarehouse || stateName === "California" ? "1:00 PM" : "2:00 PM";
   const nearby =
     METRO_NEARBY[loc.slug] ??
     (loc.state
@@ -190,31 +185,63 @@ function enrich(loc: SeoLocation): GeoLocation {
           .filter((l) => l.region === "city" && l.priority === "High" && l.slug !== loc.slug)
           .slice(0, 5)
           .map((l) => l.name));
-  const zips = ZIP_PREFIX[loc.slug] ?? (abbr ? [`${abbr}`] : []);
-  const promise = getDeliveryPromise(null, null);
+  const zips = ZIP_PREFIX[loc.slug] ?? [];
   const deliveryWindow = loc.isCaliforniaWarehouse
-    ? `West Coast express when ordered before ${cutoff} local; otherwise ${promise.copy.short}`
-    : `Standard USA window ${promise.copy.short}; same-day in select ${city} ZIPs before ${cutoff} local`;
+    ? `West Coast express when ordered before ${cutoff} local; otherwise standard USA delivery (typically 5–7 business days)`
+    : `Standard USA delivery typically 5–7 business days; same-day in select ${name} ZIPs before ${cutoff} local`;
 
+  const labelPreview = locationLabel({ type, name, stateAbbr: abbr, region: type });
   const intro =
-    loc.region === "state"
-      ? `Send flowers, cakes, and thoughtful gifts across ${city} with BlossomPot. We fulfill domestically in the USA with clear delivery windows, a ${cutoff} local cut-off for same-day eligible ZIPs, and coverage that commonly reaches ${nearby.slice(0, 3).join(", ") || "major metros statewide"}. Whether you are celebrating a birthday, anniversary, or just because, choose an arrangement that feels personal — then add your message at checkout.`
-      : `Send flowers, cakes, and thoughtful gifts to ${city}${state ? `, ${state}` : ""} with BlossomPot. Local shoppers and out-of-state senders alike get domestic USA fulfillment, a ${cutoff} ${tz.replace("America/", "")} cut-off for same-day eligible addresses, and delivery that commonly reaches ${nearby.slice(0, 3).join(", ") || "nearby neighborhoods"}. Browse bouquets, celebration cakes, and hampers curated for modern American gifting.`;
+    type === "state"
+      ? `Send flowers, cakes, and thoughtful gifts across ${name} with BlossomPot. We fulfill domestically in the USA with clear delivery windows, a ${cutoff} local cut-off for same-day eligible ZIPs, and coverage that commonly reaches ${nearby.slice(0, 3).join(", ") || "major metros statewide"}. Whether you are celebrating a birthday, anniversary, or just because, choose an arrangement that feels personal — then add your message at checkout. Shoppers searching for gifts to ${name} get nationwide carrier shipping with tracking.`
+      : `Send flowers, cakes, and thoughtful gifts to ${labelPreview} with BlossomPot. Local shoppers and out-of-state senders alike get domestic USA fulfillment, a ${cutoff} ${tz.replace(/^America\//, "").replace(/^Pacific\//, "")} cut-off for same-day eligible addresses, and delivery that commonly reaches ${nearby.slice(0, 3).join(", ") || "nearby neighborhoods"}. Browse bouquets, celebration cakes, and hampers curated for modern American gifting in ${name}.`;
 
-  return {
+  const base: GeoLocation = {
+    type,
     slug: loc.slug,
-    city,
-    state,
+    name,
+    state: stateName,
     stateAbbr: abbr,
     timezone: tz,
     cutoffTimeLocal: cutoff,
     deliveryWindow,
-    nearbyAreas: nearby.length ? nearby : [city],
-    zipPrefixes: zips.length ? zips : ["000"],
-    localFaqs: buildFaqs(city, state, cutoff, nearby),
+    nearbyAreas: nearby.length ? nearby : type === "state" ? [] : [name],
+    zipPrefixes: zips,
+    localFaqs: [],
     introParagraph: intro,
-    region: loc.region,
+    region: type,
   };
+  base.localFaqs = buildFaqs(base, nearby);
+
+  // #region agent log
+  if (loc.slug === "california") {
+    fetch("http://127.0.0.1:7653/ingest/6a11505c-4ea4-4815-8ca6-62fe058b4e02", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "388539" },
+      body: JSON.stringify({
+        sessionId: "388539",
+        runId: "geo-hotfix",
+        hypothesisId: "H1",
+        location: "geo/locations.ts:enrich",
+        message: "california label check",
+        data: {
+          type: base.type,
+          name: base.name,
+          state: base.state,
+          label: locationLabel(base),
+          title: geoPageTitle(base),
+          h1: geoPageH1(base),
+          description: geoPageDescription(base),
+          hasDateEst: /Est\.\s*[A-Z][a-z]{2}\s+\d/.test(geoPageDescription(base)),
+          faqSample: base.localFaqs[0]?.a?.slice(0, 120),
+        },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+  }
+  // #endregion
+
+  return base;
 }
 
 const bySlug = new Map(seoLocations.map((l) => [l.slug, enrich(l)]));
@@ -229,30 +256,9 @@ export function allGeoLocations(): GeoLocation[] {
 
 export function assertGeoLocationComplete(geo: GeoLocation): boolean {
   return Boolean(
-    geo.nearbyAreas?.length &&
-      geo.cutoffTimeLocal &&
+    geo.cutoffTimeLocal &&
       geo.localFaqs?.length >= 3 &&
-      geo.introParagraph?.length > 80
+      geo.introParagraph?.length > 80 &&
+      (geo.type === "state" || geo.region === "state" || (geo.nearbyAreas?.length ?? 0) > 0)
   );
-}
-
-export function geoPageTitle(geo: GeoLocation): string {
-  const place =
-    geo.region === "state"
-      ? geo.city
-      : geo.stateAbbr
-        ? `${geo.city}, ${geo.stateAbbr}`
-        : geo.state
-          ? `${geo.city}, ${geo.state}`
-          : geo.city;
-  return `Send Flowers, Cakes & Gifts to ${place} | Same-Day Delivery | BlossomPot`;
-}
-
-export function geoPageH1(geo: GeoLocation): string {
-  return `Send Flowers, Cakes & Gifts to ${geo.city}`;
-}
-
-export function geoPageDescription(geo: GeoLocation): string {
-  const place = geo.state ? `${geo.city}, ${geo.state}` : geo.city;
-  return `Order flowers, cakes & gifts to ${place}. Same-day options before ${geo.cutoffTimeLocal} local in select ZIPs; otherwise ${getDeliveryPromise().copy.short}. Secure checkout on BlossomPot.`;
 }
