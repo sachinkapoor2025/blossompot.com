@@ -107,7 +107,7 @@ export function AddToCartControl({
           disabled={disabled || busy || !sessionReady}
           className={
             isDetail
-              ? `w-full rounded-md bg-nav text-white font-bold text-sm uppercase tracking-wide py-3.5 hover:bg-primary transition disabled:opacity-50`
+              ? `w-full rounded-md bg-primary text-white font-bold text-sm uppercase tracking-wide py-3.5 shadow-md shadow-primary/25 hover:brightness-110 transition disabled:opacity-50`
               : `btn-cart ${fullWidth ? "w-full" : ""} text-xs sm:text-sm px-3 py-2 sm:px-5 sm:py-2.5`
           }
         >

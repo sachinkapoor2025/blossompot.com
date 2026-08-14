@@ -4,10 +4,11 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: "#7a1f3d",
-        nav: "#b76e79",
-        accent: "#5b7c6a",
-        gold: "#d97706",
+        primary: "#c23a6b",
+        nav: "#e07a9a",
+        accent: "#2f8f6b",
+        gold: "#e5a23a",
+        petal: "#fff5f8",
       },
       fontFamily: {
         sans: ["var(--font-sans)", "Source Sans 3", "ui-sans-serif", "system-ui", "sans-serif"],

@@ -185,7 +185,7 @@ export default async function HomePage() {
       <WhyTrustUsSection />
 
       <section className="max-w-7xl mx-auto px-4 py-12">
-        <div className="rounded-3xl bg-gradient-to-br from-primary to-[#9a3d58] text-white p-8 sm:p-12 text-center">
+        <div className="rounded-3xl bg-gradient-to-br from-primary via-[#9e2d55] to-accent text-white p-8 sm:p-12 text-center shadow-lg shadow-primary/20">
           <h2 className="text-2xl sm:text-3xl font-bold">Send a gift that feels personal</h2>
           <p className="mt-3 text-white/90 max-w-2xl mx-auto">
             From same-day bouquets to anniversary hampers, BlossomPot helps you celebrate across the USA.

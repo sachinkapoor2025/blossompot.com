@@ -239,7 +239,7 @@ export function Header() {
   }, [menuOpen]);
 
   return (
-    <header className="border-b border-slate-200 bg-white sticky top-0 z-50 shadow-sm overflow-visible">
+    <header className="border-b border-primary/10 bg-white/90 backdrop-blur-md sticky top-0 z-50 shadow-sm shadow-primary/5 overflow-visible">
       {/* Mobile top bar */}
       <div className="md:hidden max-w-7xl mx-auto px-3 py-3 flex items-center gap-2">
         <button

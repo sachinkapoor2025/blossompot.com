@@ -12,9 +12,9 @@ export const site = {
   whatsappDisplay: "+1 (800) 555-0199",
   whatsappGroupInviteUrl: "",
   logoSrc: "/logo.svg",
-  primaryColor: "#7A1F3D",
-  navBlue: "#B76E79",
-  accentColor: "#5B7C6A",
+  primaryColor: "#C23A6B",
+  navBlue: "#E07A9A",
+  accentColor: "#2F8F6B",
 } as const;
 
 /** Featured gift collections in the header mega-menu style. */

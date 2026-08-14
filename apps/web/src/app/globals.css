@@ -3,21 +3,29 @@
 @import "tailwindcss/utilities";
 
 :root {
-  --foreground: #2a2421;
-  --background: #fbf7f4;
-  --primary: #7a1f3d;
-  --nav: #b76e79;
-  --accent: #5b7c6a;
-  --muted: #6b635e;
-  --cream: #fbf7f4;
-  --berry: #7a1f3d;
-  --blush: #b76e79;
-  --sage: #5b7c6a;
+  /* Fresh florist mood: peony bloom + cut foliage (impulse-friendly, not muddy burgundy) */
+  --foreground: #243028;
+  --background: #f3faf5;
+  --primary: #c23a6b;
+  --nav: #e07a9a;
+  --accent: #2f8f6b;
+  --muted: #5c6b63;
+  --cream: #f3faf5;
+  --berry: #c23a6b;
+  --blush: #e07a9a;
+  --sage: #2f8f6b;
+  --petal: #fff5f8;
+  --marigold: #e5a23a;
+  --primary-deep: #9e2d55;
 }
 
 body {
   color: var(--foreground);
-  background: var(--background);
+  background:
+    radial-gradient(1200px 520px at 12% -8%, rgba(224, 122, 154, 0.16), transparent 58%),
+    radial-gradient(900px 480px at 92% 0%, rgba(47, 143, 107, 0.12), transparent 55%),
+    linear-gradient(180deg, #f7fcf8 0%, #f3faf5 42%, #fff8fb 100%);
+  background-attachment: fixed;
   font-family: var(--font-sans), "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -30,13 +38,13 @@ h3,
 
 @layer components {
   .btn-nav {
-    @apply inline-flex items-center justify-center rounded-full bg-nav text-white font-semibold text-sm px-4 py-2 hover:opacity-90 transition whitespace-nowrap;
+    @apply inline-flex items-center justify-center rounded-full bg-nav text-white font-semibold text-sm px-4 py-2 transition whitespace-nowrap shadow-sm shadow-nav/25 hover:bg-primary hover:shadow-md hover:shadow-primary/25 hover:-translate-y-0.5;
   }
   .btn-nav-active {
-    @apply bg-primary;
+    @apply bg-primary shadow-md shadow-primary/30;
   }
   .btn-cart {
-    @apply inline-flex items-center justify-center rounded-full bg-nav text-white font-semibold text-sm px-5 py-2.5 hover:opacity-90 transition disabled:opacity-50;
+    @apply inline-flex items-center justify-center rounded-full bg-primary text-white font-semibold text-sm px-5 py-2.5 transition disabled:opacity-50 shadow-md shadow-primary/30 hover:brightness-110 hover:shadow-lg hover:shadow-primary/35 hover:-translate-y-0.5;
   }
 }
 
@@ -52,11 +60,11 @@ h3,
 @keyframes early-bird-claim-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 3px rgba(122, 31, 61, 0.22), 0 6px 16px rgba(122, 31, 61, 0.35);
+    box-shadow: 0 0 0 3px rgba(194, 58, 107, 0.22), 0 6px 16px rgba(194, 58, 107, 0.35);
     transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 0 6px rgba(122, 31, 61, 0.12), 0 8px 22px rgba(122, 31, 61, 0.45);
+    box-shadow: 0 0 0 6px rgba(194, 58, 107, 0.12), 0 8px 22px rgba(194, 58, 107, 0.45);
     transform: scale(1.03);
   }
 }
@@ -67,7 +75,7 @@ h3,
     text-shadow: 0 0 0 transparent, 0 1px 1px rgba(0, 0, 0, 0.35);
   }
   50% {
-    text-shadow: 0 0 12px rgba(183, 110, 121, 0.85), 0 1px 1px rgba(0, 0, 0, 0.35);
+    text-shadow: 0 0 12px rgba(224, 122, 154, 0.85), 0 1px 1px rgba(0, 0, 0, 0.35);
   }
 }
 
