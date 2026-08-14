@@ -1,5 +1,5 @@
 /** Production API — fallback when Amplify build env vars are missing */
-export const PROD_API_URL = "https://foqu2ap4qi.execute-api.us-east-1.amazonaws.com/prod";
+export const PROD_API_URL = "https://6y37e2a4j1.execute-api.us-east-1.amazonaws.com/prod";
 
 /** Amplify default URL for the branch being built (dev vs main). */
 export function getAmplifyBranchUrl(): string | undefined {
