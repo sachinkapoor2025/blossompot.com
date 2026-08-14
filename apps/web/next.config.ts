@@ -40,7 +40,9 @@ const nextConfig: NextConfig = {
       { source: "/rakhi-combo-to-usa/", destination: "/gift-hampers", statusCode: 301 },
       { source: "/rakhi-hampers-to-usa", destination: "/gift-hampers", statusCode: 301 },
       { source: "/rakhi-hampers-to-usa/", destination: "/gift-hampers", statusCode: 301 },
-      { source: "/collections/rakhi-:slug*", destination: "/flowers", statusCode: 301 },
+      // path-to-regexp (Next 15.5+) forbids `:slug*` without a `/` delimiter before it
+      { source: "/collections/rakhi-:slug", destination: "/flowers", statusCode: 301 },
+      { source: "/collections/rakhi-:slug/", destination: "/flowers", statusCode: 301 },
       { source: "/sitemap.rss", destination: "/sitemap.xml", statusCode: 301 },
     ];
   },
