@@ -74,7 +74,7 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
           <div className="flex items-center gap-4">
             <SiteLogoLink size="mobile" />
             <div>
-              <p className="text-xs uppercase tracking-wide text-slate-500">Vendor portal</p>
+              <p className="text-xs uppercase tracking-wide text-slate-500">Vendor Account</p>
               <p className="text-sm font-semibold text-primary">{name || "Partner"}</p>
             </div>
           </div>
@@ -95,6 +95,12 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
                 </Link>
               );
             })}
+            <Link
+              href="/become-a-vendor"
+              className="rounded-full px-3 py-1.5 text-sm text-slate-500 hover:bg-slate-100"
+            >
+              Partner info
+            </Link>
             <button
               type="button"
               onClick={logout}
