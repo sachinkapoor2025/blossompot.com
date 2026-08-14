@@ -4,7 +4,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
 import { ProductDetailClient } from "./ProductDetailClient";
 import { breadcrumbJsonLd, faqJsonLd, productJsonLd, productPageMetadata } from "@/lib/seo";
-import { productPageFaqs } from "@/lib/content/product-faqs";
+import { productFaqsForCategory } from "@/lib/content/product-faqs";
 import { resolveImageUrl } from "@/lib/images";
 import { loadProduct, loadRelatedProducts, getStaticProductSlugs } from "@/lib/product-loader";
 import { api } from "@/lib/api";
@@ -63,7 +63,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     price: p.price,
     currency: p.currency,
     ogImage: resolveImageUrl(p.images?.[0]),
-    keywords: [p.name, ...(p.tags ?? []), "send rakhi to USA", "BlossomPot"].join(", "),
   });
 }
 
@@ -73,6 +72,7 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound();
 
   const relatedProducts = await loadRelatedProducts(product.categorySlug, product.slug);
+  const faqs = productFaqsForCategory(product.categorySlug);
 
   const categoryLabel = categoryBreadcrumbLabel(product.categorySlug);
   const crumbs = [
@@ -86,16 +86,15 @@ export default async function ProductPage({ params }: Props) {
     <>
       <JsonLd
         data={[
-          // Same `product` from loadProduct as the visible price / OG meta.
           productJsonLd(product),
           breadcrumbJsonLd(crumbs.map((c) => ({ name: c.label, path: c.href ?? `/products/${slug}` }))),
-          faqJsonLd(productPageFaqs),
+          faqJsonLd(faqs),
         ]}
       />
       <div className="max-w-6xl mx-auto px-4 pt-6">
         <Breadcrumbs items={crumbs} />
       </div>
-      <ProductDetailClient product={product} relatedProducts={relatedProducts} />
+      <ProductDetailClient product={product} relatedProducts={relatedProducts} faqs={faqs} />
     </>
   );
 }

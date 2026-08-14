@@ -1,17 +1,42 @@
 import { categoryHref } from "./category-urls";
 
+function digitsOnly(value: string): string {
+  return value.replace(/\D/g, "");
+}
+
+/**
+ * Real support phone — set NEXT_PUBLIC_SUPPORT_PHONE in Amplify / .env.
+ * Default is the live DGV US line used by sibling brand HalloweenReady (same operator).
+ * Build fails in production if this resolves to a fictional 555 number.
+ */
+const SUPPORT_PHONE_DISPLAY =
+  process.env.NEXT_PUBLIC_SUPPORT_PHONE?.trim() || "+1 (669) 260-3819";
+const SUPPORT_PHONE_DIGITS = digitsOnly(SUPPORT_PHONE_DISPLAY);
+
+if (
+  process.env.NODE_ENV === "production" &&
+  (!SUPPORT_PHONE_DIGITS || /55501\d{2}$/.test(SUPPORT_PHONE_DIGITS))
+) {
+  throw new Error(
+    "NEXT_PUBLIC_SUPPORT_PHONE must be set to a real phone number (555 placeholders are not allowed)."
+  );
+}
+
 export const site = {
   name: "BlossomPot",
   domain: "blossompot.com",
+  legalName: "Divit Global Ventures",
+  foundingDate: "2024",
   tagline: "Flowers, cakes & thoughtful gifts for every celebration",
   description:
     "BlossomPot.com — premium online gifting for flowers, bouquets, cakes, and curated gifts with fast USA delivery. Same-day options in select cities, elegant designs for birthdays, anniversaries, Valentine's Day, Mother's Day, and more.",
   supportEmail: "support@blossompot.com",
-  phone: "+1 (800) 555-0199",
-  whatsapp: "18005550199",
-  whatsappDisplay: "+1 (800) 555-0199",
+  phone: SUPPORT_PHONE_DISPLAY,
+  whatsapp: SUPPORT_PHONE_DIGITS,
+  whatsappDisplay: SUPPORT_PHONE_DISPLAY,
   whatsappGroupInviteUrl: "",
   logoSrc: "/logo.svg",
+  logoPngSrc: "/icon-512.png",
   primaryColor: "#C23A6B",
   navBlue: "#E07A9A",
   accentColor: "#2F8F6B",

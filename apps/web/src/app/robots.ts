@@ -21,6 +21,8 @@ export default function robots(): MetadataRoute.Robots {
           "/cart",
           "/orders/",
           "/email/",
+          "/*?*sort=",
+          "/*?*orderby=",
         ],
       },
       // AI / LLM crawlers — explicitly allowed for discoverability

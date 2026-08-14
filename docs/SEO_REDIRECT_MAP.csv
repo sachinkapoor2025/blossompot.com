@@ -1,0 +1,8 @@
+old_url,new_url,status_code,notes
+https://www.blossompot.com/send-rakhi-to-{slug},https://www.blossompot.com/gifts-to-{slug},301,Existing next.config rule — gift geo is canonical
+https://www.blossompot.com/cities/{slug},https://www.blossompot.com/gifts-to-{slug},301,Existing next.config rule
+https://www.blossompot.com/raksha-bandhan,https://www.blossompot.com/flowers,301,Existing next.config rule
+https://www.blossompot.com/send-rakhi-from-india,https://www.blossompot.com/,301,Existing next.config rule
+https://www.blossompot.com/rakhi-from-uk,https://www.blossompot.com/flowers,301,Existing next.config rule
+https://www.blossompot.com/rakhi-from-canada,https://www.blossompot.com/flowers,301,Existing next.config rule
+https://www.blossompot.com/categories/{internal},https://www.blossompot.com/{public},301,Category public URL map (category-urls.ts)

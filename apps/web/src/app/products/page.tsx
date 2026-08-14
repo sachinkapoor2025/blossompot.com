@@ -65,8 +65,8 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   const params = await searchParams;
   if (params.search) {
     return pageMetadata({
-      title: `Search: ${params.search} — Rakhi USA`,
-      description: `Search results for "${params.search}" — premium Rakhis with USA delivery from BlossomPot.`,
+      title: `Search: ${params.search} — Flowers & Gifts USA`,
+      description: `Search results for "${params.search}" — flowers, cakes, and gifts with USA delivery from BlossomPot.`,
       path: `/products?search=${encodeURIComponent(params.search)}`,
     });
   }
@@ -79,9 +79,9 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     });
   }
   return pageMetadata({
-    title: "Shop Rakhi — Send Rakhi to USA Online",
+    title: "Shop Flowers, Cakes & Gifts — USA Delivery | BlossomPot",
     description:
-      "Browse 126+ premium Rakhis — single, combo, kids, Bhaiya Bhabhi & Lumba. Send Rakhi to all 50 US states. Order from India worldwide.",
+      "Browse flowers, bouquets, cakes, and curated gift hampers. Birthday, anniversary, Valentine’s, and same-day options with clear USA delivery guidance.",
     path: "/products",
   });
 }
@@ -111,7 +111,7 @@ export default async function ProductsPage({ searchParams }: Props) {
     ? `Search: ${search}`
     : category
       ? categories.find((c) => c.slug === category)?.name ?? category.replace(/-/g, " ")
-      : "Shop Rakhi — Send to USA";
+      : "Shop Flowers, Cakes & Gifts";
 
   const sortedCategories = orderCategories(categories);
   const categoryMap = new Map(categories.map((c) => [c.slug, c]));
@@ -136,8 +136,9 @@ export default async function ProductsPage({ searchParams }: Props) {
       </div>
       {!search && !category && (
         <p className="text-slate-600 mb-8 max-w-2xl">
-          Premium Rakhis for Raksha Bandhan — delivered to all 50 US states. Order from India, UK, Canada, or
-          anywhere; enter your brother&apos;s US address at checkout.
+          Flowers, bouquets, cakes, and curated gifts for birthdays, anniversaries, and everyday thank-yous —
+          with clear USA delivery expectations. Enter the recipient address at checkout to see available
+          windows.
         </p>
       )}
 

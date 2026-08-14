@@ -4,7 +4,7 @@ import {
   resolveProductImageUrls,
   type ProductRatingAggregate,
 } from "@blossompot/shared";
-import { site, testimonials } from "./site";
+import { site } from "./site";
 import { getCdnUrl, siteUrl } from "./env";
 import { extendedKeywords } from "./ai-recommendation";
 import { locationPublicPath } from "./content/seo-data";
@@ -31,6 +31,7 @@ export function pageMetadata(opts: {
   title: string;
   description: string;
   path: string;
+  /** @deprecated Google ignores meta keywords — do not pass. */
   keywords?: string;
   ogImage?: string;
   noIndex?: boolean;
@@ -38,11 +39,10 @@ export function pageMetadata(opts: {
   absoluteTitle?: boolean;
 }): Metadata {
   const url = canonical(opts.path);
-  const image = opts.ogImage ?? site.logoSrc;
+  const image = opts.ogImage ?? site.logoPngSrc ?? site.logoSrc;
   return {
     title: opts.absoluteTitle ? { absolute: opts.title } : opts.title,
     description: opts.description,
-    keywords: opts.keywords ?? defaultKeywords,
     alternates: { canonical: url },
     openGraph: {
       title: opts.title,
@@ -76,14 +76,13 @@ export function productPageMetadata(opts: {
 }): Metadata {
   const description = productMetaDescription(opts.seoDescription, opts.description);
   const url = canonical(opts.path);
-  const image = opts.ogImage ?? site.logoSrc;
+  const image = opts.ogImage ?? site.logoPngSrc ?? site.logoSrc;
   const price = Number.isFinite(opts.price) ? opts.price.toFixed(2) : "0.00";
   const currency = opts.currency === "INR" ? "INR" : "USD";
 
   return {
     title: opts.title,
     description,
-    keywords: opts.keywords ?? defaultKeywords,
     alternates: { canonical: url },
     openGraph: {
       title: opts.title,
@@ -109,20 +108,19 @@ export function productPageMetadata(opts: {
 }
 
 export function organizationJsonLd() {
-  const avgRating =
-    testimonials.reduce((sum, t) => sum + t.rating, 0) / testimonials.length;
-
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
     "@id": `${siteUrl}/#organization`,
     name: site.name,
+    legalName: site.legalName,
+    foundingDate: site.foundingDate,
     url: siteUrl,
     logo: {
       "@type": "ImageObject",
-      url: canonical(site.logoSrc),
-      width: OG_IMAGE_WIDTH,
-      height: OG_IMAGE_HEIGHT,
+      url: canonical(site.logoPngSrc),
+      width: 512,
+      height: 512,
     },
     description: site.description,
     email: site.supportEmail,
@@ -134,18 +132,15 @@ export function organizationJsonLd() {
     contactPoint: [
       {
         "@type": "ContactPoint",
-        contactType: "customer support",
+        contactType: "customer service",
         email: site.supportEmail,
         telephone: site.phone,
         url: `https://wa.me/${site.whatsapp}`,
-        availableLanguage: ["English", "Hindi"],
-        areaServed: ["US", "IN"],
+        availableLanguage: ["en"],
+        areaServed: "US",
       },
     ],
-    areaServed: [
-      { "@type": "Country", name: "United States" },
-      { "@type": "Country", name: "India" },
-    ],
+    areaServed: [{ "@type": "Country", name: "United States" }],
     audience: {
       "@type": "Audience",
       audienceType:
@@ -163,23 +158,6 @@ export function organizationJsonLd() {
       "Same-day flower delivery",
       "Personalized gifts USA",
     ],
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: avgRating.toFixed(1),
-      bestRating: "5",
-      worstRating: "1",
-      reviewCount: String(testimonials.length),
-    },
-    review: testimonials.map((t) => ({
-      "@type": "Review",
-      author: { "@type": "Person", name: t.name },
-      reviewRating: {
-        "@type": "Rating",
-        ratingValue: String(t.rating),
-        bestRating: "5",
-      },
-      reviewBody: t.text,
-    })),
   };
 }
 

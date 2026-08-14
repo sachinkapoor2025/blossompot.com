@@ -3,105 +3,58 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { HomeProductCard } from "@/components/HomeProductCard";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { CityContentSection } from "@/components/CityContentSection";
-import { SeoLocationLanding } from "@/components/SeoLocationLanding";
-import { SecondaryCityLanding, buildSecondaryCityFaqs } from "@/components/SecondaryCityLanding";
 import { JsonLd } from "@/components/JsonLd";
+import { AnswerBlock } from "@/components/AnswerBlock";
+import { locationPublicPath } from "@/lib/content/seo-data";
 import {
-  allSeoLocationSlugs,
-  californiaWarehouseLocations,
-  getSeoLocation,
-  locationPublicPath,
-  seoLocations,
-} from "@/lib/content/seo-data";
-import { getCityContent } from "@/lib/content/city-pages";
-import {
-  getSecondaryCity,
-  isExpressMetro,
-  isSecondaryCity,
-  secondaryCityIntro,
-} from "@/lib/content/city-delivery-tiers";
+  assertGeoLocationComplete,
+  geoPageDescription,
+  geoPageH1,
+  geoPageTitle,
+  getGeoLocation,
+  allGeoLocations,
+} from "@/lib/content/geo/locations";
 import { getCatalogProducts, mergeProductsPreferExisting } from "@/lib/catalog-fallback";
 import { shuffleForCity } from "@/lib/city-products";
 import { loadProducts } from "@/lib/product-loader";
-import { breadcrumbJsonLd, faqJsonLd, pageMetadata, serviceAreaJsonLd } from "@/lib/seo";
-import { buildLocationContent } from "@/components/SeoLocationLanding";
+import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, pageMetadata, serviceAreaJsonLd } from "@/lib/seo";
+import { categoryHref } from "@/lib/category-urls";
 import { site } from "@/lib/site";
 import type { Product } from "@blossompot/shared";
+import { getDeliveryPromise } from "@blossompot/shared";
 
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
-/** Same as homepage: always load the full live catalog (avoid stale 20-product ISR HTML). */
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export function generateStaticParams() {
-  return allSeoLocationSlugs().map((slug) => ({ slug }));
+  return allGeoLocations()
+    .filter(assertGeoLocationComplete)
+    .map((g) => ({ slug: g.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  const geo = getGeoLocation(slug);
+  if (!geo || !assertGeoLocationComplete(geo)) {
+    return { title: "Gift Delivery", robots: { index: false, follow: false } };
+  }
   const path = locationPublicPath(slug);
-
-  // Express metros: prefer individually maintained city-pages copy for title/description.
-  const cityContent = getCityContent(slug);
-  if (isExpressMetro(slug) && cityContent) {
-    return pageMetadata({
-      title: `Send Rakhi to ${cityContent.label} USA | Fast Delivery`,
-      description:
-        cityContent.metaExtra ??
-        `Send Rakhi to ${cityContent.label}, USA with ${site.name}. Premium rakhis, express to major metros, roli chawal included.`,
-      path,
-      keywords: `send rakhi to ${cityContent.label}, rakhi delivery ${cityContent.label}, BlossomPot`,
-      absoluteTitle: true,
-    });
-  }
-
-  const secondary = getSecondaryCity(slug);
-  if (secondary) {
-    const place = `${secondary.name}, ${secondary.state}`;
-    return pageMetadata({
-      title: `Send Rakhi to ${place} | 5–7 Day USA Delivery | ${site.name}`,
-      description: `Send rakhi to ${place} with ${site.name}. Domestic USA shipping in 5–7 business days, roli chawal on most orders, Stripe & Razorpay checkout.`,
-      path,
-      keywords: `send rakhi to ${secondary.name}, rakhi delivery ${secondary.name}, rakhi ${secondary.state}`,
-      absoluteTitle: true,
-    });
-  }
-
-  const location = getSeoLocation(slug);
-  if (!location) return { title: "Rakhi Delivery" };
-
-  const place =
-    location.region === "state"
-      ? location.name
-      : location.state
-        ? `${location.name}, ${location.state}`
-        : location.name;
-  const primary = location.keywords[0] ?? `send rakhi to ${location.name.toLowerCase()}`;
-  const warehouseNote = location.isCaliforniaWarehouse
-    ? " Ships from our California warehouse for faster West Coast delivery."
-    : location.state
-      ? ` Domestic USA shipping to ${place} — no customs delays.`
-      : " Domestic USA shipping nationwide — no customs delays.";
-  const regionNote =
-    location.region === "state"
-      ? `Browse designer Single Rakhi, combos, and hampers for addresses across ${location.name}.`
-      : `Order online for doorstep delivery in ${place}${location.state ? ` and nearby ${location.state} metros` : ""}.`;
-
   return pageMetadata({
-    title: `Send Rakhi to ${place} | ${primary.charAt(0).toUpperCase() + primary.slice(1)} | ${site.name}`,
-    description: `${primary.charAt(0).toUpperCase() + primary.slice(1)} with ${site.name}.${warehouseNote} ${regionNote} Roli chawal included. Secure Stripe & Razorpay checkout.`,
+    title: geoPageTitle(geo),
+    description: geoPageDescription(geo).slice(0, 155),
     path,
-    keywords: location.keywords.slice(0, 12).join(", "),
     absoluteTitle: true,
   });
 }
 
 export default async function SeoLocationPage({ params }: Props) {
   const { slug } = await params;
+  const geo = getGeoLocation(slug);
+  if (!geo || !assertGeoLocationComplete(geo)) notFound();
 
   let products: Product[] = [];
   try {
@@ -109,143 +62,134 @@ export default async function SeoLocationPage({ params }: Props) {
   } catch {
     products = [];
   }
-  // Full catalog — same merge as homepage so every location lists every deliverable SKU.
   products = mergeProductsPreferExisting(products, getCatalogProducts());
   const cityProducts = shuffleForCity(products, slug);
-
-  // --- Express metros: individually maintained CityContentSection ---
-  const cityContent = getCityContent(slug);
-  if (isExpressMetro(slug) && cityContent) {
-    const crumbs = [
-      { label: "Home", href: "/" },
-      { label: `Send Rakhi to ${cityContent.label}` },
-    ];
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-10">
-        <JsonLd
-          data={[
-            breadcrumbJsonLd(
-              crumbs.map((c) => ({ name: c.label, path: c.href ?? locationPublicPath(slug) }))
-            ),
-            faqJsonLd(cityContent.faqs),
-            serviceAreaJsonLd({ label: cityContent.label, slug, state: cityContent.state }),
-          ]}
-        />
-        <Breadcrumbs items={crumbs} />
-        <h1 className="text-3xl font-bold text-primary mb-2">
-          Send Rakhi to {cityContent.label}, USA
-        </h1>
-        <p className="text-slate-600 mb-8 max-w-3xl">
-          {cityContent.metaExtra ??
-            `Premium Rakhi delivery to ${cityContent.label}. Domestic USA shipping — order from India, UK, Canada worldwide.`}
-        </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {cityProducts.map((p) => (
-            <HomeProductCard key={p.slug} product={p} />
-          ))}
-        </div>
-        <CityContentSection content={cityContent} />
-      </div>
-    );
-  }
-
-  // --- Secondary doorways: shared thin template ---
-  const secondary = getSecondaryCity(slug);
-  if (secondary) {
-    const place = `${secondary.name}, ${secondary.state}`;
-    const crumbs = [
-      { label: "Home", href: "/" },
-      { label: `Send Rakhi to ${secondary.name}` },
-    ];
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-10">
-        <JsonLd
-          data={[
-            breadcrumbJsonLd(
-              crumbs.map((c) => ({ name: c.label, path: c.href ?? locationPublicPath(slug) }))
-            ),
-            faqJsonLd([...buildSecondaryCityFaqs(secondary)]),
-            serviceAreaJsonLd({ label: secondary.name, slug, state: secondary.state }),
-          ]}
-        />
-        <Breadcrumbs items={crumbs} />
-        <h1 className="text-3xl font-bold text-primary mb-2">
-          Send Rakhi to {place} — Online USA Delivery
-        </h1>
-        <p className="text-slate-600 mb-8 max-w-3xl">
-          {secondaryCityIntro(secondary.slug, secondary.name, secondary.state)}
-        </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {cityProducts.map((p) => (
-            <HomeProductCard key={p.slug} product={p} />
-          ))}
-        </div>
-        <SecondaryCityLanding city={secondary} />
-      </div>
-    );
-  }
-
-  // --- All other SEO locations (states + remaining cities) ---
-  const location = getSeoLocation(slug);
-  if (!location) notFound();
-
-  const place =
-    location.region === "state"
-      ? location.name
-      : location.state
-        ? `${location.name}, ${location.state}`
-        : location.name;
-
-  const content = buildLocationContent(location);
-  const related = location.isCaliforniaWarehouse
-    ? californiaWarehouseLocations()
-        .filter((l) => l.slug !== slug && !isSecondaryCity(l.slug))
-        .slice(0, 8)
-    : location.state
-      ? seoLocations
-          .filter((l) => l.state === location.state && l.slug !== slug && !isSecondaryCity(l.slug))
-          .slice(0, 8)
-      : [];
+  const promise = getDeliveryPromise(null, null);
+  const path = locationPublicPath(slug);
+  const place = geo.state ? `${geo.city}, ${geo.state}` : geo.city;
 
   const crumbs = [
     { label: "Home", href: "/" },
-    { label: `Send Rakhi to ${place}` },
+    { label: "Shop", href: "/products" },
+    { label: `Gifts to ${geo.city}` },
   ];
+
+  const categoryLinks = [
+    { label: "Flowers", href: categoryHref("flowers") },
+    { label: "Bouquets", href: categoryHref("flower-bouquets") },
+    { label: "Cakes", href: categoryHref("cakes") },
+    { label: "Hampers", href: categoryHref("gift-hampers") },
+    { label: "Birthday", href: categoryHref("birthday-gifts") },
+    { label: "Same-Day", href: categoryHref("same-day-gifts") },
+  ];
+
+  const nearbyLinks = geo.nearbyAreas
+    .map((name) => {
+      const match = allGeoLocations().find(
+        (g) => g.city.toLowerCase() === name.toLowerCase() && g.slug !== slug
+      );
+      return match ? { label: match.city, href: locationPublicPath(match.slug) } : null;
+    })
+    .filter(Boolean)
+    .slice(0, 8) as { label: string; href: string }[];
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
       <JsonLd
         data={[
-          breadcrumbJsonLd(crumbs.map((c) => ({ name: c.label, path: c.href ?? locationPublicPath(slug) }))),
-          faqJsonLd(content.faqs),
-          serviceAreaJsonLd({ label: place, slug, state: location.state ?? undefined }),
+          breadcrumbJsonLd(
+            crumbs.map((c) => ({ name: c.label, path: c.href ?? path }))
+          ),
+          faqJsonLd(geo.localFaqs),
+          serviceAreaJsonLd({ label: geo.city, slug, state: geo.state || undefined }),
+          itemListJsonLd(
+            `Gifts to ${geo.city}`,
+            cityProducts.slice(0, 24).map((p) => ({
+              name: p.name,
+              path: `/products/${p.slug}`,
+            }))
+          ),
         ]}
       />
       <Breadcrumbs items={crumbs} />
-      <h1 className="text-3xl font-bold text-primary mb-2">
-        Send Rakhi to {place} — Online USA Delivery
-      </h1>
-      <p className="text-slate-600 mb-8 max-w-3xl">
-        {location.keywords[0]
-          ? `${location.keywords[0].charAt(0).toUpperCase() + location.keywords[0].slice(1)} with ${site.name}.`
-          : `Premium rakhi delivery to ${place}.`}{" "}
-        Domestic USA shipping, secure checkout, roli chawal on most rakhis.
-      </p>
+      <h1 className="text-3xl font-bold text-primary mb-3">{geoPageH1(geo)}</h1>
+      <p className="text-slate-600 mb-4 max-w-3xl leading-relaxed">{geo.introParagraph}</p>
+
+      <div className="mb-8 rounded-xl border border-primary/15 bg-petal/80 px-4 py-3 text-sm text-slate-800">
+        <p className="font-semibold text-primary">
+          Order by {geo.cutoffTimeLocal} local ({geo.timezone.replace("America/", "")}) for
+          same-day eligible ZIPs in {geo.city}
+        </p>
+        <p className="mt-1 text-slate-600">
+          Delivery window: {geo.deliveryWindow}. Standard USA estimate: {promise.copy.label}.
+        </p>
+        {geo.nearbyAreas.length > 0 && (
+          <p className="mt-1 text-slate-600">
+            Nearby areas commonly served: {geo.nearbyAreas.slice(0, 5).join(", ")}.
+          </p>
+        )}
+      </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {cityProducts.map((p) => (
           <HomeProductCard key={p.slug} product={p} />
         ))}
       </div>
-      {products.length === 0 && (
+      {cityProducts.length === 0 && (
         <p className="text-slate-500 mt-4">
           <Link href="/products" className="text-nav hover:underline">
-            Browse all Rakhis
+            Browse all gifts
           </Link>
         </p>
       )}
 
-      <SeoLocationLanding location={location} related={related} />
+      <section className="mt-12 grid md:grid-cols-2 gap-6">
+        <div>
+          <h2 className="text-xl font-bold text-primary mb-3">Shop categories for {place}</h2>
+          <ul className="flex flex-wrap gap-2">
+            {categoryLinks.map((c) => (
+              <li key={c.href}>
+                <Link href={c.href} className="btn-nav text-xs">
+                  {c.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+        {nearbyLinks.length > 0 && (
+          <div>
+            <h2 className="text-xl font-bold text-primary mb-3">Nearby gift delivery pages</h2>
+            <ul className="space-y-2 text-sm">
+              {nearbyLinks.map((n) => (
+                <li key={n.href}>
+                  <Link href={n.href} className="text-nav hover:underline">
+                    Send gifts to {n.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </section>
+
+      <section className="mt-12">
+        <h2 className="text-xl font-bold text-primary mb-4">
+          Frequently asked questions — {geo.city}
+        </h2>
+        <div className="space-y-4">
+          {geo.localFaqs.map((f) => (
+            <AnswerBlock key={f.q} question={f.q} answer={f.a} />
+          ))}
+        </div>
+      </section>
+
+      <p className="mt-10 text-sm text-slate-500">
+        Looking for seasonal Raksha Bandhan gifts? Visit our{" "}
+        <Link href="/flowers" className="text-nav hover:underline">
+          flowers collection
+        </Link>{" "}
+        or contact {site.name} support.
+      </p>
     </div>
   );
 }

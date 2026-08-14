@@ -5,13 +5,13 @@ import { getGoogleReviews } from "@/lib/google-reviews";
 import { ReviewForm } from "@/components/ReviewForm";
 import { JsonLd } from "@/components/JsonLd";
 import { trustFacts } from "@/lib/trust";
-import { site, testimonials } from "@/lib/site";
+import { site } from "@/lib/site";
 import { pageMetadata, canonical } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
   title: "Customer Reviews — Flowers, Cakes & Gifts USA",
   description:
-    "Read customer reviews of BlossomPot flower, cake, and gift delivery across the USA. Share your experience — premium packaging, clear shipping, and thoughtful gifting.",
+    "Read verified Google reviews of BlossomPot flower, cake, and gift delivery across the USA. Share your experience after delivery.",
   path: "/reviews",
 });
 
@@ -25,8 +25,8 @@ function reviewsPageJsonLd(ratingValue: number, reviewCount: number) {
     url: canonical("/reviews"),
     description: "Customer reviews for BlossomPot USA flower, cake, and gift delivery.",
     mainEntity: {
-      "@type": "Product",
-      name: `${site.name} Gifts USA Delivery`,
+      "@type": "Organization",
+      name: site.name,
       aggregateRating: {
         "@type": "AggregateRating",
         ratingValue: ratingValue.toFixed(1),
@@ -39,14 +39,16 @@ function reviewsPageJsonLd(ratingValue: number, reviewCount: number) {
 
 export default async function ReviewsPage() {
   const googleReviews = await getGoogleReviews();
-  const avg =
-    googleReviews.rating ??
-    testimonials.reduce((s, t) => s + t.rating, 0) / testimonials.length;
-  const count = googleReviews.totalCount ?? testimonials.length;
+  const hasLiveGoogle =
+    googleReviews.source === "google" &&
+    typeof googleReviews.rating === "number" &&
+    (googleReviews.totalCount ?? 0) > 0;
 
   return (
     <div>
-      <JsonLd data={reviewsPageJsonLd(avg, count)} />
+      {hasLiveGoogle ? (
+        <JsonLd data={reviewsPageJsonLd(googleReviews.rating!, googleReviews.totalCount!)} />
+      ) : null}
       <section className="max-w-3xl mx-auto px-4 pt-12 pb-6">
         <h1 className="text-3xl font-bold text-primary mb-3">Customer Reviews</h1>
         <p className="text-slate-600 leading-relaxed mb-2">
@@ -57,8 +59,8 @@ export default async function ReviewsPage() {
           Received your gift?{" "}
           <a href="#write-review" className="text-nav font-semibold hover:underline">
             Write a review below
-          </a>{" "}
-          — it helps other shoppers choose reliable flower and gift delivery.
+          </a>
+          .
           {googleReviews.mapsUrl ? (
             <>
               {" "}
@@ -77,7 +79,16 @@ export default async function ReviewsPage() {
         </p>
       </section>
 
-      <GoogleReviews data={googleReviews} />
+      {hasLiveGoogle ? (
+        <GoogleReviews data={googleReviews} />
+      ) : (
+        <section className="max-w-3xl mx-auto px-4 pb-8">
+          <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+            Live Google reviews will appear here once Google Places credentials are configured. We do not
+            show placeholder testimonials.
+          </p>
+        </section>
+      )}
 
       <section id="write-review" className="max-w-xl mx-auto px-4 py-12 scroll-mt-24">
         <h2 className="text-xl font-bold text-primary mb-2">Share your experience</h2>
@@ -88,16 +99,8 @@ export default async function ReviewsPage() {
       </section>
 
       <section className="max-w-3xl mx-auto px-4 pb-12 text-center text-sm text-slate-500">
-        <Link href="/about" className="text-nav hover:underline">
-          About our team
-        </Link>
-        {" · "}
-        <Link href="/shipping" className="text-nav hover:underline">
-          Shipping & delivery
-        </Link>
-        {" · "}
-        <Link href="/faq" className="text-nav hover:underline">
-          FAQ
+        <Link href="/products" className="text-nav font-semibold hover:underline">
+          Continue shopping gifts
         </Link>
       </section>
     </div>

@@ -19,7 +19,7 @@ import { LeadCaptureInput } from "@/components/LeadCaptureInput";
 import { ExploreMoreSection } from "@/components/ExploreMoreSection";
 import { HomeProductCard } from "@/components/HomeProductCard";
 import { useCart } from "@/lib/cart-context";
-import { productPageFaqs } from "@/lib/content/product-faqs";
+import { productFaqsForCategory, type ProductFaq } from "@/lib/content/product-faqs";
 import { testimonials } from "@/lib/site";
 import {
   LOW_STOCK_THRESHOLD,
@@ -103,10 +103,20 @@ function ShareButton({ title, url }: { title: string; url: string }) {
 export function ProductDetailClient({
   product,
   relatedProducts = [],
+  faqs,
 }: {
   product: Product;
   relatedProducts?: Product[];
+  faqs?: ProductFaq[];
 }) {
+  const pageFaqs = faqs ?? productFaqsForCategory(product.categorySlug);
+  const productNoun = /rakhi/i.test(product.categorySlug)
+    ? "Rakhi"
+    : product.categorySlug.includes("cake")
+      ? "cake"
+      : product.categorySlug.includes("flower") || product.categorySlug.includes("bouquet")
+        ? "flowers"
+        : "gift";
   const sessionId = useSessionId();
   const captureLead = useDebouncedLeadCapture(sessionId);
   const captureLeadNow = useLeadCapture(sessionId);
@@ -342,7 +352,7 @@ export function ProductDetailClient({
             </div>
           )}
 
-          <ScheduleDeliveryPicker className="mb-5" />
+          <ScheduleDeliveryPicker className="mb-5" productNoun={productNoun} />
 
         </div>
       </div>
@@ -473,7 +483,7 @@ export function ProductDetailClient({
           <ProductReviewsPreview />
         ) : (
           <dl className="space-y-5 max-w-2xl">
-            {productPageFaqs.map((f) => (
+            {pageFaqs.map((f) => (
               <div key={f.q}>
                 <dt className="font-semibold text-slate-900">{f.q}</dt>
                 <dd className="text-slate-600 mt-2 leading-relaxed">{f.a}</dd>
@@ -500,7 +510,7 @@ export function ProductDetailClient({
       <section className="mt-10 pt-8 border-t border-slate-200">
         <h2 className="text-lg font-bold text-primary mb-4">Common questions</h2>
         <dl className="space-y-4 max-w-2xl">
-          {productPageFaqs.map((f) => (
+          {pageFaqs.map((f) => (
             <div key={f.q}>
               <dt className="font-semibold text-slate-800 text-sm">{f.q}</dt>
               <dd className="text-sm text-slate-600 mt-1 leading-relaxed">{f.a}</dd>

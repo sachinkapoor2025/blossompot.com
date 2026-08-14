@@ -8,6 +8,8 @@ import { categoryOrder } from "@/lib/site";
 import { listAllBlogPosts } from "@/lib/content/blog-posts";
 import { allCollectionSlugs } from "@/lib/collections";
 import { allSeoLocationSlugs, locationPublicPath } from "@/lib/content/seo-data";
+import { allOccasionSlugs } from "@/lib/content/occasions";
+import { allGiftGuideSlugs } from "@/lib/content/recipients";
 
 function mergeProducts(apiProducts: Product[]): Product[] {
   const bySlug = new Map(apiProducts.map((p) => [p.slug, p]));
@@ -24,33 +26,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/products`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: `${siteUrl}/reviews`, lastModified: now, changeFrequency: "weekly", priority: 0.75 },
     { url: `${siteUrl}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${siteUrl}/about/team`, lastModified: now, changeFrequency: "monthly", priority: 0.55 },
     { url: `${siteUrl}/shipping`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${siteUrl}/faq`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${siteUrl}/raksha-bandhan`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
-    {
-      url: `${siteUrl}/send-rakhi-from-india`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.92,
-    },
-    {
-      url: `${siteUrl}/rakhi-from-uk`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${siteUrl}/rakhi-from-canada`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
+    { url: `${siteUrl}/same-day-delivery`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
+    { url: `${siteUrl}/corporate-gifting`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${siteUrl}/blog`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${siteUrl}/contact`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${siteUrl}/terms`, lastModified: now, changeFrequency: "yearly", priority: 0.4 },
     { url: `${siteUrl}/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.4 },
     { url: `${siteUrl}/returns`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: `${siteUrl}/press`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${siteUrl}/editorial-policy`, lastModified: now, changeFrequency: "monthly", priority: 0.45 },
     { url: `${siteUrl}/llms.txt`, lastModified: now, changeFrequency: "weekly", priority: 0.5 },
     { url: `${siteUrl}/llms-full.txt`, lastModified: now, changeFrequency: "daily", priority: 0.5 },
     { url: `${siteUrl}/humans.txt`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
@@ -68,6 +55,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: now,
     changeFrequency: "weekly" as const,
     priority: slug.includes("los-angeles") || slug.includes("san-") ? 0.8 : 0.72,
+  }));
+
+  const occasionRoutes = allOccasionSlugs().map((slug) => ({
+    url: `${siteUrl}/occasions/${slug}`,
+    lastModified: now,
+    changeFrequency: "weekly" as const,
+    priority: 0.78,
+  }));
+
+  const giftGuideRoutes = allGiftGuideSlugs().map((slug) => ({
+    url: `${siteUrl}/gifts/${slug}`,
+    lastModified: now,
+    changeFrequency: "weekly" as const,
+    priority: 0.76,
   }));
 
   const blogRoutes = listAllBlogPosts().map((p) => ({
@@ -96,13 +97,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${siteUrl}/products/${p.slug}`,
     lastModified: new Date(p.updatedAt ?? now),
     changeFrequency: "weekly" as const,
-    priority: p.categorySlug === "rakhi-hampers" ? 0.85 : 0.8,
+    priority: 0.8,
   }));
 
   return [
     ...staticRoutes,
     ...categoryRoutes,
     ...locationRoutes,
+    ...occasionRoutes,
+    ...giftGuideRoutes,
     ...blogRoutes,
     ...collectionRoutes,
     ...productRoutes,

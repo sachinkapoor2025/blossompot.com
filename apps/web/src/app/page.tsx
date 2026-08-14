@@ -207,9 +207,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <GoogleReviews data={googleReviews} />
-
-      <HomeSeoSection />
+      {googleReviews.source === "google" ? <GoogleReviews data={googleReviews} /> : null}
 
       <section className="max-w-7xl mx-auto px-4 py-12 border-t border-[#eadfd8]">
         <div className="max-w-xl mx-auto text-center">

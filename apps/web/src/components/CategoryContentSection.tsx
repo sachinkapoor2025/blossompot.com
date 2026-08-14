@@ -95,7 +95,7 @@ export function CategoryContentSection({ content, categoryName }: Props) {
           <section className="bg-nav text-white rounded-xl p-6">
             <h3 className="text-lg font-semibold mb-2">Need help choosing {categoryName}?</h3>
             <p className="text-sm text-white/90 mb-4">
-              Our team helps sisters pick the perfect rakhi and confirm US delivery addresses.
+              Our team helps you pick the perfect {categoryName.toLowerCase()} and confirm US delivery addresses.
             </p>
             <div className="flex flex-wrap gap-3 text-sm">
               <Link
@@ -135,8 +135,8 @@ export function CategoryContentSection({ content, categoryName }: Props) {
         <section className="bg-slate-50 border border-slate-200 rounded-xl p-6">
           <h3 className="text-lg font-semibold text-primary mb-3">Need help choosing?</h3>
           <p className="text-sm text-slate-600 leading-relaxed mb-4">
-            Message us on WhatsApp for sizing, delivery timing before Raksha Bandhan, or gift
-            recommendations for {categoryName.toLowerCase()}.
+            Message us on WhatsApp for sizing, delivery timing, or gift recommendations for{" "}
+            {categoryName.toLowerCase()}.
           </p>
           <a
             href={whatsappChatUrl(`Hi! I need help choosing a ${categoryName} for USA delivery.`)}

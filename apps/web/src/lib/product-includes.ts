@@ -194,9 +194,56 @@ function hamperIncludeLines(description: string): string[] {
   return raw.flatMap(normalizeHamperIncludeLine);
 }
 
+function isRakhiCategory(categorySlug: string): boolean {
+  return (
+    categorySlug === "single-rakhi" ||
+    categorySlug === "2-set-rakhi" ||
+    categorySlug === "3-set-rakhi" ||
+    categorySlug === "4-set-rakhi" ||
+    categorySlug === "rakhi-combo" ||
+    categorySlug === "kids-rakhi" ||
+    categorySlug === "bhaiya-bhabhi-rakhi" ||
+    categorySlug === "lumba-rakhi" ||
+    categorySlug === "rakhi-hampers" ||
+    /rakhi/i.test(categorySlug)
+  );
+}
+
+function giftDefaultLines(categorySlug: string, name: string): string[] {
+  switch (categorySlug) {
+    case "flowers":
+    case "flower-bouquets":
+      return [
+        name.trim() || "Premium flower arrangement",
+        "Florist-style presentation",
+        "Care card with freshness tips",
+      ];
+    case "cakes":
+      return [
+        name.trim() || "Celebration cake",
+        "Ready-to-serve presentation",
+        "Occasion message option at checkout",
+      ];
+    case "plants":
+      return ["Live plant as shown", "Basic care instructions", "Gift-ready packaging"];
+    case "gift-hampers":
+      return ["Curated gift selection", "Premium packaging", "Gift message option"];
+    case "personalized-gifts":
+      return ["Personalized gift item", "Custom message option", "Gift-ready packaging"];
+    default:
+      return [
+        name.trim() || "Gift item as shown",
+        "Premium packaging",
+        "Gift message option at checkout",
+      ];
+  }
+}
+
 /**
  * Customer-facing "What's included" lines for product detail pages.
- * Hampers use HTML list items; other categories use category defaults + chocolate parsing.
+ * - Prefer explicit HTML list / per-product description bullets
+ * - Rakhi categories keep ritual defaults
+ * - Flower/cake/gift categories never inherit Rakhi/Roli/Chawal defaults
  */
 export function getProductIncludes(product: ProductLike): string[] {
   const { description, name, categorySlug, tags } = product;
@@ -222,9 +269,15 @@ export function getProductIncludes(product: ProductLike): string[] {
   const blob = [name, description, ...(tags ?? [])].join(" ");
   const plain = looksLikeHtml(blob) ? stripHtml(blob) : blob;
 
+  if (!isRakhiCategory(categorySlug)) {
+    const items = [...giftDefaultLines(categorySlug, name)];
+    const chocolate = parseChocolateInclude(plain);
+    if (chocolate) items.push(chocolate);
+    return [...items, ...shippingIncludeLines()];
+  }
+
   const items = [...rakhiLines(categorySlug), ...ritualPackets()];
 
-  // Pack includes 2 small Hershey's (SKU HER-RK-10-15) even when description omits brand.
   if (product.slug === "bhai-bhabhi-lumba-rakhi-set") {
     items.push("2 small Hershey's chocolates");
   } else {

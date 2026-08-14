@@ -19,13 +19,16 @@ function formatLong(dateYmd: string): string {
   });
 }
 
-/** Customer-selectable delivery date (max 28 Aug 2026). */
+/** Customer-selectable delivery date. */
 export function ScheduleDeliveryPicker({
   className = "",
   compact = false,
+  productNoun = "gift",
 }: {
   className?: string;
   compact?: boolean;
+  /** Dynamic noun from product category, e.g. flowers / cake / gift / rakhi */
+  productNoun?: string;
 }) {
   const [{ min, max }] = useState(() => preferredDeliveryDateBounds());
   const [value, setValue] = useState("");
@@ -46,7 +49,7 @@ export function ScheduleDeliveryPicker({
       </label>
       {!compact && (
         <p className="text-xs text-slate-600 mb-2">
-          Choose when you want your Rakhi delivered. Latest available date:{" "}
+          Choose when you want your {productNoun} delivered. Latest available date:{" "}
           <strong>{formatLong(SCHEDULE_DELIVERY_MAX_DATE)}</strong>.
         </p>
       )}

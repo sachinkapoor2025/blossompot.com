@@ -43,7 +43,13 @@ export function californiaWarehouseLocations(): SeoLocation[] {
   return seoLocations.filter((l) => l.isCaliforniaWarehouse);
 }
 
+/** Canonical public geo URL for the gifting business. */
 export function locationPublicPath(slug: string): string {
+  return `/gifts-to-${slug}`;
+}
+
+/** Seasonal Rakhi-only URL (kept for redirects / intentional Rakhi landings). */
+export function rakhiLocationPublicPath(slug: string): string {
   return `/send-rakhi-to-${slug}`;
 }
 
