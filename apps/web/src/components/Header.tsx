@@ -266,7 +266,7 @@ export function Header() {
   return (
     <header className="border-b border-primary/10 bg-white/90 backdrop-blur-md sticky top-0 z-50 shadow-sm shadow-primary/5 overflow-visible">
       {/* Mobile top bar */}
-      <div className="md:hidden max-w-7xl mx-auto px-3 py-3 flex items-center gap-2">
+      <div className="md:hidden max-w-7xl mx-auto px-3 py-2.5 flex items-center gap-2">
         <button
           type="button"
           className="p-1.5 text-nav hover:text-primary shrink-0"
@@ -290,7 +290,7 @@ export function Header() {
       </div>
 
       {/* Desktop top bar */}
-      <div className="hidden md:grid max-w-7xl mx-auto px-4 py-3 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-6">
+      <div className="hidden md:grid max-w-7xl mx-auto px-4 py-2.5 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-6">
         <SiteLogoLink size="desktop" priority />
 
         <div className="w-full max-w-2xl mx-auto">

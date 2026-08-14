@@ -2,9 +2,21 @@ import Image from "next/image";
 import Link from "next/link";
 import { site } from "@/lib/site";
 
+/**
+ * Full stacked brand logo (emblem + wordmark + taglines).
+ * Aspect ~4:3 — give enough height so “Blossompot” stays readable.
+ */
 const LOGO = {
-  desktop: { width: 180, height: 60, className: "h-12 w-auto max-w-[180px] object-contain" },
-  mobile: { width: 160, height: 52, className: "h-11 w-auto max-w-[160px] object-contain" },
+  desktop: {
+    width: 220,
+    height: 160,
+    className: "h-[4.5rem] w-auto max-w-[220px] object-contain object-left",
+  },
+  mobile: {
+    width: 168,
+    height: 122,
+    className: "h-14 w-auto max-w-[168px] object-contain object-left",
+  },
 } as const;
 
 type SiteLogoProps = {
@@ -19,11 +31,12 @@ export function SiteLogo({ size = "desktop", priority = false, className = "" }:
   return (
     <Image
       src={site.logoSrc}
-      alt={site.name}
+      alt={`${site.name} — Flowers, cakes & gifts`}
       width={width}
       height={height}
       className={`${sizeClass} ${className}`.trim()}
       priority={priority}
+      sizes="(max-width: 768px) 168px, 220px"
     />
   );
 }

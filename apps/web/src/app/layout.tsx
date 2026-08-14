@@ -84,13 +84,13 @@ export const metadata: Metadata = {
     url: canonical("/"),
     title: "BlossomPot — Flowers, Cakes & Gifts | USA Delivery",
     description: site.description,
-    images: [{ url: site.logoSrc, alt: site.name, width: 1200, height: 630 }],
+    images: [{ url: site.logoPngSrc, alt: site.name, width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
     title: "BlossomPot — Flowers, Cakes & Thoughtful Gifts",
     description: site.description,
-    images: [site.logoSrc],
+    images: [site.logoPngSrc],
   },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
   verification: {

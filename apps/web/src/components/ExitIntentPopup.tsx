@@ -264,7 +264,7 @@ export function ExitIntentPopup() {
           <div className="flex items-center gap-3 pr-8">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white shadow-md ring-2 ring-white/40 overflow-hidden p-1.5">
               <Image
-                src={site.logoSrc}
+                src={site.logoMarkSrc}
                 alt={site.name}
                 width={40}
                 height={40}
@@ -396,10 +396,10 @@ export function ExitIntentPopup() {
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
                   <div className="flex h-[84px] w-[84px] sm:h-24 sm:w-24 flex-col items-center justify-center rounded-full bg-white border-[3px] border-primary shadow-lg ring-2 ring-amber-300/70 overflow-hidden px-2 py-1.5">
                     <Image
-                      src={site.logoSrc}
+                      src={site.logoMarkSrc}
                       alt={site.name}
-                      width={72}
-                      height={28}
+                      width={64}
+                      height={64}
                       className="h-auto w-full max-w-[68px] object-contain"
                     />
                     <span className="mt-0.5 text-[8px] sm:text-[9px] font-bold uppercase tracking-wide text-primary leading-none">

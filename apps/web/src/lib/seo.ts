@@ -118,8 +118,8 @@ export function organizationJsonLd() {
     logo: {
       "@type": "ImageObject",
       url: canonical(site.logoPngSrc),
-      width: 512,
-      height: 512,
+      width: 1200,
+      height: 630,
     },
     description: site.description,
     email: site.supportEmail,

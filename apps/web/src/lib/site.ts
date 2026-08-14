@@ -35,11 +35,14 @@ export const site = {
   whatsapp: SUPPORT_PHONE_DIGITS,
   whatsappDisplay: SUPPORT_PHONE_DISPLAY,
   whatsappGroupInviteUrl: "",
-  logoSrc: "/logo.svg",
-  logoPngSrc: "/icon-512.png",
+  logoSrc: "/logo.png",
+  /** Square mark for app icons / schema when a compact asset is preferred. */
+  logoMarkSrc: "/icon-512.png",
+  /** Full logo on black — Open Graph / social share (1200×630). */
+  logoPngSrc: "/logo-og.png",
   primaryColor: "#C23A6B",
   navBlue: "#E07A9A",
-  accentColor: "#2F8F6B",
+  accentColor: "#1A3D34",
 } as const;
 
 /** Featured gift collections in the header mega-menu style. */

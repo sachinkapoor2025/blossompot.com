@@ -44,6 +44,8 @@ const nextConfig: NextConfig = {
       { source: "/collections/rakhi-:slug", destination: "/flowers", statusCode: 301 },
       { source: "/collections/rakhi-:slug/", destination: "/flowers", statusCode: 301 },
       { source: "/sitemap.rss", destination: "/sitemap.xml", statusCode: 301 },
+      { source: "/logo.svg", destination: "/logo.png", statusCode: 301 },
+      { source: "/logo.svg/", destination: "/logo.png", statusCode: 301 },
     ];
   },
   async rewrites() {
