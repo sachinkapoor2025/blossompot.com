@@ -26,14 +26,14 @@ const SPIN_MS = 4200;
 const SEGMENTS = [...DAILY_DEAL_SEGMENTS];
 const WHEEL_LABELS = [...DAILY_DEAL_WHEEL_LABELS];
 const SEGMENT_COLORS = [
-  "#183a68",
-  "#c4a35a",
-  "#4876e8",
-  "#e11d48",
-  "#0f766e",
-  "#c4a35a",
-  "#183a68",
-  "#e11d48",
+  "#c23a6b",
+  "#e5a23a",
+  "#e07a9a",
+  "#2f8f6b",
+  "#9e2d55",
+  "#e5a23a",
+  "#c23a6b",
+  "#2f8f6b",
 ];
 
 function isValidEmail(value: string): boolean {
@@ -250,16 +250,7 @@ export function ExitIntentPopup() {
       <div className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5">
         <ConfettiBurst active={celebrating} burstKey={burstKey} />
 
-        <div className="relative h-28 sm:h-32 overflow-hidden">
-          <Image
-            src="/banners/banner-2-connecting-hearts.png"
-            alt="Premium flowers and gifts for USA delivery"
-            fill
-            className="object-cover object-center"
-            sizes="512px"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/75 to-primary/40" />
+        <div className="relative overflow-hidden bg-gradient-to-br from-primary via-[#9e2d55] to-nav px-5 pt-4 pb-5 text-white">
           <button
             type="button"
             onClick={close}
@@ -270,13 +261,30 @@ export function ExitIntentPopup() {
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
-          <div className="absolute inset-x-0 bottom-0 px-5 pb-4 text-white">
-            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-amber-200">Gift offer · Today only</p>
-            <h2 className="text-2xl font-bold leading-tight mt-0.5">Discount of the Day</h2>
-            <p className="text-xs sm:text-sm text-white/90 mt-1">
-              Spin for a mystery gift discount · 1 spin / mobile / day · valid {WELCOME_COUPON_HOURS}h
-            </p>
+          <div className="flex items-center gap-3 pr-8">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white shadow-md ring-2 ring-white/40 overflow-hidden p-1.5">
+              <Image
+                src={site.logoSrc}
+                alt={site.name}
+                width={40}
+                height={40}
+                className="h-auto w-full object-contain"
+                priority
+              />
+            </div>
+            <div>
+              <p className="font-display text-xl sm:text-2xl font-semibold leading-tight tracking-tight">
+                {site.name}
+              </p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-100/95">
+                blossompot.com · Gift offer · Today only
+              </p>
+            </div>
           </div>
+          <h2 className="text-2xl font-bold leading-tight mt-3">Discount of the Day</h2>
+          <p className="text-xs sm:text-sm text-white/90 mt-1">
+            Spin for a mystery gift discount · 1 spin / mobile / day · valid {WELCOME_COUPON_HOURS}h
+          </p>
         </div>
 
         <div className="relative px-5 py-5">
@@ -341,7 +349,7 @@ export function ExitIntentPopup() {
                   className="absolute -inset-1 rounded-full opacity-90"
                   style={{
                     background:
-                      "conic-gradient(from 0deg, #c4a35a, #183a68, #c4a35a, #e11d48, #c4a35a, #4876e8, #c4a35a)",
+                      "conic-gradient(from 0deg, #e5a23a, #c23a6b, #e5a23a, #2f8f6b, #e5a23a, #e07a9a, #e5a23a)",
                   }}
                   aria-hidden
                 />
@@ -359,7 +367,7 @@ export function ExitIntentPopup() {
                     transition: animateSpin
                       ? `transform ${SPIN_MS}ms cubic-bezier(0.12, 0.75, 0.18, 1)`
                       : undefined,
-                    boxShadow: "0 8px 28px rgba(24,58,104,0.28)",
+                    boxShadow: "0 8px 28px rgba(194,58,107,0.28)",
                   }}
                 >
                   {WHEEL_LABELS.map((label, i) => {
@@ -386,14 +394,17 @@ export function ExitIntentPopup() {
                 </div>
 
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-                  <div className="flex h-[72px] w-[72px] sm:h-20 sm:w-20 items-center justify-center rounded-full bg-white border-[3px] border-primary shadow-lg ring-2 ring-amber-300/70 overflow-hidden p-1.5">
+                  <div className="flex h-[84px] w-[84px] sm:h-24 sm:w-24 flex-col items-center justify-center rounded-full bg-white border-[3px] border-primary shadow-lg ring-2 ring-amber-300/70 overflow-hidden px-2 py-1.5">
                     <Image
                       src={site.logoSrc}
                       alt={site.name}
-                      width={64}
+                      width={72}
                       height={28}
-                      className="h-auto w-full object-contain"
+                      className="h-auto w-full max-w-[68px] object-contain"
                     />
+                    <span className="mt-0.5 text-[8px] sm:text-[9px] font-bold uppercase tracking-wide text-primary leading-none">
+                      BlossomPot
+                    </span>
                   </div>
                 </div>
               </div>
