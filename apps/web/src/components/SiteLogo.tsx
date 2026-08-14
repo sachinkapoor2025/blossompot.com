@@ -3,18 +3,19 @@ import Link from "next/link";
 import { site } from "@/lib/site";
 
 /**
- * Brand logo = B emblem + “Blossompot” wordmark only (no taglines in the image).
+ * Brand logo = B emblem + “Blossompot” wordmark (transparent PNG).
+ * Aspect ~863×615.
  */
 const LOGO = {
   desktop: {
-    width: 260,
-    height: 142,
-    className: "h-[5.5rem] w-auto max-w-[260px] object-contain object-left",
+    width: 280,
+    height: 200,
+    className: "h-[6.25rem] w-auto max-w-[280px] object-contain object-left",
   },
   mobile: {
-    width: 196,
-    height: 107,
-    className: "h-[4.25rem] w-auto max-w-[196px] object-contain object-left",
+    width: 210,
+    height: 150,
+    className: "h-[4.75rem] w-auto max-w-[210px] object-contain object-left",
   },
 } as const;
 
@@ -35,7 +36,7 @@ export function SiteLogo({ size = "desktop", priority = false, className = "" }:
       height={height}
       className={`${sizeClass} ${className}`.trim()}
       priority={priority}
-      sizes="(max-width: 768px) 196px, 260px"
+      sizes="(max-width: 768px) 210px, 280px"
     />
   );
 }
