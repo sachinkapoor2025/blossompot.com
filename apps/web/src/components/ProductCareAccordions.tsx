@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import type { Product } from "@blossompot/shared";
 import { productHasEatablesWithRakhi } from "@/lib/product-includes";
 
-/** Care tips for Rakhi gifts that include chocolates, sweets, or dry fruits. */
+/** Care tips for gifts that include chocolates, sweets, or dry fruits. */
 const EATABLE_INSTRUCTIONS = [
   "Keep chocolates and other eatables in a sealed, airtight container at room temperature — away from direct sun and humidity.",
   "For the best taste and freshness, please enjoy them before the expiry date printed on the pack.",
@@ -108,7 +108,7 @@ type Props = {
 
 /**
  * Collapsed care / shipping accordions on the product page.
- * - Instructions: only when the gift includes eatables with Rakhi
+ * - Instructions: only when the gift includes eatables
  * - Shipping & Delivery: every product
  */
 export function ProductCareAccordions({ product, className = "" }: Props) {

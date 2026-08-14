@@ -433,26 +433,7 @@ export function howToSendGiftJsonLd() {
 }
 
 /** @deprecated Use howToSendGiftJsonLd */
-export const howToSendRakhiJsonLd = howToSendGiftJsonLd;
 
-export function rakshaBandhanEventJsonLd() {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Event",
-    name: "Celebration gifting with BlossomPot",
-    description:
-      "Send flowers, cakes, and thoughtful gifts across the USA with BlossomPot for birthdays, anniversaries, and every celebration.",
-    startDate: "2026-01-01",
-    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-    eventStatus: "https://schema.org/EventScheduled",
-    location: {
-      "@type": "Country",
-      name: "United States",
-    },
-    organizer: { "@id": `${siteUrl}/#organization` },
-    url: canonical("/flowers"),
-  };
-}
 
 export function contactPageJsonLd() {
   return {

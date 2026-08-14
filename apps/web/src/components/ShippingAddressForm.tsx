@@ -219,7 +219,7 @@ export function ShippingAddressForm({
             label="Sender name (your name)"
             value={value.senderName ?? ""}
             onChange={(e) => update("senderName", e.target.value)}
-            placeholder="So your brother knows who sent this Rakhi"
+            placeholder="So the recipient knows who sent this gift"
             required
             autoComplete="nickname"
           />
@@ -233,7 +233,7 @@ export function ShippingAddressForm({
               required
               rows={4}
               maxLength={500}
-              placeholder="Write a Raksha Bandhan note — it will appear on the shipping label"
+              placeholder="Write a personal note — it will appear on the shipping label"
               className="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent text-sm leading-relaxed"
             />
             <p className="text-xs text-slate-500 mt-1">

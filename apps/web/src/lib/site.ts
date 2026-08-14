@@ -54,7 +54,6 @@ export const giftSetsMenu = {
 } as const;
 
 /** @deprecated Use giftSetsMenu — kept for transitional imports. */
-export const rakhiSetsMenu = giftSetsMenu;
 
 export const navItems = [
   { label: "Home", href: "/" },

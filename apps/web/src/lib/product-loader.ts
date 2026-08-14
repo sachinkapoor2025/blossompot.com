@@ -6,6 +6,7 @@ import {
   getCatalogProductsByCategory,
   mergeProductsPreferExisting,
 } from "./catalog-fallback";
+import { isRakhiRelatedCategorySlug, isRakhiRelatedProduct } from "./rakhi-filter";
 
 /**
  * Prefer last good API price over bundled catalog when the API blips.
@@ -35,9 +36,9 @@ function memoryProduct(slug: string): Product | null {
   return hit.product;
 }
 
-/** Catalog is OK for vendor/hamper SKUs that may not be in DynamoDB yet. */
+/** Catalog is OK for vendor SKUs that may not be in DynamoDB yet. */
 function allowCatalogFallback(product: Product): boolean {
-  return Boolean(product.vendorSlug) || product.categorySlug === "rakhi-hampers";
+  return Boolean(product.vendorSlug);
 }
 
 function isProductMissingError(err: unknown): boolean {
@@ -53,12 +54,17 @@ function isProductMissingError(err: unknown): boolean {
 export async function loadProduct(slug: string): Promise<Product | null> {
   try {
     const data = await api<{ product: Product }>(`/products/${slug}`, FRESH_PRODUCT_FETCH);
+    if (isRakhiRelatedProduct(data.product)) return null;
     return rememberProduct(data.product);
   } catch (err) {
     const stale = memoryProduct(slug);
-    if (stale) return stale;
+    if (stale) {
+      if (isRakhiRelatedProduct(stale)) return null;
+      return stale;
+    }
 
     const catalog = getCatalogProduct(slug);
+    if (catalog && isRakhiRelatedProduct(catalog)) return null;
     if (catalog && (allowCatalogFallback(catalog) || isProductMissingError(err))) {
       return catalog;
     }
@@ -73,6 +79,8 @@ export async function loadProducts(params?: {
   category?: string;
   search?: string;
 }): Promise<Product[]> {
+  if (params?.category && isRakhiRelatedCategorySlug(params.category)) return [];
+
   const query = new URLSearchParams();
   if (params?.category) query.set("category", params.category);
   if (params?.search) query.set("search", params.search);
@@ -80,7 +88,7 @@ export async function loadProducts(params?: {
 
   try {
     const data = await api<{ products: Product[] }>(`/products${qs}`, FRESH_PRODUCT_FETCH);
-    return rememberProducts(data.products);
+    return rememberProducts(data.products.filter((p) => !isRakhiRelatedProduct(p)));
   } catch {
     if (params?.category) {
       return getCatalogProductsByCategory(params.category);

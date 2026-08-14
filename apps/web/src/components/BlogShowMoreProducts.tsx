@@ -19,7 +19,7 @@ function ShowMoreGrid({ products }: { products: BlogShowMoreProduct[] }) {
           Show More
         </h2>
         <p className="mt-1 text-sm text-slate-600">
-          Explore Rakhis from Single, Bhaiya Bhabhi, Kids, Lumba, Sets, and Hampers.
+          Explore flowers, cakes, and curated gift hampers.
         </p>
       </div>
 
@@ -56,7 +56,7 @@ function ShowMoreGrid({ products }: { products: BlogShowMoreProduct[] }) {
   );
 }
 
-/** FNP-style “Show More” Rakhi image grid for blog pages (2 products × 6 categories). */
+/** FNP-style “Show More” gift image grid for blog pages (2 products × 6 categories). */
 export async function BlogShowMoreProducts() {
   const products = await loadBlogShowMoreProducts();
   if (products.length === 0) return null;

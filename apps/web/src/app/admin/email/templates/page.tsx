@@ -54,20 +54,20 @@ export default function TemplatesPage() {
       installed.includes(FREE_SHIPPING_TEMPLATE_ID) ||
       installed.includes(STARTING_PRICE_TEMPLATE_ID)
     ) {
-      setMessage("Campaign templates installed: Free Shipping Above $7 and Rakhi Starting at ₹343 ($3.99).");
+      setMessage("Campaign templates installed: Free Shipping Above $7 campaign starters.");
     } else if (
       updated.includes(FREE_SHIPPING_TEMPLATE_ID) ||
       updated.includes(STARTING_PRICE_TEMPLATE_ID)
     ) {
       setMessage("Campaign templates updated from latest marketing email configs.");
     } else if (installed.includes(PREMIUM_RAKSHA_BANDHAN_TEMPLATE_ID)) {
-      setMessage("Premium Raksha Bandhan template installed — edit images, categories, and CTAs below.");
+      setMessage("Premium gifts template installed — edit images, categories, and CTAs below.");
     } else if (updated.includes(PREMIUM_RAKSHA_BANDHAN_TEMPLATE_ID)) {
-      setMessage("Premium Raksha Bandhan template upgraded with visual editor fields.");
+      setMessage("Premium gifts template upgraded with visual editor fields.");
     } else if (installed.includes(RAKSHA_BANDHAN_TEMPLATE_ID)) {
-      setMessage("Raksha Bandhan USA template installed and ready to use.");
+      setMessage("Gifts USA template installed and ready to use.");
     } else if (updated.includes(RAKSHA_BANDHAN_TEMPLATE_ID)) {
-      setMessage("Raksha Bandhan USA template updated.");
+      setMessage("Gifts USA template updated.");
     }
     return list;
   }, [api]);

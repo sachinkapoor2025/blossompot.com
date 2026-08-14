@@ -24,7 +24,7 @@ export interface HomeBanner {
 
 const TRUST_FEATURES = [
   {
-    label: "Premium Rakhis",
+    label: "Premium Gifts",
     icon: (
       <path
         strokeLinecap="round"

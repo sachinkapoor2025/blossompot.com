@@ -58,7 +58,7 @@ export function abandonedCouponWhatsAppMessage(input: {
   if (input.confirmedSale) {
     return `Hi! This is ${SITE}. Thanks for confirming your order — use code ${input.code} for ${input.discountPercent}% off (Confirmed sale). Valid until ${expiry} (ET). Checkout: ${url}`;
   }
-  return `Hi! This is ${SITE}. Complete your Rakhi order with ${input.discountPercent}% off using code ${input.code}. Valid until ${expiry} (ET). Checkout: ${url}`;
+  return `Hi! This is ${SITE}. Complete your gift order with ${input.discountPercent}% off using code ${input.code}. Valid until ${expiry} (ET). Checkout: ${url}`;
 }
 
 export function welcomeCouponWhatsAppMessage(input: {
@@ -88,7 +88,7 @@ export function abandonedCartWhatsAppMessage(input: {
   const expiry = input.expiresAt ? ` Valid until ${formatExpiryEt(input.expiresAt)} (ET).` : "";
   const nudge =
     input.reminder === 1
-      ? "You left Rakhis in your cart."
+      ? "You left items in your cart."
       : "Still thinking it over? Your cart is waiting.";
   return `${hi}! ${nudge}
 
@@ -136,7 +136,7 @@ export function orderStatusWhatsAppMessage(input: {
         totalLabel: input.totalLabel ?? "",
       });
     case "accepted":
-      return `${hi}! We've accepted your Rakhi order #${shortId}.${total}\n\nTrack: ${orderUrl}`;
+      return `${hi}! We've accepted your gift order #${shortId}.${total}\n\nTrack: ${orderUrl}`;
     case "on_hold":
       return `${hi}! Order #${shortId} is temporarily on hold while we review it.${total}\n\nWe'll update you soon. ${orderUrl}`;
     case "processing":
@@ -148,10 +148,10 @@ export function orderStatusWhatsAppMessage(input: {
       ]
         .filter(Boolean)
         .join("\n");
-      return `${hi}! Your Rakhi order #${shortId} has shipped!\n${track || "Tracking will appear on your order page shortly."}${total}\n\nTrack: ${orderUrl}`;
+      return `${hi}! Your gift order #${shortId} has shipped!\n${track || "Tracking will appear on your order page shortly."}${total}\n\nTrack: ${orderUrl}`;
     }
     case "delivered":
-      return `${hi}! Order #${shortId} is marked delivered. We hope your brother loves his Rakhi!\n\n${orderUrl}`;
+      return `${hi}! Order #${shortId} is marked delivered. We hope your brother loves the gift!\n\n${orderUrl}`;
     case "complete":
       return `${hi}! Order #${shortId} is complete. Thank you for celebrating with ${SITE}.\n\nLeave a review: ${SITE_URL()}/reviews`;
     case "cancelled":
@@ -175,7 +175,7 @@ export function pendingPaymentWhatsAppMessage(input: {
 Total: ${input.totalLabel}
 Pay here: ${SITE_URL()}/orders/${input.orderId}
 
-Complete payment so we can pack and ship for Raksha Bandhan.`;
+Complete payment so we can pack and ship your gift.`;
 }
 
 export function reviewRequestWhatsAppMessage(input: {

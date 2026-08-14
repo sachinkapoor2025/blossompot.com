@@ -24,9 +24,9 @@ export function WishlistPageClient({ recommendedProducts }: Props) {
       <div className="max-w-7xl mx-auto px-4 py-16">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <h1 className="text-3xl font-bold text-primary mb-3">Wish Lists</h1>
-          <p className="text-slate-600 mb-6">Your saved Rakhis will appear here. Tap the heart on any product to save it.</p>
+          <p className="text-slate-600 mb-6">Your saved gifts will appear here. Tap the heart on any product to save it.</p>
           <Link href="/products" className="text-nav font-semibold hover:underline">
-            Browse Rakhi collection →
+            Browse gift collection →
           </Link>
         </div>
 

@@ -13,7 +13,7 @@ export const HOME_PAGE_INDEPENDENCE_DAY_BANNER_PATH =
 export const HOME_PAGE_INDEPENDENCE_DAY_BANNER_URL = `${SITE_ORIGIN}${HOME_PAGE_INDEPENDENCE_DAY_BANNER_PATH}`;
 
 export const HOME_PAGE_INDEPENDENCE_DAY_BANNER_ALT =
-  "India Independence Day Freedom Sale — Send Rakhi to USA | BlossomPot" as const;
+  "Celebration Sale — Flowers, Cakes & Gifts | BlossomPot" as const;
 
 /**
  * First homepage banner image for marketing emails.

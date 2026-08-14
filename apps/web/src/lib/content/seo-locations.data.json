@@ -1,2345 +1,1682 @@
 [
   {
     "slug": "anaheim",
-    "path": "/send-rakhi-to-anaheim",
+    "path": "/gifts-to-anaheim",
     "name": "Anaheim",
     "state": "California",
     "region": "city",
     "isCaliforniaWarehouse": true,
     "priority": "High",
-    "keywords": [
-      "buy rakhi online anaheim",
-      "order rakhi to anaheim",
-      "rakhi delivery to anaheim",
-      "rakhi delivery to anaheim same day",
-      "send rakhi to anaheim"
-    ]
+    "keywords": []
   },
   {
     "slug": "berkeley",
-    "path": "/send-rakhi-to-berkeley",
+    "path": "/gifts-to-berkeley",
     "name": "Berkeley",
     "state": "California",
     "region": "city",
     "isCaliforniaWarehouse": true,
     "priority": "High",
-    "keywords": [
-      "buy rakhi online berkeley",
-      "order rakhi to berkeley",
-      "rakhi delivery to berkeley",
-      "rakhi delivery to berkeley same day",
-      "send rakhi to berkeley"
-    ]
+    "keywords": []
   },
   {
     "slug": "cupertino",
-    "path": "/send-rakhi-to-cupertino",
+    "path": "/gifts-to-cupertino",
     "name": "Cupertino",
     "state": "California",
     "region": "city",
     "isCaliforniaWarehouse": true,
     "priority": "High",
-    "keywords": [
-      "buy rakhi online cupertino",
-      "order rakhi to cupertino",
-      "rakhi delivery to cupertino",
-      "rakhi delivery to cupertino same day",
-      "send rakhi to cupertino"
-    ]
+    "keywords": []
   },
   {
     "slug": "dublin-california",
-    "path": "/send-rakhi-to-dublin-california",
+    "path": "/gifts-to-dublin-california",
     "name": "Dublin",
     "state": "California",
     "region": "city",
     "isCaliforniaWarehouse": true,
     "priority": "High",
-    "keywords": [
-      "buy rakhi online dublin california",
-      "order rakhi to dublin california",
-      "rakhi delivery to dublin california",
-      "rakhi delivery to dublin california same day",
-      "send rakhi to dublin california"
-    ]
+    "keywords": []
   },
   {
     "slug": "fremont",
-    "path": "/send-rakhi-to-fremont",
+    "path": "/gifts-to-fremont",
     "name": "Fremont",
     "state": "California",
     "region": "city",
     "isCaliforniaWarehouse": true,
     "priority": "High",
-    "keywords": [
-      "buy rakhi online fremont",
-      "order rakhi to fremont",
-      "rakhi delivery to fremont",
-      "rakhi delivery to fremont same day",
-      "send rakhi to fremont"
-    ]
+    "keywords": []
   },
   {
     "slug": "fresno",
-    "path": "/send-rakhi-to-fresno",
+    "path": "/gifts-to-fresno",
     "name": "Fresno",
     "state": "California",
     "region": "city",
     "isCaliforniaWarehouse": true,
     "priority": "High",
-    "keywords": [
-      "buy rakhi online fresno",
-      "order rakhi to fresno",
-      "rakhi delivery to fresno",
-      "rakhi delivery to fresno same day",
-      "send rakhi to fresno"
-    ]
+    "keywords": []
   },
   {
     "slug": "hayward",
-    "path": "/send-rakhi-to-hayward",
+    "path": "/gifts-to-hayward",
     "name": "Hayward",
     "state": "California",
     "region": "city",
     "isCaliforniaWarehouse": true,
     "priority": "High",
-    "keywords": [
-      "buy rakhi online hayward",
-      "order rakhi to hayward",
-      "rakhi delivery to hayward",
-      "rakhi delivery to hayward same day",
-      "send rakhi to hayward"
-    ]
+    "keywords": []
   },
   {
     "slug": "irvine",
-    "path": "/send-rakhi-to-irvine",
+    "path": "/gifts-to-irvine",
     "name": "Irvine",
     "state": "California",
     "region": "city",
     "isCaliforniaWarehouse": true,
     "priority": "High",
-    "keywords": [
-      "buy rakhi online irvine",
-      "order rakhi to irvine",
-      "rakhi delivery to irvine",
-      "rakhi delivery to irvine same day",
-      "send rakhi to irvine"
-    ]
+    "keywords": []
   },
   {
     "slug": "long-beach",
-    "path": "/send-rakhi-to-long-beach",
+    "path": "/gifts-to-long-beach",
     "name": "Long Beach",
     "state": "California",
     "region": "city",
     "isCaliforniaWarehouse": true,
     "priority": "High",
-    "keywords": [
-      "buy rakhi online long beach",
-      "order rakhi to long beach",
-      "rakhi delivery to long beach",
-      "rakhi delivery to long beach same day",
-      "send rakhi to long beach"
-    ]
+    "keywords": []
   },
   {
     "slug": "los-angeles",
-    "path": "/send-rakhi-to-los-angeles",
+    "path": "/gifts-to-los-angeles",
     "name": "Los Angeles",
     "state": "California",
     "region": "city",
     "isCaliforniaWarehouse": true,
     "priority": "High",
-    "keywords": [
-      "buy rakhi online los angeles",
-      "order rakhi to los angeles",
-      "rakhi delivery to los angeles",
-      "rakhi delivery to los angeles same day",
-      "send rakhi to los angeles"
-    ]
+    "keywords": []
   },
   {
     "slug": "milpitas",
-    "path": "/send-rakhi-to-milpitas",
+    "path": "/gifts-to-milpitas",
     "name": "Milpitas",
     "state": "California",
     "region": "city",
     "isCaliforniaWarehouse": true,
     "priority": "High",
-    "keywords": [
-      "buy rakhi online milpitas",
-      "order rakhi to milpitas",
-      "rakhi delivery to milpitas",
-      "rakhi delivery to milpitas same day",
-      "send rakhi to milpitas"
-    ]
+    "keywords": []
   },
   {
     "slug": "oakland",
-    "path": "/send-rakhi-to-oakland",
+    "path": "/gifts-to-oakland",
     "name": "Oakland",
     "state": "California",
     "region": "city",
     "isCaliforniaWarehouse": true,
     "priority": "High",
-    "keywords": [
-      "buy rakhi online oakland",
-      "order rakhi to oakland",
-      "rakhi delivery to oakland",
-      "rakhi delivery to oakland same day",
-      "send rakhi to oakland"
-    ]
+    "keywords": []
   },
   {
     "slug": "pleasanton",
-    "path": "/send-rakhi-to-pleasanton",
+    "path": "/gifts-to-pleasanton",
     "name": "Pleasanton",
     "state": "California",
     "region": "city",
     "isCaliforniaWarehouse": true,
     "priority": "High",
-    "keywords": [
-      "buy rakhi online pleasanton",
-      "order rakhi to pleasanton",
-      "rakhi delivery to pleasanton",
-      "rakhi delivery to pleasanton same day",
-      "send rakhi to pleasanton"
-    ]
+    "keywords": []
   },
   {
     "slug": "sacramento",
-    "path": "/send-rakhi-to-sacramento",
+    "path": "/gifts-to-sacramento",
     "name": "Sacramento",
     "state": "California",
     "region": "city",
     "isCaliforniaWarehouse": true,
     "priority": "High",
-    "keywords": [
-      "buy rakhi online sacramento",
-      "order rakhi to sacramento",
-      "rakhi delivery to sacramento",
-      "rakhi delivery to sacramento same day",
-      "send rakhi to sacramento"
-    ]
+    "keywords": []
   },
   {
     "slug": "san-diego",
-    "path": "/send-rakhi-to-san-diego",
+    "path": "/gifts-to-san-diego",
     "name": "San Diego",
     "state": "California",
     "region": "city",
     "isCaliforniaWarehouse": true,
     "priority": "High",
-    "keywords": [
-      "buy rakhi online san diego",
-      "order rakhi to san diego",
-      "rakhi delivery to san diego",
-      "rakhi delivery to san diego same day",
-      "send rakhi to san diego"
-    ]
+    "keywords": []
   },
   {
     "slug": "san-francisco",
-    "path": "/send-rakhi-to-san-francisco",
+    "path": "/gifts-to-san-francisco",
     "name": "San Francisco",
     "state": "California",
     "region": "city",
     "isCaliforniaWarehouse": true,
     "priority": "High",
-    "keywords": [
-      "buy rakhi online san francisco",
-      "order rakhi to san francisco",
-      "rakhi delivery to san francisco",
-      "rakhi delivery to san francisco same day",
-      "send rakhi to san francisco"
-    ]
+    "keywords": []
   },
   {
     "slug": "san-jose",
-    "path": "/send-rakhi-to-san-jose",
+    "path": "/gifts-to-san-jose",
     "name": "San Jose",
     "state": "California",
     "region": "city",
     "isCaliforniaWarehouse": true,
     "priority": "High",
-    "keywords": [
-      "buy rakhi online san jose",
-      "order rakhi to san jose",
-      "rakhi delivery to san jose",
-      "rakhi delivery to san jose same day",
-      "send rakhi to san jose"
-    ]
+    "keywords": []
   },
   {
     "slug": "san-ramon",
-    "path": "/send-rakhi-to-san-ramon",
+    "path": "/gifts-to-san-ramon",
     "name": "San Ramon",
     "state": "California",
     "region": "city",
     "isCaliforniaWarehouse": true,
     "priority": "High",
-    "keywords": [
-      "buy rakhi online san ramon",
-      "order rakhi to san ramon",
-      "rakhi delivery to san ramon",
-      "rakhi delivery to san ramon same day",
-      "send rakhi to san ramon"
-    ]
+    "keywords": []
   },
   {
     "slug": "santa-clara",
-    "path": "/send-rakhi-to-santa-clara",
+    "path": "/gifts-to-santa-clara",
     "name": "Santa Clara",
     "state": "California",
     "region": "city",
     "isCaliforniaWarehouse": true,
     "priority": "High",
-    "keywords": [
-      "buy rakhi online santa clara",
-      "order rakhi to santa clara",
-      "rakhi delivery to santa clara",
-      "rakhi delivery to santa clara same day",
-      "send rakhi to santa clara"
-    ]
+    "keywords": []
   },
   {
     "slug": "sunnyvale",
-    "path": "/send-rakhi-to-sunnyvale",
+    "path": "/gifts-to-sunnyvale",
     "name": "Sunnyvale",
     "state": "California",
     "region": "city",
     "isCaliforniaWarehouse": true,
     "priority": "High",
-    "keywords": [
-      "buy rakhi online sunnyvale",
-      "order rakhi to sunnyvale",
-      "rakhi delivery to sunnyvale",
-      "rakhi delivery to sunnyvale same day",
-      "send rakhi to sunnyvale"
-    ]
+    "keywords": []
   },
   {
     "slug": "california",
-    "path": "/send-rakhi-to-california",
+    "path": "/gifts-to-california",
     "name": "California",
     "state": "California",
     "region": "state",
     "isCaliforniaWarehouse": true,
     "priority": "High",
-    "keywords": [
-      "rakhi delivery to california",
-      "send rakhi to california"
-    ]
+    "keywords": []
   },
   {
     "slug": "georgia",
-    "path": "/send-rakhi-to-georgia",
+    "path": "/gifts-to-georgia",
     "name": "Georgia",
     "state": "Georgia",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "High",
-    "keywords": [
-      "rakhi delivery to georgia",
-      "send rakhi to georgia"
-    ]
+    "keywords": []
   },
   {
     "slug": "illinois",
-    "path": "/send-rakhi-to-illinois",
+    "path": "/gifts-to-illinois",
     "name": "Illinois",
     "state": "Illinois",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "High",
-    "keywords": [
-      "rakhi delivery to illinois",
-      "send rakhi to illinois"
-    ]
+    "keywords": []
   },
   {
     "slug": "texas",
-    "path": "/send-rakhi-to-texas",
+    "path": "/gifts-to-texas",
     "name": "Texas",
     "state": "Texas",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "High",
-    "keywords": [
-      "rakhi delivery to texas",
-      "send rakhi to texas"
-    ]
+    "keywords": []
   },
   {
     "slug": "albuquerque",
-    "path": "/send-rakhi-to-albuquerque",
+    "path": "/gifts-to-albuquerque",
     "name": "Albuquerque",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to albuquerque",
-      "rakhi delivery to albuquerque",
-      "send rakhi to albuquerque"
-    ]
+    "keywords": []
   },
   {
     "slug": "alpharetta",
-    "path": "/send-rakhi-to-alpharetta",
+    "path": "/gifts-to-alpharetta",
     "name": "Alpharetta",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to alpharetta",
-      "rakhi delivery to alpharetta",
-      "send rakhi to alpharetta"
-    ]
+    "keywords": []
   },
   {
     "slug": "ashburn-virginia",
-    "path": "/send-rakhi-to-ashburn-virginia",
+    "path": "/gifts-to-ashburn-virginia",
     "name": "Ashburn Virginia",
     "state": "Virginia",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to ashburn virginia",
-      "rakhi delivery to ashburn virginia",
-      "send rakhi to ashburn virginia"
-    ]
+    "keywords": []
   },
   {
     "slug": "atlanta",
-    "path": "/send-rakhi-to-atlanta",
+    "path": "/gifts-to-atlanta",
     "name": "Atlanta",
     "state": "Georgia",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to atlanta",
-      "rakhi delivery to atlanta",
-      "send rakhi to atlanta"
-    ]
+    "keywords": []
   },
   {
     "slug": "aurora-colorado",
-    "path": "/send-rakhi-to-aurora-colorado",
+    "path": "/gifts-to-aurora-colorado",
     "name": "Aurora Colorado",
     "state": "Colorado",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to aurora colorado",
-      "rakhi delivery to aurora colorado",
-      "send rakhi to aurora colorado"
-    ]
+    "keywords": []
   },
   {
     "slug": "austin",
-    "path": "/send-rakhi-to-austin",
+    "path": "/gifts-to-austin",
     "name": "Austin",
     "state": "Texas",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to austin",
-      "rakhi delivery to austin",
-      "send rakhi to austin"
-    ]
+    "keywords": []
   },
   {
     "slug": "bakersfield",
-    "path": "/send-rakhi-to-bakersfield",
+    "path": "/gifts-to-bakersfield",
     "name": "Bakersfield",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to bakersfield",
-      "rakhi delivery to bakersfield",
-      "send rakhi to bakersfield"
-    ]
+    "keywords": []
   },
   {
     "slug": "baton-rouge",
-    "path": "/send-rakhi-to-baton-rouge",
+    "path": "/gifts-to-baton-rouge",
     "name": "Baton Rouge",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to baton rouge",
-      "rakhi delivery to baton rouge",
-      "send rakhi to baton rouge"
-    ]
+    "keywords": []
   },
   {
     "slug": "bellevue",
-    "path": "/send-rakhi-to-bellevue",
+    "path": "/gifts-to-bellevue",
     "name": "Bellevue",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to bellevue",
-      "rakhi delivery to bellevue",
-      "send rakhi to bellevue"
-    ]
+    "keywords": []
   },
   {
     "slug": "boise-idaho",
-    "path": "/send-rakhi-to-boise-idaho",
+    "path": "/gifts-to-boise-idaho",
     "name": "Boise Idaho",
     "state": "Idaho",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to boise idaho",
-      "rakhi delivery to boise idaho",
-      "send rakhi to boise idaho"
-    ]
+    "keywords": []
   },
   {
     "slug": "boston",
-    "path": "/send-rakhi-to-boston",
+    "path": "/gifts-to-boston",
     "name": "Boston",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to boston",
-      "rakhi delivery to boston",
-      "send rakhi to boston"
-    ]
+    "keywords": []
   },
   {
     "slug": "brooklyn-new-york",
-    "path": "/send-rakhi-to-brooklyn-new-york",
+    "path": "/gifts-to-brooklyn-new-york",
     "name": "Brooklyn New York",
     "state": "New York",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to brooklyn new york",
-      "rakhi delivery to brooklyn new york",
-      "send rakhi to brooklyn new york"
-    ]
+    "keywords": []
   },
   {
     "slug": "buffalo",
-    "path": "/send-rakhi-to-buffalo",
+    "path": "/gifts-to-buffalo",
     "name": "Buffalo",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to buffalo",
-      "rakhi delivery to buffalo",
-      "send rakhi to buffalo"
-    ]
+    "keywords": []
   },
   {
     "slug": "cambridge-massachusetts",
-    "path": "/send-rakhi-to-cambridge-massachusetts",
+    "path": "/gifts-to-cambridge-massachusetts",
     "name": "Cambridge Massachusetts",
     "state": "Massachusetts",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to cambridge massachusetts",
-      "rakhi delivery to cambridge massachusetts",
-      "send rakhi to cambridge massachusetts"
-    ]
+    "keywords": []
   },
   {
     "slug": "cary-north-carolina",
-    "path": "/send-rakhi-to-cary-north-carolina",
+    "path": "/gifts-to-cary-north-carolina",
     "name": "Cary North Carolina",
     "state": "North Carolina",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to cary north carolina",
-      "rakhi delivery to cary north carolina",
-      "send rakhi to cary north carolina"
-    ]
+    "keywords": []
   },
   {
     "slug": "chandler-arizona",
-    "path": "/send-rakhi-to-chandler-arizona",
+    "path": "/gifts-to-chandler-arizona",
     "name": "Chandler Arizona",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to chandler arizona",
-      "rakhi delivery to chandler arizona",
-      "send rakhi to chandler arizona"
-    ]
+    "keywords": []
   },
   {
     "slug": "chapel-hill",
-    "path": "/send-rakhi-to-chapel-hill",
+    "path": "/gifts-to-chapel-hill",
     "name": "Chapel Hill",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to chapel hill",
-      "rakhi delivery to chapel hill",
-      "send rakhi to chapel hill"
-    ]
+    "keywords": []
   },
   {
     "slug": "charlotte",
-    "path": "/send-rakhi-to-charlotte",
+    "path": "/gifts-to-charlotte",
     "name": "Charlotte",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to charlotte",
-      "rakhi delivery to charlotte",
-      "send rakhi to charlotte"
-    ]
+    "keywords": []
   },
   {
     "slug": "chicago",
-    "path": "/send-rakhi-to-chicago",
+    "path": "/gifts-to-chicago",
     "name": "Chicago",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to chicago",
-      "rakhi delivery to chicago",
-      "send rakhi to chicago"
-    ]
+    "keywords": []
   },
   {
     "slug": "cincinnati",
-    "path": "/send-rakhi-to-cincinnati",
+    "path": "/gifts-to-cincinnati",
     "name": "Cincinnati",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to cincinnati",
-      "rakhi delivery to cincinnati",
-      "send rakhi to cincinnati"
-    ]
+    "keywords": []
   },
   {
     "slug": "cleveland",
-    "path": "/send-rakhi-to-cleveland",
+    "path": "/gifts-to-cleveland",
     "name": "Cleveland",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to cleveland",
-      "rakhi delivery to cleveland",
-      "send rakhi to cleveland"
-    ]
+    "keywords": []
   },
   {
     "slug": "colorado-springs",
-    "path": "/send-rakhi-to-colorado-springs",
+    "path": "/gifts-to-colorado-springs",
     "name": "Colorado Springs",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to colorado springs",
-      "rakhi delivery to colorado springs",
-      "send rakhi to colorado springs"
-    ]
+    "keywords": []
   },
   {
     "slug": "columbia-maryland",
-    "path": "/send-rakhi-to-columbia-maryland",
+    "path": "/gifts-to-columbia-maryland",
     "name": "Columbia Maryland",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to columbia maryland",
-      "rakhi delivery to columbia maryland",
-      "send rakhi to columbia maryland"
-    ]
+    "keywords": []
   },
   {
     "slug": "columbus-ohio",
-    "path": "/send-rakhi-to-columbus-ohio",
+    "path": "/gifts-to-columbus-ohio",
     "name": "Columbus Ohio",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to columbus ohio",
-      "rakhi delivery to columbus ohio",
-      "send rakhi to columbus ohio"
-    ]
+    "keywords": []
   },
   {
     "slug": "dallas",
-    "path": "/send-rakhi-to-dallas",
+    "path": "/gifts-to-dallas",
     "name": "Dallas",
     "state": "Texas",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to dallas",
-      "rakhi delivery to dallas",
-      "send rakhi to dallas"
-    ]
+    "keywords": []
   },
   {
     "slug": "denver",
-    "path": "/send-rakhi-to-denver",
+    "path": "/gifts-to-denver",
     "name": "Denver",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to denver",
-      "rakhi delivery to denver",
-      "send rakhi to denver"
-    ]
+    "keywords": []
   },
   {
     "slug": "des-moines",
-    "path": "/send-rakhi-to-des-moines",
+    "path": "/gifts-to-des-moines",
     "name": "Des Moines",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to des moines",
-      "rakhi delivery to des moines",
-      "send rakhi to des moines"
-    ]
+    "keywords": []
   },
   {
     "slug": "detroit",
-    "path": "/send-rakhi-to-detroit",
+    "path": "/gifts-to-detroit",
     "name": "Detroit",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to detroit",
-      "rakhi delivery to detroit",
-      "send rakhi to detroit"
-    ]
+    "keywords": []
   },
   {
     "slug": "edison-nj",
-    "path": "/send-rakhi-to-edison-nj",
+    "path": "/gifts-to-edison-nj",
     "name": "Edison Nj",
     "state": "New Jersey",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to edison nj",
-      "rakhi delivery to edison nj",
-      "send rakhi to edison nj"
-    ]
+    "keywords": []
   },
   {
     "slug": "el-paso",
-    "path": "/send-rakhi-to-el-paso",
+    "path": "/gifts-to-el-paso",
     "name": "El Paso",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to el paso",
-      "rakhi delivery to el paso",
-      "send rakhi to el paso"
-    ]
+    "keywords": []
   },
   {
     "slug": "fairfax-virginia",
-    "path": "/send-rakhi-to-fairfax-virginia",
+    "path": "/gifts-to-fairfax-virginia",
     "name": "Fairfax Virginia",
     "state": "Virginia",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to fairfax virginia",
-      "rakhi delivery to fairfax virginia",
-      "send rakhi to fairfax virginia"
-    ]
+    "keywords": []
   },
   {
     "slug": "frisco-texas",
-    "path": "/send-rakhi-to-frisco-texas",
+    "path": "/gifts-to-frisco-texas",
     "name": "Frisco Texas",
     "state": "Texas",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to frisco texas",
-      "rakhi delivery to frisco texas",
-      "send rakhi to frisco texas"
-    ]
+    "keywords": []
   },
   {
     "slug": "gaithersburg-maryland",
-    "path": "/send-rakhi-to-gaithersburg-maryland",
+    "path": "/gifts-to-gaithersburg-maryland",
     "name": "Gaithersburg Maryland",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to gaithersburg maryland",
-      "rakhi delivery to gaithersburg maryland",
-      "send rakhi to gaithersburg maryland"
-    ]
+    "keywords": []
   },
   {
     "slug": "hartford-connecticut",
-    "path": "/send-rakhi-to-hartford-connecticut",
+    "path": "/gifts-to-hartford-connecticut",
     "name": "Hartford Connecticut",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to hartford connecticut",
-      "rakhi delivery to hartford connecticut",
-      "send rakhi to hartford connecticut"
-    ]
+    "keywords": []
   },
   {
     "slug": "herndon-virginia",
-    "path": "/send-rakhi-to-herndon-virginia",
+    "path": "/gifts-to-herndon-virginia",
     "name": "Herndon Virginia",
     "state": "Virginia",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to herndon virginia",
-      "rakhi delivery to herndon virginia",
-      "send rakhi to herndon virginia"
-    ]
+    "keywords": []
   },
   {
     "slug": "houston",
-    "path": "/send-rakhi-to-houston",
+    "path": "/gifts-to-houston",
     "name": "Houston",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to houston",
-      "rakhi delivery to houston",
-      "send rakhi to houston"
-    ]
+    "keywords": []
   },
   {
     "slug": "indianapolis",
-    "path": "/send-rakhi-to-indianapolis",
+    "path": "/gifts-to-indianapolis",
     "name": "Indianapolis",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to indianapolis",
-      "rakhi delivery to indianapolis",
-      "send rakhi to indianapolis"
-    ]
+    "keywords": []
   },
   {
     "slug": "irving-texas",
-    "path": "/send-rakhi-to-irving-texas",
+    "path": "/gifts-to-irving-texas",
     "name": "Irving Texas",
     "state": "Texas",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to irving texas",
-      "rakhi delivery to irving texas",
-      "send rakhi to irving texas"
-    ]
+    "keywords": []
   },
   {
     "slug": "iselin",
-    "path": "/send-rakhi-to-iselin",
+    "path": "/gifts-to-iselin",
     "name": "Iselin",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to iselin",
-      "rakhi delivery to iselin",
-      "send rakhi to iselin"
-    ]
+    "keywords": []
   },
   {
     "slug": "jacksonville-florida",
-    "path": "/send-rakhi-to-jacksonville-florida",
+    "path": "/gifts-to-jacksonville-florida",
     "name": "Jacksonville Florida",
     "state": "Florida",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to jacksonville florida",
-      "rakhi delivery to jacksonville florida",
-      "send rakhi to jacksonville florida"
-    ]
+    "keywords": []
   },
   {
     "slug": "jersey-city",
-    "path": "/send-rakhi-to-jersey-city",
+    "path": "/gifts-to-jersey-city",
     "name": "Jersey City",
     "state": "New Jersey",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to jersey city",
-      "rakhi delivery to jersey city",
-      "send rakhi to jersey city"
-    ]
+    "keywords": []
   },
   {
     "slug": "johns-creek",
-    "path": "/send-rakhi-to-johns-creek",
+    "path": "/gifts-to-johns-creek",
     "name": "Johns Creek",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to johns creek",
-      "rakhi delivery to johns creek",
-      "send rakhi to johns creek"
-    ]
+    "keywords": []
   },
   {
     "slug": "kansas-city",
-    "path": "/send-rakhi-to-kansas-city",
+    "path": "/gifts-to-kansas-city",
     "name": "Kansas City",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to kansas city",
-      "rakhi delivery to kansas city",
-      "send rakhi to kansas city"
-    ]
+    "keywords": []
   },
   {
     "slug": "katy-texas",
-    "path": "/send-rakhi-to-katy-texas",
+    "path": "/gifts-to-katy-texas",
     "name": "Katy Texas",
     "state": "Texas",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to katy texas",
-      "rakhi delivery to katy texas",
-      "send rakhi to katy texas"
-    ]
+    "keywords": []
   },
   {
     "slug": "las-vegas",
-    "path": "/send-rakhi-to-las-vegas",
+    "path": "/gifts-to-las-vegas",
     "name": "Las Vegas",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to las vegas",
-      "rakhi delivery to las vegas",
-      "send rakhi to las vegas"
-    ]
+    "keywords": []
   },
   {
     "slug": "long-island",
-    "path": "/send-rakhi-to-long-island",
+    "path": "/gifts-to-long-island",
     "name": "Long Island",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to long island",
-      "rakhi delivery to long island",
-      "send rakhi to long island"
-    ]
+    "keywords": []
   },
   {
     "slug": "louisville",
-    "path": "/send-rakhi-to-louisville",
+    "path": "/gifts-to-louisville",
     "name": "Louisville",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to louisville",
-      "rakhi delivery to louisville",
-      "send rakhi to louisville"
-    ]
+    "keywords": []
   },
   {
     "slug": "memphis",
-    "path": "/send-rakhi-to-memphis",
+    "path": "/gifts-to-memphis",
     "name": "Memphis",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to memphis",
-      "rakhi delivery to memphis",
-      "send rakhi to memphis"
-    ]
+    "keywords": []
   },
   {
     "slug": "mesa-arizona",
-    "path": "/send-rakhi-to-mesa-arizona",
+    "path": "/gifts-to-mesa-arizona",
     "name": "Mesa Arizona",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to mesa arizona",
-      "rakhi delivery to mesa arizona",
-      "send rakhi to mesa arizona"
-    ]
+    "keywords": []
   },
   {
     "slug": "miami",
-    "path": "/send-rakhi-to-miami",
+    "path": "/gifts-to-miami",
     "name": "Miami",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to miami",
-      "rakhi delivery to miami",
-      "send rakhi to miami"
-    ]
+    "keywords": []
   },
   {
     "slug": "milwaukee",
-    "path": "/send-rakhi-to-milwaukee",
+    "path": "/gifts-to-milwaukee",
     "name": "Milwaukee",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to milwaukee",
-      "rakhi delivery to milwaukee",
-      "send rakhi to milwaukee"
-    ]
+    "keywords": []
   },
   {
     "slug": "minneapolis",
-    "path": "/send-rakhi-to-minneapolis",
+    "path": "/gifts-to-minneapolis",
     "name": "Minneapolis",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to minneapolis",
-      "rakhi delivery to minneapolis",
-      "send rakhi to minneapolis"
-    ]
+    "keywords": []
   },
   {
     "slug": "morrisville-north-carolina",
-    "path": "/send-rakhi-to-morrisville-north-carolina",
+    "path": "/gifts-to-morrisville-north-carolina",
     "name": "Morrisville North Carolina",
     "state": "North Carolina",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to morrisville north carolina",
-      "rakhi delivery to morrisville north carolina",
-      "send rakhi to morrisville north carolina"
-    ]
+    "keywords": []
   },
   {
     "slug": "naperville",
-    "path": "/send-rakhi-to-naperville",
+    "path": "/gifts-to-naperville",
     "name": "Naperville",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to naperville",
-      "rakhi delivery to naperville",
-      "send rakhi to naperville"
-    ]
+    "keywords": []
   },
   {
     "slug": "nashville",
-    "path": "/send-rakhi-to-nashville",
+    "path": "/gifts-to-nashville",
     "name": "Nashville",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to nashville",
-      "rakhi delivery to nashville",
-      "send rakhi to nashville"
-    ]
+    "keywords": []
   },
   {
     "slug": "new-jersey",
-    "path": "/send-rakhi-to-new-jersey",
+    "path": "/gifts-to-new-jersey",
     "name": "New Jersey",
     "state": "New Jersey",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to new jersey",
-      "rakhi delivery to new jersey",
-      "send rakhi to new jersey"
-    ]
+    "keywords": []
   },
   {
     "slug": "new-orleans",
-    "path": "/send-rakhi-to-new-orleans",
+    "path": "/gifts-to-new-orleans",
     "name": "New Orleans",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to new orleans",
-      "rakhi delivery to new orleans",
-      "send rakhi to new orleans"
-    ]
+    "keywords": []
   },
   {
     "slug": "new-york",
-    "path": "/send-rakhi-to-new-york",
+    "path": "/gifts-to-new-york",
     "name": "New York",
     "state": "New York",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to new york",
-      "rakhi delivery to new york",
-      "send rakhi to new york"
-    ]
+    "keywords": []
   },
   {
     "slug": "novi-michigan",
-    "path": "/send-rakhi-to-novi-michigan",
+    "path": "/gifts-to-novi-michigan",
     "name": "Novi Michigan",
     "state": "Michigan",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to novi michigan",
-      "rakhi delivery to novi michigan",
-      "send rakhi to novi michigan"
-    ]
+    "keywords": []
   },
   {
     "slug": "oklahoma-city",
-    "path": "/send-rakhi-to-oklahoma-city",
+    "path": "/gifts-to-oklahoma-city",
     "name": "Oklahoma City",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to oklahoma city",
-      "rakhi delivery to oklahoma city",
-      "send rakhi to oklahoma city"
-    ]
+    "keywords": []
   },
   {
     "slug": "omaha",
-    "path": "/send-rakhi-to-omaha",
+    "path": "/gifts-to-omaha",
     "name": "Omaha",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to omaha",
-      "rakhi delivery to omaha",
-      "send rakhi to omaha"
-    ]
+    "keywords": []
   },
   {
     "slug": "orlando",
-    "path": "/send-rakhi-to-orlando",
+    "path": "/gifts-to-orlando",
     "name": "Orlando",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to orlando",
-      "rakhi delivery to orlando",
-      "send rakhi to orlando"
-    ]
+    "keywords": []
   },
   {
     "slug": "pasadena-california",
-    "path": "/send-rakhi-to-pasadena-california",
+    "path": "/gifts-to-pasadena-california",
     "name": "Pasadena",
     "state": "California",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to pasadena california",
-      "rakhi delivery to pasadena california",
-      "send rakhi to pasadena california"
-    ]
+    "keywords": []
   },
   {
     "slug": "philadelphia",
-    "path": "/send-rakhi-to-philadelphia",
+    "path": "/gifts-to-philadelphia",
     "name": "Philadelphia",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to philadelphia",
-      "rakhi delivery to philadelphia",
-      "send rakhi to philadelphia"
-    ]
+    "keywords": []
   },
   {
     "slug": "phoenix",
-    "path": "/send-rakhi-to-phoenix",
+    "path": "/gifts-to-phoenix",
     "name": "Phoenix",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to phoenix",
-      "rakhi delivery to phoenix",
-      "send rakhi to phoenix"
-    ]
+    "keywords": []
   },
   {
     "slug": "piscataway",
-    "path": "/send-rakhi-to-piscataway",
+    "path": "/gifts-to-piscataway",
     "name": "Piscataway",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to piscataway",
-      "rakhi delivery to piscataway",
-      "send rakhi to piscataway"
-    ]
+    "keywords": []
   },
   {
     "slug": "pittsburgh",
-    "path": "/send-rakhi-to-pittsburgh",
+    "path": "/gifts-to-pittsburgh",
     "name": "Pittsburgh",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to pittsburgh",
-      "rakhi delivery to pittsburgh",
-      "send rakhi to pittsburgh"
-    ]
+    "keywords": []
   },
   {
     "slug": "plano",
-    "path": "/send-rakhi-to-plano",
+    "path": "/gifts-to-plano",
     "name": "Plano",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to plano",
-      "rakhi delivery to plano",
-      "send rakhi to plano"
-    ]
+    "keywords": []
   },
   {
     "slug": "portland",
-    "path": "/send-rakhi-to-portland",
+    "path": "/gifts-to-portland",
     "name": "Portland",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to portland",
-      "rakhi delivery to portland",
-      "send rakhi to portland"
-    ]
+    "keywords": []
   },
   {
     "slug": "princeton",
-    "path": "/send-rakhi-to-princeton",
+    "path": "/gifts-to-princeton",
     "name": "Princeton",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to princeton",
-      "rakhi delivery to princeton",
-      "send rakhi to princeton"
-    ]
+    "keywords": []
   },
   {
     "slug": "providence-rhode-island",
-    "path": "/send-rakhi-to-providence-rhode-island",
+    "path": "/gifts-to-providence-rhode-island",
     "name": "Providence Rhode Island",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to providence rhode island",
-      "rakhi delivery to providence rhode island",
-      "send rakhi to providence rhode island"
-    ]
+    "keywords": []
   },
   {
     "slug": "queens-new-york",
-    "path": "/send-rakhi-to-queens-new-york",
+    "path": "/gifts-to-queens-new-york",
     "name": "Queens New York",
     "state": "New York",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to queens new york",
-      "rakhi delivery to queens new york",
-      "send rakhi to queens new york"
-    ]
+    "keywords": []
   },
   {
     "slug": "raleigh",
-    "path": "/send-rakhi-to-raleigh",
+    "path": "/gifts-to-raleigh",
     "name": "Raleigh",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to raleigh",
-      "rakhi delivery to raleigh",
-      "send rakhi to raleigh"
-    ]
+    "keywords": []
   },
   {
     "slug": "redmond-washington",
-    "path": "/send-rakhi-to-redmond-washington",
+    "path": "/gifts-to-redmond-washington",
     "name": "Redmond Washington",
     "state": "Washington",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to redmond washington",
-      "rakhi delivery to redmond washington",
-      "send rakhi to redmond washington"
-    ]
+    "keywords": []
   },
   {
     "slug": "reston-virginia",
-    "path": "/send-rakhi-to-reston-virginia",
+    "path": "/gifts-to-reston-virginia",
     "name": "Reston Virginia",
     "state": "Virginia",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to reston virginia",
-      "rakhi delivery to reston virginia",
-      "send rakhi to reston virginia"
-    ]
+    "keywords": []
   },
   {
     "slug": "richmond-virginia",
-    "path": "/send-rakhi-to-richmond-virginia",
+    "path": "/gifts-to-richmond-virginia",
     "name": "Richmond Virginia",
     "state": "Virginia",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to richmond virginia",
-      "rakhi delivery to richmond virginia",
-      "send rakhi to richmond virginia"
-    ]
+    "keywords": []
   },
   {
     "slug": "riverside-california",
-    "path": "/send-rakhi-to-riverside-california",
+    "path": "/gifts-to-riverside-california",
     "name": "Riverside",
     "state": "California",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to riverside california",
-      "rakhi delivery to riverside california",
-      "send rakhi to riverside california"
-    ]
+    "keywords": []
   },
   {
     "slug": "rochester-new-york",
-    "path": "/send-rakhi-to-rochester-new-york",
+    "path": "/gifts-to-rochester-new-york",
     "name": "Rochester New York",
     "state": "New York",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to rochester new york",
-      "rakhi delivery to rochester new york",
-      "send rakhi to rochester new york"
-    ]
+    "keywords": []
   },
   {
     "slug": "rockville-maryland",
-    "path": "/send-rakhi-to-rockville-maryland",
+    "path": "/gifts-to-rockville-maryland",
     "name": "Rockville Maryland",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to rockville maryland",
-      "rakhi delivery to rockville maryland",
-      "send rakhi to rockville maryland"
-    ]
+    "keywords": []
   },
   {
     "slug": "salt-lake-city",
-    "path": "/send-rakhi-to-salt-lake-city",
+    "path": "/gifts-to-salt-lake-city",
     "name": "Salt Lake City",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to salt lake city",
-      "rakhi delivery to salt lake city",
-      "send rakhi to salt lake city"
-    ]
+    "keywords": []
   },
   {
     "slug": "san-antonio",
-    "path": "/send-rakhi-to-san-antonio",
+    "path": "/gifts-to-san-antonio",
     "name": "San Antonio",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to san antonio",
-      "rakhi delivery to san antonio",
-      "send rakhi to san antonio"
-    ]
+    "keywords": []
   },
   {
     "slug": "santa-monica",
-    "path": "/send-rakhi-to-santa-monica",
+    "path": "/gifts-to-santa-monica",
     "name": "Santa Monica",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to santa monica",
-      "rakhi delivery to santa monica",
-      "send rakhi to santa monica"
-    ]
+    "keywords": []
   },
   {
     "slug": "sarasota-florida",
-    "path": "/send-rakhi-to-sarasota-florida",
+    "path": "/gifts-to-sarasota-florida",
     "name": "Sarasota Florida",
     "state": "Florida",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to sarasota florida",
-      "rakhi delivery to sarasota florida",
-      "send rakhi to sarasota florida"
-    ]
+    "keywords": []
   },
   {
     "slug": "schaumburg",
-    "path": "/send-rakhi-to-schaumburg",
+    "path": "/gifts-to-schaumburg",
     "name": "Schaumburg",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to schaumburg",
-      "rakhi delivery to schaumburg",
-      "send rakhi to schaumburg"
-    ]
+    "keywords": []
   },
   {
     "slug": "scottsdale-arizona",
-    "path": "/send-rakhi-to-scottsdale-arizona",
+    "path": "/gifts-to-scottsdale-arizona",
     "name": "Scottsdale Arizona",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to scottsdale arizona",
-      "rakhi delivery to scottsdale arizona",
-      "send rakhi to scottsdale arizona"
-    ]
+    "keywords": []
   },
   {
     "slug": "seattle",
-    "path": "/send-rakhi-to-seattle",
+    "path": "/gifts-to-seattle",
     "name": "Seattle",
     "state": "Washington",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to seattle",
-      "rakhi delivery to seattle",
-      "send rakhi to seattle"
-    ]
+    "keywords": []
   },
   {
     "slug": "spokane-washington",
-    "path": "/send-rakhi-to-spokane-washington",
+    "path": "/gifts-to-spokane-washington",
     "name": "Spokane Washington",
     "state": "Washington",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to spokane washington",
-      "rakhi delivery to spokane washington",
-      "send rakhi to spokane washington"
-    ]
+    "keywords": []
   },
   {
     "slug": "st-louis",
-    "path": "/send-rakhi-to-st-louis",
+    "path": "/gifts-to-st-louis",
     "name": "St Louis",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to st louis",
-      "rakhi delivery to st louis",
-      "send rakhi to st louis"
-    ]
+    "keywords": []
   },
   {
     "slug": "st-petersburg-florida",
-    "path": "/send-rakhi-to-st-petersburg-florida",
+    "path": "/gifts-to-st-petersburg-florida",
     "name": "St Petersburg Florida",
     "state": "Florida",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to st petersburg florida",
-      "rakhi delivery to st petersburg florida",
-      "send rakhi to st petersburg florida"
-    ]
+    "keywords": []
   },
   {
     "slug": "stamford-connecticut",
-    "path": "/send-rakhi-to-stamford-connecticut",
+    "path": "/gifts-to-stamford-connecticut",
     "name": "Stamford Connecticut",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to stamford connecticut",
-      "rakhi delivery to stamford connecticut",
-      "send rakhi to stamford connecticut"
-    ]
+    "keywords": []
   },
   {
     "slug": "sugar-land-texas",
-    "path": "/send-rakhi-to-sugar-land-texas",
+    "path": "/gifts-to-sugar-land-texas",
     "name": "Sugar Land Texas",
     "state": "Texas",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to sugar land texas",
-      "rakhi delivery to sugar land texas",
-      "send rakhi to sugar land texas"
-    ]
+    "keywords": []
   },
   {
     "slug": "tacoma-washington",
-    "path": "/send-rakhi-to-tacoma-washington",
+    "path": "/gifts-to-tacoma-washington",
     "name": "Tacoma Washington",
     "state": "Washington",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to tacoma washington",
-      "rakhi delivery to tacoma washington",
-      "send rakhi to tacoma washington"
-    ]
+    "keywords": []
   },
   {
     "slug": "tampa",
-    "path": "/send-rakhi-to-tampa",
+    "path": "/gifts-to-tampa",
     "name": "Tampa",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to tampa",
-      "rakhi delivery to tampa",
-      "send rakhi to tampa"
-    ]
+    "keywords": []
   },
   {
     "slug": "tempe-arizona",
-    "path": "/send-rakhi-to-tempe-arizona",
+    "path": "/gifts-to-tempe-arizona",
     "name": "Tempe Arizona",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to tempe arizona",
-      "rakhi delivery to tempe arizona",
-      "send rakhi to tempe arizona"
-    ]
+    "keywords": []
   },
   {
     "slug": "troy-michigan",
-    "path": "/send-rakhi-to-troy-michigan",
+    "path": "/gifts-to-troy-michigan",
     "name": "Troy Michigan",
     "state": "Michigan",
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to troy michigan",
-      "rakhi delivery to troy michigan",
-      "send rakhi to troy michigan"
-    ]
+    "keywords": []
   },
   {
     "slug": "tucson",
-    "path": "/send-rakhi-to-tucson",
+    "path": "/gifts-to-tucson",
     "name": "Tucson",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to tucson",
-      "rakhi delivery to tucson",
-      "send rakhi to tucson"
-    ]
+    "keywords": []
   },
   {
     "slug": "tulsa",
-    "path": "/send-rakhi-to-tulsa",
+    "path": "/gifts-to-tulsa",
     "name": "Tulsa",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to tulsa",
-      "rakhi delivery to tulsa",
-      "send rakhi to tulsa"
-    ]
+    "keywords": []
   },
   {
     "slug": "washington-dc",
-    "path": "/send-rakhi-to-washington-dc",
+    "path": "/gifts-to-washington-dc",
     "name": "Washington Dc",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to washington dc",
-      "rakhi delivery to washington dc",
-      "send rakhi to washington dc"
-    ]
+    "keywords": []
   },
   {
     "slug": "wichita",
-    "path": "/send-rakhi-to-wichita",
+    "path": "/gifts-to-wichita",
     "name": "Wichita",
     "state": null,
     "region": "city",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "order rakhi to wichita",
-      "rakhi delivery to wichita",
-      "send rakhi to wichita"
-    ]
+    "keywords": []
   },
   {
     "slug": "alabama",
-    "path": "/send-rakhi-to-alabama",
+    "path": "/gifts-to-alabama",
     "name": "Alabama",
     "state": "Alabama",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to alabama",
-      "send rakhi to alabama"
-    ]
+    "keywords": []
   },
   {
     "slug": "alaska",
-    "path": "/send-rakhi-to-alaska",
+    "path": "/gifts-to-alaska",
     "name": "Alaska",
     "state": "Alaska",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to alaska",
-      "send rakhi to alaska"
-    ]
+    "keywords": []
   },
   {
     "slug": "arizona",
-    "path": "/send-rakhi-to-arizona",
+    "path": "/gifts-to-arizona",
     "name": "Arizona",
     "state": "Arizona",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to arizona",
-      "send rakhi to arizona"
-    ]
+    "keywords": []
   },
   {
     "slug": "arkansas",
-    "path": "/send-rakhi-to-arkansas",
+    "path": "/gifts-to-arkansas",
     "name": "Arkansas",
     "state": "Arkansas",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to arkansas",
-      "send rakhi to arkansas"
-    ]
+    "keywords": []
   },
   {
     "slug": "colorado",
-    "path": "/send-rakhi-to-colorado",
+    "path": "/gifts-to-colorado",
     "name": "Colorado",
     "state": "Colorado",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to colorado",
-      "send rakhi to colorado"
-    ]
+    "keywords": []
   },
   {
     "slug": "connecticut",
-    "path": "/send-rakhi-to-connecticut",
+    "path": "/gifts-to-connecticut",
     "name": "Connecticut",
     "state": "Connecticut",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to connecticut",
-      "send rakhi to connecticut"
-    ]
+    "keywords": []
   },
   {
     "slug": "delaware",
-    "path": "/send-rakhi-to-delaware",
+    "path": "/gifts-to-delaware",
     "name": "Delaware",
     "state": "Delaware",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to delaware",
-      "send rakhi to delaware"
-    ]
+    "keywords": []
   },
   {
     "slug": "florida",
-    "path": "/send-rakhi-to-florida",
+    "path": "/gifts-to-florida",
     "name": "Florida",
     "state": "Florida",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to florida",
-      "send rakhi to florida"
-    ]
+    "keywords": []
   },
   {
     "slug": "hawaii",
-    "path": "/send-rakhi-to-hawaii",
+    "path": "/gifts-to-hawaii",
     "name": "Hawaii",
     "state": "Hawaii",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to hawaii",
-      "send rakhi to hawaii"
-    ]
+    "keywords": []
   },
   {
     "slug": "idaho",
-    "path": "/send-rakhi-to-idaho",
+    "path": "/gifts-to-idaho",
     "name": "Idaho",
     "state": "Idaho",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to idaho",
-      "send rakhi to idaho"
-    ]
+    "keywords": []
   },
   {
     "slug": "indiana",
-    "path": "/send-rakhi-to-indiana",
+    "path": "/gifts-to-indiana",
     "name": "Indiana",
     "state": "Indiana",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to indiana",
-      "send rakhi to indiana"
-    ]
+    "keywords": []
   },
   {
     "slug": "iowa",
-    "path": "/send-rakhi-to-iowa",
+    "path": "/gifts-to-iowa",
     "name": "Iowa",
     "state": "Iowa",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to iowa",
-      "send rakhi to iowa"
-    ]
+    "keywords": []
   },
   {
     "slug": "kansas",
-    "path": "/send-rakhi-to-kansas",
+    "path": "/gifts-to-kansas",
     "name": "Kansas",
     "state": "Kansas",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to kansas",
-      "send rakhi to kansas"
-    ]
+    "keywords": []
   },
   {
     "slug": "kentucky",
-    "path": "/send-rakhi-to-kentucky",
+    "path": "/gifts-to-kentucky",
     "name": "Kentucky",
     "state": "Kentucky",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to kentucky",
-      "send rakhi to kentucky"
-    ]
+    "keywords": []
   },
   {
     "slug": "louisiana",
-    "path": "/send-rakhi-to-louisiana",
+    "path": "/gifts-to-louisiana",
     "name": "Louisiana",
     "state": "Louisiana",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to louisiana",
-      "send rakhi to louisiana"
-    ]
+    "keywords": []
   },
   {
     "slug": "maine",
-    "path": "/send-rakhi-to-maine",
+    "path": "/gifts-to-maine",
     "name": "Maine",
     "state": "Maine",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to maine",
-      "send rakhi to maine"
-    ]
+    "keywords": []
   },
   {
     "slug": "maryland",
-    "path": "/send-rakhi-to-maryland",
+    "path": "/gifts-to-maryland",
     "name": "Maryland",
     "state": "Maryland",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to maryland",
-      "send rakhi to maryland"
-    ]
+    "keywords": []
   },
   {
     "slug": "massachusetts",
-    "path": "/send-rakhi-to-massachusetts",
+    "path": "/gifts-to-massachusetts",
     "name": "Massachusetts",
     "state": "Massachusetts",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to massachusetts",
-      "send rakhi to massachusetts"
-    ]
+    "keywords": []
   },
   {
     "slug": "michigan",
-    "path": "/send-rakhi-to-michigan",
+    "path": "/gifts-to-michigan",
     "name": "Michigan",
     "state": "Michigan",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to michigan",
-      "send rakhi to michigan"
-    ]
+    "keywords": []
   },
   {
     "slug": "minnesota",
-    "path": "/send-rakhi-to-minnesota",
+    "path": "/gifts-to-minnesota",
     "name": "Minnesota",
     "state": "Minnesota",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to minnesota",
-      "send rakhi to minnesota"
-    ]
+    "keywords": []
   },
   {
     "slug": "mississippi",
-    "path": "/send-rakhi-to-mississippi",
+    "path": "/gifts-to-mississippi",
     "name": "Mississippi",
     "state": "Mississippi",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to mississippi",
-      "send rakhi to mississippi"
-    ]
+    "keywords": []
   },
   {
     "slug": "missouri",
-    "path": "/send-rakhi-to-missouri",
+    "path": "/gifts-to-missouri",
     "name": "Missouri",
     "state": "Missouri",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to missouri",
-      "send rakhi to missouri"
-    ]
+    "keywords": []
   },
   {
     "slug": "montana",
-    "path": "/send-rakhi-to-montana",
+    "path": "/gifts-to-montana",
     "name": "Montana",
     "state": "Montana",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to montana",
-      "send rakhi to montana"
-    ]
+    "keywords": []
   },
   {
     "slug": "nebraska",
-    "path": "/send-rakhi-to-nebraska",
+    "path": "/gifts-to-nebraska",
     "name": "Nebraska",
     "state": "Nebraska",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to nebraska",
-      "send rakhi to nebraska"
-    ]
+    "keywords": []
   },
   {
     "slug": "nevada",
-    "path": "/send-rakhi-to-nevada",
+    "path": "/gifts-to-nevada",
     "name": "Nevada",
     "state": "Nevada",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to nevada",
-      "send rakhi to nevada"
-    ]
+    "keywords": []
   },
   {
     "slug": "nevada-usa",
-    "path": "/send-rakhi-to-nevada-usa",
+    "path": "/gifts-to-nevada-usa",
     "name": "Nevada",
     "state": "Nevada",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to nevada usa",
-      "send rakhi to nevada usa"
-    ]
+    "keywords": []
   },
   {
     "slug": "new-hampshire",
-    "path": "/send-rakhi-to-new-hampshire",
+    "path": "/gifts-to-new-hampshire",
     "name": "New Hampshire",
     "state": "New Hampshire",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to new hampshire",
-      "send rakhi to new hampshire"
-    ]
+    "keywords": []
   },
   {
     "slug": "new-mexico",
-    "path": "/send-rakhi-to-new-mexico",
+    "path": "/gifts-to-new-mexico",
     "name": "New Mexico",
     "state": "New Mexico",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to new mexico",
-      "send rakhi to new mexico"
-    ]
+    "keywords": []
   },
   {
     "slug": "north-carolina",
-    "path": "/send-rakhi-to-north-carolina",
+    "path": "/gifts-to-north-carolina",
     "name": "North Carolina",
     "state": "North Carolina",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to north carolina",
-      "send rakhi to north carolina"
-    ]
+    "keywords": []
   },
   {
     "slug": "north-dakota",
-    "path": "/send-rakhi-to-north-dakota",
+    "path": "/gifts-to-north-dakota",
     "name": "North Dakota",
     "state": "North Dakota",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to north dakota",
-      "send rakhi to north dakota"
-    ]
+    "keywords": []
   },
   {
     "slug": "ohio",
-    "path": "/send-rakhi-to-ohio",
+    "path": "/gifts-to-ohio",
     "name": "Ohio",
     "state": "Ohio",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to ohio",
-      "send rakhi to ohio"
-    ]
+    "keywords": []
   },
   {
     "slug": "oklahoma",
-    "path": "/send-rakhi-to-oklahoma",
+    "path": "/gifts-to-oklahoma",
     "name": "Oklahoma",
     "state": "Oklahoma",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to oklahoma",
-      "send rakhi to oklahoma"
-    ]
+    "keywords": []
   },
   {
     "slug": "oregon",
-    "path": "/send-rakhi-to-oregon",
+    "path": "/gifts-to-oregon",
     "name": "Oregon",
     "state": "Oregon",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to oregon",
-      "send rakhi to oregon"
-    ]
+    "keywords": []
   },
   {
     "slug": "pennsylvania",
-    "path": "/send-rakhi-to-pennsylvania",
+    "path": "/gifts-to-pennsylvania",
     "name": "Pennsylvania",
     "state": "Pennsylvania",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to pennsylvania",
-      "send rakhi to pennsylvania"
-    ]
+    "keywords": []
   },
   {
     "slug": "rhode-island",
-    "path": "/send-rakhi-to-rhode-island",
+    "path": "/gifts-to-rhode-island",
     "name": "Rhode Island",
     "state": "Rhode Island",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to rhode island",
-      "send rakhi to rhode island"
-    ]
+    "keywords": []
   },
   {
     "slug": "south-carolina",
-    "path": "/send-rakhi-to-south-carolina",
+    "path": "/gifts-to-south-carolina",
     "name": "South Carolina",
     "state": "South Carolina",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to south carolina",
-      "send rakhi to south carolina"
-    ]
+    "keywords": []
   },
   {
     "slug": "south-dakota",
-    "path": "/send-rakhi-to-south-dakota",
+    "path": "/gifts-to-south-dakota",
     "name": "South Dakota",
     "state": "South Dakota",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to south dakota",
-      "send rakhi to south dakota"
-    ]
+    "keywords": []
   },
   {
     "slug": "tennessee",
-    "path": "/send-rakhi-to-tennessee",
+    "path": "/gifts-to-tennessee",
     "name": "Tennessee",
     "state": "Tennessee",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to tennessee",
-      "send rakhi to tennessee"
-    ]
+    "keywords": []
   },
   {
     "slug": "utah",
-    "path": "/send-rakhi-to-utah",
+    "path": "/gifts-to-utah",
     "name": "Utah",
     "state": "Utah",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to utah",
-      "send rakhi to utah"
-    ]
+    "keywords": []
   },
   {
     "slug": "vermont",
-    "path": "/send-rakhi-to-vermont",
+    "path": "/gifts-to-vermont",
     "name": "Vermont",
     "state": "Vermont",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to vermont",
-      "send rakhi to vermont"
-    ]
+    "keywords": []
   },
   {
     "slug": "virginia",
-    "path": "/send-rakhi-to-virginia",
+    "path": "/gifts-to-virginia",
     "name": "Virginia",
     "state": "Virginia",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to virginia",
-      "send rakhi to virginia"
-    ]
+    "keywords": []
   },
   {
     "slug": "washington",
-    "path": "/send-rakhi-to-washington",
+    "path": "/gifts-to-washington",
     "name": "Washington",
     "state": "Washington",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to washington",
-      "send rakhi to washington"
-    ]
+    "keywords": []
   },
   {
     "slug": "west-virginia",
-    "path": "/send-rakhi-to-west-virginia",
+    "path": "/gifts-to-west-virginia",
     "name": "West Virginia",
     "state": "West Virginia",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to west virginia",
-      "send rakhi to west virginia"
-    ]
+    "keywords": []
   },
   {
     "slug": "wisconsin",
-    "path": "/send-rakhi-to-wisconsin",
+    "path": "/gifts-to-wisconsin",
     "name": "Wisconsin",
     "state": "Wisconsin",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to wisconsin",
-      "send rakhi to wisconsin"
-    ]
+    "keywords": []
   },
   {
     "slug": "wyoming",
-    "path": "/send-rakhi-to-wyoming",
+    "path": "/gifts-to-wyoming",
     "name": "Wyoming",
     "state": "Wyoming",
     "region": "state",
     "isCaliforniaWarehouse": false,
     "priority": "Medium",
-    "keywords": [
-      "rakhi delivery to wyoming",
-      "send rakhi to wyoming"
-    ]
+    "keywords": []
   }
 ]

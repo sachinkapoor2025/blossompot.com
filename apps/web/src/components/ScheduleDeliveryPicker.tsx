@@ -27,7 +27,7 @@ export function ScheduleDeliveryPicker({
 }: {
   className?: string;
   compact?: boolean;
-  /** Dynamic noun from product category, e.g. flowers / cake / gift / rakhi */
+  /** Dynamic noun from product category, e.g. flowers / cake / gift */
   productNoun?: string;
 }) {
   const [{ min, max }] = useState(() => preferredDeliveryDateBounds());

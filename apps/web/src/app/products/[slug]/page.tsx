@@ -15,7 +15,7 @@ import type { Product } from "@blossompot/shared";
 function categoryBreadcrumbLabel(categorySlug: string): string {
   const seo = getCategoryPageSeo(categorySlug);
   if (seo?.h1) {
-    // "Send Single Rakhi to USA" → "Single Rakhi"
+    // Normalize legacy SEO title prefixes
     return seo.h1.replace(/^Send\s+/i, "").replace(/\s+to USA$/i, "").trim();
   }
   return categorySlug

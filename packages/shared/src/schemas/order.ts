@@ -30,14 +30,14 @@ export const shippingAddressSchema = z.object({
   country: z.string().min(2).max(2),
   phone: phoneSchema,
   email: z.string().email(),
-  /** Sister / buyer name — shown on shipping label so brother knows who sent the Rakhi. */
+  /** Buyer / sender name — shown on shipping label so the recipient knows who sent the gift. */
   senderName: z.string().trim().max(80).optional(),
   /** Personal note from sister — printed on the shipping label. */
   senderMessage: z.string().trim().max(500).optional(),
 });
 
 export const DEFAULT_SENDER_MESSAGE =
-  "Although we are far away from each other, this distance will not affect the strong bond of our relation. Happy Raksha Bandhan! This package is filled with Rakhi as well as overloaded with our emotions. Please accept this bundle of love and emotions.";
+  "Thinking of you — hope this gift brings a smile. With love from BlossomPot.";
 
 export const checkoutShippingAddressSchema = shippingAddressSchema.extend({
   senderName: z

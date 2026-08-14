@@ -97,7 +97,7 @@ export function orderConfirmationHeadline(status: string): string {
 export function orderConfirmationSubcopy(status: string): string {
   switch (status) {
     case ORDER_STATUS.SHIPPED:
-      return "Your Rakhi gift is on the way. Use the tracking details below to follow your shipment.";
+      return "Your gift is on the way. Use the tracking details below to follow your shipment.";
     case ORDER_STATUS.IN_TRANSIT:
       return "Your package is moving through the carrier network. Tracking updates appear below as scans arrive.";
     case ORDER_STATUS.OUT_FOR_DELIVERY:
@@ -105,9 +105,9 @@ export function orderConfirmationSubcopy(status: string): string {
     case ORDER_STATUS.DELIVERY_EXCEPTION:
       return "The carrier reported a delivery exception. Check tracking details below or contact support.";
     case ORDER_STATUS.DELIVERED:
-      return "Your gift has arrived. We hope your brother loves it — thank you for choosing BlossomPot.";
+      return "Your gift has arrived. We hope they love it — thank you for choosing BlossomPot.";
     case ORDER_STATUS.COMPLETE:
-      return "Thank you for celebrating Raksha Bandhan with BlossomPot.";
+      return "Thank you for choosing BlossomPot.";
     case ORDER_STATUS.PROCESSING:
     case ORDER_STATUS.ACCEPTED:
       return "We've received your payment and our team is preparing your order for USA dispatch.";
@@ -121,7 +121,7 @@ export function orderConfirmationSubcopy(status: string): string {
       return "Complete payment to confirm your order and start USA delivery.";
     default:
       return isOrderPaymentSettled(status)
-        ? "Your Rakhi gift is on its way. We've sent a confirmation email and our team will dispatch your order soon."
+        ? "Your gift is on its way. We've sent a confirmation email and our team will dispatch your order soon."
         : "Complete payment to confirm your order and start USA delivery.";
   }
 }

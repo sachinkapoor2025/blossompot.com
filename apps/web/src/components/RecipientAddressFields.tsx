@@ -36,7 +36,7 @@ type Props = {
 export function RecipientAddressFields({
   value,
   onChange,
-  title = "Delivery address for this Rakhi",
+  title = "Delivery address for this gift",
 }: Props) {
   const [phoneCountry, setPhoneCountry] = useState(DEFAULT_COUNTRY_ISO);
   const [phoneLocal, setPhoneLocal] = useState("");

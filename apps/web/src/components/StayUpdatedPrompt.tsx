@@ -166,7 +166,7 @@ export function StayUpdatedPrompt() {
               <div className="text-center">
                 <p className="text-base font-bold text-slate-800">Stay Updated!</p>
                 <p className="mt-1 text-xs text-slate-600">
-                  Share your email for new offers and top-selling Rakhis.
+                  Share your email for new offers and top-selling gifts.
                 </p>
               </div>
               <input

@@ -8,7 +8,6 @@ import { ProductAddonsPicker } from "@/components/ProductAddonsPicker";
 import { ProductImageGallery } from "@/components/ProductImageGallery";
 import { WishlistButton } from "@/components/WishlistButton";
 import { TrustBadges } from "@/components/TrustBadges";
-import { RakshaBandhanCountdown } from "@/components/RakshaBandhanCountdown";
 import { ProductReviewsPreview } from "@/components/ProductReviewsPreview";
 import { StickyAddToCartBar } from "@/components/StickyAddToCartBar";
 import { useSessionId, useDebouncedLeadCapture, useLeadCapture } from "@/lib/session";
@@ -48,7 +47,7 @@ function ProductIncludesPreview({ product }: { product: Product }) {
   const items = getProductIncludes(product);
   if (items.length === 0) return null;
   const heading =
-    product.categorySlug === "rakhi-hampers" ? "What's included in this hamper" : "What's included";
+    product.categorySlug === "gift-hampers" ? "What's included in this hamper" : "What's included";
   return (
     <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
       <p className="text-sm font-semibold text-primary mb-2">{heading}</p>
@@ -110,13 +109,11 @@ export function ProductDetailClient({
   faqs?: ProductFaq[];
 }) {
   const pageFaqs = faqs ?? productFaqsForCategory(product.categorySlug);
-  const productNoun = /rakhi/i.test(product.categorySlug)
-    ? "Rakhi"
-    : product.categorySlug.includes("cake")
-      ? "cake"
-      : product.categorySlug.includes("flower") || product.categorySlug.includes("bouquet")
-        ? "flowers"
-        : "gift";
+  const productNoun = product.categorySlug.includes("cake")
+    ? "cake"
+    : product.categorySlug.includes("flower") || product.categorySlug.includes("bouquet")
+      ? "flowers"
+      : "gift";
   const sessionId = useSessionId();
   const captureLead = useDebouncedLeadCapture(sessionId);
   const captureLeadNow = useLeadCapture(sessionId);
@@ -239,8 +236,8 @@ export function ProductDetailClient({
 
           {isFlashComboProduct(product.slug) && isFlashComboSaleActive() && (
             <p className="text-sm font-semibold text-accent bg-rose-50 border border-rose-100 rounded-md px-3 py-2 mb-3">
-              24-hour flash sale — ends {flashComboSaleEndsAt().toLocaleString()}. Includes 1
-              packet Roli + 1 packet Chawal. Shipping{" "}
+              24-hour flash sale — ends {flashComboSaleEndsAt().toLocaleString()}. See product details for
+              what's included. Shipping{" "}
               {format(FLASH_COMBO_SHIPPING_USD, "USD")}. Coupon codes do not apply.
             </p>
           )}
@@ -289,15 +286,11 @@ export function ProductDetailClient({
           <p className="text-slate-600 text-sm sm:text-base mb-3 leading-relaxed">{summary}</p>
           <ProductIncludesPreview product={product} />
 
-          <div className="mb-3">
-            <RakshaBandhanCountdown variant="inline" />
-          </div>
-
           {fastSelling && <FastSellingBanner unitsSold={unitsSold} />}
 
           {lowStock && (
             <p className="text-sm font-semibold text-orange-700 bg-orange-50 border border-orange-100 rounded-md px-3 py-2 mb-3">
-              Only {product.inventory} left in stock — order soon for Raksha Bandhan delivery
+              Only {product.inventory} left in stock — order soon for on-time delivery
             </p>
           )}
 

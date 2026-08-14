@@ -48,7 +48,7 @@ export function locationPublicPath(slug: string): string {
   return `/gifts-to-${slug}`;
 }
 
-/** Seasonal Rakhi-only URL (kept for redirects / intentional Rakhi landings). */
+/** Legacy path helper — next.config 301s these to /gifts-to-*. */
 export function rakhiLocationPublicPath(slug: string): string {
   return `/send-rakhi-to-${slug}`;
 }

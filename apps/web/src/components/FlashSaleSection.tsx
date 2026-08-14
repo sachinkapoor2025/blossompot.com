@@ -216,8 +216,8 @@ export function FlashSaleSection({ product }: { product: Product | null }) {
             </div>
 
             <p className="text-slate-600 text-sm sm:text-base mb-4 max-w-xl">
-              Blue Beads Pearl Single + Om Rakhi + Wonderful Pistachios 21g + Roli packet +
-              Chawal packet. No coupon codes on this offer.
+              Limited combo offer — see product details for what’s included +
+              See product details for contents. No coupon codes on this offer.
             </p>
 
             <ul className="text-sm text-slate-700 space-y-1.5 mb-5 columns-1 sm:columns-2 gap-x-8 max-w-xl">

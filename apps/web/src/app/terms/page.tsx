@@ -5,7 +5,7 @@ import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
   title: "Terms & Conditions",
-  description: `Terms and conditions for shopping on ${site.name} — Rakhi delivery to the USA.`,
+  description: `Terms and conditions for shopping on ${site.name} — gift delivery to the USA.`,
   path: "/terms",
 });
 
@@ -19,7 +19,7 @@ export default function TermsPage() {
         </p>
         <h2 className="text-xl font-bold text-primary">Orders &amp; delivery</h2>
         <p>
-          We deliver Rakhis to addresses within the United States. Delivery times are estimates (typically 5–7
+          We deliver gifts to addresses within the United States. Delivery times are estimates (typically 5–7
           business days) and may vary by location. You are responsible for providing an accurate US shipping address
           at checkout.
         </p>

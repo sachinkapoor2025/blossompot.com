@@ -1,4 +1,4 @@
-/** 24-hour flash combo: Blue Beads Pearl + Om Rakhi (roli/chawal) + 21g pistachio pack. */
+/** 24-hour flash combo: limited combo gift + 21g pistachio pack. */
 
 export const FLASH_COMBO_SALE_SLUG = "blue-beads-om-pista-flash-combo";
 
@@ -19,8 +19,8 @@ export const FLASH_COMBO_SALE = {
   compareAtUsd: 24.99,
   shippingUsd: FLASH_COMBO_SHIPPING_USD,
   includes: [
-    "Blue Beads Pearl Single Rakhi",
-    "Om Rakhi for Brother",
+    "Limited combo item A",
+    "Limited combo item B",
     "Wonderful Pistachios No Shells — 0.75 oz (21 g)",
     "1 packet Roli",
     "1 packet Chawal",

@@ -11,6 +11,7 @@ import { loadProducts } from "@/lib/product-loader";
 import type { Product, Category } from "@blossompot/shared";
 import { categoryHref } from "@/lib/category-urls";
 import { homeCategoryOrder, orderCategories } from "@/lib/site";
+import { isRakhiRelatedCategorySlug, isRakhiRelatedProduct } from "@/lib/rakhi-filter";
 
 /** Match PDP: no ISR HTML with stale product prices. */
 export const dynamic = "force-dynamic";
@@ -27,37 +28,33 @@ function resolveSort(raw?: string): ProductSort {
 }
 
 const CATEGORY_SEO: Record<string, { title: string; description: string }> = {
-  "single-rakhi": {
-    title: "Single Rakhi USA — Send to Brother Online",
-    description: "Shop single rakhis with roli chawal. Send Rakhi to USA — traditional, Om, pearl & designer styles. 5–7 day delivery.",
+  flowers: {
+    title: "Flowers USA — Fresh Arrangements | BlossomPot",
+    description: "Shop fresh flowers and bouquets with USA delivery. Birthday, anniversary, and everyday gifts.",
   },
-  "2-set-rakhi": {
-    title: "2 Set Rakhi USA — Two-Piece Rakhi Sets",
-    description: "Shop 2-piece rakhi sets for brothers in the USA. Designer multi-rakhi packs with fast domestic delivery.",
+  "flower-bouquets": {
+    title: "Flower Bouquets USA | BlossomPot",
+    description: "Designer flower bouquets for USA delivery — romantic, celebratory, and thank-you styles.",
   },
-  "3-set-rakhi": {
-    title: "3 Set Rakhi USA — Three-Piece Rakhi Sets",
-    description: "Shop 3-piece rakhi sets for multiple brothers in the USA. Designer packs with fast domestic delivery.",
+  cakes: {
+    title: "Celebration Cakes USA | BlossomPot",
+    description: "Birthday and celebration cakes with clear USA delivery guidance from BlossomPot.",
   },
-  "4-set-rakhi": {
-    title: "4 Set Rakhi USA — Four-Piece Rakhi Sets",
-    description: "Shop 4-piece rakhi sets for larger families in the USA. Designer packs with fast domestic delivery.",
+  "gift-hampers": {
+    title: "Gift Hampers USA | BlossomPot",
+    description: "Curated gift hampers and celebration boxes shipped across the United States.",
   },
-  "rakhi-combo": {
-    title: "Rakhi Combo USA — Rakhi with Chocolates",
-    description: "Rakhi combo sets with Ferrero Rocher, Lindt & Hershey's. Send Rakhi combo to USA with free shipping on selected orders.",
+  "birthday-gifts": {
+    title: "Birthday Gifts USA | BlossomPot",
+    description: "Birthday flowers, cakes, and gift combos with USA delivery options.",
   },
-  "kids-rakhi": {
-    title: "Kids Rakhi USA — Cartoon & Fun Designs",
-    description: "Cute kids rakhis for little brothers in USA. Soft, colorful, child-friendly designs with fast US delivery.",
+  "anniversary-gifts": {
+    title: "Anniversary Gifts USA | BlossomPot",
+    description: "Anniversary roses, bouquets, and romantic gifts for USA delivery.",
   },
-  "bhaiya-bhabhi-rakhi": {
-    title: "Bhaiya Bhabhi Rakhi USA — Matching Sets",
-    description: "Elegant Bhaiya Bhabhi Rakhi sets with Lumba for sister-in-law. Send to USA for Raksha Bandhan.",
-  },
-  "lumba-rakhi": {
-    title: "Lumba Rakhi USA — Bracelet Rakhi for Bhabhi",
-    description: "Beautiful Lumba rakhis for Bhabhi. Send Lumba Rakhi to USA with premium packaging and fast delivery.",
+  "same-day-gifts": {
+    title: "Same-Day Gifts USA | BlossomPot",
+    description: "Same-day eligible gifts in select ZIP codes — confirm cut-off at checkout.",
   },
 };
 
@@ -100,8 +97,8 @@ export default async function ProductsPage({ searchParams }: Props) {
       loadProducts({ search, category }),
       api<{ categories: Category[] }>("/categories", { revalidate: false }),
     ]);
-    products = liveProducts;
-    categories = categoriesData.categories;
+    products = liveProducts.filter((p) => !isRakhiRelatedProduct(p));
+    categories = categoriesData.categories.filter((c) => !isRakhiRelatedCategorySlug(c.slug));
   } catch {
     products = [];
     categories = [];

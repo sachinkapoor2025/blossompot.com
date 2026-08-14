@@ -595,7 +595,7 @@ function CheckoutPageInner() {
       const senderMessage = address.senderMessage?.trim() ?? "";
       const phone = address.phone?.trim() ?? "";
       if (!senderName) {
-        throw new Error("Please enter your name (sender) so your brother knows who sent the Rakhi.");
+        throw new Error("Please enter your name (sender) so the recipient knows who sent the gift.");
       }
       if (senderMessage.length < 10) {
         throw new Error("Please write a short message for your brother (it will appear on the shipping label).");
@@ -832,10 +832,10 @@ function CheckoutPageInner() {
             {showSplitDelivery && (
               <section className="rounded-lg border border-slate-200 bg-white p-5 sm:p-6 space-y-4">
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900">Deliver each Rakhi</h2>
+                  <h2 className="text-lg font-bold text-slate-900">Deliver each gift</h2>
                   <p className="text-sm text-slate-600 mt-1">
-                    By default every Rakhi ships to the address above. Uncheck “Same address” to send
-                    a Rakhi to a different US location. Per address: under $8 is $6.99, $8–$13.99 is
+                    By default every gift ships to the address above. Uncheck “Same address” to send
+                    a gift to a different US location. Per address: under $8 is $6.99, $8–$13.99 is
                     $3.99, and above $13.99 ships free.
                   </p>
                 </div>
@@ -858,7 +858,7 @@ function CheckoutPageInner() {
                         )}
                         <div className="min-w-0 flex-1">
                           <p className="text-xs font-medium text-slate-500">
-                            Rakhi {index + 1} of {deliveryUnits.length}
+                            Gift {index + 1} of {deliveryUnits.length}
                           </p>
                           <p className="font-semibold text-slate-900 line-clamp-2">{unit.name}</p>
                           <p className="text-sm text-accent font-medium mt-0.5">
@@ -895,7 +895,7 @@ function CheckoutPageInner() {
                           className="mt-0.5 rounded border-slate-300 text-nav focus:ring-accent"
                         />
                         <span>
-                          Send this Rakhi to the same address
+                          Send this gift to the same address
                           <span className="block text-xs text-slate-500 mt-0.5">
                             Uncheck to enter a different delivery address
                           </span>
@@ -909,7 +909,7 @@ function CheckoutPageInner() {
                               prev.map((u) => (u.key === unit.key ? { ...u, address: next } : u))
                             )
                           }
-                          title={`Address for Rakhi ${index + 1}`}
+                          title={`Address for gift ${index + 1}`}
                         />
                       )}
                     </li>

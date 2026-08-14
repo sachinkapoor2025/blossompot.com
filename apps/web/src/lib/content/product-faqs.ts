@@ -85,22 +85,6 @@ const COMBOS: ProductFaq[] = [
   SHARED_DAMAGE,
 ];
 
-const RAKHI: ProductFaq[] = [
-  SHARED_DELIVERY,
-  {
-    q: "Can I order from India, UK, or Canada?",
-    a: "Yes. Enter the US delivery address at checkout. We fulfill domestically inside America — no customs hassle for the recipient.",
-  },
-  {
-    q: "Is roli and chawal included?",
-    a: "Most single rakhis include complimentary roli (kumkum) and chawal (rice) for the traditional Raksha Bandhan tilak ceremony.",
-  },
-  SHARED_PAYMENT,
-  {
-    q: "What if my Rakhi arrives damaged?",
-    a: "Contact us within 48 hours of delivery with photos. We offer replacements or refunds for damaged or incorrect items — see our Returns & Guarantee policy.",
-  },
-];
 
 const DEFAULT_GIFT: ProductFaq[] = [
   SHARED_DELIVERY,
@@ -116,7 +100,6 @@ const DEFAULT_GIFT: ProductFaq[] = [
 export const productPageFaqs = DEFAULT_GIFT;
 
 export function productFaqsForCategory(categorySlug: string): ProductFaq[] {
-  if (/rakhi/i.test(categorySlug)) return RAKHI;
   switch (categorySlug) {
     case "flowers":
     case "flower-bouquets":

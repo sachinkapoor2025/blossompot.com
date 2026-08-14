@@ -223,10 +223,10 @@ Your exclusive code:
 
 Enter this code at checkout on https://www.blossompot.com/checkout
 
-One spin per mobile number per day. Shop premium Rakhis with delivery to all 50 US states:
+One spin per mobile number per day. Shop premium gifts with delivery to all 50 US states:
 https://www.blossompot.com/products
 
-Raksha Bandhan 2026 is August 28 — order early for on-time delivery.
+Order early for on-time USA delivery.
 
 — ${SITE_NAME} Team
 order@blossompot.com`,
@@ -712,7 +712,7 @@ We deliver to all 50 US states in 5–7 business days after dispatch.${footer}`,
         subject: `Order accepted — #${shortId} | ${SITE_NAME}`,
         body: `Hi ${name},
 
-Good news — we've accepted your Rakhi order #${shortId} and our team is preparing it for fulfillment.
+Good news — we've accepted your gift order #${shortId} and our team is preparing it for fulfillment.
 
 Order total: ${total}
 
@@ -745,7 +745,7 @@ You'll receive another update with tracking details once it ships.${footer}`,
         subject: `Order shipped — #${shortId} | ${SITE_NAME}`,
         body: `Hi ${name},
 
-Your Rakhi order #${shortId} is on its way!
+Your gift order #${shortId} is on its way!
 
 ${trackingLines || "Tracking details will appear on your order page shortly."}
 
@@ -775,7 +775,7 @@ Great news — order #${shortId} is out for delivery today.
 
 ${trackingLines || "See tracking on your order page."}
 
-Please watch for the carrier. Enjoy Raksha Bandhan!${footer}`,
+Please watch for the carrier. Enjoy your gift!${footer}`,
       };
     case ORDER_STATUS.DELIVERY_EXCEPTION:
       return {
@@ -795,14 +795,14 @@ If you need help, reply to this email and our team will assist.${footer}`,
 
 Your order #${shortId} has been delivered.
 
-${trackingLines ? `${trackingLines}\n\n` : ""}We hope your brother loves his Rakhi! If anything looks wrong with the package, reply to this email and we'll help right away.${footer}`,
+${trackingLines ? `${trackingLines}\n\n` : ""}We hope your brother loves the gift! If anything looks wrong with the package, reply to this email and we'll help right away.${footer}`,
       };
     case ORDER_STATUS.COMPLETE:
       return {
         subject: `Order complete — #${shortId} | ${SITE_NAME}`,
         body: `Hi ${name},
 
-Your order #${shortId} is complete. Thank you for celebrating Raksha Bandhan with ${SITE_NAME}.
+Your order #${shortId} is complete. Thank you for shopping with ${SITE_NAME}.
 
 We'd love a quick review when you have a moment: ${siteUrl()}/reviews${footer}`,
       };
@@ -857,12 +857,12 @@ export async function sendPendingPaymentReminderEmail(order: Order): Promise<Ema
 
   const text = `Hi ${name},
 
-This is a friendly reminder — your Rakhi order #${shortId} is still waiting for payment.
+This is a friendly reminder — your gift order #${shortId} is still waiting for payment.
 
 Order total: ${total}
 Status: Payment pending
 
-Complete payment so we can pack and ship your Rakhi for Raksha Bandhan 2026 (August 28):
+Complete payment so we can pack and ship your gift so we can pack and ship:
 → ${orderUrl}
 → ${checkoutUrl}
 
@@ -1026,14 +1026,14 @@ export async function sendReviewRequestEmail(order: Order): Promise<EmailSendRes
 
   const text = `Hi ${name},
 
-We hope your Rakhi order #${shortId} arrived safely and made Raksha Bandhan special!
+We hope your gift order #${shortId} arrived safely and made your celebration special!
 
-We're BlossomPot — dedicated to Rakhi and Raksha Bandhan traditions — and your feedback helps other sisters trust us for USA Rakhi delivery.
+We're BlossomPot — dedicated to thoughtful USA gifting — and your feedback helps other sisters trust us for USA gift delivery.
 
 Would you take 30 seconds to share your experience?
 ${reviewUrl}
 
-You can mention delivery speed, packaging, or how your brother liked the Rakhi. We read every review.
+You can mention delivery speed, packaging, or how they liked the gift. We read every review.
 
 Thank you for choosing ${SITE_NAME}.
 
@@ -1044,7 +1044,7 @@ WhatsApp / support: ${notifyAddress()}`;
   const emailResult = await sendEmail({
     to: customerEmail,
     mailbox: "orders",
-    subject: `How was your Rakhi delivery? — ${SITE_NAME}`,
+    subject: `How was your gift delivery? — ${SITE_NAME}`,
     text,
     replyTo: notifyAddress(),
   });
@@ -1095,7 +1095,7 @@ export async function sendAbandonedCartEmail(input: {
   const totalLabel = `${input.currency} ${input.value.toFixed(2)}`;
   const reminderLine =
     input.reminder === 1
-      ? "You left some beautiful Rakhis in your cart."
+      ? "You left items in your cart."
       : "Still thinking it over? Your cart is waiting — plus an extra nudge from us.";
 
   const text = `Hi ${input.name},
@@ -1111,7 +1111,7 @@ Valid until: ${expiryLabel}
 → https://www.blossompot.com/cart
 → https://www.blossompot.com/checkout
 
-Raksha Bandhan 2026 is August 28 — order early for on-time USA delivery.
+Order early for on-time USA delivery.
 
 — ${SITE_NAME} Team
 order@blossompot.com`;

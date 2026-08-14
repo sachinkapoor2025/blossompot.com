@@ -8,12 +8,12 @@ import { loadProducts } from "@/lib/product-loader";
 
 /** Categories featured in the blog “Show More” product image grid (2 products each). */
 export const BLOG_SHOW_MORE_CATEGORIES = [
-  { slug: "single-rakhi", label: "Single Rakhi" },
-  { slug: "bhaiya-bhabhi-rakhi", label: "Bhaiya Bhabhi Rakhi" },
-  { slug: "kids-rakhi", label: "Kids Rakhi" },
-  { slug: "lumba-rakhi", label: "Lumba Rakhi" },
-  { slug: "rakhi-combo", label: "Rakhi Sets" },
-  { slug: "rakhi-hampers", label: "Rakhi Hampers" },
+  { slug: "flowers", label: "Flowers" },
+  { slug: "flower-bouquets", label: "Bouquets" },
+  { slug: "cakes", label: "Cakes" },
+  { slug: "gift-hampers", label: "Hampers" },
+  { slug: "birthday-gifts", label: "Birthday" },
+  { slug: "anniversary-gifts", label: "Anniversary" },
 ] as const;
 
 export type BlogShowMoreProduct = {
@@ -33,7 +33,7 @@ function productInCategory(product: Product, categorySlug: string): boolean {
   return product.additionalCategorySlugs?.includes(categorySlug) ?? false;
 }
 
-/** Load 2 image-ready products from each Rakhi category for blog pages. */
+/** Load 2 image-ready products from each gift category for blog pages. */
 export async function loadBlogShowMoreProducts(): Promise<BlogShowMoreProduct[]> {
   let products: Product[] = [];
   try {

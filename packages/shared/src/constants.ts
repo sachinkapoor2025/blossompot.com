@@ -141,14 +141,14 @@ export const ORANGE_COUNTY_PRODUCT_INVENTORY = 500;
 
 /**
  * Backend-only vendor key for hamper fulfillment API / order tagging.
- * Never show this name on the storefront — customers only see "Rakhi Hamper".
+ * Never show this name on the storefront — customers only see "Gift Hamper".
  */
 export const VENDOR_ORANGE_COUNTY = "orange-county" as const;
 
 /** Default BlossomPot fulfillment key (catalog lines without product.vendorSlug). */
 export const VENDOR_BLOSSOMPOT = "blossompot" as const;
 
-/** Public category slug (display name: "Rakhi Hamper"). */
+/** Public category slug (legacy; prefer gift-hampers). */
 export const ORANGE_COUNTY_CATEGORY_SLUG = "rakhi-hampers" as const;
 
 /**

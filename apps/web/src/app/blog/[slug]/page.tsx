@@ -97,7 +97,7 @@ export default async function BlogPostPage({ params }: Props) {
 
         {post.relatedCategory && (
           <div className="mt-10 p-6 bg-slate-50 rounded-xl border min-w-0">
-            <h2 className="font-semibold text-primary mb-2">Shop related Rakhis</h2>
+            <h2 className="font-semibold text-primary mb-2">Shop related gifts</h2>
             <Link href={categoryHref(post.relatedCategory)} className="text-nav font-semibold hover:underline">
               Browse {post.relatedCategory.replace(/-/g, " ")} →
             </Link>
@@ -108,8 +108,8 @@ export default async function BlogPostPage({ params }: Props) {
           <Link href="/" className="text-nav hover:underline">
             Shop BlossomPot home →
           </Link>
-          <Link href="/raksha-bandhan" className="text-nav hover:underline">
-            Raksha Bandhan 2026 guide →
+          <Link href="/flowers" className="text-nav hover:underline">
+            Shop flowers →
           </Link>
           <Link href="/blog" className="text-nav hover:underline">
             ← All articles

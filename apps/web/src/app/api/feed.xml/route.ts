@@ -91,9 +91,9 @@ export async function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">
 <channel>
-<title>BlossomPot — Send Rakhi to USA</title>
+<title>BlossomPot — Flowers, Cakes & Gifts USA</title>
 <link>${escapeXml(site)}</link>
-<description>Premium Rakhis delivered to all 50 US states</description>
+<description>Premium flowers, cakes, and gifts delivered across the USA</description>
 ${items}
 </channel>
 </rss>`;

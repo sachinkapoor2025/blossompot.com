@@ -5,9 +5,9 @@ import { JsonLd } from "@/components/JsonLd";
 import { faqJsonLd, pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "FAQ — Send Rakhi to USA",
+  title: "FAQ — Flowers, Cakes & Gifts USA",
   description:
-    "Frequently asked questions about sending Rakhi to USA: delivery time, ordering from India, chocolates, Bhaiya Bhabhi sets, and Raksha Bandhan shipping.",
+    "Frequently asked questions about BlossomPot: USA delivery windows, ordering from abroad, gift messages, payments, and returns.",
   path: "/faq",
 });
 
@@ -17,7 +17,7 @@ export default function FaqPage() {
       <JsonLd data={faqJsonLd(faqs)} />
       <h1 className="text-3xl font-bold text-primary mb-2">Frequently Asked Questions</h1>
       <p className="text-slate-600 mb-8">
-        Everything you need to know about sending Rakhi to USA with {site.name}.
+        Everything you need to know about sending flowers, cakes, and gifts across the USA with {site.name}.
       </p>
       <div className="space-y-4">
         {faqs.map((f) => (
@@ -32,15 +32,21 @@ export default function FaqPage() {
       </div>
       <p className="mt-10 text-sm text-slate-500">
         More guides:{" "}
-        <Link href="/send-rakhi-from-india" className="text-nav hover:underline">
-          Send Rakhi from India
+        <Link href="/shipping" className="text-nav hover:underline">
+          Shipping
         </Link>
         {" · "}
-        <Link href="/blog" className="text-nav hover:underline">Blog</Link>
+        <Link href="/blog" className="text-nav hover:underline">
+          Blog
+        </Link>
         {" · "}
-        <Link href="/shipping" className="text-nav hover:underline">Shipping</Link>
+        <Link href="/flowers" className="text-nav hover:underline">
+          Shop flowers
+        </Link>
         {" · "}
-        <Link href="/raksha-bandhan" className="text-nav hover:underline">Raksha Bandhan 2026</Link>
+        <Link href="/contact" className="text-nav hover:underline">
+          Contact
+        </Link>
       </p>
     </div>
   );

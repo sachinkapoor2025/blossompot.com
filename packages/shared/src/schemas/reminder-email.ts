@@ -40,7 +40,7 @@ export const sendReminderEmailsSchema = z.object({
 export type SendReminderEmailsInput = z.infer<typeof sendReminderEmailsSchema>;
 
 export const DEFAULT_CHECKOUT_NUDGE_SUBJECT =
-  "Your Rakhi is waiting — complete your BlossomPot order";
+  "Your cart is waiting — complete your BlossomPot order";
 
 export function defaultCheckoutNudgeHtml(opts: {
   name?: string;
@@ -57,13 +57,13 @@ export function defaultCheckoutNudgeHtml(opts: {
       <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;">
         <tr><td style="background:#7c1d3a;padding:24px 28px;">
           <p style="margin:0;font-size:22px;font-weight:700;color:#ffffff;letter-spacing:0.02em;">BlossomPot</p>
-          <p style="margin:6px 0 0;font-size:13px;color:#fecaca;">Ship Rakhi across the USA</p>
+          <p style="margin:6px 0 0;font-size:13px;color:#fecaca;">Ship gift across the USA</p>
         </td></tr>
         <tr><td style="padding:28px;">
           <p style="margin:0 0 12px;font-size:16px;line-height:1.5;">${greeting}</p>
           <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#334155;">
             You started shopping with us but haven’t completed your order yet.
-            Raksha Bandhan is near — finish checkout so your brother receives his Rakhi on time.
+            your celebration is near — finish checkout so your brother receives his gift on time.
           </p>
           <p style="margin:0 0 24px;text-align:center;">
             <a href="${checkoutUrl}" style="display:inline-block;background:#7c1d3a;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:8px;font-size:15px;font-weight:600;">
@@ -71,7 +71,7 @@ export function defaultCheckoutNudgeHtml(opts: {
             </a>
           </p>
           <p style="margin:0;font-size:14px;line-height:1.6;color:#64748b;">
-            Or browse the collection: <a href="${shopUrl}" style="color:#7c1d3a;">Shop Rakhi</a>
+            Or browse the collection: <a href="${shopUrl}" style="color:#7c1d3a;">Shop gift</a>
           </p>
         </td></tr>
         <tr><td style="padding:16px 28px 24px;border-top:1px solid #e2e8f0;">

@@ -128,7 +128,7 @@ export async function runBrowserLoadTest(options: {
   const preset = options.preset;
   const limits = loadTestLimits(preset);
   const { users, parallel, p95LimitMs, failRateLimit } = limits;
-  const categorySlug = options.categorySlug?.trim() || "single-rakhi";
+  const categorySlug = options.categorySlug?.trim() || "flowers";
   const apiBase = getApiUrl().replace(/\/$/, "");
   const started = Date.now();
   const maxWallMs = wallClockForUsers(users);

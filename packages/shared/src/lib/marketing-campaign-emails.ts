@@ -13,9 +13,9 @@ import { cdnUploadUrl, resolveProductImageUrl } from "./image-url";
 const SITE = "https://www.blossompot.com";
 const SITE_SHORT = "https://blossompot.com";
 const SHOP = `${SITE}/products`;
-const HAMPERS = `${SITE}/rakhi-hampers-to-usa`;
+const HAMPERS = `${SITE}/gift-hampers`;
 const LOGO = `${SITE}/logo.png`;
-const HERO = `${SITE}/banners/banner-1-usa-rakhi-delivery.png`;
+const HERO = `${SITE}/banners/banner-independence-day-2026.png`;
 const FB = `${SITE}/email-templates/icons/facebook.png`;
 const IG = `${SITE}/email-templates/icons/instagram.png`;
 
@@ -51,59 +51,59 @@ export const FREE_SHIPPING_EMAIL_CONFIG = {
   templateId: "free-shipping-above-7",
   name: "Free Shipping Above $7",
   subject: "FREE SHIPPING on Orders Above $7 (₹667.73) — BlossomPot",
-  preheader: "Free shipping on orders above $7 (₹667.73). Premium Rakhis ships from the USA.",
+  preheader: "Free shipping on orders above $7 (₹667.73). Premium gifts ships from the USA.",
   logoUrl: LOGO,
   logoHref: SITE,
   heroImageUrl: HERO,
   heroImageHref: SHOP,
-  heroImageAlt: "BlossomPot — Free shipping on Rakhi orders above $7",
+  heroImageAlt: "BlossomPot — Free shipping on gift orders above $7",
   offerEyebrow: "RAKSHA BANDHAN OFFER",
   offerHeadline: "FREE SHIPPING",
   offerSubhead: "On Orders Above $7 (₹667.73)",
   offerBody:
-    "Send love across America with premium designer Rakhis — and enjoy free domestic shipping when your order is $7 or more. Ships from California. No customs delays.",
+    "Send love across America with premium flowers and gifts — and enjoy free domestic shipping when your order is $7 or more. Ships from California. No customs delays.",
   ctaText: "Shop Now",
   ctaHref: SHOP,
   benefitsHeading: "Why Shop BlossomPot",
   benefits: [
     { icon: "🚚", title: "Fast USA Delivery", description: "5–7 business days to all 50 states." },
-    { icon: "✨", title: "Premium Quality Rakhis", description: "Designer threads, roli & chawal." },
+    { icon: "✨", title: "Premium Quality gifts", description: "Designer threads, gift-ready packaging." },
     { icon: "🔒", title: "Secure Checkout", description: "Pay safely with Stripe or Razorpay." },
     { icon: "🇺🇸", title: "Ships From USA", description: "California fulfillment — no customs." },
   ] satisfies CampaignBenefit[],
-  categoriesHeading: "Featured Rakhi Categories",
-  categoriesSubheading: "Pick the perfect gift for every bond this Raksha Bandhan.",
+  categoriesHeading: "Featured gift Categories",
+  categoriesSubheading: "Pick the perfect gift for every bond this celebration.",
   categories: [
     {
-      name: "Single Rakhi",
+      name: "Single gift",
       description: "Classic & designer threads for brother.",
       imageUrl: cdnUploadUrl("2026/05/pink-multi-stone-rakhi-to-usa.jpeg"),
-      href: `${SITE}/single-rakhi-to-usa`,
+      href: `${SITE}/flowers`,
       buttonText: "Shop Now",
     },
     {
-      name: "Rakhi Combo",
-      description: "Rakhi with chocolates & festive treats.",
+      name: "gift Combo",
+      description: "gift with chocolates & festive treats.",
       imageUrl: cdnUploadUrl("2026/05/fercho.png"),
-      href: `${SITE}/rakhi-combo-to-usa`,
+      href: `${SITE}/gift-hampers`,
       buttonText: "Shop Now",
     },
     {
-      name: "Kids Rakhi",
+      name: "Kids gift",
       description: "Fun designs little brothers love.",
-      imageUrl: cdnUploadUrl("2026/04/BRO-Kids-Rakhi-e1775564401163.jpg"),
-      href: `${SITE}/kids-rakhi-to-usa`,
+      imageUrl: cdnUploadUrl("2026/04/BRO-Kids-gift-e1775564401163.jpg"),
+      href: `${SITE}/cakes`,
       buttonText: "Shop Now",
     },
     {
       name: "Bhaiya Bhabhi",
       description: "Matching sets for brother & bhabhi.",
-      imageUrl: cdnUploadUrl("2026/05/bhaiya-bhabhi-rakhi-to-usa-e1779468666580.jpeg"),
-      href: `${SITE}/bhaiya-bhabhi-rakhi-to-usa`,
+      imageUrl: cdnUploadUrl("2026/05/anniversary-gifts-e1779468666580.jpeg"),
+      href: `${SITE}/anniversary-gifts`,
       buttonText: "Shop Now",
     },
   ] satisfies CampaignCard[],
-  midCtaHeading: "Ready to Send Your Rakhi?",
+  midCtaHeading: "Ready to Send Your gift?",
   midCtaBody: "Orders $7+ ship free across the USA. Shop the festive collection today.",
   midCtaText: "Shop Free Shipping Deals",
   midCtaHref: SHOP,
@@ -122,20 +122,20 @@ export const FREE_SHIPPING_EMAIL_CONFIG = {
 /** ═══════════════ TEMPLATE 2 — Starting at ₹343 / $3.99 ═══════════════ */
 export const STARTING_PRICE_EMAIL_CONFIG = {
   templateId: "rakhi-starting-265",
-  name: "Rakhi Starting at ₹343",
-  subject: "Beautiful Rakhi Starting at Only ₹343 ($3.99) — Limited Time",
-  preheader: "Limited time: beautiful Rakhis from ₹343 ($3.99). Grab this Raksha Bandhan offer.",
+  name: "Gifts Starting at ₹343",
+  subject: "Beautiful Gifts Starting at Only ₹343 ($3.99) — Limited Time",
+  preheader: "Limited time: beautiful gifts from ₹343 ($3.99). Grab this celebration offer.",
   logoUrl: LOGO,
   logoHref: SITE,
   heroImageUrl: HERO,
   heroImageHref: SHOP,
-  heroImageAlt: "Beautiful Rakhi starting at ₹343 ($3.99) — BlossomPot",
+  heroImageAlt: "Beautiful gifts starting at ₹343 ($3.99) — BlossomPot",
   urgencyText: "⚡ Limited Time Offer",
   offerEyebrow: "FESTIVE DEAL",
-  offerHeadline: "Beautiful Rakhi",
+  offerHeadline: "Beautiful gifts",
   offerSubhead: "Starting at Only ₹343 ($3.99)",
   offerBody:
-    "Celebrate Raksha Bandhan without stretching your budget. Explore premium designs — singles, sets, kids styles, and Bhaiya-Bhabhi pairs — with festive packaging and USA delivery.",
+    "Celebrate celebration without stretching your budget. Explore premium designs — singles, sets, kids styles, and Bhaiya-Bhabhi pairs — with festive packaging and USA delivery.",
   ctaText: "Grab This Offer",
   ctaHref: SHOP,
   sections: [
@@ -144,19 +144,19 @@ export const STARTING_PRICE_EMAIL_CONFIG = {
       subheading: "Most-loved designs sisters order again and again.",
       cards: [
         {
-          name: "Pink Multi-Stone Rakhi",
+          name: "Pink Multi-Stone gift",
           description: "Elegant festive favorite for brother.",
           imageUrl: cdnUploadUrl("2026/05/pink-multi-stone-rakhi-to-usa.jpeg"),
-          href: `${SITE}/single-rakhi-to-usa`,
+          href: `${SITE}/flowers`,
           buttonText: "Shop Now",
           badge: "BEST SELLER",
           priceLabel: "From $3.99",
         },
         {
-          name: "Om Designer Rakhi",
+          name: "Om Designer gift",
           description: "Spiritual motif with premium finish.",
-          imageUrl: cdnUploadUrl("2026/03/Om-Single-Rakhi-1-e1779466859856.png"),
-          href: `${SITE}/single-rakhi-to-usa`,
+          imageUrl: cdnUploadUrl("2026/03/Om-Single-gift-1-e1779466859856.png"),
+          href: `${SITE}/flowers`,
           buttonText: "Shop Now",
           badge: "HOT",
           priceLabel: "From $3.99",
@@ -164,23 +164,23 @@ export const STARTING_PRICE_EMAIL_CONFIG = {
       ] satisfies CampaignCard[],
     },
     {
-      heading: "Rakhi Sets",
+      heading: "gift Sets",
       subheading: "Multi-piece packs for more than one brother.",
       cards: [
         {
-          name: "Set of 2 Rakhis",
+          name: "Set of 2 gifts",
           description: "Coordinated twin packs — one delivery.",
           imageUrl: cdnUploadUrl("2026/05/pink-multi-stone-rakhi-to-usa.jpeg"),
-          href: `${SITE}/2-set-rakhi-to-usa`,
+          href: `${SITE}/products`,
           buttonText: "Shop Sets",
           badge: "SET",
           priceLabel: "Value pack",
         },
         {
-          name: "Set of 3 Rakhis",
+          name: "Set of 3 gifts",
           description: "Perfect for multi-brother households.",
           imageUrl: cdnUploadUrl("2026/05/fercho.png"),
-          href: `${SITE}/3-set-rakhi-to-usa`,
+          href: `${SITE}/products`,
           buttonText: "Shop Sets",
           badge: "SET",
           priceLabel: "Value pack",
@@ -188,14 +188,14 @@ export const STARTING_PRICE_EMAIL_CONFIG = {
       ] satisfies CampaignCard[],
     },
     {
-      heading: "Kids Rakhis",
+      heading: "Kids gifts",
       subheading: "Cartoon-bright styles for little brothers.",
       cards: [
         {
-          name: "BRO Kids Rakhi",
+          name: "BRO Kids gift",
           description: "Soft, playful, child-friendly threads.",
-          imageUrl: cdnUploadUrl("2026/04/BRO-Kids-Rakhi-e1775564401163.jpg"),
-          href: `${SITE}/kids-rakhi-to-usa`,
+          imageUrl: cdnUploadUrl("2026/04/BRO-Kids-gift-e1775564401163.jpg"),
+          href: `${SITE}/cakes`,
           buttonText: "Shop Kids",
           badge: "KIDS",
           priceLabel: "From $3.99",
@@ -203,8 +203,8 @@ export const STARTING_PRICE_EMAIL_CONFIG = {
         {
           name: "Chhota Bheem Kids",
           description: "Fun character designs kids adore.",
-          imageUrl: cdnUploadUrl("2026/04/Chhota-Bheem-Kids-Rakhi-with-Assorted-Chocolates-e1775565435556.jpg"),
-          href: `${SITE}/kids-rakhi-to-usa`,
+          imageUrl: cdnUploadUrl("2026/04/Chhota-Bheem-Kids-gift-with-Assorted-Chocolates-e1775565435556.jpg"),
+          href: `${SITE}/cakes`,
           buttonText: "Shop Kids",
           badge: "KIDS",
           priceLabel: "Combo deals",
@@ -212,23 +212,23 @@ export const STARTING_PRICE_EMAIL_CONFIG = {
       ] satisfies CampaignCard[],
     },
     {
-      heading: "Bhaiya-Bhabhi Rakhis",
+      heading: "Bhaiya-Bhabhi gifts",
       subheading: "Matching rakhi + lumba sets for the couple.",
       cards: [
         {
           name: "Bhaiya Bhabhi Set",
           description: "Coordinated designs for brother & bhabhi.",
-          imageUrl: cdnUploadUrl("2026/05/bhaiya-bhabhi-rakhi-to-usa-e1779468666580.jpeg"),
-          href: `${SITE}/bhaiya-bhabhi-rakhi-to-usa`,
+          imageUrl: cdnUploadUrl("2026/05/anniversary-gifts-e1779468666580.jpeg"),
+          href: `${SITE}/anniversary-gifts`,
           buttonText: "Shop Sets",
           badge: "SET",
           priceLabel: "Gift ready",
         },
         {
-          name: "Lumba Rakhi",
+          name: "Lumba gift",
           description: "Bracelet-style elegance for bhabhi.",
-          imageUrl: cdnUploadUrl("2026/04/Unique-pink-Lumba-Rakhi-e1779468035922.jpg"),
-          href: `${SITE}/lumba-rakhi-to-usa`,
+          imageUrl: cdnUploadUrl("2026/04/Unique-pink-Lumba-gift-e1779468035922.jpg"),
+          href: `${SITE}/products`,
           buttonText: "Shop Lumba",
           badge: "NEW",
           priceLabel: "Premium",
@@ -237,7 +237,7 @@ export const STARTING_PRICE_EMAIL_CONFIG = {
     },
   ],
   midCtaHeading: "Don't Miss This Festive Deal",
-  midCtaBody: "Beautiful Rakhis from ₹343 ($3.99). Limited-time pricing — order for USA delivery today.",
+  midCtaBody: "Beautiful giftss from ₹343 ($3.99). Limited-time pricing — order for USA delivery today.",
   midCtaText: "Grab This Offer",
   midCtaHref: SHOP,
   footerTagline: "Connecting Hearts Across Borders",
@@ -255,75 +255,75 @@ export const STARTING_PRICE_EMAIL_CONFIG = {
 /** ═══════════════ TEMPLATE 3 — Shop More, Save More ($10.99 / ₹1,046) ═══════════════ */
 export const SHOP_MORE_SAVE_MORE_EMAIL_CONFIG = {
   templateId: "shop-more-save-more",
-  name: "Are you Looking to Send Rakhi to USA?",
-  subject: "Are you Looking to Send Rakhi to USA? 💝✨",
+  name: "Are you Looking to Send gifts to USA?",
+  subject: "Are you Looking to Send gifts to USA? 💝✨",
   preheader:
-    "Are you looking to send Rakhi to USA? Shop more, save more on cart value above $10.99 / ₹1,046. Premium Rakhis with USA delivery.",
+    "Are you looking to send gift to USA? Shop more, save more on cart value above $10.99 / ₹1,046. Premium gifts with USA delivery.",
   logoUrl: LOGO,
   logoHref: SITE_SHORT,
   logoTagline: "Connecting Hearts Across Borders",
   heroImageUrl: `${SITE}/email-templates/shop-more-save-more-hero-1046.png`,
   heroImageHref: SITE_SHORT,
-  heroImageAlt: "Are you Looking to Send Rakhi to USA? Shop More, Save More — Cart value above $10.99 / ₹1,046",
+  heroImageAlt: "Are you Looking to Send gifts to USA? Shop More, Save More — Cart value above $10.99 / ₹1,046",
   offerEyebrow: "RAKSHA BANDHAN SPECIAL",
-  offerHeadline: "Are you Looking to Send Rakhi to USA? 💝✨",
+  offerHeadline: "Are you Looking to Send gifts to USA? 💝✨",
   offerSubhead: "Shop More, Save More",
   offerThreshold: "Cart Value Above $10.99 / ₹1,046",
   offerBody:
-    "Celebrate Raksha Bandhan with premium designer Rakhis, combos, and hampers — delivered across America from our California warehouse. Add more to your cart and unlock festive savings.",
+    "Celebrate celebration with premium flowers and gifts, combos, and hampers — delivered across America from our California warehouse. Add more to your cart and unlock festive savings.",
   ctaText: "Shop Now",
   ctaHref: SITE_SHORT,
   categoriesHeading: "Shop by Category",
-  categoriesSubheading: "Tap a collection to find the perfect Rakhi for every bond.",
+  categoriesSubheading: "Tap a collection to find the perfect gift for every bond.",
   categories: [
     {
-      name: "Single Rakhi",
+      name: "Single gift",
       description: "Classic & designer threads for brother.",
       imageUrl: cdnUploadUrl("2026/05/pink-multi-stone-rakhi-to-usa.jpeg"),
-      href: `${SITE}/single-rakhi-to-usa`,
+      href: `${SITE}/flowers`,
       buttonText: "Shop Now",
     },
     {
-      name: "Bhaiya Bhabhi Rakhi",
+      name: "Bhaiya Bhabhi gift",
       description: "Matching sets for brother & bhabhi.",
-      imageUrl: cdnUploadUrl("2026/05/bhaiya-bhabhi-rakhi-to-usa-e1779468666580.jpeg"),
-      href: `${SITE}/bhaiya-bhabhi-rakhi-to-usa`,
+      imageUrl: cdnUploadUrl("2026/05/anniversary-gifts-e1779468666580.jpeg"),
+      href: `${SITE}/anniversary-gifts`,
       buttonText: "Shop Now",
     },
     {
-      name: "Kids Rakhi",
+      name: "Kids gift",
       description: "Fun designs little brothers love.",
-      imageUrl: cdnUploadUrl("2026/04/BRO-Kids-Rakhi-e1775564401163.jpg"),
-      href: `${SITE}/kids-rakhi-to-usa`,
+      imageUrl: cdnUploadUrl("2026/04/BRO-Kids-gift-e1775564401163.jpg"),
+      href: `${SITE}/cakes`,
       buttonText: "Shop Now",
     },
     {
-      name: "Lumba Rakhi",
+      name: "Lumba gift",
       description: "Elegant bracelet styles for bhabhi.",
-      imageUrl: cdnUploadUrl("2026/04/Unique-pink-Lumba-Rakhi-e1779468035922.jpg"),
-      href: `${SITE}/lumba-rakhi-to-usa`,
+      imageUrl: cdnUploadUrl("2026/04/Unique-pink-Lumba-gift-e1779468035922.jpg"),
+      href: `${SITE}/products`,
       buttonText: "Shop Now",
     },
     {
-      name: "Rakhi Sets",
+      name: "gift Sets",
       description: "Multi-piece packs & chocolate combos.",
       imageUrl: cdnUploadUrl("2026/05/fercho.png"),
-      href: `${SITE}/rakhi-combo-to-usa`,
+      href: `${SITE}/gift-hampers`,
       buttonText: "Shop Now",
     },
     {
-      name: "Rakhi Hampers",
+      name: "gift Hampers",
       description: "Premium gift boxes with sweets & dry fruits.",
-      imageUrl: cdnUploadUrl("2026/03/Om-Single-Rakhi-1-e1779466859856.png"),
-      href: `${SITE}/rakhi-hampers-to-usa`,
+      imageUrl: cdnUploadUrl("2026/03/Om-Single-gift-1-e1779466859856.png"),
+      href: `${SITE}/gift-hampers`,
       buttonText: "Shop Now",
     },
   ] satisfies CampaignCard[],
-  productsHeading: "Featured Rakhis",
+  productsHeading: "Featured gifts",
   productsSubheading: "Handpicked bestsellers — tap Shop Now to order for USA delivery.",
   products: [
     {
-      name: "Blue Sapphire Pearl Single Rakhi",
+      name: "Blue Sapphire Pearl Single gift",
       description: "Royal blue stone & pearl elegance.",
       imageUrl: cdnUploadUrl("2026/03/eecdbc61-da5a-4470-b8d8-5333b07a3f55-e1775488275697.webp"),
       href: `${SITE}/products/blue-sapphire-pearl-single-rakhi`,
@@ -332,7 +332,7 @@ export const SHOP_MORE_SAVE_MORE_EMAIL_CONFIG = {
       badge: "BESTSELLER",
     },
     {
-      name: "Pearl Single Rakhi",
+      name: "Pearl Single gift",
       description: "Timeless pearl design with roli chawal.",
       imageUrl: cdnUploadUrl("2026/03/pearl-single-rakhi-e1779467005952.webp"),
       href: `${SITE}/products/pearl-single-rakhi`,
@@ -343,16 +343,16 @@ export const SHOP_MORE_SAVE_MORE_EMAIL_CONFIG = {
     {
       name: "Bhai & Bhabhi Lumba Set",
       description: "Coordinated set with chocolates.",
-      imageUrl: cdnUploadUrl("2026/04/Bhai-Bhabhi-Lumba-Rakhi-Set-e1776082926101.jpg"),
+      imageUrl: cdnUploadUrl("2026/04/Bhai-Bhabhi-Lumba-gift-Set-e1776082926101.jpg"),
       href: `${SITE}/products/bhai-bhabhi-lumba-rakhi-set`,
       buttonText: "Shop Now",
       priceLabel: "$39.00",
       badge: "SET",
     },
     {
-      name: "BRO Kids Rakhi",
+      name: "BRO Kids gift",
       description: "Playful design for little brother.",
-      imageUrl: cdnUploadUrl("2026/04/BRO-Kids-Rakhi-e1775564401163.jpg"),
+      imageUrl: cdnUploadUrl("2026/04/BRO-Kids-gift-e1775564401163.jpg"),
       href: `${SITE}/products/bro-kids-rakhi-for-little-brother`,
       buttonText: "Shop Now",
       priceLabel: "$25.00",
@@ -361,7 +361,7 @@ export const SHOP_MORE_SAVE_MORE_EMAIL_CONFIG = {
     {
       name: "Designer Peach Lumba",
       description: "Soft pastel elegance for bhabhi.",
-      imageUrl: cdnUploadUrl("2026/04/Designer-Peach-Lumba-Rakhi-for-Bhabhi-1-e1775832500515.jpg"),
+      imageUrl: cdnUploadUrl("2026/04/Designer-Peach-Lumba-gift-for-Bhabhi-1-e1775832500515.jpg"),
       href: `${SITE}/products/designer-peach-lumba-rakhi-for-bhabhi`,
       buttonText: "Shop Now",
       priceLabel: "From $2.99",
@@ -370,7 +370,7 @@ export const SHOP_MORE_SAVE_MORE_EMAIL_CONFIG = {
     {
       name: "Festive Om Shree Gift Set",
       description: "Spiritual rakhi with chocolate treats.",
-      imageUrl: cdnUploadUrl("2026/03/Om-Single-Rakhi-1-e1779466859856.png"),
+      imageUrl: cdnUploadUrl("2026/03/Om-Single-gift-1-e1779466859856.png"),
       href: `${SITE}/products/festive-om-shree-rakhi-chocolate-gift-set`,
       buttonText: "Shop Now",
       priceLabel: "Combo deal",
@@ -378,16 +378,16 @@ export const SHOP_MORE_SAVE_MORE_EMAIL_CONFIG = {
     },
   ] satisfies CampaignCard[],
   whyHeading: "Why Choose BlossomPot",
-  whySubheading: "Trusted by sisters worldwide for Raksha Bandhan USA delivery.",
+  whySubheading: "Trusted by sisters worldwide for celebration USA delivery.",
   whyBenefits: [
     { icon: "🚚", title: "Fast USA Delivery", description: "5–7 day domestic shipping to all 50 states." },
     { icon: "🔒", title: "Secure Payments", description: "Safe checkout with Stripe & Razorpay." },
-    { icon: "✨", title: "Premium Quality", description: "Designer rakhis with roli & chawal." },
+    { icon: "✨", title: "Premium Quality", description: "Designer rakhis with gift-ready packaging." },
     { icon: "🤝", title: "Trusted Service", description: "WhatsApp support before & after delivery." },
   ] satisfies CampaignBenefit[],
   midCtaHeading: "Don't Miss This Festive Offer",
   midCtaBody:
-    "Shop more, save more when your cart is above $10.99 / ₹1,046. Send love across borders — order your Rakhi today.",
+    "Shop more, save more when your cart is above $10.99 / ₹1,046. Send love across borders — order your gift today.",
   midCtaText: "Shop Now",
   midCtaHref: SITE_SHORT,
   footerTagline: "Connecting Hearts Across Borders",
@@ -403,27 +403,27 @@ export const SHOP_MORE_SAVE_MORE_EMAIL_CONFIG = {
   unsubscribeLabel: "Unsubscribe",
 } as const;
 
-/** ═══════════════ TEMPLATE 4 — Rakhi Hampers to USA ═══════════════ */
+/** ═══════════════ TEMPLATE 4 — Gift Hampers to USA ═══════════════ */
 export const RAKHI_HAMPERS_USA_EMAIL_CONFIG = {
   templateId: "rakhi-hampers-to-usa",
-  name: "Rakhi Hampers to USA 🎁",
-  subject: "Make Raksha Bandhan Special – Send Beautiful Rakhi Hampers to USA 🎁",
+  name: "Gift Hampers to USA 🎁",
+  subject: "Make celebration Special – Send Beautiful gifts Hampers to USA 🎁",
   preheader:
-    "Premium Rakhi hamper collection for your brother in the USA — sweets, dry fruits & designer rakhis with fast domestic delivery.",
+    "Premium gift hamper collection for your brother in the USA — sweets, dry fruits & designer rakhis with fast domestic delivery.",
   logoUrl: LOGO,
   logoHref: SITE,
   logoTagline: "Connecting Hearts Across Borders",
-  title: "Premium Rakhi Hamper Collection for Your Brother in the USA",
+  title: "Premium gift Hamper Collection for Your Brother in the USA",
   introEyebrow: "RAKSHA BANDHAN 2026",
   introBody:
-    "Make this Raksha Bandhan unforgettable with a ready-to-gift Rakhi hamper. Each box pairs designer rakhis with sweets, dry fruits, and festive treats — packed with care and shipped from California to every state in America.",
+    "Make this celebration unforgettable with a ready-to-gift gift hamper. Each box pairs designer rakhis with sweets, dry fruits, and festive treats — packed with care and shipped from California to every state in America.",
   introCtaText: "Shop All Hampers",
   introCtaHref: HAMPERS,
-  productsHeading: "Featured Rakhi Hampers",
+  productsHeading: "Featured gift Hampers",
   productsSubheading: "Handpicked gift boxes your brother will love — tap Shop Now to order for USA delivery.",
   products: [
     {
-      name: "Nuts & Love Rakhi Hamper",
+      name: "Nuts & Love gift Hamper",
       description: "Designer rakhi with almonds, cashews & Ferrero.",
       imageUrl: resolveProductImageUrl("/uploads/orange-county/TFUSA003/TFUSA003.jpg"),
       href: `${SITE}/products/nuts-love-rakhi-hamper`,
@@ -432,8 +432,8 @@ export const RAKHI_HAMPERS_USA_EMAIL_CONFIG = {
       badge: "BEST VALUE",
     },
     {
-      name: "Rakhi Dry Fruit Celebration Combo",
-      description: "Rakhi, Kaju Katli, cashews, pistachios & tikka set.",
+      name: "gift Dry Fruit Celebration Combo",
+      description: "gift, Kaju Katli, cashews, pistachios & tikka set.",
       imageUrl: resolveProductImageUrl("/uploads/orange-county/TFUSRH2026-3/TFUSRH2026-3.jpg"),
       href: `${SITE}/products/rakhi-dry-fruit-celebration-combo`,
       buttonText: "Shop Now",
@@ -441,8 +441,8 @@ export const RAKHI_HAMPERS_USA_EMAIL_CONFIG = {
       badge: "POPULAR",
     },
     {
-      name: "Grand Rakhi Dry Fruit Indulgence Box",
-      description: "Rakhi with Kaju Katli, almonds, cashews & pistachios.",
+      name: "Grand gift Dry Fruit Indulgence Box",
+      description: "gift with Kaju Katli, almonds, cashews & pistachios.",
       imageUrl: resolveProductImageUrl("/uploads/orange-county/TFUSRH2026-8/TFUSRH2026-8b.jpg"),
       href: `${SITE}/products/grand-rakhi-dry-fruit-indulgence-box`,
       buttonText: "Shop Now",
@@ -450,7 +450,7 @@ export const RAKHI_HAMPERS_USA_EMAIL_CONFIG = {
       badge: "PREMIUM",
     },
     {
-      name: "Rakhi 3-in-1 Festive Hamper",
+      name: "gift 3-in-1 Festive Hamper",
       description: "Set of 3 rakhis, Kaju Katli, cashews & Ferrero.",
       imageUrl: resolveProductImageUrl("/uploads/orange-county/TFUSRH2026-24/TFUSRH2026-24.jpg"),
       href: `${SITE}/products/rakhi-3-in-1-festive-hamper`,
@@ -468,7 +468,7 @@ export const RAKHI_HAMPERS_USA_EMAIL_CONFIG = {
       badge: "ELEGANT",
     },
     {
-      name: "Think of me Rakhi Hamper",
+      name: "Think of me gift Hamper",
       description: "Set of 2 rakhis with cashews, pistachios & almonds.",
       imageUrl: resolveProductImageUrl("/uploads/orange-county/TFCOM009/TFCOM009.jpg"),
       href: `${SITE}/products/think-of-me-rakhi-hamper`,
@@ -486,10 +486,10 @@ export const RAKHI_HAMPERS_USA_EMAIL_CONFIG = {
     { icon: "🎁", title: "Fresh Packaging", description: "Festive gift boxes packed with care." },
     { icon: "✅", title: "Easy Ordering", description: "Order online in minutes — we deliver." },
   ] satisfies CampaignBenefit[],
-  midCtaHeading: "Order Before Raksha Bandhan",
+  midCtaHeading: "Order Before celebration",
   midCtaBody:
-    "Don't wait until the last minute. Choose a beautiful Rakhi hamper today and send love across miles — delivered fresh to your brother in the USA.",
-  midCtaText: "Shop Rakhi Hampers Now",
+    "Don't wait until the last minute. Choose a beautiful gift hamper today and send love across miles — delivered fresh to your brother in the USA.",
+  midCtaText: "Shop gift Hampers Now",
   midCtaHref: HAMPERS,
   footerTagline: "Connecting Hearts Across Borders",
   footerLogoUrl: LOGO,
@@ -510,9 +510,9 @@ const independenceDayHomeBanner = getFirstHomePageBannerForEmail();
 export const INDEPENDENCE_DAY_EMAIL_CONFIG = {
   templateId: "india-independence-day-offer",
   name: "Celebrate Independence Day with Love from India to USA 🇺🇸",
-  subject: "🇮🇳 Independence Day Special Offer – Celebrate with Rakhi Gifts from USA Rakhi",
+  subject: "🇮🇳 Independence Day Special Offer – Celebrate with gift Gifts from USA gift",
   preheader:
-    "Celebrate India's Independence Day with 15% OFF Rakhi gifts in the USA — Single Rakhi, Bhaiya-Bhabhi, Kids, Lumba, combos & hampers for Raksha Bandhan.",
+    "Celebrate India's Independence Day with 15% OFF gift gifts in the USA — Single gift, Bhaiya-Bhabhi, Kids, Lumba, combos & hampers for celebration.",
   logoUrl: LOGO,
   logoHref: SITE,
   logoTagline: "Connecting Hearts Across Borders",
@@ -523,64 +523,64 @@ export const INDEPENDENCE_DAY_EMAIL_CONFIG = {
   title: " Celebrate Independence Day with Love from India to USA 🇺🇸",
   introEyebrow: "INDEPENDENCE DAY · 15 AUGUST",
   introBody:
-    "From every corner of India to homes across America, Independence Day reminds us of freedom, family, and the bonds that hold us together. This season of pride and love, send a meaningful Rakhi for Brother, Bhaiya-Bhabhi Rakhi, or a festive Rakhi Hamper — premium Rakhi Gifts in USA, shipped domestically for Raksha Bandhan.",
+    "From every corner of India to homes across America, Independence Day reminds us of freedom, family, and the bonds that hold us together. This season of pride and love, send a meaningful gift for Brother, Bhaiya-Bhabhi gift, or a festive gift Hamper — premium gift Gifts in USA, shipped domestically for celebration.",
   offerBadge: "15% OFF",
   offerLabel: "Independence Day Special Offer",
   offerBody:
-    "Shop BlossomPot’s Independence Day collection and enjoy 15% OFF on Rakhi gifts — designer threads, combos, and hampers for every sibling bond.",
+    "Shop BlossomPot’s Independence Day collection and enjoy 15% OFF on gift gifts — designer threads, combos, and hampers for every sibling bond.",
   ctaText: "Shop Now & Save 15%",
   ctaHref: SHOP,
-  categoriesHeading: "Shop Rakhi Gifts in USA",
+  categoriesHeading: "Shop gift Gifts in USA",
   categoriesSubheading:
-    "Explore Single Rakhi, Bhaiya Bhabhi Rakhi, Kids Rakhi, Lumba Rakhi, Rakhi Combos, and Rakhi Hampers — all ready for USA delivery.",
+    "Explore Single gift, Bhaiya Bhabhi gift, Kids gift, Lumba gift, gift Combos, and gift Hampers — all ready for USA delivery.",
   categories: [
     {
-      name: "Single Rakhi",
-      description: "Classic & designer Rakhi for Brother.",
+      name: "Single gift",
+      description: "Classic & designer gift for Brother.",
       imageUrl: cdnUploadUrl("2026/05/pink-multi-stone-rakhi-to-usa.jpeg"),
-      href: `${SITE}/single-rakhi-to-usa`,
+      href: `${SITE}/flowers`,
       buttonText: "Shop Now",
     },
     {
-      name: "Bhaiya Bhabhi Rakhi",
+      name: "Bhaiya Bhabhi gift",
       description: "Matching sets for brother & bhabhi.",
-      imageUrl: cdnUploadUrl("2026/05/bhaiya-bhabhi-rakhi-to-usa-e1779468666580.jpeg"),
-      href: `${SITE}/bhaiya-bhabhi-rakhi-to-usa`,
+      imageUrl: cdnUploadUrl("2026/05/anniversary-gifts-e1779468666580.jpeg"),
+      href: `${SITE}/anniversary-gifts`,
       buttonText: "Shop Now",
     },
     {
-      name: "Kids Rakhi",
+      name: "Kids gift",
       description: "Fun designs little brothers love.",
-      imageUrl: cdnUploadUrl("2026/04/BRO-Kids-Rakhi-e1775564401163.jpg"),
-      href: `${SITE}/kids-rakhi-to-usa`,
+      imageUrl: cdnUploadUrl("2026/04/BRO-Kids-gift-e1775564401163.jpg"),
+      href: `${SITE}/cakes`,
       buttonText: "Shop Now",
     },
     {
-      name: "Lumba Rakhi",
+      name: "Lumba gift",
       description: "Elegant bracelet styles for bhabhi.",
-      imageUrl: cdnUploadUrl("2026/04/Unique-pink-Lumba-Rakhi-e1779468035922.jpg"),
-      href: `${SITE}/lumba-rakhi-to-usa`,
+      imageUrl: cdnUploadUrl("2026/04/Unique-pink-Lumba-gift-e1779468035922.jpg"),
+      href: `${SITE}/products`,
       buttonText: "Shop Now",
     },
     {
-      name: "Rakhi Combo",
-      description: "Rakhi with chocolates & festive treats.",
+      name: "gift Combo",
+      description: "gift with chocolates & festive treats.",
       imageUrl: cdnUploadUrl("2026/05/fercho.png"),
-      href: `${SITE}/rakhi-combo-to-usa`,
+      href: `${SITE}/gift-hampers`,
       buttonText: "Shop Now",
     },
     {
-      name: "Rakhi Hamper",
+      name: "gift Hamper",
       description: "Premium gift boxes with sweets & dry fruits.",
-      imageUrl: cdnUploadUrl("2026/03/Om-Single-Rakhi-1-e1779466859856.png"),
-      href: `${SITE}/rakhi-hampers-to-usa`,
+      imageUrl: cdnUploadUrl("2026/03/Om-Single-gift-1-e1779466859856.png"),
+      href: `${SITE}/gift-hampers`,
       buttonText: "Shop Now",
     },
   ] satisfies CampaignCard[],
-  midCtaHeading: "Shop Rakhi Collection — Save 15%",
+  midCtaHeading: "Shop gift Collection — Save 15%",
   midCtaBody:
-    "Don’t miss this Independence Day offer. Order your USA Rakhi gifts today and celebrate freedom, family, and Raksha Bandhan across miles.",
-  midCtaText: "Shop Rakhi Collection",
+    "Don’t miss this Independence Day offer. Order your USA gift gifts today and celebrate freedom, family, and celebration across miles.",
+  midCtaText: "Shop gift Collection",
   midCtaHref: SHOP,
   footerTagline: "Connecting Hearts Across Borders",
   footerLogoUrl: LOGO,
@@ -1261,7 +1261,7 @@ export function buildShopMoreSaveMoreEmailHtml(
   });
 }
 
-/** Template 4 HTML — Rakhi Hampers to USA (no top banner; white premium layout). */
+/** Template 4 HTML — Gift Hampers to USA (no top banner; white premium layout). */
 export function buildRakhiHampersUsaEmailHtml(
   cfg: typeof RAKHI_HAMPERS_USA_EMAIL_CONFIG = RAKHI_HAMPERS_USA_EMAIL_CONFIG
 ): string {
@@ -1312,14 +1312,14 @@ export function buildRakhiHampersUsaEmailHtml(
               ${fiveBenefitsGrid(cfg.benefits)}
             </td>
           </tr>
-          <!-- Strong CTA — order before Raksha Bandhan -->
+          <!-- Strong CTA — order before celebration -->
           <tr>
             <td class="mobile-pad" style="padding:12px 24px 36px 24px;background-color:${WHITE};">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${NAVY};border-radius:14px;">
                 <tr>
                   <td align="center" style="padding:34px 22px;">
                     <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#f0d78c;font-weight:bold;padding-bottom:8px;">
-                      Limited Time · Raksha Bandhan
+                      Limited Time · celebration
                     </div>
                     <div class="section-title" style="font-family:Georgia,'Times New Roman',serif;font-size:22px;line-height:28px;font-weight:bold;color:#ffffff;padding-bottom:8px;">
                       ${escapeHtml(cfg.midCtaHeading)}

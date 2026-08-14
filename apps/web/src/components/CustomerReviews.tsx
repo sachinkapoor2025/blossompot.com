@@ -48,8 +48,8 @@ export function CustomerReviews({ showIntro = true }: CustomerReviewsProps) {
         </h2>
         {showIntro && (
           <p className="text-slate-600 text-sm md:text-base max-w-2xl mb-8 md:mb-10 leading-relaxed">
-            Stories from sisters who sent Rakhi to brothers across the USA — domestic delivery, thoughtful packaging,
-            and on-time Raksha Bandhan gifts.{" "}
+            Stories from customers who sent flowers, cakes, and gifts across the USA — domestic delivery, thoughtful packaging,
+            and on-time celebration gifts.{" "}
             <Link href="/reviews" className="text-nav font-semibold hover:underline">
               Share your review →
             </Link>

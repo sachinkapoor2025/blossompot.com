@@ -257,7 +257,7 @@ export default function CartPage() {
               )}
               {itemCount > 1 && (
                 <p className="text-xs text-slate-500">
-                  At checkout you can ship each Rakhi to a different US address. Per address: under
+                  At checkout you can ship each gift to a different US address. Per address: under
                   $8 is $6.99, $8–$13.99 is $3.99, and above $13.99 ships free.
                 </p>
               )}

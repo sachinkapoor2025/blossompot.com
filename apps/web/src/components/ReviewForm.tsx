@@ -137,7 +137,7 @@ export function ReviewForm() {
           value={review}
           onChange={(e) => setReview(e.target.value)}
           className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
-          placeholder="How was delivery? Did your brother love the Rakhi? Would you recommend BlossomPot to other sisters?"
+          placeholder="How was delivery? Did the recipient love the gift? Would you recommend BlossomPot?"
           required
         />
       </div>
