@@ -18,6 +18,7 @@ import { trackSessionHeartbeat } from "@/lib/track";
 import { DEFAULT_COUNTRY_ISO } from "@/lib/country-codes";
 import { ConfettiBurst } from "@/components/ConfettiBurst";
 import { PhoneInput, buildPhoneValue } from "@/components/PhoneInput";
+import { useOptionalDeliveryLocation } from "@/lib/delivery-location-context";
 
 const STORAGE_KEY = "blossompot_daily_deal_shown";
 const SHOW_AFTER_MS = 10_000;
@@ -67,6 +68,9 @@ type CouponResult = {
 
 export function ExitIntentPopup() {
   const pathname = usePathname();
+  const delivery = useOptionalDeliveryLocation();
+  const hasDeliveryLocation = Boolean(delivery?.location);
+  const locationSelectorOpen = Boolean(delivery?.selectorOpen);
   const [open, setOpen] = useState(false);
   const [countryIso, setCountryIso] = useState(DEFAULT_COUNTRY_ISO);
   const [localNumber, setLocalNumber] = useState("");
@@ -92,6 +96,10 @@ export function ExitIntentPopup() {
   }, []);
 
   useEffect(() => {
+    if (!hasDeliveryLocation || locationSelectorOpen) {
+      setOpen(false);
+      return;
+    }
     if (pathname.startsWith("/admin") || pathname.startsWith("/ses-email") || pathname.startsWith("/checkout")) return;
     if (sessionStorage.getItem(STORAGE_KEY)) return;
 
@@ -113,7 +121,7 @@ export function ExitIntentPopup() {
     }, remaining);
 
     return () => window.clearTimeout(timer);
-  }, [pathname]);
+  }, [pathname, hasDeliveryLocation, locationSelectorOpen]);
 
   const copyCode = async () => {
     if (!coupon) return;

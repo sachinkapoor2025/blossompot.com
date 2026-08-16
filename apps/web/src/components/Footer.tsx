@@ -10,36 +10,36 @@ const INSTAGRAM_URL = "https://www.instagram.com/blossompot/";
 
 export function Footer() {
   return (
-    <footer className="border-t border-slate-200 bg-primary text-white mt-auto">
+    <footer className="border-t border-primary/15 bg-[#f8eef2] text-slate-700 mt-auto">
       <div className="max-w-7xl mx-auto px-4 py-10 sm:py-12">
         <div className="grid grid-cols-2 lg:grid-cols-12 gap-x-6 gap-y-8 sm:gap-x-8 sm:gap-y-10 text-sm">
           {/* Brand + contact — full width on mobile, one column on desktop */}
           <div className="col-span-2 lg:col-span-3">
             <SiteLogoLink size="desktop" className="mb-5" />
-            <p className="text-white/80 leading-relaxed mb-4 max-w-xs">
+            <p className="text-slate-600 leading-relaxed mb-4 max-w-xs">
               Flowers, cakes, and thoughtful gifts delivered across the USA. Premium online gifting for every celebration.
             </p>
-            <div className="space-y-2 text-white/90">
+            <div className="space-y-2 text-slate-700">
               <p>
-                <span className="text-white/60 text-xs uppercase tracking-wide block mb-0.5">Email</span>
-                <a href={`mailto:${site.supportEmail}`} className="font-medium hover:text-white hover:underline">
+                <span className="text-slate-500 text-xs uppercase tracking-wide block mb-0.5">Email</span>
+                <a href={`mailto:${site.supportEmail}`} className="font-medium text-primary hover:underline">
                   {site.supportEmail}
                 </a>
               </p>
               <p>
-                <span className="text-white/60 text-xs uppercase tracking-wide block mb-0.5">WhatsApp</span>
+                <span className="text-slate-500 text-xs uppercase tracking-wide block mb-0.5">WhatsApp</span>
                 <a
                   href={whatsappChatUrl()}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-medium hover:underline"
+                  className="font-medium text-primary hover:underline"
                 >
                   {site.whatsappDisplay}
                 </a>
               </p>
             </div>
             <div className="mt-5">
-              <p className="text-xs uppercase tracking-wide text-white/60 mb-2">Follow us</p>
+              <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">Follow us</p>
               <div className="flex items-center gap-3">
                 <a
                   href={FACEBOOK_URL}
@@ -75,11 +75,11 @@ export function Footer() {
 
           {/* Shop */}
           <div className="min-w-0 lg:col-span-2">
-            <p className="font-semibold text-white mb-3 sm:mb-4">Shop Gifts</p>
-            <ul className="space-y-2 text-white/80">
+            <p className="font-semibold text-primary mb-3 sm:mb-4">Shop Gifts</p>
+            <ul className="space-y-2 text-slate-600">
               {giftSetsMenu.items.map((n) => (
                 <li key={n.href}>
-                  <Link href={n.href} className="hover:text-white hover:underline">
+                  <Link href={n.href} className="hover:text-primary hover:underline">
                     {n.label}
                   </Link>
                 </li>
@@ -88,13 +88,13 @@ export function Footer() {
                 .filter((n) => "category" in n)
                 .map((n) => (
                   <li key={n.href}>
-                    <Link href={n.href} className="hover:text-white hover:underline">
+                    <Link href={n.href} className="hover:text-primary hover:underline">
                       {n.label}
                     </Link>
                   </li>
                 ))}
               <li>
-                <Link href="/products" className="hover:text-white hover:underline">
+                <Link href="/products" className="hover:text-primary hover:underline">
                   All Products
                 </Link>
               </li>
@@ -103,40 +103,40 @@ export function Footer() {
 
           {/* Help */}
           <div className="min-w-0 lg:col-span-2">
-            <p className="font-semibold text-white mb-3 sm:mb-4">Help &amp; Info</p>
-            <ul className="space-y-2 text-white/80">
-              <li><Link href="/same-day-delivery" className="hover:text-white hover:underline">Same-Day Delivery</Link></li>
-              <li><Link href="/flowers" className="hover:text-white hover:underline">Send Flowers</Link></li>
-              <li><Link href="/blog" className="hover:text-white hover:underline">Blog &amp; Guides</Link></li>
-              <li><Link href="/shipping" className="hover:text-white hover:underline">Shipping &amp; Delivery</Link></li>
-              <li><Link href="/faq" className="hover:text-white hover:underline">FAQ</Link></li>
-              <li><Link href="/reviews" className="hover:text-white hover:underline">Customer Reviews</Link></li>
-              <li><Link href="/about" className="hover:text-white hover:underline">About Us</Link></li>
-              <li><Link href="/vendor" className="hover:text-white hover:underline">Vendor Account</Link></li>
-              <li><Link href="/become-a-vendor" className="hover:text-white hover:underline">Become a Vendor</Link></li>
-              <li><Link href="/returns" className="hover:text-white hover:underline">Returns &amp; Guarantee</Link></li>
-              <li><Link href="/contact" className="hover:text-white hover:underline">Contact Us</Link></li>
+            <p className="font-semibold text-primary mb-3 sm:mb-4">Help &amp; Info</p>
+            <ul className="space-y-2 text-slate-600">
+              <li><Link href="/same-day-delivery" className="hover:text-primary hover:underline">Same-Day Delivery</Link></li>
+              <li><Link href="/flowers" className="hover:text-primary hover:underline">Send Flowers</Link></li>
+              <li><Link href="/blog" className="hover:text-primary hover:underline">Blog &amp; Guides</Link></li>
+              <li><Link href="/shipping" className="hover:text-primary hover:underline">Shipping &amp; Delivery</Link></li>
+              <li><Link href="/faq" className="hover:text-primary hover:underline">FAQ</Link></li>
+              <li><Link href="/reviews" className="hover:text-primary hover:underline">Customer Reviews</Link></li>
+              <li><Link href="/about" className="hover:text-primary hover:underline">About Us</Link></li>
+              <li><Link href="/vendor" className="hover:text-primary hover:underline">Vendor Account</Link></li>
+              <li><Link href="/become-a-vendor" className="hover:text-primary hover:underline">Become a Vendor</Link></li>
+              <li><Link href="/returns" className="hover:text-primary hover:underline">Returns &amp; Guarantee</Link></li>
+              <li><Link href="/contact" className="hover:text-primary hover:underline">Contact Us</Link></li>
             </ul>
           </div>
 
           {/* Geo hubs — top states + index */}
           <div className="col-span-2 lg:col-span-5 min-w-0">
-            <p className="font-semibold text-white mb-3 sm:mb-4">Deliver to</p>
-            <ul className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2 text-white/80">
+            <p className="font-semibold text-primary mb-3 sm:mb-4">Deliver to</p>
+            <ul className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2 text-slate-600">
               {footerGeoLinks(12).map((c) => (
                 <li key={c.href}>
-                  <Link href={c.href} className="hover:text-white hover:underline">
+                  <Link href={c.href} className="hover:text-primary hover:underline">
                     {c.label}
                   </Link>
                 </li>
               ))}
               <li className="col-span-2 sm:col-span-3">
-                <Link href="/locations" className="hover:text-white hover:underline font-medium">
+                <Link href="/locations" className="hover:text-primary hover:underline font-medium">
                   International locations →
                 </Link>
               </li>
               <li className="col-span-2 sm:col-span-3">
-                <Link href="/delivery-locations" className="hover:text-white hover:underline font-medium">
+                <Link href="/delivery-locations" className="hover:text-primary hover:underline font-medium">
                   All USA delivery locations →
                 </Link>
               </li>
@@ -145,31 +145,31 @@ export function Footer() {
         </div>
 
         {/* Payments row */}
-        <div className="mt-10 pt-8 border-t border-white/15 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="mt-10 pt-8 border-t border-primary/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-wide text-white/60 mb-2">Accepted payments</p>
+            <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">Accepted payments</p>
             <PaymentMethodIcons />
           </div>
-          <p className="text-xs text-white/50 max-w-md">
+          <p className="text-xs text-slate-500 max-w-md">
             Secure checkout with encrypted payment processing. Prices shown in USD or INR at checkout.
           </p>
         </div>
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-white/10 bg-primary/95">
-        <div className="max-w-7xl mx-auto px-4 py-5 flex flex-col gap-3 text-xs text-white/50">
+      <div className="border-t border-primary/10 bg-[#f1dce4]">
+        <div className="max-w-7xl mx-auto px-4 py-5 flex flex-col gap-3 text-xs text-slate-500">
           <p className="text-center sm:text-left">
             Operated by {trustFacts.operator}.{" "}
-            <Link href="/about" className="text-white/70 hover:text-white underline underline-offset-2">
+            <Link href="/about" className="text-primary hover:underline underline-offset-2">
               About our team
             </Link>
             {" · "}
-            <Link href="/reviews" className="text-white/70 hover:text-white underline underline-offset-2">
+            <Link href="/reviews" className="text-primary hover:underline underline-offset-2">
               Share your review
             </Link>
             {" · "}
-            <Link href="/returns" className="text-white/70 hover:text-white underline underline-offset-2">
+            <Link href="/returns" className="text-primary hover:underline underline-offset-2">
               Satisfaction guarantee
             </Link>
           </p>
@@ -179,19 +179,19 @@ export function Footer() {
               every mile.
             </p>
             <p className="flex flex-wrap gap-x-3 gap-y-1">
-              <Link href="/terms" className="hover:text-white underline underline-offset-2">
+              <Link href="/terms" className="hover:text-primary underline underline-offset-2">
                 Terms
               </Link>
-              <Link href="/privacy" className="hover:text-white underline underline-offset-2">
+              <Link href="/privacy" className="hover:text-primary underline underline-offset-2">
                 Privacy
               </Link>
-              <Link href="/press" className="hover:text-white underline underline-offset-2">
+              <Link href="/press" className="hover:text-primary underline underline-offset-2">
                 Press
               </Link>
-              <Link href="/llms.txt" className="hover:text-white underline underline-offset-2">
+              <Link href="/llms.txt" className="hover:text-primary underline underline-offset-2">
                 LLMs.txt
               </Link>
-              <Link href="/humans.txt" className="hover:text-white underline underline-offset-2">
+              <Link href="/humans.txt" className="hover:text-primary underline underline-offset-2">
                 Humans.txt
               </Link>
             </p>
