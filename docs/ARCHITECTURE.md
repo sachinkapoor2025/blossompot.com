@@ -59,6 +59,7 @@ the Lambda via env vars (`PRODUCTS_TABLE`, `ORDERS_TABLE`, `CARTS_TABLE`,
 | config | `CONFIG#PAYMENTS` | `META` | Stripe/Razorpay settings |
 | config | `CONFIG#SHIPPING` | `META` | USPS rate-shopping, origin address, festival mode |
 | config | `CONFIG#VENDOR_COMMISSIONS` | `META` | Marketplace commission rules (global / category / vendor) |
+| config | `VCOV#{vendorSlug}` | `SAREA#{areaId}` / `META` | Vendor delivery service areas (ALLOW/DENY by country, state, city, postal, prefix, radius) |
 | config | `MVENDOR#<vendorId>` | `META` | Marketplace partner profile + status; lookups `MVENDOREMAIL#` / `MVENDORSLUG#`; sessions `MVENDORSESSION#`; ledger `MVENDORLEDGER#` |
 
 **Marketplace multi-vendor model:** BlossomPot acquires the customer → customer pays BlossomPot → local vendor fulfills → BlossomPot keeps margin → vendor receives payout. Applications are never auto-published (`pending` → `under_review` → `approved`/`active` → `suspended`/`rejected`). Vendor products require admin approval (`draft` / `pending_approval` → `approved` → published). Public storefront keeps `vendorSlug`/`vendorCost` private; optional `fulfilledByName` shows “Fulfilled by / Local Partner”. ZIP coverage: `GET /marketplace/coverage?zip=`. UI: `/become-a-vendor`, `/vendor/*`, `/admin/marketplace-vendors`. Orange County machine API (`/vendors/orange-county/*`) remains separate.
@@ -95,8 +96,16 @@ When admin (or Orange County vendor tracking) changes order status (accepted, pr
 
 | Method | Path | Purpose |
 |--------|------|---------|
-| GET | `/products` | List/search products |
-| GET | `/products/{slug}` | Product detail |
+| GET | `/products` | List/search products. Optional `country` + `postalCode` filters to vendors that can fulfill that location. Omit for full catalog (SEO). |
+| GET | `/products/{slug}` | Product detail. Optional `country` + `postalCode` adds `availability`. |
+| GET/POST | `/location/check-serviceability` | Guest: country + postal → serviceable vendors |
+| GET | `/admin/vendors/{vendorSlug}/service-areas` | Admin: list vendor coverage rules |
+| POST | `/admin/vendors/{vendorSlug}/service-areas` | Admin: create coverage rule |
+| PUT | `/admin/vendors/{vendorSlug}/service-areas/{areaId}` | Admin: update coverage rule |
+| DELETE | `/admin/vendors/{vendorSlug}/service-areas/{areaId}` | Admin: delete coverage rule |
+| POST | `/admin/vendors/{vendorSlug}/service-areas/import` | Admin: CSV row import |
+| POST | `/admin/serviceability/test` | Admin: test one vendor + location |
+| GET | `/admin/serviceability/summary` | Admin: coverage counts |
 | GET | `/products/{slug}/reviews` | Published product reviews |
 | POST | `/products/{slug}/reviews` | Admin: create/moderate a review |
 | POST | `/products` | Admin: create product |
@@ -105,8 +114,8 @@ When admin (or Orange County vendor tracking) changes order status (accepted, pr
 | POST | `/products/bulk` | Admin: CSV bulk upload |
 | GET | `/categories` | List categories |
 | POST | `/categories` | Admin: create |
-| GET | `/cart` | Get cart |
-| POST | `/cart/items` | Add to cart (optional `addons[]` as catalog ids or `{ id, quantity }` for BlossomPot products) |
+| GET | `/cart` | Get cart. Optional `country` + `postalCode` flags lines that are no longer serviceable. |
+| POST | `/cart/items` | Add to cart (optional `addons[]` as catalog ids or `{ id, quantity }` for BlossomPot products). Optional `deliveryCountry` + `deliveryPostal` rejects non-serviceable items. |
 | PUT | `/cart/items/{lineId}` | Update quantity by cart line id |
 | DELETE | `/cart/items/{lineId}` | Remove cart line |
 | POST | `/checkout` | Create order + payment intent |
@@ -260,13 +269,15 @@ Every form blur or debounced keystroke can POST to `/leads`:
 ## SEO
 
 - Next.js `generateMetadata` per product/category page
-- `/sitemap.xml`, `/sitemap-geo.xml`, `/robots.txt` dynamic routes
+- `/sitemap.xml`, `/sitemap-geo.xml`, `/sitemap-locations.xml`, `/robots.txt` dynamic routes
 - JSON-LD Product schema on product pages
 - Canonical URLs, Open Graph tags (www host)
 - **Sample products:** `isSampleProduct` + `SAMPLE_PRODUCT_INDEXABLE` (default off) — excluded from public list/sitemap/PDP until real inventory
 - **Private:** `/admin`, `/vendor`, cart/checkout/account/wishlist noindex + robots disallow
-- **Audit:** `npm run audit:seo` — see `docs/SEARCH_READINESS.md`
-- **Nationwide geo:** SoT is `apps/web/src/lib/content/geo/locations.data.json` (52 states/territories + 639 cities). Public URLs `/gifts-to-{slug}` rewrite to `/locations/[slug]`. Publish wave via `GEO_PUBLISH_WAVE` (`states` | `cities-200` | `all`). Content: `npm run geo:generate` / `npm run geo:validate`. Index: `/delivery-locations`. Display labels only via `locationLabel()` — never concatenate name+state.
+- **Audit:** `npm run audit:seo` / `audit:seo-tech` / `audit:crawlers` — see `docs/SEARCH_READINESS.md` and `docs/SEO-ARCHITECTURE.md`
+- **Nationwide USA geo:** SoT is `apps/web/src/lib/content/geo/locations.data.json` (52 states/territories + 639 cities). Public URLs `/gifts-to-{slug}` rewrite to `/locations/[slug]`. Publish wave via `GEO_PUBLISH_WAVE` (`states` | `cities-200` | `all`). Content: `npm run geo:generate` / `npm run geo:validate`. Index: `/delivery-locations`. Display labels only via `locationLabel()` — never concatenate name+state.
+- **International locations:** SoT is `apps/web/src/lib/content/geo/international/` (Canada, Australia, Europe origin markets). Hub `/locations/`. Hierarchical `/locations/{market}/...`. USA `/locations/united-states/{state}/{city}` **301**s to `/gifts-to-*`. Quality gate: `npm run assert:international-geo`. See `docs/LOCATION-ARCHITECTURE.md`.
+- **Crawlers / security:** `docs/CRAWLER-POLICY.md`, `docs/SECURITY.md`, `docs/SEARCH-ENGINE-SETUP.md`
 
 ## Multi-Developer + Cursor Workflow
 

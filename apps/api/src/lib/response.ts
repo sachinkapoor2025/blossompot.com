@@ -7,6 +7,13 @@ const CORS_HEADERS = {
     "Content-Type, Authorization, X-Session-Id, X-Vendor-Api-Key",
 };
 
+const SECURITY_HEADERS = {
+  "X-Content-Type-Options": "nosniff",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "X-Frame-Options": "DENY",
+  "Cache-Control": "no-store",
+};
+
 export function json(
   statusCode: number,
   body: unknown,
@@ -17,6 +24,7 @@ export function json(
     headers: {
       "Content-Type": "application/json",
       ...CORS_HEADERS,
+      ...SECURITY_HEADERS,
       ...extraHeaders,
     },
     body: JSON.stringify(body),

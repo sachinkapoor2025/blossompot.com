@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
+import { DeliveryLocationProvider } from "@/lib/delivery-location-context";
 import { CartProvider } from "@/lib/cart-context";
 import { WishlistProvider } from "@/lib/wishlist-context";
 import { CurrencyProvider } from "@/lib/currency-context";
@@ -71,10 +72,6 @@ export const metadata: Metadata = {
       "x-default": canonical("/"),
       en: canonical("/"),
       "en-US": canonical("/"),
-      "en-IN": canonical("/"),
-      "en-GB": canonical("/"),
-      "en-CA": canonical("/"),
-      "en-AU": canonical("/"),
     },
   },
   openGraph: {
@@ -128,6 +125,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AnalyticsScripts />
         <JsonLd data={[organizationJsonLd(), webSiteJsonLd(), onlineStoreJsonLd()]} />
         <AuthProvider>
+          <DeliveryLocationProvider>
           <CartProvider>
             <WishlistProvider>
             <CurrencyProvider>
@@ -142,6 +140,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </CurrencyProvider>
             </WishlistProvider>
           </CartProvider>
+          </DeliveryLocationProvider>
         </AuthProvider>
       </body>
     </html>

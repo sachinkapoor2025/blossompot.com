@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { HomeProductCard } from "@/components/HomeProductCard";
+import { HomeProductList } from "@/components/HomeProductList";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
 import { AnswerBlock } from "@/components/AnswerBlock";
@@ -107,11 +107,10 @@ export default async function GiftSlugPage({ params }: Props) {
       )}
 
       {filtered.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {filtered.map((p) => (
-            <HomeProductCard key={p.slug} product={p} />
-          ))}
-        </div>
+        <HomeProductList
+          products={filtered}
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 list-none p-0 m-0"
+        />
       ) : (
         <p className="text-slate-600 mb-6">
           No matching gifts right now.{" "}

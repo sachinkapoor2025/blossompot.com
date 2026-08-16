@@ -7,6 +7,7 @@ import {
   quoteFreeShippingThreshold,
 } from "@blossompot/shared";
 import { useCart } from "@/lib/cart-context";
+import { useDeliveryLocation } from "@/lib/delivery-location-context";
 import { useCurrency } from "@/lib/currency-context";
 import { SecureCheckoutBadge } from "@/components/SecureCheckoutBadge";
 import { PaymentMethodIcons } from "@/components/PaymentMethodIcons";
@@ -111,10 +112,12 @@ function AddonList({ item, format }: { item: CartItem; format: (n: number, c: Di
 export default function CartPage() {
   const { cart, loading } = useCart();
   const { format, convert, displayCurrency, usdInrRate } = useCurrency();
+  const delivery = useDeliveryLocation();
 
   if (loading) return <div className="p-10 text-center text-slate-600">Loading cart...</div>;
 
   const items = cart?.items ?? [];
+  const blockedItems = items.filter((i) => i.unavailableForLocation);
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
   const cartCurrency = (items[0]?.currency ?? "USD") as DisplayCurrency;
   const total = items.reduce((sum, i) => {
@@ -196,6 +199,19 @@ export default function CartPage() {
                         >
                           {item.name}
                         </Link>
+                        {item.unavailableForLocation ? (
+                          <p className="text-sm text-amber-900 bg-amber-50 border border-amber-100 rounded-md px-3 py-2">
+                            {item.unavailableReason ??
+                              "This item is no longer available for delivery to your selected location."}
+                            <button
+                              type="button"
+                              onClick={delivery.openSelector}
+                              className="ml-2 font-semibold text-nav underline"
+                            >
+                              Change location
+                            </button>
+                          </p>
+                        ) : null}
                         <AddonList item={item} format={format} />
                         <CartQuantityControls
                           lineId={lineKey}
@@ -278,11 +294,16 @@ export default function CartPage() {
 
             <EstimatedDeliveryNote variant="banner" prefix="Order today →" className="mb-5" />
 
+            {blockedItems.length > 0 ? (
+              <p className="text-sm text-amber-900 bg-amber-50 border border-amber-100 rounded-md px-3 py-2 mb-3">
+                Remove unavailable items or change location before checkout.
+              </p>
+            ) : null}
             <Link
-              href="/checkout"
+              href={blockedItems.length ? "/products" : "/checkout"}
               className="block w-full text-center rounded-md bg-primary text-white font-bold text-sm uppercase tracking-wide py-3.5 hover:bg-primary/90 transition"
             >
-              Proceed to checkout
+              {blockedItems.length ? "View products in your area" : "Proceed to checkout"}
             </Link>
 
             <CheckoutLegalNotice className="mt-4 text-center" />

@@ -143,7 +143,7 @@ export function organizationJsonLd() {
     audience: {
       "@type": "Audience",
       audienceType:
-        "Customers ordering flowers, cakes, bouquets, and gifts for delivery across the United States",
+        "Customers in the United States and worldwide ordering flowers, cakes, bouquets, and gifts for delivery across the United States",
     },
     knowsAbout: [
       "Flower delivery USA",

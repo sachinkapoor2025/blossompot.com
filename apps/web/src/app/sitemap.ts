@@ -9,6 +9,7 @@ import { listAllBlogPosts } from "@/lib/content/blog-posts";
 import { allCollectionSlugs } from "@/lib/collections";
 import { publishedGeoLocations } from "@/lib/content/geo/locations";
 import { locationPublicPath } from "@/lib/content/seo-data";
+import { internationalPath, publishedInternationalLocations } from "@/lib/content/geo/international";
 import { allOccasionSlugs } from "@/lib/content/occasions";
 import { allGiftGuideSlugs } from "@/lib/content/recipients";
 
@@ -40,6 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/press`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: `${siteUrl}/editorial-policy`, lastModified: now, changeFrequency: "monthly", priority: 0.45 },
     { url: `${siteUrl}/delivery-locations`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${siteUrl}/locations`, lastModified: now, changeFrequency: "weekly", priority: 0.82 },
     { url: `${siteUrl}/occasions`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${siteUrl}/gifts`, lastModified: now, changeFrequency: "weekly", priority: 0.78 },
     { url: `${siteUrl}/become-a-vendor`, lastModified: now, changeFrequency: "monthly", priority: 0.65 },
@@ -64,6 +66,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
       priority: 0.8,
     }));
+
+  const internationalRoutes = publishedInternationalLocations().map((loc) => ({
+    url: `${siteUrl}${internationalPath(loc)}`,
+    lastModified: now,
+    changeFrequency: "weekly" as const,
+    priority: loc.kind === "city" ? 0.72 : 0.8,
+  }));
 
   const occasionRoutes = allOccasionSlugs().map((slug) => ({
     url: `${siteUrl}/occasions/${slug}`,
@@ -112,6 +121,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticRoutes,
     ...categoryRoutes,
     ...locationRoutes,
+    ...internationalRoutes,
     ...occasionRoutes,
     ...giftGuideRoutes,
     ...blogRoutes,

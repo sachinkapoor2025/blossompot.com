@@ -161,6 +161,24 @@ export const orderSchema = z.object({
   statusHistory: z.array(orderStatusHistoryEntrySchema).optional(),
   /** Primary / first delivery address (always set; mirrors shipments[0] when multi). */
   shippingAddress: shippingAddressSchema,
+  /** Snapshot of serviceability at order time — do not rewrite if vendor areas change later. */
+  deliverySnapshot: z
+    .object({
+      countryCode: z.string(),
+      postalCode: z.string(),
+      checkedAt: z.string(),
+      vendors: z
+        .array(
+          z.object({
+            vendorSlug: z.string(),
+            serviceable: z.boolean(),
+            matchedRuleId: z.string().optional(),
+            matchedScope: z.string().optional(),
+          })
+        )
+        .optional(),
+    })
+    .optional(),
   /** Multi-address deliveries. Omitted on older single-address orders. */
   shipments: z.array(orderShipmentSchema).optional(),
   paymentProvider: z.enum(["stripe", "razorpay"]).optional(),

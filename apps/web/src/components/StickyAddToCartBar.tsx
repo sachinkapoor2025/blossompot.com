@@ -10,10 +10,12 @@ export function StickyAddToCartBar({
   product,
   getContact,
   addons = [],
+  disabled = false,
 }: {
   product: Product;
   getContact?: () => { name?: string; email?: string; phone?: string };
   addons?: ProductAddonSelection[];
+  disabled?: boolean;
 }) {
   const { format } = useCurrency();
   const [visible, setVisible] = useState(false);
@@ -53,7 +55,7 @@ export function StickyAddToCartBar({
         <div className="w-[9.5rem] shrink-0">
           <AddToCartControl
             productSlug={product.slug}
-            disabled={false}
+            disabled={disabled}
             fullWidth
             variant="detail"
             getContact={getContact}

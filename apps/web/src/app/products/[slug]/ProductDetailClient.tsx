@@ -39,6 +39,8 @@ import type { Product, ProductAddonSelection } from "@blossompot/shared";
 import { FastSellingBanner } from "@/components/FastSellingBadge";
 import { looksLikeHtml, shortPlainDescription } from "@/lib/html-text";
 import { getProductIncludes } from "@/lib/product-includes";
+import { fulfillmentVendorSlug } from "@blossompot/shared";
+import { useDeliveryLocation } from "@/lib/delivery-location-context";
 
 type Tab = "description" | "reviews" | "faq";
 
@@ -119,6 +121,12 @@ export function ProductDetailClient({
   const captureLeadNow = useLeadCapture(sessionId);
   const { cart, itemCount } = useCart();
   const { format } = useCurrency();
+  const delivery = useDeliveryLocation();
+  const locationSet = Boolean(delivery.location);
+  const deliverable =
+    !locationSet ||
+    delivery.checking ||
+    delivery.vendorSlugs.includes(fulfillmentVendorSlug(product));
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -296,6 +304,29 @@ export function ProductDetailClient({
 
           <EstimatedDeliveryNote variant="banner" prefix="Estimated delivery:" className="mb-4" />
 
+          <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm">
+            {delivery.location ? (
+              deliverable ? (
+                <p className="text-green-800">
+                  ✓ Available for delivery to {delivery.location.postalDisplay}
+                </p>
+              ) : (
+                <p className="text-amber-900">
+                  This product is currently not available for delivery to {delivery.location.postalDisplay}.
+                </p>
+              )
+            ) : (
+              <p className="text-slate-700">Select a delivery location to confirm availability.</p>
+            )}
+            <button
+              type="button"
+              onClick={delivery.openSelector}
+              className="mt-1 font-semibold text-nav underline underline-offset-2"
+            >
+              {delivery.location ? "Change location" : "Choose location"}
+            </button>
+          </div>
+
           <TrustBadges variant="compact" className="mb-5" />
 
           <ProductCareAccordions product={product} />
@@ -326,6 +357,7 @@ export function ProductDetailClient({
                     productSlug={product.slug}
                     disabled={
                       product.inventory <= 0 ||
+                      !deliverable ||
                       (isFlashComboProduct(product.slug) && !isFlashComboSaleActive())
                     }
                     fullWidth
@@ -364,6 +396,7 @@ export function ProductDetailClient({
                     productSlug={product.slug}
                     disabled={
                       product.inventory <= 0 ||
+                      !deliverable ||
                       (isFlashComboProduct(product.slug) && !isFlashComboSaleActive())
                     }
                     fullWidth
@@ -545,7 +578,12 @@ export function ProductDetailClient({
         </dl>
       </section>
     </div>
-    <StickyAddToCartBar product={product} getContact={getContact} addons={addons} />
+    <StickyAddToCartBar
+      product={product}
+      getContact={getContact}
+      addons={addons}
+      disabled={!deliverable}
+    />
     </>
   );
 }

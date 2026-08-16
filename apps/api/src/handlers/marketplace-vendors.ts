@@ -856,20 +856,20 @@ export async function getVendorAgreement(_event: APIGatewayProxyEventV2) {
   });
 }
 
-/** Public: which marketplace vendors can deliver to a ZIP (coverage gate for catalog). */
+/** Public: which vendors can deliver to a ZIP (uses the shared serviceability engine). */
 export async function marketplaceCoverageByZip(event: APIGatewayProxyEventV2) {
   const zip = (event.queryStringParameters?.zip ?? "").trim();
+  const country = (event.queryStringParameters?.country ?? "US").trim().toUpperCase();
   if (zip.length < 3) return badRequest("zip query required");
-  const vendors = (await listVendors()).filter(
-    (v) =>
-      (v.status === "active" || v.status === "approved") &&
-      (v.deliveryZone?.zipCodes?.some((z) => z === zip || z.startsWith(zip.slice(0, 5))) ||
-        v.zip === zip)
-  );
+  const { getServiceableVendors } = await import("@blossompot/shared");
+  const { loadCoverageBundle } = await import("../lib/serviceability-store");
+  const { areas, activeVendorSlugs } = await loadCoverageBundle();
+  const matches = getServiceableVendors(areas, { countryCode: country, postalCode: zip }, activeVendorSlugs);
   return ok({
     zip,
-    available: vendors.length > 0,
-    vendorSlugs: vendors.map((v) => v.vendorSlug),
-    count: vendors.length,
+    country,
+    available: matches.length > 0,
+    vendorSlugs: matches.map((m) => m.vendorSlug),
+    count: matches.length,
   });
 }

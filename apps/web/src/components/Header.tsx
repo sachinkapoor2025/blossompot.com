@@ -8,6 +8,8 @@ import { categoryHref } from "@/lib/category-urls";
 import { navItems, cityLinks, cityNavHref, cityNavMenuLabel, giftSetsMenu } from "@/lib/site";
 import { SearchBar } from "@/components/SearchBar";
 import { SiteLogoLink } from "@/components/SiteLogo";
+import { DeliveryLocationChip } from "@/components/DeliveryLocationChip";
+import { DeliveryLocationBanner } from "@/components/DeliveryLocationBanner";
 
 function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
   const [open, setOpen] = useState(false);
@@ -31,6 +33,16 @@ function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
       {open && (
         <div className="absolute top-full right-0 pt-1.5 z-[100]">
           <div className="min-w-[220px] max-h-[min(70vh,360px)] overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-xl">
+            <Link
+              href="/locations"
+              className="block px-4 py-2.5 text-sm font-semibold text-nav hover:bg-blue-50 whitespace-nowrap"
+              onClick={() => {
+                setOpen(false);
+                onNavigate?.();
+              }}
+            >
+              All locations
+            </Link>
             {cityLinks.map((c) => (
               <Link
                 key={c.slug}
@@ -265,6 +277,7 @@ export function Header() {
 
   return (
     <header className="border-b border-primary/10 bg-white/90 backdrop-blur-md sticky top-0 z-50 shadow-sm shadow-primary/5 overflow-visible">
+      <DeliveryLocationBanner />
       {/* Mobile top bar */}
       <div className="md:hidden max-w-7xl mx-auto px-3 py-2.5 flex items-center gap-2">
         <button
@@ -282,6 +295,7 @@ export function Header() {
         <div className="flex-1" />
 
         <div className="flex items-center shrink-0">
+          <DeliveryLocationChip compact />
           <VendorAccountLink className="text-nav hover:text-primary p-1.5" />
           <AccountLink className="text-nav hover:text-primary p-1.5" />
           <WishlistLink className="text-nav hover:text-primary p-1.5" />
@@ -297,7 +311,10 @@ export function Header() {
           <SearchBar />
         </div>
 
-        <div className="flex items-start justify-end shrink-0">
+        <div className="flex items-start justify-end shrink-0 gap-2">
+          <div className="pt-1">
+            <DeliveryLocationChip />
+          </div>
           <DesktopHeaderAction href="/vendor" label="Vendor Account" wide>
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path
@@ -476,6 +493,13 @@ export function Header() {
                 </button>
                 {citiesOpen && (
                   <div className="mt-1 ml-2 border-l-2 border-slate-100 pl-2 space-y-1">
+                    <Link
+                      href="/locations"
+                      onClick={closeMenu}
+                      className="block rounded-lg px-4 py-2.5 text-sm font-semibold text-nav hover:bg-blue-50"
+                    >
+                      All locations
+                    </Link>
                     {cityLinks.map((c) => (
                       <Link
                         key={c.slug}

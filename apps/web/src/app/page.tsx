@@ -6,7 +6,7 @@ import { HomeHero } from "@/components/HomeHero";
 import { HomeBrandTaglines } from "@/components/HomeBrandTaglines";
 import { GoogleReviews } from "@/components/GoogleReviews";
 import { getGoogleReviews } from "@/lib/google-reviews";
-import { HomeProductCard } from "@/components/HomeProductCard";
+import { HomeProductList } from "@/components/HomeProductList";
 import { FastSellingSection } from "@/components/FastSellingSection";
 import { TrustStrip } from "@/components/TrustStrip";
 import { WhyTrustUsSection } from "@/components/WhyTrustUsSection";
@@ -143,13 +143,7 @@ export default async function HomePage() {
               View all
             </Link>
           </div>
-          <ul className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 list-none p-0 m-0">
-            {bestsellers.map((product) => (
-              <li key={product.slug}>
-                <HomeProductCard product={product} />
-              </li>
-            ))}
-          </ul>
+          <HomeProductList products={bestsellers} />
         </section>
       )}
 
@@ -171,13 +165,7 @@ export default async function HomePage() {
                   Shop {section.name}
                 </Link>
               </div>
-              <ul className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 list-none p-0 m-0">
-                {section.products.slice(0, 8).map((product) => (
-                  <li key={product.slug}>
-                    <HomeProductCard product={product} />
-                  </li>
-                ))}
-              </ul>
+              <HomeProductList products={section.products} limit={8} />
             </section>
           )
       )}

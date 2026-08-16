@@ -36,6 +36,11 @@ export default function DeliveryLocationsPage() {
       <p className="text-slate-600 max-w-3xl mb-8 leading-relaxed">
         Delivering to all 50 states, DC and Puerto Rico. Open a state hub for city pages, cut-offs,
         and local FAQs. Same-day options appear only where coverage and the local clock allow.
+        Ordering from Canada, Australia, the UK, or Europe? Start at the{" "}
+        <Link href="/locations" className="text-nav hover:underline">
+          international locations hub
+        </Link>
+        .
       </p>
 
       <div className="space-y-8">

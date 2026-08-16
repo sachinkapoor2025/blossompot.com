@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { classifyUserAgent } from "@/lib/crawler-policy";
 
 /**
  * Edge 301: apex → www.
@@ -15,7 +16,14 @@ export function middleware(request: NextRequest) {
     );
     return NextResponse.redirect(dest, 301);
   }
-  return NextResponse.next();
+
+  const response = NextResponse.next();
+  const classified = classifyUserAgent(request.headers.get("user-agent"));
+  response.headers.set("x-blossompot-bot-class", classified.class);
+  if (classified.crawlerId) {
+    response.headers.set("x-blossompot-crawler", classified.crawlerId);
+  }
+  return response;
 }
 
 export const config = {

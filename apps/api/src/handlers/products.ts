@@ -18,6 +18,7 @@ import {
 } from "@blossompot/shared";
 import { docClient, PRODUCTS_TABLE, now, slugify } from "../lib/db";
 import { ok, okCached, created, badRequest, notFound, forbidden } from "../lib/response";
+import { evaluateProductsForLocation, parseLocationQuery } from "./serviceability";
 import { getAuth, requireAdmin } from "../lib/auth";
 import { withResolvedProductImages, resolveProductImageUrl } from "../lib/images";
 import { syncInventoryAlertState } from "../lib/inventory";
@@ -168,9 +169,18 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
     );
   }
 
+  const location = parseLocationQuery(event);
+  let products = items.map(forStorefront);
+  if (location) {
+    const evals = await evaluateProductsForLocation(items, location);
+    const deliverable = new Set(evals.filter((e) => e.deliverable).map((e) => e.slug));
+    products = products.filter((p) => deliverable.has(p.slug));
+    return ok({ products, location, filtered: true });
+  }
+
   // Short CDN TTL only — listing + PDP must not drift for minutes after price edits.
-  if (search) return ok({ products: items.map(forStorefront) });
-  return okCached({ products: items.map(forStorefront) }, 10);
+  if (search) return ok({ products });
+  return okCached({ products }, 10);
 }
 
 export async function getProduct(event: APIGatewayProxyEventV2) {
@@ -180,6 +190,18 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
   const nowMs = Date.now();
   const cached = productGetCache.get(slug);
   if (cached && nowMs - cached.at < PRODUCT_GET_CACHE_TTL_MS) {
+    const location = parseLocationQuery(event);
+    if (location) {
+      const [evalRow] = await evaluateProductsForLocation([cached.product], location);
+      return ok({
+        product: forStorefront(cached.product),
+        availability: {
+          deliverable: Boolean(evalRow?.deliverable),
+          reason: evalRow?.reason,
+          location,
+        },
+      });
+    }
     return okCached({ product: forStorefront(cached.product) }, 30);
   }
 
@@ -206,6 +228,18 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
   // Sample / non-indexable SKUs stay out of the public storefront until converted or enabled.
   if (!isProductSearchIndexable(product)) return notFound("Product not found");
   productGetCache.set(slug, { at: nowMs, product });
+  const location = parseLocationQuery(event);
+  if (location) {
+    const [evalRow] = await evaluateProductsForLocation([product], location);
+    return ok({
+      product: forStorefront(product),
+      availability: {
+        deliverable: Boolean(evalRow?.deliverable),
+        reason: evalRow?.reason,
+        location,
+      },
+    });
+  }
   return okCached({ product: forStorefront(product) }, 10);
 }
 

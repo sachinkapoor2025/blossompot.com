@@ -6,6 +6,7 @@ import { getOrCreateSessionId, useSessionId } from "./session";
 import { useAuth } from "./auth-context";
 import { trackCartAdd, trackCartRemove } from "./track";
 import { cartAddonSignature, type Cart, type ProductAddonSelection } from "@blossompot/shared";
+import { DELIVERY_LOCATION_EVENT, locationQueryString, readDeliveryLocation } from "./delivery-location";
 
 interface CartContextValue {
   cart: Cart | null;
@@ -50,7 +51,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (!sid) return;
     setLoading(true);
     try {
-      const data = await api<{ cart: Cart }>("/cart", { sessionId: sid, token });
+      const loc = readDeliveryLocation();
+      const data = await api<{ cart: Cart }>(`/cart${locationQueryString(loc)}`, { sessionId: sid, token });
       setCart(normalizeCart(data.cart));
     } catch {
       setCart({ items: [], updatedAt: new Date().toISOString() });
@@ -62,6 +64,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (sessionId) refresh();
   }, [sessionId, refresh]);
+
+  useEffect(() => {
+    const onLocation = () => {
+      void refresh();
+    };
+    window.addEventListener(DELIVERY_LOCATION_EVENT, onLocation);
+    return () => window.removeEventListener(DELIVERY_LOCATION_EVENT, onLocation);
+  }, [refresh]);
 
   const addItem = async (
     productSlug: string,
@@ -83,6 +93,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
         ...(contact?.email ? { email: contact.email } : {}),
         ...(contact?.phone ? { phone: contact.phone } : {}),
         ...(addons?.length ? { addons } : {}),
+        ...(() => {
+          const loc = readDeliveryLocation();
+          return loc
+            ? { deliveryCountry: loc.countryCode, deliveryPostal: loc.postalCode }
+            : {};
+        })(),
       }),
     });
     setCart(normalizeCart(data.cart));

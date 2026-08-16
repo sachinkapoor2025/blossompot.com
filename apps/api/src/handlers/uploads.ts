@@ -74,7 +74,15 @@ export async function getUploadUrl(event: APIGatewayProxyEventV2) {
 
   if (!filename) return badRequest("filename required");
 
-  const ext = path.extname(filename) || ".jpg";
+  const ALLOWED_EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif"]);
+  const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+  const ext = (path.extname(filename) || "").toLowerCase();
+  if (!ALLOWED_EXT.has(ext)) {
+    return badRequest("Only jpg, png, webp, and gif uploads are allowed");
+  }
+  if (!ALLOWED_MIME.has(contentType.toLowerCase())) {
+    return badRequest("Unsupported image content type");
+  }
   const prefix =
     folder === "blog"
       ? "blog"

@@ -20,6 +20,8 @@ import {
 import { docClient, CARTS_TABLE, PRODUCTS_TABLE, now, ttlInDays } from "../lib/db";
 import { ok, badRequest, unauthorized } from "../lib/response";
 import { getUserOrSessionKey, getSessionId } from "../lib/auth";
+import { evaluateProductsForLocation } from "./serviceability";
+import { formatPostalDisplay } from "@blossompot/shared";
 import { resolveProductImageUrl } from "../lib/images";
 import { upsertSessionProfile } from "../lib/customer-profile";
 import { ensureOrangeCountyProductInDb } from "../lib/orange-county-catalog";
@@ -94,6 +96,29 @@ export async function getCartHandler(event: APIGatewayProxyEventV2) {
   if ((raw.items ?? []).some((i) => !i.lineId)) {
     await saveCart(userKey, { ...raw, items }, getSessionId(event));
   }
+  const country = event.queryStringParameters?.country ?? event.queryStringParameters?.countryCode;
+  const postal = event.queryStringParameters?.postalCode ?? event.queryStringParameters?.zip;
+  if (country && postal && items.length) {
+    const evals = await evaluateProductsForLocation(
+      items.map((i) => ({ slug: i.productSlug, vendorSlug: i.vendorSlug })),
+      { countryCode: country, postalCode: postal }
+    );
+    const bySlug = new Map(evals.map((e) => [e.slug, e]));
+    const flagged = items.map((item) => {
+      const ev = bySlug.get(item.productSlug);
+      return ev && !ev.deliverable
+        ? {
+            ...item,
+            unavailableForLocation: true,
+            unavailableReason: `No longer available for delivery to ${formatPostalDisplay(country, postal)}.`,
+          }
+        : item;
+    });
+    return ok({
+      cart: { items: flagged, updatedAt: raw.updatedAt ?? now() },
+      locationRevalidated: true,
+    });
+  }
   return ok({ cart: { items, updatedAt: raw.updatedAt ?? now() } });
 }
 
@@ -149,6 +174,27 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
 
   if (isFlashComboProduct(product.slug) && !isFlashComboSaleActive()) {
     return badRequest("This 24-hour flash offer has ended");
+  }
+
+  if (parsed.data.deliveryCountry && parsed.data.deliveryPostal) {
+    const [row] = await evaluateProductsForLocation(
+      [
+        {
+          slug: product.slug,
+          vendorSlug: product.vendorSlug,
+          inventory: product.inventory,
+        },
+      ],
+      { countryCode: parsed.data.deliveryCountry, postalCode: parsed.data.deliveryPostal }
+    );
+    if (row && !row.deliverable) {
+      return badRequest(
+        `This product is currently not available for delivery to ${formatPostalDisplay(
+          parsed.data.deliveryCountry,
+          parsed.data.deliveryPostal
+        )}.`
+      );
+    }
   }
 
   const requestedAddons = parsed.data.addons ?? [];

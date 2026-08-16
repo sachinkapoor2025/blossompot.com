@@ -14,6 +14,7 @@ Technical foundation for Google, Bing, and AI crawlers. **This does not guarante
 2. Submit sitemaps:
    - `https://www.blossompot.com/sitemap.xml`
    - `https://www.blossompot.com/sitemap-geo.xml`
+   - `https://www.blossompot.com/sitemap-locations.xml`
 3. Confirm `https://www.blossompot.com/robots.txt` allows `/` and lists those sitemaps.
 4. Monitor: Coverage / Pages, Product rich results, Core Web Vitals, Mobile usability.
 5. Do **not** request indexing for `/admin`, `/vendor`, `/cart`, `/checkout`, `/account`.
@@ -39,6 +40,9 @@ Technical foundation for Google, Bing, and AI crawlers. **This does not guarante
 
 ```bash
 npm run audit:seo
+npm run audit:seo-tech
+npm run audit:crawlers
+npm run assert:international-geo
 AUDIT_SEO_BASE=https://www.blossompot.com npm run audit:seo
 ```
 

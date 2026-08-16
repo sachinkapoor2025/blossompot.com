@@ -89,6 +89,7 @@ export const homeSeoContent = {
       { label: "Gifts to Pennsylvania", href: locationPublicPath("pennsylvania") },
       { label: "Gifts to Georgia", href: locationPublicPath("georgia") },
       { label: "All delivery locations", href: "/delivery-locations" },
+      { label: "International locations", href: "/locations" },
     ],
   },
   faqs: {

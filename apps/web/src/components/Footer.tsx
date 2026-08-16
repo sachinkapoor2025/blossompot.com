@@ -131,8 +131,13 @@ export function Footer() {
                 </li>
               ))}
               <li className="col-span-2 sm:col-span-3">
+                <Link href="/locations" className="hover:text-white hover:underline font-medium">
+                  International locations →
+                </Link>
+              </li>
+              <li className="col-span-2 sm:col-span-3">
                 <Link href="/delivery-locations" className="hover:text-white hover:underline font-medium">
-                  All delivery locations →
+                  All USA delivery locations →
                 </Link>
               </li>
             </ul>

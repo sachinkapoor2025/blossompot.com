@@ -174,6 +174,14 @@ export const marketplaceVendorKeys = {
   agreementSk: () => "META" as const,
 };
 
+/** Vendor delivery coverage rules (config table). */
+export const vendorCoverageKeys = {
+  pk: (vendorSlug: string) => `VCOV#${vendorSlug}`,
+  metaSk: () => "META" as const,
+  areaSk: (areaId: string) => `SAREA#${areaId}`,
+  areaPrefix: () => "SAREA#" as const,
+};
+
 // ---- email campaigns table (SES bulk marketing) ----
 export const sesEmailKeys = {
   campaignPk: (campaignId: string) => `CAMPAIGN#${campaignId}`,

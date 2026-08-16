@@ -51,7 +51,11 @@ export default function ShippingPage() {
         <p>
           Customers in India, the United Kingdom, Canada, Australia, and worldwide can order on {site.domain}.
           Enter your recipient&apos;s <strong>US delivery address</strong> at checkout — we fulfill for
-          delivery inside America.
+          delivery inside America. Country guides:{" "}
+          <Link href="/locations" className="text-nav hover:underline">
+            locations hub
+          </Link>
+          .
         </p>
         <h2 className="text-xl font-bold text-primary">Packaging</h2>
         <p>

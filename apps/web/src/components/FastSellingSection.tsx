@@ -1,7 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import type { Product } from "@blossompot/shared";
 import { FAST_SELLING_THRESHOLD, isFastSelling, sortByUnitsSold } from "@blossompot/shared";
 import { HomeProductCard } from "@/components/HomeProductCard";
+import { LocationEmptyHint, useLocationFilteredProducts } from "@/components/LocationFilteredProducts";
 
 type FastSellingSectionProps = {
   products: Product[];
@@ -11,6 +14,7 @@ type FastSellingSectionProps = {
 
 export function FastSellingSection({ products, limit = 10 }: FastSellingSectionProps) {
   const fastSelling = products.filter(isFastSelling).sort(sortByUnitsSold).slice(0, limit);
+  const visible = useLocationFilteredProducts(fastSelling);
 
   if (fastSelling.length === 0) return null;
 
@@ -30,11 +34,15 @@ export function FastSellingSection({ products, limit = 10 }: FastSellingSectionP
             Shop all →
           </Link>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-stretch">
-          {fastSelling.map((p) => (
-            <HomeProductCard key={p.slug} product={p} showFastSellingBadge />
-          ))}
-        </div>
+        {visible.emptyBecauseLocation ? (
+          <LocationEmptyHint />
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-stretch">
+            {visible.products.map((p) => (
+              <HomeProductCard key={p.slug} product={p} showFastSellingBadge />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

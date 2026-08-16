@@ -29,6 +29,9 @@ export const cartItemSchema = z.object({
   couponExcluded: z.boolean().optional(),
   /** Optional BlossomPot dry-fruit / chocolate extras on this line. */
   addons: z.array(cartItemAddonSchema).max(20).optional(),
+  /** Set by GET /cart when the current delivery location cannot fulfill this line. */
+  unavailableForLocation: z.boolean().optional(),
+  unavailableReason: z.string().optional(),
 });
 
 const addToCartAddonSchema = z.union([
@@ -50,6 +53,9 @@ export const addToCartSchema = z.object({
    * Plain string ids still accepted (= quantity 1).
    */
   addons: z.array(addToCartAddonSchema).max(20).optional(),
+  /** Optional delivery location for server-side serviceability (country + postal only). */
+  deliveryCountry: z.string().trim().min(2).max(2).optional(),
+  deliveryPostal: z.string().trim().min(2).max(16).optional(),
 });
 
 export const cartSchema = z.object({

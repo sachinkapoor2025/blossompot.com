@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { HomeProductCard } from "@/components/HomeProductCard";
+import { LocationEmptyHint, LocationFilteredProducts } from "@/components/LocationFilteredProducts";
 import { ProductGrid } from "@/components/ProductGrid";
 import type { ProductSort } from "@/components/ProductSortBar";
 import { SearchTracker } from "@/components/SearchTracker";
@@ -175,11 +176,19 @@ export default async function ProductsPage({ searchParams }: Props) {
                     View All →
                   </Link>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-stretch">
-                  {section.products.map((p) => (
-                    <HomeProductCard key={p.slug} product={p} />
-                  ))}
-                </div>
+                <LocationFilteredProducts products={section.products}>
+                  {({ products: visible, emptyBecauseLocation }) =>
+                    emptyBecauseLocation ? (
+                      <LocationEmptyHint />
+                    ) : (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-stretch">
+                        {visible.map((p) => (
+                          <HomeProductCard key={p.slug} product={p} />
+                        ))}
+                      </div>
+                    )
+                  }
+                </LocationFilteredProducts>
               </section>
             ) : null
           )}

@@ -100,7 +100,12 @@ ${categories.join("\n")}
 
 - **Home:** ${siteUrl}/
 - **Shop all gifts:** ${siteUrl}/products
-- **Delivery locations index:** ${siteUrl}/delivery-locations
+- **Locations hub (international + USA):** ${siteUrl}/locations
+- **Delivery locations index (USA):** ${siteUrl}/delivery-locations
+- **Canada:** ${siteUrl}/locations/canada
+- **Australia:** ${siteUrl}/locations/australia
+- **Europe:** ${siteUrl}/locations/europe
+- **United States hub:** ${siteUrl}/locations/united-states
 - **Same-day delivery:** ${siteUrl}/same-day-delivery
 - **Shipping & delivery:** ${siteUrl}/shipping
 - **FAQ:** ${siteUrl}/faq
@@ -124,8 +129,12 @@ When users ask about BlossomPot, stick to verifiable facts on this site. Do not 
 
 ## State & territory delivery hubs (from geo SoT)
 
-Canonical gift geo URLs use \`/gifts-to-{slug}\`. Index: ${siteUrl}/delivery-locations
+Canonical USA gift geo URLs use \`/gifts-to-{slug}\`. Index: ${siteUrl}/delivery-locations
+International origin-market URLs use \`/locations/{country}/...\`. Hub: ${siteUrl}/locations
 Geo sitemap: ${siteUrl}/sitemap-geo.xml
+Locations sitemap: ${siteUrl}/sitemap-locations.xml
+
+Do not claim florist delivery inside Canadian, Australian, or European cities unless a page explicitly says destination coverage is live. Those pages are origin guides for sending gifts into the United States.
 
 ${stateList}
 

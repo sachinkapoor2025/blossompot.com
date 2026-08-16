@@ -214,6 +214,12 @@ export default function AdminMarketplaceVendorsPage() {
                     <p className="text-xs text-slate-500">
                       {v.city}, {v.state} {v.zip} · {v.businessType} · {v.status}
                     </p>
+                    <a
+                      href={`/admin/service-areas?vendor=${encodeURIComponent(v.vendorSlug)}`}
+                      className="text-xs text-nav underline"
+                    >
+                      Service areas
+                    </a>
                   </div>
                   <div className="flex flex-col gap-2 items-end">
                     <input

@@ -9,6 +9,7 @@ import { FastSellingBadge } from "@/components/FastSellingBadge";
 import { ProductImageRotator } from "@/components/ProductImageRotator";
 import { useCurrency } from "@/lib/currency-context";
 import { getDiscountPercent } from "@/lib/pricing";
+import { useOptionalDeliveryLocation } from "@/lib/delivery-location-context";
 
 export function HomeProductCard({
   product,
@@ -18,6 +19,7 @@ export function HomeProductCard({
   showFastSellingBadge?: boolean;
 }) {
   const { format } = useCurrency();
+  const delivery = useOptionalDeliveryLocation();
   const discount = getDiscountPercent(product.price, product.compareAtPrice);
   const fastSelling = showFastSellingBadge || isFastSelling(product);
 
@@ -62,6 +64,11 @@ export function HomeProductCard({
         </div>
       </Link>
       <div className="mt-auto px-3 pb-3">
+        {delivery?.location ? (
+          <p className="text-[11px] text-green-700 mb-1">✓ Available for {delivery.location.postalDisplay}</p>
+        ) : (
+          <p className="text-[11px] text-slate-500 mb-1">Check delivery</p>
+        )}
         <AddToCartControl productSlug={product.slug} disabled={product.inventory <= 0} />
       </div>
     </div>

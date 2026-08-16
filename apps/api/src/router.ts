@@ -1,5 +1,6 @@
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
-import { ok, notFound, corsPreflight } from "./lib/response";
+import { ok, notFound, corsPreflight, json } from "./lib/response";
+import { allowRequest, clientIp, limitForPath } from "./lib/rate-limit";
 import * as products from "./handlers/products";
 import * as categories from "./handlers/categories";
 import * as cart from "./handlers/cart";
@@ -27,6 +28,7 @@ import * as paymentLedger from "./handlers/payment-ledger";
 import * as paymentReconciliation from "./handlers/payment-reconciliation";
 import * as vendorManagement from "./handlers/vendor-management";
 import * as marketplaceVendors from "./handlers/marketplace-vendors";
+import * as serviceability from "./handlers/serviceability";
 import * as reviews from "./handlers/reviews";
 import { stripeWebhook } from "./handlers/payments/stripe";
 import {
@@ -160,6 +162,40 @@ const routes: Route[] = [
   // Marketplace vendor partners (signup, portal, admin review)
   { method: "GET", pattern: /^\/marketplace\/vendor-agreement$/, handler: marketplaceVendors.getVendorAgreement },
   { method: "GET", pattern: /^\/marketplace\/coverage$/, handler: marketplaceVendors.marketplaceCoverageByZip },
+  { method: "GET", pattern: /^\/location\/check-serviceability$/, handler: serviceability.checkServiceability },
+  { method: "POST", pattern: /^\/location\/check-serviceability$/, handler: serviceability.checkServiceability },
+  {
+    method: "GET",
+    pattern: /^\/admin\/vendors\/([^/]+)\/service-areas$/,
+    handler: serviceability.adminListServiceAreas,
+    params: ["vendorSlug"],
+  },
+  {
+    method: "POST",
+    pattern: /^\/admin\/vendors\/([^/]+)\/service-areas$/,
+    handler: serviceability.adminCreateServiceArea,
+    params: ["vendorSlug"],
+  },
+  {
+    method: "PUT",
+    pattern: /^\/admin\/vendors\/([^/]+)\/service-areas\/([^/]+)$/,
+    handler: serviceability.adminUpdateServiceArea,
+    params: ["vendorSlug", "areaId"],
+  },
+  {
+    method: "DELETE",
+    pattern: /^\/admin\/vendors\/([^/]+)\/service-areas\/([^/]+)$/,
+    handler: serviceability.adminDeleteServiceArea,
+    params: ["vendorSlug", "areaId"],
+  },
+  {
+    method: "POST",
+    pattern: /^\/admin\/vendors\/([^/]+)\/service-areas\/import$/,
+    handler: serviceability.adminImportServiceAreas,
+    params: ["vendorSlug"],
+  },
+  { method: "POST", pattern: /^\/admin\/serviceability\/test$/, handler: serviceability.adminTestServiceability },
+  { method: "GET", pattern: /^\/admin\/serviceability\/summary$/, handler: serviceability.adminCoverageSummary },
   { method: "POST", pattern: /^\/marketplace\/vendors\/apply$/, handler: marketplaceVendors.applyMarketplaceVendor },
   { method: "POST", pattern: /^\/marketplace\/vendors\/login$/, handler: marketplaceVendors.vendorLogin },
   { method: "POST", pattern: /^\/marketplace\/vendors\/logout$/, handler: marketplaceVendors.vendorLogout },
@@ -385,6 +421,15 @@ export async function route(event: APIGatewayProxyEventV2): Promise<APIGatewayPr
         params[name] = match[i + 1];
       });
       event.pathParameters = { ...event.pathParameters, ...params };
+    }
+
+    const limit = limitForPath(method, path);
+    if (limit) {
+      const ip = clientIp(event);
+      const key = `${limit.cls}:${ip}:${path.split("/")[1] ?? "root"}`;
+      if (!allowRequest(key, limit.limit, limit.windowMs)) {
+        return json(429, { error: "Too many requests" }, { "Retry-After": "60" });
+      }
     }
 
     return routeDef.handler(event);

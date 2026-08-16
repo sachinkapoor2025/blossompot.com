@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { useCart } from "@/lib/cart-context";
+import { useDeliveryLocation } from "@/lib/delivery-location-context";
 import { useAuth, useApiClient } from "@/lib/auth-context";
 import { useCurrency, type DisplayCurrency } from "@/lib/currency-context";
 import { useSessionId, useDebouncedLeadCapture, useLeadCapture } from "@/lib/session";
@@ -75,6 +76,8 @@ function CheckoutPageInner() {
   const searchParams = useSearchParams();
   const retryOrderId = searchParams.get("orderId");
   const { cart, loading: cartLoading, refresh } = useCart();
+  const delivery = useDeliveryLocation();
+  const locationBlocked = (cart?.items ?? []).some((item) => item.unavailableForLocation);
   const { user, token } = useAuth();
   const { format, displayCurrency, convert, usdInrRate } = useCurrency();
   const sessionId = useSessionId();
@@ -377,6 +380,15 @@ function CheckoutPageInner() {
     void prefill();
   }, [user, token, sessionId]);
 
+  useEffect(() => {
+    if (!delivery.location || delivery.location.countryCode !== "US") return;
+    setAddress((current) =>
+      current.postalCode
+        ? current
+        : { ...current, postalCode: delivery.location!.postalDisplay, country: "US" }
+    );
+  }, [delivery.location]);
+
   const captureField = (field: string, value: string) => {
     const a = addressRef.current;
     captureLeadDebounced({
@@ -556,6 +568,11 @@ function CheckoutPageInner() {
     setError("");
 
     try {
+      if (locationBlocked) {
+        throw new Error(
+          "Some items are not available for your delivery location. Remove them or change location."
+        );
+      }
       if (retryOrder) {
         const data = await api<{
           order: Order;
@@ -1083,6 +1100,14 @@ function CheckoutPageInner() {
               />
             )}
 
+            {locationBlocked ? (
+              <p className="text-sm text-amber-900 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+                Some cart items cannot be delivered to your selected location.{" "}
+                <button type="button" onClick={delivery.openSelector} className="font-semibold underline">
+                  Change location
+                </button>
+              </p>
+            ) : null}
             {error && <p className="text-red-500 text-sm">{error}</p>}
 
             {stripeCheckout && paymentMethod === "stripe" && (
@@ -1112,7 +1137,7 @@ function CheckoutPageInner() {
                 ) : (
                   <button
                     type="submit"
-                    disabled={loading || (paymentMethod === "razorpay" && !razorpayReady)}
+                    disabled={loading || locationBlocked || (paymentMethod === "razorpay" && !razorpayReady)}
                     className="w-full rounded-md bg-primary text-white font-bold text-sm uppercase tracking-wide py-3.5 hover:bg-primary/90 transition disabled:opacity-50"
                   >
                     {loading

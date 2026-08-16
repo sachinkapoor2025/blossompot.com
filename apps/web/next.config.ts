@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 import { categoryRedirectRules, categoryRewriteRules } from "./src/lib/category-urls";
 import { legacyRedirectRules } from "./src/lib/legacy-urls";
+import { STOREFRONT_CSP, STOREFRONT_SECURITY_HEADERS } from "./src/lib/security-headers";
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@blossompot/shared"],
@@ -56,6 +57,17 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [{ protocol: "https", hostname: "**" }],
+  },
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          ...STOREFRONT_SECURITY_HEADERS,
+          { key: "Content-Security-Policy-Report-Only", value: STOREFRONT_CSP },
+        ],
+      },
+    ];
   },
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,

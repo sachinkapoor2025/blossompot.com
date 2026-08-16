@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { HomeProductCard } from "@/components/HomeProductCard";
+import { HomeProductList } from "@/components/HomeProductList";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
 import {
@@ -81,11 +81,10 @@ export default async function CollectionPage({ params }: Props) {
           </Link>
         </p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-stretch">
-          {filtered.map((product) => (
-            <HomeProductCard key={product.slug} product={product} />
-          ))}
-        </div>
+        <HomeProductList
+          products={filtered}
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-stretch list-none p-0 m-0"
+        />
       )}
     </div>
   );

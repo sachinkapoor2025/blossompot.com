@@ -28,7 +28,10 @@ import {
   type OrderStatusHistoryEntry,
   type CartItem,
   type VendorFulfillment,
+  formatPostalDisplay,
+  fulfillmentVendorSlug,
 } from "@blossompot/shared";
+import { evaluateProductsForLocation } from "./serviceability";
 import { resolveCheckoutUsdInrRate } from "../lib/exchange-rate";
 import { docClient, ORDERS_TABLE, CUSTOMERS_TABLE, now } from "../lib/db";
 import { ok, created, badRequest, unauthorized, forbidden, notFound } from "../lib/response";
@@ -237,6 +240,21 @@ export async function checkout(event: APIGatewayProxyEventV2) {
   const stockError = await validateOrderInventory(orderItems);
   if (stockError) return badRequest(stockError);
 
+  const destCountry = (parsed.data.shippingAddress.country ?? "US").trim().toUpperCase();
+  const destPostal = (parsed.data.shippingAddress.postalCode ?? "").trim();
+  if (!destPostal) return badRequest("A delivery postal / ZIP code is required");
+
+  const serviceabilityRows = await evaluateProductsForLocation(
+    orderItems.map((i) => ({ slug: i.productSlug, vendorSlug: i.vendorSlug })),
+    { countryCode: destCountry, postalCode: destPostal }
+  );
+  const blocked = serviceabilityRows.find((row) => !row.deliverable);
+  if (blocked) {
+    return badRequest(
+      `This product is currently not available for delivery to ${formatPostalDisplay(destCountry, destPostal)}.`
+    );
+  }
+
   const subtotal = cartSubtotal(orderItems);
   const checkoutShipments =
     parsed.data.shipments?.length
@@ -376,6 +394,17 @@ export async function checkout(event: APIGatewayProxyEventV2) {
     status: ORDER_STATUS.PENDING_PAYMENT,
     statusHistory: [{ status: ORDER_STATUS.PENDING_PAYMENT, at: timestamp }],
     shippingAddress: orderShipments[0]?.shippingAddress ?? parsed.data.shippingAddress,
+    deliverySnapshot: {
+      countryCode: destCountry,
+      postalCode: destPostal,
+      checkedAt: timestamp,
+      vendors: serviceabilityRows.map((row) => ({
+        vendorSlug: fulfillmentVendorSlug({ vendorSlug: row.vendorSlug }),
+        serviceable: row.deliverable,
+        matchedRuleId: row.matchedRule?.areaId,
+        matchedScope: row.matchedRule?.scope,
+      })),
+    },
     shipments: orderShipments,
     ...(preferredDeliveryDate
       ? { estimatedDeliveryAt: preferredDeliveryDateToIso(preferredDeliveryDate) }
