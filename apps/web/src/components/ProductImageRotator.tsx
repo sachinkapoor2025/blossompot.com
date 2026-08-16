@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { resolveImageUrl } from "@/lib/images";
+import { site } from "@/lib/site";
 import {
   selectDisplayableProductImages,
   type SizedProductImage,
@@ -103,10 +104,13 @@ export function ProductImageRotator({
     return () => window.clearInterval(id);
   }, [urls, paused, visible, staggerKey]);
 
+  const frames = urls.length > 0 ? urls : resolved.length > 0 ? resolved : [site.logoSrc];
+
   if (resolved.length === 0) {
     return (
-      <div className={`flex items-center justify-center bg-slate-50 text-slate-400 text-sm ${className}`}>
-        No image
+      <div className={`flex items-center justify-center bg-white ${className}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={site.logoSrc} alt={site.name} className="h-2/3 w-2/3 object-contain p-4" />
       </div>
     );
   }
@@ -118,7 +122,7 @@ export function ProductImageRotator({
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      {urls.map((src, i) => (
+      {frames.map((src, i) => (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           key={`${src}-${i}`}
@@ -132,9 +136,13 @@ export function ProductImageRotator({
           decoding="async"
           width={1200}
           height={1200}
+          onError={(event) => {
+            event.currentTarget.src = site.logoSrc;
+            event.currentTarget.classList.add("object-contain", "bg-white", "p-6");
+          }}
         />
       ))}
-      {urls.length > 1 && (
+      {frames.length > 1 && (
         <div className="absolute bottom-2 left-1/2 z-[1] flex -translate-x-1/2 gap-1" aria-hidden>
           {urls.map((_, i) => (
             <span

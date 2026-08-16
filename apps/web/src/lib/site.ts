@@ -1,4 +1,5 @@
 import { categoryHref } from "./category-urls";
+import { editorialCdnUrl } from "./editorial-cdn";
 
 function digitsOnly(value: string): string {
   return value.replace(/\D/g, "");
@@ -112,7 +113,7 @@ export const usCityLinks = cityLinks.filter(isUsCityNavLink);
 
 export const homeBanners = [
   {
-    src: "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=1600&q=80",
+    src: editorialCdnUrl("home-banner-flowers.jpg"),
     alt: "Premium flower bouquets for USA delivery — BlossomPot",
     href: "/flowers",
     eyebrow: "BLOSSOMPOT · USA GIFTING",
@@ -124,7 +125,7 @@ export const homeBanners = [
     pill: "Same-day options · Premium quality · Trusted gifting",
   },
   {
-    src: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=1600&q=80",
+    src: editorialCdnUrl("home-banner-cakes.jpg"),
     alt: "Celebration cakes delivered across the USA — BlossomPot",
     href: "/cakes",
     eyebrow: "CAKES FOR EVERY OCCASION",
@@ -135,7 +136,7 @@ export const homeBanners = [
     pill: "Birthday · Anniversary · Custom messages",
   },
   {
-    src: "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=1600&q=80",
+    src: editorialCdnUrl("home-banner-hampers.jpg"),
     alt: "Luxury gift hampers — BlossomPot",
     href: "/gift-hampers",
     eyebrow: "CURATED GIFT HAMPERS",
@@ -186,28 +187,28 @@ export const testimonials = [
     name: "Emily",
     rating: 5,
     timeAgo: "3 days ago",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80",
+    image: editorialCdnUrl("testimonial-emily.jpg"),
     text: "I ordered a rose bouquet for my mom in Texas. It arrived fresh, beautifully wrapped, and she called me in tears — in the best way. BlossomPot made Mother's Day effortless.",
   },
   {
     name: "Sarah",
     rating: 5,
     timeAgo: "1 week ago",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80",
+    image: editorialCdnUrl("testimonial-sarah.jpg"),
     text: "The anniversary hamper and cake combo for my husband in New York was perfect. Fast delivery, elegant packaging, and the quality matched the photos.",
   },
   {
     name: "Priya",
     rating: 5,
     timeAgo: "2 weeks ago",
-    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80",
+    image: editorialCdnUrl("testimonial-priya.jpg"),
     text: "Ordered same-day flowers for a friend in California. Checkout was smooth, tracking was clear, and the bouquet looked premium. Will order again for birthdays.",
   },
   {
     name: "Jessica",
     rating: 5,
     timeAgo: "3 weeks ago",
-    image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&q=80",
+    image: editorialCdnUrl("testimonial-jessica.jpg"),
     text: "BlossomPot feels like a real gifting marketplace — great selection of cakes, bouquets, and hampers. Support answered my delivery questions quickly.",
   },
 ] as const;

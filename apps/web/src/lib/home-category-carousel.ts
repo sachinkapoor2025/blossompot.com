@@ -1,5 +1,6 @@
 import type { Category, Product } from "@blossompot/shared";
 import { categoryHref } from "./category-urls";
+import { editorialCdnUrl } from "./editorial-cdn";
 import { pickHomeCategoryProducts } from "./home-category-products";
 import { resolveImageUrl } from "./images";
 
@@ -15,79 +16,79 @@ const TILES: { slug: string; label: string; fallback: string; alt: string }[] = 
   {
     slug: "flowers",
     label: "Flowers",
-    fallback: "https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=480&q=75",
+    fallback: editorialCdnUrl("tile-flowers.jpg"),
     alt: "Fresh mixed flowers",
   },
   {
     slug: "flower-bouquets",
     label: "Bouquets",
-    fallback: "https://images.unsplash.com/photo-1455659817273-f093b0cdc19e?auto=format&fit=crop&w=480&q=75",
+    fallback: editorialCdnUrl("tile-bouquets.jpg"),
     alt: "Hand-tied flower bouquet",
   },
   {
     slug: "birthday-gifts",
     label: "Birthday",
-    fallback: "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=480&q=75",
+    fallback: editorialCdnUrl("tile-birthday.jpg"),
     alt: "Birthday flowers and gifts",
   },
   {
     slug: "anniversary-gifts",
     label: "Anniversary",
-    fallback: "https://images.unsplash.com/photo-1518621012118-4d0d512fdd5b?auto=format&fit=crop&w=480&q=75",
+    fallback: editorialCdnUrl("tile-anniversary.jpg"),
     alt: "Anniversary rose bouquet",
   },
   {
     slug: "valentines-day-gifts",
     label: "Valentine's",
-    fallback: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=480&q=75",
+    fallback: editorialCdnUrl("tile-valentines.jpg"),
     alt: "Valentine's Day roses",
   },
   {
     slug: "mothers-day-gifts",
     label: "Mother's Day",
-    fallback: "https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=480&q=75",
+    fallback: editorialCdnUrl("tile-mothers-day.jpg"),
     alt: "Mother's Day flowers",
   },
   {
     slug: "wedding-gifts",
     label: "Wedding",
-    fallback: "https://images.unsplash.com/photo-1468327768560-75b778cbb551?auto=format&fit=crop&w=480&q=75",
+    fallback: editorialCdnUrl("tile-wedding.jpg"),
     alt: "Wedding flowers",
   },
   {
     slug: "cakes",
     label: "Cakes",
-    fallback: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=480&q=75",
+    fallback: editorialCdnUrl("tile-cakes.jpg"),
     alt: "Celebration cake",
   },
   {
     slug: "gift-hampers",
     label: "Hampers",
-    fallback: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=480&q=75",
+    fallback: editorialCdnUrl("tile-hampers.jpg"),
     alt: "Curated gift hamper",
   },
   {
     slug: "same-day-gifts",
     label: "Same-Day",
-    fallback: "https://images.unsplash.com/photo-1520763185298-1b434c919102?auto=format&fit=crop&w=480&q=75",
+    fallback: editorialCdnUrl("tile-same-day.jpg"),
     alt: "Same-day flower delivery",
   },
   {
     slug: "plants",
     label: "Plants",
-    fallback: "https://images.unsplash.com/photo-1566938064504-a380d867ac89?auto=format&fit=crop&w=480&q=75",
+    fallback: editorialCdnUrl("tile-plants.jpg"),
     alt: "Indoor gift plant",
   },
   {
     slug: "personalized-gifts",
     label: "Personalized",
-    fallback: "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=480&q=75",
+    fallback: editorialCdnUrl("tile-personalized.jpg"),
     alt: "Personalized gift box",
   },
   {
     slug: "celebration-gifts",
     label: "Celebration",
-    fallback: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=480&q=75",
+    fallback: editorialCdnUrl("tile-celebration.jpg"),
     alt: "Celebration gifts",
   },
 ];

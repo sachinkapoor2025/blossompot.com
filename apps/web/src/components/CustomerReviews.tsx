@@ -67,6 +67,10 @@ export function CustomerReviews({ showIntro = true }: CustomerReviewsProps) {
                   fill
                   className="object-cover"
                   sizes="220px"
+                  onError={(event) => {
+                    event.currentTarget.srcset = "";
+                    event.currentTarget.src = "/logo.png";
+                  }}
                 />
               </div>
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SafeStoreImage } from "@/components/SafeStoreImage";
 import type { FlowerDirectoryEntry, FlowerGuide } from "@/lib/content/flower-guide";
 
 type CardFlower = Pick<
@@ -24,13 +25,11 @@ export function FlowerCard({
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-[#eadfd8] bg-white shadow-sm hover:shadow-md transition">
       <div className="relative aspect-[4/3] bg-petal overflow-hidden">
         {image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <SafeStoreImage
             src={image.src}
             alt={image.alt}
             width={image.width}
             height={image.height}
-            loading="lazy"
             className="h-full w-full object-cover group-hover:scale-[1.03] transition duration-500"
           />
         ) : (

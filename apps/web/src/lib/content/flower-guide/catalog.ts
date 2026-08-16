@@ -1,11 +1,19 @@
-import { unsplashImage } from "./images";
+import { hostedFlowerImage, unsplashImage } from "./images";
 import type { FlowerDirectoryEntry } from "./types";
+
+function withDirectoryImage(entry: FlowerDirectoryEntry): FlowerDirectoryEntry {
+  if (entry.image) return entry;
+  return {
+    ...entry,
+    image: hostedFlowerImage(`${entry.slug}.jpg`, `${entry.name} flower`),
+  };
+}
 
 /**
  * Core flower directory. Published guides are expanded in `published/`.
  * Remaining entries stay researching until a reviewed guide exists.
  */
-export const flowerDirectory: FlowerDirectoryEntry[] = [
+const flowerDirectoryRaw: FlowerDirectoryEntry[] = [
   {
     slug: "alstroemeria",
     name: "Alstroemeria",
@@ -1145,6 +1153,8 @@ export const flowerDirectory: FlowerDirectoryEntry[] = [
     status: "researching",
   },
 ];
+
+export const flowerDirectory: FlowerDirectoryEntry[] = flowerDirectoryRaw.map(withDirectoryImage);
 
 export function directoryBySlug(slug: string): FlowerDirectoryEntry | undefined {
   return flowerDirectory.find((f) => f.slug === slug);

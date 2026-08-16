@@ -9,6 +9,7 @@ import { directoryBySlug, featuredFlowerLocations, getPublishedGuide, publicFlow
 import { loadProducts } from "@/lib/product-loader";
 import { productsForFlower } from "@/lib/content/flower-guide/products";
 import { HomeProductCard } from "@/components/HomeProductCard";
+import { SafeStoreImage } from "@/components/SafeStoreImage";
 import { articleJsonLd, breadcrumbJsonLd, faqJsonLd, pageMetadata } from "@/lib/seo";
 import { isFlowerGuideIndexable } from "@blossompot/shared";
 
@@ -104,12 +105,12 @@ export default async function FlowerGuidePage({ params }: Props) {
       <article>
         <div className="relative min-h-[360px] overflow-hidden">
           {hero ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <SafeStoreImage
               src={hero.src}
               alt={hero.alt}
               width={hero.width}
               height={hero.height}
+              loading="eager"
               className="absolute inset-0 h-full w-full object-cover"
             />
           ) : null}

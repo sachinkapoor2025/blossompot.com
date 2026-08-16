@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
+import { SafeStoreImage } from "@/components/SafeStoreImage";
 import type { HomeCategoryTile } from "@/lib/home-category-carousel";
 
 function ArrowIcon({ dir }: { dir: "prev" | "next" }) {
@@ -114,13 +115,11 @@ export function HomeCategoryCarousel({ tiles }: { tiles: HomeCategoryTile[] }) {
               <li key={tile.slug} className="snap-start shrink-0 w-[112px] sm:w-[132px]">
                 <Link href={tile.href} className="group block text-center">
                   <span className="block overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-[#eadfd8] aspect-square">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                    <SafeStoreImage
                       src={tile.image}
                       alt={tile.alt}
                       width={264}
                       height={264}
-                      loading="lazy"
                       className="h-full w-full object-cover group-hover:scale-[1.04] transition duration-300"
                     />
                   </span>

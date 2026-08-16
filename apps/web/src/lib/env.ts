@@ -54,7 +54,7 @@ export function getSiteUrl(): string {
 }
 
 /** Production CDN for product/media images (S3 via CloudFront). */
-export const PROD_CDN_URL = "https://d301af4ndyn9qx.cloudfront.net";
+export const PROD_CDN_URL = "https://d2d01h4hac5hqs.cloudfront.net";
 
 /** CloudFront base for product/media images. */
 export function getCdnUrl(): string {

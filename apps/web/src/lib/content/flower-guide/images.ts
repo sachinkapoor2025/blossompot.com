@@ -1,10 +1,38 @@
+import { cdnUploadUrl } from "@blossompot/shared";
 import type { FlowerImage } from "./types";
 
-/** Unsplash License: free to use, including commercially. Attribution stored for transparency. */
-const UNSPLASH = "Unsplash License";
+const HOSTED_LICENSE = "Hosted on BlossomPot CDN";
 
+export function flowerGuideCdnUrl(filename: string): string {
+  return cdnUploadUrl(`flower-guide/${filename.replace(/^\/+/, "")}`);
+}
+
+export function hostedFlowerImage(
+  filename: string,
+  alt: string,
+  attribution = "Wikimedia Commons",
+  role: FlowerImage["role"] = "hero",
+  width = 1600,
+  height = 1067
+): FlowerImage {
+  return {
+    src: flowerGuideCdnUrl(filename),
+    alt,
+    width,
+    height,
+    filename,
+    attribution,
+    license: HOSTED_LICENSE,
+    role,
+  };
+}
+
+/**
+ * Legacy helper kept so published guides stay unchanged.
+ * `photoId` is ignored at render time — images are served from CloudFront.
+ */
 export function unsplashImage(
-  photoId: string,
+  _photoId: string,
   alt: string,
   filename: string,
   photographer: string,
@@ -12,21 +40,11 @@ export function unsplashImage(
   width = 1600,
   height = 1067
 ): FlowerImage {
-  return {
-    src: `https://images.unsplash.com/${photoId}?auto=format&fit=crop&w=${width}&q=75`,
-    alt,
-    width,
-    height,
-    filename,
-    attribution: `${photographer} / Unsplash`,
-    license: UNSPLASH,
-    role,
-  };
+  return hostedFlowerImage(filename, alt, `${photographer} / hosted by BlossomPot`, role, width, height);
 }
 
-export const HUB_HERO = unsplashImage(
-  "photo-1490750967868-88aa4486c946",
-  "Mixed garden flowers in soft daylight",
+export const HUB_HERO = hostedFlowerImage(
   "flower-guide-hero-mixed-blooms.jpg",
-  "Jennifer Loomis"
+  "Mixed garden flowers in soft daylight",
+  "Wikimedia Commons"
 );
