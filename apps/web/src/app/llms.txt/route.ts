@@ -110,6 +110,8 @@ ${categories.join("\n")}
 - **Shipping & delivery:** ${siteUrl}/shipping
 - **FAQ:** ${siteUrl}/faq
 - **Blog:** ${siteUrl}/blog
+- **Flower Knowledge Centre:** ${siteUrl}/flower-guide
+- **Flower A–Z:** ${siteUrl}/flower-guide/flowers-a-z
 - **Contact:** ${siteUrl}/contact
 
 ---

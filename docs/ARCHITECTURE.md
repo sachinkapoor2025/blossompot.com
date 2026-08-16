@@ -269,7 +269,8 @@ Every form blur or debounced keystroke can POST to `/leads`:
 ## SEO
 
 - Next.js `generateMetadata` per product/category page
-- `/sitemap.xml`, `/sitemap-geo.xml`, `/sitemap-locations.xml`, `/robots.txt` dynamic routes
+- `/sitemap.xml`, `/sitemap-geo.xml`, `/sitemap-locations.xml`, `/sitemap-flowers.xml`, `/robots.txt` dynamic routes
+- **Flower Knowledge Centre:** `/flower-guide` — encyclopedia, seasons, occasions, care, comparisons, glossary. Only reviewed/published flower pages are indexable. See `docs/FLOWER-KNOWLEDGE-CENTRE.md`.
 - JSON-LD Product schema on product pages
 - Canonical URLs, Open Graph tags (www host)
 - **Sample products:** `isSampleProduct` + `SAMPLE_PRODUCT_INDEXABLE` (default off) — excluded from public list/sitemap/PDP until real inventory

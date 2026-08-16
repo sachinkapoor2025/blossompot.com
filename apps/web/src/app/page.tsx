@@ -10,7 +10,9 @@ import { HomeProductList } from "@/components/HomeProductList";
 import { FastSellingSection } from "@/components/FastSellingSection";
 import { TrustStrip } from "@/components/TrustStrip";
 import { WhyTrustUsSection } from "@/components/WhyTrustUsSection";
-import { HomeSeoSection } from "@/components/HomeSeoSection";
+import { HomeFlowerGuideCta } from "@/components/flower-guide/HomeFlowerGuideCta";
+import { HomeCategoryCarousel } from "@/components/HomeCategoryCarousel";
+import { buildHomeCategoryTiles } from "@/lib/home-category-carousel";
 import { JsonLd } from "@/components/JsonLd";
 import { site, homeCategoryOrder, faqs, homeBanners } from "@/lib/site";
 import {
@@ -32,17 +34,6 @@ export const metadata: Metadata = pageMetadata({
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
-
-const FEATURED_CATEGORIES = [
-  { slug: "flowers", label: "Flowers", href: "/flowers", blurb: "Roses, tulips & fresh blooms" },
-  { slug: "flower-bouquets", label: "Bouquets", href: "/bouquets", blurb: "Designer arrangements" },
-  { slug: "cakes", label: "Cakes", href: "/cakes", blurb: "Celebration-ready cakes" },
-  { slug: "birthday-gifts", label: "Birthday", href: "/birthday-gifts", blurb: "Hampers & combos" },
-  { slug: "anniversary-gifts", label: "Anniversary", href: "/anniversary-gifts", blurb: "Romantic gifts" },
-  { slug: "gift-hampers", label: "Hampers", href: "/gift-hampers", blurb: "Curated gift boxes" },
-  { slug: "same-day-gifts", label: "Same-Day", href: "/same-day-delivery", blurb: "When it matters today" },
-  { slug: "personalized-gifts", label: "Personalized", href: "/personalized-gifts", blurb: "Add a personal touch" },
-] as const;
 
 export default async function HomePage() {
   let products: Product[] = [];
@@ -91,6 +82,7 @@ export default async function HomePage() {
     .slice(0, 8);
 
   const googleReviews = await getGoogleReviews();
+  const categoryTiles = buildHomeCategoryTiles(products, categories);
 
   return (
     <div>
@@ -99,38 +91,20 @@ export default async function HomePage() {
       <HomeHero banners={[...homeBanners]} />
       <HomeBrandTaglines />
 
-      <section className="max-w-7xl mx-auto px-4 py-10">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-primary">Shop by occasion</h2>
-          <p className="mt-2 text-sm text-slate-600">Flowers, cakes, and gifts for every celebration</p>
-        </div>
-        <ul className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 list-none p-0 m-0">
-          {FEATURED_CATEGORIES.map((c) => (
-            <li key={c.slug}>
-              <Link
-                href={c.href}
-                className="block rounded-2xl border border-[#eadfd8] bg-white p-4 hover:border-nav hover:shadow-md transition"
-              >
-                <p className="font-semibold text-primary">{c.label}</p>
-                <p className="text-xs text-slate-500 mt-1">{c.blurb}</p>
-              </Link>
-            </li>
-          ))}
-        </ul>
-        <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <Link href="/flowers" className="btn-nav">
-            Shop Flowers
-          </Link>
-          <Link href="/same-day-delivery" className="btn-nav bg-primary">
-            Same-Day Delivery
-          </Link>
-          <Link href="/gift-hampers" className="btn-nav">
-            Explore Hampers
-          </Link>
-        </div>
-      </section>
-
+      <HomeCategoryCarousel tiles={categoryTiles} />
       <TrustStrip />
+
+      <div className="max-w-7xl mx-auto px-4 pt-6 pb-2 flex flex-wrap justify-center gap-3">
+        <Link href="/flowers" className="btn-nav">
+          Shop Flowers
+        </Link>
+        <Link href="/same-day-delivery" className="btn-nav bg-primary">
+          Same-Day Delivery
+        </Link>
+        <Link href="/gift-hampers" className="btn-nav">
+          Explore Hampers
+        </Link>
+      </div>
 
       {bestsellers.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 py-10">
@@ -171,6 +145,8 @@ export default async function HomePage() {
       )}
 
       <WhyTrustUsSection />
+
+      <HomeFlowerGuideCta />
 
       <section className="max-w-7xl mx-auto px-4 py-12">
         <div className="rounded-3xl bg-gradient-to-br from-primary via-[#9e2d55] to-accent text-white p-8 sm:p-12 text-center shadow-lg shadow-primary/20">

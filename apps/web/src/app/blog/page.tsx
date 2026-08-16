@@ -21,7 +21,11 @@ export default async function BlogPage() {
       <h1 className="text-3xl font-bold text-primary mb-2">Gifting Guides & Blog</h1>
       <p className="text-slate-600 mb-8">
         Ideas and tips for sending flowers, cakes, and thoughtful gifts across the USA — for birthdays,
-        anniversaries, and everyday celebrations.
+        anniversaries, and everyday celebrations. For deeper flower meanings, seasons and care, visit the{" "}
+        <Link href="/flower-guide" className="text-nav font-semibold hover:underline">
+          Flower Knowledge Centre
+        </Link>
+        .
       </p>
       <div className="grid gap-6 sm:grid-cols-2">
         {posts.map((post) => (

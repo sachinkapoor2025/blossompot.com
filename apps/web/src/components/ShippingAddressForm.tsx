@@ -277,8 +277,8 @@ export function ShippingAddressForm({
               inputClassName="border-slate-300 focus:outline-none focus:ring-2 focus:ring-accent"
             />
             <p className="text-xs text-slate-500 mt-1">
-              India (+91) is selected by default. Country code is for contact; coupons match the
-              mobile number.
+              United States (+1) is selected by default. Country code is for contact; coupons match
+              the mobile number.
             </p>
           </div>
           <LeadCaptureInput

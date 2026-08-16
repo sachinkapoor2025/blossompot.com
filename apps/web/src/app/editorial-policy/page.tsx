@@ -38,9 +38,15 @@ export default function EditorialPolicyPage() {
           <h2 className="text-xl font-bold text-primary mb-2">What we publish</h2>
           <p>
             Editorial pages cover occasions, recipients, delivery expectations, etiquette, and how to
-            shop flowers, cakes, and gifts on {site.name}. Product prices, availability, and delivery
-            windows shown in the catalog are system-driven and can change; narrative pages describe
-            typical patterns and should be read alongside live product and checkout information.
+            shop flowers, cakes, and gifts on {site.name}. The{" "}
+            <Link href="/flower-guide" className="text-nav hover:underline">
+              Flower Knowledge Centre
+            </Link>{" "}
+            publishes encyclopedia guides only after research and review (statuses: draft, researching,
+            reviewed, published, needs update, archived). Only reviewed or published flower pages are
+            indexable. Product prices, availability, and delivery windows shown in the catalog are
+            system-driven and can change; narrative pages describe typical patterns and should be read
+            alongside live product and checkout information.
           </p>
         </section>
 

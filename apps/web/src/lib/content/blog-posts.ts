@@ -26,7 +26,7 @@ export const blogPosts: BlogPost[] = [
       {
         paragraphs: [
           "Fresh flowers look their best when you trim stems, use clean water, and keep arrangements away from direct heat. Whether you received a birthday bouquet or ordered anniversary roses for someone across the USA, a few minutes of care after delivery makes a noticeable difference.",
-          "BlossomPot ships gift-ready arrangements with clear product guidance. Use the steps below as a simple routine for most cut-flower gifts.",
+          "BlossomPot ships gift-ready arrangements with clear product guidance. Use the steps below as a simple routine for most cut-flower gifts. For flower-by-flower notes, see the Flower Knowledge Centre care guides for roses, tulips, lilies and more.",
         ],
       },
       {
@@ -57,7 +57,7 @@ export const blogPosts: BlogPost[] = [
       {
         paragraphs: [
           "Rose color helps set the tone before the recipient even reads your note. Red remains the classic romantic choice, soft pinks feel warm and appreciative, and whites read elegant for congratulations or sympathy.",
-          "When you send flowers across the USA, pick a palette that matches your relationship — not just what photographs well online.",
+          "When you send flowers across the USA, pick a palette that matches your relationship — not just what photographs well online. The full rose encyclopedia covers colour conventions, varieties and seasonal supply in more depth.",
         ],
       },
       {

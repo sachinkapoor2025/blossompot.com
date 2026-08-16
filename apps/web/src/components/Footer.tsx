@@ -107,6 +107,7 @@ export function Footer() {
             <ul className="space-y-2 text-slate-600">
               <li><Link href="/same-day-delivery" className="hover:text-primary hover:underline">Same-Day Delivery</Link></li>
               <li><Link href="/flowers" className="hover:text-primary hover:underline">Send Flowers</Link></li>
+              <li><Link href="/flower-guide" className="hover:text-primary hover:underline">Flower Guide</Link></li>
               <li><Link href="/blog" className="hover:text-primary hover:underline">Blog &amp; Guides</Link></li>
               <li><Link href="/shipping" className="hover:text-primary hover:underline">Shipping &amp; Delivery</Link></li>
               <li><Link href="/faq" className="hover:text-primary hover:underline">FAQ</Link></li>

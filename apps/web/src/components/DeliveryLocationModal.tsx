@@ -99,7 +99,7 @@ export function DeliveryLocationModal() {
             {postalLabel}
             <input
               autoComplete="postal-code"
-              inputMode={countryCode === "US" || countryCode === "AU" || countryCode === "IN" ? "numeric" : "text"}
+              inputMode={["US", "AU", "AE", "DE", "FR", "IT", "ES"].includes(countryCode) ? "numeric" : "text"}
               value={postalCode}
               onChange={(e) => setPostalCode(e.target.value)}
               placeholder={countries.find((c) => c.countryCode === countryCode)?.postalPlaceholder}

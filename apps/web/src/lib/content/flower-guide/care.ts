@@ -1,0 +1,251 @@
+export type CareArticle = {
+  slug: string;
+  title: string;
+  h1: string;
+  seoTitle: string;
+  seoDescription: string;
+  summary: string;
+  steps: string[];
+  notes: string[];
+  relatedFlowers: string[];
+};
+
+export const careArticles: CareArticle[] = [
+  {
+    slug: "how-to-make-cut-flowers-last-longer",
+    title: "How to Make Cut Flowers Last Longer",
+    h1: "How to Make Cut Flowers Last Longer",
+    seoTitle: "How to Make Cut Flowers Last Longer | BlossomPot",
+    seoDescription: "Practical, verified cut-flower care: clean water, recut stems, cool rooms and what actually shortens vase life.",
+    summary: "Most cut flowers last longer when stems are recut, water stays clean, leaves stay out of the vase, and the arrangement sits in a cool place away from fruit and heat.",
+    steps: [
+      "Unwrap and recut 1–2 cm from each stem at an angle with a clean knife or secateurs.",
+      "Strip leaves that would sit below the waterline.",
+      "Fill a clean vase with fresh water. Use the flower-food sachet if one is supplied.",
+      "Change water every one to two days and recut stems if the ends look slimy or sealed.",
+      "Keep the vase away from direct sun, heaters, and ripening fruit (ethylene gas speeds ageing).",
+    ],
+    notes: [
+      "Vase life is a range, not a guarantee. Variety, travel time and room temperature all matter.",
+      "Do not add aspirin, lemonade or coins as a routine — clean water and a clean vase matter more than household myths.",
+    ],
+    relatedFlowers: ["rose", "tulip", "lily", "alstroemeria"],
+  },
+  {
+    slug: "how-often-should-you-change-flower-water",
+    title: "How Often Should You Change Flower Water?",
+    h1: "How Often Should You Change Flower Water?",
+    seoTitle: "How Often to Change Flower Water | BlossomPot",
+    seoDescription: "Change cut-flower water every one to two days, or sooner if it clouds. Why bacteria shorten vase life.",
+    summary: "Change vase water every one to two days, or immediately if it looks cloudy or smells. Bacteria block stems and are the main reason mixed bunches collapse early.",
+    steps: [
+      "Lift the bunch, empty the vase, and wash it with hot water.",
+      "Recut stems before they go back in.",
+      "Refill with fresh water; add flower food if you still have it.",
+    ],
+    notes: ["Thirsty flowers such as hydrangeas and sunflowers may need a top-up between full changes."],
+    relatedFlowers: ["hydrangea", "sunflower", "rose"],
+  },
+  {
+    slug: "how-to-cut-flower-stems",
+    title: "How to Cut Flower Stems",
+    h1: "How to Cut Flower Stems",
+    seoTitle: "How to Cut Flower Stems | BlossomPot",
+    seoDescription: "Cut stems at an angle with clean tools. Why crushing and dirty scissors shorten vase life.",
+    summary: "Use clean, sharp secateurs or a knife. Cut at a slight angle so the stem does not sit flat on the vase floor. Avoid household scissors that crush hollow stems.",
+    steps: [
+      "Wipe the blade clean.",
+      "Cut 1–2 cm off the bottom at an angle.",
+      "Place the stem in water promptly so the cut does not seal in air.",
+    ],
+    notes: ["Woody stems (roses, chrysanthemums) benefit from a fresh cut more than a smash. Splitting stems is optional and not required for most modern cuts."],
+    relatedFlowers: ["rose", "chrysanthemum", "gerbera"],
+  },
+  {
+    slug: "how-to-revive-wilting-flowers",
+    title: "How to Revive Wilting Flowers",
+    h1: "How to Revive Wilting Flowers",
+    seoTitle: "How to Revive Wilting Flowers | BlossomPot",
+    seoDescription: "When recutting and a deep drink revive limp flowers — and when they are simply finished.",
+    summary: "Many limp flowers, especially roses and hydrangeas, recover after a fresh cut and a deep drink in a cool room. If petals are translucent or dropping, the flower is finished.",
+    steps: [
+      "Recut the stem under water if you can.",
+      "Place in a clean vase filled well up the stem.",
+      "Move to a cool room for a few hours.",
+      "For hydrangeas, professional florists sometimes dunk the head briefly; do this gently and only if the stem can still take up water.",
+    ],
+    notes: ["Tulips that flop are often still alive — they may need a taller vase rather than a revival trick."],
+    relatedFlowers: ["rose", "hydrangea", "tulip"],
+  },
+  {
+    slug: "how-to-care-for-roses",
+    title: "How to Care for Roses",
+    h1: "How to Care for Cut Roses",
+    seoTitle: "How to Care for Roses in a Vase | BlossomPot",
+    seoDescription: "Rose vase care: recut stems, clean water, guard petals and cool placement.",
+    summary: "Recut rose stems, remove underwater leaves and guard petals if they are bruised, then keep the vase cool and clean.",
+    steps: [
+      "Recut stems and remove leaves below the waterline.",
+      "Peel only damaged outer guard petals — do not strip the flower.",
+      "Use flower food and change water every one to two days.",
+      "If a head droops, recut and check water freshness before assuming the rose is over.",
+    ],
+    notes: ["Fragrance and vase life vary by cultivar. Garden roses may open faster than tight hybrid teas."],
+    relatedFlowers: ["rose"],
+  },
+  {
+    slug: "how-to-care-for-tulips",
+    title: "How to Care for Tulips",
+    h1: "How to Care for Cut Tulips",
+    seoTitle: "How to Care for Tulips | BlossomPot",
+    seoDescription: "Tulips keep growing in the vase. Cool water, a deep vase and why daffodil sap matters.",
+    summary: "Tulips drink a lot, keep growing, and bend toward light. Use a deep vase, cool water and a cool room.",
+    steps: [
+      "Recut stems and place in a generous amount of cool water.",
+      "Do not mix with freshly cut daffodils unless the daffodils were conditioned separately.",
+      "Rotate the vase if they lean hard toward a window.",
+    ],
+    notes: ["Elongation is normal, not a defect."],
+    relatedFlowers: ["tulip"],
+  },
+  {
+    slug: "how-to-care-for-lilies",
+    title: "How to Care for Lilies",
+    h1: "How to Care for Cut Lilies",
+    seoTitle: "How to Care for Lilies | BlossomPot",
+    seoDescription: "Lily care: let buds open, remove pollen anthers, and keep true lilies away from cats.",
+    summary: "Let lily buds open in clean water, remove anthers to reduce stains, and never leave true lilies where cats can reach them.",
+    steps: [
+      "Recut stems and support the height.",
+      "As each flower opens, pinch off the pollen-bearing anthers.",
+      "Keep the vase away from cats — Lilium can cause kidney failure.",
+    ],
+    notes: ["Oriental lilies are strongly scented; move them out of a small bedroom if the scent is too much."],
+    relatedFlowers: ["lily"],
+  },
+  {
+    slug: "how-to-care-for-orchids",
+    title: "How to Care for Orchids",
+    h1: "How to Care for Orchids",
+    seoTitle: "How to Care for Orchids | BlossomPot",
+    seoDescription: "Moth orchid care without ice-cube myths: light, watering and cut-stem basics.",
+    summary: "Potted moth orchids want bright indirect light and a thorough water when the mix is nearly dry. Ice cubes are not a care method.",
+    steps: [
+      "Place in bright, indirect light — not a hot south-facing sill.",
+      "Water when the potting mix is almost dry; drain fully.",
+      "For cut stems, recut and keep water clean.",
+    ],
+    notes: ["Phalaenopsis is generally listed as non-toxic to cats and dogs; other orchid genera can differ."],
+    relatedFlowers: ["orchid"],
+  },
+  {
+    slug: "how-to-care-for-peonies",
+    title: "How to Care for Peonies",
+    h1: "How to Care for Cut Peonies",
+    seoTitle: "How to Care for Peonies | BlossomPot",
+    seoDescription: "Help peony buds open, then keep heavy heads cool and well hydrated.",
+    summary: "Tight peony buds open in a slightly warmer room; once open, cool air slows them. Give heavy heads space and clean water.",
+    steps: [
+      "Recut stems and use a vase wide enough for opening blooms.",
+      "Change water often — peony foliage sours water.",
+      "Move to a cooler room once they are open if you want extra days.",
+    ],
+    notes: ["Peonies are listed as toxic if eaten by pets."],
+    relatedFlowers: ["peony"],
+  },
+  {
+    slug: "how-to-care-for-hydrangeas",
+    title: "How to Care for Hydrangeas",
+    h1: "How to Care for Cut Hydrangeas",
+    seoTitle: "How to Care for Hydrangeas | BlossomPot",
+    seoDescription: "Hydrangeas wilt from thirst. Recut stems, use deep water, and revive limp heads carefully.",
+    summary: "Cut hydrangeas fail from poor water uptake more than from 'being finished'. Recut and give them a deep, clean drink.",
+    steps: [
+      "Recut stems and place in deep water immediately.",
+      "If limp, recut again and leave in a cool room.",
+      "Keep away from heat vents and direct sun.",
+    ],
+    notes: ["A florist stem will not change colour in the vase the way a garden shrub can in different soil."],
+    relatedFlowers: ["hydrangea"],
+  },
+  {
+    slug: "how-to-keep-flowers-fresh-in-summer",
+    title: "How to Keep Flowers Fresh in Summer",
+    h1: "How to Keep Flowers Fresh in Summer",
+    seoTitle: "How to Keep Flowers Fresh in Summer | BlossomPot",
+    seoDescription: "Summer vase care: more water, cooler rooms, and which flowers suffer most in heat.",
+    summary: "Heat shortens vase life. Use more water, recut on arrival, and keep arrangements out of sun and cars.",
+    steps: [
+      "Get flowers into water quickly after delivery.",
+      "Choose the coolest indoor spot that is still visible.",
+      "Top up thirsty sunflowers and hydrangeas daily.",
+    ],
+    notes: ["Air-conditioning helps if it is not blowing directly on the petals."],
+    relatedFlowers: ["sunflower", "hydrangea", "dahlia", "rose"],
+  },
+  {
+    slug: "how-to-care-for-flowers-during-delivery",
+    title: "How to Care for Flowers During Delivery",
+    h1: "How to Care for Flowers During Delivery",
+    seoTitle: "Flower Care During Delivery | BlossomPot",
+    seoDescription: "What happens to flowers in transit and what to do when a box arrives.",
+    summary: "Flowers travel best when kept cool and upright. When a box arrives, open it, recut stems and hydrate before judging quality.",
+    steps: [
+      "Open the box out of direct sun.",
+      "Recut stems and place in water even if you will arrange later.",
+      "Allow closed buds time to open — especially roses and lilies.",
+    ],
+    notes: ["BlossomPot delivery windows are estimates handled with courier partners. Have someone ready to receive the box on hot or freezing days."],
+    relatedFlowers: ["rose", "orchid", "tulip"],
+  },
+  {
+    slug: "how-to-arrange-flowers-in-a-vase",
+    title: "How to Arrange Flowers in a Vase",
+    h1: "How to Arrange Flowers in a Vase",
+    seoTitle: "How to Arrange Flowers in a Vase | BlossomPot",
+    seoDescription: "A simple home method: clean vase, criss-cross stems, and a focal flower.",
+    summary: "Start with a clean vase about half as tall as the stems. Build a grid with greenery or criss-crossed stems, then add a focal flower and supporting blooms.",
+    steps: [
+      "Fill the vase and add a loose foliage grid.",
+      "Place the largest flowers first, slightly off-centre.",
+      "Fill gaps with medium stems, then airy fillers such as baby's breath.",
+      "Turn the vase as you work so the back is not empty.",
+    ],
+    notes: ["Professional floral foam is optional and not required for a simple home vase. If you use foam, keep it fully saturated and dispose of it responsibly — it is not biodegradable."],
+    relatedFlowers: ["rose", "babys-breath", "lisianthus"],
+  },
+  {
+    slug: "how-to-remove-pollen-from-lilies",
+    title: "How to Remove Pollen From Lilies",
+    h1: "How to Remove Pollen From Lilies",
+    seoTitle: "How to Remove Lily Pollen | BlossomPot",
+    seoDescription: "Remove lily anthers as flowers open. Lift stray pollen with tape — do not rub.",
+    summary: "Pinch or snip anthers as each lily opens. If pollen lands on fabric, lift it with sticky tape. Rubbing drives the stain in.",
+    steps: [
+      "Wait until the flower opens enough to see the anthers.",
+      "Pinch them off and bin them — do not blow pollen around a room with cats.",
+      "Lift stray grains with tape.",
+    ],
+    notes: ["Pollen and vase water from true lilies are dangerous to cats."],
+    relatedFlowers: ["lily"],
+  },
+  {
+    slug: "how-to-store-flowers-overnight",
+    title: "How to Store Flowers Overnight",
+    h1: "How to Store Flowers Overnight",
+    seoTitle: "How to Store Flowers Overnight | BlossomPot",
+    seoDescription: "Hydrate first, then store cut flowers in a cool room — not a freezing car or a sealed hot box.",
+    summary: "If you must hold flowers overnight, recut and hydrate them, then leave them in a cool interior room. A refrigerator can help if it is not too cold and contains no fruit.",
+    steps: [
+      "Recut and put stems in water as soon as you can.",
+      "Use a cool room. Avoid garages that freeze or overheat.",
+      "If using a fridge, keep flowers away from fruit and from vents that ice the petals.",
+    ],
+    notes: ["Tulips and orchids have different cold tolerances; when in doubt, a cool room is safer than a very cold fridge."],
+    relatedFlowers: ["rose", "tulip", "orchid"],
+  },
+];
+
+export function getCareArticle(slug: string): CareArticle | undefined {
+  return careArticles.find((a) => a.slug === slug);
+}
