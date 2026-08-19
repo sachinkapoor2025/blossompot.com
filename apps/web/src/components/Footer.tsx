@@ -110,8 +110,7 @@ export function Footer() {
               </p>
             </div>
             <div className="mt-5">
-<<<<<<< HEAD
-              <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">Follow us</p>
+              <p className="text-xs uppercase tracking-wide text-white/60 mb-2">Follow us</p>
               <div className="flex items-center gap-3">
                 <a
                   href={FACEBOOK_URL}
@@ -142,26 +141,6 @@ export function Footer() {
                   </svg>
                 </a>
               </div>
-=======
-              <p className="text-xs uppercase tracking-wide text-white/60 mb-2">Follow us</p>
-              <ul className="flex flex-wrap items-center gap-2.5 sm:gap-3" aria-label="Social media">
-                {SOCIAL_LINKS.map((social) => (
-                  <li key={social.name}>
-                    <a
-                      href={social.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={social.label}
-                      title={social.label}
-                      style={social.style}
-                      className={`flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center hover:scale-105 transition-transform ${social.className}`}
-                    >
-                      {social.icon}
-                    </a>
-                  </li>
-                ))}
-              </ul>
->>>>>>> 996aa3a (add social icons in the footer)
             </div>
           </div>
 
