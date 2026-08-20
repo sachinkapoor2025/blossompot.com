@@ -17,6 +17,11 @@ const LOGO = {
     height: 150,
     className: "h-[4.75rem] w-auto max-w-[210px] object-contain object-left",
   },
+  headerMobile: {
+    width: 140,
+    height: 100,
+    className: "h-10 w-auto max-w-[min(40vw,132px)] object-contain object-left",
+  },
 } as const;
 
 type SiteLogoProps = {

@@ -68,7 +68,7 @@ const SOCIAL_LINKS: {
   },
   {
     name: "Pinterest",
-    href: "https://www.pinterest.com/blossompot/",
+    href: "https://in.pinterest.com/blossomdgv/_profile/",
     label: "BlossomPot on Pinterest",
     className: "rounded-full bg-[#E60023]",
     icon: (

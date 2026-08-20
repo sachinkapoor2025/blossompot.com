@@ -4,7 +4,7 @@ import { categoryHref } from "@/lib/category-urls";
 import { api } from "@/lib/api";
 import { HomeHero } from "@/components/HomeHero";
 import { HomeBrandTaglines } from "@/components/HomeBrandTaglines";
-import { GoogleReviews } from "@/components/GoogleReviews";
+import { CustomerReviews } from "@/components/CustomerReviews";
 import { getGoogleReviews } from "@/lib/google-reviews";
 import { HomeProductList } from "@/components/HomeProductList";
 import { FastSellingSection } from "@/components/FastSellingSection";
@@ -146,6 +146,8 @@ export default async function HomePage() {
 
       <WhyTrustUsSection />
 
+      <CustomerReviews data={googleReviews} />
+
       <HomeFlowerGuideCta />
 
       <section className="max-w-7xl mx-auto px-4 py-12">
@@ -170,8 +172,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
-      {googleReviews.source === "google" ? <GoogleReviews data={googleReviews} /> : null}
 
       <section className="max-w-7xl mx-auto px-4 py-12 border-t border-[#eadfd8]">
         <div className="max-w-xl mx-auto text-center">

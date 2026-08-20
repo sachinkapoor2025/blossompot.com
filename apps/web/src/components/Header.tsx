@@ -119,27 +119,13 @@ function BurgerIcon() {
   );
 }
 
-function VendorAccountLink({ className = "" }: { className?: string }) {
+function AccountLink() {
   return (
     <Link
-      href="/vendor"
-      className={`p-2 text-primary hover:text-nav ${className}`}
-      aria-label="Vendor Account"
+      href="/account"
+      className="flex h-11 w-11 shrink-0 items-center justify-center text-nav hover:text-primary"
+      aria-label="Account"
     >
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72l1.189-1.19A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72M6.75 18h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .414.336.75.75.75z"
-        />
-      </svg>
-    </Link>
-  );
-}
-
-function AccountLink({ className = "" }: { className?: string }) {
-  return (
-    <Link href="/account" className={`p-2 text-primary hover:text-nav ${className}`} aria-label="Account">
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
         <path
           strokeLinecap="round"
@@ -151,9 +137,13 @@ function AccountLink({ className = "" }: { className?: string }) {
   );
 }
 
-function WishlistLink({ className = "" }: { className?: string }) {
+function WishlistLink() {
   return (
-    <Link href="/wishlist" className={`p-2 text-primary hover:text-nav ${className}`} aria-label="Wishlist">
+    <Link
+      href="/wishlist"
+      className="flex h-11 w-11 shrink-0 items-center justify-center text-nav hover:text-primary"
+      aria-label="Wishlist"
+    >
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
         <path
           strokeLinecap="round"
@@ -165,11 +155,15 @@ function WishlistLink({ className = "" }: { className?: string }) {
   );
 }
 
-function CartLink({ className = "" }: { className?: string }) {
+function CartLink() {
   const { itemCount } = useCart();
 
   return (
-    <Link href="/cart" className={`relative p-2 text-primary hover:text-nav ${className}`} aria-label="Cart">
+    <Link
+      href="/cart"
+      className="relative flex h-11 w-11 shrink-0 items-center justify-center text-primary hover:text-nav"
+      aria-label="Cart"
+    >
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
           strokeLinecap="round"
@@ -179,7 +173,7 @@ function CartLink({ className = "" }: { className?: string }) {
         />
       </svg>
       {itemCount > 0 && (
-        <span className="absolute -top-0.5 -right-0.5 bg-accent text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+        <span className="absolute top-1 right-0.5 bg-accent text-white text-[10px] rounded-full min-w-4 h-4 px-0.5 flex items-center justify-center font-bold">
           {itemCount}
         </span>
       )}
@@ -276,30 +270,35 @@ export function Header() {
   }, [menuOpen]);
 
   return (
-    <header className="border-b border-primary/10 bg-white/90 backdrop-blur-md sticky top-0 z-50 shadow-sm shadow-primary/5 overflow-visible">
+    <header className={`border-b border-primary/10 bg-white/90 backdrop-blur-md sticky top-0 shadow-sm shadow-primary/5 overflow-visible ${menuOpen ? "z-[70]" : "z-50"}`}>
       <DeliveryLocationBanner />
       {/* Mobile top bar */}
-      <div className="md:hidden max-w-7xl mx-auto px-3 py-2.5 flex items-center gap-2">
-        <button
-          type="button"
-          className="p-1.5 text-nav hover:text-primary shrink-0"
-          aria-label="Open menu"
-          aria-expanded={menuOpen}
-          onClick={() => setMenuOpen(true)}
-        >
-          <BurgerIcon />
-        </button>
+      <div className="md:hidden min-w-0 overflow-x-clip">
+        <div className="flex items-center gap-1 px-2 py-2">
+          <button
+            type="button"
+            className="flex h-11 w-11 shrink-0 items-center justify-center text-nav hover:text-primary"
+            aria-label="Open menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen(true)}
+          >
+            <BurgerIcon />
+          </button>
 
-        <SiteLogoLink size="mobile" priority onClick={closeMenu} />
+          <SiteLogoLink size="headerMobile" className="min-w-0" priority onClick={closeMenu} />
 
-        <div className="flex-1" />
+          <div className="ml-auto flex shrink-0 items-center">
+            <AccountLink />
+            <WishlistLink />
+            <CartLink />
+          </div>
+        </div>
 
-        <div className="flex items-center shrink-0">
+        <div className="flex min-w-0 items-center gap-2 border-t border-slate-100 bg-white px-3 py-2">
           <DeliveryLocationChip compact />
-          <VendorAccountLink className="text-nav hover:text-primary p-1.5" />
-          <AccountLink className="text-nav hover:text-primary p-1.5" />
-          <WishlistLink className="text-nav hover:text-primary p-1.5" />
-          <CartLink className="p-1.5" />
+          <div className="min-w-0 flex-1">
+            <SearchBar />
+          </div>
         </div>
       </div>
 
@@ -346,12 +345,6 @@ export function Header() {
         </div>
       </div>
 
-      <div className="md:hidden border-t border-slate-100 bg-white px-4 py-2.5">
-        <div className="max-w-7xl mx-auto">
-          <SearchBar />
-        </div>
-      </div>
-
       {/* Desktop nav */}
       <nav className="hidden md:block border-t border-slate-100 bg-white overflow-visible">
         <div className="max-w-7xl mx-auto px-4 py-2.5">
@@ -387,29 +380,28 @@ export function Header() {
 
       {/* Mobile slide-out menu */}
       {menuOpen && (
-        <>
-          <button
-            type="button"
-            className="md:hidden fixed inset-0 bg-black/40 z-40"
-            aria-label="Close menu"
-            onClick={closeMenu}
-          />
-          <aside className="md:hidden fixed top-0 left-0 bottom-0 w-[min(85vw,320px)] z-50 bg-white shadow-xl flex flex-col">
-            <div className="flex items-center justify-between px-4 py-4 border-b border-slate-100">
-              <span className="font-semibold text-primary">Menu</span>
-              <button
-                type="button"
-                className="p-1 text-slate-500 hover:text-nav"
-                aria-label="Close menu"
-                onClick={closeMenu}
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                  <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
-                </svg>
-              </button>
-            </div>
+        <aside
+          className="md:hidden fixed inset-0 z-[70] flex h-[100dvh] w-full max-w-full flex-col overflow-hidden bg-white"
+          style={{ height: "100svh" }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu"
+        >
+          <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+            <span className="font-semibold text-primary">Menu</span>
+            <button
+              type="button"
+              className="flex h-11 w-11 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-nav"
+              aria-label="Close menu"
+              onClick={closeMenu}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            </button>
+          </div>
 
-            <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-1">
+          <nav className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-3 py-3 space-y-1">
               {navItems.map((item) => {
                 if (item.href === "/") {
                   return (
@@ -529,8 +521,31 @@ export function Header() {
                 Become a Vendor
               </Link>
             </nav>
+
+            <div className="grid shrink-0 grid-cols-3 border-t border-slate-100 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+              <Link
+                href="/account"
+                onClick={closeMenu}
+                className="flex flex-col items-center gap-1 px-2 py-3 text-xs font-semibold text-primary hover:bg-slate-50"
+              >
+                Account
+              </Link>
+              <Link
+                href="/wishlist"
+                onClick={closeMenu}
+                className="flex flex-col items-center gap-1 px-2 py-3 text-xs font-semibold text-primary hover:bg-slate-50"
+              >
+                Wishlist
+              </Link>
+              <Link
+                href="/cart"
+                onClick={closeMenu}
+                className="flex flex-col items-center gap-1 px-2 py-3 text-xs font-semibold text-primary hover:bg-slate-50"
+              >
+                Cart
+              </Link>
+            </div>
           </aside>
-        </>
       )}
     </header>
   );
