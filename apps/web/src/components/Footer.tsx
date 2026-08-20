@@ -110,37 +110,24 @@ export function Footer() {
               </p>
             </div>
             <div className="mt-5">
-              <p className="text-xs uppercase tracking-wide text-white/60 mb-2">Follow us</p>
-              <div className="flex items-center gap-3">
-                <a
-                  href={FACEBOOK_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="BlossomPot on Facebook"
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1877F2] hover:scale-105 transition-transform"
-                >
-                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="#fff" aria-hidden>
-                    <path d="M13.397 20.997v-8.196h2.765l.411-3.209h-3.176V7.548c0-.926.258-1.56 1.587-1.56h1.684V3.127A22.336 22.336 0 0013.843 3c-2.386 0-4.027 1.455-4.027 4.061v2.431H7.574v3.209h2.242v8.196h3.581z" />
-                  </svg>
-                </a>
-                <a
-                  href={INSTAGRAM_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="BlossomPot on Instagram"
-                  className="flex h-10 w-10 items-center justify-center rounded-[22%] hover:scale-105 transition-transform"
-                  style={{
-                    background:
-                      "radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)",
-                  }}
-                >
-                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden>
-                    <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" stroke="#fff" strokeWidth="2" />
-                    <circle cx="12" cy="12" r="4.2" stroke="#fff" strokeWidth="2" />
-                    <circle cx="17.4" cy="6.6" r="1.2" fill="#fff" />
-                  </svg>
-                </a>
-              </div>
+              <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">Follow us</p>
+              <ul className="flex flex-wrap items-center gap-2.5 sm:gap-3" aria-label="Social media">
+                {SOCIAL_LINKS.map((social) => (
+                  <li key={social.name}>
+                    <a
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={social.label}
+                      title={social.label}
+                      style={social.style}
+                      className={`flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center hover:scale-105 transition-transform ${social.className}`}
+                    >
+                      {social.icon}
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
 
