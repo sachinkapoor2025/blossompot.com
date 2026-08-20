@@ -119,11 +119,35 @@ function BurgerIcon() {
   );
 }
 
+function VendorIcon({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72l1.189-1.19A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72M6.75 18h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .414.336.75.75.75z"
+      />
+    </svg>
+  );
+}
+
+function VendorLink() {
+  return (
+    <Link
+      href="/vendor"
+      className="flex h-10 w-10 shrink-0 items-center justify-center text-nav hover:text-primary"
+      aria-label="Vendor Account"
+    >
+      <VendorIcon />
+    </Link>
+  );
+}
+
 function AccountLink() {
   return (
     <Link
       href="/account"
-      className="flex h-11 w-11 shrink-0 items-center justify-center text-nav hover:text-primary"
+      className="flex h-10 w-10 shrink-0 items-center justify-center text-nav hover:text-primary"
       aria-label="Account"
     >
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -141,7 +165,7 @@ function WishlistLink() {
   return (
     <Link
       href="/wishlist"
-      className="flex h-11 w-11 shrink-0 items-center justify-center text-nav hover:text-primary"
+      className="flex h-10 w-10 shrink-0 items-center justify-center text-nav hover:text-primary"
       aria-label="Wishlist"
     >
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -161,7 +185,7 @@ function CartLink() {
   return (
     <Link
       href="/cart"
-      className="relative flex h-11 w-11 shrink-0 items-center justify-center text-primary hover:text-nav"
+      className="relative flex h-10 w-10 shrink-0 items-center justify-center text-primary hover:text-nav"
       aria-label="Cart"
     >
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -274,10 +298,10 @@ export function Header() {
       <DeliveryLocationBanner />
       {/* Mobile top bar */}
       <div className="md:hidden min-w-0 overflow-x-clip">
-        <div className="flex items-center gap-1 px-2 py-2">
+        <div className="flex items-center gap-0.5 px-1.5 py-2">
           <button
             type="button"
-            className="flex h-11 w-11 shrink-0 items-center justify-center text-nav hover:text-primary"
+            className="flex h-10 w-10 shrink-0 items-center justify-center text-nav hover:text-primary"
             aria-label="Open menu"
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen(true)}
@@ -287,7 +311,8 @@ export function Header() {
 
           <SiteLogoLink size="headerMobile" className="min-w-0" priority onClick={closeMenu} />
 
-          <div className="ml-auto flex shrink-0 items-center">
+          <div className="ml-auto flex shrink-0 items-center gap-0.5">
+            <VendorLink />
             <AccountLink />
             <WishlistLink />
             <CartLink />
@@ -315,13 +340,7 @@ export function Header() {
             <DeliveryLocationChip />
           </div>
           <DesktopHeaderAction href="/vendor" label="Vendor Account" wide>
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72l1.189-1.19A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72M6.75 18h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .414.336.75.75.75z"
-              />
-            </svg>
+            <VendorIcon />
           </DesktopHeaderAction>
           <DesktopHeaderAction href="/account" label="Account">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>

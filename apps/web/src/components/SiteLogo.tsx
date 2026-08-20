@@ -20,7 +20,7 @@ const LOGO = {
   headerMobile: {
     width: 140,
     height: 100,
-    className: "h-10 w-auto max-w-[min(40vw,132px)] object-contain object-left",
+    className: "h-9 w-auto max-w-[min(28vw,104px)] object-contain object-left",
   },
 } as const;
 
