@@ -15,7 +15,12 @@ export interface RecommendableProduct {
   recipient?: string;
   sameDayAvailable?: boolean;
   featured?: boolean;
-  ratingAggregate?: { average?: number; count?: number };
+  ratingAggregate?: {
+    ratingValue?: number;
+    reviewCount?: number;
+    average?: number;
+    count?: number;
+  };
 }
 
 export interface RecommendationContext {
@@ -169,7 +174,7 @@ export function scoreGiftProduct(
     score -= 6;
   }
 
-  const rating = product.ratingAggregate?.average ?? 0;
+  const rating = product.ratingAggregate?.ratingValue ?? product.ratingAggregate?.average ?? 0;
   if (rating >= 4.5) {
     score += 10;
     reasons.push("Highly rated");
