@@ -27,7 +27,7 @@ export type CrawlerPolicyEntry = {
 };
 
 const PRIVATE_PATHS =
-  "/admin/ /vendor/ /api/ /checkout /account /cart /wishlist /orders/ /email/ /unsubscribe/ /ses-email/";
+  "/admin/ /vendor/ /api/ /checkout /account /cart /wishlist /gifting/ /orders/ /email/ /unsubscribe/ /ses-email/";
 
 export const CRAWLER_POLICY: CrawlerPolicyEntry[] = [
   {

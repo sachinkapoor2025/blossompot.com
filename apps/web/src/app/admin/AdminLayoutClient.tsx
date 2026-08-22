@@ -57,6 +57,7 @@ const navItems: NavItem[] = [
     ],
   },
   { type: "link", href: "/admin/email", label: "Marketing Email" },
+  { type: "link", href: "/admin/gifting", label: "Gifting Assistant" },
   {
     type: "group",
     id: "expense-settlement",

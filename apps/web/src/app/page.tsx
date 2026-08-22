@@ -144,6 +144,31 @@ export default async function HomePage() {
           )
       )}
 
+      <section className="max-w-7xl mx-auto px-4 py-12">
+        <div className="rounded-3xl border border-primary/15 bg-gradient-to-br from-rose-50 via-white to-orange-50 p-8 sm:p-12">
+          <p className="text-xs uppercase tracking-[0.2em] text-primary/70">Personal gifting assistant</p>
+          <h2 className="mt-2 text-2xl sm:text-4xl font-bold text-primary">Never forget a special occasion again.</h2>
+          <p className="mt-3 text-slate-600 max-w-2xl">
+            You tell us the dates. We remember them, help you choose the perfect gift, and make sure your special moments don&apos;t get forgotten.
+          </p>
+          <ol className="mt-6 grid gap-3 sm:grid-cols-5 text-sm text-slate-700">
+            <li><strong>1.</strong> Add your people</li>
+            <li><strong>2.</strong> Save their dates</li>
+            <li><strong>3.</strong> We remind you</li>
+            <li><strong>4.</strong> Choose or Surprise Me</li>
+            <li><strong>5.</strong> We deliver</li>
+          </ol>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link href="/remember" className="inline-flex min-h-11 items-center rounded-full bg-nav px-5 text-sm font-semibold text-white">
+              Start Remembering
+            </Link>
+            <Link href="/forgot-occasion" className="inline-flex min-h-11 items-center rounded-full border border-primary/30 px-5 text-sm font-semibold text-primary">
+              Forgot a special occasion?
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <WhyTrustUsSection />
 
       <CustomerReviews data={googleReviews} />

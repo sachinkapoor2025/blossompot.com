@@ -2,7 +2,16 @@
 
 import type { ReactNode } from "react";
 
-export type AccountTab = "orders" | "addresses" | "payments" | "details";
+export type AccountTab =
+  | "home"
+  | "people"
+  | "calendar"
+  | "gifts"
+  | "membership"
+  | "orders"
+  | "addresses"
+  | "payments"
+  | "details";
 
 function OrdersIcon() {
   return (
@@ -38,6 +47,11 @@ function UserIcon() {
 }
 
 const TABS: { id: AccountTab; label: string; icon: ReactNode }[] = [
+  { id: "home", label: "Dashboard", icon: <OrdersIcon /> },
+  { id: "people", label: "My People", icon: <UserIcon /> },
+  { id: "calendar", label: "Calendar", icon: <AddressIcon /> },
+  { id: "gifts", label: "Gifts", icon: <OrdersIcon /> },
+  { id: "membership", label: "Membership", icon: <PaymentIcon /> },
   { id: "orders", label: "Orders", icon: <OrdersIcon /> },
   { id: "addresses", label: "Addresses", icon: <AddressIcon /> },
   { id: "payments", label: "Payment methods", icon: <PaymentIcon /> },

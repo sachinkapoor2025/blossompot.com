@@ -69,6 +69,7 @@ export const navItems = [
   { label: "Valentine's", href: categoryHref("valentines-day-gifts"), category: "valentines-day-gifts" },
   { label: "Hampers", href: categoryHref("gift-hampers"), category: "gift-hampers" },
   { label: "Same-Day", href: categoryHref("same-day-gifts"), category: "same-day-gifts" },
+  { label: "Remember", href: "/remember" },
 ] as const;
 
 export type CityNavLink = {

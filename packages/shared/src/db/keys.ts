@@ -233,8 +233,52 @@ export const reminderEmailKeys = {
   statusSk: (createdAt: string, email: string) => `${createdAt}#${email.trim().toLowerCase()}`,
 };
 
+/**
+ * Personal gifting assistant — user data lives on the customers table
+ * (`USER#<id>` / `RECIPIENT#` …). Plans, settings, reminder queues and
+ * admin indexes live on the config table (same PK/SK pattern as expenses).
+ */
+export const giftingKeys = {
+  settings: { pk: "CONFIG#GIFTING", sk: "META" as const },
+  analytics: { pk: "GIFTANALYTICS", sk: "META" as const },
+
+  planPk: (planId: string) => `SUBPLAN#${planId}`,
+  planSk: () => "META" as const,
+  entityPlanPk: () => "ENTITY#SUBPLAN" as const,
+  entityPlanSk: (sortOrder: number, planId: string) =>
+    `${String(Math.max(0, sortOrder)).padStart(4, "0")}#${planId}`,
+
+  recipientSk: (recipientId: string) => `RECIPIENT#${recipientId}`,
+  recipientPrefix: () => "RECIPIENT#" as const,
+  occasionSk: (occasionId: string) => `OCCASION#${occasionId}`,
+  occasionPrefix: () => "OCCASION#" as const,
+  subscriptionSk: () => "SUBSCRIPTION" as const,
+  historySk: (historyId: string) => `GIFTHISTORY#${historyId}`,
+  historyPrefix: () => "GIFTHISTORY#" as const,
+  loyaltySk: () => "LOYALTY" as const,
+  loyaltyTxSk: (txId: string) => `LOYALTYTX#${txId}`,
+  loyaltyTxPrefix: () => "LOYALTYTX#" as const,
+  streakSk: () => "STREAK" as const,
+  messageSk: (messageId: string) => `GIFTMESSAGE#${messageId}`,
+  messagePrefix: () => "GIFTMESSAGE#" as const,
+  prefsSk: () => "GIFTPREFS" as const,
+  reminderSk: (reminderId: string) => `REMINDER#${reminderId}`,
+  reminderPrefix: () => "REMINDER#" as const,
+
+  entityRecipientPk: () => "ENTITY#RECIPIENT" as const,
+  entityOccasionPk: () => "ENTITY#OCCASION" as const,
+  entitySubscriptionPk: () => "ENTITY#SUBSCRIPTION" as const,
+  entityReminderPk: () => "ENTITY#REMINDER" as const,
+  entityHistoryPk: () => "ENTITY#GIFTHISTORY" as const,
+  entityNotifyPk: () => "ENTITY#GIFTNOTIFY" as const,
+  reminderQueuePk: () => "QUEUE#GIFTREMINDER" as const,
+  reminderTokenPk: (token: string) => `REMINDERTOKEN#${token}`,
+  reminderTokenSk: () => "META" as const,
+  notifyLogPk: (logId: string) => `GIFTNOTIFY#${logId}`,
+  notifyLogSk: () => "META" as const,
+};
+
 /** Pending-payment reminder unsubscribe list (dedicated table). */
-export const pendingPaymentUnsubKeys = {
   pk: (email: string) => `EMAIL#${email.trim().toLowerCase()}`,
   sk: () => "META" as const,
 };

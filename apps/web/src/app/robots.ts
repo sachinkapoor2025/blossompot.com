@@ -21,6 +21,7 @@ export default function robots(): MetadataRoute.Robots {
           "/account",
           "/cart",
           "/wishlist",
+          "/gifting/",
           "/orders/",
           "/email/",
           "/unsubscribe/",

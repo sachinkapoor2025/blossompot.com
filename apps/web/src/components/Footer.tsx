@@ -163,6 +163,8 @@ export function Footer() {
           <div className="min-w-0 lg:col-span-2">
             <p className="font-semibold text-primary mb-3 sm:mb-4">Help &amp; Info</p>
             <ul className="space-y-2 text-slate-600">
+              <li><Link href="/remember" className="hover:text-primary hover:underline">Never Forget an Occasion</Link></li>
+              <li><Link href="/forgot-occasion" className="hover:text-primary hover:underline">Forgot a Special Occasion?</Link></li>
               <li><Link href="/same-day-delivery" className="hover:text-primary hover:underline">Same-Day Delivery</Link></li>
               <li><Link href="/flowers" className="hover:text-primary hover:underline">Send Flowers</Link></li>
               <li><Link href="/flower-guide" className="hover:text-primary hover:underline">Flower Guide</Link></li>
