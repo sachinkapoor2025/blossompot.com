@@ -239,4 +239,40 @@ export const faqs = [
     q: "Can I track my order?",
     a: "Yes. After purchase you receive order confirmation and can track status from your account or order page.",
   },
+  {
+    q: "What is BlossomPot's delivery charge?",
+    a: "Shipping costs depend on the product, the delivery place and the delivery method you choose. Any delivery fees that apply will be shown at checkout before you place your order.",
+  },
+  {
+    q: "Can I choose a delivery date for my gift?",
+    a: "Yes. Select your preferred delivery date at checkout where available. Delivery dates and timeslots are subject to change based on product and recipient location.",
+  },
+  {
+    q: "Can I change or cancel my order once it is placed?",
+    a: "If your order has not been processed or prepared for delivery, you may be able to modify or cancel it. Please contact our support team right away with your order information.",
+  },
+  {
+    q: "What if the recipient is not there at the time of delivery?",
+    a: "If the recipient is not available, the delivery partner may follow the available delivery instructions or attempt delivery again. For assistance with a specific order, please contact our support team.",
+  },
+  {
+    q: "What if my gift is received damaged or with a problem?",
+    a: "Please contact BlossomPot support immediately if your order arrives damaged or if there is an issue with the product. Providing your order information and photos of the product and packaging can assist us in investigating and resolving the matter.",
+  },
+  {
+    q: "How fresh are flowers from BlossomPot?",
+    a: "Our goal is to provide fresh flowers and arrangements that are carefully prepared. The flowers are seasonal and naturally unique so exact varieties, colours or appearance may differ from time to time based on local availability.",
+  },
+  {
+    q: "Can I send a gift to anyone in any US state?",
+    a: "Yes. BlossomPot ships gifts to all 50 states, Washington D.C. and Puerto Rico. Availability of delivery and estimated delivery times will vary by recipient location.",
+  },
+  {
+    q: "Can I order flowers, cakes and other gifts in same order?",
+    a: "Yes. You can browse through flowers, cakes, gift hampers, personalized gifts, plants and other products on BlossomPot. The products available and the delivery options may differ depending on the items you select.",
+  },
+  {
+    q: "How can I contact BlossomPot if I need help with my order?",
+    a: "If you need any help with an order, delivery or any other question please contact the BlossomPot support team via the email or WhatsApp support options on our website.",
+  },
 ] as const;
