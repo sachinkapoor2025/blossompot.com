@@ -643,7 +643,11 @@ export async function incrementAnalytics(field: string, amount = 1): Promise<voi
       Key: { PK: giftingKeys.analytics.pk, SK: giftingKeys.analytics.sk },
     })
   );
-  const data = { ...(current.Item ?? {}), PK: giftingKeys.analytics.pk, SK: giftingKeys.analytics.sk };
+  const data: Record<string, unknown> = {
+    ...(current.Item ?? {}),
+    PK: giftingKeys.analytics.pk,
+    SK: giftingKeys.analytics.sk,
+  };
   data[field] = Number(data[field] ?? 0) + amount;
   data.updatedAt = now();
   await docClient.send(new PutCommand({ TableName: CONFIG_TABLE, Item: data }));

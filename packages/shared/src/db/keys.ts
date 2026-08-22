@@ -279,6 +279,7 @@ export const giftingKeys = {
 };
 
 /** Pending-payment reminder unsubscribe list (dedicated table). */
+export const pendingPaymentUnsubKeys = {
   pk: (email: string) => `EMAIL#${email.trim().toLowerCase()}`,
   sk: () => "META" as const,
 };
