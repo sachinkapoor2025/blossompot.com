@@ -30,8 +30,9 @@ import { docClient } from "./db";
 
 type Stored<T> = T & { PK: string; SK: string };
 
-function stripKeys<T extends Record<string, unknown>>(item: T): Omit<T, "PK" | "SK"> {
-  const { PK: _pk, SK: _sk, ...rest } = item;
+function stripKeys<T>(item: T): Omit<T, "PK" | "SK"> {
+  const rec = item as T & { PK?: unknown; SK?: unknown };
+  const { PK: _pk, SK: _sk, ...rest } = rec;
   return rest as Omit<T, "PK" | "SK">;
 }
 
@@ -184,11 +185,11 @@ export async function getUserItem<T>(userId: string, sk: string): Promise<T | nu
   return result.Item ? (stripKeys(result.Item as Stored<T>) as T) : null;
 }
 
-async function putUserItem(userId: string, sk: string, item: Record<string, unknown>) {
+async function putUserItem(userId: string, sk: string, item: object) {
   await docClient.send(
     new PutCommand({
       TableName: CUSTOMERS_TABLE,
-      Item: { ...item, PK: accountKeys.pk(userId), SK: sk },
+      Item: { ...(item as Record<string, unknown>), PK: accountKeys.pk(userId), SK: sk },
     })
   );
 }
@@ -627,11 +628,11 @@ export async function listAdminIndex<T>(pk: string, limit = 100): Promise<T[]> {
   return (result.Items ?? []).map((item) => stripKeys(item as Stored<T>)) as T[];
 }
 
-async function putAdminIndex(pk: string, sk: string, item: Record<string, unknown>) {
+async function putAdminIndex(pk: string, sk: string, item: object) {
   await docClient.send(
     new PutCommand({
       TableName: CONFIG_TABLE,
-      Item: { PK: pk, SK: sk, ...item },
+      Item: { PK: pk, SK: sk, ...(item as Record<string, unknown>) },
     })
   );
 }
