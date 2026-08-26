@@ -265,6 +265,7 @@ const routes: Route[] = [
 
   // Personal gifting assistant
   { method: "GET", pattern: /^\/gifting\/plans$/, handler: gifting.listPublicPlans },
+  { method: "GET", pattern: /^\/gifting\/membership\/events$/, handler: gifting.previewMembershipEvents },
   { method: "GET", pattern: /^\/gifting\/emergency$/, handler: gifting.getEmergencyGifts },
   { method: "GET", pattern: /^\/gifting\/dashboard$/, handler: gifting.getGiftingDashboard },
   { method: "GET", pattern: /^\/gifting\/recipients$/, handler: gifting.listMyRecipients },
@@ -296,6 +297,13 @@ const routes: Route[] = [
   { method: "PUT", pattern: /^\/admin\/gifting\/plans\/([^/]+)$/, handler: adminGifting.adminUpdatePlan, params: ["planId"] },
   { method: "DELETE", pattern: /^\/admin\/gifting\/plans\/([^/]+)$/, handler: adminGifting.adminDeletePlan, params: ["planId"] },
   { method: "GET", pattern: /^\/admin\/gifting\/notifications$/, handler: adminGifting.adminListGiftingLogs },
+  { method: "GET", pattern: /^\/admin\/gifting\/subscriptions$/, handler: adminGifting.adminListMembershipOrders },
+  {
+    method: "GET",
+    pattern: /^\/admin\/gifting\/subscriptions\/([^/]+)$/,
+    handler: adminGifting.adminGetMembershipOrder,
+    params: ["userId"],
+  },
   { method: "GET", pattern: /^\/admin\/orders$/, handler: orders.listAdminOrders },
   {
     method: "GET",

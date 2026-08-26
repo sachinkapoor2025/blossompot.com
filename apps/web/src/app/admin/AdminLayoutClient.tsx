@@ -15,6 +15,7 @@ type NavItem =
 const navItems: NavItem[] = [
   { type: "link", href: "/admin", label: "Dashboard", exact: true },
   { type: "link", href: "/admin/orders", label: "Orders" },
+  { type: "link", href: "/admin/membership-orders", label: "Membership Orders" },
   {
     type: "group",
     id: "analytics",

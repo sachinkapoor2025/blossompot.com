@@ -17,11 +17,15 @@ export const GIFTING_OCCASION_TYPES = [
   "birthday",
   "anniversary",
   "valentines",
+  "chocolate_day",
   "mothers_day",
   "fathers_day",
   "rakhi",
   "christmas",
   "friendship_day",
+  "new_year",
+  "halloween",
+  "thanksgiving",
   "first_date",
   "wedding_day",
   "day_we_met",
@@ -44,6 +48,10 @@ export const GIFTING_CHANNELS = ["email", "whatsapp", "both"] as const;
 export const GIFTING_FEEDBACK = ["loved", "perfect", "okay", "not_suitable"] as const;
 
 export const GIFTING_PLAN_DURATIONS = [3, 6, 12, 24] as const;
+
+/** Custom membership length the existing reminder engine can honor (1–24 months). */
+export const CUSTOM_PLAN_DURATION_MIN = 1;
+export const CUSTOM_PLAN_DURATION_MAX = 24;
 
 export const GIFTING_REMINDER_KINDS = [
   "occasion",
@@ -149,10 +157,35 @@ export const giftingPrefsUpdateSchema = z.object({
   autoRecommendEnabled: z.boolean().optional(),
 });
 
+export const membershipSelectedEventSchema = z.object({
+  key: z.string().min(1).max(120),
+  title: z.string().min(1).max(120),
+  occasionType: occasionTypeSchema,
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+  month: z.number().int().min(1).max(12).optional(),
+  day: z.number().int().min(1).max(31).optional(),
+  source: z.enum(["catalog", "personal", "custom"]),
+  recurring: z.boolean().optional(),
+});
+
+const membershipStartDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+
 export const subscribeInputSchema = z.object({
   planId: z.string().min(1).max(80),
   paymentMethod: z.enum(["stripe", "razorpay"]).optional(),
   reminderChannel: reminderChannelSchema.optional(),
+  membershipStartDate: membershipStartDateSchema.optional(),
+  customDurationMonths: z
+    .number()
+    .int()
+    .min(CUSTOM_PLAN_DURATION_MIN)
+    .max(CUSTOM_PLAN_DURATION_MAX)
+    .optional(),
+  selectedEvents: z.array(membershipSelectedEventSchema).max(40).optional(),
+  skipEvents: z.boolean().optional(),
 });
 
 export const confirmSubscribeSchema = z.object({
@@ -202,6 +235,8 @@ export const subscriptionPlanInputSchema = z.object({
   discountPercent: z.number().min(0).max(90).optional(),
   renewalEnabled: z.boolean().optional(),
   sortOrder: z.number().int().min(0).max(99).optional(),
+  isCustom: z.boolean().optional(),
+  allowsEventCustomization: z.boolean().optional(),
 });
 
 export const subscriptionPlanUpdateSchema = subscriptionPlanInputSchema.partial();
@@ -258,6 +293,8 @@ export type RecipientCreateInput = z.infer<typeof recipientCreateSchema>;
 export type OccasionCreateInput = z.infer<typeof occasionCreateSchema>;
 export type SubscriptionPlanInput = z.infer<typeof subscriptionPlanInputSchema>;
 export type GiftingSettingsUpdate = z.infer<typeof giftingSettingsUpdateSchema>;
+export type MembershipSelectedEvent = z.infer<typeof membershipSelectedEventSchema>;
+export type SubscribeInput = z.infer<typeof subscribeInputSchema>;
 
 export interface GiftRecipient {
   id: string;
@@ -312,6 +349,8 @@ export interface SubscriptionPlan {
   discountPercent?: number;
   renewalEnabled?: boolean;
   sortOrder: number;
+  isCustom?: boolean;
+  allowsEventCustomization?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -333,6 +372,10 @@ export interface GiftingSubscription {
   razorpayOrderId?: string;
   paymentMethod?: "stripe" | "razorpay";
   autoRenew?: boolean;
+  reminderChannel?: GiftingChannel;
+  membershipStartDate?: string;
+  selectedEvents?: MembershipSelectedEvent[];
+  isCustomPlan?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -543,6 +586,7 @@ export const DEFAULT_SUBSCRIPTION_PLANS: Array<
       "Email reminders",
     ],
     status: "active",
+    allowsEventCustomization: true,
     sortOrder: 1,
   },
   {
@@ -559,6 +603,7 @@ export const DEFAULT_SUBSCRIPTION_PLANS: Array<
       "Surprise Me recommendations",
     ],
     status: "active",
+    allowsEventCustomization: true,
     sortOrder: 2,
   },
   {
@@ -578,6 +623,7 @@ export const DEFAULT_SUBSCRIPTION_PLANS: Array<
     ],
     status: "active",
     recommended: true,
+    allowsEventCustomization: true,
     sortOrder: 3,
   },
   {
@@ -595,7 +641,26 @@ export const DEFAULT_SUBSCRIPTION_PLANS: Array<
       "VIP member recognition",
     ],
     status: "active",
+    allowsEventCustomization: true,
     sortOrder: 4,
+  },
+  {
+    id: "custom",
+    name: "Custom Plan",
+    slug: "blossompot-custom",
+    durationMonths: 12,
+    price: 79,
+    currency: "USD",
+    isCustom: true,
+    allowsEventCustomization: true,
+    benefits: [
+      "Choose a membership length from 1 to 24 months",
+      "Pick a start date that fits your calendar",
+      "Reminders only for occasions in your window",
+      "Email and WhatsApp reminder options",
+    ],
+    status: "active",
+    sortOrder: 5,
   },
 ];
 
@@ -616,11 +681,15 @@ export const OCCASION_TYPE_LABELS: Record<GiftingOccasionType, string> = {
   birthday: "Birthday",
   anniversary: "Anniversary",
   valentines: "Valentine's Day",
+  chocolate_day: "Chocolate Day",
   mothers_day: "Mother's Day",
   fathers_day: "Father's Day",
   rakhi: "Rakhi",
   christmas: "Christmas",
   friendship_day: "Friendship Day",
+  new_year: "New Year",
+  halloween: "Halloween",
+  thanksgiving: "Thanksgiving",
   first_date: "First Date",
   wedding_day: "Wedding Day",
   day_we_met: "The Day We Met",

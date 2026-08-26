@@ -67,6 +67,7 @@ export * from "./lib/product-addons";
 export * from "./lib/flash-sale";
 export * from "./schemas/gifting";
 export * from "./lib/gifting-occasions";
+export * from "./lib/membership-events";
 export * from "./lib/gifting-recommend";
 export * from "./db/keys";
 export * from "./constants";

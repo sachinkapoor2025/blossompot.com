@@ -47,7 +47,7 @@ export function RememberLanding({ plans }: { plans: SubscriptionPlan[] }) {
         <p className="text-center text-slate-600 text-sm mb-8">
           Not a discount membership — a never-forget service for the people you love.
         </p>
-        <PlanCards plans={plans} />
+        <PlanCards plans={plans} teaser />
         <div className="text-center mt-8">
           <Link href="/account?tab=membership" className="inline-flex min-h-12 items-center rounded-full bg-nav px-6 text-sm font-semibold text-white">
             Start Remembering

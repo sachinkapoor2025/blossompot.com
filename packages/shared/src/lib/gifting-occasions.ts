@@ -53,8 +53,17 @@ export interface NationalOccasion {
   date: Date;
 }
 
+const RAKHI_BY_YEAR: Record<number, string> = {
+  2026: "2026-08-28",
+  2027: "2027-08-17",
+  2028: "2028-08-05",
+  2029: "2029-08-23",
+  2030: "2030-08-12",
+};
+
 export function nationalOccasionsForYear(year: number): NationalOccasion[] {
-  return [
+  const items: NationalOccasion[] = [
+    { key: "new_year", title: "New Year", occasionType: "new_year", date: utcDate(year, 1, 1) },
     { key: "valentines", title: "Valentine's Day", occasionType: "valentines", date: utcDate(year, 2, 14) },
     {
       key: "mothers_day",
@@ -68,17 +77,35 @@ export function nationalOccasionsForYear(year: number): NationalOccasion[] {
       occasionType: "fathers_day",
       date: nthWeekdayOfMonth(year, 6, 0, 3),
     },
+    { key: "chocolate_day", title: "Chocolate Day", occasionType: "chocolate_day", date: utcDate(year, 7, 7) },
     {
       key: "friendship_day",
       title: "Friendship Day",
       occasionType: "friendship_day",
       date: nthWeekdayOfMonth(year, 8, 0, 1),
     },
+    { key: "halloween", title: "Halloween", occasionType: "halloween", date: utcDate(year, 10, 31) },
+    {
+      key: "thanksgiving",
+      title: "Thanksgiving",
+      occasionType: "thanksgiving",
+      date: nthWeekdayOfMonth(year, 11, 4, 4),
+    },
     { key: "christmas", title: "Christmas", occasionType: "christmas", date: utcDate(year, 12, 25) },
   ];
+  const rakhi = RAKHI_BY_YEAR[year];
+  if (rakhi) {
+    items.push({
+      key: "rakhi",
+      title: "Rakhi",
+      occasionType: "rakhi",
+      date: new Date(`${rakhi}T00:00:00.000Z`),
+    });
+  }
+  return items.sort((a, b) => a.date.getTime() - b.date.getTime());
 }
 
-export function upcomingNationalOccasions(from = new Date(), limit = 8): UpcomingOccasionView[] {
+export function upcomingNationalOccasions(from = new Date(), limit = 16): UpcomingOccasionView[] {
   const year = from.getUTCFullYear();
   const items = [...nationalOccasionsForYear(year), ...nationalOccasionsForYear(year + 1)]
     .filter((o) => startOfUtcDay(o.date) >= startOfUtcDay(from))
@@ -190,7 +217,7 @@ export function mergeUpcomingOccasions(input: {
   }
 
   if (input.includeNational !== false) {
-    all.push(...upcomingNationalOccasions(from, 8));
+    all.push(...upcomingNationalOccasions(from, 16));
   }
 
   return all

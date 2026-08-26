@@ -13,7 +13,12 @@ import {
   recipientCreateSchema,
   recipientUpdateSchema,
   reminderChoiceSchema,
+  resolveMembershipEvents,
+  resolvePlanDurationMonths,
+  resolvePlanPrice,
   subscribeInputSchema,
+  todayIsoDate,
+  membershipWindow,
   type GiftHistoryEntry,
   type GiftRecipient,
   type GiftReminder,
@@ -89,6 +94,29 @@ export async function listPublicPlans() {
       choiceWindowHours: settings.choiceWindowHours,
       whatsappConfigured: settings.whatsappEnabled,
     },
+  });
+}
+
+export async function previewMembershipEvents(event: APIGatewayProxyEventV2) {
+  const planId = event.queryStringParameters?.planId;
+  const startDate = event.queryStringParameters?.startDate || todayIsoDate();
+  const customDuration = event.queryStringParameters?.durationMonths
+    ? Number(event.queryStringParameters.durationMonths)
+    : undefined;
+  await ensureDefaultPlans();
+  const plan = planId ? await getPlan(planId) : null;
+  const durationMonths = plan
+    ? resolvePlanDurationMonths(plan, Number.isFinite(customDuration) ? customDuration : undefined)
+    : Number.isFinite(customDuration)
+      ? Math.min(24, Math.max(1, customDuration ?? 12))
+      : 12;
+  const { eligible } = resolveMembershipEvents({ startDate, durationMonths, skipEvents: true });
+  const window = membershipWindow(startDate, durationMonths);
+  return ok({
+    startDate,
+    durationMonths,
+    endDate: window.endIso,
+    events: eligible,
   });
 }
 
@@ -401,7 +429,7 @@ export async function startSubscription(event: APIGatewayProxyEventV2) {
   if (!auth) return unauthorized();
   const parsed = subscribeInputSchema.safeParse(JSON.parse(event.body ?? "{}"));
   if (!parsed.success) return badRequest(parsed.error.message);
-  await ensureDefaultPlans();
+  const plans = await ensureDefaultPlans();
   const plan = await getPlan(parsed.data.planId);
   if (!plan || plan.status !== "active") return badRequest("Subscription plan is not available");
 
@@ -410,31 +438,47 @@ export async function startSubscription(event: APIGatewayProxyEventV2) {
     return badRequest("You already have an active membership.");
   }
 
+  const durationMonths = resolvePlanDurationMonths(plan, parsed.data.customDurationMonths);
+  const price = resolvePlanPrice(plan, plans, parsed.data.customDurationMonths);
+  const startDate = parsed.data.membershipStartDate || todayIsoDate();
+  const { selected } = resolveMembershipEvents({
+    startDate,
+    durationMonths,
+    selectedEvents: parsed.data.selectedEvents,
+    skipEvents: parsed.data.skipEvents,
+  });
+  if (selected.length === 0 && !parsed.data.skipEvents) {
+    return badRequest("Select at least one event that falls in your membership window, or skip to use the defaults.");
+  }
+
+  const reminderChannel = parsed.data.reminderChannel ?? "email";
   const timestamp = now();
   const subscription: GiftingSubscription = {
     id: uuidv4(),
     userId: auth.userId,
     email: auth.email,
     planId: plan.id,
-    planName: plan.name,
-    durationMonths: plan.durationMonths,
-    price: plan.price,
+    planName: plan.isCustom ? `${plan.name} (${durationMonths} months)` : plan.name,
+    durationMonths,
+    price,
     currency: plan.currency,
     status: "pending_payment",
     paymentMethod: parsed.data.paymentMethod ?? (plan.currency === "INR" ? "razorpay" : "stripe"),
     autoRenew: plan.renewalEnabled ?? false,
+    reminderChannel,
+    membershipStartDate: startDate,
+    selectedEvents: selected,
+    isCustomPlan: Boolean(plan.isCustom),
     createdAt: timestamp,
     updatedAt: timestamp,
   };
 
-  if (parsed.data.reminderChannel) {
-    await savePrefs({
-      userId: auth.userId,
-      reminderChannel: parsed.data.reminderChannel,
-      autoRecommendEnabled: true,
-      updatedAt: timestamp,
-    });
-  }
+  await savePrefs({
+    userId: auth.userId,
+    reminderChannel,
+    autoRecommendEnabled: true,
+    updatedAt: timestamp,
+  });
 
   const payment = await createSubscriptionPayment(subscription);
   subscription.paymentIntentId = payment.paymentIntentId;
@@ -577,7 +621,9 @@ export async function activatePaidSubscriptionById(subscriptionId: string, userI
 }
 
 async function activateSubscription(current: GiftingSubscription): Promise<GiftingSubscription> {
-  const startedAt = now();
+  const startedAt = current.membershipStartDate
+    ? `${current.membershipStartDate}T00:00:00.000Z`
+    : now();
   const activated: GiftingSubscription = {
     ...current,
     status: "active",
@@ -589,19 +635,58 @@ async function activateSubscription(current: GiftingSubscription): Promise<Gifti
   const settings = await getGiftingSettings();
   await addLoyaltyPoints(current.userId, settings.loyalty.subscriptionBonus, "Membership started", "subscription");
   await incrementAnalytics("subscriptionActivated");
+  await scheduleMembershipEventReminders(activated);
   const copy = subscriptionConfirmationCopy(activated);
   await sendGiftingNotification({
     userId: current.userId,
     email: current.email,
-    channel: "email",
+    channel: current.reminderChannel ?? "email",
     settings,
     template: "subscription_confirmation",
     subject: copy.subject,
     text: copy.text,
     html: copy.html,
-    whatsappMessage: `${copy.text} ${SITE_URL()}/account?tab=home`,
+    whatsappMessage: `${copy.text} ${SITE_URL()}/account?tab=membership`,
   });
   return activated;
+}
+
+async function scheduleMembershipEventReminders(sub: GiftingSubscription) {
+  const settings = await getGiftingSettings();
+  const existingOccasions = await listOccasions(sub.userId);
+  for (const event of sub.selectedEvents ?? []) {
+    if (!event.date || !event.month || !event.day) continue;
+    const duplicateOccasion = existingOccasions.some(
+      (o) =>
+        o.occasionType === event.occasionType &&
+        o.month === event.month &&
+        o.day === event.day &&
+        (o.title === event.title || event.source === "catalog")
+    );
+    let occasionId: string | undefined;
+    if (!duplicateOccasion && event.source !== "catalog") {
+      const createdOcc = await createOccasion(sub.userId, {
+        title: event.title,
+        occasionType: event.occasionType,
+        month: event.month,
+        day: event.day,
+        year: Number(event.date.slice(0, 4)),
+        recurring: event.recurring ?? true,
+        remindNextYear: true,
+      });
+      occasionId = createdOcc.id;
+    } else {
+      occasionId = existingOccasions.find(
+        (o) => o.occasionType === event.occasionType && o.month === event.month && o.day === event.day
+      )?.id;
+    }
+    await scheduleOffsets(sub.userId, settings, {
+      occasionId,
+      occasionTitle: event.title,
+      occasionType: event.occasionType,
+      occasionDate: event.date,
+    });
+  }
 }
 
 const SITE_URL = () => (process.env.SITE_URL ?? "https://www.blossompot.com").replace(/\/$/, "");

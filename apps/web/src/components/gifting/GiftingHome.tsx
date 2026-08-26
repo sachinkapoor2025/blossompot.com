@@ -63,8 +63,8 @@ export function GiftingHome({
       {!data.subscriptionActive && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           Start a BlossomPot membership to save people, dates, and reminders.{" "}
-          <Link href="/remember" className="font-semibold underline">
-            See plans
+          <Link href="/account?tab=membership" className="font-semibold underline">
+            Choose a plan
           </Link>
         </div>
       )}

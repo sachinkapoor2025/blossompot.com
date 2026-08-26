@@ -11,7 +11,9 @@ import type {
   GiftingSubscription,
   LoyaltyAccount,
   LoyaltyTransaction,
+  MembershipSelectedEvent,
   SavedGiftMessage,
+  SubscribeInput,
   SubscriptionPlan,
   UpcomingOccasionView,
 } from "@blossompot/shared";
@@ -86,7 +88,7 @@ export function giftingApi(token: string, sessionId: string) {
       }>("/gifting/loyalty", auth),
     recommend: (query: string) =>
       api<{ recommendations: GiftRecommendation[]; recipient?: GiftRecipient }>(`/gifting/recommend?${query}`, auth),
-    subscribe: (body: unknown) =>
+    subscribe: (body: SubscribeInput) =>
       api<{
         subscription: GiftingSubscription;
         payment: { paymentIntentId?: string; clientSecret?: string; razorpayOrderId?: string; razorpayKeyId?: string };
@@ -107,6 +109,20 @@ export function fetchPublicPlans() {
     plans: SubscriptionPlan[];
     settings: { reminderOffsetsDays: number[]; choiceWindowHours: number; whatsappConfigured: boolean };
   }>("/gifting/plans");
+}
+
+export function fetchMembershipEvents(query: { planId?: string; startDate: string; durationMonths: number }) {
+  const params = new URLSearchParams({
+    startDate: query.startDate,
+    durationMonths: String(query.durationMonths),
+  });
+  if (query.planId) params.set("planId", query.planId);
+  return api<{
+    startDate: string;
+    durationMonths: number;
+    endDate: string;
+    events: Array<MembershipSelectedEvent & { description?: string; group?: string; needsDate?: boolean }>;
+  }>(`/gifting/membership/events?${params.toString()}`);
 }
 
 export function fetchEmergencyGifts(category?: string) {

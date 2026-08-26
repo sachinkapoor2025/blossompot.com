@@ -65,15 +65,18 @@ export async function saveGiftingSettings(settings: GiftingSettings): Promise<Gi
 
 export async function ensureDefaultPlans(): Promise<SubscriptionPlan[]> {
   const existing = await listPlans(true);
-  if (existing.length > 0) return existing;
+  const byId = new Map(existing.map((plan) => [plan.id, plan]));
   const timestamp = now();
-  const plans = DEFAULT_SUBSCRIPTION_PLANS.map((plan) => ({
+  const missing = DEFAULT_SUBSCRIPTION_PLANS.filter((plan) => !byId.has(plan.id)).map((plan) => ({
     ...plan,
     createdAt: timestamp,
     updatedAt: timestamp,
   }));
-  await Promise.all(plans.map((plan) => putPlan(plan)));
-  return plans;
+  if (missing.length > 0) {
+    await Promise.all(missing.map((plan) => putPlan(plan)));
+  }
+  if (existing.length === 0 && missing.length > 0) return missing;
+  return listPlans(true);
 }
 
 async function putPlan(plan: SubscriptionPlan) {
@@ -356,14 +359,25 @@ export async function getSubscription(userId: string): Promise<GiftingSubscripti
 
 export async function saveSubscription(sub: GiftingSubscription): Promise<GiftingSubscription> {
   await putUserItem(sub.userId, giftingKeys.subscriptionSk(), sub);
-  await putAdminIndex(giftingKeys.entitySubscriptionPk(), `${sub.status}#${sub.updatedAt}#${sub.id}`, {
+  await putAdminIndex(giftingKeys.entitySubscriptionPk(), `${sub.updatedAt}#${sub.id}`, {
     id: sub.id,
     userId: sub.userId,
     email: sub.email,
+    planId: sub.planId,
     planName: sub.planName,
+    durationMonths: sub.durationMonths,
+    price: sub.price,
+    currency: sub.currency,
     status: sub.status,
+    paymentMethod: sub.paymentMethod,
+    reminderChannel: sub.reminderChannel,
+    membershipStartDate: sub.membershipStartDate,
+    selectedEvents: sub.selectedEvents ?? [],
+    isCustomPlan: sub.isCustomPlan ?? false,
+    startedAt: sub.startedAt,
     expiresAt: sub.expiresAt,
     createdAt: sub.createdAt,
+    updatedAt: sub.updatedAt,
   });
   return sub;
 }

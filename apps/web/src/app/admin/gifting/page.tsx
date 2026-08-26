@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useSessionId } from "@/lib/session";
@@ -90,6 +91,9 @@ export default function AdminGiftingPage() {
       <div>
         <h1 className="text-2xl font-bold text-primary">Personal gifting assistant</h1>
         <p className="text-sm text-slate-500 mt-1">Subscriptions, reminders, recommendations, and loyalty.</p>
+        <Link href="/admin/membership-orders" className="inline-block mt-2 text-sm font-semibold text-nav">
+          View membership / reminder orders →
+        </Link>
       </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
 

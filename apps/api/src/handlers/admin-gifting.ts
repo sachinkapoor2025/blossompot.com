@@ -5,6 +5,7 @@ import {
   giftingSettingsUpdateSchema,
   subscriptionPlanInputSchema,
   subscriptionPlanUpdateSchema,
+  type GiftingSubscription,
   type SubscriptionPlan,
 } from "@blossompot/shared";
 import { requireAdmin } from "../lib/auth";
@@ -16,9 +17,12 @@ import {
   getAnalytics,
   getGiftingSettings,
   getPlan,
+  getPrefs,
+  getSubscription,
   listAdminIndex,
   listNotificationLogs,
   listPlans,
+  listReminders,
   saveGiftingSettings,
   savePlan,
 } from "../lib/gifting-store";
@@ -34,7 +38,7 @@ export async function adminGetGiftingOverview(event: APIGatewayProxyEventV2) {
     getGiftingSettings(),
     ensureDefaultPlans(),
     getAnalytics(),
-    listAdminIndex(giftingKeys.entitySubscriptionPk(), 80),
+    listAdminIndex(giftingKeys.entitySubscriptionPk(), 200),
     listAdminIndex(giftingKeys.entityReminderPk(), 80),
     listAdminIndex(giftingKeys.entityRecipientPk(), 80),
     listAdminIndex(giftingKeys.entityHistoryPk(), 80),
@@ -164,4 +168,43 @@ export async function adminDeletePlan(event: APIGatewayProxyEventV2) {
 export async function adminListGiftingLogs(event: APIGatewayProxyEventV2) {
   if (!admin(event)) return forbidden();
   return ok({ notifications: await listNotificationLogs(200) });
+}
+
+function dedupeMembershipOrders<T extends { id?: string; updatedAt?: string; userId?: string }>(rows: T[]): T[] {
+  const latest = new Map<string, T>();
+  for (const row of rows) {
+    const key = row.id || row.userId || "";
+    if (!key) continue;
+    const current = latest.get(key);
+    if (!current || String(row.updatedAt ?? "") > String(current.updatedAt ?? "")) {
+      latest.set(key, row);
+    }
+  }
+  return [...latest.values()].sort((a, b) => String(b.updatedAt ?? "").localeCompare(String(a.updatedAt ?? "")));
+}
+
+export async function adminListMembershipOrders(event: APIGatewayProxyEventV2) {
+  if (!admin(event)) return forbidden();
+  const rows = await listAdminIndex<GiftingSubscription & { reminderChannel?: string }>(
+    giftingKeys.entitySubscriptionPk(),
+    200
+  );
+  return ok({ orders: dedupeMembershipOrders(rows) });
+}
+
+export async function adminGetMembershipOrder(event: APIGatewayProxyEventV2) {
+  if (!admin(event)) return forbidden();
+  const userId = event.pathParameters?.userId;
+  if (!userId) return badRequest("Customer ID required");
+  const subscription = await getSubscription(userId);
+  if (!subscription) return notFound("Membership order not found");
+  const [prefs, reminders] = await Promise.all([getPrefs(userId), listReminders(userId)]);
+  return ok({
+    order: {
+      ...subscription,
+      reminderChannel: subscription.reminderChannel ?? prefs.reminderChannel,
+    },
+    prefs,
+    reminders: reminders.filter((r) => r.kind === "occasion").slice(-40),
+  });
 }
