@@ -138,7 +138,7 @@ export function MembershipJourney({
       ? customPlanPrice(durationMonths, plans)
       : plan.price
     : 0;
-  const window = durationMonths ? membershipWindow(draft.startDate, durationMonths) : null;
+  const membershipTerm = durationMonths ? membershipWindow(draft.startDate, durationMonths) : null;
 
   const eligible = useMemo<EligibleMembershipEvent[]>(() => {
     if (!durationMonths) return [];
@@ -281,7 +281,7 @@ export function MembershipJourney({
     }
     const [, month, day] = customDate.split("-").map(Number);
     if (!month || !day) return;
-    const endIso = window?.endIso;
+    const endIso = membershipTerm?.endIso;
     if (endIso && (customDate < draft.startDate || customDate > endIso)) {
       setError("Custom event dates must fall inside your membership window.");
       return;
@@ -353,7 +353,10 @@ export function MembershipJourney({
       setError("Razorpay is not configured.");
       return;
     }
-    const RazorpayCtor = (window as unknown as { Razorpay?: new (opts: Record<string, unknown>) => { open: () => void } }).Razorpay;
+    const host = globalThis as typeof globalThis & {
+      Razorpay?: new (opts: Record<string, unknown>) => { open: () => void };
+    };
+    const RazorpayCtor = host.Razorpay;
     if (!RazorpayCtor) {
       setError("Razorpay checkout failed to load. Refresh and try again.");
       return;
@@ -457,10 +460,10 @@ export function MembershipJourney({
         </div>
       )}
 
-      {draft.step === 2 && window && (
+      {draft.step === 2 && membershipTerm && (
         <div className="space-y-4">
           <p className="text-sm text-slate-600">
-            Occasions from {formatMembershipDate(draft.startDate)} to {formatMembershipDate(window.endIso)}
+            Occasions from {formatMembershipDate(draft.startDate)} to {formatMembershipDate(membershipTerm.endIso)}
             {durationMonths >= 12
               ? " — all supported events in this membership are available."
               : " — only events that fall in your membership window are shown."}
@@ -533,7 +536,7 @@ export function MembershipJourney({
                 className="w-full border rounded-lg px-3 py-2 text-sm"
                 value={customDate}
                 min={draft.startDate}
-                max={window.endIso}
+                max={membershipTerm.endIso}
                 onChange={(e) => setCustomDate(e.target.value)}
               />
               <button type="button" onClick={addCustomEvent} className="min-h-10 rounded-full bg-slate-800 px-4 text-sm text-white font-semibold">
@@ -591,7 +594,7 @@ export function MembershipJourney({
         </div>
       )}
 
-      {draft.step === 4 && plan && window && (
+      {draft.step === 4 && plan && membershipTerm && (
         <div className="space-y-4">
           <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-3 text-sm">
             <div className="flex justify-between gap-3">
@@ -610,7 +613,7 @@ export function MembershipJourney({
               <span className="text-slate-500">Starts:</span> {formatMembershipDate(draft.startDate)}
             </p>
             <p>
-              <span className="text-slate-500">Ends:</span> {formatMembershipDate(window.endIso)}
+              <span className="text-slate-500">Ends:</span> {formatMembershipDate(membershipTerm.endIso)}
             </p>
             <p>
               <span className="text-slate-500">Price:</span> ${price}
@@ -684,7 +687,7 @@ export function MembershipJourney({
           {payment?.clientSecret && method === "stripe" && (
             <StripePaymentForm
               clientSecret={payment.clientSecret}
-              returnUrl={`${typeof window !== "undefined" ? window.location.origin : ""}/account?tab=membership&step=5`}
+              returnUrl={`${typeof globalThis.location !== "undefined" ? globalThis.location.origin : ""}/account?tab=membership&step=5`}
               amountLabel={`$${price}`}
               onError={setError}
             />
