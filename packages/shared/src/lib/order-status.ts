@@ -33,7 +33,7 @@ export function formatOrderStatusLabel(status: string): string {
     case ORDER_STATUS.PAID:
       return "Paid";
     case ORDER_STATUS.ACCEPTED:
-      return "Accepted";
+      return "Order Confirmed";
     case ORDER_STATUS.ON_HOLD:
       return "On hold";
     case ORDER_STATUS.PROCESSING:
@@ -71,11 +71,12 @@ export function orderConfirmationHeadline(status: string): string {
     case ORDER_STATUS.DELIVERY_EXCEPTION:
       return "There's a delivery update";
     case ORDER_STATUS.DELIVERED:
-      return "Your order was delivered!";
+      return "Your Order Has Been Delivered!";
     case ORDER_STATUS.COMPLETE:
-      return "Your order is complete!";
-    case ORDER_STATUS.PROCESSING:
+      return "Your Order is Complete!";
     case ORDER_STATUS.ACCEPTED:
+      return "Your Order is Confirmed!";
+    case ORDER_STATUS.PROCESSING:
       return "Your order is being prepared!";
     case ORDER_STATUS.ON_HOLD:
       return "Your order is on hold";
@@ -108,8 +109,9 @@ export function orderConfirmationSubcopy(status: string): string {
       return "Your gift has arrived. We hope they love it — thank you for choosing BlossomPot.";
     case ORDER_STATUS.COMPLETE:
       return "Thank you for choosing BlossomPot.";
-    case ORDER_STATUS.PROCESSING:
     case ORDER_STATUS.ACCEPTED:
+      return "Thank you for choosing BlossomPot. We will send you another email once your order is on the way.";
+    case ORDER_STATUS.PROCESSING:
       return "We've received your payment and our team is preparing your order for USA dispatch.";
     case ORDER_STATUS.ON_HOLD:
       return "Our team is reviewing your order. We'll email you with an update shortly.";

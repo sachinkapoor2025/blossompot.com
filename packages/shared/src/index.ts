@@ -58,6 +58,7 @@ export * from "./lib/marketing-campaign-emails";
 export * from "./lib/home-page-banners";
 export * from "./lib/order-number";
 export * from "./lib/order-status";
+export * from "./lib/order-confirmed-email";
 export * from "./lib/carrier-tracking";
 export * from "./lib/order-vendors";
 export * from "./lib/postal-countries";

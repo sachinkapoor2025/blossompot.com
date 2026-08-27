@@ -678,9 +678,18 @@ export async function updateOrderStatus(event: APIGatewayProxyEventV2) {
     }),
   };
 
-  await docClient.send(new PutCommand({ TableName: ORDERS_TABLE, Item: updated }));
-
   const statusChanged = resolvedStatus !== order.status;
+  const shouldNotifyCustomer =
+    statusChanged &&
+    !(
+      order.status === ORDER_STATUS.PENDING_PAYMENT &&
+      resolvedStatus === ORDER_STATUS.CANCELLED
+    );
+  if (shouldNotifyCustomer) {
+    updated.lastCustomerStatusNotification = resolvedStatus;
+  }
+
+  await docClient.send(new PutCommand({ TableName: ORDERS_TABLE, Item: updated }));
 
   if (statusChanged && resolvedStatus === ORDER_STATUS.REFUNDED) {
     try {
@@ -701,16 +710,17 @@ export async function updateOrderStatus(event: APIGatewayProxyEventV2) {
 
   // Notify customer + order@blossompot on every status step (accepted → … → complete, cancelled/refunded).
   // Skip pending_payment → cancelled: shopper never paid; admin alert above is enough.
-  if (
-    statusChanged &&
-    !(
-      order.status === ORDER_STATUS.PENDING_PAYMENT &&
-      resolvedStatus === ORDER_STATUS.CANCELLED
-    )
-  ) {
-    const statusEmailResult = await notifyCustomerOrderStatusChange(updated);
-    if (!statusEmailResult.ok && !statusEmailResult.skipped) {
-      console.error("Order status email failed:", statusEmailResult.error);
+  // Skip when the same status is saved again (lastCustomerStatusNotification dedupe).
+  if (shouldNotifyCustomer) {
+    try {
+      const statusEmailResult = await notifyCustomerOrderStatusChange(updated, {
+        previousNotificationStatus: order.lastCustomerStatusNotification,
+      });
+      if (!statusEmailResult.ok && !statusEmailResult.skipped) {
+        console.error("Order status email failed:", statusEmailResult.error);
+      }
+    } catch (err) {
+      console.error("Order status notify error:", orderId, err);
     }
   }
 

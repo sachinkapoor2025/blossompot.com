@@ -199,6 +199,8 @@ export const orderSchema = z.object({
   trackingEvents: z.array(trackingEventSchema).max(50).optional(),
   /** Last order.status for which a customer status email was sent (dedupe). */
   lastTrackingNotificationStatus: z.string().optional(),
+  /** Last order.status for which customer email/WhatsApp status notify ran (dedupe). */
+  lastCustomerStatusNotification: z.string().optional(),
   /**
    * Per-vendor fulfillment (tracking) for mixed Orange County + BlossomPot carts.
    * Legacy single-vendor orders may only have top-level trackingNumber/carrier.

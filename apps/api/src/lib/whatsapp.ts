@@ -136,7 +136,11 @@ export function orderStatusWhatsAppMessage(input: {
         totalLabel: input.totalLabel ?? "",
       });
     case "accepted":
-      return `${hi}! We've accepted your gift order #${shortId}.${total}\n\nTrack: ${orderUrl}`;
+      return `${hi}, we have confirmed your ${SITE} order #${shortId}.${total}
+
+We will send you another message once your order is on the way.
+
+${orderUrl}`;
     case "on_hold":
       return `${hi}! Order #${shortId} is temporarily on hold while we review it.${total}\n\nWe'll update you soon. ${orderUrl}`;
     case "processing":
@@ -151,9 +155,15 @@ export function orderStatusWhatsAppMessage(input: {
       return `${hi}! Your gift order #${shortId} has shipped!\n${track || "Tracking will appear on your order page shortly."}${total}\n\nTrack: ${orderUrl}`;
     }
     case "delivered":
-      return `${hi}! Order #${shortId} is marked delivered. We hope your brother loves the gift!\n\n${orderUrl}`;
+      return `${hi}, your ${SITE} order #${shortId} has been delivered.${total}
+
+We would love your feedback. Please write a short review:
+${SITE_URL()}/reviews`;
     case "complete":
-      return `${hi}! Order #${shortId} is complete. Thank you for celebrating with ${SITE}.\n\nLeave a review: ${SITE_URL()}/reviews`;
+      return `${hi}, your ${SITE} order #${shortId} is complete.${total}
+
+We would love your feedback. Please write a short review:
+${SITE_URL()}/reviews`;
     case "cancelled":
       return `${hi}! Order #${shortId} has been cancelled.${total}\n\nQuestions? Reply here or visit ${orderUrl}`;
     case "refunded":

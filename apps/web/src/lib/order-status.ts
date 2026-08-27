@@ -3,7 +3,7 @@ import { ORDER_STATUS, ORDER_STATUS_TRANSITIONS } from "@blossompot/shared";
 export const ORDER_STATUS_LABELS: Record<string, string> = {
   [ORDER_STATUS.PENDING_PAYMENT]: "Pending payment",
   [ORDER_STATUS.PAID]: "Paid",
-  [ORDER_STATUS.ACCEPTED]: "Accepted",
+  [ORDER_STATUS.ACCEPTED]: "Order Confirmed",
   [ORDER_STATUS.ON_HOLD]: "On hold",
   [ORDER_STATUS.PROCESSING]: "Processing",
   [ORDER_STATUS.SHIPPED]: "Shipped",
@@ -19,7 +19,7 @@ export const ORDER_STATUS_LABELS: Record<string, string> = {
 export const ORDER_STATUS_BADGE: Record<string, string> = {
   [ORDER_STATUS.PENDING_PAYMENT]: "bg-amber-100 text-amber-800",
   [ORDER_STATUS.PAID]: "bg-blue-100 text-blue-800",
-  [ORDER_STATUS.ACCEPTED]: "bg-cyan-100 text-cyan-800",
+  [ORDER_STATUS.ACCEPTED]: "bg-emerald-100 text-emerald-800",
   [ORDER_STATUS.ON_HOLD]: "bg-orange-100 text-orange-900",
   [ORDER_STATUS.PROCESSING]: "bg-indigo-100 text-indigo-800",
   [ORDER_STATUS.SHIPPED]: "bg-purple-100 text-purple-800",

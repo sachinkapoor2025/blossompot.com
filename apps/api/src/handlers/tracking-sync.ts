@@ -273,9 +273,12 @@ export async function syncOrderTracking(
     (opts?.forceEmail || order.lastTrackingNotificationStatus !== nextStatus)
   ) {
     updated.lastTrackingNotificationStatus = nextStatus;
+    updated.lastCustomerStatusNotification = nextStatus;
     await docClient.send(new PutCommand({ TableName: ORDERS_TABLE, Item: updated }));
     try {
-      const emailResult = await notifyCustomerOrderStatusChange(updated);
+      const emailResult = await notifyCustomerOrderStatusChange(updated, {
+        previousNotificationStatus: order.lastCustomerStatusNotification,
+      });
       emailed = Boolean(emailResult.ok && !emailResult.skipped);
       if (!emailResult.ok && !emailResult.skipped) {
         console.error("Tracking sync email failed:", order.orderId, emailResult.error);

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  formatOrderStatusLabel,
   isOrderAwaitingPayment,
   isOrderPaymentSettled,
   orderConfirmationHeadline,
@@ -48,6 +49,12 @@ describe("orderConfirmationHeadline", () => {
   it("uses transit / delivered headlines", () => {
     assert.match(orderConfirmationHeadline("in_transit"), /transit/i);
     assert.match(orderConfirmationHeadline("out_for_delivery"), /out for delivery/i);
-    assert.match(orderConfirmationHeadline("delivered"), /delivered/i);
+    assert.equal(orderConfirmationHeadline("delivered"), "Your Order Has Been Delivered!");
+    assert.equal(orderConfirmationHeadline("complete"), "Your Order is Complete!");
+  });
+
+  it("labels accepted as Order Confirmed", () => {
+    assert.equal(orderConfirmationHeadline("accepted"), "Your Order is Confirmed!");
+    assert.equal(formatOrderStatusLabel("accepted"), "Order Confirmed");
   });
 });

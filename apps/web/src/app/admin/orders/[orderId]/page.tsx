@@ -1004,14 +1004,14 @@ export default function AdminOrderDetailPage() {
 
               {isReviveFromCancelled && transitions.length > 0 && (
                 <p className="text-xs text-amber-800 bg-amber-50 border border-amber-100 rounded-md px-2 py-1.5">
-                  This order was cancelled. Moving it to On hold, Accepted, or Processing revives it for
+                  This order was cancelled. Moving it to On hold, Order Confirmed, or Processing revives it for
                   fulfillment.
                 </p>
               )}
 
               {isAcceptOnly && !isReviveFromCancelled && (
                 <p className="text-xs text-slate-500">
-                  Accept confirms the order for fulfillment. Add tracking when you move it to Processing or Shipped.
+                  Confirming the order starts fulfillment. Add tracking when you move it to Processing or Shipped.
                 </p>
               )}
 
@@ -1125,10 +1125,10 @@ export default function AdminOrderDetailPage() {
                     ? isOnHoldOnly
                       ? "Revive → on hold"
                       : isAcceptOnly
-                        ? "Revive → accepted"
+                        ? "Revive → order confirmed"
                         : "Revive order"
                     : isAcceptOnly
-                      ? "Accept order"
+                      ? "Confirm order"
                       : isOnHoldOnly
                         ? "Put on hold"
                         : "Save update"}
