@@ -125,6 +125,8 @@ export async function adminCreatePlan(event: APIGatewayProxyEventV2) {
     discountPercent: parsed.data.discountPercent,
     renewalEnabled: parsed.data.renewalEnabled,
     sortOrder: parsed.data.sortOrder ?? 10,
+    isCustom: parsed.data.isCustom,
+    allowsEventCustomization: parsed.data.allowsEventCustomization,
     createdAt: timestamp,
     updatedAt: timestamp,
   };

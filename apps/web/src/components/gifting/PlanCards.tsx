@@ -83,6 +83,14 @@ export function PlanCards({
                     {selected ? "Selected" : "Select Plan"}
                   </button>
                 )}
+                {teaser && (
+                  <a
+                    href={`/account?tab=membership&plan=${encodeURIComponent(plan.id)}`}
+                    className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-nav text-white font-semibold"
+                  >
+                    Select Plan
+                  </a>
+                )}
               </div>
             </article>
           );
@@ -129,6 +137,14 @@ export function PlanCards({
                 >
                   Select Plan
                 </button>
+              )}
+              {teaser && (
+                <a
+                  href={`/account?tab=membership&plan=${encodeURIComponent(benefitsPlan.id)}`}
+                  className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-nav text-white font-semibold"
+                >
+                  Select Plan
+                </a>
               )}
               <button
                 type="button"

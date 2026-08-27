@@ -152,8 +152,7 @@ export function scoreGiftProduct(
 
   const disliked = (context.history ?? []).filter((h) => h.feedback === "not_suitable").map((h) => h.productSlug);
   if (disliked.includes(product.slug)) {
-    score -= 50;
-    reasons.push("Previously marked not suitable");
+    return { score: -1000, reasons: ["Previously marked not suitable"] };
   }
 
   const loved = (context.history ?? []).filter((h) => h.feedback === "loved" || h.feedback === "perfect");

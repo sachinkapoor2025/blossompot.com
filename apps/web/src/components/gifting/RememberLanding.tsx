@@ -3,11 +3,11 @@ import type { SubscriptionPlan } from "@blossompot/shared";
 import { PlanCards } from "./PlanCards";
 
 const STEPS = [
-  { n: "1", title: "Add Your People", text: "Wife, mom, friend — whoever you never want to forget." },
-  { n: "2", title: "Save Their Special Dates", text: "Birthdays, anniversaries, and the day you met." },
-  { n: "3", title: "We Remind You", text: "Email — and WhatsApp when your account is connected." },
-  { n: "4", title: "Choose or Let Us Surprise You", text: "Pick flowers, cake, a combo, or Surprise Me." },
-  { n: "5", title: "We Deliver", text: "The gift arrives. Next year, we remember again." },
+  { n: "1", title: "Select a plan", text: "3 months, 6 months, 1 year, 2 years, or a custom length." },
+  { n: "2", title: "Choose events", text: "We’ll show occasions that fall in your membership window." },
+  { n: "3", title: "Reminder preference", text: "WhatsApp, email, or both — you decide." },
+  { n: "4", title: "Review & confirm", text: "Check the plan, dates, and events before paying." },
+  { n: "5", title: "Pay & remember", text: "Activate membership. We remind you before each occasion." },
 ];
 
 export function RememberLanding({ plans }: { plans: SubscriptionPlan[] }) {
@@ -18,19 +18,19 @@ export function RememberLanding({ plans }: { plans: SubscriptionPlan[] }) {
           <p className="text-xs uppercase tracking-[0.25em] text-white/70">Personal gifting assistant</p>
           <h1 className="mt-3 text-3xl sm:text-5xl font-bold leading-tight">Never Forget a Special Occasion Again.</h1>
           <p className="mt-4 text-white/90 max-w-2xl mx-auto text-base sm:text-lg">
-            You tell us the dates. We remember them, help you choose the perfect gift, and make sure your special moments don&apos;t get forgotten.
+            Pick a membership, choose the dates that matter, and we’ll remind you in time to send the perfect gift.
           </p>
           <Link
             href="/account?tab=membership"
             className="mt-8 inline-flex min-h-12 items-center rounded-full bg-white px-6 text-sm font-semibold text-primary"
           >
-            Start Remembering
+            Start membership
           </Link>
         </div>
       </section>
 
       <section className="max-w-5xl mx-auto px-4 py-12">
-        <h2 className="text-2xl font-bold text-primary text-center mb-8">How it works</h2>
+        <h2 className="text-2xl font-bold text-primary text-center mb-8">A simple 5-step membership</h2>
         <ol className="grid gap-4 sm:grid-cols-5">
           {STEPS.map((step) => (
             <li key={step.n} className="rounded-2xl border border-slate-200 bg-white p-4 text-center">
@@ -45,14 +45,9 @@ export function RememberLanding({ plans }: { plans: SubscriptionPlan[] }) {
       <section className="max-w-5xl mx-auto px-4 pb-16">
         <h2 className="text-2xl font-bold text-primary text-center mb-2">Choose how long we remember</h2>
         <p className="text-center text-slate-600 text-sm mb-8">
-          Not a discount membership — a never-forget service for the people you love.
+          View benefits first, then select a plan. You’ll pick events and reminders next — not all at once.
         </p>
         <PlanCards plans={plans} teaser />
-        <div className="text-center mt-8">
-          <Link href="/account?tab=membership" className="inline-flex min-h-12 items-center rounded-full bg-nav px-6 text-sm font-semibold text-white">
-            Start Remembering
-          </Link>
-        </div>
       </section>
     </div>
   );

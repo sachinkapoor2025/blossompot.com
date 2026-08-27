@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   durationLabel,
   formatMembershipDate,
@@ -37,22 +38,38 @@ export function MembershipPanel({
     return (
       <div className="space-y-5">
         {justJoined && (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-            <h2 className="text-lg font-bold text-emerald-900">Membership confirmed</h2>
-            <p className="text-sm text-emerald-800 mt-1">
-              {subscription.planName} is active. We’ll remind you before the occasions you selected.
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+            <p className="text-xs uppercase tracking-[0.2em] text-emerald-700 font-semibold">Membership confirmed</p>
+            <h2 className="text-xl font-bold text-emerald-950 mt-1">You’re all set</h2>
+            <p className="text-sm text-emerald-800 mt-2">
+              {subscription.planName} is active. We’ll remind you by{" "}
+              {reminderChannelLabel(subscription.reminderChannel ?? channel).toLowerCase()} before the occasions you
+              selected. Gifts are never charged automatically.
             </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link
+                href="/account?tab=people"
+                className="inline-flex min-h-11 items-center rounded-full bg-nav px-5 text-sm font-semibold text-white"
+              >
+                Add your people
+              </Link>
+              <Link
+                href="/account?tab=calendar"
+                className="inline-flex min-h-11 items-center rounded-full border border-emerald-300 px-5 text-sm font-semibold text-emerald-900"
+              >
+                View calendar
+              </Link>
+            </div>
           </div>
         )}
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm">
+        <div className="rounded-xl border border-emerald-200 bg-white p-4 text-sm">
           <p className="font-semibold text-emerald-900">{subscription.planName} is active</p>
           {subscription.membershipStartDate && (
             <p className="text-emerald-800 mt-1">Starts {formatMembershipDate(subscription.membershipStartDate)}</p>
           )}
           {subscription.expiresAt && (
             <p className="text-emerald-800 mt-1">
-              Renews / ends{" "}
-              {new Date(subscription.expiresAt).toLocaleDateString("en-US", { dateStyle: "long" })}
+              Renews / ends {new Date(subscription.expiresAt).toLocaleDateString("en-US", { dateStyle: "long" })}
             </p>
           )}
           <p className="text-emerald-800 mt-1">

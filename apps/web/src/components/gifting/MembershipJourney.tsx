@@ -11,6 +11,7 @@ import {
   durationLabel,
   eligibleMembershipEvents,
   formatMembershipDate,
+  groupEligibleEvents,
   membershipWindow,
   reminderChannelLabel,
   resolvePlanDurationMonths,
@@ -28,7 +29,7 @@ import { StripePaymentForm } from "@/components/StripePaymentForm";
 import { PaymentMethodPicker, type PaymentMethod } from "@/components/PaymentMethodPicker";
 import { PlanCards } from "./PlanCards";
 
-const DRAFT_KEY = "blossompot.membership.draft.v1";
+const DRAFT_KEY = "blossompot.membership.draft.v2";
 
 type Draft = {
   step: number;
@@ -68,6 +69,10 @@ function loadDraft(channel: GiftingChannel): Draft {
   }
 }
 
+function defaultKeys(events: EligibleMembershipEvent[]) {
+  return events.filter((event) => !event.needsDate).map((event) => event.key);
+}
+
 function Stepper({ step }: { step: number }) {
   return (
     <ol className="grid grid-cols-5 gap-1 sm:gap-2 mb-6">
@@ -78,14 +83,10 @@ function Stepper({ step }: { step: number }) {
           <li key={item.id} className="text-center">
             <p
               className={`mx-auto flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${
-                current
-                  ? "bg-nav text-white"
-                  : done
-                    ? "bg-emerald-600 text-white"
-                    : "bg-slate-200 text-slate-600"
+                current ? "bg-nav text-white" : done ? "bg-emerald-600 text-white" : "bg-slate-200 text-slate-600"
               }`}
             >
-              {item.id}
+              {done ? "✓" : item.id}
             </p>
             <p className={`mt-1 text-[11px] sm:text-xs font-semibold ${current ? "text-primary" : "text-slate-500"}`}>
               {item.label}
@@ -115,6 +116,7 @@ export function MembershipJourney({
   const client = useMemo(() => giftingApi(token, sessionId), [token, sessionId]);
   const captureLead = useLeadCapture(sessionId);
   const confirmOnce = useRef(false);
+  const appliedPlan = useRef(false);
 
   const [draft, setDraft] = useState<Draft>(() => loadDraft(channel));
   const [error, setError] = useState("");
@@ -133,12 +135,9 @@ export function MembershipJourney({
 
   const plan = plans.find((p) => p.id === draft.planId) ?? null;
   const durationMonths = plan ? resolvePlanDurationMonths(plan, draft.customDurationMonths) : 0;
-  const price = plan
-    ? plan.isCustom
-      ? customPlanPrice(durationMonths, plans)
-      : plan.price
-    : 0;
+  const price = plan ? (plan.isCustom ? customPlanPrice(durationMonths, plans) : plan.price) : 0;
   const membershipTerm = durationMonths ? membershipWindow(draft.startDate, durationMonths) : null;
+  const customizingPlan = Boolean(plan?.isCustom && draft.step === 1);
 
   const eligible = useMemo<EligibleMembershipEvent[]>(() => {
     if (!durationMonths) return [];
@@ -149,10 +148,12 @@ export function MembershipJourney({
     });
   }, [draft.startDate, draft.customEvents, durationMonths]);
 
+  const grouped = useMemo(() => groupEligibleEvents(eligible), [eligible]);
+
   const selectedEvents: MembershipSelectedEvent[] = useMemo(() => {
     const chosen = draft.customized
-      ? eligible.filter((e) => draft.selectedKeys.includes(e.key))
-      : eligible.filter((e) => !e.needsDate);
+      ? eligible.filter((event) => draft.selectedKeys.includes(event.key))
+      : eligible.filter((event) => !event.needsDate);
     return toPersistedEvents(chosen);
   }, [draft.customized, draft.selectedKeys, eligible]);
 
@@ -170,13 +171,14 @@ export function MembershipJourney({
       const params = new URLSearchParams(searchParams.toString());
       params.set("tab", "membership");
       params.set("step", String(step));
+      if (extra?.planId || draft.planId) params.set("plan", extra?.planId || draft.planId);
       router.replace(`/account?${params.toString()}`, { scroll: false });
     },
-    [router, searchParams]
+    [router, searchParams, draft.planId]
   );
 
   useEffect(() => {
-    const urlStep = Number(searchParams.get("step") ?? draft.step);
+    const urlStep = Number(searchParams.get("step") || draft.step);
     if (urlStep >= 2 && !draft.planId) {
       syncStep(1);
       return;
@@ -199,10 +201,7 @@ export function MembershipJourney({
     void (async () => {
       setBusy(true);
       try {
-        await client.confirm({
-          subscriptionId,
-          paymentIntentId: paymentIntent,
-        });
+        await client.confirm({ subscriptionId, paymentIntentId: paymentIntent });
         sessionStorage.removeItem(DRAFT_KEY);
         onComplete();
       } catch (err) {
@@ -214,40 +213,78 @@ export function MembershipJourney({
     })();
   }, [searchParams, payment, draft.pendingSubscriptionId, client, onComplete]);
 
-  const selectPlan = (planId: string) => {
-    const nextPlan = plans.find((p) => p.id === planId);
-    setError("");
-    void captureLead({ page: "/account?tab=membership", source: "browse" });
-    syncStep(1, {
-      planId,
-      customDurationMonths: nextPlan?.isCustom ? 12 : nextPlan?.durationMonths ?? 12,
-      confirmed: false,
-    });
-  };
-
   const goEvents = (overrides?: Partial<Draft>) => {
     const next = { ...draft, ...overrides };
-    const nextPlan = plans.find((p) => p.id === next.planId) ?? plan;
+    const nextPlan = plans.find((item) => item.id === next.planId) ?? plan;
     if (!nextPlan) {
       setError("Select a membership plan to continue.");
       return;
     }
-    if (nextPlan.isCustom && (next.customDurationMonths < CUSTOM_PLAN_DURATION_MIN || next.customDurationMonths > CUSTOM_PLAN_DURATION_MAX)) {
+    if (
+      nextPlan.isCustom &&
+      (next.customDurationMonths < CUSTOM_PLAN_DURATION_MIN || next.customDurationMonths > CUSTOM_PLAN_DURATION_MAX)
+    ) {
       setError(`Choose a custom length between ${CUSTOM_PLAN_DURATION_MIN} and ${CUSTOM_PLAN_DURATION_MAX} months.`);
       return;
     }
+    const months = resolvePlanDurationMonths(nextPlan, next.customDurationMonths);
     const nextEligible = eligibleMembershipEvents({
       startDate: next.startDate,
-      durationMonths: resolvePlanDurationMonths(nextPlan, next.customDurationMonths),
+      durationMonths: months,
       customEvents: next.customEvents,
     });
     syncStep(2, {
       ...overrides,
-      selectedKeys: nextEligible.filter((e) => !e.needsDate).map((e) => e.key),
+      selectedKeys: defaultKeys(nextEligible),
       customized: false,
     });
     setCustomizing(false);
     setError("");
+  };
+
+  useEffect(() => {
+    if (appliedPlan.current) return;
+    if (draft.step !== 1 || draft.planId) {
+      if (draft.planId) appliedPlan.current = true;
+      return;
+    }
+    const urlPlan = searchParams.get("plan");
+    const nextPlan = urlPlan ? plans.find((item) => item.id === urlPlan) : undefined;
+    if (!nextPlan) return;
+    appliedPlan.current = true;
+    if (nextPlan.isCustom) {
+      setDraft((prev) => ({ ...prev, planId: nextPlan.id, customDurationMonths: 12 }));
+      return;
+    }
+    goEvents({
+      planId: nextPlan.id,
+      customDurationMonths: nextPlan.durationMonths,
+      startDate: draft.startDate || todayIsoDate(),
+      confirmed: false,
+    });
+    // Deep-link a plan from /remember only once while still on step 1.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, plans, draft.step, draft.planId]);
+
+  const selectPlan = (planId: string) => {
+    const nextPlan = plans.find((item) => item.id === planId);
+    if (!nextPlan) return;
+    setError("");
+    void captureLead({ page: "/account?tab=membership", source: "browse" });
+    if (nextPlan.isCustom) {
+      syncStep(1, {
+        planId,
+        customDurationMonths: 12,
+        confirmed: false,
+      });
+      return;
+    }
+    goEvents({
+      planId,
+      customDurationMonths: nextPlan.durationMonths,
+      startDate: draft.startDate || todayIsoDate(),
+      confirmed: false,
+    });
   };
 
   const goReminders = () => {
@@ -273,6 +310,21 @@ export function MembershipJourney({
     syncStep(5, { confirmed: true });
   };
 
+  const changeStartDate = (startDate: string) => {
+    const nextEligible = eligibleMembershipEvents({
+      startDate,
+      durationMonths,
+      customEvents: draft.customEvents,
+    });
+    setDraft((prev) => ({
+      ...prev,
+      startDate,
+      selectedKeys: prev.customized
+        ? prev.selectedKeys.filter((key) => nextEligible.some((event) => event.key === key))
+        : defaultKeys(nextEligible),
+    }));
+  };
+
   const addCustomEvent = () => {
     const title = customTitle.trim();
     if (!title || !customDate) {
@@ -293,7 +345,7 @@ export function MembershipJourney({
       durationMonths,
       customEvents: nextCustom,
     });
-    const extraKeys = nextEligible.filter((e) => e.source === "custom").map((e) => e.key);
+    const extraKeys = nextEligible.filter((event) => event.source === "custom").map((event) => event.key);
     setDraft((prev) => ({
       ...prev,
       customEvents: nextCustom,
@@ -320,7 +372,10 @@ export function MembershipJourney({
       });
       const secret = started.payment.clientSecret ?? started.payment.paymentIntentId ?? "";
       const localPayment =
-        !secret || secret.includes("_dev_") || secret.includes("_loadtest_") || (started.payment.razorpayOrderId ?? "").includes("_dev_");
+        !secret ||
+        secret.includes("_dev_") ||
+        secret.includes("_loadtest_") ||
+        (started.payment.razorpayOrderId ?? "").includes("_dev_");
       if (localPayment) {
         await client.confirm({
           subscriptionId: started.subscription.id,
@@ -399,129 +454,145 @@ export function MembershipJourney({
         </p>
       </div>
       <Stepper step={draft.step} />
+      {plan && draft.step > 1 && (
+        <p className="text-sm text-slate-600 -mt-3">
+          {plan.isCustom ? "Custom Plan" : plan.name} · {durationLabel(durationMonths)} · ${price}
+        </p>
+      )}
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       {draft.step === 1 && (
         <div className="space-y-5">
-          <PlanCards plans={plans} busy={busy} selectedPlanId={draft.planId} onSelect={selectPlan} />
-          {plan && (
-            <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-3">
-              <p className="text-sm font-semibold text-slate-800">
-                {plan.isCustom ? "Customize your plan" : "Membership start date"}
-              </p>
-              {plan.isCustom && (
-                <label className="block text-sm">
-                  Duration (1–24 months)
-                  <input
-                    type="number"
-                    min={CUSTOM_PLAN_DURATION_MIN}
-                    max={CUSTOM_PLAN_DURATION_MAX}
-                    className="mt-1 w-full border rounded-lg px-3 py-2"
-                    value={draft.customDurationMonths}
-                    onChange={(e) =>
-                      setDraft((prev) => ({ ...prev, customDurationMonths: Number(e.target.value) }))
-                    }
-                  />
-                </label>
-              )}
-              <label className="block text-sm">
-                Start date
+          {customizingPlan ? (
+            <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-lg font-bold text-primary">Custom Plan</h3>
+                  <p className="text-sm text-slate-600 mt-1">
+                    Choose a length from {CUSTOM_PLAN_DURATION_MIN} to {CUSTOM_PLAN_DURATION_MAX} months. Skip to use 1
+                    year.
+                  </p>
+                </div>
+                <button type="button" className="text-sm font-semibold text-nav" onClick={() => syncStep(1, { planId: "" })}>
+                  Change plan
+                </button>
+              </div>
+              <label className="block text-sm font-medium text-slate-700">
+                Duration (months)
                 <input
-                  type="date"
+                  type="number"
+                  min={CUSTOM_PLAN_DURATION_MIN}
+                  max={CUSTOM_PLAN_DURATION_MAX}
                   className="mt-1 w-full border rounded-lg px-3 py-2"
-                  value={draft.startDate}
-                  onChange={(e) => setDraft((prev) => ({ ...prev, startDate: e.target.value }))}
+                  value={draft.customDurationMonths}
+                  onChange={(e) =>
+                    setDraft((prev) => ({ ...prev, customDurationMonths: Number(e.target.value) }))
+                  }
                 />
               </label>
-              {plan.isCustom && (
-                <p className="text-sm text-slate-600">
-                  {durationLabel(durationMonths)} · ${price}
-                </p>
-              )}
+              <p className="text-sm text-slate-600">
+                {durationLabel(durationMonths)} · ${price}
+              </p>
               <div className="flex flex-wrap gap-2">
                 <button type="button" onClick={() => goEvents()} className="min-h-11 rounded-full bg-nav px-5 text-white font-semibold">
                   Next
                 </button>
                 <button
                   type="button"
-                  onClick={() =>
-                    goEvents({
-                      startDate: todayIsoDate(),
-                      customDurationMonths: plan.isCustom ? 12 : draft.customDurationMonths,
-                    })
-                  }
+                  onClick={() => goEvents({ customDurationMonths: 12, startDate: todayIsoDate() })}
                   className="min-h-11 rounded-full border border-slate-300 px-5 font-semibold"
                 >
                   Skip
                 </button>
               </div>
             </div>
+          ) : (
+            <PlanCards plans={plans} busy={busy} selectedPlanId={draft.planId} onSelect={selectPlan} />
           )}
         </div>
       )}
 
       {draft.step === 2 && membershipTerm && (
         <div className="space-y-4">
-          <p className="text-sm text-slate-600">
-            Occasions from {formatMembershipDate(draft.startDate)} to {formatMembershipDate(membershipTerm.endIso)}
-            {durationMonths >= 12
-              ? " — all supported events in this membership are available."
-              : " — only events that fall in your membership window are shown."}
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {plan?.allowsEventCustomization !== false && (
-              <button
-                type="button"
-                onClick={() => {
-                  setCustomizing(true);
-                  setDraft((prev) => ({
-                    ...prev,
-                    customized: true,
-                    selectedKeys: prev.selectedKeys.length ? prev.selectedKeys : eligible.filter((e) => !e.needsDate).map((e) => e.key),
-                  }));
-                }}
-                className="min-h-10 rounded-full border border-slate-300 px-4 text-sm font-semibold"
-              >
-                Customize Events
-              </button>
-            )}
+          <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-3">
+            <p className="text-sm text-slate-600">
+              {durationMonths >= 12
+                ? "All supported occasions in this membership are available."
+                : "Only events that fall in your membership window are shown."}{" "}
+              Window: {formatMembershipDate(draft.startDate)} – {formatMembershipDate(membershipTerm.endIso)}.
+            </p>
+            <label className="block text-sm font-medium text-slate-700 max-w-xs">
+              Membership start date
+              <input
+                type="date"
+                className="mt-1 w-full border rounded-lg px-3 py-2"
+                value={draft.startDate}
+                onChange={(e) => changeStartDate(e.target.value)}
+              />
+            </label>
           </div>
-          <ul className="space-y-2">
-            {eligible.map((event) => {
-              const checked = draft.customized ? draft.selectedKeys.includes(event.key) : !event.needsDate;
-              return (
-                <li key={event.key} className="rounded-xl border border-slate-200 bg-white px-4 py-3 flex items-start gap-3">
-                  {customizing ? (
-                    <input
-                      type="checkbox"
-                      className="mt-1"
-                      checked={checked}
-                      onChange={() => {
-                        setDraft((prev) => {
-                          const has = prev.selectedKeys.includes(event.key);
-                          return {
-                            ...prev,
-                            customized: true,
-                            selectedKeys: has
-                              ? prev.selectedKeys.filter((k) => k !== event.key)
-                              : [...prev.selectedKeys, event.key],
-                          };
-                        });
-                      }}
-                    />
-                  ) : (
-                    <span className="mt-1 text-emerald-600">{checked ? "✓" : "–"}</span>
-                  )}
-                  <div>
-                    <p className="font-semibold text-slate-800">{event.title}</p>
-                    <p className="text-sm text-slate-500">
-                      {event.date ? formatMembershipDate(event.date) : event.needsDate ? "Add a date to include this" : "Saved dates during membership"}
-                    </p>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+          {plan?.allowsEventCustomization !== false && (
+            <button
+              type="button"
+              onClick={() => {
+                setCustomizing(true);
+                setDraft((prev) => ({
+                  ...prev,
+                  customized: true,
+                  selectedKeys: prev.selectedKeys.length ? prev.selectedKeys : defaultKeys(eligible),
+                }));
+              }}
+              className="min-h-10 rounded-full border border-slate-300 px-4 text-sm font-semibold"
+            >
+              Customize Events
+            </button>
+          )}
+          {grouped.map((section) => (
+            <div key={section.group}>
+              <h3 className="text-sm font-bold text-slate-700 mb-2">{section.label}</h3>
+              <ul className="space-y-2">
+                {section.events.map((event) => {
+                  const checked = draft.customized ? draft.selectedKeys.includes(event.key) : !event.needsDate;
+                  return (
+                    <li key={event.key} className="rounded-xl border border-slate-200 bg-white px-4 py-3 flex items-start gap-3">
+                      {customizing ? (
+                        <input
+                          type="checkbox"
+                          className="mt-1"
+                          checked={checked}
+                          onChange={() => {
+                            setDraft((prev) => {
+                              const has = prev.selectedKeys.includes(event.key);
+                              return {
+                                ...prev,
+                                customized: true,
+                                selectedKeys: has
+                                  ? prev.selectedKeys.filter((key) => key !== event.key)
+                                  : [...prev.selectedKeys, event.key],
+                              };
+                            });
+                          }}
+                        />
+                      ) : (
+                        <span className="mt-1 text-emerald-600">{checked ? "✓" : "–"}</span>
+                      )}
+                      <div>
+                        <p className="font-semibold text-slate-800">{event.title}</p>
+                        <p className="text-sm text-slate-500">
+                          {event.date
+                            ? formatMembershipDate(event.date)
+                            : event.needsDate
+                              ? "Add a date to include this"
+                              : "Saved dates during membership"}
+                        </p>
+                        <p className="text-xs text-slate-400 mt-0.5">{event.description}</p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
           {customizing && (
             <div className="rounded-xl border border-dashed border-slate-300 p-4 space-y-3">
               <p className="text-sm font-semibold">Add a custom date in this window</p>
@@ -556,7 +627,7 @@ export function MembershipJourney({
               onClick={() => {
                 syncStep(3, {
                   customized: false,
-                  selectedKeys: eligible.filter((e) => !e.needsDate).map((e) => e.key),
+                  selectedKeys: defaultKeys(eligible),
                 });
               }}
               className="min-h-11 rounded-full border border-slate-300 px-5 font-semibold"
@@ -571,15 +642,28 @@ export function MembershipJourney({
         <div className="space-y-4">
           <fieldset className="space-y-2">
             <legend className="text-sm font-semibold text-slate-700">How should we remind you?</legend>
-            {(["email", "whatsapp", "both"] as const).map((value) => (
-              <label key={value} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm">
+            {([
+              { value: "email" as const, hint: "Occasion emails before each selected date." },
+              { value: "whatsapp" as const, hint: "WhatsApp when your account is connected. Otherwise we use email." },
+              { value: "both" as const, hint: "Email and WhatsApp for the same occasion." },
+            ]).map((option) => (
+              <label
+                key={option.value}
+                className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${
+                  draft.reminderChannel === option.value ? "border-primary bg-rose-50" : "border-slate-200 bg-white"
+                }`}
+              >
                 <input
                   type="radio"
                   name="reminder-channel"
-                  checked={draft.reminderChannel === value}
-                  onChange={() => setDraft((prev) => ({ ...prev, reminderChannel: value }))}
+                  className="mt-1"
+                  checked={draft.reminderChannel === option.value}
+                  onChange={() => setDraft((prev) => ({ ...prev, reminderChannel: option.value }))}
                 />
-                {reminderChannelLabel(value)}
+                <span>
+                  <span className="font-semibold text-slate-800">{reminderChannelLabel(option.value)}</span>
+                  <span className="block text-slate-500 mt-0.5">{option.hint}</span>
+                </span>
               </label>
             ))}
           </fieldset>
@@ -663,7 +747,8 @@ export function MembershipJourney({
             </p>
           )}
           <p className="text-sm text-slate-600">
-            Pay ${price} to activate {plan.isCustom ? "your custom plan" : plan.name}. Card details are processed by Stripe or Razorpay — we never store them.
+            Pay ${price} to activate {plan.isCustom ? "your custom plan" : plan.name}. Card details are processed by Stripe
+            or Razorpay — we never store them.
           </p>
           <PaymentMethodPicker value={method} onChange={setMethod} checkoutCurrency={plan.currency} />
           {method === "razorpay" && (
@@ -671,7 +756,7 @@ export function MembershipJourney({
           )}
           {!payment && (
             <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={() => syncStep(4)} className="min-h-11 rounded-full border border-slate-300 px-5 font-semibold">
+              <button type="button" onClick={() => syncStep(4, { confirmed: false })} className="min-h-11 rounded-full border border-slate-300 px-5 font-semibold">
                 Back
               </button>
               <button

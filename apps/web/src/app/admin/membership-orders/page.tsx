@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useApiClient } from "@/lib/auth-context";
 import {
   durationLabel,
@@ -11,7 +12,7 @@ import {
   type GiftingSubscription,
   type MembershipSelectedEvent,
 } from "@blossompot/shared";
-import { paginate, sortItems, type SortDir } from "@/lib/admin-utils";
+import { formatMoney, paginate, sortItems, type SortDir } from "@/lib/admin-utils";
 import { TableControls } from "@/components/admin/TableControls";
 
 type MembershipOrder = GiftingSubscription & {
@@ -36,6 +37,7 @@ function paymentLabel(status: string) {
 
 export default function AdminMembershipOrdersPage() {
   const apiClient = useApiClient();
+  const router = useRouter();
   const [orders, setOrders] = useState<MembershipOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("all");
@@ -75,12 +77,21 @@ export default function AdminMembershipOrdersPage() {
   const { items, totalPages, total } = paginate(filtered, page, pageSize);
 
   return (
-    <div className="p-4 sm:p-8 max-w-7xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-primary">Membership / Reminder Orders</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Purchased reminder memberships, selected occasions, and notification preferences.
-        </p>
+    <div className="max-w-7xl mx-auto px-4 py-10">
+      <div className="flex items-center justify-between mb-6 gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">Membership / Reminder Orders</h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Purchased reminder memberships, selected occasions, and notification preferences.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={load}
+          className="text-sm border border-slate-200 rounded-lg px-3 py-1.5 hover:bg-slate-50"
+        >
+          Refresh
+        </button>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-4">
@@ -138,41 +149,63 @@ export default function AdminMembershipOrdersPage() {
                 <th className="p-3">Customer</th>
                 <th className="p-3">Plan</th>
                 <th className="p-3">Duration</th>
+                <th className="p-3">Start</th>
                 <th className="p-3">Events</th>
                 <th className="p-3">Reminders</th>
                 <th className="p-3">Payment</th>
                 <th className="p-3">Status</th>
-                <th className="p-3">Updated</th>
+                <th className="p-3">Total</th>
               </tr>
             </thead>
             <tbody>
               {items.length === 0 && (
                 <tr>
-                  <td className="p-4 text-slate-500" colSpan={8}>
+                  <td className="p-4 text-slate-500" colSpan={9}>
                     No membership orders yet.
                   </td>
                 </tr>
               )}
               {items.map((order) => (
-                <tr key={order.id} className="border-t">
+                <tr
+                  key={order.id}
+                  className="border-t hover:bg-slate-50 cursor-pointer"
+                  onClick={() => router.push(`/admin/membership-orders/${encodeURIComponent(order.userId)}`)}
+                >
                   <td className="p-3">
-                    <Link href={`/admin/membership-orders/${encodeURIComponent(order.userId)}`} className="font-semibold text-nav">
+                    <Link
+                      href={`/admin/membership-orders/${encodeURIComponent(order.userId)}`}
+                      className="font-semibold text-nav"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       {order.email}
                     </Link>
                   </td>
                   <td className="p-3">{order.planName}</td>
                   <td className="p-3">{durationLabel(order.durationMonths)}</td>
-                  <td className="p-3">{order.selectedEvents?.length ?? 0}</td>
+                  <td className="p-3 text-slate-600">
+                    {order.membershipStartDate ? formatMembershipDate(order.membershipStartDate) : "—"}
+                  </td>
+                  <td className="p-3">
+                    {order.selectedEvents?.length ?? 0}
+                    {order.selectedEvents?.[0]?.date ? (
+                      <span className="block text-xs text-slate-500">
+                        Next {formatMembershipDate(order.selectedEvents[0].date)}
+                      </span>
+                    ) : null}
+                  </td>
                   <td className="p-3">{reminderChannelLabel(order.reminderChannel ?? "email")}</td>
-                  <td className="p-3">{paymentLabel(order.status)}</td>
+                  <td className="p-3">
+                    {paymentLabel(order.status)}
+                    {order.paymentMethod ? (
+                      <span className="block text-xs text-slate-500">{order.paymentMethod}</span>
+                    ) : null}
+                  </td>
                   <td className="p-3">
                     <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${statusClass(order.status)}`}>
                       {order.status.replace("_", " ")}
                     </span>
                   </td>
-                  <td className="p-3 text-slate-500">
-                    {order.membershipStartDate ? formatMembershipDate(order.membershipStartDate) : order.updatedAt.slice(0, 10)}
-                  </td>
+                  <td className="p-3">{formatMoney(order.price, order.currency)}</td>
                 </tr>
               ))}
             </tbody>

@@ -7,6 +7,7 @@ import {
   customPlanPrice,
   durationLabel,
   eligibleMembershipEvents,
+  groupEligibleEvents,
   membershipWindow,
   resolveMembershipEvents,
   resolvePlanDurationMonths,
@@ -55,8 +56,8 @@ describe("membership events", () => {
     assert.ok(types.has("valentines"));
     assert.ok(types.has("chocolate_day"));
     assert.ok(types.has("christmas"));
-    assert.ok(types.has("birthday"));
-    assert.ok(types.has("anniversary"));
+    assert.ok(events.some((e) => e.occasionType === "birthday"));
+    assert.ok(events.some((e) => e.occasionType === "anniversary"));
     assert.ok(events.some((e) => e.title === "Chocolate Day" && e.date === "2027-07-07"));
   });
 
@@ -131,6 +132,14 @@ describe("membership events", () => {
     assert.ok(mid > 49 && mid < 79);
     assert.equal(resolvePlanDurationMonths(plans.find((p) => p.isCustom)!, 18), 18);
     assert.equal(resolvePlanDurationMonths(plans.find((p) => p.isCustom)!, 99), CUSTOM_PLAN_DURATION_MAX);
+  });
+
+  it("groups eligible events for the membership wizard", () => {
+    const events = eligibleMembershipEvents({ startDate: "2026-08-26", durationMonths: 12 });
+    const groups = groupEligibleEvents(events);
+    assert.ok(groups.some((g) => g.group === "romance"));
+    assert.ok(groups.some((g) => g.group === "festival"));
+    assert.ok(groups.every((g) => g.events.length > 0));
   });
 
   it("computes a closed membership window", () => {

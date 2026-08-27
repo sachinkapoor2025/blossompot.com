@@ -10,6 +10,13 @@ import { nextMonthDay, nthWeekdayOfMonth, toIsoDate } from "./gifting-occasions"
 
 export type MembershipEventGroup = "romance" | "family" | "festival" | "personal";
 
+export const MEMBERSHIP_EVENT_GROUP_LABELS: Record<MembershipEventGroup, string> = {
+  romance: "Romance",
+  family: "Family",
+  festival: "Festivals",
+  personal: "Birthdays & personal dates",
+};
+
 export type MembershipEventKind = "fixed" | "nth_weekday" | "lunar" | "personal";
 
 export interface MembershipEventDefinition {
@@ -271,9 +278,8 @@ function datedOccurrence(def: MembershipEventDefinition, year: number): Date | n
 }
 
 function occurrencesInWindow(def: MembershipEventDefinition, start: Date, end: Date): Date[] {
-  const years = new Set<number>([start.getUTCFullYear(), end.getUTCFullYear(), end.getUTCFullYear() + 1]);
   const found: Date[] = [];
-  for (const year of years) {
+  for (let year = start.getUTCFullYear(); year <= end.getUTCFullYear(); year++) {
     const date = datedOccurrence(def, year);
     if (!date) continue;
     const day = startOfUtcDay(date);
@@ -466,6 +472,21 @@ export function reminderChannelLabel(channel: "email" | "whatsapp" | "both"): st
   if (channel === "both") return "Email + WhatsApp";
   if (channel === "whatsapp") return "WhatsApp";
   return "Email";
+}
+
+export function groupEligibleEvents(events: EligibleMembershipEvent[]): Array<{
+  group: MembershipEventGroup;
+  label: string;
+  events: EligibleMembershipEvent[];
+}> {
+  const order: MembershipEventGroup[] = ["romance", "family", "festival", "personal"];
+  return order
+    .map((group) => ({
+      group,
+      label: MEMBERSHIP_EVENT_GROUP_LABELS[group],
+      events: events.filter((event) => event.group === group),
+    }))
+    .filter((section) => section.events.length > 0);
 }
 
 export const MEMBERSHIP_JOURNEY_STEPS = [
