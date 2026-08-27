@@ -439,7 +439,7 @@ export function MembershipJourney({
                 </p>
               )}
               <div className="flex flex-wrap gap-2">
-                <button type="button" onClick={goEvents} className="min-h-11 rounded-full bg-nav px-5 text-white font-semibold">
+                <button type="button" onClick={() => goEvents()} className="min-h-11 rounded-full bg-nav px-5 text-white font-semibold">
                   Next
                 </button>
                 <button
