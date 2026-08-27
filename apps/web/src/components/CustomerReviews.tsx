@@ -1,7 +1,34 @@
 import Link from "next/link";
-import Image from "next/image";
 import { testimonials } from "@/lib/site";
-import { resolveImageUrl } from "@/lib/images";
+import type { GoogleReviewsPayload } from "@/lib/google-reviews";
+
+type ReviewItem = {
+  id: string;
+  name: string;
+  rating: number;
+  text: string;
+  dateLabel?: string;
+};
+
+function reviewsFromData(data?: GoogleReviewsPayload): ReviewItem[] {
+  if (data?.reviews.length) {
+    return data.reviews.map((review) => ({
+      id: review.id,
+      name: review.authorName,
+      rating: review.rating,
+      text: review.text,
+      dateLabel: review.dateLabel,
+    }));
+  }
+
+  return testimonials.map((review, index) => ({
+    id: `site-${index}-${review.name}`,
+    name: review.name,
+    rating: review.rating,
+    text: review.text,
+    dateLabel: review.timeAgo,
+  }));
+}
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -9,9 +36,10 @@ function StarRating({ rating }: { rating: number }) {
       {Array.from({ length: 5 }, (_, i) => (
         <svg
           key={i}
-          className={`w-4 h-4 ${i < rating ? "text-gold" : "text-slate-200"}`}
+          className={`h-4 w-4 shrink-0 ${i < rating ? "text-amber-400" : "text-slate-200"}`}
           viewBox="0 0 20 20"
           fill="currentColor"
+          aria-hidden
         >
           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
         </svg>
@@ -20,68 +48,61 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-function CustomerBadge() {
-  return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
-      <svg className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-        <path
-          fillRule="evenodd"
-          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-          clipRule="evenodd"
-        />
-      </svg>
-      BlossomPot customer
-    </span>
-  );
-}
-
 type CustomerReviewsProps = {
-  showIntro?: boolean;
+  data?: GoogleReviewsPayload;
 };
 
-export function CustomerReviews({ showIntro = true }: CustomerReviewsProps) {
+export function CustomerReviews({ data }: CustomerReviewsProps) {
+  const reviews = reviewsFromData(data);
+  if (reviews.length === 0) return null;
+
+  const isGoogle = data?.source === "google";
+  const average =
+    reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
+
   return (
-    <section className="bg-white border-t border-slate-100 py-12 md:py-16">
-      <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-2xl md:text-3xl font-bold text-primary mb-3 md:mb-4">
-          Loved by Brothers &amp; Sisters
-        </h2>
-        {showIntro && (
-          <p className="text-slate-600 text-sm md:text-base max-w-2xl mb-8 md:mb-10 leading-relaxed">
-            Stories from customers who sent flowers, cakes, and gifts across the USA — domestic delivery, thoughtful packaging,
-            and on-time celebration gifts.{" "}
-            <Link href="/reviews" className="text-nav font-semibold hover:underline">
-              Share your review →
-            </Link>
+    <section
+      className="overflow-x-clip border-y border-[#eadfd8] bg-gradient-to-b from-[#fff8f5] to-white"
+      aria-labelledby="customer-reviews-heading"
+    >
+      <div className="mx-auto max-w-7xl px-4 py-12 md:py-16">
+        <div className="mx-auto mb-8 max-w-2xl text-center md:mb-10">
+          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-nav">Customer reviews</p>
+          <h2 id="customer-reviews-heading" className="text-2xl font-bold text-primary md:text-3xl">
+            What Our Customers Say
+          </h2>
+          <p className="mt-3 text-sm leading-relaxed text-slate-600 md:text-base">
+            {isGoogle && data.rating != null && data.totalCount != null
+              ? `${data.rating.toFixed(1)}★ on Google · ${data.totalCount.toLocaleString()} reviews`
+              : `${average.toFixed(1)} out of 5 from recent BlossomPot customers`}
           </p>
-        )}
-        {!showIntro && <div className="mb-8" />}
+        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6">
-          {testimonials.map((review) => (
-            <article key={review.name} className="flex flex-col">
-              <div className="relative w-full max-w-[220px] aspect-[2/3] rounded-[999px] overflow-hidden bg-slate-100 mb-5 mx-auto sm:mx-0">
-                <Image
-                  src={resolveImageUrl(review.image)}
-                  alt={`${review.name} customer review`}
-                  fill
-                  className="object-cover"
-                  sizes="220px"
-                />
-              </div>
-
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2">
-                <h3 className="text-lg font-bold text-slate-800">{review.name}</h3>
-                <CustomerBadge />
-                <span className="text-xs text-slate-400">{review.timeAgo}</span>
-              </div>
-
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {reviews.map((review) => (
+            <article
+              key={review.id}
+              className="flex min-w-0 flex-col rounded-2xl border border-primary/10 bg-white p-5 shadow-sm"
+            >
               <StarRating rating={review.rating} />
-
-              <p className="mt-3 text-sm text-slate-600 leading-relaxed">{review.text}</p>
+              <p className="mt-3 flex-1 break-words text-sm leading-relaxed text-slate-600">
+                “{review.text}”
+              </p>
+              <div className="mt-4 border-t border-slate-100 pt-3">
+                <p className="truncate font-semibold text-slate-800">{review.name}</p>
+                {review.dateLabel ? (
+                  <p className="mt-0.5 text-xs text-slate-400">{review.dateLabel}</p>
+                ) : null}
+              </div>
             </article>
           ))}
         </div>
+
+        <p className="mt-8 text-center">
+          <Link href="/reviews" className="text-sm font-semibold text-nav hover:underline">
+            Read all reviews or share yours →
+          </Link>
+        </p>
       </div>
     </section>
   );

@@ -1,5 +1,5 @@
 /** CloudFront distribution for product/media images (from blossompot-prod stack). */
-export const DEFAULT_PRODUCT_CDN = "https://d301af4ndyn9qx.cloudfront.net";
+export const DEFAULT_PRODUCT_CDN = "https://d2d01h4hac5hqs.cloudfront.net";
 
 export function getProductCdnBase(cdnBase?: string): string {
   const fromArg = cdnBase?.trim();

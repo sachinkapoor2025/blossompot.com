@@ -46,7 +46,7 @@ export function PaymentMethodPicker({
       : allOptions;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6" role="group" aria-label="Choose payment method">
       {options.map((option) => {
         const selected = value === option.id;
         return (
@@ -62,7 +62,10 @@ export function PaymentMethodPicker({
             aria-pressed={selected}
           >
             {option.icon}
-            <span className="font-semibold text-slate-900 text-sm">{option.label}</span>
+            <span className="font-semibold text-slate-900 text-sm">
+              {option.label}
+              {selected ? <span className="block text-xs font-medium text-nav mt-0.5">Selected</span> : null}
+            </span>
           </button>
         );
       })}

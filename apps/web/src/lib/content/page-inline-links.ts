@@ -10,6 +10,7 @@ export const categoryPageInlineLinks: Record<string, readonly { phrase: string; 
   flowers: [
     { phrase: "flower bouquets", href: categoryHref("flower-bouquets") },
     { phrase: "anniversary gifts", href: categoryHref("anniversary-gifts") },
+    { phrase: "flower guide", href: "/flower-guide" },
   ],
   "flower-bouquets": [
     { phrase: "flowers", href: categoryHref("flowers") },

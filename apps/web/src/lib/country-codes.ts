@@ -4,7 +4,7 @@ export type CountryDialCode = {
   dial: string;
 };
 
-/** ISO countries with dial codes — India & US pinned first in `orderedCountryDialCodes()`. */
+/** ISO countries with dial codes — served markets pinned first in `orderedCountryDialCodes()`. */
 const ALL: CountryDialCode[] = [
   { iso: "AF", name: "Afghanistan", dial: "+93" },
   { iso: "AL", name: "Albania", dial: "+355" },
@@ -198,7 +198,7 @@ const ALL: CountryDialCode[] = [
   { iso: "ZW", name: "Zimbabwe", dial: "+263" },
 ];
 
-const PINNED = ["IN", "US"] as const;
+const PINNED = ["US", "GB", "AE", "CA", "AU"] as const;
 
 export function orderedCountryDialCodes(): CountryDialCode[] {
   const byIso = new Map(ALL.map((c) => [c.iso, c]));
@@ -216,4 +216,4 @@ export function formatE164(dial: string, localNumber: string): string {
   return `+${code}${digits}`;
 }
 
-export const DEFAULT_COUNTRY_ISO = "IN";
+export const DEFAULT_COUNTRY_ISO = "US";

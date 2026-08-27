@@ -30,6 +30,8 @@ import * as vendorManagement from "./handlers/vendor-management";
 import * as marketplaceVendors from "./handlers/marketplace-vendors";
 import * as serviceability from "./handlers/serviceability";
 import * as reviews from "./handlers/reviews";
+import * as gifting from "./handlers/gifting";
+import * as adminGifting from "./handlers/admin-gifting";
 import { stripeWebhook } from "./handlers/payments/stripe";
 import {
   razorpayWebhook,
@@ -260,6 +262,48 @@ const routes: Route[] = [
   { method: "POST", pattern: /^\/account\/addresses$/, handler: account.createAccountAddress },
   { method: "PUT", pattern: /^\/account\/addresses\/([^/]+)$/, handler: account.updateAccountAddress, params: ["addressId"] },
   { method: "DELETE", pattern: /^\/account\/addresses\/([^/]+)$/, handler: account.deleteAccountAddress, params: ["addressId"] },
+
+  // Personal gifting assistant
+  { method: "GET", pattern: /^\/gifting\/plans$/, handler: gifting.listPublicPlans },
+  { method: "GET", pattern: /^\/gifting\/membership\/events$/, handler: gifting.previewMembershipEvents },
+  { method: "GET", pattern: /^\/gifting\/emergency$/, handler: gifting.getEmergencyGifts },
+  { method: "GET", pattern: /^\/gifting\/dashboard$/, handler: gifting.getGiftingDashboard },
+  { method: "GET", pattern: /^\/gifting\/recipients$/, handler: gifting.listMyRecipients },
+  { method: "POST", pattern: /^\/gifting\/recipients$/, handler: gifting.createMyRecipient },
+  { method: "PUT", pattern: /^\/gifting\/recipients\/([^/]+)$/, handler: gifting.updateMyRecipient, params: ["recipientId"] },
+  { method: "DELETE", pattern: /^\/gifting\/recipients\/([^/]+)$/, handler: gifting.deleteMyRecipient, params: ["recipientId"] },
+  { method: "GET", pattern: /^\/gifting\/occasions$/, handler: gifting.listMyOccasions },
+  { method: "POST", pattern: /^\/gifting\/occasions$/, handler: gifting.createMyOccasion },
+  { method: "PUT", pattern: /^\/gifting\/occasions\/([^/]+)$/, handler: gifting.updateMyOccasion, params: ["occasionId"] },
+  { method: "DELETE", pattern: /^\/gifting\/occasions\/([^/]+)$/, handler: gifting.deleteMyOccasion, params: ["occasionId"] },
+  { method: "PUT", pattern: /^\/gifting\/prefs$/, handler: gifting.updateMyPrefs },
+  { method: "GET", pattern: /^\/gifting\/history$/, handler: gifting.listMyHistory },
+  { method: "POST", pattern: /^\/gifting\/history$/, handler: gifting.createMyHistory },
+  { method: "POST", pattern: /^\/gifting\/history\/([^/]+)\/feedback$/, handler: gifting.submitGiftFeedback, params: ["historyId"] },
+  { method: "GET", pattern: /^\/gifting\/messages$/, handler: gifting.listMyMessages },
+  { method: "GET", pattern: /^\/gifting\/loyalty$/, handler: gifting.getMyLoyalty },
+  { method: "GET", pattern: /^\/gifting\/recommend$/, handler: gifting.recommendGiftsHandler },
+  { method: "POST", pattern: /^\/gifting\/subscribe$/, handler: gifting.startSubscription },
+  { method: "POST", pattern: /^\/gifting\/subscribe\/confirm$/, handler: gifting.confirmSubscription },
+  { method: "POST", pattern: /^\/gifting\/subscribe\/cancel$/, handler: gifting.cancelSubscription },
+  { method: "GET", pattern: /^\/gifting\/reminders\/([^/]+)$/, handler: gifting.getPublicReminder, params: ["token"] },
+  { method: "POST", pattern: /^\/gifting\/reminders\/([^/]+)\/choose$/, handler: gifting.choosePublicReminder, params: ["token"] },
+  { method: "GET", pattern: /^\/gifting\/preview-email$/, handler: gifting.previewReminderEmail },
+  { method: "GET", pattern: /^\/admin\/gifting$/, handler: adminGifting.adminGetGiftingOverview },
+  { method: "PUT", pattern: /^\/admin\/gifting\/settings$/, handler: adminGifting.adminUpdateGiftingSettings },
+  { method: "POST", pattern: /^\/admin\/gifting\/settings\/reset$/, handler: adminGifting.adminResetGiftingSettings },
+  { method: "GET", pattern: /^\/admin\/gifting\/plans$/, handler: adminGifting.adminListPlans },
+  { method: "POST", pattern: /^\/admin\/gifting\/plans$/, handler: adminGifting.adminCreatePlan },
+  { method: "PUT", pattern: /^\/admin\/gifting\/plans\/([^/]+)$/, handler: adminGifting.adminUpdatePlan, params: ["planId"] },
+  { method: "DELETE", pattern: /^\/admin\/gifting\/plans\/([^/]+)$/, handler: adminGifting.adminDeletePlan, params: ["planId"] },
+  { method: "GET", pattern: /^\/admin\/gifting\/notifications$/, handler: adminGifting.adminListGiftingLogs },
+  { method: "GET", pattern: /^\/admin\/gifting\/subscriptions$/, handler: adminGifting.adminListMembershipOrders },
+  {
+    method: "GET",
+    pattern: /^\/admin\/gifting\/subscriptions\/([^/]+)$/,
+    handler: adminGifting.adminGetMembershipOrder,
+    params: ["userId"],
+  },
   { method: "GET", pattern: /^\/admin\/orders$/, handler: orders.listAdminOrders },
   {
     method: "GET",

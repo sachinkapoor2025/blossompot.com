@@ -34,6 +34,7 @@
     "seed:serviceability": "tsx scripts/seed-serviceability.ts",
     "fix:seo-descriptions": "tsx scripts/fix-seo-descriptions.ts",
     "migrate:images": "tsx scripts/migrate-images-to-s3.ts",
+    "host:images": "tsx scripts/host-images-to-s3.ts",
     "rewrite:product-images": "tsx scripts/rewrite-product-image-urls.ts",
     "restore:product-images": "tsx scripts/restore-product-images-from-pitr.ts",
     "reconcile:s3-images": "tsx scripts/reconcile-s3-product-images.ts",

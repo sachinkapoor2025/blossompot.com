@@ -47,7 +47,11 @@ function AccountLoginForm() {
       logout();
       return;
     }
-    router.push(redirect.startsWith("/account") ? redirect : "/account");
+    const keepQuery = searchParams.toString();
+    const fallback = keepQuery ? `/account?${keepQuery}` : "/account";
+    const next = searchParams.get("redirect") ?? fallback;
+    const safe = next.startsWith("/") && !next.startsWith("//") ? next : "/account";
+    router.push(safe);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -393,6 +393,18 @@ export async function razorpayWebhook(event: APIGatewayProxyEventV2) {
     if (eventName === "payment.captured" || eventName === "order.paid") {
       const payment = payload.payload?.payment?.entity;
       const rpOrder = payload.payload?.order?.entity;
+      const notes = {
+        ...(typeof rpOrder?.notes === "object" && rpOrder.notes && !Array.isArray(rpOrder.notes)
+          ? (rpOrder.notes as Record<string, unknown>)
+          : {}),
+        ...(typeof payment?.notes === "object" && payment.notes && !Array.isArray(payment.notes)
+          ? (payment.notes as Record<string, unknown>)
+          : {}),
+      };
+      if (notes.type === "gifting_subscription" && typeof notes.subscriptionId === "string" && typeof notes.userId === "string") {
+        const { activatePaidSubscriptionById } = await import("../gifting");
+        await activatePaidSubscriptionById(notes.subscriptionId, notes.userId);
+      }
       const rpOrderIdRaw = payment?.order_id ?? rpOrder?.id;
       const result = await markPaidFromRazorpay({
         notesOrderId:

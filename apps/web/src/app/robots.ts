@@ -21,6 +21,7 @@ export default function robots(): MetadataRoute.Robots {
           "/account",
           "/cart",
           "/wishlist",
+          "/gifting/",
           "/orders/",
           "/email/",
           "/unsubscribe/",
@@ -49,6 +50,7 @@ export default function robots(): MetadataRoute.Robots {
       `${siteUrl}/sitemap.xml`,
       `${siteUrl}/sitemap-geo.xml`,
       `${siteUrl}/sitemap-locations.xml`,
+      `${siteUrl}/sitemap-flowers.xml`,
     ],
     host,
   };

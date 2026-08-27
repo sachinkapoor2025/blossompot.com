@@ -156,6 +156,8 @@ export function organizationJsonLd() {
       "Gift hampers USA",
       "Same-day flower delivery",
       "Personalized gifts USA",
+      "Flower meanings and care guides",
+      "Seasonal flower calendar",
     ],
   };
 }
@@ -173,11 +175,13 @@ export function onlineStoreJsonLd() {
     telephone: site.phone,
     areaServed: [
       { "@type": "Country", name: "United States" },
-      { "@type": "Country", name: "India" },
+      { "@type": "Country", name: "Canada" },
+      { "@type": "Country", name: "Australia" },
+      { "@type": "Country", name: "United Arab Emirates" },
     ],
     priceRange: "$$",
-    currenciesAccepted: "USD, INR",
-    paymentAccepted: "Credit Card, Debit Card, UPI, Razorpay, Stripe",
+    currenciesAccepted: "USD",
+    paymentAccepted: "Credit Card, Debit Card, Stripe",
     shippingDetails: {
       "@type": "OfferShippingDetails",
       shippingDestination: { "@type": "DefinedRegion", addressCountry: "US" },
@@ -362,13 +366,14 @@ export function articleJsonLd(article: {
   publishedAt: string;
   updatedAt?: string;
   image?: string;
+  path?: string;
 }) {
   return {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: article.title,
     description: article.description,
-    url: canonical(`/blog/${article.slug}`),
+    url: canonical(article.path ?? `/blog/${article.slug}`),
     datePublished: article.publishedAt,
     dateModified: article.updatedAt ?? article.publishedAt,
     ...(article.image ? { image: article.image } : {}),

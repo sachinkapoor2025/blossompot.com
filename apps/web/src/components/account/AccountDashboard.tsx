@@ -13,12 +13,29 @@ import { AccountOrdersPanel } from "./AccountOrdersPanel";
 import { AccountAddressesPanel } from "./AccountAddressesPanel";
 import { AccountPaymentsPanel } from "./AccountPaymentsPanel";
 import { AccountDetailsPanel } from "./AccountDetailsPanel";
+import { GiftingHome } from "@/components/gifting/GiftingHome";
+import { PeopleManager } from "@/components/gifting/PeopleManager";
+import { CalendarPanel } from "@/components/gifting/CalendarPanel";
+import { GiftHistoryPanel } from "@/components/gifting/GiftHistoryPanel";
+import { MembershipPanel } from "@/components/gifting/MembershipPanel";
+import { fetchPublicPlans, giftingApi, type GiftingDashboard } from "@/lib/gifting";
+import type { SubscriptionPlan } from "@blossompot/shared";
 
-const VALID_TABS: AccountTab[] = ["orders", "addresses", "payments", "details"];
+const VALID_TABS: AccountTab[] = [
+  "home",
+  "people",
+  "calendar",
+  "gifts",
+  "membership",
+  "orders",
+  "addresses",
+  "payments",
+  "details",
+];
 
 function parseTab(value: string | null): AccountTab {
   if (value && VALID_TABS.includes(value as AccountTab)) return value as AccountTab;
-  return "orders";
+  return "home";
 }
 
 export function AccountDashboard({
@@ -43,6 +60,8 @@ export function AccountDashboard({
   const [accountLoading, setAccountLoading] = useState(true);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [accountError, setAccountError] = useState("");
+  const [gifting, setGifting] = useState<GiftingDashboard | null>(null);
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
 
   const fallbackProfile = useCallback((): AccountProfile => {
     const ts = new Date().toISOString();
@@ -72,6 +91,16 @@ export function AccountDashboard({
     }
   }, [token, sessionId, fallbackProfile, user.email]);
 
+  const loadGifting = useCallback(async () => {
+    if (!sessionId) return;
+    try {
+      const data = await giftingApi(token, sessionId).dashboard();
+      setGifting(data);
+    } catch {
+      setGifting(null);
+    }
+  }, [token, sessionId]);
+
   const loadOrders = useCallback(async () => {
     if (!sessionId) return;
     setOrdersLoading(true);
@@ -92,7 +121,11 @@ export function AccountDashboard({
   useEffect(() => {
     void loadAccount();
     void loadOrders();
-  }, [loadAccount, loadOrders]);
+    void loadGifting();
+    void fetchPublicPlans()
+      .then((data) => setPlans(data.plans))
+      .catch(() => setPlans([]));
+  }, [loadAccount, loadOrders, loadGifting]);
 
   useEffect(() => {
     setTab(parseTab(searchParams.get("tab")));
@@ -110,7 +143,7 @@ export function AccountDashboard({
       <div className="max-w-5xl mx-auto px-4 py-8 sm:py-10">
         <div className="rounded-xl bg-gradient-to-r from-blue-600 via-violet-600 to-violet-800 text-white px-6 py-8 sm:px-10 sm:py-10 mb-6 shadow-md text-center sm:text-left">
           <p className="text-lg sm:text-xl font-medium leading-relaxed max-w-3xl mx-auto sm:mx-0">
-            Welcome back to your account. Manage orders, addresses and profile details easily.
+            Welcome back. BlossomPot remembers the dates — you just choose the gift.
           </p>
         </div>
 
@@ -152,6 +185,59 @@ export function AccountDashboard({
         )}
 
         <div className="mt-6">
+          {tab === "home" &&
+            (gifting ? (
+              <GiftingHome data={gifting} onAddPeople={() => changeTab("people")} />
+            ) : (
+              <p className="text-slate-500 text-sm py-6">Loading your gifting dashboard…</p>
+            ))}
+
+          {tab === "people" && sessionId && (
+            <PeopleManager
+              token={token}
+              sessionId={sessionId}
+              recipients={gifting?.recipients ?? []}
+              canEdit={Boolean(gifting?.subscriptionActive)}
+              onChanged={() => void loadGifting()}
+            />
+          )}
+
+          {tab === "calendar" && sessionId && gifting && (
+            <CalendarPanel
+              token={token}
+              sessionId={sessionId}
+              upcoming={gifting.upcoming}
+              occasions={gifting.occasions}
+              recipients={gifting.recipients}
+              canEdit={gifting.subscriptionActive}
+              onChanged={() => void loadGifting()}
+            />
+          )}
+
+          {tab === "gifts" && sessionId && gifting && (
+            <GiftHistoryPanel
+              token={token}
+              sessionId={sessionId}
+              history={gifting.history}
+              recipients={gifting.recipients}
+              focusRecipientId={searchParams.get("recipientId") ?? undefined}
+              occasionType={searchParams.get("occasionType") ?? undefined}
+              onChanged={() => void loadGifting()}
+            />
+          )}
+
+          {tab === "membership" && sessionId && (
+            <MembershipPanel
+              token={token}
+              sessionId={sessionId}
+              subscription={gifting?.subscription ?? null}
+              active={Boolean(gifting?.subscriptionActive)}
+              plans={plans}
+              channel={gifting?.prefs.reminderChannel ?? "email"}
+              onChanged={() => void loadGifting()}
+            />
+          )}
+
           {tab === "orders" && <AccountOrdersPanel orders={orders} loading={ordersLoading} />}
 
           {tab === "addresses" &&

@@ -46,7 +46,7 @@ export function CurrencySwitcher() {
 
   return (
     <div
-      className="fixed right-0 top-[42%] sm:top-1/2 -translate-y-1/2 z-30 flex flex-col shadow-lg rounded-l-md overflow-hidden pointer-events-auto"
+      className="fixed right-0 top-[58%] md:top-1/2 -translate-y-1/2 z-30 flex flex-col shadow-lg rounded-l-md overflow-hidden pointer-events-auto"
       role="group"
       aria-label="Currency switcher"
     >

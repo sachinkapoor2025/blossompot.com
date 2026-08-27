@@ -34,6 +34,8 @@ import {
 } from "@blossompot/shared";
 import { EstimatedDeliveryNote } from "@/components/EstimatedDeliveryNote";
 import { ProductCareAccordions } from "@/components/ProductCareAccordions";
+import { LearnAboutFlower } from "@/components/flower-guide/LearnAboutFlower";
+import { flowerGuideForProduct } from "@/lib/content/flower-guide/products";
 import { ScheduleDeliveryPicker } from "@/components/ScheduleDeliveryPicker";
 import type { Product, ProductAddonSelection } from "@blossompot/shared";
 import { FastSellingBanner } from "@/components/FastSellingBadge";
@@ -110,6 +112,7 @@ export function ProductDetailClient({
   relatedProducts?: Product[];
   faqs?: ProductFaq[];
 }) {
+  const flowerGuide = flowerGuideForProduct(product);
   const pageFaqs = faqs ?? productFaqsForCategory(product.categorySlug);
   const productNoun = product.categorySlug.includes("cake")
     ? "cake"
@@ -330,6 +333,7 @@ export function ProductDetailClient({
           <TrustBadges variant="compact" className="mb-5" />
 
           <ProductCareAccordions product={product} />
+          {flowerGuide ? <LearnAboutFlower guide={flowerGuide} /> : null}
 
           {showAddons ? (
             <ProductAddonsPicker selected={addons} onChange={setAddons} className="mb-4" />

@@ -12,6 +12,7 @@ import { locationPublicPath } from "@/lib/content/seo-data";
 import { internationalPath, publishedInternationalLocations } from "@/lib/content/geo/international";
 import { allOccasionSlugs } from "@/lib/content/occasions";
 import { allGiftGuideSlugs } from "@/lib/content/recipients";
+import { flowerSitemapPaths } from "@/lib/content/flower-guide";
 
 function mergeProducts(apiProducts: Product[]): Product[] {
   const bySlug = new Map(apiProducts.map((p) => [p.slug, p]));
@@ -33,7 +34,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/faq`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${siteUrl}/same-day-delivery`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
     { url: `${siteUrl}/corporate-gifting`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${siteUrl}/remember`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
+    { url: `${siteUrl}/forgot-occasion`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
     { url: `${siteUrl}/blog`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${siteUrl}/flower-guide`, lastModified: now, changeFrequency: "weekly", priority: 0.86 },
     { url: `${siteUrl}/contact`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${siteUrl}/terms`, lastModified: now, changeFrequency: "yearly", priority: 0.4 },
     { url: `${siteUrl}/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.4 },
@@ -88,6 +92,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.76,
   }));
 
+  const flowerGuideRoutes = flowerSitemapPaths()
+    .filter((p) => p.path !== "/flower-guide")
+    .map((p) => ({
+      url: `${siteUrl}${p.path}`,
+      lastModified: new Date(p.lastModified),
+      changeFrequency: "weekly" as const,
+      priority: 0.72,
+    }));
+
   const blogRoutes = listAllBlogPosts().map((p) => ({
     url: `${siteUrl}/blog/${p.slug}`,
     lastModified: new Date(p.updatedAt),
@@ -124,6 +137,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...internationalRoutes,
     ...occasionRoutes,
     ...giftGuideRoutes,
+    ...flowerGuideRoutes,
     ...blogRoutes,
     ...collectionRoutes,
     ...productRoutes,

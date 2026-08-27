@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { resolveImageUrls } from "@/lib/images";
+import { site } from "@/lib/site";
 import {
   selectDisplayableProductImages,
   type SizedProductImage,
@@ -213,8 +214,9 @@ export function ProductImageGallery({ images, alt }: ProductImageGalleryProps) {
 
   if (!current) {
     return (
-      <div className="aspect-square bg-slate-100 rounded-xl flex items-center justify-center text-slate-400">
-        No image
+      <div className="aspect-square bg-white rounded-xl flex items-center justify-center border border-slate-100">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={site.logoSrc} alt={site.name} className="h-2/3 w-2/3 object-contain p-6" />
       </div>
     );
   }
@@ -242,6 +244,9 @@ export function ProductImageGallery({ images, alt }: ProductImageGalleryProps) {
             src={current}
             alt={`${alt} — image ${selected + 1} of ${imgs.length}`}
             onLoad={() => setImageBounds(updateBounds())}
+            onError={(event) => {
+              event.currentTarget.src = site.logoSrc;
+            }}
             className="w-full h-full object-contain p-2 transition-transform duration-200 group-hover:scale-[1.02] md:group-hover:scale-100 select-none"
             draggable={false}
           />

@@ -95,6 +95,29 @@ export default async function BlogPostPage({ params }: Props) {
           ))}
         </div>
 
+        {post.slug === "how-to-keep-flowers-fresh-longer" ? (
+          <p className="mt-8 text-sm text-slate-600">
+            Continue in the{" "}
+            <Link href="/flower-guide/flower-care" className="text-nav font-semibold hover:underline">
+              Flower Care Centre
+            </Link>{" "}
+            for rose, tulip, lily and hydrangea-specific steps.
+          </p>
+        ) : null}
+        {post.slug === "rose-color-meanings-for-gifting" ? (
+          <p className="mt-8 text-sm text-slate-600">
+            Read the full{" "}
+            <Link href="/flower-guide/rose" className="text-nav font-semibold hover:underline">
+              rose encyclopedia
+            </Link>{" "}
+            and the{" "}
+            <Link href="/flower-guide/flower-meanings" className="text-nav font-semibold hover:underline">
+              flower meanings
+            </Link>{" "}
+            hub.
+          </p>
+        ) : null}
+
         {post.relatedCategory && (
           <div className="mt-10 p-6 bg-slate-50 rounded-xl border min-w-0">
             <h2 className="font-semibold text-primary mb-2">Shop related gifts</h2>

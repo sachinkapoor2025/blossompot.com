@@ -762,6 +762,18 @@ export async function markOrderPaid(
     }
   }
   await decrementInventoryForOrder(updated);
+  if (updated.userId && updated.total > 0) {
+    try {
+      const { getGiftingSettings, addLoyaltyPoints } = await import("../lib/gifting-store");
+      const giftingSettings = await getGiftingSettings();
+      const points = Math.round(updated.total * (giftingSettings.loyalty.pointsPerUsd || 1));
+      if (points > 0) {
+        await addLoyaltyPoints(updated.userId, points, `Order ${updated.orderNumber ?? updated.orderId}`, "purchase");
+      }
+    } catch (err) {
+      console.error("Gifting loyalty award failed:", orderId, err);
+    }
+  }
 
   const settings = await loadShippingSettings();
   if (

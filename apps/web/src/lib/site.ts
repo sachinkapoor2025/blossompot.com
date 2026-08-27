@@ -1,4 +1,5 @@
 import { categoryHref } from "./category-urls";
+import { editorialCdnUrl } from "./editorial-cdn";
 
 function digitsOnly(value: string): string {
   return value.replace(/\D/g, "");
@@ -68,6 +69,7 @@ export const navItems = [
   { label: "Valentine's", href: categoryHref("valentines-day-gifts"), category: "valentines-day-gifts" },
   { label: "Hampers", href: categoryHref("gift-hampers"), category: "gift-hampers" },
   { label: "Same-Day", href: categoryHref("same-day-gifts"), category: "same-day-gifts" },
+  { label: "Remember", href: "/remember" },
 ] as const;
 
 export type CityNavLink = {
@@ -112,7 +114,7 @@ export const usCityLinks = cityLinks.filter(isUsCityNavLink);
 
 export const homeBanners = [
   {
-    src: "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=1600&q=80",
+    src: editorialCdnUrl("home-banner-flowers.jpg"),
     alt: "Premium flower bouquets for USA delivery — BlossomPot",
     href: "/flowers",
     eyebrow: "BLOSSOMPOT · USA GIFTING",
@@ -124,7 +126,7 @@ export const homeBanners = [
     pill: "Same-day options · Premium quality · Trusted gifting",
   },
   {
-    src: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=1600&q=80",
+    src: editorialCdnUrl("home-banner-cakes.jpg"),
     alt: "Celebration cakes delivered across the USA — BlossomPot",
     href: "/cakes",
     eyebrow: "CAKES FOR EVERY OCCASION",
@@ -135,7 +137,7 @@ export const homeBanners = [
     pill: "Birthday · Anniversary · Custom messages",
   },
   {
-    src: "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=1600&q=80",
+    src: editorialCdnUrl("home-banner-hampers.jpg"),
     alt: "Luxury gift hampers — BlossomPot",
     href: "/gift-hampers",
     eyebrow: "CURATED GIFT HAMPERS",
@@ -186,28 +188,28 @@ export const testimonials = [
     name: "Emily",
     rating: 5,
     timeAgo: "3 days ago",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80",
+    image: editorialCdnUrl("testimonial-emily.jpg"),
     text: "I ordered a rose bouquet for my mom in Texas. It arrived fresh, beautifully wrapped, and she called me in tears — in the best way. BlossomPot made Mother's Day effortless.",
   },
   {
     name: "Sarah",
     rating: 5,
     timeAgo: "1 week ago",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80",
+    image: editorialCdnUrl("testimonial-sarah.jpg"),
     text: "The anniversary hamper and cake combo for my husband in New York was perfect. Fast delivery, elegant packaging, and the quality matched the photos.",
   },
   {
     name: "Priya",
     rating: 5,
     timeAgo: "2 weeks ago",
-    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80",
+    image: editorialCdnUrl("testimonial-priya.jpg"),
     text: "Ordered same-day flowers for a friend in California. Checkout was smooth, tracking was clear, and the bouquet looked premium. Will order again for birthdays.",
   },
   {
     name: "Jessica",
     rating: 5,
     timeAgo: "3 weeks ago",
-    image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&q=80",
+    image: editorialCdnUrl("testimonial-jessica.jpg"),
     text: "BlossomPot feels like a real gifting marketplace — great selection of cakes, bouquets, and hampers. Support answered my delivery questions quickly.",
   },
 ] as const;
@@ -236,5 +238,41 @@ export const faqs = [
   {
     q: "Can I track my order?",
     a: "Yes. After purchase you receive order confirmation and can track status from your account or order page.",
+  },
+  {
+    q: "What is BlossomPot's delivery charge?",
+    a: "Shipping costs depend on the product, the delivery place and the delivery method you choose. Any delivery fees that apply will be shown at checkout before you place your order.",
+  },
+  {
+    q: "Can I choose a delivery date for my gift?",
+    a: "Yes. Select your preferred delivery date at checkout where available. Delivery dates and timeslots are subject to change based on product and recipient location.",
+  },
+  {
+    q: "Can I change or cancel my order once it is placed?",
+    a: "If your order has not been processed or prepared for delivery, you may be able to modify or cancel it. Please contact our support team right away with your order information.",
+  },
+  {
+    q: "What if the recipient is not there at the time of delivery?",
+    a: "If the recipient is not available, the delivery partner may follow the available delivery instructions or attempt delivery again. For assistance with a specific order, please contact our support team.",
+  },
+  {
+    q: "What if my gift is received damaged or with a problem?",
+    a: "Please contact BlossomPot support immediately if your order arrives damaged or if there is an issue with the product. Providing your order information and photos of the product and packaging can assist us in investigating and resolving the matter.",
+  },
+  {
+    q: "How fresh are flowers from BlossomPot?",
+    a: "Our goal is to provide fresh flowers and arrangements that are carefully prepared. The flowers are seasonal and naturally unique so exact varieties, colours or appearance may differ from time to time based on local availability.",
+  },
+  {
+    q: "Can I send a gift to anyone in any US state?",
+    a: "Yes. BlossomPot ships gifts to all 50 states, Washington D.C. and Puerto Rico. Availability of delivery and estimated delivery times will vary by recipient location.",
+  },
+  {
+    q: "Can I order flowers, cakes and other gifts in same order?",
+    a: "Yes. You can browse through flowers, cakes, gift hampers, personalized gifts, plants and other products on BlossomPot. The products available and the delivery options may differ depending on the items you select.",
+  },
+  {
+    q: "How can I contact BlossomPot if I need help with my order?",
+    a: "If you need any help with an order, delivery or any other question please contact the BlossomPot support team via the email or WhatsApp support options on our website.",
   },
 ] as const;

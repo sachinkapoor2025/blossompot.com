@@ -5,6 +5,7 @@ import { processPendingPaymentReminders } from "./handlers/pending-payment-remin
 import { reconcilePendingRazorpayPayments } from "./handlers/payments/razorpay";
 import { runPaymentReconciliationJob } from "./handlers/payment-reconciliation";
 import { processUspsTrackingSync } from "./handlers/tracking-sync";
+import { processGiftingReminders } from "./handlers/gifting-reminders";
 
 type CronEvent = {
   task?: string;
@@ -65,6 +66,13 @@ export async function handler(event: CronEvent, _context: Context) {
     results.pendingPaymentRemindersError = err instanceof Error ? err.message : String(err);
   }
 
+  try {
+    results.giftingReminders = await processGiftingReminders();
+  } catch (err) {
+    console.error("Gifting reminders cron failed:", err);
+    results.giftingRemindersError = err instanceof Error ? err.message : String(err);
+  }
+
   // USPS tracking sync runs on the dedicated EventBridge rule (task: trackingSync).
 
   // Best-effort reconciliation snapshot log (does not fail the email cron).
@@ -78,7 +86,8 @@ export async function handler(event: CronEvent, _context: Context) {
   if (
     results.reviewEmailsError ||
     results.abandonedCartEmailsError ||
-    results.pendingPaymentRemindersError
+    results.pendingPaymentRemindersError ||
+    results.giftingRemindersError
   ) {
     throw new Error(JSON.stringify(results));
   }

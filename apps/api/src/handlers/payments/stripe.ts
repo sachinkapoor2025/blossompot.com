@@ -76,6 +76,10 @@ export async function stripeWebhook(event: APIGatewayProxyEventV2) {
       if (orderId) {
         await markOrderPaid(orderId, { paymentIntentId: intent.id });
       }
+      if (intent.metadata?.type === "gifting_subscription" && intent.metadata.subscriptionId && intent.metadata.userId) {
+        const { activatePaidSubscriptionById } = await import("../gifting");
+        await activatePaidSubscriptionById(intent.metadata.subscriptionId, intent.metadata.userId);
+      }
     }
 
     if (stripeEvent.type === "payment_intent.payment_failed") {

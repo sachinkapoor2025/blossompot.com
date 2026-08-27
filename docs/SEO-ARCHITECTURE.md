@@ -8,9 +8,10 @@
 
 | URL | Contents |
 |-----|----------|
-| `/sitemap.xml` | Static pages, categories, products, blog, USA **state** hubs, international locations |
+| `/sitemap.xml` | Static pages, categories, products, blog, flower guide, USA **state** hubs, international locations |
 | `/sitemap-geo.xml` | Published USA geo pages (`/gifts-to-*`) |
 | `/sitemap-locations.xml` | `/locations` hub + indexable international pages only |
+| `/sitemap-flowers.xml` | Published Flower Knowledge Centre URLs only (no drafts or filter combinations) |
 
 Unpublished, draft, thin, or noindex locations are omitted.
 
