@@ -31,6 +31,52 @@ import { PlanCards } from "./PlanCards";
 
 const DRAFT_KEY = "blossompot.membership.draft.v2";
 
+type GatewayPayment = {
+  subscription: GiftingSubscription;
+  clientSecret?: string;
+  paymentIntentId?: string;
+  razorpayOrderId?: string;
+  razorpayKeyId?: string;
+};
+
+type RazorpayCtor = new (opts: Record<string, unknown>) => {
+  open: () => void;
+  on: (event: string, handler: (response: { error?: { description?: string } }) => void) => void;
+};
+
+function waitForRazorpay(timeoutMs = 10000): Promise<RazorpayCtor> {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+    const tick = () => {
+      const ctor = (globalThis as typeof globalThis & { Razorpay?: RazorpayCtor }).Razorpay;
+      if (ctor) {
+        resolve(ctor);
+        return;
+      }
+      if (Date.now() - start >= timeoutMs) {
+        reject(new Error("Razorpay checkout failed to load. Disable ad blockers or try another network, then retry."));
+        return;
+      }
+      setTimeout(tick, 120);
+    };
+    tick();
+  });
+}
+
+function isSimulatedGatewayPayment(payment: GatewayPayment, method: PaymentMethod): boolean {
+  if (method === "razorpay") {
+    const orderId = payment.razorpayOrderId ?? "";
+    return !orderId || orderId.includes("_dev_") || orderId.includes("_loadtest_");
+  }
+  const secret = payment.clientSecret ?? payment.paymentIntentId ?? "";
+  return !secret || secret.includes("_dev_") || secret.includes("_loadtest_");
+}
+
+function paymentMatchesMethod(payment: GatewayPayment, method: PaymentMethod): boolean {
+  if (method === "razorpay") return Boolean(payment.razorpayOrderId) && !payment.clientSecret;
+  return Boolean(payment.clientSecret);
+}
+
 type Draft = {
   step: number;
   planId: string;
@@ -41,6 +87,7 @@ type Draft = {
   reminderChannel: GiftingChannel;
   customized: boolean;
   confirmed: boolean;
+  paymentMethod?: PaymentMethod;
   pendingSubscriptionId?: string;
 };
 
@@ -124,20 +171,40 @@ export function MembershipJourney({
   const [customizing, setCustomizing] = useState(false);
   const [customTitle, setCustomTitle] = useState("");
   const [customDate, setCustomDate] = useState("");
-  const [payment, setPayment] = useState<{
-    subscription: GiftingSubscription;
-    clientSecret?: string;
-    paymentIntentId?: string;
-    razorpayOrderId?: string;
-    razorpayKeyId?: string;
-  } | null>(null);
-  const [method, setMethod] = useState<PaymentMethod>("stripe");
+  const [payment, setPayment] = useState<GatewayPayment | null>(null);
+  const [method, setMethod] = useState<PaymentMethod>(() => loadDraft(channel).paymentMethod ?? "stripe");
+  const [razorpayReady, setRazorpayReady] = useState(false);
+  const [openingGateway, setOpeningGateway] = useState(false);
+  const confirmingPay = useRef(false);
+
+  useEffect(() => {
+    if (draft.step !== 5 || method !== "razorpay") return;
+    const host = globalThis as typeof globalThis & { Razorpay?: unknown };
+    if (host.Razorpay) {
+      setRazorpayReady(true);
+      return;
+    }
+    const id = window.setInterval(() => {
+      if ((globalThis as typeof globalThis & { Razorpay?: unknown }).Razorpay) {
+        setRazorpayReady(true);
+        window.clearInterval(id);
+      }
+    }, 200);
+    return () => window.clearInterval(id);
+  }, [draft.step, method]);
 
   const plan = plans.find((p) => p.id === draft.planId) ?? null;
   const durationMonths = plan ? resolvePlanDurationMonths(plan, draft.customDurationMonths) : 0;
   const price = plan ? (plan.isCustom ? customPlanPrice(durationMonths, plans) : plan.price) : 0;
   const membershipTerm = durationMonths ? membershipWindow(draft.startDate, durationMonths) : null;
   const customizingPlan = Boolean(plan?.isCustom && draft.step === 1);
+
+  useEffect(() => {
+    if (plan?.currency === "INR" && method !== "razorpay") {
+      setMethod("razorpay");
+      setPayment(null);
+    }
+  }, [plan?.currency, method]);
 
   const eligible = useMemo<EligibleMembershipEvent[]>(() => {
     if (!durationMonths) return [];
@@ -201,9 +268,7 @@ export function MembershipJourney({
     void (async () => {
       setBusy(true);
       try {
-        await client.confirm({ subscriptionId, paymentIntentId: paymentIntent });
-        sessionStorage.removeItem(DRAFT_KEY);
-        onComplete();
+        await confirmMembershipPayment({ subscriptionId, paymentIntentId: paymentIntent });
       } catch (err) {
         confirmOnce.current = false;
         setError(err instanceof Error ? err.message : "Could not confirm membership payment");
@@ -307,7 +372,7 @@ export function MembershipJourney({
 
   const goPayment = () => {
     setError("");
-    syncStep(5, { confirmed: true });
+    syncStep(5, { confirmed: true, paymentMethod: method });
   };
 
   const changeStartDate = (startDate: string) => {
@@ -356,8 +421,109 @@ export function MembershipJourney({
     setCustomDate("");
   };
 
+  const changePaymentMethod = (next: PaymentMethod) => {
+    setMethod(next);
+    setPayment(null);
+    setError("");
+    setDraft((prev) => ({ ...prev, paymentMethod: next }));
+  };
+
+  const confirmMembershipPayment = async (body: {
+    subscriptionId: string;
+    paymentIntentId?: string;
+    razorpayOrderId?: string;
+    razorpayPaymentId?: string;
+    razorpaySignature?: string;
+  }) => {
+    if (confirmingPay.current) return;
+    confirmingPay.current = true;
+    try {
+      await client.confirm(body);
+      sessionStorage.removeItem(DRAFT_KEY);
+      onComplete();
+    } catch (err) {
+      confirmingPay.current = false;
+      throw err;
+    }
+  };
+
+  const openRazorpayCheckout = async (gateway: GatewayPayment) => {
+    const orderId = gateway.razorpayOrderId;
+    if (!orderId) {
+      setError("Razorpay could not be started. Try again or pay with Stripe.");
+      return;
+    }
+    if (isSimulatedGatewayPayment(gateway, "razorpay")) {
+      await confirmMembershipPayment({
+        subscriptionId: gateway.subscription.id,
+        razorpayOrderId: orderId,
+      });
+      return;
+    }
+    const key = gateway.razorpayKeyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+    if (!key) {
+      setError("Razorpay is not configured.");
+      return;
+    }
+    setOpeningGateway(true);
+    setError("");
+    try {
+      const RazorpayCtor = await waitForRazorpay();
+      await new Promise<void>((resolve, reject) => {
+        const rzp = new RazorpayCtor({
+          key,
+          amount: Math.round(gateway.subscription.price * 100),
+          currency: gateway.subscription.currency,
+          name: "BlossomPot",
+          description: gateway.subscription.planName,
+          order_id: orderId,
+          prefill: { email: gateway.subscription.email },
+          notes: {
+            type: "gifting_subscription",
+            subscriptionId: gateway.subscription.id,
+            planName: gateway.subscription.planName,
+            reminderChannel: gateway.subscription.reminderChannel ?? "email",
+          },
+          theme: { color: "#C23A6B" },
+          handler: async (response: {
+            razorpay_order_id: string;
+            razorpay_payment_id: string;
+            razorpay_signature: string;
+          }) => {
+            try {
+              await confirmMembershipPayment({
+                subscriptionId: gateway.subscription.id,
+                razorpayOrderId: response.razorpay_order_id,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+              });
+              resolve();
+            } catch (err) {
+              reject(err);
+            }
+          },
+          modal: {
+            ondismiss: () => reject(new Error("Payment cancelled. You can retry Razorpay when you are ready.")),
+          },
+        });
+        rzp.on("payment.failed", (response) => {
+          reject(new Error(response.error?.description ?? "Razorpay payment failed. You can retry."));
+        });
+        rzp.open();
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not open Razorpay checkout");
+    } finally {
+      setOpeningGateway(false);
+    }
+  };
+
   const startPayment = async () => {
     if (!plan) return;
+    if (payment && paymentMatchesMethod(payment, method)) {
+      if (method === "razorpay") await openRazorpayCheckout(payment);
+      return;
+    }
     setBusy(true);
     setError("");
     try {
@@ -370,79 +536,56 @@ export function MembershipJourney({
         selectedEvents,
         skipEvents: !draft.customized,
       });
-      const secret = started.payment.clientSecret ?? started.payment.paymentIntentId ?? "";
-      const localPayment =
-        !secret ||
-        secret.includes("_dev_") ||
-        secret.includes("_loadtest_") ||
-        (started.payment.razorpayOrderId ?? "").includes("_dev_");
-      if (localPayment) {
-        await client.confirm({
-          subscriptionId: started.subscription.id,
-          paymentIntentId: started.payment.paymentIntentId,
-          razorpayOrderId: started.payment.razorpayOrderId,
-        });
-        sessionStorage.removeItem(DRAFT_KEY);
-        onComplete();
-        return;
-      }
-      setPayment({
+      const gateway: GatewayPayment = {
         subscription: started.subscription,
         clientSecret: started.payment.clientSecret,
         paymentIntentId: started.payment.paymentIntentId,
         razorpayOrderId: started.payment.razorpayOrderId,
         razorpayKeyId: started.payment.razorpayKeyId,
-      });
-      setDraft((prev) => ({ ...prev, pendingSubscriptionId: started.subscription.id, confirmed: true, step: 5 }));
+      };
+
+      if (method === "razorpay" && !gateway.razorpayOrderId) {
+        setError("Razorpay could not be started. Try again or choose Stripe.");
+        return;
+      }
+      if (method === "stripe" && !gateway.clientSecret && !gateway.paymentIntentId) {
+        setError("Stripe could not be started. Try again or choose Razorpay.");
+        return;
+      }
+      if (method === "razorpay" && gateway.clientSecret && !gateway.razorpayOrderId) {
+        setError("The selected method is Razorpay, but Stripe was started. Please retry.");
+        return;
+      }
+      if (method === "stripe" && gateway.razorpayOrderId && !gateway.clientSecret) {
+        setError("The selected method is Stripe, but Razorpay was started. Please retry.");
+        return;
+      }
+
+      if (isSimulatedGatewayPayment(gateway, method)) {
+        await confirmMembershipPayment({
+          subscriptionId: started.subscription.id,
+          paymentIntentId: started.payment.paymentIntentId,
+          razorpayOrderId: started.payment.razorpayOrderId,
+        });
+        return;
+      }
+
+      setPayment(gateway);
+      setDraft((prev) => ({
+        ...prev,
+        pendingSubscriptionId: started.subscription.id,
+        confirmed: true,
+        step: 5,
+        paymentMethod: method,
+      }));
+      if (method === "razorpay") {
+        await openRazorpayCheckout(gateway);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not start membership payment");
     } finally {
       setBusy(false);
     }
-  };
-
-  const payRazorpay = async () => {
-    if (!payment?.razorpayOrderId || !payment.subscription) return;
-    const key = payment.razorpayKeyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-    if (!key) {
-      setError("Razorpay is not configured.");
-      return;
-    }
-    const host = globalThis as typeof globalThis & {
-      Razorpay?: new (opts: Record<string, unknown>) => { open: () => void };
-    };
-    const RazorpayCtor = host.Razorpay;
-    if (!RazorpayCtor) {
-      setError("Razorpay checkout failed to load. Refresh and try again.");
-      return;
-    }
-    const rzp = new RazorpayCtor({
-      key,
-      amount: Math.round(payment.subscription.price * 100),
-      currency: payment.subscription.currency,
-      name: "BlossomPot",
-      description: payment.subscription.planName,
-      order_id: payment.razorpayOrderId,
-      handler: async (response: {
-        razorpay_order_id: string;
-        razorpay_payment_id: string;
-        razorpay_signature: string;
-      }) => {
-        try {
-          await client.confirm({
-            subscriptionId: payment.subscription.id,
-            razorpayOrderId: response.razorpay_order_id,
-            razorpayPaymentId: response.razorpay_payment_id,
-            razorpaySignature: response.razorpay_signature,
-          });
-          sessionStorage.removeItem(DRAFT_KEY);
-          onComplete();
-        } catch (err) {
-          setError(err instanceof Error ? err.message : "Could not confirm Razorpay payment");
-        }
-      },
-    });
-    rzp.open();
   };
 
   return (
@@ -746,29 +889,73 @@ export function MembershipJourney({
               {busy ? "Confirming your membership payment…" : "Payment received. Finishing your membership…"}
             </p>
           )}
-          <p className="text-sm text-slate-600">
-            Pay ${price} to activate {plan.isCustom ? "your custom plan" : plan.name}. Card details are processed by Stripe
-            or Razorpay — we never store them.
-          </p>
-          <PaymentMethodPicker value={method} onChange={setMethod} checkoutCurrency={plan.currency} />
+          {(searchParams.get("redirect_status") === "failed" || searchParams.get("redirect_status") === "canceled") && (
+            <p className="text-sm text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+              Stripe payment was not completed. You can retry below — your membership is not active until payment is confirmed.
+            </p>
+          )}
+          <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-2 text-sm">
+            <p className="font-semibold text-slate-900">
+              Pay ${price} to activate {plan.isCustom ? "your custom plan" : plan.name}
+            </p>
+            <p className="text-slate-600">
+              Selected method:{" "}
+              <span className="font-semibold text-slate-900">{method === "razorpay" ? "Razorpay" : "Stripe"}</span>
+              . Card and UPI details stay with the payment provider — we never store them.
+            </p>
+          </div>
+          <PaymentMethodPicker
+            value={method}
+            onChange={changePaymentMethod}
+            checkoutCurrency={plan.currency}
+          />
           {method === "razorpay" && (
-            <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />
+            <Script
+              src="https://checkout.razorpay.com/v1/checkout.js"
+              strategy="afterInteractive"
+              onLoad={() => setRazorpayReady(true)}
+              onError={() =>
+                setError("Could not load Razorpay. Disable ad blockers or try another network, then retry.")
+              }
+            />
           )}
-          {!payment && (
-            <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={() => syncStep(4, { confirmed: false })} className="min-h-11 rounded-full border border-slate-300 px-5 font-semibold">
-                Back
-              </button>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => void startPayment()}
-                className="min-h-11 rounded-full bg-nav px-5 text-white font-semibold disabled:opacity-50"
-              >
-                {busy ? "Starting…" : "Continue to payment"}
-              </button>
-            </div>
-          )}
+          <p className="text-xs text-slate-500">
+            {method === "razorpay"
+              ? razorpayReady || openingGateway
+                ? "Razorpay checkout will open in a secure popup."
+                : "Loading Razorpay checkout…"
+              : "Stripe’s card form will appear after you continue."}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setPayment(null);
+                syncStep(4, { confirmed: false });
+              }}
+              className="min-h-11 rounded-full border border-slate-300 px-5 font-semibold"
+            >
+              Back
+            </button>
+            <button
+              type="button"
+              disabled={busy || openingGateway || (method === "razorpay" && !razorpayReady && !payment)}
+              onClick={() => void startPayment()}
+              className="min-h-11 rounded-full bg-nav px-5 text-white font-semibold disabled:opacity-50"
+            >
+              {busy || openingGateway
+                ? method === "razorpay"
+                  ? "Opening Razorpay…"
+                  : "Starting Stripe…"
+                : payment && method === "razorpay"
+                  ? "Retry Razorpay"
+                  : method === "razorpay"
+                    ? "Pay with Razorpay"
+                    : payment
+                      ? "Continue with Stripe"
+                      : "Pay with Stripe"}
+            </button>
+          </div>
           {payment?.clientSecret && method === "stripe" && (
             <StripePaymentForm
               clientSecret={payment.clientSecret}
@@ -776,15 +963,6 @@ export function MembershipJourney({
               amountLabel={`$${price}`}
               onError={setError}
             />
-          )}
-          {payment?.razorpayOrderId && method === "razorpay" && (
-            <button
-              type="button"
-              onClick={() => void payRazorpay()}
-              className="min-h-11 w-full rounded-full bg-nav text-white font-semibold"
-            >
-              Pay with Razorpay
-            </button>
           )}
         </div>
       )}

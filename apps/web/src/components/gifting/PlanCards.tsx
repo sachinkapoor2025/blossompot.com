@@ -35,7 +35,7 @@ export function PlanCards({
           return (
             <article
               key={plan.id}
-              className={`relative flex flex-col rounded-2xl border p-5 ${
+              className={`relative flex flex-col rounded-2xl border p-5 transition hover:-translate-y-0.5 hover:shadow-lg ${
                 selected
                   ? "border-primary bg-rose-50 shadow-md ring-1 ring-primary/20"
                   : popular

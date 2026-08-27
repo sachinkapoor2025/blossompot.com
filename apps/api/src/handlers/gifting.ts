@@ -453,8 +453,9 @@ export async function startSubscription(event: APIGatewayProxyEventV2) {
 
   const reminderChannel = parsed.data.reminderChannel ?? "email";
   const timestamp = now();
+  const reusePending = existing?.status === "pending_payment";
   const subscription: GiftingSubscription = {
-    id: uuidv4(),
+    id: reusePending ? existing.id : uuidv4(),
     userId: auth.userId,
     email: auth.email,
     planId: plan.id,
@@ -469,7 +470,7 @@ export async function startSubscription(event: APIGatewayProxyEventV2) {
     membershipStartDate: startDate,
     selectedEvents: selected,
     isCustomPlan: Boolean(plan.isCustom),
-    createdAt: timestamp,
+    createdAt: reusePending ? existing.createdAt : timestamp,
     updatedAt: timestamp,
   };
 
@@ -797,9 +798,23 @@ function getStripe(): Stripe | null {
 }
 
 async function createSubscriptionPayment(sub: GiftingSubscription) {
+  const notes = {
+    type: "gifting_subscription",
+    subscriptionId: sub.id,
+    userId: sub.userId,
+    email: sub.email,
+    planName: sub.planName,
+    durationMonths: String(sub.durationMonths),
+    reminderChannel: sub.reminderChannel ?? "email",
+  };
+
   if (isLoadTestMode()) {
+    if (sub.paymentMethod === "razorpay") {
+      return { razorpayOrderId: `order_loadtest_${sub.id}`, razorpayKeyId: "rzp_loadtest" };
+    }
     return { paymentIntentId: `pi_loadtest_${sub.id}`, clientSecret: `pi_loadtest_${sub.id}_secret` };
   }
+
   if (sub.paymentMethod === "razorpay") {
     const keyId = process.env.RAZORPAY_KEY_ID || process.env.RAZOR_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET || process.env.RAZOR_KEY_SECRET;
@@ -811,7 +826,7 @@ async function createSubscriptionPayment(sub: GiftingSubscription) {
       amount: Math.round(sub.price * 100),
       currency: sub.currency,
       receipt: sub.id.slice(0, 40),
-      notes: { type: "gifting_subscription", subscriptionId: sub.id, userId: sub.userId },
+      notes,
     });
     return { razorpayOrderId: order.id, razorpayKeyId: keyId };
   }
@@ -823,7 +838,7 @@ async function createSubscriptionPayment(sub: GiftingSubscription) {
   const intent = await stripe.paymentIntents.create({
     amount: Math.round(sub.price * 100),
     currency: sub.currency.toLowerCase(),
-    metadata: { type: "gifting_subscription", subscriptionId: sub.id, userId: sub.userId },
+    metadata: notes,
     automatic_payment_methods: { enabled: true },
     receipt_email: sub.email,
   });

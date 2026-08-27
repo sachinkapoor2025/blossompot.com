@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import { RememberLanding } from "@/components/gifting/RememberLanding";
 import { fetchPublicPlans } from "@/lib/gifting";
-import { pageMetadata } from "@/lib/seo";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbJsonLd, faqJsonLd, pageMetadata } from "@/lib/seo";
 import { DEFAULT_SUBSCRIPTION_PLANS } from "@blossompot/shared";
+import { REMEMBER_FAQS, rememberHowToJsonLd, rememberServiceJsonLd } from "@/components/gifting/remember-content";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Never Forget a Special Occasion | BlossomPot",
+  title: "Occasion Reminder Membership — Never Forget a Birthday or Anniversary",
   description:
-    "BlossomPot remembers birthdays, anniversaries, and custom dates, then helps you choose and deliver the perfect gift.",
+    "BlossomPot Remember membership sends email and WhatsApp reminders before birthdays, anniversaries, Valentine’s Day, and festivals. Choose a 3-month to 2-year plan, pick your dates, then pay securely with Stripe or Razorpay. Gifts are never charged automatically.",
   path: "/remember",
 });
 
@@ -25,5 +27,20 @@ export default async function RememberPage() {
   } catch {
     /* fallback defaults */
   }
-  return <RememberLanding plans={plans} />;
+  return (
+    <>
+      <JsonLd
+        data={[
+          breadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Remember Membership", path: "/remember" },
+          ]),
+          rememberServiceJsonLd(),
+          rememberHowToJsonLd(),
+          faqJsonLd(REMEMBER_FAQS),
+        ]}
+      />
+      <RememberLanding plans={plans} />
+    </>
+  );
 }
