@@ -441,6 +441,7 @@ async function persistVendorOrderUpdate(
           GSI3PK: orderKeys.gsi3pk(nextStatus),
           GSI3SK: orderKeys.gsi3sk(order.createdAt),
           lastTrackingNotificationStatus: nextStatus,
+          lastCustomerStatusNotification: nextStatus,
         }
       : {}),
   };
@@ -448,9 +449,15 @@ async function persistVendorOrderUpdate(
   await docClient.send(new PutCommand({ TableName: ORDERS_TABLE, Item: updated }));
 
   if (statusChanged) {
-    const emailResult = await notifyCustomerOrderStatusChange(updated);
-    if (!emailResult.ok && !emailResult.skipped) {
-      console.error("Vendor status customer email failed:", emailResult.error);
+    try {
+      const emailResult = await notifyCustomerOrderStatusChange(updated, {
+        previousNotificationStatus: order.lastCustomerStatusNotification,
+      });
+      if (!emailResult.ok && !emailResult.skipped) {
+        console.error("Vendor status customer email failed:", emailResult.error);
+      }
+    } catch (err) {
+      console.error("Vendor status notify error:", order.orderId, err);
     }
   }
 
