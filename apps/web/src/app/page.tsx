@@ -28,8 +28,9 @@ import type { Product, Category } from "@blossompot/shared";
 export const metadata: Metadata = pageMetadata({
   title: "BlossomPot — Flowers, Cakes & Gifts | USA Delivery",
   description:
-    "Shop flowers, bouquets, cakes, and curated gifts at BlossomPot. Premium online gifting with fast USA delivery, same-day options, and elegant packaging.",
+    "Order fresh flowers, cakes, and gift hampers online with fast USA delivery. Same-day options in select cities. Secure checkout, WhatsApp support, gifts for every occasion.",
   path: "/",
+  absoluteTitle: true,
 });
 
 export const dynamic = "force-dynamic";
@@ -147,7 +148,7 @@ export default async function HomePage() {
       <section className="max-w-7xl mx-auto px-4 py-12">
         <div className="rounded-3xl border border-primary/15 bg-gradient-to-br from-rose-50 via-white to-orange-50 p-8 sm:p-12">
           <p className="text-xs uppercase tracking-[0.2em] text-primary/70">Personal gifting assistant</p>
-          <h2 className="mt-2 text-2xl sm:text-4xl font-bold text-primary">Never forget a special occasion again.</h2>
+          <p className="mt-2 text-2xl sm:text-4xl font-bold text-primary">Never forget a special occasion again.</p>
           <p className="mt-3 text-slate-600 max-w-2xl">
             You tell us the dates. We remember them, help you choose the perfect gift, and make sure your special moments don&apos;t get forgotten.
           </p>
@@ -215,7 +216,7 @@ export default async function HomePage() {
         <div className="space-y-4">
           {faqs.map((f) => (
             <div key={f.q}>
-              <h3 className="font-semibold text-primary text-sm">{f.q}</h3>
+              <p className="font-semibold text-primary text-sm">{f.q}</p>
               <p className="text-sm text-slate-600 mt-1">{f.a}</p>
             </div>
           ))}

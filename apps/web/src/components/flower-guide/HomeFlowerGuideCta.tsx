@@ -17,8 +17,8 @@ export function HomeFlowerGuideCta() {
             />
           </div>
           <div className="p-8 sm:p-10">
-            <p className="text-xs uppercase tracking-[0.2em] text-nav font-semibold">Flower Knowledge Centre</p>
-            <h2 className="font-display text-3xl text-primary mt-2">Discover the world of flowers</h2>
+            <p className="text-xs uppercase tracking-[0.2em] text-nav font-semibold">Discover the world of flowers</p>
+            <h2 className="font-display text-3xl text-primary mt-2">Flower Knowledge Centre</h2>
             <p className="mt-3 text-slate-600 leading-relaxed">
               Not sure which flowers to choose? Explore our flower guides to discover meanings, colours,
               seasons, care tips and the best flowers for every occasion.

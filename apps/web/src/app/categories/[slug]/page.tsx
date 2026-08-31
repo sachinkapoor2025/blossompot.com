@@ -95,6 +95,17 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   }
 
   const name = category?.name ?? slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  const headingName: Record<string, string> = {
+    flowers: "Flowers",
+    "flower-bouquets": "Flower Bouquets",
+    cakes: "Cakes",
+    "gift-hampers": "Gift Hampers",
+    "birthday-gifts": "Birthday Gifts",
+    "anniversary-gifts": "Anniversary Gifts",
+    "same-day-gifts": "Same-Day Gifts",
+    "valentines-day-gifts": "Valentine's Day Gifts",
+  };
+  const seoCategoryName = headingName[slug] ?? name;
   const pageSeo = getCategoryPageSeo(slug);
   const h1 = pageSeo?.h1 ?? `${name} — USA Delivery`;
   const baseDescription =
@@ -136,7 +147,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       )}
 
       {rich ? (
-        <CategoryContentSection content={rich} categoryName={name} />
+        <CategoryContentSection content={rich} categoryName={seoCategoryName} />
       ) : (
         <>
           <section className="mt-12 pt-10 border-t border-slate-200">
@@ -170,7 +181,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           </section>
 
           <section className="mt-10 p-6 bg-slate-50 rounded-xl">
-            <h2 className="font-semibold text-primary mb-3">Why order {name} from BlossomPot?</h2>
+            <h2 className="font-semibold text-primary mb-3">Why order {seoCategoryName} from BlossomPot?</h2>
             <ul className="grid sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-2 text-sm text-slate-600">
               <li className="flex gap-2">
                 <span className="text-nav shrink-0">✓</span>

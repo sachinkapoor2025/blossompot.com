@@ -6,7 +6,7 @@ import { site } from "@/lib/site";
 
 const STEPS = [
   { n: "1", title: "Select a plan", text: "3 months, 6 months, 1 year, 2 years, or a custom length." },
-  { n: "2", title: "Choose events", text: "We’ll show occasions that fall in your membership window." },
+  { n: "2", title: "Choose events", text: "We'll show occasions that fall in your membership window." },
   { n: "3", title: "Reminder preference", text: "WhatsApp, email, or both — you decide." },
   { n: "4", title: "Review & confirm", text: "Check the plan, dates, and events before paying." },
   { n: "5", title: "Pay & remember", text: "Pay with Stripe or Razorpay. We remind you in time." },
@@ -23,7 +23,7 @@ const BENEFITS = [
   },
   {
     title: "Festivals on your radar",
-    text: "Valentine’s Day, Chocolate Day, Mother’s Day, Rakhi, Christmas, and more — only if they fall in your plan.",
+    text: "Valentine's Day, Chocolate Day, Mother's Day, Rakhi, Christmas, and more — only if they fall in your plan.",
   },
   {
     title: "You approve every gift",

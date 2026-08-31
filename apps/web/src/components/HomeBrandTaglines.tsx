@@ -25,15 +25,12 @@ export function HomeBrandTaglines() {
             —
           </span>
         </p>
-        <p
+        <h1
           className="mt-2 font-display text-xl sm:text-2xl italic text-[#1A3D34]"
           style={{ fontFamily: "var(--font-display), Georgia, serif" }}
         >
-          Delivering Smiles{" "}
-          <span className="text-[#E07A9A] not-italic" aria-hidden>
-            ♡
-          </span>
-        </p>
+          Delivering Smiles — Flowers, Cakes & Gifts for Every Celebration
+        </h1>
       </div>
     </section>
   );

@@ -65,7 +65,7 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "valentines-day-gifts": {
     extraParagraphs: [
-      "Valentine’s Day flowers, chocolates, and romantic gift sets designed for memorable February celebrations.",
+      "Valentine's Day flowers, chocolates, and romantic gift sets designed for memorable February celebrations.",
     ],
   },
   "mothers-day-gifts": {

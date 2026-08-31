@@ -17,7 +17,9 @@ const OG_IMAGE_HEIGHT = 630;
 /** Build absolute canonical URL for a path (no query string). */
 export function canonical(path: string): string {
   const p = path.startsWith("/") ? path : `/${path}`;
-  return `${siteUrl}${p === "/" ? "" : p}`.replace(/([^:]\/)\/+/g, "$1") || siteUrl;
+  const base = siteUrl.replace(/\/$/, "");
+  if (p === "/") return `${base}/`;
+  return `${base}${p}`.replace(/([^:]\/)\/+/g, "$1") || base;
 }
 
 function ogImages(url: string, alt: string) {
