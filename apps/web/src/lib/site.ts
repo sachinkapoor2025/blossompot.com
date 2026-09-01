@@ -1,22 +1,28 @@
 import { categoryHref } from "./category-urls";
 import { editorialCdnUrl } from "./editorial-cdn";
 
-function digitsOnly(value: string): string {
-  return value.replace(/\D/g, "");
+const BLOCKED_SUPPORT_PHONE_DIGITS = new Set(["16692603819", "6692603819"]);
+
+function isBlockedSupportPhone(digits: string): boolean {
+  const compact = digits.replace(/\D/g, "");
+  if (!compact) return false;
+  return BLOCKED_SUPPORT_PHONE_DIGITS.has(compact) || BLOCKED_SUPPORT_PHONE_DIGITS.has(compact.replace(/^1/, ""));
 }
 
 /**
- * Real support phone — set NEXT_PUBLIC_SUPPORT_PHONE in Amplify / .env.
- * Default is the live DGV US line used by sibling brand HalloweenReady (same operator).
- * Build fails in production if this resolves to a fictional 555 number.
+ * Optional support phone. The former default +1 (669) 260-3819 is never shown
+ * and is never used in WhatsApp wa.me links.
  */
-const SUPPORT_PHONE_DISPLAY =
-  process.env.NEXT_PUBLIC_SUPPORT_PHONE?.trim() || "+1 (669) 260-3819";
-const SUPPORT_PHONE_DIGITS = digitsOnly(SUPPORT_PHONE_DISPLAY);
+const RAW_SUPPORT_PHONE = process.env.NEXT_PUBLIC_SUPPORT_PHONE?.trim() || "";
+const SUPPORT_PHONE_DIGITS_RAW = RAW_SUPPORT_PHONE.replace(/\D/g, "");
+const SUPPORT_PHONE_BLOCKED = isBlockedSupportPhone(SUPPORT_PHONE_DIGITS_RAW);
+const SUPPORT_PHONE_DISPLAY = SUPPORT_PHONE_BLOCKED ? "" : RAW_SUPPORT_PHONE;
+const SUPPORT_PHONE_DIGITS = SUPPORT_PHONE_BLOCKED ? "" : SUPPORT_PHONE_DIGITS_RAW;
 
 if (
   process.env.NODE_ENV === "production" &&
-  (!SUPPORT_PHONE_DIGITS || /55501\d{2}$/.test(SUPPORT_PHONE_DIGITS))
+  SUPPORT_PHONE_DIGITS &&
+  /55501\d{2}$/.test(SUPPORT_PHONE_DIGITS)
 ) {
   throw new Error(
     "NEXT_PUBLIC_SUPPORT_PHONE must be set to a real phone number (555 placeholders are not allowed)."
@@ -177,10 +183,20 @@ export function orderCategories<T extends { slug: string }>(categories: readonly
   return [...categories].sort((a, b) => (rank.get(a.slug) ?? 99) - (rank.get(b.slug) ?? 99));
 }
 
+/** Visible WhatsApp CTA text. Never prints the retired +1 (669) 260-3819 number. */
+export function whatsappLinkLabel(fallback = "Chat on WhatsApp"): string {
+  const display = site.whatsappDisplay.trim();
+  return display || fallback;
+}
+
 export function whatsappChatUrl(message = "Hi BlossomPot, I need help with a gift order."): string {
   const groupUrl = site.whatsappGroupInviteUrl?.trim();
   if (groupUrl) return groupUrl;
-  return `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(message)}`;
+  const digits = site.whatsapp.replace(/\D/g, "");
+  if (digits) {
+    return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
+  }
+  return `https://wa.me/?text=${encodeURIComponent(message)}`;
 }
 
 export const testimonials = [
@@ -211,6 +227,13 @@ export const testimonials = [
     timeAgo: "3 weeks ago",
     image: editorialCdnUrl("testimonial-jessica.jpg"),
     text: "BlossomPot feels like a real gifting marketplace — great selection of cakes, bouquets, and hampers. Support answered my delivery questions quickly.",
+  },
+  {
+    name: "Amanda",
+    rating: 5,
+    timeAgo: "1 month ago",
+    image: editorialCdnUrl("testimonial-amanda.jpg"),
+    text: "Sent a birthday cake and mixed bouquet to my sister in Florida. Everything arrived on the date we chose, looked exactly like the listing, and made her day. I'll be back for Valentine's.",
   },
 ] as const;
 

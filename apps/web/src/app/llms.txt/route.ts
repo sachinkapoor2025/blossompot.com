@@ -120,8 +120,8 @@ ${categories.join("\n")}
 
 - **Operator:** Divit Global Ventures (DGV)
 - **Legal name:** ${site.legalName}
-- **Support phone:** ${site.phone}
 - **Support email:** ${site.supportEmail}
+- **WhatsApp:** Chat via the WhatsApp button on blossompot.com
 - **Coverage:** ${deliveryClaims.standard}
 - **Secure checkout:** Stripe (USD) + Razorpay (INR / UPI)
 
@@ -166,7 +166,7 @@ ${faqList}
 - **Nationwide:** ${deliveryClaims.standard}
 - **Dispatch:** ${deliveryClaims.dispatch}
 - **Shipping:** ${deliveryClaims.shipping}
-- **Support:** ${site.supportEmail} | WhatsApp ${site.whatsappDisplay}
+- **Support:** ${site.supportEmail} | WhatsApp chat on blossompot.com
 
 ---
 

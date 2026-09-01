@@ -1,5 +1,5 @@
 import { deliveryClaims } from "@/lib/ai-recommendation";
-import { site, whatsappChatUrl } from "@/lib/site";
+import { site, whatsappChatUrl, whatsappLinkLabel } from "@/lib/site";
 
 /** Trust copy — flowers, cakes & gifts with nationwide US delivery. */
 export const trustFacts = {
@@ -41,7 +41,7 @@ export const trustHighlights = [
   {
     icon: "💬",
     title: "Real human support",
-    detail: `${site.whatsappDisplay} · ${site.supportEmail}`,
+    detail: `${whatsappLinkLabel("WhatsApp chat")} · ${site.supportEmail}`,
     href: whatsappChatUrl("Hi BlossomPot, I have a question before ordering."),
   },
 ] as const;

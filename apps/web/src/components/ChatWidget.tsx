@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ChatMessage } from "@blossompot/shared";
-import { site, whatsappChatUrl } from "@/lib/site";
+import { whatsappChatUrl, whatsappLinkLabel } from "@/lib/site";
 import { getOrCreateSessionId } from "@/lib/session";
 import { api } from "@/lib/api";
 
@@ -307,7 +307,7 @@ export function ChatWidget() {
             <p className="mt-2 text-[10px] text-white/40 text-center">
               Website help only ·{" "}
               <a href={whatsappChatUrl()} target="_blank" rel="noopener noreferrer" className="underline hover:text-white/60">
-                WhatsApp {site.whatsappDisplay}
+                {whatsappLinkLabel()}
               </a>{" "}
               for orders
             </p>

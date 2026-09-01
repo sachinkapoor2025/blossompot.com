@@ -136,7 +136,7 @@ export default function AboutPage() {
             rel="noopener noreferrer"
             className="text-nav hover:underline"
           >
-            WhatsApp ({site.whatsappDisplay})
+            WhatsApp
           </a>
           , email{" "}
           <a href={`mailto:${site.supportEmail}`} className="text-nav hover:underline">

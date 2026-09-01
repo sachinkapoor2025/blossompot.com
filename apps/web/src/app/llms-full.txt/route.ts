@@ -75,7 +75,7 @@ ${faqList}
 
 ## Contact
 
-Email: ${site.supportEmail} | WhatsApp: ${site.whatsappDisplay}
+Email: ${site.supportEmail} | WhatsApp chat on blossompot.com
 Press: ${siteUrl}/press
 `;
 

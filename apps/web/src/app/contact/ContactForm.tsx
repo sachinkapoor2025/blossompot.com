@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { site, whatsappChatUrl } from "@/lib/site";
+import { site, whatsappChatUrl, whatsappLinkLabel } from "@/lib/site";
 import { useSessionId } from "@/lib/session";
 import { api } from "@/lib/api";
 import { PhoneInput, buildPhoneValue } from "@/components/PhoneInput";
@@ -81,7 +81,7 @@ export function ContactForm() {
             rel="noopener noreferrer"
             className="text-nav hover:underline"
           >
-            {site.whatsappDisplay}
+            {whatsappLinkLabel()}
           </a>
         </div>
         <div className="border border-slate-200 rounded-xl p-6">

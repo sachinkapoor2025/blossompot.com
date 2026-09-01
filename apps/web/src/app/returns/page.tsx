@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { site, whatsappChatUrl } from "@/lib/site";
+import { site, whatsappChatUrl, whatsappLinkLabel } from "@/lib/site";
 import { JsonLd } from "@/components/JsonLd";
 import { faqJsonLd, pageMetadata } from "@/lib/seo";
 
@@ -123,14 +123,14 @@ export default function ReturnsPage() {
         </p>
         <ul className="list-disc pl-5 space-y-2">
           <li>
-            Message us on WhatsApp at{" "}
+            Message us on{" "}
             <a
               href={whatsappChatUrl("Hi BlossomPot, I need help tracking my order.")}
               className="text-nav underline"
               target="_blank"
               rel="noopener noreferrer"
             >
-              {site.whatsappDisplay}
+              WhatsApp
             </a>{" "}
             or email{" "}
             <a href={`mailto:${site.supportEmail}`} className="text-nav underline">
@@ -207,7 +207,7 @@ export default function ReturnsPage() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              {site.whatsappDisplay}
+              {whatsappLinkLabel()}
             </a>
           </li>
           <li>

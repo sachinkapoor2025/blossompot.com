@@ -4,7 +4,7 @@ import {
   resolveProductImageUrls,
   type ProductRatingAggregate,
 } from "@blossompot/shared";
-import { site } from "./site";
+import { site, whatsappChatUrl } from "./site";
 import { getCdnUrl, siteUrl } from "./env";
 import { locationPublicPath } from "./content/seo-data";
 
@@ -125,7 +125,7 @@ export function organizationJsonLd() {
     },
     description: site.description,
     email: site.supportEmail,
-    telephone: site.phone,
+    ...(site.phone ? { telephone: site.phone } : {}),
     sameAs: [
       "https://www.facebook.com/blossompot/",
       "https://www.instagram.com/blossompot/",
@@ -135,8 +135,8 @@ export function organizationJsonLd() {
         "@type": "ContactPoint",
         contactType: "customer service",
         email: site.supportEmail,
-        telephone: site.phone,
-        url: `https://wa.me/${site.whatsapp}`,
+        ...(site.phone ? { telephone: site.phone } : {}),
+        url: site.whatsapp ? `https://wa.me/${site.whatsapp}` : whatsappChatUrl(),
         availableLanguage: ["en"],
         areaServed: "US",
       },
@@ -174,7 +174,7 @@ export function onlineStoreJsonLd() {
     description: site.description,
     image: canonical(site.logoSrc),
     email: site.supportEmail,
-    telephone: site.phone,
+    ...(site.phone ? { telephone: site.phone } : {}),
     areaServed: [
       { "@type": "Country", name: "United States" },
       { "@type": "Country", name: "Canada" },

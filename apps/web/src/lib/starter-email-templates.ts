@@ -6,8 +6,12 @@ import {
   buildPremiumMarketingEmailHtml,
   buildFreeShippingEmailHtml,
   buildShopMoreSaveMoreEmailHtml,
+  buildAnniversaryEmailHtml,
+  buildBirthdayEmailHtml,
   FREE_SHIPPING_EMAIL_CONFIG,
   SHOP_MORE_SAVE_MORE_EMAIL_CONFIG,
+  ANNIVERSARY_EMAIL_CONFIG,
+  BIRTHDAY_EMAIL_CONFIG,
   type MarketingEmailContent,
 } from "@blossompot/shared";
 
@@ -29,6 +33,8 @@ export const RAKSHA_BANDHAN_TEMPLATE_ID = PREMIUM_GIFTS_TEMPLATE_ID;
 export const PREMIUM_RAKSHA_BANDHAN_TEMPLATE_ID = PREMIUM_GIFTS_TEMPLATE_ID;
 export const FREE_SHIPPING_TEMPLATE_ID = FREE_SHIPPING_EMAIL_CONFIG.templateId;
 export const SHOP_MORE_SAVE_MORE_TEMPLATE_ID = SHOP_MORE_SAVE_MORE_EMAIL_CONFIG.templateId;
+export const ANNIVERSARY_TEMPLATE_ID = ANNIVERSARY_EMAIL_CONFIG.templateId;
+export const BIRTHDAY_TEMPLATE_ID = BIRTHDAY_EMAIL_CONFIG.templateId;
 /** @deprecated removed Rakhi starters */
 export const STARTING_PRICE_TEMPLATE_ID = "gifts-starting-offer";
 /** @deprecated */
@@ -58,6 +64,20 @@ export const STARTER_EMAIL_TEMPLATES: StarterEmailTemplateMeta[] = [
     subject: SHOP_MORE_SAVE_MORE_EMAIL_CONFIG.subject,
     buildHtml: () => buildShopMoreSaveMoreEmailHtml(),
     htmlPath: "/email-templates/shop-more-save-more.html",
+  },
+  {
+    templateId: ANNIVERSARY_TEMPLATE_ID,
+    name: ANNIVERSARY_EMAIL_CONFIG.name,
+    subject: ANNIVERSARY_EMAIL_CONFIG.subject,
+    buildHtml: () => buildAnniversaryEmailHtml(),
+    htmlPath: "/email-templates/anniversary-gifts.html",
+  },
+  {
+    templateId: BIRTHDAY_TEMPLATE_ID,
+    name: BIRTHDAY_EMAIL_CONFIG.name,
+    subject: BIRTHDAY_EMAIL_CONFIG.subject,
+    buildHtml: () => buildBirthdayEmailHtml(),
+    htmlPath: "/email-templates/birthday-gifts.html",
   },
 ];
 
