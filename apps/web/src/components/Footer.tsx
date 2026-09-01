@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import Link from "next/link";
-import { site, navItems, giftSetsMenu, whatsappChatUrl, whatsappLinkLabel } from "@/lib/site";
+import { site, navItems, giftSetsMenu } from "@/lib/site";
 import { PaymentMethodIcons } from "@/components/PaymentMethodIcons";
 import { SiteLogoLink } from "@/components/SiteLogo";
 import { trustFacts } from "@/lib/trust";
@@ -95,17 +95,6 @@ export function Footer() {
                 <span className="text-slate-500 text-xs uppercase tracking-wide block mb-0.5">Email</span>
                 <a href={`mailto:${site.supportEmail}`} className="font-medium text-primary hover:underline">
                   {site.supportEmail}
-                </a>
-              </p>
-              <p>
-                <span className="text-slate-500 text-xs uppercase tracking-wide block mb-0.5">WhatsApp</span>
-                <a
-                  href={whatsappChatUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-primary hover:underline"
-                >
-                  {whatsappLinkLabel()}
                 </a>
               </p>
             </div>
