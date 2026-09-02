@@ -118,6 +118,18 @@ export function isUsCityNavLink(link: CityNavLink): boolean {
 
 export const usCityLinks = cityLinks.filter(isUsCityNavLink);
 
+/** Country flower-delivery landing pages in the header Countries menu. */
+export const countriesMenu = {
+  label: "Countries",
+  items: [
+    { label: "Flower Delivery in USA", href: "/flower-delivery-usa", slug: "usa" },
+    { label: "Flower Delivery in UK", href: "/flower-delivery-uk", slug: "uk" },
+    { label: "Flower Delivery in Canada", href: "/flower-delivery-canada", slug: "canada" },
+    { label: "Flower Delivery in Australia", href: "/flower-delivery-australia", slug: "australia" },
+    { label: "Flower Delivery in UAE", href: "/flower-delivery-uae", slug: "uae" },
+  ],
+} as const;
+
 export const homeBanners = [
   {
     src: editorialCdnUrl("home-banner-flowers.jpg"),

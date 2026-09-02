@@ -5,7 +5,14 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import { categoryHref } from "@/lib/category-urls";
-import { navItems, cityLinks, cityNavHref, cityNavMenuLabel, giftSetsMenu } from "@/lib/site";
+import {
+  navItems,
+  cityLinks,
+  cityNavHref,
+  cityNavMenuLabel,
+  giftSetsMenu,
+  countriesMenu,
+} from "@/lib/site";
 import { SearchBar } from "@/components/SearchBar";
 import { SiteLogoLink } from "@/components/SiteLogo";
 import { DeliveryLocationChip } from "@/components/DeliveryLocationChip";
@@ -54,6 +61,54 @@ function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
                 }}
               >
                 {cityNavMenuLabel(c)}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CountriesMenu({
+  active,
+  onNavigate,
+}: {
+  active: boolean;
+  onNavigate?: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div
+      className="relative shrink-0"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-haspopup="true"
+        className={`btn-nav gap-1 ${active || open ? "btn-nav-active" : ""}`}
+      >
+        {countriesMenu.label}
+        <span className={`text-xs transition-transform ${open ? "rotate-180" : ""}`}>▼</span>
+      </button>
+      {open && (
+        <div className="absolute top-full right-0 pt-1.5 z-[100]">
+          <div className="min-w-[240px] rounded-lg border border-slate-200 bg-white py-1 shadow-xl">
+            {countriesMenu.items.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-nav whitespace-nowrap"
+                onClick={() => {
+                  setOpen(false);
+                  onNavigate?.();
+                }}
+              >
+                {item.label}
               </Link>
             ))}
           </div>
@@ -259,6 +314,7 @@ export function Header() {
   const activeCategory = searchParams.get("category");
   const [menuOpen, setMenuOpen] = useState(false);
   const [citiesOpen, setCitiesOpen] = useState(false);
+  const [countriesOpen, setCountriesOpen] = useState(false);
   const [giftSetsOpen, setGiftSetsOpen] = useState(false);
 
   const isActive = (href: string, category?: string) => {
@@ -273,16 +329,19 @@ export function Header() {
   };
 
   const isGiftSetsActive = giftSetsMenu.items.some((item) => isActive(item.href, item.category));
+  const isCountriesActive = countriesMenu.items.some((item) => pathname === item.href);
 
   const closeMenu = () => {
     setMenuOpen(false);
     setCitiesOpen(false);
+    setCountriesOpen(false);
     setGiftSetsOpen(false);
   };
 
   useEffect(() => {
     setMenuOpen(false);
     setCitiesOpen(false);
+    setCountriesOpen(false);
     setGiftSetsOpen(false);
   }, [pathname, activeCategory]);
 
@@ -393,6 +452,7 @@ export function Header() {
               );
             })}
             <CitiesMenu />
+            <CountriesMenu active={isCountriesActive} />
           </div>
         </div>
       </nav>
@@ -519,6 +579,39 @@ export function Header() {
                         className="block rounded-lg px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-nav"
                       >
                         {cityNavMenuLabel(c)}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setCountriesOpen((v) => !v)}
+                  className={`w-full flex items-center justify-between rounded-lg px-4 py-3 text-sm font-semibold ${
+                    isCountriesActive || countriesOpen
+                      ? "bg-nav text-white"
+                      : "text-primary hover:bg-blue-50 hover:text-nav"
+                  }`}
+                >
+                  {countriesMenu.label}
+                  <span className={`text-xs transition-transform ${countriesOpen ? "rotate-180" : ""}`}>▼</span>
+                </button>
+                {countriesOpen && (
+                  <div className="mt-1 ml-2 border-l-2 border-slate-100 pl-2 space-y-1">
+                    {countriesMenu.items.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={closeMenu}
+                        className={`block rounded-lg px-4 py-2.5 text-sm ${
+                          pathname === item.href
+                            ? "bg-blue-50 text-nav font-semibold"
+                            : "text-slate-700 hover:bg-blue-50 hover:text-nav"
+                        }`}
+                      >
+                        {item.label}
                       </Link>
                     ))}
                   </div>

@@ -1,4 +1,4 @@
-import { site, navItems, cityNavHref, cityLinks, faqs, giftSetsMenu, whatsappLinkLabel } from "@/lib/site";
+import { site, navItems, cityNavHref, cityLinks, faqs, giftSetsMenu, countriesMenu, whatsappLinkLabel } from "@/lib/site";
 import { categoryHref } from "@/lib/category-urls";
 import { siteUrl } from "@/lib/env";
 import { blogPosts } from "@/lib/content/blog-posts";
@@ -17,6 +17,7 @@ export function buildChatKnowledge(): string {
     .filter((n) => !("category" in n))
     .map((n) => `- ${n.label}: ${siteUrl}${n.href === "/" ? "" : n.href}`);
 
+  const countries = countriesMenu.items.map((c) => `- ${c.label}: ${siteUrl}${c.href}`);
   const cities = cityLinks.map((c) => `- ${c.menuLabel ?? c.label}: ${siteUrl}${cityNavHref(c)}`);
 
   const faqBlock = faqs.map((f) => `Q: ${f.q}\nA: ${f.a}`).join("\n\n");
@@ -41,6 +42,10 @@ ${pages.join("\n")}
 - FAQ: ${siteUrl}/faq
 - About: ${siteUrl}/about
 - Contact: ${siteUrl}/contact
+
+## Flower delivery by country
+${countries.join("\n")}
+The homepage serves shoppers in the USA, UK, Canada, Australia, and the UAE. Live flower destination coverage is the United States. UK, Canada, Australia, and UAE pages help shoppers in those countries send gifts to a US address.
 
 ## USA delivery cities
 ${cities.join("\n")}

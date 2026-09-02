@@ -16,6 +16,16 @@ export function exploreMoreGroupsForProduct(productSlug?: string) {
     : exploreCityLinks;
   return [
     {
+      heading: "Flower delivery by country",
+      links: [
+        { label: "USA", href: "/flower-delivery-usa" },
+        { label: "United Kingdom", href: "/flower-delivery-uk" },
+        { label: "Canada", href: "/flower-delivery-canada" },
+        { label: "Australia", href: "/flower-delivery-australia" },
+        { label: "United Arab Emirates", href: "/flower-delivery-uae" },
+      ],
+    },
+    {
       heading: "Gifts by Location",
       links: cityLinks,
     },

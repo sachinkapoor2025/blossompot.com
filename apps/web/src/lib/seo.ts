@@ -177,6 +177,7 @@ export function onlineStoreJsonLd() {
     ...(site.phone ? { telephone: site.phone } : {}),
     areaServed: [
       { "@type": "Country", name: "United States" },
+      { "@type": "Country", name: "United Kingdom" },
       { "@type": "Country", name: "Canada" },
       { "@type": "Country", name: "Australia" },
       { "@type": "Country", name: "United Arab Emirates" },

@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import Link from "next/link";
-import { site, navItems, giftSetsMenu } from "@/lib/site";
+import { site, navItems, giftSetsMenu, countriesMenu } from "@/lib/site";
 import { PaymentMethodIcons } from "@/components/PaymentMethodIcons";
 import { SiteLogoLink } from "@/components/SiteLogo";
 import { trustFacts } from "@/lib/trust";
@@ -174,6 +174,16 @@ export function Footer() {
           <div className="col-span-2 lg:col-span-5 min-w-0">
             <p className="font-semibold text-primary mb-3 sm:mb-4">Deliver to</p>
             <ul className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2 text-slate-600">
+              {countriesMenu.items.map((item) => (
+                <li key={item.href} className="col-span-1">
+                  <Link href={item.href} className="hover:text-primary hover:underline">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+              <li className="col-span-2 sm:col-span-3 pt-2">
+                <span className="text-xs uppercase tracking-wide text-slate-500">USA cities &amp; states</span>
+              </li>
               {footerGeoLinks(12).map((c) => (
                 <li key={c.href}>
                   <Link href={c.href} className="hover:text-primary hover:underline">

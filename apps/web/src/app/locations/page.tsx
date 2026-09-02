@@ -11,6 +11,7 @@ import {
   MARKET_SLUGS,
 } from "@/lib/content/geo/international";
 import { locationPublicPath } from "@/lib/content/seo-data";
+import { countriesMenu } from "@/lib/site";
 
 export const metadata: Metadata = pageMetadata({
   title: "Where BlossomPot Operates — USA Delivery & International Ordering",
@@ -91,6 +92,22 @@ export default function LocationsHubPage() {
               Full USA index
             </Link>
           </li>
+        </ul>
+      </section>
+
+      <section className="mb-10">
+        <h2 className="text-xl font-bold text-primary mb-3">Flower delivery by country</h2>
+        <p className="text-slate-700 mb-3 max-w-3xl leading-relaxed">
+          Dedicated flower-delivery landing pages for the USA, UK, Canada, Australia, and the UAE.
+        </p>
+        <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+          {countriesMenu.items.map((item) => (
+            <li key={item.href}>
+              <Link href={item.href} className="text-nav hover:underline">
+                {item.label}
+              </Link>
+            </li>
+          ))}
         </ul>
       </section>
 

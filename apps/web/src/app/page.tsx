@@ -14,7 +14,7 @@ import { HomeFlowerGuideCta } from "@/components/flower-guide/HomeFlowerGuideCta
 import { HomeCategoryCarousel } from "@/components/HomeCategoryCarousel";
 import { buildHomeCategoryTiles } from "@/lib/home-category-carousel";
 import { JsonLd } from "@/components/JsonLd";
-import { site, homeCategoryOrder, faqs, homeBanners } from "@/lib/site";
+import { site, homeCategoryOrder, faqs, homeBanners, countriesMenu } from "@/lib/site";
 import {
   getCatalogProductsByCategory,
   mergeProductsPreferExisting,
@@ -26,9 +26,9 @@ import { faqJsonLd, pageMetadata } from "@/lib/seo";
 import type { Product, Category } from "@blossompot/shared";
 
 export const metadata: Metadata = pageMetadata({
-  title: "BlossomPot — Flowers, Cakes & Gifts | USA Delivery",
+  title: "BlossomPot — Flowers, Cakes & Gifts | USA, UK, Canada, Australia & UAE",
   description:
-    "Order fresh flowers, cakes, and gift hampers online with fast USA delivery. Same-day options in select cities. Secure checkout, WhatsApp support, gifts for every occasion.",
+    "Order fresh flowers, cakes, and gift hampers online. Shoppers in the USA, UK, Canada, Australia, and UAE send gifts with fast USA delivery. Same-day options in select cities.",
   path: "/",
   absoluteTitle: true,
 });
@@ -106,6 +106,28 @@ export default async function HomePage() {
           Explore Hampers
         </Link>
       </div>
+
+      <section className="max-w-7xl mx-auto px-4 pt-8 pb-2">
+        <div className="text-center mb-5">
+          <h2 className="text-2xl font-bold text-primary">Flower delivery by country</h2>
+          <p className="text-sm text-slate-600 mt-1 max-w-2xl mx-auto">
+            BlossomPot serves shoppers in the USA, UK, Canada, Australia, and the UAE. Open a country
+            page for local ordering notes, occasions, and flower collections.
+          </p>
+        </div>
+        <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          {countriesMenu.items.map((item) => (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                className="flex min-h-[4.5rem] items-center justify-center rounded-xl border border-primary/15 bg-white px-3 py-3 text-center text-sm font-semibold text-primary hover:border-primary/40 hover:bg-petal/70"
+              >
+                {item.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       {bestsellers.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 py-10">
