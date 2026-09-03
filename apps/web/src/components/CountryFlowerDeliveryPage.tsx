@@ -9,8 +9,10 @@ import {
   otherCountryFlowerDeliveryLinks,
   type CountryFlowerDeliverySlug,
 } from "@/lib/content/country-flower-delivery";
+import { countryPageInlineLinks } from "@/lib/content/page-inline-links";
 import { getCatalogProducts, mergeProductsPreferExisting } from "@/lib/catalog-fallback";
 import { shuffleForCity } from "@/lib/city-products";
+import { applyInlineLinks } from "@/lib/inline-links";
 import { loadProducts } from "@/lib/product-loader";
 import { breadcrumbJsonLd, canonical, faqJsonLd, itemListJsonLd } from "@/lib/seo";
 import { site } from "@/lib/site";
@@ -42,6 +44,8 @@ export async function CountryFlowerDeliveryPage({
   products = mergeProductsPreferExisting(products, getCatalogProducts());
   const featured = pickCountryProducts(products, country);
   const otherCountries = otherCountryFlowerDeliveryLinks(country);
+  const inlineLinks = countryPageInlineLinks[country] ?? [];
+  const usedHrefs = new Set<string>();
   const crumbs = [
     { label: "Home", href: "/" },
     { label: page.menuLabel },
@@ -96,7 +100,9 @@ export async function CountryFlowerDeliveryPage({
       />
       <Breadcrumbs items={crumbs} />
       <h1 className="text-3xl font-bold text-primary mb-3">{page.h1}</h1>
-      <p className="text-slate-600 mb-6 max-w-3xl leading-relaxed">{page.intro}</p>
+      <p className="text-slate-600 mb-6 max-w-3xl leading-relaxed">
+        {applyInlineLinks(page.intro, inlineLinks, { usedHrefs, currentPath: page.href, max: 4 })}
+      </p>
 
       <div className="mb-8 rounded-xl border border-primary/15 bg-petal/80 px-4 py-3 text-sm text-slate-800">
         <p className="font-medium">{page.availability}</p>
@@ -104,12 +110,16 @@ export async function CountryFlowerDeliveryPage({
 
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-3">{page.howItWorksHeading}</h2>
-        <p className="text-slate-700 leading-relaxed max-w-3xl">{page.howItWorks}</p>
+        <p className="text-slate-700 leading-relaxed max-w-3xl">
+          {applyInlineLinks(page.howItWorks, inlineLinks, { usedHrefs, currentPath: page.href, max: 4 })}
+        </p>
       </section>
 
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-3">{page.categoriesHeading}</h2>
-        <p className="text-slate-700 mb-4 max-w-3xl leading-relaxed">{page.categoriesIntro}</p>
+        <p className="text-slate-700 mb-4 max-w-3xl leading-relaxed">
+          {applyInlineLinks(page.categoriesIntro, inlineLinks, { usedHrefs, currentPath: page.href, max: 4 })}
+        </p>
         <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {page.categories.map((cat) => (
             <li key={cat.href}>
@@ -156,7 +166,9 @@ export async function CountryFlowerDeliveryPage({
 
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-3">{page.citiesHeading}</h2>
-        <p className="text-slate-700 mb-3 max-w-3xl leading-relaxed">{page.citiesIntro}</p>
+        <p className="text-slate-700 mb-3 max-w-3xl leading-relaxed">
+          {applyInlineLinks(page.citiesIntro, inlineLinks, { usedHrefs, currentPath: page.href, max: 4 })}
+        </p>
         <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
           {page.cityLinks.map((link) => (
             <li key={link.href}>
@@ -212,7 +224,7 @@ export async function CountryFlowerDeliveryPage({
           country page has its own flower delivery notes, occasions, and internal links.
         </p>
         <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
-          {otherCountries.map((link) => (
+          {otherCountries.slice(0, 4).map((link) => (
             <li key={link.href}>
               <Link href={link.href} className="text-nav hover:underline">
                 {link.label}
@@ -225,23 +237,13 @@ export async function CountryFlowerDeliveryPage({
       <section>
         <h2 className="text-xl font-bold text-primary mb-3">Related pages</h2>
         <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
-          {page.relatedHubs.map((link) => (
+          {page.relatedHubs.slice(0, 4).map((link) => (
             <li key={link.href}>
               <Link href={link.href} className="text-nav hover:underline">
                 {link.label}
               </Link>
             </li>
           ))}
-          <li>
-            <Link href="/faq" className="text-nav hover:underline">
-              FAQ
-            </Link>
-          </li>
-          <li>
-            <Link href="/contact" className="text-nav hover:underline">
-              Contact
-            </Link>
-          </li>
         </ul>
       </section>
     </div>

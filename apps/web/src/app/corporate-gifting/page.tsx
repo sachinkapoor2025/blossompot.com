@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
 import { AnswerBlock } from "@/components/AnswerBlock";
-import { categoryHref } from "@/lib/category-urls";
+import { marketingPageInlineLinks } from "@/lib/content/page-inline-links";
+import { applyInlineLinks } from "@/lib/inline-links";
 import { breadcrumbJsonLd, faqJsonLd, pageMetadata } from "@/lib/seo";
 import { site } from "@/lib/site";
 import { CorporateQuoteForm } from "./CorporateQuoteForm";
@@ -33,6 +33,8 @@ export const metadata: Metadata = pageMetadata({
 
 export default function CorporateGiftingPage() {
   const path = "/corporate-gifting";
+  const inlineLinks = marketingPageInlineLinks.corporate;
+  const usedHrefs = new Set<string>();
   const crumbs = [
     { label: "Home", href: "/" },
     { label: "Corporate Gifting" },
@@ -50,10 +52,11 @@ export default function CorporateGiftingPage() {
       <h1 className="text-3xl font-bold text-primary mb-4">Corporate Gifting with {site.name}</h1>
       <div className="space-y-4 text-slate-700 leading-relaxed mb-10">
         <p>
-          {site.name} helps teams send flowers, bouquets, cakes, and curated gift hampers for client
-          thank-yous, employee recognition, and celebration moments across the United States. Orders can
-          start from our public catalog for smaller sends, or begin with a quote request when you need
-          coordinated quantities, multiple addresses, or a defined delivery window.
+          {applyInlineLinks(
+            `${site.name} helps teams send flowers, bouquets, cakes, and curated gift hampers for client thank-yous, employee recognition, and celebration moments across the United States. Orders can start from our public catalog for smaller sends, or begin with a quote request when you need coordinated quantities, multiple addresses, or a defined delivery window.`,
+            inlineLinks,
+            { usedHrefs, currentPath: path, max: 4 }
+          )}
         </p>
         <p>
           We do not invent inventory guarantees or unpublished “enterprise SLAs” on this page. What we can
@@ -61,25 +64,7 @@ export default function CorporateGiftingPage() {
           and timing, and our support team will respond with realistic options based on current catalog and
           fulfillment capacity. {site.name} is operated by {site.legalName}.
         </p>
-        <p>
-          Popular corporate starting points include{" "}
-          <Link href={categoryHref("flowers")} className="text-nav hover:underline">
-            flowers
-          </Link>
-          ,{" "}
-          <Link href={categoryHref("gift-hampers")} className="text-nav hover:underline">
-            gift hampers
-          </Link>
-          , and{" "}
-          <Link href={categoryHref("celebration-gifts")} className="text-nav hover:underline">
-            celebration gifts
-          </Link>
-          . For branding or press questions, see our{" "}
-          <Link href="/press" className="text-nav hover:underline">
-            press kit
-          </Link>
-          .
-        </p>
+        <p>Popular corporate starting points include flowers, gift hampers, and celebration gifts. For branding or press questions, see our press kit.</p>
       </div>
 
       <h2 className="text-xl font-bold text-primary mb-3">Request a quote</h2>

@@ -18,6 +18,8 @@ import {
 } from "@/lib/content/geo/locations";
 import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, serviceAreaJsonLd } from "@/lib/seo";
 import { categoryHref } from "@/lib/category-urls";
+import { applyInlineLinks } from "@/lib/inline-links";
+import { cityPageInlineLinks, statePageInlineLinks } from "@/lib/content/page-inline-links";
 import type { Product } from "@blossompot/shared";
 
 const categoryLinks = [
@@ -91,6 +93,7 @@ export function StateGeoTemplate({
       ? neighbors
       : childCities.slice(0, 6)
     : neighbors;
+  const usedHrefs = new Set<string>();
   const crumbs = [
     { label: "Home", href: "/" },
     { label: "Shop", href: "/products" },
@@ -114,7 +117,9 @@ export function StateGeoTemplate({
       />
       <Breadcrumbs items={crumbs} />
       <h1 className="text-3xl font-bold text-primary mb-3">{geoPageH1(geo)}</h1>
-      <p className="text-slate-600 mb-4 max-w-3xl leading-relaxed">{geo.introParagraph}</p>
+      <p className="text-slate-600 mb-4 max-w-3xl leading-relaxed">
+        {applyInlineLinks(geo.introParagraph, statePageInlineLinks, { usedHrefs, currentPath: path, max: 4 })}
+      </p>
 
       <div className="mb-8 rounded-xl border border-primary/15 bg-petal/80 px-4 py-3 text-sm text-slate-800">
         <SameDayCountdown
@@ -213,6 +218,7 @@ export function CityGeoTemplate({
   const parent = stateForCity(geo);
   const nearbyLinks = resolveNearbyLinks(geo, geo.slug);
   const showNearby = nearbyLinks.length >= 3;
+  const usedHrefs = new Set<string>();
   const crumbs = [
     { label: "Home", href: "/" },
     { label: "Shop", href: "/products" },
@@ -238,7 +244,9 @@ export function CityGeoTemplate({
       />
       <Breadcrumbs items={crumbs} />
       <h1 className="text-3xl font-bold text-primary mb-3">{geoPageH1(geo)}</h1>
-      <p className="text-slate-600 mb-4 max-w-3xl leading-relaxed">{geo.introParagraph}</p>
+      <p className="text-slate-600 mb-4 max-w-3xl leading-relaxed">
+        {applyInlineLinks(geo.introParagraph, cityPageInlineLinks, { usedHrefs, currentPath: path, max: 4 })}
+      </p>
 
       <div className="mb-8 rounded-xl border border-primary/15 bg-petal/80 px-4 py-3 text-sm text-slate-800">
         <SameDayCountdown

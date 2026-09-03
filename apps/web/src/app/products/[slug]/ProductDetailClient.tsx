@@ -486,7 +486,11 @@ export function ProductDetailClient({
             )}
 
             {/* Explore More sits immediately after Related searches for description-tab readers. */}
-            <ExploreMoreSection productSlug={product.slug} />
+            <ExploreMoreSection
+              productSlug={product.slug}
+              categorySlug={product.categorySlug}
+              occasion={product.occasion}
+            />
 
             <div className="max-w-md space-y-3">
               <LeadCaptureInput
@@ -556,7 +560,13 @@ export function ProductDetailClient({
         )}
 
         {/* Always in the document (not tab-gated) so crawlers and other tabs still get internal links. */}
-        {tab !== "description" ? <ExploreMoreSection productSlug={product.slug} /> : null}
+        {tab !== "description" ? (
+          <ExploreMoreSection
+            productSlug={product.slug}
+            categorySlug={product.categorySlug}
+            occasion={product.occasion}
+          />
+        ) : null}
       </section>
 
       {relatedProducts.length > 0 && (

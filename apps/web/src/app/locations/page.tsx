@@ -10,6 +10,8 @@ import {
   isInternationalIndexable,
   MARKET_SLUGS,
 } from "@/lib/content/geo/international";
+import { marketingPageInlineLinks } from "@/lib/content/page-inline-links";
+import { applyInlineLinks } from "@/lib/inline-links";
 import { locationPublicPath } from "@/lib/content/seo-data";
 import { countriesMenu } from "@/lib/site";
 
@@ -29,6 +31,8 @@ const usaExamples = [
 ];
 
 export default function LocationsHubPage() {
+  const inlineLinks = marketingPageInlineLinks.locations;
+  const usedHrefs = new Set<string>();
   const markets = MARKET_SLUGS.map((slug) => getInternationalLocation(slug)).filter(
     (m): m is NonNullable<typeof m> => Boolean(m && isInternationalIndexable(m))
   );
@@ -50,11 +54,11 @@ export default function LocationsHubPage() {
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Locations" }]} />
       <h1 className="text-3xl font-bold text-primary mb-3">Where we operate</h1>
       <p className="text-slate-600 max-w-3xl mb-6 leading-relaxed">
-        BlossomPot’s live delivery destination is the United States — all 50 states, DC, and Puerto Rico.
-        Shoppers in Canada, Australia, the United Kingdom, and other European countries can order on this
-        site and send flowers, cakes, and hampers to a US address. We do not invent local florist shops
-        abroad. Country and city guides below explain how ordering works from those places, with unique
-        time-zone and checkout notes. Thin or unfinished markets stay unpublished.
+        {applyInlineLinks(
+          "BlossomPot’s live delivery destination is the United States — all 50 states, DC, and Puerto Rico. Shoppers in Canada, Australia, the United Kingdom, and other European countries can order on this site and send flowers, cakes, and hampers to a US address. We do not invent local florist shops abroad. Country and city guides below explain how ordering works from those places, with unique time-zone and checkout notes. Thin or unfinished markets stay unpublished.",
+          inlineLinks,
+          { usedHrefs, currentPath: "/locations", max: 4 }
+        )}
       </p>
 
       <section className="mb-10">

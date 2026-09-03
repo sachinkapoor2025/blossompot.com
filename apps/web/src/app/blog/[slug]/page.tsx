@@ -7,6 +7,8 @@ import { categoryHref } from "@/lib/category-urls";
 import { JsonLd } from "@/components/JsonLd";
 import { loadBlogPostWithImage } from "@/lib/blog-images";
 import { listAllBlogPosts } from "@/lib/content/blog-posts";
+import { blogPageInlineLinks } from "@/lib/content/page-inline-links";
+import { applyInlineLinks } from "@/lib/inline-links";
 import { articleJsonLd, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 
 interface Props {
@@ -42,6 +44,8 @@ export default async function BlogPostPage({ params }: Props) {
     { label: "Blog", href: "/blog" },
     { label: post.title },
   ];
+  const inlineLinks = blogPageInlineLinks[post.slug] ?? [];
+  const usedHrefs = new Set<string>();
 
   return (
     <div className="overflow-x-hidden">
@@ -88,7 +92,7 @@ export default async function BlogPostPage({ params }: Props) {
               )}
               {section.paragraphs.map((p, j) => (
                 <p key={j} className="text-slate-700 leading-relaxed mb-4 break-words [overflow-wrap:anywhere]">
-                  {p}
+                  {applyInlineLinks(p, inlineLinks, { usedHrefs, currentPath: `/blog/${post.slug}`, max: 4 })}
                 </p>
               ))}
             </section>

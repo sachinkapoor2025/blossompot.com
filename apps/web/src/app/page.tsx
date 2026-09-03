@@ -12,6 +12,7 @@ import { TrustStrip } from "@/components/TrustStrip";
 import { WhyTrustUsSection } from "@/components/WhyTrustUsSection";
 import { HomeFlowerGuideCta } from "@/components/flower-guide/HomeFlowerGuideCta";
 import { HomeCategoryCarousel } from "@/components/HomeCategoryCarousel";
+import { HomeSeoSection } from "@/components/HomeSeoSection";
 import { buildHomeCategoryTiles } from "@/lib/home-category-carousel";
 import { JsonLd } from "@/components/JsonLd";
 import { site, homeCategoryOrder, faqs, homeBanners, countriesMenu } from "@/lib/site";
@@ -197,6 +198,7 @@ export default async function HomePage() {
       <CustomerReviews data={googleReviews} />
 
       <HomeFlowerGuideCta />
+      <HomeSeoSection />
 
       <section className="max-w-7xl mx-auto px-4 py-12">
         <div className="rounded-3xl bg-gradient-to-br from-primary via-[#9e2d55] to-accent text-white p-8 sm:p-12 text-center shadow-lg shadow-primary/20">

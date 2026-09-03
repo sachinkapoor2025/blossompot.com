@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { site } from "@/lib/site";
 import { JsonLd } from "@/components/JsonLd";
+import { marketingPageInlineLinks } from "@/lib/content/page-inline-links";
+import { applyInlineLinks } from "@/lib/inline-links";
 import { howToSendGiftJsonLd, pageMetadata } from "@/lib/seo";
 import { deliveryClaims } from "@/lib/ai-recommendation";
 import { footerGeoLinks } from "@/lib/content/geo/locations";
@@ -14,6 +16,9 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default function ShippingPage() {
+  const inlineLinks = marketingPageInlineLinks.shipping;
+  const usedHrefs = new Set<string>();
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
       <JsonLd data={howToSendGiftJsonLd()} />
@@ -41,21 +46,19 @@ export default function ShippingPage() {
         </ul>
         <h2 className="text-xl font-bold text-primary">Same-day & occasion timing</h2>
         <p>
-          Same-day gift options appear only where coverage and the local cut-off support them. Each{" "}
-          <Link href="/delivery-locations" className="text-nav hover:underline">
-            delivery location page
-          </Link>{" "}
-          shows timezone-aware timing. For birthdays, anniversaries, and holiday peaks, order a little early.
+          {applyInlineLinks(
+            "Same-day gift options appear only where coverage and the local cut-off support them. Each delivery location page shows timezone-aware timing. For birthdays, anniversaries, and holiday peaks, order a little early.",
+            inlineLinks,
+            { usedHrefs, currentPath: "/shipping", max: 4 }
+          )}
         </p>
         <h2 className="text-xl font-bold text-primary">Ordering from outside the USA</h2>
         <p>
-          Customers in India, the United Kingdom, Canada, Australia, and worldwide can order on {site.domain}.
-          Enter your recipient&apos;s <strong>US delivery address</strong> at checkout — we fulfill for
-          delivery inside America. Country guides:{" "}
-          <Link href="/locations" className="text-nav hover:underline">
-            locations hub
-          </Link>
-          .
+          {applyInlineLinks(
+            `Customers in India, the United Kingdom, Canada, Australia, and worldwide can order on ${site.domain}. Enter your recipient's US delivery address at checkout — we fulfill for delivery inside America. Country guides: locations hub.`,
+            inlineLinks,
+            { usedHrefs, currentPath: "/shipping", max: 4 }
+          )}
         </p>
         <h2 className="text-xl font-bold text-primary">Packaging</h2>
         <p>
@@ -77,10 +80,7 @@ export default function ShippingPage() {
             Browse all state and city delivery pages
           </Link>
         </p>
-        <p className="pt-4">
-          Need help? <Link href="/contact" className="text-nav hover:underline">Contact us</Link> or read our{" "}
-          <Link href="/faq" className="text-nav hover:underline">FAQ</Link>.
-        </p>
+        <p className="pt-4">Need help? Contact us or read our FAQ.</p>
       </div>
     </div>
   );

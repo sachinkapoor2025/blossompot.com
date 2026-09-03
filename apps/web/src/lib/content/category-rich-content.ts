@@ -32,7 +32,34 @@ const relatedAll = [
 ].map((c) => ({ ...c, href: categoryHref(c.slug) }));
 
 function relatedExcept(slug: string) {
-  return relatedAll.filter((c) => c.slug !== slug);
+  const preferredBySlug: Record<string, string[]> = {
+    flowers: ["flower-bouquets", "anniversary-gifts", "birthday-gifts", "gift-hampers"],
+    "flower-bouquets": ["flowers", "anniversary-gifts", "valentines-day-gifts", "cakes"],
+    cakes: ["birthday-gifts", "gift-hampers", "same-day-gifts", "flowers"],
+    "birthday-gifts": ["cakes", "flowers", "gift-hampers", "same-day-gifts"],
+    "anniversary-gifts": ["flowers", "flower-bouquets", "cakes", "gift-hampers"],
+    "valentines-day-gifts": ["flower-bouquets", "flowers", "anniversary-gifts", "gift-hampers"],
+    "mothers-day-gifts": ["flowers", "plants", "flower-bouquets", "gift-hampers"],
+    "wedding-gifts": ["flowers", "gift-hampers", "cakes", "anniversary-gifts"],
+    "personalized-gifts": ["gift-hampers", "birthday-gifts", "flowers", "anniversary-gifts"],
+    "gift-hampers": ["birthday-gifts", "cakes", "flowers", "corporate-gifting"],
+    plants: ["mothers-day-gifts", "flowers", "celebration-gifts", "gift-hampers"],
+    "same-day-gifts": ["flowers", "cakes", "birthday-gifts", "delivery-locations"],
+    "celebration-gifts": ["gift-hampers", "birthday-gifts", "flowers", "cakes"],
+  };
+
+  const preferred = preferredBySlug[slug] ?? [];
+  const picked = preferred
+    .map((target) =>
+      target === "corporate-gifting"
+        ? { label: "Corporate Gifting", href: "/corporate-gifting", text: "Bulk gifts for clients and teams." }
+        : target === "delivery-locations"
+          ? { label: "Delivery Locations", href: "/delivery-locations", text: "State and city pages with local timing." }
+          : relatedAll.find((c) => c.slug === target)
+    )
+    .filter((c): c is { label: string; href: string; text: string } => Boolean(c));
+
+  return picked.slice(0, 4);
 }
 
 function giftCategory(

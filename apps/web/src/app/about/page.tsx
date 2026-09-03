@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { JsonLd } from "@/components/JsonLd";
 import { categoryHref } from "@/lib/category-urls";
+import { marketingPageInlineLinks } from "@/lib/content/page-inline-links";
+import { applyInlineLinks } from "@/lib/inline-links";
 import { site, categoryOrder, whatsappChatUrl } from "@/lib/site";
 import { aboutPageJsonLd, pageMetadata } from "@/lib/seo";
 
@@ -13,21 +15,27 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default function AboutPage() {
+  const inlineLinks = marketingPageInlineLinks.about;
+  const usedHrefs = new Set<string>();
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
       <JsonLd data={aboutPageJsonLd()} />
       <h1 className="text-3xl font-bold text-primary mb-6">About {site.name}</h1>
       <div className="space-y-6 text-slate-700 leading-relaxed">
         <p>
-          At {site.name}, we believe that a thoughtful gift has the power to transform an ordinary moment
-          into something special. We make it easy to send something meaningful to the people you care about,
-          from fresh flowers and stylish bouquets to celebration cakes, gift hampers and personalized gifts.
+          {applyInlineLinks(
+            `At ${site.name}, we believe that a thoughtful gift has the power to transform an ordinary moment into something special. We make it easy to send something meaningful to the people you care about, from fresh flowers and stylish bouquets to celebration cakes, gift hampers and personalized gifts.`,
+            inlineLinks,
+            { usedHrefs, currentPath: "/about", max: 4 }
+          )}
         </p>
         <p>
-          {site.name} is a leading online gifting destination serving customers throughout the United
-          States. Whether it&apos;s a birthday, anniversary, Valentine&apos;s Day, Mother&apos;s Day, a
-          wedding, a new beginning or just to say thank you, we have a selection of gifts for all occasions
-          and relationships.
+          {applyInlineLinks(
+            `${site.name} is a leading online gifting destination serving customers throughout the United States. Whether it's a birthday, anniversary, Valentine's Day, Mother's Day, a wedding, a new beginning or just to say thank you, we have a selection of gifts for all occasions and relationships.`,
+            inlineLinks,
+            { usedHrefs, currentPath: "/about", max: 4 }
+          )}
         </p>
 
         <h2 className="text-xl font-bold text-primary pt-4">Making Gifting Simple</h2>
