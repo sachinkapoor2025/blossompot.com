@@ -363,4 +363,34 @@ export const blogPageInlineLinks: Record<string, readonly { phrase: string; href
     { phrase: "flower bouquets", href: categoryHref("flower-bouquets") },
     { phrase: "same-day", href: categoryHref("same-day-gifts") },
   ],
+  "next-day-flower-delivery-uk": [
+    { phrase: "Valentine's Day", href: categoryHref("valentines-day-gifts") },
+    { phrase: "personalized gifts", href: categoryHref("personalized-gifts") },
+    { phrase: "curated hampers", href: categoryHref("gift-hampers") },
+    { phrase: "United Kingdom", href: "/flower-delivery-uk" },
+  ],
+  "same-day-flower-delivery-uk": [
+    { phrase: "same-day flowers", href: categoryHref("same-day-gifts") },
+    { phrase: "Mother's Day", href: categoryHref("mothers-day-gifts") },
+    { phrase: "London", href: "/locations/europe/united-kingdom/london" },
+    { phrase: "cakes", href: categoryHref("cakes") },
+  ],
+  "letterbox-flowers-uk": [
+    { phrase: "thank-you gestures", href: categoryHref("celebration-gifts") },
+    { phrase: "Mother's Day", href: categoryHref("mothers-day-gifts") },
+    { phrase: "personalized gifts", href: categoryHref("personalized-gifts") },
+    { phrase: "Manchester", href: "/locations/europe/united-kingdom/manchester" },
+  ],
+  "cake-delivery-uk": [
+    { phrase: "birthday cake", href: categoryHref("cakes") },
+    { phrase: "anniversary", href: categoryHref("anniversary-gifts") },
+    { phrase: "fresh bouquet", href: categoryHref("flower-bouquets") },
+    { phrase: "gift hampers", href: categoryHref("gift-hampers") },
+  ],
+  "birthday-flowers-delivery-uk": [
+    { phrase: "birthday bouquet", href: categoryHref("birthday-gifts") },
+    { phrase: "Mixed bouquets", href: categoryHref("flower-bouquets") },
+    { phrase: "plants", href: categoryHref("plants") },
+    { phrase: "United Kingdom", href: "/flower-delivery-uk" },
+  ],
 };
