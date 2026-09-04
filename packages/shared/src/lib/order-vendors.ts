@@ -1,4 +1,4 @@
-import { VENDOR_ORANGE_COUNTY, VENDOR_BLOSSOMPOT } from "../constants";
+import { VENDOR_ORANGE_COUNTY, VENDOR_BLOSSOMPOT, VENDOR_GBO } from "../constants";
 
 export { VENDOR_BLOSSOMPOT };
 
@@ -21,6 +21,7 @@ export function lineVendorKey(item: { vendorSlug?: string | null }): string {
 export function vendorDisplayLabel(slug: string): string {
   if (slug === VENDOR_ORANGE_COUNTY) return "Orange County";
   if (slug === VENDOR_BLOSSOMPOT) return "BlossomPot";
+  if (slug === VENDOR_GBO) return "Gift Baskets Overseas";
   return slug
     .split("-")
     .filter(Boolean)
@@ -70,6 +71,20 @@ export function orderHasUsarakhi(order: {
   items?: Array<{ vendorSlug?: string | null }>;
 }): boolean {
   return orderHasVendor(order, VENDOR_BLOSSOMPOT);
+}
+
+export function orderHasGbo(order: {
+  vendorSlugs?: string[];
+  items?: Array<{ vendorSlug?: string | null }>;
+}): boolean {
+  return orderHasVendor(order, VENDOR_GBO);
+}
+
+export function orderIsGboOnly(order: {
+  items?: Array<{ vendorSlug?: string | null }>;
+}): boolean {
+  const items = order.items ?? [];
+  return items.length > 0 && items.every((i) => lineVendorKey(i) === VENDOR_GBO);
 }
 
 export function isMultiVendorOrder(order: {

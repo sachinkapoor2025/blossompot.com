@@ -115,6 +115,34 @@ Parameters:
     Type: String
     Default: ""
     Description: e.g. whatsapp:+14155238886 (optional Twilio WhatsApp sender)
+  GboApiToken:
+    Type: String
+    Default: ""
+    NoEcho: true
+    Description: Gift Baskets Overseas partner API token from support@GiftBasketsOverseas.com (not the portal password)
+  GboInternalApiKey:
+    Type: String
+    Default: ""
+    NoEcho: true
+    Description: API key for our dedicated GBO wrapper (X-Gbo-Api-Key)
+  GboSandbox:
+    Type: String
+    Default: "false"
+    AllowedValues: ["true", "false"]
+    Description: When true, GBO catalog/order calls use /api/v1/sandbox
+  GboPaymentType:
+    Type: String
+    Default: monthlyBilling
+    AllowedValues: [monthlyBilling, balance]
+    Description: GBO create-order payment.type
+  GboAuthScheme:
+    Type: String
+    Default: bearer
+    AllowedValues: [bearer, basic, basic-b64, header]
+    Description: How to send GBO_API_TOKEN (docs say Basic Token; most partners use Bearer)
+  GboBaseUrl:
+    Type: String
+    Default: "https://www.giftbasketsoverseas.com/api/v1"
 
 Globals:
   Function:
@@ -182,6 +210,12 @@ Globals:
         TWILIO_ACCOUNT_SID: !Ref TwilioAccountSid
         TWILIO_AUTH_TOKEN: !Ref TwilioAuthToken
         TWILIO_WHATSAPP_FROM: !Ref TwilioWhatsAppFrom
+        GBO_API_TOKEN: !Ref GboApiToken
+        GBO_INTERNAL_API_KEY: !Ref GboInternalApiKey
+        GBO_SANDBOX: !Ref GboSandbox
+        GBO_PAYMENT_TYPE: !Ref GboPaymentType
+        GBO_AUTH_SCHEME: !Ref GboAuthScheme
+        GBO_BASE_URL: !Ref GboBaseUrl
 
 Resources:
   ProductsTable:
@@ -781,6 +815,61 @@ Resources:
     Metadata:
       BuildMethod: makefile
 
+  # Separate API Gateway + Lambda wrapping Gift Baskets Overseas (catalog + orders).
+  # Storefront/admin remain on HttpApi; this gateway is GBO-only.
+  GboHttpApi:
+    Type: AWS::Serverless::HttpApi
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Name: !Sub blossompot-gbo-http-api-${Environment}
+      StageName: !Ref Environment
+      CorsConfiguration:
+        AllowMethods: ["GET", "POST", "OPTIONS"]
+        AllowHeaders: ["Content-Type", "X-Gbo-Api-Key"]
+        AllowOrigins: ["*"]
+
+  GboApiFunction:
+    Type: AWS::Serverless::Function
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      FunctionName: !Sub blossompot-gbo-api-${Environment}
+      Handler: gbo-api.handler
+      Timeout: 29
+      CodeUri: ..
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref Environment
+          GBO_API_TOKEN: !Ref GboApiToken
+          GBO_INTERNAL_API_KEY: !Ref GboInternalApiKey
+          GBO_SANDBOX: !Ref GboSandbox
+          GBO_PAYMENT_TYPE: !Ref GboPaymentType
+          GBO_AUTH_SCHEME: !Ref GboAuthScheme
+          GBO_BASE_URL: !Ref GboBaseUrl
+          SITE_URL: https://www.blossompot.com
+      Events:
+        GboProxy:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref GboHttpApi
+            Path: /{proxy+}
+            Method: ANY
+        GboRoot:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref GboHttpApi
+            Path: /
+            Method: ANY
+        GboHealth:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref GboHttpApi
+            Path: /health
+            Method: GET
+    Metadata:
+      BuildMethod: makefile
+
   ReviewEmailsCronFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -818,7 +907,7 @@ Resources:
           Type: Schedule
           Properties:
             Schedule: rate(15 minutes)
-            Description: USPS tracking sync for active shipments (task trackingSync)
+            Description: USPS + Gift Baskets Overseas tracking sync (task trackingSync)
             Enabled: true
             Input: '{"task":"trackingSync"}'
         RazorpayReconcileHourly:
@@ -911,7 +1000,7 @@ Resources:
       StageName: !Ref Environment
       CorsConfiguration:
         AllowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
-        AllowHeaders: ["Content-Type", "Authorization", "X-Session-Id"]
+        AllowHeaders: ["Content-Type", "Authorization", "X-Session-Id", "X-Vendor-Api-Key", "X-Gbo-Api-Key"]
         AllowOrigins: ["*"]
 
 Outputs:
@@ -921,6 +1010,9 @@ Outputs:
   VendorApiUrl:
     Description: Orange County vendor order API only (X-Vendor-Api-Key)
     Value: !Sub https://${VendorHttpApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}
+  GboApiUrl:
+    Description: Gift Baskets Overseas wrapper API only (X-Gbo-Api-Key)
+    Value: !Sub https://${GboHttpApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}
   ProductsTableName:
     Value: !Ref ProductsTable
   OrdersTableName:

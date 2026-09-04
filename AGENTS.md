@@ -73,6 +73,10 @@ Push to `main` triggers GitHub Actions. Do not manually deploy unless fixing CI.
 
 Always preserve backward compatibility for existing orders and cart sessions.
 
+## Gift Baskets Overseas
+
+Dropship partner API (separate Gateway from Orange County). Types in `packages/shared` (`VENDOR_GBO`, `docs/VENDOR_GBO_API.md`). Never commit `GBO_API_TOKEN` or the partner portal password.
+
 ## Product images (peak season)
 
 - Never overwrite a product’s `images[]` with a shorter list during imports or bulk upserts.

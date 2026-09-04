@@ -73,6 +73,8 @@ Order status lifecycle: `pending_payment → paid → (accepted/on_hold) → pro
 
 **Orange County vendor tracking:** `POST /vendors/orange-county/tracking` accepts enum statuses (`in_transit`, `delivered`) **or** free-text USPS scan lines (e.g. `Arrived at USPS Regional Destination Facility`). Those strings are mapped with the same `mapCarrierTrackingPhase` layer and advance `order.status` for admin + customer together.
 
+**Gift Baskets Overseas (dropship):** Dedicated wrapper API (`GboApiUrl`, planned custom domain `gbo.blossompot.com`) plus storefront `GET /gbo/*`. After payment, GBO lines (`vendorSlug=gift-baskets-overseas`, SKU `gbo:US:123`) are posted to GBO `order/create`. Cron `trackingSync` also polls GBO `order/get`. Secrets: `GBO_API_TOKEN` (partner token from GBO support — not the portal password) and `GBO_INTERNAL_API_KEY` (`X-Gbo-Api-Key`). See `docs/VENDOR_GBO_API.md`.
+
 Migration from the legacy single table: `npm run migrate:multitable` (copies orders +
 leads/sessions; products re-seed via `import:blossompot`).
 
@@ -81,7 +83,7 @@ leads/sessions; products re-seed via `import:blossompot`).
 | Job | Schedule | Purpose |
 |-----|----------|---------|
 | `ReviewEmailsCronFunction` | Every 15 minutes | Review emails + abandoned cart + pending-payment + **gifting occasion reminders** |
-| `ReviewEmailsCronFunction` (`task: trackingSync`) | Every 15 minutes | **USPS tracking sync** for active shipments (`processUspsTrackingSync`) |
+| `ReviewEmailsCronFunction` (`task: trackingSync`) | Every 15 minutes | **USPS tracking sync** (`processUspsTrackingSync`) plus **GBO** place-retry / status poll (`processGboTrackingSync`) |
 | `ReviewEmailsCronFunction` (review path) | As due | Email customers 1 day after order is marked **Delivered** or **Complete**, linking to `/reviews` |
 
 When admin (or Orange County vendor tracking) changes order status (accepted, processing, shipped, delivered, complete, cancelled, refunded, or paid), the API emails **both** the customer at `shippingAddress.email` and the ops inbox (`order@blossompot.com` / `NOTIFY_EMAIL`) via **SMTP** (`notifyCustomerOrderStatusChange` in `apps/api/src/lib/email.ts` — same transactional path as paid confirmation). Admin copy includes customer contact, items, tracking, and an admin order link so the team need not open the portal for every update. **Marketing campaigns** (`/ses-email/*`, admin Email) send via **marketing SMTP** (default Mailercloud `smtp-prod.mailrcld.com:587`) configured under Admin → Email → Settings; Amazon SES API remains an optional legacy transport if `marketingTransport=ses`. Transactional `SMTP_*` env is separate and unchanged. Shipped emails include carrier/tracking when present. `pending_payment` → `cancelled` skips the customer/status pair (admin payment-failed alert only). Separately, **Delivered** or **Complete** also sets `reviewEmailDueAt` (delivery + 1 day); the cron sends one review-request email per order (`reviewEmailSentAt`).
@@ -167,6 +169,12 @@ When admin (or Orange County vendor tracking) changes order status (accepted, pr
 | GET | `/admin/vendor-api/orders/{orderId}` | Admin: proxy get one vendor order (`OC#####` or UUID) |
 | POST | `/admin/vendor-api/shipment` | Admin: proxy AWB update (`orderNumber`, `courierName`, `awb`) |
 | POST | `/admin/vendor-api/tracking` | Admin: proxy tracking status (`orderNumber`, `currentShipmentStatus`) |
+| GET | `/gbo/health` | Gift Baskets Overseas wrapper health (token configured + country count). See `docs/VENDOR_GBO_API.md` |
+| GET | `/gbo/countries` | GBO serviced countries |
+| GET | `/gbo/categories?country=` | GBO gift categories for a destination country |
+| GET | `/gbo/gifts?country=` | GBO gift catalog (`price_min` / `price_max` / `category` optional) |
+| GET | `/gbo/gifts/{productId}?country=` | GBO gift detail |
+| GET/POST | `/admin/gbo/*` | Admin: GBO catalog proxy + place/sync BlossomPot orders. UI: `/admin/vendor-management?tab=gbo` |
 | GET | `/vendors/orange-county/orders` | **Dedicated Vendor API only** (`VendorApiUrl` / `orange-county.blossompot.com`). Last **15 days**; default = post-payment statuses (`paid`…`complete`); paginated (`limit`/`cursor`/`nextCursor`); human `orderId`=`OC#####`; vendorCost (not retail). Override with `?status=`. See `docs/VENDOR_ORANGE_COUNTY_API.md` |
 | GET | `/vendors/orange-county/orders/{orderId}` | Same vendor API; `{orderId}` accepts `OC10001` or internal UUID |
 | POST | `/vendors/orange-county/shipment` | Vendor posts AWB + courier (`orderNumber`, `courierName`, `awb`) |
@@ -175,7 +183,7 @@ When admin (or Orange County vendor tracking) changes order status (accepted, pr
 | POST | `/vendors/orange-county/orders/{orderId}/tracking` | Same tracking update with order id in path |
 | POST | `/webhooks/stripe` | Stripe webhook |
 
-**Product add-ons (BlossomPot only):** Fixed dry-fruit / chocolate extras (`packages/shared/src/lib/product-addons.ts`). Shown on PDP when `allowsAddons` is true (non–Orange County). Shoppers pick quantity per add-on (1–10); nested on `CartItem.addons` with `quantity`; line totals include `price × quantity`. Merge key includes quantities. OC products reject addons server-side.
+**Product add-ons (BlossomPot only):** Fixed extras (`packages/shared/src/lib/product-addons.ts`). Shown on PDP when `allowsAddons` is true (not Orange County or Gift Baskets Overseas). Shoppers pick quantity per add-on (1–10); nested on `CartItem.addons` with `quantity`; line totals include `price × quantity`. Merge key includes quantities. OC/GBO products reject addons server-side.
 
 ### Scale notes (catalog / concurrency)
 

@@ -1,4 +1,4 @@
-import { VENDOR_BLOSSOMPOT, VENDOR_ORANGE_COUNTY } from "../constants";
+import { VENDOR_BLOSSOMPOT, VENDOR_ORANGE_COUNTY, VENDOR_GBO } from "../constants";
 import { normalizePostal, normalizePrefix } from "./postal-countries";
 
 export const SERVICE_SCOPES = [
@@ -148,6 +148,7 @@ export function checkVendorServiceability(
   }
   const loc = normalizeDeliveryLocation(location);
   const matching = areas.filter((a) => a.vendorSlug === vendorSlug && areaMatchesLocation(a, loc));
+  const hasVendorAreas = areas.some((a) => a.vendorSlug === vendorSlug && a.isActive);
   const denies = matching.filter((a) => a.ruleType === "DENY").sort((a, b) => specificity(b) - specificity(a));
   if (denies[0]) {
     return {
@@ -166,7 +167,25 @@ export function checkVendorServiceability(
       matchedRule: pickRule(allows[0]),
     };
   }
+  if (isGlobalFulfillmentVendor(vendorSlug) && !hasVendorAreas) {
+    return {
+      serviceable: true,
+      reason: "matched",
+      vendorSlug,
+      matchedRule: {
+        areaId: "gbo-global",
+        scope: "COUNTRY",
+        ruleType: "ALLOW",
+        countryCode: loc.countryCode,
+      },
+    };
+  }
   return { serviceable: false, reason: "no_matching_service_area", vendorSlug };
+}
+
+/** GBO delivers to 200+ countries; used until admin stores explicit coverage rules. */
+export function isGlobalFulfillmentVendor(vendorSlug: string): boolean {
+  return vendorSlug === VENDOR_GBO;
 }
 
 function pickRule(area: VendorServiceArea): NonNullable<ServiceabilityMatch["matchedRule"]> {
@@ -208,7 +227,10 @@ export function isProductDeliverableToLocation(
   if (product.published === false || (product.inventory ?? 1) <= 0) {
     return { serviceable: false, reason: "inactive_vendor", vendorSlug };
   }
-  const active = vendorSlug === VENDOR_BLOSSOMPOT || activeVendorSlugs.has(vendorSlug);
+  const active =
+    vendorSlug === VENDOR_BLOSSOMPOT ||
+    vendorSlug === VENDOR_GBO ||
+    activeVendorSlugs.has(vendorSlug);
   return checkVendorServiceability(vendorSlug, areas, location, active);
 }
 

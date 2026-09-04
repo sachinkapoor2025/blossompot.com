@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { VENDOR_BLOSSOMPOT } from "../constants";
+import { VENDOR_BLOSSOMPOT, VENDOR_GBO } from "../constants";
 import {
   checkVendorServiceability,
   defaultBlossompotAreas,
@@ -118,5 +118,11 @@ describe("serviceability engine", () => {
     ];
     const r = checkVendorServiceability("vendor-d", areas, { countryCode: "CA", postalCode: "M5V 3A8" });
     assert.equal(r.serviceable, true);
+  });
+
+  it("treats Gift Baskets Overseas as globally serviceable until coverage rules exist", () => {
+    const r = checkVendorServiceability(VENDOR_GBO, [], { countryCode: "GB", postalCode: "SW1A 1AA" });
+    assert.equal(r.serviceable, true);
+    assert.equal(r.matchedRule?.countryCode, "GB");
   });
 });

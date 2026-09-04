@@ -145,6 +145,12 @@ export const ORANGE_COUNTY_PRODUCT_INVENTORY = 500;
  */
 export const VENDOR_ORANGE_COUNTY = "orange-county" as const;
 
+/**
+ * Gift Baskets Overseas dropship partner (international catalog + fulfillment).
+ * Public label: "Gift Baskets Overseas" — never expose partner login or API token.
+ */
+export const VENDOR_GBO = "gift-baskets-overseas" as const;
+
 /** Default BlossomPot fulfillment key (catalog lines without product.vendorSlug). */
 export const VENDOR_BLOSSOMPOT = "blossompot" as const;
 

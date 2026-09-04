@@ -24,6 +24,7 @@ import {
   allVendorsHaveTracking,
   anyVendorHasTracking,
   isMultiVendorOrder,
+  orderIsGboOnly,
   type Order,
   type OrderStatusHistoryEntry,
   type CartItem,
@@ -788,6 +789,7 @@ export async function markOrderPaid(
   const settings = await loadShippingSettings();
   if (
     settings.autoPurchaseOnPayment &&
+    !orderIsGboOnly(updated) &&
     updated.shippingServiceCode &&
     updated.labelStatus !== "purchased"
   ) {
@@ -834,6 +836,17 @@ export async function markOrderPaid(
     await invalidateProductSalesForOrder(updated);
   } catch (err) {
     console.error("Product sales rollup invalidate failed:", orderId, err);
+  }
+
+  try {
+    const { placeGboOrderForPaidOrder, orderNeedsGboPlacement } = await import("../lib/gbo-orders");
+    const latest = (await fetchOrder(orderId)) ?? updated;
+    if (orderNeedsGboPlacement(latest)) {
+      const gboResult = await placeGboOrderForPaidOrder(latest);
+      if (gboResult.error) console.error("GBO place after pay failed:", orderId, gboResult.error);
+    }
+  } catch (err) {
+    console.error("GBO place after pay failed:", orderId, err);
   }
 }
 
