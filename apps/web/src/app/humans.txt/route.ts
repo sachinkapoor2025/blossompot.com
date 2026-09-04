@@ -8,7 +8,6 @@ export async function GET() {
 Store: ${site.name}
 Site: ${siteUrl}
 Contact: ${site.supportEmail}
-Phone: ${site.phone}
 
 /* THANKS */
 Customers who trust BlossomPot for thoughtful USA gifting

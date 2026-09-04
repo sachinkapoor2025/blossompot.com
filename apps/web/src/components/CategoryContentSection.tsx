@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { categoryHref } from "@/lib/category-urls";
 import type { CategoryRichContent } from "@/lib/content/category-rich-content";
 import { categoryPageInlineLinks } from "@/lib/content/page-inline-links";
 import { applyInlineLinks } from "@/lib/inline-links";
@@ -11,6 +12,7 @@ interface Props {
 
 export function CategoryContentSection({ content, categoryName }: Props) {
   const inlineLinks = categoryPageInlineLinks[content.slug] ?? [];
+  const usedHrefs = new Set<string>();
 
   return (
     <div className="mt-12 pt-10 border-t border-slate-200">
@@ -20,7 +22,7 @@ export function CategoryContentSection({ content, categoryName }: Props) {
             <h2 className="text-2xl font-bold text-primary mb-4">{content.headline}</h2>
             {content.intro.map((p, i) => (
               <p key={i} className="mb-4">
-                {applyInlineLinks(p, inlineLinks)}
+                {applyInlineLinks(p, inlineLinks, { usedHrefs, currentPath: categoryHref(content.slug), max: 4 })}
               </p>
             ))}
           </header>
@@ -29,7 +31,7 @@ export function CategoryContentSection({ content, categoryName }: Props) {
             <h3 className="text-xl font-semibold text-primary mb-3">{content.delivery.heading}</h3>
             {content.delivery.paragraphs.map((p, i) => (
               <p key={i} className="mb-3">
-                {p}
+                {applyInlineLinks(p, inlineLinks, { usedHrefs, max: 4 })}
               </p>
             ))}
           </section>
@@ -59,7 +61,7 @@ export function CategoryContentSection({ content, categoryName }: Props) {
               <h3 className="text-xl font-semibold text-primary mb-3">{content.tradition.heading}</h3>
               {content.tradition.paragraphs.map((p, i) => (
                 <p key={i} className="mb-3">
-                  {p}
+                  {applyInlineLinks(p, inlineLinks, { usedHrefs, max: 4 })}
                 </p>
               ))}
             </section>
@@ -119,7 +121,7 @@ export function CategoryContentSection({ content, categoryName }: Props) {
 
       <div className="grid md:grid-cols-2 gap-6 mt-10">
         <section className="bg-white border border-slate-200 rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-primary mb-4">Explore More Collections</h3>
+          <h2 className="text-lg font-semibold text-primary mb-4">Explore More Collections</h2>
           <ul className="space-y-3 text-sm">
             {content.relatedCategories.map((cat) => (
               <li key={cat.href}>
@@ -150,9 +152,9 @@ export function CategoryContentSection({ content, categoryName }: Props) {
       </div>
 
       <section className="mt-10 pt-8 border-t border-slate-200">
-        <h3 className="text-xl font-semibold text-primary mb-6">
+        <h2 className="text-xl font-semibold text-primary mb-6">
           Frequently Asked Questions — {categoryName}
-        </h3>
+        </h2>
         <div className="grid md:grid-cols-2 gap-6">
           {content.faqs.map((faq) => (
             <div key={faq.q} className="bg-white border border-slate-100 rounded-xl p-5">

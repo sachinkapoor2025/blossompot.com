@@ -60,7 +60,7 @@ const server = http.createServer(async (req, res) => {
       res.statusCode = 204;
       res.setHeader("Access-Control-Allow-Origin", "*");
       res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-      res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Session-Id");
+      res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Session-Id, X-Vendor-Api-Key, X-Gbo-Api-Key");
       res.end();
       return;
     }

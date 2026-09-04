@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { HomeProductCard } from "@/components/HomeProductCard";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
@@ -17,6 +18,8 @@ import {
 } from "@/lib/content/geo/locations";
 import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, serviceAreaJsonLd } from "@/lib/seo";
 import { categoryHref } from "@/lib/category-urls";
+import { applyInlineLinks } from "@/lib/inline-links";
+import { cityPageInlineLinks, statePageInlineLinks } from "@/lib/content/page-inline-links";
 import type { Product } from "@blossompot/shared";
 
 const categoryLinks = [
@@ -27,6 +30,19 @@ const categoryLinks = [
   { label: "Birthday", href: categoryHref("birthday-gifts") },
   { label: "Same-Day", href: categoryHref("same-day-gifts") },
 ];
+
+function VisualHeading({
+  as,
+  className,
+  children,
+}: {
+  as: "h2" | "h3" | "p";
+  className: string;
+  children: ReactNode;
+}) {
+  const Tag = as;
+  return <Tag className={className}>{children}</Tag>;
+}
 
 function resolveNearbyLinks(geo: GeoLocation, slug: string) {
   const fromSlugs = (geo.nearbySlugs ?? [])
@@ -70,6 +86,14 @@ export function StateGeoTemplate({
     .map((s) => getGeoLocation(s))
     .filter(Boolean) as GeoLocation[];
   const neighbors = neighboringStates(geo, 4);
+  const compactSeo = geo.slug === "texas";
+  const nearbyHeading = compactSeo ? "Nearby gift delivery pages" : "Neighbouring states";
+  const nearbyLinks = compactSeo
+    ? neighbors.length > 0
+      ? neighbors
+      : childCities.slice(0, 6)
+    : neighbors;
+  const usedHrefs = new Set<string>();
   const crumbs = [
     { label: "Home", href: "/" },
     { label: "Shop", href: "/products" },
@@ -93,7 +117,9 @@ export function StateGeoTemplate({
       />
       <Breadcrumbs items={crumbs} />
       <h1 className="text-3xl font-bold text-primary mb-3">{geoPageH1(geo)}</h1>
-      <p className="text-slate-600 mb-4 max-w-3xl leading-relaxed">{geo.introParagraph}</p>
+      <p className="text-slate-600 mb-4 max-w-3xl leading-relaxed">
+        {applyInlineLinks(geo.introParagraph, statePageInlineLinks, { usedHrefs, currentPath: path, max: 4 })}
+      </p>
 
       <div className="mb-8 rounded-xl border border-primary/15 bg-petal/80 px-4 py-3 text-sm text-slate-800">
         <SameDayCountdown
@@ -106,9 +132,9 @@ export function StateGeoTemplate({
       </div>
 
       <section className="mb-10">
-        <h2 className="text-xl font-bold text-primary mb-3">
+        <VisualHeading as={compactSeo ? "p" : "h2"} className="text-xl font-bold text-primary mb-3">
           Cities we deliver to in {place}
-        </h2>
+        </VisualHeading>
         <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 text-sm">
           {childCities.map((c) => (
             <li key={c.slug}>
@@ -120,9 +146,9 @@ export function StateGeoTemplate({
         </ul>
       </section>
 
-      <h2 className="text-xl font-bold text-primary mb-3">
+      <VisualHeading as={compactSeo ? "p" : "h2"} className="text-xl font-bold text-primary mb-3">
         Flower delivery {place} — featured gifts
-      </h2>
+      </VisualHeading>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {products.map((p) => (
           <HomeProductCard key={p.slug} product={p} />
@@ -142,11 +168,11 @@ export function StateGeoTemplate({
             ))}
           </ul>
         </div>
-        {neighbors.length > 0 && (
+        {nearbyLinks.length > 0 && (
           <div>
-            <h2 className="text-xl font-bold text-primary mb-3">Neighbouring states</h2>
+            <h2 className="text-xl font-bold text-primary mb-3">{nearbyHeading}</h2>
             <ul className="space-y-2 text-sm">
-              {neighbors.map((n) => (
+              {nearbyLinks.map((n) => (
                 <li key={n.slug}>
                   <Link href={locationPublicPath(n.slug)} className="text-nav hover:underline">
                     Send gifts to {locationLabel(n)}
@@ -159,12 +185,15 @@ export function StateGeoTemplate({
       </section>
 
       <section className="mt-12">
-        <h2 className="text-xl font-bold text-primary mb-2">
+        <VisualHeading as={compactSeo ? "p" : "h2"} className="text-xl font-bold text-primary mb-2">
           Cake delivery {place} &amp; same day gift delivery {place}
-        </h2>
-        <h3 className="text-lg font-semibold text-primary mb-4">
+        </VisualHeading>
+        <VisualHeading
+          as={compactSeo ? "h2" : "h3"}
+          className="text-lg font-semibold text-primary mb-4"
+        >
           Frequently asked questions — {place}
-        </h3>
+        </VisualHeading>
         <div className="space-y-4">
           {geo.localFaqs.map((f) => (
             <AnswerBlock key={f.q} question={f.q} answer={f.a} />
@@ -189,6 +218,7 @@ export function CityGeoTemplate({
   const parent = stateForCity(geo);
   const nearbyLinks = resolveNearbyLinks(geo, geo.slug);
   const showNearby = nearbyLinks.length >= 3;
+  const usedHrefs = new Set<string>();
   const crumbs = [
     { label: "Home", href: "/" },
     { label: "Shop", href: "/products" },
@@ -214,7 +244,9 @@ export function CityGeoTemplate({
       />
       <Breadcrumbs items={crumbs} />
       <h1 className="text-3xl font-bold text-primary mb-3">{geoPageH1(geo)}</h1>
-      <p className="text-slate-600 mb-4 max-w-3xl leading-relaxed">{geo.introParagraph}</p>
+      <p className="text-slate-600 mb-4 max-w-3xl leading-relaxed">
+        {applyInlineLinks(geo.introParagraph, cityPageInlineLinks, { usedHrefs, currentPath: path, max: 4 })}
+      </p>
 
       <div className="mb-8 rounded-xl border border-primary/15 bg-petal/80 px-4 py-3 text-sm text-slate-800">
         <SameDayCountdown

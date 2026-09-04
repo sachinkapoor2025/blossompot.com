@@ -6,6 +6,7 @@ import { homeSeoContent } from "@/lib/content/home-seo";
 
 export function HomeSeoSection() {
   const { intro, categories, delivery, howItWorks, cities, faqs } = homeSeoContent;
+  const usedHrefs = new Set<string>();
 
   return (
     <section className="bg-slate-50 border-y border-slate-200" aria-labelledby="home-seo-heading">
@@ -18,7 +19,7 @@ export function HomeSeoSection() {
               </h2>
               {intro.paragraphs.map((para, i) => (
                 <p key={i} className="mb-4">
-                  {applyInlineLinks(para, homepageInlineLinks)}
+                  {applyInlineLinks(para, homepageInlineLinks, { usedHrefs, currentPath: "/", max: 4 })}
                 </p>
               ))}
             </header>
@@ -27,7 +28,7 @@ export function HomeSeoSection() {
               <h3 className="text-xl font-semibold text-primary mb-3">{delivery.heading}</h3>
               {delivery.paragraphs.map((para, i) => (
                 <p key={i} className="mb-4">
-                  {para}
+                  {applyInlineLinks(para, homepageInlineLinks, { usedHrefs, currentPath: "/", max: 4 })}
                 </p>
               ))}
               <div className="flex flex-wrap gap-2 mt-2">

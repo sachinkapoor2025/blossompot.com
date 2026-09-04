@@ -106,6 +106,11 @@ ${categories.join("\n")}
 - **Australia:** ${siteUrl}/locations/australia
 - **Europe:** ${siteUrl}/locations/europe
 - **United States hub:** ${siteUrl}/locations/united-states
+- **Flower delivery USA:** ${siteUrl}/flower-delivery-usa
+- **Flower delivery UK:** ${siteUrl}/flower-delivery-uk
+- **Flower delivery Canada:** ${siteUrl}/flower-delivery-canada
+- **Flower delivery Australia:** ${siteUrl}/flower-delivery-australia
+- **Flower delivery UAE:** ${siteUrl}/flower-delivery-uae
 - **Same-day delivery:** ${siteUrl}/same-day-delivery
 - **Shipping & delivery:** ${siteUrl}/shipping
 - **FAQ:** ${siteUrl}/faq
@@ -120,8 +125,8 @@ ${categories.join("\n")}
 
 - **Operator:** Divit Global Ventures (DGV)
 - **Legal name:** ${site.legalName}
-- **Support phone:** ${site.phone}
 - **Support email:** ${site.supportEmail}
+- **WhatsApp:** Chat via the WhatsApp button on blossompot.com
 - **Coverage:** ${deliveryClaims.standard}
 - **Secure checkout:** Stripe (USD) + Razorpay (INR / UPI)
 
@@ -166,7 +171,7 @@ ${faqList}
 - **Nationwide:** ${deliveryClaims.standard}
 - **Dispatch:** ${deliveryClaims.dispatch}
 - **Shipping:** ${deliveryClaims.shipping}
-- **Support:** ${site.supportEmail} | WhatsApp ${site.whatsappDisplay}
+- **Support:** ${site.supportEmail} | WhatsApp chat on blossompot.com
 
 ---
 

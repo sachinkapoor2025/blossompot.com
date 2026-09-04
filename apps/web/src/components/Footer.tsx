@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import Link from "next/link";
-import { site, navItems, giftSetsMenu, whatsappChatUrl } from "@/lib/site";
+import { site, navItems, giftSetsMenu, countriesMenu } from "@/lib/site";
 import { PaymentMethodIcons } from "@/components/PaymentMethodIcons";
 import { SiteLogoLink } from "@/components/SiteLogo";
 import { trustFacts } from "@/lib/trust";
@@ -97,17 +97,6 @@ export function Footer() {
                   {site.supportEmail}
                 </a>
               </p>
-              <p>
-                <span className="text-slate-500 text-xs uppercase tracking-wide block mb-0.5">WhatsApp</span>
-                <a
-                  href={whatsappChatUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-primary hover:underline"
-                >
-                  {site.whatsappDisplay}
-                </a>
-              </p>
             </div>
             <div className="mt-5">
               <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">Follow us</p>
@@ -177,6 +166,7 @@ export function Footer() {
               <li><Link href="/become-a-vendor" className="hover:text-primary hover:underline">Become a Vendor</Link></li>
               <li><Link href="/returns" className="hover:text-primary hover:underline">Returns &amp; Guarantee</Link></li>
               <li><Link href="/contact" className="hover:text-primary hover:underline">Contact Us</Link></li>
+              <li><Link href="/terms" className="hover:text-primary hover:underline">Terms &amp; Conditions</Link></li>
             </ul>
           </div>
 
@@ -184,6 +174,16 @@ export function Footer() {
           <div className="col-span-2 lg:col-span-5 min-w-0">
             <p className="font-semibold text-primary mb-3 sm:mb-4">Deliver to</p>
             <ul className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2 text-slate-600">
+              {countriesMenu.items.map((item) => (
+                <li key={item.href} className="col-span-1">
+                  <Link href={item.href} className="hover:text-primary hover:underline">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+              <li className="col-span-2 sm:col-span-3 pt-2">
+                <span className="text-xs uppercase tracking-wide text-slate-500">USA cities &amp; states</span>
+              </li>
               {footerGeoLinks(12).map((c) => (
                 <li key={c.href}>
                   <Link href={c.href} className="hover:text-primary hover:underline">
@@ -241,7 +241,7 @@ export function Footer() {
             </p>
             <p className="flex flex-wrap gap-x-3 gap-y-1">
               <Link href="/terms" className="hover:text-primary underline underline-offset-2">
-                Terms
+                Terms &amp; Conditions
               </Link>
               <Link href="/privacy" className="hover:text-primary underline underline-offset-2">
                 Privacy

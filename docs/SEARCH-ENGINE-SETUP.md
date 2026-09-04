@@ -5,7 +5,7 @@ Do not put verification secrets in git beyond the existing public meta tokens in
 ## Google Search Console
 
 1. Property: `https://www.blossompot.com` (URL-prefix or Domain).
-2. Verification: DNS TXT **or** the HTML file / meta tag (`GOOGLE_SITE_VERIFICATION` / `analyticsConfig.googleSiteVerification`).
+2. Verification: DNS TXT **or** the meta tag in the global layout (`analyticsConfig.googleSiteVerification`).
 3. Submit sitemaps:
    - `https://www.blossompot.com/sitemap.xml`
    - `https://www.blossompot.com/sitemap-geo.xml`

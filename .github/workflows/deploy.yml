@@ -75,6 +75,11 @@ jobs:
           TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
           TWILIO_WHATSAPP_FROM: ${{ secrets.TWILIO_WHATSAPP_FROM }}
           MARKETING_SMTP_PASS: ${{ secrets.MARKETING_SMTP_PASS }}
+          GBO_API_TOKEN: ${{ secrets.GBO_API_TOKEN }}
+          GBO_INTERNAL_API_KEY: ${{ secrets.GBO_INTERNAL_API_KEY }}
+          GBO_SANDBOX: ${{ secrets.GBO_SANDBOX }}
+          GBO_PAYMENT_TYPE: ${{ secrets.GBO_PAYMENT_TYPE }}
+          GBO_AUTH_SCHEME: ${{ secrets.GBO_AUTH_SCHEME }}
         run: |
           # Omit empty WhatsApp/Twilio/marketing overrides so a prior SAM deploy's values are not wiped.
           BASE_URL="${USPS_BASE_URL:-https://apis.usps.com}"
@@ -92,6 +97,11 @@ jobs:
             echo "::warning::MARKETING_SMTP_PASS secret is empty — marketing campaigns need Mailercloud credentials in Admin → Email → Settings (or set the GitHub secret)."
           fi
           [ -n "${RAZORPAY_WEBHOOK_SECRET:-}" ] && EXTRA="$EXTRA RazorpayWebhookSecret=${RAZORPAY_WEBHOOK_SECRET}"
+          [ -n "${GBO_API_TOKEN:-}" ] && EXTRA="$EXTRA GboApiToken=${GBO_API_TOKEN}"
+          [ -n "${GBO_INTERNAL_API_KEY:-}" ] && EXTRA="$EXTRA GboInternalApiKey=${GBO_INTERNAL_API_KEY}"
+          [ -n "${GBO_SANDBOX:-}" ] && EXTRA="$EXTRA GboSandbox=${GBO_SANDBOX}"
+          [ -n "${GBO_PAYMENT_TYPE:-}" ] && EXTRA="$EXTRA GboPaymentType=${GBO_PAYMENT_TYPE}"
+          [ -n "${GBO_AUTH_SCHEME:-}" ] && EXTRA="$EXTRA GboAuthScheme=${GBO_AUTH_SCHEME}"
           sam build && sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --config-env prod \
             --parameter-overrides "\
           Environment=prod \

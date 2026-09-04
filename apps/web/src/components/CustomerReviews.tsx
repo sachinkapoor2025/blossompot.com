@@ -67,9 +67,9 @@ export function CustomerReviews({ data }: CustomerReviewsProps) {
     >
       <div className="mx-auto max-w-7xl px-4 py-12 md:py-16">
         <div className="mx-auto mb-8 max-w-2xl text-center md:mb-10">
-          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-nav">Customer reviews</p>
+          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-nav">Loved by gifters</p>
           <h2 id="customer-reviews-heading" className="text-2xl font-bold text-primary md:text-3xl">
-            What Our Customers Say
+            Customer reviews
           </h2>
           <p className="mt-3 text-sm leading-relaxed text-slate-600 md:text-base">
             {isGoogle && data.rating != null && data.totalCount != null
@@ -78,7 +78,7 @@ export function CustomerReviews({ data }: CustomerReviewsProps) {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {reviews.map((review) => (
             <article
               key={review.id}

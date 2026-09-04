@@ -4,16 +4,17 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { VendorApiPanel } from "@/components/admin/VendorApiPanel";
+import { GboApiPanel } from "@/components/admin/GboApiPanel";
 import { VendorExpensePanel } from "@/components/admin/VendorExpensePanel";
 
-type VendorTab = "api" | "expense";
+type VendorTab = "api" | "gbo" | "expense";
 
 function VendorManagementHubInner() {
   const { isSuperAdmin, loading: authLoading } = useAuth();
   const searchParams = useSearchParams();
   const initial = useMemo(() => {
     const t = searchParams.get("tab");
-    if (t === "expense" || t === "api") return t;
+    if (t === "expense" || t === "api" || t === "gbo") return t;
     // Default: expense for super admins; API for everyone else.
     return "expense" as VendorTab;
   }, [searchParams]);
@@ -32,6 +33,7 @@ function VendorManagementHubInner() {
   const tabs: { id: VendorTab; label: string; superOnly?: boolean }[] = [
     { id: "expense", label: "Vendor expense management", superOnly: true },
     { id: "api", label: "Vendor API" },
+    { id: "gbo", label: "GBO API" },
   ];
 
   return (
@@ -40,7 +42,7 @@ function VendorManagementHubInner() {
         <div>
           <h1 className="text-2xl font-bold">Vendor Management</h1>
           <p className="text-sm text-slate-600 mt-1">
-            Orange County vendor tools — API console and (super admin) expense / payout tracking.
+            Orange County vendor tools, Gift Baskets Overseas API, and (super admin) expense / payout tracking.
           </p>
         </div>
         <div className="flex flex-col xs:flex-row flex-wrap items-stretch sm:items-center gap-2 w-full sm:w-auto">
@@ -63,7 +65,7 @@ function VendorManagementHubInner() {
         </div>
       </div>
 
-      {tab === "expense" ? <VendorExpensePanel /> : <VendorApiPanel />}
+      {tab === "expense" ? <VendorExpensePanel /> : tab === "gbo" ? <GboApiPanel /> : <VendorApiPanel />}
     </div>
   );
 }

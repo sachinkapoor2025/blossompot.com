@@ -26,7 +26,7 @@ export async function handler(
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Session-Id",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Session-Id, X-Vendor-Api-Key, X-Gbo-Api-Key",
       },
       body: JSON.stringify({ error: message }),
     };

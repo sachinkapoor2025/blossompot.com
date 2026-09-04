@@ -46,6 +46,42 @@ export type CampaignBenefit = {
   description: string;
 };
 
+/** Shared shape for offer-style campaign emails (hero, benefits, 4 category cards, mid-CTA). */
+export type OfferStyleEmailConfig = {
+  preheader: string;
+  logoUrl: string;
+  logoHref: string;
+  heroImageUrl: string;
+  heroImageHref: string;
+  heroImageAlt: string;
+  offerEyebrow: string;
+  offerHeadline: string;
+  offerSubhead: string;
+  offerBody: string;
+  ctaText: string;
+  ctaHref: string;
+  benefitsHeading: string;
+  benefits: readonly CampaignBenefit[];
+  categoriesHeading: string;
+  categoriesSubheading: string;
+  categories: readonly CampaignCard[];
+  midCtaHeading: string;
+  midCtaBody: string;
+  midCtaText: string;
+  midCtaHref: string;
+  footerTagline: string;
+  websiteUrl: string;
+  websiteLabel: string;
+  orderEmail: string;
+  facebookUrl: string;
+  facebookIconUrl: string;
+  instagramUrl: string;
+  instagramIconUrl: string;
+  copyrightText: string;
+  unsubscribeLabel: string;
+  footerLogoUrl?: string;
+};
+
 /** ═══════════════ TEMPLATE 1 — Free Shipping Above $7 ═══════════════ */
 export const FREE_SHIPPING_EMAIL_CONFIG = {
   templateId: "free-shipping-above-7",
@@ -108,6 +144,154 @@ export const FREE_SHIPPING_EMAIL_CONFIG = {
   midCtaText: "Shop Free Shipping Deals",
   midCtaHref: SHOP,
   footerTagline: "Connecting Hearts Across Borders",
+  websiteUrl: SITE,
+  websiteLabel: "www.blossompot.com",
+  orderEmail: "order@blossompot.com",
+  facebookUrl: "https://www.facebook.com/blossompot/",
+  facebookIconUrl: FB,
+  instagramUrl: "https://www.instagram.com/blossompot/",
+  instagramIconUrl: IG,
+  copyrightText: "© 2026 BlossomPot. All Rights Reserved.",
+  unsubscribeLabel: "Unsubscribe",
+} as const;
+
+/** ═══════════════ TEMPLATE — Anniversary gifts ═══════════════ */
+export const ANNIVERSARY_EMAIL_CONFIG = {
+  templateId: "anniversary-gifts",
+  name: "Anniversary Gifts",
+  subject: "Celebrate your anniversary with flowers, cakes & gifts — BlossomPot",
+  preheader:
+    "Romantic roses, celebration cakes, and gift hampers delivered across the USA. Make this anniversary unforgettable.",
+  logoUrl: LOGO,
+  logoHref: SITE,
+  heroImageUrl: cdnUploadUrl("editorial/tile-anniversary.jpg"),
+  heroImageHref: `${SITE}/anniversary-gifts`,
+  heroImageAlt: "Anniversary roses and gifts from BlossomPot",
+  offerEyebrow: "ANNIVERSARY COLLECTION",
+  offerHeadline: "Celebrate Your Love Story",
+  offerSubhead: "Flowers, cakes & gifts made for anniversaries",
+  offerBody:
+    "Mark another year together with florist-quality roses, elegant cakes, and curated hampers. Nationwide USA delivery, with same-day options in select cities when you order before the local cut-off.",
+  ctaText: "Shop Anniversary Gifts",
+  ctaHref: `${SITE}/anniversary-gifts`,
+  benefitsHeading: "Why Couples Choose BlossomPot",
+  benefits: [
+    { icon: "🌹", title: "Romantic florals", description: "Roses, mixed bouquets, and premium arrangements." },
+    { icon: "🎂", title: "Celebration cakes", description: "Pair blooms with a cake they will remember." },
+    { icon: "🚚", title: "USA delivery", description: "Reliable nationwide shipping, same-day in select cities." },
+    { icon: "💌", title: "Personal gift note", description: "Add a message at checkout — we handle the rest." },
+  ] satisfies CampaignBenefit[],
+  categoriesHeading: "Gifts They Will Treasure",
+  categoriesSubheading: "Choose flowers, cakes, or a hamper — or combine them for a complete surprise.",
+  categories: [
+    {
+      name: "Anniversary Gifts",
+      description: "Curated roses, combos, and keepsakes for the date that matters.",
+      imageUrl: cdnUploadUrl("editorial/tile-anniversary.jpg"),
+      href: `${SITE}/anniversary-gifts`,
+      buttonText: "Shop Now",
+    },
+    {
+      name: "Flower Bouquets",
+      description: "Hand-tied bouquets that arrive fresh and gift-ready.",
+      imageUrl: cdnUploadUrl("editorial/tile-bouquets.jpg"),
+      href: `${SITE}/bouquets`,
+      buttonText: "Shop Now",
+    },
+    {
+      name: "Cakes",
+      description: "Celebration cakes to share after the bouquet is opened.",
+      imageUrl: cdnUploadUrl("editorial/tile-cakes.jpg"),
+      href: `${SITE}/cakes`,
+      buttonText: "Shop Now",
+    },
+    {
+      name: "Gift Hampers",
+      description: "Gourmet hampers for a fuller, more memorable gift.",
+      imageUrl: cdnUploadUrl("editorial/tile-hampers.jpg"),
+      href: `${SITE}/gift-hampers`,
+      buttonText: "Shop Now",
+    },
+  ] satisfies CampaignCard[],
+  midCtaHeading: "Make This Anniversary Unforgettable",
+  midCtaBody: "Choose a delivery date, add a personal note, and we will take care of the rest.",
+  midCtaText: "Browse Anniversary Gifts",
+  midCtaHref: `${SITE}/anniversary-gifts`,
+  footerTagline: "Thoughtful gifts for meaningful moments",
+  websiteUrl: SITE,
+  websiteLabel: "www.blossompot.com",
+  orderEmail: "order@blossompot.com",
+  facebookUrl: "https://www.facebook.com/blossompot/",
+  facebookIconUrl: FB,
+  instagramUrl: "https://www.instagram.com/blossompot/",
+  instagramIconUrl: IG,
+  copyrightText: "© 2026 BlossomPot. All Rights Reserved.",
+  unsubscribeLabel: "Unsubscribe",
+} as const;
+
+/** ═══════════════ TEMPLATE — Birthday gifts ═══════════════ */
+export const BIRTHDAY_EMAIL_CONFIG = {
+  templateId: "birthday-gifts",
+  name: "Birthday Gifts",
+  subject: "Make their birthday bloom — cakes, flowers & gifts from BlossomPot",
+  preheader:
+    "Birthday cakes, bright bouquets, and gift hampers delivered across the USA. Same-day options in select cities.",
+  logoUrl: LOGO,
+  logoHref: SITE,
+  heroImageUrl: cdnUploadUrl("editorial/home-banner-cakes.jpg"),
+  heroImageHref: `${SITE}/birthday-gifts`,
+  heroImageAlt: "Birthday cakes and gifts from BlossomPot",
+  offerEyebrow: "BIRTHDAY COLLECTION",
+  offerHeadline: "Make Their Birthday Bloom",
+  offerSubhead: "Cakes, flowers & gifts delivered on the day they celebrate",
+  offerBody:
+    "Send a birthday they will talk about — designer cakes, colorful bouquets, and thoughtful hampers with USA delivery. Pick a date at checkout and add a personal message.",
+  ctaText: "Shop Birthday Gifts",
+  ctaHref: `${SITE}/birthday-gifts`,
+  benefitsHeading: "Birthday Gifting, Made Simple",
+  benefits: [
+    { icon: "🎂", title: "Celebration cakes", description: "Chocolate, floral, and designer birthday cakes." },
+    { icon: "🌸", title: "Fresh flowers", description: "Bright bouquets that arrive looking their best." },
+    { icon: "🚚", title: "On-time delivery", description: "Nationwide USA shipping plus same-day in select cities." },
+    { icon: "🎁", title: "Hampers & extras", description: "Complete the surprise with a curated gift box." },
+  ] satisfies CampaignBenefit[],
+  categoriesHeading: "Everything for the Birthday",
+  categoriesSubheading: "Start with a cake, add flowers, or send a full hamper — all in one order.",
+  categories: [
+    {
+      name: "Birthday Gifts",
+      description: "Occasion-ready picks for friends, family, and colleagues.",
+      imageUrl: cdnUploadUrl("editorial/tile-birthday.jpg"),
+      href: `${SITE}/birthday-gifts`,
+      buttonText: "Shop Now",
+    },
+    {
+      name: "Cakes",
+      description: "The centerpiece of any birthday table.",
+      imageUrl: cdnUploadUrl("editorial/tile-cakes.jpg"),
+      href: `${SITE}/cakes`,
+      buttonText: "Shop Now",
+    },
+    {
+      name: "Flowers",
+      description: "Fresh stems and mixed bouquets for a colorful hello.",
+      imageUrl: cdnUploadUrl("editorial/tile-flowers.jpg"),
+      href: `${SITE}/flowers`,
+      buttonText: "Shop Now",
+    },
+    {
+      name: "Gift Hampers",
+      description: "Treats and extras when you want to go bigger.",
+      imageUrl: cdnUploadUrl("editorial/tile-hampers.jpg"),
+      href: `${SITE}/gift-hampers`,
+      buttonText: "Shop Now",
+    },
+  ] satisfies CampaignCard[],
+  midCtaHeading: "Do Not Miss Their Special Day",
+  midCtaBody: "Choose a delivery date, add a cake or bouquet, and we will deliver the celebration.",
+  midCtaText: "Browse Birthday Gifts",
+  midCtaHref: `${SITE}/birthday-gifts`,
+  footerTagline: "Thoughtful gifts for meaningful moments",
   websiteUrl: SITE,
   websiteLabel: "www.blossompot.com",
   orderEmail: "order@blossompot.com",
@@ -977,7 +1161,7 @@ function footerFrom(cfg: {
 
 /** Template 1 HTML — Free shipping above $7. */
 export function buildFreeShippingEmailHtml(
-  cfg: typeof FREE_SHIPPING_EMAIL_CONFIG = FREE_SHIPPING_EMAIL_CONFIG
+  cfg: OfferStyleEmailConfig = FREE_SHIPPING_EMAIL_CONFIG
 ): string {
   const bodyRows = `
           <!-- Hero image -->
@@ -1055,6 +1239,18 @@ export function buildFreeShippingEmailHtml(
     bodyRows,
     footer: footerFrom(cfg),
   });
+}
+
+export function buildAnniversaryEmailHtml(
+  cfg: OfferStyleEmailConfig = ANNIVERSARY_EMAIL_CONFIG
+): string {
+  return buildFreeShippingEmailHtml(cfg);
+}
+
+export function buildBirthdayEmailHtml(
+  cfg: OfferStyleEmailConfig = BIRTHDAY_EMAIL_CONFIG
+): string {
+  return buildFreeShippingEmailHtml(cfg);
 }
 
 /** Template 2 HTML — Starting at ₹343 / $3.99. */

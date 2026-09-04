@@ -103,6 +103,9 @@ export function truncateAtWordBoundary(text: string, maxLen = 155): string {
 
 /** Evergreen meta description — fits ≤155 chars without mid-sentence ellipsis. */
 export function geoPageDescription(geo: GeoLocation): string {
+  if (geo.slug === "texas") {
+    return "Order flowers, cakes & gifts to Texas. Same-day options before 2:00 PM local in select ZIPs; nationwide standard delivery otherwise. Secure checkout on Stripe or Razorpay.";
+  }
   const place = locationLabel(geo);
   const raw = `Order flowers, cakes & gifts to ${place}. Same-day in select ZIPs before ${geo.cutoffTimeLocal} local; otherwise standard USA delivery in 5–7 business days.`;
   return truncateAtWordBoundary(raw, 155);

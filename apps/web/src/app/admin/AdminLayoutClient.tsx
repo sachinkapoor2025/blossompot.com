@@ -55,6 +55,7 @@ const navItems: NavItem[] = [
       { href: "/admin/service-areas", label: "Service areas" },
       { href: "/admin/vendor-management?tab=expense", label: "Vendor expense" },
       { href: "/admin/vendor-management?tab=api", label: "Vendor API" },
+      { href: "/admin/vendor-management?tab=gbo", label: "GBO API" },
     ],
   },
   { type: "link", href: "/admin/email", label: "Marketing Email" },

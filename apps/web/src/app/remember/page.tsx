@@ -7,10 +7,11 @@ import { DEFAULT_SUBSCRIPTION_PLANS } from "@blossompot/shared";
 import { REMEMBER_FAQS, rememberHowToJsonLd, rememberServiceJsonLd } from "@/components/gifting/remember-content";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Occasion Reminder Membership — Never Forget a Birthday or Anniversary",
+  title: "Occasion Reminder Membership — Never Forget a Birthday or Anniversary | BlossomPot",
   description:
-    "BlossomPot Remember membership sends email and WhatsApp reminders before birthdays, anniversaries, Valentine’s Day, and festivals. Choose a 3-month to 2-year plan, pick your dates, then pay securely with Stripe or Razorpay. Gifts are never charged automatically.",
+    "BlossomPot Remember membership sends email and WhatsApp reminders before birthdays, anniversaries, Valentine's Day, and festivals. Choose a 3-month to 2-year plan, pick your dates, then pay securely with Stripe or Razorpay. Gifts are never charged automatically.",
   path: "/remember",
+  absoluteTitle: true,
 });
 
 export const dynamic = "force-dynamic";

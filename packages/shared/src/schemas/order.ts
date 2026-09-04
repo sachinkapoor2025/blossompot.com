@@ -2,6 +2,7 @@ import { z } from "zod";
 import { cartItemSchema } from "./cart";
 import { ORDER_STATUS } from "../constants";
 import { checkoutAttributionSchema, orderAttributionSchema } from "./attribution";
+import { orderGboFulfillmentSchema } from "./vendor-gbo";
 
 /** International phone: 10–15 digits; allows +, spaces, dashes, parentheses. */
 export function isValidShippingPhone(phone: string): boolean {
@@ -218,6 +219,8 @@ export const orderSchema = z.object({
     .optional(),
   /** Last shipment status string received from vendor tracking API (e.g. in_transit). */
   vendorShipmentStatus: z.string().max(80).optional(),
+  /** Gift Baskets Overseas dropship snapshot (invoice, status, tracking). */
+  gbo: orderGboFulfillmentSchema.optional(),
   adminNotes: z.string().max(2000).optional(),
   estimatedDeliveryAt: z.string().optional(),
   deliveredAt: z.string().optional(),

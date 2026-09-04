@@ -46,12 +46,33 @@ function orderEmail(): string {
   return process.env.NOTIFY_EMAIL?.trim()?.split(",")[0]?.trim() || "order@blossompot.com";
 }
 
+function isBlockedSupportPhone(raw: string): boolean {
+  const compact = raw.replace(/\D/g, "");
+  if (!compact) return true;
+  return compact === "16692603819" || compact === "6692603819" || compact.replace(/^1/, "") === "6692603819";
+}
+
 function supportPhone(): string {
-  return (
-    process.env.SUPPORT_PHONE?.trim() ||
-    process.env.NEXT_PUBLIC_SUPPORT_PHONE?.trim() ||
-    "+1 (669) 260-3819"
-  );
+  const raw =
+    process.env.SUPPORT_PHONE?.trim() || process.env.NEXT_PUBLIC_SUPPORT_PHONE?.trim() || "";
+  if (!raw || isBlockedSupportPhone(raw)) return "";
+  return raw;
+}
+
+function supportPhoneHtmlRow(): string {
+  const phone = supportPhone();
+  if (!phone) return "";
+  return `
+                <tr>
+                  <td align="center" style="padding:0 0 18px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:20px;color:#D7E4DF;">
+                    Phone / WhatsApp: ${escapeHtml(phone)}
+                  </td>
+                </tr>`;
+}
+
+function supportPhoneTextLine(): string {
+  const phone = supportPhone();
+  return phone ? `Phone / WhatsApp: ${phone}` : "";
 }
 
 function logoUrl(): string {
@@ -507,11 +528,7 @@ function buildPremiumOrderEmailHtml(order: Order, copy: PremiumOrderEmailCopy): 
                     <a href="mailto:${escAttr(orderEmail())}" style="color:#F3D5C2;text-decoration:underline;">${escapeHtml(orderEmail())}</a>
                   </td>
                 </tr>
-                <tr>
-                  <td align="center" style="padding:0 0 18px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:20px;color:#D7E4DF;">
-                    Phone / WhatsApp: ${escapeHtml(supportPhone())}
-                  </td>
-                </tr>
+                ${supportPhoneHtmlRow()}
                 <tr>
                   <td align="center" style="padding:0 0 16px 0;">
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
@@ -600,7 +617,7 @@ View your order: ${s.orderUrl}
 Customer support
 Email: ${supportEmail()}
 Orders: ${orderEmail()}
-Phone / WhatsApp: ${supportPhone()}
+${supportPhoneTextLine()}
 
 ${TRUST_HIGHLIGHTS.join("  |  ")}
 
@@ -682,7 +699,7 @@ ${ORDER_SEO_BLURB}
 Customer support
 Email: ${supportEmail()}
 Orders: ${orderEmail()}
-Phone / WhatsApp: ${supportPhone()}
+${supportPhoneTextLine()}
 Website: ${siteOrigin()}
 
 ${TRUST_HIGHLIGHTS.join("  |  ")}

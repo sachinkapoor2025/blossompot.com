@@ -6,6 +6,7 @@ import { reconcilePendingRazorpayPayments } from "./handlers/payments/razorpay";
 import { runPaymentReconciliationJob } from "./handlers/payment-reconciliation";
 import { processUspsTrackingSync } from "./handlers/tracking-sync";
 import { processGiftingReminders } from "./handlers/gifting-reminders";
+import { processGboTrackingSync } from "./lib/gbo-orders";
 
 type CronEvent = {
   task?: string;
@@ -36,7 +37,14 @@ export async function handler(event: CronEvent, _context: Context) {
   if (event?.task === "trackingSync") {
     try {
       const trackingSync = await processUspsTrackingSync();
-      return { trackingSync };
+      let gboTrackingSync: unknown;
+      try {
+        gboTrackingSync = await processGboTrackingSync();
+      } catch (err) {
+        console.error("GBO tracking sync failed:", err);
+        gboTrackingSync = { error: err instanceof Error ? err.message : String(err) };
+      }
+      return { trackingSync, gboTrackingSync };
     } catch (err) {
       console.error("USPS tracking sync cron failed:", err);
       throw err;

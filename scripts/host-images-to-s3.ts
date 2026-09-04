@@ -172,6 +172,7 @@ const EDITORIAL_JOBS: ImageJob[] = [
   { key: "uploads/editorial/testimonial-sarah.jpg", unsplash: "photo-1438761681033-6461ffad8d80" },
   { key: "uploads/editorial/testimonial-priya.jpg", unsplash: "photo-1544005313-94ddf0286df2" },
   { key: "uploads/editorial/testimonial-jessica.jpg", unsplash: "photo-1580489944761-15a19d654956" },
+  { key: "uploads/editorial/testimonial-amanda.jpg", unsplash: "photo-1531123897727-8f129e1688ce" },
 ];
 
 function log(message: string): void {

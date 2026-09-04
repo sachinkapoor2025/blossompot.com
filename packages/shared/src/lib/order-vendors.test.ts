@@ -1,12 +1,15 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { VENDOR_ORANGE_COUNTY, VENDOR_BLOSSOMPOT } from "../constants";
+import { VENDOR_ORANGE_COUNTY, VENDOR_BLOSSOMPOT, VENDOR_GBO } from "../constants";
 import {
   allVendorsHaveTracking,
   ensureVendorFulfillments,
   isMultiVendorOrder,
+  orderHasGbo,
+  orderIsGboOnly,
   orderVendorKeys,
   upsertVendorFulfillment,
+  vendorDisplayLabel,
 } from "./order-vendors";
 
 describe("order-vendors", () => {
@@ -30,6 +33,16 @@ describe("order-vendors", () => {
     assert.equal(rows.length, 1);
     assert.equal(rows[0]?.trackingNumber, "AWB1");
     assert.equal(rows[0]?.carrier, "UPS");
+  });
+
+  it("labels Gift Baskets Overseas and detects GBO-only carts", () => {
+    assert.equal(vendorDisplayLabel(VENDOR_GBO), "Gift Baskets Overseas");
+    assert.equal(orderHasGbo({ items: [{ vendorSlug: VENDOR_GBO }] }), true);
+    assert.equal(orderIsGboOnly({ items: [{ vendorSlug: VENDOR_GBO }] }), true);
+    assert.equal(
+      orderIsGboOnly({ items: [{ vendorSlug: VENDOR_GBO }, { vendorSlug: VENDOR_BLOSSOMPOT }] }),
+      false
+    );
   });
 
   it("requires all vendors for full ship", () => {

@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import {
   VENDOR_BLOSSOMPOT,
   VENDOR_ORANGE_COUNTY,
+  VENDOR_GBO,
   defaultBlossompotAreas,
   defaultOrangeCountyAreas,
   marketplaceVendorKeys,
@@ -109,6 +110,7 @@ export async function loadCoverageBundle(): Promise<{
   const slugs = [
     VENDOR_BLOSSOMPOT,
     VENDOR_ORANGE_COUNTY,
+    VENDOR_GBO,
     ...activeMarket.map((v) => v.vendorSlug),
   ];
 

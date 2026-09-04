@@ -23,6 +23,8 @@ import * as pendingPaymentUnsub from "./handlers/pending-payment-unsub";
 import * as shipping from "./handlers/shipping";
 import * as loadTest from "./handlers/load-test";
 import * as adminVendorApi from "./handlers/admin-vendor-api";
+import * as adminGboApi from "./handlers/admin-gbo-api";
+import * as gbo from "./handlers/gbo";
 import * as expenses from "./handlers/expenses";
 import * as paymentLedger from "./handlers/payment-ledger";
 import * as paymentReconciliation from "./handlers/payment-reconciliation";
@@ -247,6 +249,46 @@ const routes: Route[] = [
   },
   { method: "POST", pattern: /^\/admin\/vendor-api\/shipment$/, handler: adminVendorApi.adminVendorPostShipment },
   { method: "POST", pattern: /^\/admin\/vendor-api\/tracking$/, handler: adminVendorApi.adminVendorPostTracking },
+  // Gift Baskets Overseas — public catalog proxy + admin console
+  { method: "GET", pattern: /^\/gbo\/health$/, handler: gbo.gboHealthHandler },
+  { method: "GET", pattern: /^\/gbo\/countries$/, handler: gbo.gboCountriesHandler },
+  { method: "GET", pattern: /^\/gbo\/categories$/, handler: gbo.gboCategoriesHandler },
+  { method: "GET", pattern: /^\/gbo\/gifts$/, handler: gbo.gboGiftsHandler },
+  {
+    method: "GET",
+    pattern: /^\/gbo\/gifts\/([^/]+)$/,
+    handler: gbo.gboGiftDetailHandler,
+    params: ["productId"],
+  },
+  { method: "GET", pattern: /^\/admin\/gbo\/health$/, handler: adminGboApi.adminGboHealth },
+  { method: "GET", pattern: /^\/admin\/gbo\/countries$/, handler: adminGboApi.adminGboCountries },
+  { method: "GET", pattern: /^\/admin\/gbo\/categories$/, handler: adminGboApi.adminGboCategories },
+  { method: "GET", pattern: /^\/admin\/gbo\/gifts$/, handler: adminGboApi.adminGboGifts },
+  {
+    method: "GET",
+    pattern: /^\/admin\/gbo\/gifts\/([^/]+)$/,
+    handler: adminGboApi.adminGboGiftDetail,
+    params: ["productId"],
+  },
+  { method: "POST", pattern: /^\/admin\/gbo\/orders$/, handler: adminGboApi.adminGboCreateOrder },
+  {
+    method: "GET",
+    pattern: /^\/admin\/gbo\/orders\/([^/]+)$/,
+    handler: adminGboApi.adminGboGetOrder,
+    params: ["orderId"],
+  },
+  {
+    method: "POST",
+    pattern: /^\/admin\/gbo\/orders\/([^/]+)\/place$/,
+    handler: adminGboApi.adminGboPlaceBlossompotOrder,
+    params: ["orderId"],
+  },
+  {
+    method: "POST",
+    pattern: /^\/admin\/gbo\/orders\/([^/]+)\/sync$/,
+    handler: adminGboApi.adminGboSyncBlossompotOrder,
+    params: ["orderId"],
+  },
   // Orange County vendor feed is ONLY on dedicated VendorHttpApi (vendor-api.ts / VendorApiUrl).
   { method: "GET", pattern: /^\/orders$/, handler: orders.listOrders },
   {

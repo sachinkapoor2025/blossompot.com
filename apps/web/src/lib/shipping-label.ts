@@ -144,7 +144,7 @@ export function buildShippingLabelHtml(order: Order): string {
             : `<p class="addr" style="font-weight:700;margin:0">${escapeHtml(site.name)}</p>`
         }
         <p class="addr muted">${escapeHtml(site.supportEmail)}</p>
-        <p class="addr muted">${escapeHtml(site.phone)}</p>
+        ${site.phone ? `<p class="addr muted">${escapeHtml(site.phone)}</p>` : ""}
       </div>
       <div class="cell" style="flex:1.4">
         <p class="section-title">Ship to</p>

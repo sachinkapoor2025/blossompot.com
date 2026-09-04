@@ -5,7 +5,13 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import { categoryHref } from "@/lib/category-urls";
-import { navItems, cityLinks, cityNavHref, cityNavMenuLabel, giftSetsMenu } from "@/lib/site";
+import {
+  navItems,
+  cityLinks,
+  cityNavHref,
+  cityNavMenuLabel,
+  countriesMenu,
+} from "@/lib/site";
 import { SearchBar } from "@/components/SearchBar";
 import { SiteLogoLink } from "@/components/SiteLogo";
 import { DeliveryLocationChip } from "@/components/DeliveryLocationChip";
@@ -63,7 +69,7 @@ function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-function GiftSetsMenu({
+function CountriesMenu({
   active,
   onNavigate,
 }: {
@@ -85,15 +91,15 @@ function GiftSetsMenu({
         aria-haspopup="true"
         className={`btn-nav gap-1 ${active || open ? "btn-nav-active" : ""}`}
       >
-        {giftSetsMenu.label}
+        {countriesMenu.label}
         <span className={`text-xs transition-transform ${open ? "rotate-180" : ""}`}>▼</span>
       </button>
       {open && (
-        <div className="absolute top-full left-0 pt-1.5 z-[100]">
-          <div className="min-w-[200px] rounded-lg border border-slate-200 bg-white py-1 shadow-xl">
-            {giftSetsMenu.items.map((item) => (
+        <div className="absolute top-full right-0 pt-1.5 z-[100]">
+          <div className="min-w-[240px] rounded-lg border border-slate-200 bg-white py-1 shadow-xl">
+            {countriesMenu.items.map((item) => (
               <Link
-                key={item.category}
+                key={item.href}
                 href={item.href}
                 className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-nav whitespace-nowrap"
                 onClick={() => {
@@ -259,7 +265,7 @@ export function Header() {
   const activeCategory = searchParams.get("category");
   const [menuOpen, setMenuOpen] = useState(false);
   const [citiesOpen, setCitiesOpen] = useState(false);
-  const [giftSetsOpen, setGiftSetsOpen] = useState(false);
+  const [countriesOpen, setCountriesOpen] = useState(false);
 
   const isActive = (href: string, category?: string) => {
     if (href === "/") return pathname === "/" && !activeCategory;
@@ -272,18 +278,18 @@ export function Header() {
     return pathname.startsWith(href.split("?")[0]) && href !== "/";
   };
 
-  const isGiftSetsActive = giftSetsMenu.items.some((item) => isActive(item.href, item.category));
+  const isCountriesActive = countriesMenu.items.some((item) => pathname === item.href);
 
   const closeMenu = () => {
     setMenuOpen(false);
     setCitiesOpen(false);
-    setGiftSetsOpen(false);
+    setCountriesOpen(false);
   };
 
   useEffect(() => {
     setMenuOpen(false);
     setCitiesOpen(false);
-    setGiftSetsOpen(false);
+    setCountriesOpen(false);
   }, [pathname, activeCategory]);
 
   useEffect(() => {
@@ -368,31 +374,17 @@ export function Header() {
       <nav className="hidden md:block border-t border-slate-100 bg-white overflow-visible">
         <div className="max-w-7xl mx-auto px-4 py-2.5">
           <div className="flex flex-wrap items-center gap-2">
-            {navItems.map((item) => {
-              if (item.href === "/") {
-                return (
-                  <span key={item.href} className="contents">
-                    <Link
-                      href={item.href}
-                      className={`btn-nav ${isActive(item.href) ? "btn-nav-active" : ""}`}
-                    >
-                      {item.label}
-                    </Link>
-                    <GiftSetsMenu active={isGiftSetsActive} />
-                  </span>
-                );
-              }
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`btn-nav ${isActive(item.href, "category" in item ? item.category : undefined) ? "btn-nav-active" : ""}`}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`btn-nav ${isActive(item.href, "category" in item ? item.category : undefined) ? "btn-nav-active" : ""}`}
+              >
+                {item.label}
+              </Link>
+            ))}
             <CitiesMenu />
+            <CountriesMenu active={isCountriesActive} />
           </div>
         </div>
       </nav>
@@ -421,75 +413,20 @@ export function Header() {
           </div>
 
           <nav className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-3 py-3 space-y-1">
-              {navItems.map((item) => {
-                if (item.href === "/") {
-                  return (
-                    <div key={item.href} className="space-y-1">
-                      <Link
-                        href={item.href}
-                        onClick={closeMenu}
-                        className={`block rounded-lg px-4 py-3 text-sm font-semibold ${
-                          isActive(item.href)
-                            ? "bg-nav text-white"
-                            : "text-primary hover:bg-blue-50 hover:text-nav"
-                        }`}
-                      >
-                        {item.label}
-                      </Link>
-                      <div>
-                        <button
-                          type="button"
-                          onClick={() => setGiftSetsOpen((v) => !v)}
-                          className={`w-full flex items-center justify-between rounded-lg px-4 py-3 text-sm font-semibold ${
-                            isGiftSetsActive || giftSetsOpen
-                              ? "bg-nav text-white"
-                              : "text-primary hover:bg-blue-50 hover:text-nav"
-                          }`}
-                        >
-                          {giftSetsMenu.label}
-                          <span
-                            className={`text-xs transition-transform ${giftSetsOpen ? "rotate-180" : ""}`}
-                          >
-                            ▼
-                          </span>
-                        </button>
-                        {giftSetsOpen && (
-                          <div className="mt-1 ml-2 border-l-2 border-slate-100 pl-2 space-y-1">
-                            {giftSetsMenu.items.map((setItem) => (
-                              <Link
-                                key={setItem.category}
-                                href={setItem.href}
-                                onClick={closeMenu}
-                                className={`block rounded-lg px-4 py-2.5 text-sm ${
-                                  isActive(setItem.href, setItem.category)
-                                    ? "bg-blue-50 text-nav font-semibold"
-                                    : "text-slate-700 hover:bg-blue-50 hover:text-nav"
-                                }`}
-                              >
-                                {setItem.label}
-                              </Link>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                }
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={closeMenu}
-                    className={`block rounded-lg px-4 py-3 text-sm font-semibold ${
-                      isActive(item.href, "category" in item ? item.category : undefined)
-                        ? "bg-nav text-white"
-                        : "text-primary hover:bg-blue-50 hover:text-nav"
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={closeMenu}
+                  className={`block rounded-lg px-4 py-3 text-sm font-semibold ${
+                    isActive(item.href, "category" in item ? item.category : undefined)
+                      ? "bg-nav text-white"
+                      : "text-primary hover:bg-blue-50 hover:text-nav"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
 
               <div>
                 <button
@@ -519,6 +456,39 @@ export function Header() {
                         className="block rounded-lg px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-nav"
                       >
                         {cityNavMenuLabel(c)}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setCountriesOpen((v) => !v)}
+                  className={`w-full flex items-center justify-between rounded-lg px-4 py-3 text-sm font-semibold ${
+                    isCountriesActive || countriesOpen
+                      ? "bg-nav text-white"
+                      : "text-primary hover:bg-blue-50 hover:text-nav"
+                  }`}
+                >
+                  {countriesMenu.label}
+                  <span className={`text-xs transition-transform ${countriesOpen ? "rotate-180" : ""}`}>▼</span>
+                </button>
+                {countriesOpen && (
+                  <div className="mt-1 ml-2 border-l-2 border-slate-100 pl-2 space-y-1">
+                    {countriesMenu.items.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={closeMenu}
+                        className={`block rounded-lg px-4 py-2.5 text-sm ${
+                          pathname === item.href
+                            ? "bg-blue-50 text-nav font-semibold"
+                            : "text-slate-700 hover:bg-blue-50 hover:text-nav"
+                        }`}
+                      >
+                        {item.label}
                       </Link>
                     ))}
                   </div>
