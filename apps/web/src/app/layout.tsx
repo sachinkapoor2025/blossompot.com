@@ -117,10 +117,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <meta name="google-site-verification" content={googleSiteVerification} />
         ) : null}
         {bingSiteVerification ? <meta name="msvalidate.01" content={bingSiteVerification} /> : null}
+        {/* GA4 gtag — afterInteractive so it does not block LCP. */}
+        <GoogleAnalytics />
       </head>
       <body className="min-h-screen antialiased flex flex-col font-sans">
-        {/* Analytics after body start — never beforeInteractive in <head> (blocks LCP). */}
-        <GoogleAnalytics />
         <AnalyticsScripts />
         <JsonLd data={[organizationJsonLd(), webSiteJsonLd(), onlineStoreJsonLd()]} />
         <AuthProvider>

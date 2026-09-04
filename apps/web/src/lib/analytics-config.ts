@@ -5,13 +5,13 @@
  */
 export const analyticsConfig = {
   gtmId: "GTM-KQLBTVVK",
-  ga4Id: "G-YFK9MJ1LFD",
+  ga4Id: "G-CXW9WXWHJG",
   /** Google Ads conversion tag (gtag.js) — hardcoded, not Amplify env. */
   googleAdsId: "AW-18198485613",
   metaPixelId: "1459099935879507",
   clarityId: "xdpv6v2lq9",
-  /** Meta tag content for Google Search Console (HTML file verification remains in /public). */
-  googleSiteVerification: "S42koURTcOVX_mpWF78_92lw2UUP5x-EwlfOBmGXFWo",
+  /** Meta tag content for Google Search Console (global layout head). */
+  googleSiteVerification: "r0yDaKbS-4D4EhmsKCw49YPVJHs0SZRcjYNXdFbApVY",
   /** Bing Webmaster Tools meta tag — set when you have the code from Bing. */
   bingSiteVerification: "",
   bingUetId: "",
