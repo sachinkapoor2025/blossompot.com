@@ -91,7 +91,7 @@ describe("buildOrderConfirmedEmailHtml", () => {
     assert.match(html, /100% Secure Payment/);
     assert.match(html, /Fresh &amp; Premium Quality/);
     assert.match(html, /On-time Delivery/);
-    assert.match(html, /instagram\.com\/blos\.sompot/);
+    assert.match(html, /instagram\.com\/blossompot10/);
     assert.match(html, /support@blossompot\.com/);
     assert.doesNotMatch(html, /16692603819/);
     assert.doesNotMatch(html, /\+1 \(669\) 260-3819/);

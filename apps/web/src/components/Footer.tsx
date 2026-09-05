@@ -21,7 +21,7 @@ const SOCIAL_LINKS: {
 }[] = [
   {
     name: "Instagram",
-    href: "https://www.instagram.com/blos.sompot/",
+    href: "https://www.instagram.com/blossompot10/",
     label: "BlossomPot on Instagram",
     className: "rounded-[22%]",
     style: INSTAGRAM_GRADIENT,
@@ -35,7 +35,7 @@ const SOCIAL_LINKS: {
   },
   {
     name: "Facebook",
-    href: "https://www.facebook.com/profile.php?id=61593676012563",
+    href: "https://www.facebook.com/profile.php?id=61594220485535",
     label: "BlossomPot on Facebook",
     className: "rounded-full bg-[#1877F2]",
     icon: (
@@ -57,7 +57,7 @@ const SOCIAL_LINKS: {
   },
   {
     name: "X",
-    href: "https://x.com/blossomchaon16",
+    href: "https://x.com/Blossompot10",
     label: "BlossomPot on X (Twitter)",
     className: "rounded-full bg-black",
     icon: (
@@ -68,12 +68,23 @@ const SOCIAL_LINKS: {
   },
   {
     name: "Pinterest",
-    href: "https://in.pinterest.com/blossomdgv/_profile/",
+    href: "https://in.pinterest.com/blossompot10/_profile/",
     label: "BlossomPot on Pinterest",
     className: "rounded-full bg-[#E60023]",
     icon: (
       <svg className="h-5 w-5" viewBox="0 0 24 24" fill="#fff" aria-hidden>
         <path d="M12.017 0C5.396 0 .029 5.367.029 11.988c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12.017 24c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001 12.017.001z" />
+      </svg>
+    ),
+  },
+  {
+    name: "YouTube",
+    href: "https://www.youtube.com/channel/UCSuFmYkUb03v90AcYw-x8EA",
+    label: "BlossomPot on YouTube",
+    className: "rounded-full bg-[#FF0000]",
+    icon: (
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="#fff" aria-hidden>
+        <path d="M10 8.64v6.72L16.27 12 10 8.64z" />
       </svg>
     ),
   },

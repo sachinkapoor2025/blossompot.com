@@ -15,6 +15,7 @@ import { JsonLd } from "@/components/JsonLd";
 import { BlossomPotPromoBar } from "@/components/BlossomPotPromoBar";
 import { ClientDeferredWidgets } from "@/components/ClientDeferredWidgets";
 import { AnalyticsScripts, GoogleAnalytics } from "@/components/AnalyticsScripts";
+import { MetaPixel } from "@/components/MetaPixel";
 import { site } from "@/lib/site";
 import { getSiteVerification } from "@/lib/analytics-config";
 import {
@@ -119,6 +120,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {bingSiteVerification ? <meta name="msvalidate.01" content={bingSiteVerification} /> : null}
         {/* GA4 gtag — afterInteractive so it does not block LCP. */}
         <GoogleAnalytics />
+        <MetaPixel />
       </head>
       <body className="min-h-screen antialiased flex flex-col font-sans">
         <AnalyticsScripts />

@@ -147,9 +147,9 @@ export const FREE_SHIPPING_EMAIL_CONFIG = {
   websiteUrl: SITE,
   websiteLabel: "www.blossompot.com",
   orderEmail: "order@blossompot.com",
-  facebookUrl: "https://www.facebook.com/blossompot/",
+  facebookUrl: "https://www.facebook.com/profile.php?id=61594220485535",
   facebookIconUrl: FB,
-  instagramUrl: "https://www.instagram.com/blossompot/",
+  instagramUrl: "https://www.instagram.com/blossompot10/",
   instagramIconUrl: IG,
   copyrightText: "© 2026 BlossomPot. All Rights Reserved.",
   unsubscribeLabel: "Unsubscribe",
@@ -221,9 +221,9 @@ export const ANNIVERSARY_EMAIL_CONFIG = {
   websiteUrl: SITE,
   websiteLabel: "www.blossompot.com",
   orderEmail: "order@blossompot.com",
-  facebookUrl: "https://www.facebook.com/blossompot/",
+  facebookUrl: "https://www.facebook.com/profile.php?id=61594220485535",
   facebookIconUrl: FB,
-  instagramUrl: "https://www.instagram.com/blossompot/",
+  instagramUrl: "https://www.instagram.com/blossompot10/",
   instagramIconUrl: IG,
   copyrightText: "© 2026 BlossomPot. All Rights Reserved.",
   unsubscribeLabel: "Unsubscribe",
@@ -295,9 +295,9 @@ export const BIRTHDAY_EMAIL_CONFIG = {
   websiteUrl: SITE,
   websiteLabel: "www.blossompot.com",
   orderEmail: "order@blossompot.com",
-  facebookUrl: "https://www.facebook.com/blossompot/",
+  facebookUrl: "https://www.facebook.com/profile.php?id=61594220485535",
   facebookIconUrl: FB,
-  instagramUrl: "https://www.instagram.com/blossompot/",
+  instagramUrl: "https://www.instagram.com/blossompot10/",
   instagramIconUrl: IG,
   copyrightText: "© 2026 BlossomPot. All Rights Reserved.",
   unsubscribeLabel: "Unsubscribe",
@@ -428,9 +428,9 @@ export const STARTING_PRICE_EMAIL_CONFIG = {
   websiteUrl: SITE,
   websiteLabel: "www.blossompot.com",
   orderEmail: "order@blossompot.com",
-  facebookUrl: "https://www.facebook.com/blossompot/",
+  facebookUrl: "https://www.facebook.com/profile.php?id=61594220485535",
   facebookIconUrl: FB,
-  instagramUrl: "https://www.instagram.com/blossompot/",
+  instagramUrl: "https://www.instagram.com/blossompot10/",
   instagramIconUrl: IG,
   copyrightText: "© 2026 BlossomPot. All Rights Reserved.",
   unsubscribeLabel: "Unsubscribe",
@@ -579,9 +579,9 @@ export const SHOP_MORE_SAVE_MORE_EMAIL_CONFIG = {
   websiteUrl: SITE_SHORT,
   websiteLabel: "blossompot.com",
   orderEmail: "order@blossompot.com",
-  facebookUrl: "https://www.facebook.com/blossompot/",
+  facebookUrl: "https://www.facebook.com/profile.php?id=61594220485535",
   facebookIconUrl: FB,
-  instagramUrl: "https://www.instagram.com/blossompot/",
+  instagramUrl: "https://www.instagram.com/blossompot10/",
   instagramIconUrl: IG,
   copyrightText: "© 2026 BlossomPot. All Rights Reserved.",
   unsubscribeLabel: "Unsubscribe",
@@ -680,9 +680,9 @@ export const RAKHI_HAMPERS_USA_EMAIL_CONFIG = {
   websiteUrl: SITE,
   websiteLabel: "www.blossompot.com",
   orderEmail: "order@blossompot.com",
-  facebookUrl: "https://www.facebook.com/blossompot/",
+  facebookUrl: "https://www.facebook.com/profile.php?id=61594220485535",
   facebookIconUrl: FB,
-  instagramUrl: "https://www.instagram.com/blossompot/",
+  instagramUrl: "https://www.instagram.com/blossompot10/",
   instagramIconUrl: IG,
   copyrightText: "© 2026 BlossomPot. All Rights Reserved.",
   unsubscribeLabel: "Unsubscribe",
@@ -771,9 +771,9 @@ export const INDEPENDENCE_DAY_EMAIL_CONFIG = {
   websiteUrl: SITE,
   websiteLabel: "www.blossompot.com",
   orderEmail: "order@blossompot.com",
-  facebookUrl: "https://www.facebook.com/blossompot/",
+  facebookUrl: "https://www.facebook.com/profile.php?id=61594220485535",
   facebookIconUrl: FB,
-  instagramUrl: "https://www.instagram.com/blossompot/",
+  instagramUrl: "https://www.instagram.com/blossompot10/",
   instagramIconUrl: IG,
   copyrightText: "© 2026 BlossomPot. All Rights Reserved.",
   unsubscribeLabel: "Unsubscribe",
@@ -1097,12 +1097,12 @@ function emailShell(opts: {
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:0 auto;">
                       <tr>
                         <td style="padding:0 8px;">
-                          <a href="${escAttr(f.facebookUrl)}" target="_blank" style="text-decoration:none;">
+                          <a href="${escAttr(f.facebookUrl)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;">
                             <img src="${escAttr(f.facebookIconUrl)}" width="36" height="36" alt="Facebook" style="display:block;border:0;width:36px;height:36px;" />
                           </a>
                         </td>
                         <td style="padding:0 8px;">
-                          <a href="${escAttr(f.instagramUrl)}" target="_blank" style="text-decoration:none;">
+                          <a href="${escAttr(f.instagramUrl)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;">
                             <img src="${escAttr(f.instagramIconUrl)}" width="36" height="36" alt="Instagram" style="display:block;border:0;width:36px;height:36px;" />
                           </a>
                         </td>

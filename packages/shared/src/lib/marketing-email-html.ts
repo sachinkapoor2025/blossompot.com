@@ -127,9 +127,9 @@ export const DEFAULT_PREMIUM_MARKETING_EMAIL_CONTENT: MarketingEmailContent = {
   websiteUrl: SITE,
   websiteLabel: "www.blossompot.com",
   orderEmail: "order@blossompot.com",
-  facebookUrl: "https://www.facebook.com/blossompot/",
+  facebookUrl: "https://www.facebook.com/profile.php?id=61594220485535",
   facebookIconUrl: CDN_FB,
-  instagramUrl: "https://www.instagram.com/blossompot/",
+  instagramUrl: "https://www.instagram.com/blossompot10/",
   instagramIconUrl: CDN_IG,
   copyrightText: "© 2026 BlossomPot. All Rights Reserved.",
   unsubscribeLabel: "Unsubscribe",
@@ -481,12 +481,12 @@ export function buildPremiumMarketingEmailHtml(content: MarketingEmailContent): 
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:0 auto;">
                       <tr>
                         <td align="center" valign="middle" style="padding:0 8px;">
-                          <a href="${escAttr(c.facebookUrl)}" target="_blank" style="text-decoration:none;border:0;">
+                          <a href="${escAttr(c.facebookUrl)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;border:0;">
                             <img src="${escAttr(c.facebookIconUrl)}" width="36" height="36" alt="Facebook" style="display:block;width:36px;height:36px;border:0;" />
                           </a>
                         </td>
                         <td align="center" valign="middle" style="padding:0 8px;">
-                          <a href="${escAttr(c.instagramUrl)}" target="_blank" style="text-decoration:none;border:0;">
+                          <a href="${escAttr(c.instagramUrl)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;border:0;">
                             <img src="${escAttr(c.instagramIconUrl)}" width="36" height="36" alt="Instagram" style="display:block;width:36px;height:36px;border:0;" />
                           </a>
                         </td>

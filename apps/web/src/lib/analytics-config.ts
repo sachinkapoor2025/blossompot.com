@@ -1,14 +1,14 @@
 /**
  * Production analytics & site-verification IDs.
- * GA4 and Google Search Console verification are hardcoded (not env-overridable)
- * so Amplify cannot serve a stale property ID. Other pixels still allow env overrides.
+ * GA4, Meta Pixel, and Google Search Console verification are hardcoded
+ * (not env-overridable) so Amplify cannot serve a stale property ID.
  */
 export const analyticsConfig = {
   gtmId: "GTM-KQLBTVVK",
   ga4Id: "G-CXW9WXWHJG",
   /** Google Ads conversion tag (gtag.js) — hardcoded, not Amplify env. */
   googleAdsId: "AW-18198485613",
-  metaPixelId: "1459099935879507",
+  metaPixelId: "2481682688984889",
   clarityId: "xdpv6v2lq9",
   /** Meta tag content for Google Search Console (global layout head). */
   googleSiteVerification: "r0yDaKbS-4D4EhmsKCw49YPVJHs0SZRcjYNXdFbApVY",
@@ -28,7 +28,8 @@ export function getAnalyticsIds() {
     // Hardcoded so stale Amplify NEXT_PUBLIC_GA4_ID cannot replace the live GA4 property.
     ga4Id: analyticsConfig.ga4Id,
     googleAdsId: envOrDefault("NEXT_PUBLIC_GOOGLE_ADS_ID", analyticsConfig.googleAdsId),
-    metaPixelId: envOrDefault("NEXT_PUBLIC_META_PIXEL_ID", analyticsConfig.metaPixelId),
+    // Hardcoded so stale Amplify NEXT_PUBLIC_META_PIXEL_ID cannot replace the live Pixel.
+    metaPixelId: analyticsConfig.metaPixelId,
     clarityId: envOrDefault("NEXT_PUBLIC_CLARITY_ID", analyticsConfig.clarityId),
     bingUetId: envOrDefault("NEXT_PUBLIC_BING_UET_ID", analyticsConfig.bingUetId),
   };
