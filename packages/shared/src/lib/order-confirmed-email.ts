@@ -91,13 +91,13 @@ export function orderConfirmedBannerUrl(): string {
 export const BLOSSOMPOT_SOCIAL_LINKS: { name: string; href: string; color: string; label: string }[] = [
   {
     name: "IG",
-    href: "https://www.instagram.com/blos.sompot/",
+    href: "https://www.instagram.com/blossompot10/",
     color: "#C13584",
     label: "Instagram",
   },
   {
     name: "f",
-    href: "https://www.facebook.com/profile.php?id=61593676012563",
+    href: "https://www.facebook.com/profile.php?id=61594220485535",
     color: "#1877F2",
     label: "Facebook",
   },
@@ -109,15 +109,21 @@ export const BLOSSOMPOT_SOCIAL_LINKS: { name: string; href: string; color: strin
   },
   {
     name: "X",
-    href: "https://x.com/blossomchaon16",
+    href: "https://x.com/Blossompot10",
     color: "#111111",
     label: "X",
   },
   {
     name: "P",
-    href: "https://in.pinterest.com/blossomdgv/_profile/",
+    href: "https://in.pinterest.com/blossompot10/_profile/",
     color: "#E60023",
     label: "Pinterest",
+  },
+  {
+    name: "YT",
+    href: "https://www.youtube.com/channel/UCSuFmYkUb03v90AcYw-x8EA",
+    color: "#FF0000",
+    label: "YouTube",
   },
 ];
 
@@ -315,7 +321,7 @@ function socialIconsHtml(): string {
   const cells = BLOSSOMPOT_SOCIAL_LINKS.map(
     (social) => `
                           <td align="center" valign="middle" width="36" height="36" bgcolor="${social.color}" style="padding:0;width:36px;height:36px;background-color:${social.color};border-radius:18px;">
-                            <a href="${escAttr(social.href)}" target="_blank" aria-label="${escAttr(social.label)}" style="display:block;width:36px;height:36px;line-height:36px;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;color:#ffffff;text-decoration:none;text-align:center;">${escapeHtml(social.name)}</a>
+                            <a href="${escAttr(social.href)}" target="_blank" rel="noopener noreferrer" aria-label="${escAttr(social.label)}" style="display:block;width:36px;height:36px;line-height:36px;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;color:#ffffff;text-decoration:none;text-align:center;">${escapeHtml(social.name)}</a>
                           </td>
                           <td width="8" style="font-size:0;line-height:0;">&nbsp;</td>`
   ).join("");

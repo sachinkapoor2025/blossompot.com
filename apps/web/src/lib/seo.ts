@@ -127,8 +127,12 @@ export function organizationJsonLd() {
     email: site.supportEmail,
     ...(site.phone ? { telephone: site.phone } : {}),
     sameAs: [
-      "https://www.facebook.com/blossompot/",
-      "https://www.instagram.com/blossompot/",
+      "https://www.facebook.com/profile.php?id=61594220485535",
+      "https://www.instagram.com/blossompot10/",
+      "https://x.com/Blossompot10",
+      "https://in.pinterest.com/blossompot10/_profile/",
+      "https://www.youtube.com/channel/UCSuFmYkUb03v90AcYw-x8EA",
+      "https://www.linkedin.com/in/blossom-chary-13038b42b/",
     ],
     contactPoint: [
       {
