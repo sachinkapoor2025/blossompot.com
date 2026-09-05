@@ -393,4 +393,34 @@ export const blogPageInlineLinks: Record<string, readonly { phrase: string; href
     { phrase: "plants", href: categoryHref("plants") },
     { phrase: "United Kingdom", href: "/flower-delivery-uk" },
   ],
+  "flower-delivery-etiquette-uk": [
+    { phrase: "birthday", href: categoryHref("birthday-gifts") },
+    { phrase: "anniversary", href: categoryHref("anniversary-gifts") },
+    { phrase: "Mother's Day", href: categoryHref("mothers-day-gifts") },
+    { phrase: "United Kingdom", href: "/flower-delivery-uk" },
+  ],
+  "best-flowers-to-send-uk": [
+    { phrase: "roses", href: categoryHref("flower-bouquets") },
+    { phrase: "birthday", href: categoryHref("birthday-gifts") },
+    { phrase: "Mother's Day", href: categoryHref("mothers-day-gifts") },
+    { phrase: "United Kingdom", href: "/flower-delivery-uk" },
+  ],
+  "mothers-day-flowers-uk": [
+    { phrase: "Mother's Day", href: categoryHref("mothers-day-gifts") },
+    { phrase: "cakes", href: categoryHref("cakes") },
+    { phrase: "personalized gifts", href: categoryHref("personalized-gifts") },
+    { phrase: "London", href: "/locations/europe/united-kingdom/london" },
+  ],
+  "anniversary-flowers-uk": [
+    { phrase: "anniversary", href: categoryHref("anniversary-gifts") },
+    { phrase: "roses", href: categoryHref("flower-bouquets") },
+    { phrase: "cake", href: categoryHref("cakes") },
+    { phrase: "United Kingdom", href: "/flower-delivery-uk" },
+  ],
+  "gift-hampers-delivery-uk": [
+    { phrase: "gift hampers", href: categoryHref("gift-hampers") },
+    { phrase: "birthday", href: categoryHref("birthday-gifts") },
+    { phrase: "flowers", href: categoryHref("flowers") },
+    { phrase: "United Kingdom", href: "/flower-delivery-uk" },
+  ],
 };
