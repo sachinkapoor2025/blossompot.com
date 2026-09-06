@@ -423,4 +423,34 @@ export const blogPageInlineLinks: Record<string, readonly { phrase: string; href
     { phrase: "flowers", href: categoryHref("flowers") },
     { phrase: "United Kingdom", href: "/flower-delivery-uk" },
   ],
+  "cake-delivery-birmingham": [
+    { phrase: "birthday cake", href: categoryHref("cakes") },
+    { phrase: "same-day", href: categoryHref("same-day-gifts") },
+    { phrase: "gift hampers", href: categoryHref("gift-hampers") },
+    { phrase: "flowers", href: categoryHref("flowers") },
+  ],
+  "flower-delivery-manchester": [
+    { phrase: "Manchester", href: "/locations/europe/united-kingdom/manchester" },
+    { phrase: "birthday", href: categoryHref("birthday-gifts") },
+    { phrase: "Mother's Day", href: categoryHref("mothers-day-gifts") },
+    { phrase: "flowers", href: categoryHref("flowers") },
+  ],
+  "flower-delivery-london": [
+    { phrase: "London", href: "/locations/europe/united-kingdom/london" },
+    { phrase: "birthday", href: categoryHref("birthday-gifts") },
+    { phrase: "roses", href: categoryHref("flower-bouquets") },
+    { phrase: "cakes", href: categoryHref("cakes") },
+  ],
+  "cheap-flower-delivery-uk": [
+    { phrase: "flowers", href: categoryHref("flowers") },
+    { phrase: "birthday", href: categoryHref("birthday-gifts") },
+    { phrase: "Mother's Day", href: categoryHref("mothers-day-gifts") },
+    { phrase: "United Kingdom", href: "/flower-delivery-uk" },
+  ],
+  "best-flower-delivery-service-uk": [
+    { phrase: "flowers", href: categoryHref("flowers") },
+    { phrase: "same-day", href: categoryHref("same-day-gifts") },
+    { phrase: "gift hampers", href: categoryHref("gift-hampers") },
+    { phrase: "London", href: "/locations/europe/united-kingdom/london" },
+  ],
 };
