@@ -96,6 +96,19 @@ jobs:
           else
             echo "::warning::MARKETING_SMTP_PASS secret is empty — marketing campaigns need Mailercloud credentials in Admin → Email → Settings (or set the GitHub secret)."
           fi
+          [ -n "${STRIPE_SECRET_KEY:-}" ] && EXTRA="$EXTRA StripeSecretKey=${STRIPE_SECRET_KEY}"
+          if [ -z "${STRIPE_SECRET_KEY:-}" ]; then
+            echo "::warning::STRIPE_SECRET_KEY is empty — Stripe checkout will stay in stub mode until the GitHub secret is set."
+          fi
+          [ -n "${STRIPE_WEBHOOK_SECRET:-}" ] && EXTRA="$EXTRA StripeWebhookSecret=${STRIPE_WEBHOOK_SECRET}"
+          if [ -z "${STRIPE_WEBHOOK_SECRET:-}" ]; then
+            echo "::warning::STRIPE_WEBHOOK_SECRET is empty — add a Stripe webhook to {ApiUrl}/webhooks/stripe (payment_intent.succeeded). Checkout still confirms via POST /payments/stripe/confirm."
+          fi
+          [ -n "${RAZORPAY_KEY_ID:-}" ] && EXTRA="$EXTRA RazorpayKeyId=${RAZORPAY_KEY_ID}"
+          [ -n "${RAZORPAY_KEY_SECRET:-}" ] && EXTRA="$EXTRA RazorpayKeySecret=${RAZORPAY_KEY_SECRET}"
+          if [ -z "${RAZORPAY_KEY_ID:-}" ] || [ -z "${RAZORPAY_KEY_SECRET:-}" ]; then
+            echo "::warning::RAZOR_KEY_ID / RAZOR_KEY_SECRET missing — Razorpay checkout will stay in stub mode."
+          fi
           [ -n "${RAZORPAY_WEBHOOK_SECRET:-}" ] && EXTRA="$EXTRA RazorpayWebhookSecret=${RAZORPAY_WEBHOOK_SECRET}"
           [ -n "${GBO_API_TOKEN:-}" ] && EXTRA="$EXTRA GboApiToken=${GBO_API_TOKEN}"
           [ -n "${GBO_INTERNAL_API_KEY:-}" ] && EXTRA="$EXTRA GboInternalApiKey=${GBO_INTERNAL_API_KEY}"
@@ -105,11 +118,7 @@ jobs:
           sam build && sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --config-env prod \
             --parameter-overrides "\
           Environment=prod \
-          RazorpayKeyId=${RAZORPAY_KEY_ID} \
-          RazorpayKeySecret=${RAZORPAY_KEY_SECRET} \
           SmtpPassword=${SMTP_PASSWORD} \
-          StripeSecretKey=${STRIPE_SECRET_KEY} \
-          StripeWebhookSecret=${STRIPE_WEBHOOK_SECRET} \
           UspsClientId=${USPS_CLIENT_ID} \
           UspsClientSecret=${USPS_CLIENT_SECRET} \
           UspsSecretArn=${USPS_SECRET_ARN} \
@@ -139,6 +148,28 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
+      - name: Sync Stripe and Razorpay public keys to Amplify
+        env:
+          AMPLIFY_APP_ID: ${{ secrets.AMPLIFY_APP_ID }}
+          STRIPE_PK: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+          RAZOR_KEY_ID: ${{ secrets.RAZOR_KEY_ID }}
+        run: |
+          APP_ID="${AMPLIFY_APP_ID:-d1vlvm5li37k6g}"
+          BRANCH="${GITHUB_REF_NAME}"
+          if [ "$BRANCH" != "main" ] && [ "$BRANCH" != "dev" ]; then
+            echo "Skip Amplify env sync for branch $BRANCH"
+            exit 0
+          fi
+          EXISTING=$(aws amplify get-branch --app-id "$APP_ID" --branch-name "$BRANCH" \
+            --query 'branch.environmentVariables' --output json 2>/dev/null || echo '{}')
+          export EXISTING
+          MERGED=$(python3 -c "import json,os; e=json.loads(os.environ.get('EXISTING') or '{}'); s=(os.environ.get('STRIPE_PK') or '').strip(); r=(os.environ.get('RAZOR_KEY_ID') or '').strip(); e.update({k:v for k,v in [('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY',s),('RAZOR_KEY_ID',r),('NEXT_PUBLIC_RAZORPAY_KEY_ID',r)] if v}); print(json.dumps(e))")
+          export MERGED
+          ENV_STRING=$(python3 -c "import json,os; d=json.loads(os.environ.get('MERGED') or '{}'); print(','.join(f'{k}={v}' for k,v in d.items()))")
+          aws amplify update-branch --app-id "$APP_ID" --branch-name "$BRANCH" --environment-variables "$ENV_STRING" >/dev/null
+          echo "Amplify $BRANCH env updated with Stripe publishable key and Razorpay key id (values not logged)."
+        continue-on-error: true
+
       - name: Export SAM outputs for web build
         run: |
           output() {
@@ -168,4 +199,6 @@ jobs:
       - name: Deploy note
         run: |
           echo "Connect AWS Amplify to this repo — amplify.yml is configured."
-          echo "Set Amplify env: RAZOR_KEY_ID (same as GitHub secret) for Razorpay checkout."
+          echo "Stripe: STRIPE_SECRET_KEY on Lambda; NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY on Amplify."
+          echo "Razorpay: RAZOR_KEY_ID + RAZOR_KEY_SECRET on Lambda; RAZOR_KEY_ID on Amplify."
+          echo "Optional: STRIPE_WEBHOOK_SECRET + Dashboard webhook {ApiUrl}/webhooks/stripe"

@@ -33,6 +33,9 @@ applications:
                     echo "NEXT_PUBLIC_COGNITO_REGION=${AWS_REGION:-us-east-1}"
                     if [ -n "$API_URL" ] && [ "$API_URL" != "None" ]; then echo "NEXT_PUBLIC_API_URL=$API_URL"; fi
                     if [ -n "$CLOUDFRONT_DOMAIN" ] && [ "$CLOUDFRONT_DOMAIN" != "None" ]; then echo "NEXT_PUBLIC_CDN_URL=https://$CLOUDFRONT_DOMAIN"; fi
+                    if [ -n "${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-}" ]; then echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"; fi
+                    if [ -n "${NEXT_PUBLIC_RAZORPAY_KEY_ID:-}" ]; then echo "NEXT_PUBLIC_RAZORPAY_KEY_ID=$NEXT_PUBLIC_RAZORPAY_KEY_ID"; fi
+                    if [ -n "${RAZOR_KEY_ID:-}" ]; then echo "NEXT_PUBLIC_RAZORPAY_KEY_ID=$RAZOR_KEY_ID"; fi
                   } >> "$ENV_FILE"
                 fi
               fi
@@ -53,7 +56,8 @@ applications:
         NEXT_PUBLIC_COGNITO_CLIENT_ID: ${NEXT_PUBLIC_COGNITO_CLIENT_ID}
         NEXT_PUBLIC_COGNITO_REGION: ${NEXT_PUBLIC_COGNITO_REGION}
         NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
-        NEXT_PUBLIC_RAZORPAY_KEY_ID: ${RAZOR_KEY_ID}
+        NEXT_PUBLIC_RAZORPAY_KEY_ID: ${NEXT_PUBLIC_RAZORPAY_KEY_ID}
+        RAZOR_KEY_ID: ${RAZOR_KEY_ID}
         NEXT_PUBLIC_CDN_URL: ${NEXT_PUBLIC_CDN_URL}
         NEXT_PUBLIC_USD_INR_RATE: ${NEXT_PUBLIC_USD_INR_RATE}
         NEXT_PUBLIC_GTM_ID: ${NEXT_PUBLIC_GTM_ID}

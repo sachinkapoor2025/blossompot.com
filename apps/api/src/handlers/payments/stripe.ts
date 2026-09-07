@@ -1,8 +1,9 @@
 import Stripe from "stripe";
 import type { Order } from "@blossompot/shared";
 import type { APIGatewayProxyEventV2 } from "aws-lambda";
-import { ok, badRequest, serverError } from "../../lib/response";
-import { markOrderPaid, markOrderPaymentFailed } from "../orders";
+import { ok, badRequest, serverError, unauthorized, notFound, forbidden } from "../../lib/response";
+import { markOrderPaid, markOrderPaymentFailed, getOrderById } from "../orders";
+import { getUserOrSessionKey } from "../../lib/auth";
 import { isLoadTestMode } from "../../lib/load-test";
 
 function getStripe(): Stripe | null {
@@ -53,6 +54,47 @@ export async function createStripePaymentIntent(order: Order) {
     paymentIntentId: intent.id,
     clientSecret: intent.client_secret!,
   };
+}
+
+export async function confirmStripePayment(event: APIGatewayProxyEventV2) {
+  const userKey = getUserOrSessionKey(event);
+  if (!userKey) return unauthorized("Session or auth required");
+
+  const body = JSON.parse(event.body ?? "{}");
+  const orderId = typeof body.orderId === "string" ? body.orderId.trim() : "";
+  const paymentIntentId =
+    typeof body.paymentIntentId === "string" ? body.paymentIntentId.trim() : "";
+  if (!orderId) return badRequest("orderId required");
+
+  const order = await getOrderById(orderId);
+  if (!order) return notFound("Order not found");
+
+  const stripe = getStripe();
+  if (!stripe) return badRequest("Stripe is not configured on the API");
+
+  const piId = paymentIntentId || order.paymentIntentId || "";
+  if (!piId || piId.includes("_dev_") || piId.includes("_loadtest_")) {
+    return badRequest("No Stripe payment to confirm");
+  }
+  if (order.paymentIntentId && order.paymentIntentId !== piId) {
+    return forbidden("Payment does not match this order");
+  }
+
+  try {
+    const intent = await stripe.paymentIntents.retrieve(piId);
+    if (intent.metadata?.orderId && intent.metadata.orderId !== orderId) {
+      return forbidden("Payment does not match this order");
+    }
+    if (intent.status !== "succeeded") {
+      return ok({ paid: false, status: intent.status });
+    }
+    await markOrderPaid(orderId, { paymentIntentId: intent.id });
+    const updated = await getOrderById(orderId);
+    return ok({ paid: true, order: updated });
+  } catch (err) {
+    console.error("Stripe confirm failed:", err);
+    return serverError(err instanceof Error ? err.message : "Stripe confirm failed");
+  }
 }
 
 export async function stripeWebhook(event: APIGatewayProxyEventV2) {
