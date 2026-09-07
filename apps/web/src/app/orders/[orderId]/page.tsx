@@ -30,6 +30,30 @@ function OrderDetailInner({ orderId }: { orderId: string }) {
       setLoading(true);
       setError("");
       try {
+        const redirectOk = searchParams.get("redirect_status") === "succeeded";
+        const paymentIntent = searchParams.get("payment_intent")?.trim() ?? "";
+        if (redirectOk) {
+          try {
+            const confirmed = await api<{ paid?: boolean; order?: Order }>(
+              "/payments/stripe/confirm",
+              {
+                method: "POST",
+                sessionId,
+                token,
+                body: JSON.stringify({
+                  orderId,
+                  ...(paymentIntent ? { paymentIntentId: paymentIntent } : {}),
+                }),
+              }
+            );
+            if (confirmed.order) {
+              setOrder(confirmed.order);
+              return;
+            }
+          } catch {
+            /* webhook may still mark paid; fall through to GET */
+          }
+        }
         const data = await api<{ order: Order }>(`/orders/${orderId}`, { sessionId, token });
         setOrder(data.order);
       } catch (err) {
