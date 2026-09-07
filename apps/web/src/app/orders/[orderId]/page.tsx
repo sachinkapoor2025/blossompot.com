@@ -64,7 +64,7 @@ function OrderDetailInner({ orderId }: { orderId: string }) {
     };
 
     void load();
-  }, [orderId, sessionId, token]);
+  }, [orderId, sessionId, token, searchParams]);
 
   useEffect(() => {
     if (!order || purchaseTracked.current) return;
