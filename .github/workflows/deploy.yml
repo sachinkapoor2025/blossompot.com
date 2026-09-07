@@ -162,9 +162,10 @@ jobs:
           fi
           EXISTING=$(aws amplify get-branch --app-id "$APP_ID" --branch-name "$BRANCH" \
             --query 'branch.environmentVariables' --output json 2>/dev/null || echo '{}')
-          MERGED=$(EXISTING="$EXISTING" python3 -c 'import json,os; e=json.loads(os.environ.get("EXISTING") or "{}"); s=(os.environ.get("STRIPE_PK") or "").strip(); r=(os.environ.get("RAZOR_KEY_ID") or "").strip();
-s and e.__setitem__("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY", s); r and e.__setitem__("RAZOR_KEY_ID", r); r and e.__setitem__("NEXT_PUBLIC_RAZORPAY_KEY_ID", r); print(json.dumps(e))')
-          ENV_STRING=$(python3 -c 'import json,sys; d=json.loads(sys.stdin.read()); print(",".join(f"{k}={v}" for k,v in d.items()))' <<< "$MERGED")
+          export EXISTING
+          MERGED=$(python3 -c "import json,os; e=json.loads(os.environ.get('EXISTING') or '{}'); s=(os.environ.get('STRIPE_PK') or '').strip(); r=(os.environ.get('RAZOR_KEY_ID') or '').strip(); e.update({k:v for k,v in [('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY',s),('RAZOR_KEY_ID',r),('NEXT_PUBLIC_RAZORPAY_KEY_ID',r)] if v}); print(json.dumps(e))")
+          export MERGED
+          ENV_STRING=$(python3 -c "import json,os; d=json.loads(os.environ.get('MERGED') or '{}'); print(','.join(f'{k}={v}' for k,v in d.items()))")
           aws amplify update-branch --app-id "$APP_ID" --branch-name "$BRANCH" --environment-variables "$ENV_STRING" >/dev/null
           echo "Amplify $BRANCH env updated with Stripe publishable key and Razorpay key id (values not logged)."
         continue-on-error: true
