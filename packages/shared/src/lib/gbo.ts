@@ -118,14 +118,14 @@ export function parseGboLineRef(item: {
 
 /**
  * Numeric partner order id GBO requires on create/get.
- * Namespaces US vs OC sequences so 10001 does not collide.
+ * Namespaces OC vs BP/US sequences so 10001 does not collide.
  */
 export function gboPartnerOrderId(order: {
   orderNumber?: string | null;
   orderId: string;
 }): number {
   const n = (order.orderNumber ?? "").trim().toUpperCase();
-  const m = n.match(/^(OC|US)(\d{5,})$/);
+  const m = n.match(/^(OC|US|BP)(\d{5,})$/);
   if (m) {
     const seq = Number(m[2]);
     const ns = m[1] === "OC" ? 200_000 : 100_000;

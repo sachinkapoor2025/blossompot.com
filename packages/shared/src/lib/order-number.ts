@@ -1,11 +1,15 @@
 import { VENDOR_ORANGE_COUNTY } from "../constants";
 
-/** Human-readable order numbers: OC10001… (Orange County) / US10001… (all others). */
+/** Human-readable order numbers: OC10001… (Orange County) / BP10002… (all others). */
 export const ORDER_NUMBER_START = 10001;
 
-export type OrderNumberPrefix = "OC" | "US";
+/** Prefix stamped on new orders. */
+export type OrderNumberPrefix = "OC" | "BP";
 
-const HUMAN_ORDER_NUMBER_RE = /^(OC|US)(\d{5,})$/i;
+/** Includes legacy US##### numbers already issued. */
+export type StoredOrderNumberPrefix = OrderNumberPrefix | "US";
+
+const HUMAN_ORDER_NUMBER_RE = /^(OC|US|BP)(\d{5,})$/i;
 
 export function isHumanOrderNumber(value: string): boolean {
   return HUMAN_ORDER_NUMBER_RE.test(value.trim());
@@ -13,16 +17,16 @@ export function isHumanOrderNumber(value: string): boolean {
 
 export function parseHumanOrderNumber(
   value: string
-): { prefix: OrderNumberPrefix; seq: number } | null {
+): { prefix: StoredOrderNumberPrefix; seq: number } | null {
   const m = value.trim().match(HUMAN_ORDER_NUMBER_RE);
   if (!m) return null;
   return {
-    prefix: m[1]!.toUpperCase() as OrderNumberPrefix,
+    prefix: m[1]!.toUpperCase() as StoredOrderNumberPrefix,
     seq: Number(m[2]),
   };
 }
 
-export function formatOrderNumber(prefix: OrderNumberPrefix, seq: number): string {
+export function formatOrderNumber(prefix: StoredOrderNumberPrefix, seq: number): string {
   return `${prefix}${String(seq).padStart(5, "0")}`;
 }
 
@@ -36,6 +40,14 @@ export function displayOrderRef(order: {
   return order.orderId.slice(0, 8).toUpperCase();
 }
 
+/**
+ * DynamoDB counter key for a display prefix.
+ * BP continues the legacy US sequence so BP10002 follows US10001.
+ */
+export function orderNumberCounterPrefix(prefix: OrderNumberPrefix): "OC" | "US" {
+  return prefix === "OC" ? "OC" : "US";
+}
+
 /** OC prefix when the order includes any Orange County vendor lines. */
 export function orderNumberPrefixForItems(
   items: Array<{ vendorSlug?: string | null }>,
@@ -43,5 +55,5 @@ export function orderNumberPrefixForItems(
 ): OrderNumberPrefix {
   if (vendorSlugs?.includes(VENDOR_ORANGE_COUNTY)) return "OC";
   if (items.some((i) => i.vendorSlug === VENDOR_ORANGE_COUNTY)) return "OC";
-  return "US";
+  return "BP";
 }

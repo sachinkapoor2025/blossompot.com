@@ -1,5 +1,5 @@
 /**
- * Backfill human-readable order numbers (OC10001… / US10001…) on existing orders
+ * Backfill human-readable order numbers (OC10001… / BP##### / legacy US10001…) on existing orders
  * and create ORDERNUM# lookup pointers.
  *
  *   ENVIRONMENT=prod npx tsx scripts/backfill-order-numbers.ts
@@ -18,7 +18,6 @@ import {
   formatOrderNumber,
   orderNumberPrefixForItems,
   type Order,
-  type OrderNumberPrefix,
 } from "@blossompot/shared";
 
 const ENV = process.env.ENVIRONMENT ?? "prod";
@@ -30,7 +29,7 @@ const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }));
 
 type StoredOrder = Order & { PK: string; SK: string };
 
-async function setCounter(prefix: OrderNumberPrefix, nextVal: number) {
+async function setCounter(prefix: "OC" | "US", nextVal: number) {
   if (DRY_RUN) {
     console.log(`[dry-run] counter ${prefix} → ${nextVal}`);
     return;

@@ -222,12 +222,12 @@ export function GboApiPanel() {
             Place or sync a paid BlossomPot order that contains Gift Baskets Overseas lines (`gbo:US:123` SKUs).
           </p>
           <label className="mt-3 block text-xs text-slate-600">
-            BlossomPot order id or US##### / OC#####
+            BlossomPot order id or BP##### / OC##### / US#####
             <input
               value={blossompotOrderId}
               onChange={(e) => setBlossompotOrderId(e.target.value)}
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              placeholder="US10042"
+              placeholder="BP10002"
             />
           </label>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">

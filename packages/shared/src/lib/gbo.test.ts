@@ -49,6 +49,7 @@ describe("gbo helpers", () => {
 
   it("namespaces partner order ids", () => {
     assert.equal(gboPartnerOrderId({ orderNumber: "US10001", orderId: "uuid" }), 110001);
+    assert.equal(gboPartnerOrderId({ orderNumber: "BP10002", orderId: "uuid" }), 110002);
     assert.equal(gboPartnerOrderId({ orderNumber: "OC10001", orderId: "uuid" }), 210001);
     assert.notEqual(
       gboPartnerOrderId({ orderId: "449cd53d-8a7e-4494-9479-b3c342380828" }),
