@@ -12,8 +12,9 @@ import {
   isRakhiSetSizeCategory,
   productMatchesRakhiSetCategory,
   resolveProductImagesForUpsert,
-  isProductSearchIndexable,
+  isProductStorefrontVisible,
   isSampleCatalogProduct,
+  VENDOR_GBO,
   type Product,
 } from "@blossompot/shared";
 import { docClient, PRODUCTS_TABLE, now, slugify } from "../lib/db";
@@ -29,7 +30,17 @@ function forStorefront(product: Product): Product {
   const stripped = stripVendorPrivateFields(
     withCompetitiveStorefrontPricing(withResolvedProductImages(product))
   );
-  return { ...stripped, allowsAddons } as Product;
+  const international = product.vendorSlug === VENDOR_GBO || product.internationalDelivery === true;
+  return {
+    ...stripped,
+    allowsAddons,
+    ...(international
+      ? {
+          internationalDelivery: true,
+          fulfilledByName: product.fulfilledByName || "International delivery partner",
+        }
+      : {}),
+  } as Product;
 }
 
 function isKidsComboProduct(product: Product): boolean {
@@ -158,7 +169,7 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
   }
 
   items = items.filter(
-    (p) => p.published !== false && (p.inventory ?? 0) > 0 && isProductSearchIndexable(p)
+    (p) => p.published !== false && (p.inventory ?? 0) > 0 && isProductStorefrontVisible(p)
   );
   if (search) {
     items = items.filter(
@@ -225,8 +236,7 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
   if (!item) return notFound("Product not found");
   const product = item;
   if (product.published === false) return notFound("Product not found");
-  // Sample / non-indexable SKUs stay out of the public storefront until converted or enabled.
-  if (!isProductSearchIndexable(product)) return notFound("Product not found");
+  if (!isProductStorefrontVisible(product)) return notFound("Product not found");
   productGetCache.set(slug, { at: nowMs, product });
   const location = parseLocationQuery(event);
   if (location) {

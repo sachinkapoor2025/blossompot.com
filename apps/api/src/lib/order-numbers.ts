@@ -5,6 +5,7 @@ import {
   formatOrderNumber,
   isHumanOrderNumber,
   orderNumberPrefixForItems,
+  orderNumberCounterPrefix,
   type Order,
   type OrderNumberPrefix,
   type CartItem,
@@ -17,14 +18,15 @@ type StoredOrder = Order & {
 };
 
 /**
- * Atomically allocate the next human order number for a prefix (OC or US).
- * Sequence starts at ORDER_NUMBER_START (10001).
+ * Atomically allocate the next human order number (OC or BP).
+ * BP continues the legacy US##### counter so the sequence does not restart.
  */
 export async function allocateOrderNumber(prefix: OrderNumberPrefix): Promise<string> {
+  const counterPrefix = orderNumberCounterPrefix(prefix);
   const result = await docClient.send(
     new UpdateCommand({
       TableName: ORDERS_TABLE,
-      Key: { PK: orderKeys.counterPk(prefix), SK: orderKeys.counterSk() },
+      Key: { PK: orderKeys.counterPk(counterPrefix), SK: orderKeys.counterSk() },
       UpdateExpression:
         "SET nextVal = if_not_exists(nextVal, :start) + :inc, prefix = :prefix, updatedAt = :u",
       ExpressionAttributeValues: {
@@ -78,7 +80,7 @@ async function loadOrderByUuid(orderId: string): Promise<StoredOrder | undefined
 }
 
 /**
- * Resolve an order by UUID or human order number (OC10001 / US10001).
+ * Resolve an order by UUID or human order number (OC10001 / BP10002 / legacy US10001).
  */
 export async function resolveOrderByIdOrNumber(
   idOrNumber: string

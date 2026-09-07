@@ -150,6 +150,11 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
   ) {
     productItem =
       (await ensureOrangeCountyProductInDb(parsed.data.productSlug)) ?? productItem;
+  } else if (
+    productItem.vendorSlug === "gift-baskets-overseas" ||
+    productItem.internationalDelivery === true
+  ) {
+    productItem = (await ensureProductInDb(parsed.data.productSlug)) ?? productItem;
   }
   if (!productItem) return badRequest("Product not found");
 

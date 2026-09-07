@@ -10,7 +10,7 @@ import { loadProduct, loadRelatedProducts, getStaticProductSlugs } from "@/lib/p
 import { api } from "@/lib/api";
 import { categoryHref } from "@/lib/category-urls";
 import { getCategoryPageSeo } from "@/lib/content/category-seo";
-import { isProductSearchIndexable, type Product } from "@blossompot/shared";
+import { isProductSearchIndexable, isProductStorefrontVisible, type Product } from "@blossompot/shared";
 
 function categoryBreadcrumbLabel(categorySlug: string): string {
   const seo = getCategoryPageSeo(categorySlug);
@@ -73,7 +73,7 @@ export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
   const product = await loadProduct(slug);
   if (!product) notFound();
-  if (!isProductSearchIndexable(product)) notFound();
+  if (!isProductStorefrontVisible(product)) notFound();
 
   const relatedProducts = await loadRelatedProducts(product.categorySlug, product.slug);
   const faqs = productFaqsForCategory(product.categorySlug);

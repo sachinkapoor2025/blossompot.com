@@ -143,7 +143,7 @@ export const orderSchema = z.object({
   /**
    * Human-readable order number for staff, customers, and vendors.
    * Orange County fulfill orders: OC10001…
-   * All other BlossomPot orders: US10001…
+   * All other BlossomPot orders: BP10002… (legacy US10001… still valid)
    */
   orderNumber: z.string().optional(),
   userId: z.string().optional(),

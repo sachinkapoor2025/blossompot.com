@@ -43,7 +43,7 @@ export const orderKeys = {
   // GSI3: filter by status, sorted by date
   gsi3pk: (status: string) => `STATUS#${status}`,
   gsi3sk: (createdAt: string) => createdAt,
-  /** Atomic counters for human order numbers (OC / US). */
+  /** Atomic counters for human order numbers (OC / US). BP display numbers share the US counter. */
   counterPk: (prefix: "OC" | "US") => `COUNTER#ORDER#${prefix}`,
   counterSk: () => "META" as const,
   /** Lookup pointer: ORDERNUM#OC10001 → orderId (UUID). */

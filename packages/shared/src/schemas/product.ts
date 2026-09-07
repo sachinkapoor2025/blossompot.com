@@ -57,6 +57,8 @@ export const productSchema = z.object({
   prepTimeHours: z.number().int().min(0).max(168).optional(),
   /** Public local-partner label (safe for storefront; vendorSlug stays private). */
   fulfilledByName: z.string().min(1).max(120).optional(),
+  /** Public flag: Gift Baskets Overseas / international dropship (vendorSlug stays private). */
+  internationalDelivery: z.boolean().optional(),
   /**
    * Temporary catalog filler for demos/SEO/vendor onboarding.
    * Filter/delete with `isSampleProduct = true` when real inventory replaces samples.

@@ -121,7 +121,7 @@ export const BLOSSOMPOT_SOCIAL_LINKS: { name: string; href: string; color: strin
   },
   {
     name: "YT",
-    href: "https://www.youtube.com/channel/UCSuFmYkUb03v90AcYw-x8EA",
+    href: "https://www.youtube.com/@blossompot",
     color: "#FF0000",
     label: "YouTube",
   },

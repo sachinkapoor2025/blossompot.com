@@ -60,6 +60,7 @@ export const giftSetsMenu = {
     { label: "Flower Bouquets", href: categoryHref("flower-bouquets"), category: "flower-bouquets" },
     { label: "Cakes", href: categoryHref("cakes"), category: "cakes" },
     { label: "Gift Hampers", href: categoryHref("gift-hampers"), category: "gift-hampers" },
+    { label: "Overseas Gifts", href: "/overseas" },
   ],
 } as const;
 
@@ -74,6 +75,7 @@ export const navItems = [
   { label: "Anniversary", href: categoryHref("anniversary-gifts"), category: "anniversary-gifts" },
   { label: "Valentine's", href: categoryHref("valentines-day-gifts"), category: "valentines-day-gifts" },
   { label: "Hampers", href: categoryHref("gift-hampers"), category: "gift-hampers" },
+  { label: "Overseas", href: "/overseas" },
   { label: "Same-Day", href: categoryHref("same-day-gifts"), category: "same-day-gifts" },
   { label: "Remember", href: "/remember" },
 ] as const;

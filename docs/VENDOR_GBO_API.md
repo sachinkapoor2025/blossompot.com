@@ -75,6 +75,14 @@ Admin (Cognito):
 
 UI: **Admin → Vendor Management → GBO API**.
 
+## Storefront
+
+Shop: `/overseas` (USA catalog). Add to cart uses SKU `gbo:US:{id}` and `vendorSlug=gift-baskets-overseas`. After payment the API places the GBO order.
+
+Sell price is GBO `price_retail`; vendor cost is GBO `price` (10% reseller discount). Coupons are excluded on these SKUs.
+
+Sandbox catalog is `indexable: false` until a production token is live.
+
 ## Checkout integration
 
 Cart lines for GBO gifts use:
@@ -102,7 +110,7 @@ The 15-minute tracking cron also:
 
 ## Not in this pass
 
-Storefront PDP / add-to-cart for the live GBO catalog is not wired yet. Catalog is available via `/gbo/*` so the shop can be built next without changing the partner contract.
+Production API key (this is the **dev** sandbox key). Broader destination-country picker on `/overseas` beyond USA checkout.
 
 ## Support
 

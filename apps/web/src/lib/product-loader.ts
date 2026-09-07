@@ -1,5 +1,5 @@
-import type { Product } from "@blossompot/shared";
-import { isProductSearchIndexable } from "@blossompot/shared";
+import { parseGboSlug, gboGiftToProduct, type GboGift, type Product } from "@blossompot/shared";
+import { isProductStorefrontVisible } from "@blossompot/shared";
 import { api } from "./api";
 import {
   getCatalogProduct,
@@ -10,7 +10,7 @@ import {
 import { isRakhiRelatedCategorySlug, isRakhiRelatedProduct } from "./rakhi-filter";
 
 function isStorefrontVisible(product: Product): boolean {
-  return !isRakhiRelatedProduct(product) && isProductSearchIndexable(product);
+  return !isRakhiRelatedProduct(product) && isProductStorefrontVisible(product);
 }
 
 /**
@@ -72,6 +72,23 @@ export async function loadProduct(slug: string): Promise<Product | null> {
     if (catalog && !isStorefrontVisible(catalog)) return null;
     if (catalog && (allowCatalogFallback(catalog) || isProductMissingError(err))) {
       return catalog;
+    }
+
+    const gboRef = parseGboSlug(slug);
+    if (gboRef) {
+      try {
+        const data = await api<{ gift: GboGift }>(
+          `/gbo/gifts/${gboRef.productId}?country=${gboRef.country}`,
+          FRESH_PRODUCT_FETCH
+        );
+        if (data.gift) {
+          const mapped = gboGiftToProduct(gboRef.country, data.gift);
+          const { vendorCost: _c, ...rest } = mapped;
+          return rememberProduct(rest as Product);
+        }
+      } catch {
+        /* GBO token missing or gift not found */
+      }
     }
 
     if (process.env.NODE_ENV !== "production") {

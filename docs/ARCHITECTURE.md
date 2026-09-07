@@ -73,7 +73,7 @@ Order status lifecycle: `pending_payment → paid → (accepted/on_hold) → pro
 
 **Orange County vendor tracking:** `POST /vendors/orange-county/tracking` accepts enum statuses (`in_transit`, `delivered`) **or** free-text USPS scan lines (e.g. `Arrived at USPS Regional Destination Facility`). Those strings are mapped with the same `mapCarrierTrackingPhase` layer and advance `order.status` for admin + customer together.
 
-**Gift Baskets Overseas (dropship):** Dedicated wrapper API (`GboApiUrl`, planned custom domain `gbo.blossompot.com`) plus storefront `GET /gbo/*`. After payment, GBO lines (`vendorSlug=gift-baskets-overseas`, SKU `gbo:US:123`) are posted to GBO `order/create`. Cron `trackingSync` also polls GBO `order/get`. Secrets: `GBO_API_TOKEN` (partner token from GBO support — not the portal password) and `GBO_INTERNAL_API_KEY` (`X-Gbo-Api-Key`). See `docs/VENDOR_GBO_API.md`.
+**Gift Baskets Overseas (dropship):** Dedicated wrapper API (`GboApiUrl`, planned custom domain `gbo.blossompot.com`) plus storefront `GET /gbo/*` and shop `/overseas`. After payment, GBO lines (`vendorSlug=gift-baskets-overseas`, SKU `gbo:US:123`) are posted to GBO `order/create`. Cron `trackingSync` also polls GBO `order/get`. Secrets: `GBO_API_TOKEN` (partner token from GBO support — not the portal password) and `GBO_INTERNAL_API_KEY` (`X-Gbo-Api-Key`). See `docs/VENDOR_GBO_API.md`.
 
 Migration from the legacy single table: `npm run migrate:multitable` (copies orders +
 leads/sessions; products re-seed via `import:blossompot`).

@@ -179,6 +179,9 @@ export async function gboListCategories(
     .map((r) => r.data);
 }
 
+const GIFTS_CACHE_MS = 120_000;
+const giftsCache = new Map<string, { at: number; gifts: GboGift[] }>();
+
 export async function gboListGifts(
   input: { country: string; priceMin?: number; priceMax?: number; category?: string },
   config?: GboClientConfig
@@ -188,11 +191,17 @@ export async function gboListGifts(
   if (input.priceMin != null) q.set("price_min", String(input.priceMin));
   if (input.priceMax != null) q.set("price_max", String(input.priceMax));
   if (input.category) q.set("category", input.category);
+  const cacheKey = `${iso}|${q.toString()}|${config?.sandbox ? "s" : "p"}`;
+  const hit = giftsCache.get(cacheKey);
+  if (hit && Date.now() - hit.at < GIFTS_CACHE_MS) return hit.gifts;
+
   const data = await gboFetch(`/gifts/get?${q.toString()}`, { sandbox: config?.sandbox, config });
-  return asArray(data)
+  const gifts = asArray(data)
     .map((row) => gboGiftSchema.safeParse(row))
     .filter((r) => r.success)
     .map((r) => r.data);
+  giftsCache.set(cacheKey, { at: Date.now(), gifts });
+  return gifts;
 }
 
 export async function gboGetGift(
