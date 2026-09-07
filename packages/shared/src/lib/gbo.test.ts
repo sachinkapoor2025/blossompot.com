@@ -3,7 +3,10 @@ import { describe, it } from "node:test";
 import { ORDER_STATUS } from "../constants";
 import {
   clipGboGiftCardText,
+  formatGboProductSlug,
   formatGboSku,
+  gboGiftToProduct,
+  gboImageUrl,
   gboPartnerOrderId,
   mapGboStatusToOrderStatus,
   parseGboLineRef,
@@ -21,6 +24,27 @@ describe("gbo helpers", () => {
       productId: 9,
     });
     assert.equal(formatGboSku("us", 1), "gbo:US:1");
+    assert.equal(formatGboProductSlug("US", 3, "The Peak of Celebration"), "gbo-us-3-the-peak-of-celebration");
+    assert.equal(gboImageUrl("/img/a.jpg"), "https://www.giftbasketsoverseas.com/img/a.jpg");
+  });
+
+  it("maps GBO gifts to storefront products at retail with reseller cost", () => {
+    const product = gboGiftToProduct("us", {
+      id: 3,
+      name: "The Peak of Celebration",
+      price: "256.46",
+      price_retail: "284.95",
+      image: "https://example.com/a.jpg",
+      contents: "Gourmet treats",
+    });
+    assert.equal(product.slug, "gbo-us-3-the-peak-of-celebration");
+    assert.equal(product.sku, "gbo:US:3");
+    assert.equal(product.price, 284.95);
+    assert.equal(product.vendorCost, 256.46);
+    assert.equal(product.vendorSlug, "gift-baskets-overseas");
+    assert.equal(product.internationalDelivery, true);
+    assert.equal(product.couponExcluded, true);
+    assert.equal(product.indexable, false);
   });
 
   it("namespaces partner order ids", () => {

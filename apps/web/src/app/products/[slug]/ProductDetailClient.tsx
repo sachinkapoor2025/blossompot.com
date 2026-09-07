@@ -41,7 +41,7 @@ import type { Product, ProductAddonSelection } from "@blossompot/shared";
 import { FastSellingBanner } from "@/components/FastSellingBadge";
 import { looksLikeHtml, shortPlainDescription } from "@/lib/html-text";
 import { getProductIncludes } from "@/lib/product-includes";
-import { fulfillmentVendorSlug } from "@blossompot/shared";
+import { fulfillmentVendorSlug, VENDOR_GBO } from "@blossompot/shared";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
 
 type Tab = "description" | "reviews" | "faq";
@@ -126,10 +126,13 @@ export function ProductDetailClient({
   const { format } = useCurrency();
   const delivery = useDeliveryLocation();
   const locationSet = Boolean(delivery.location);
+  const vendorKey = product.internationalDelivery
+    ? VENDOR_GBO
+    : fulfillmentVendorSlug(product);
   const deliverable =
     !locationSet ||
     delivery.checking ||
-    delivery.vendorSlugs.includes(fulfillmentVendorSlug(product));
+    delivery.vendorSlugs.includes(vendorKey);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");

@@ -1,5 +1,13 @@
-import { ORDER_STATUS, VENDOR_GBO } from "../constants";
+import {
+  GBO_CATEGORY_SLUG,
+  GBO_PRODUCT_INVENTORY,
+  ORDER_STATUS,
+  VENDOR_GBO,
+} from "../constants";
 import type { OrderStatus } from "../constants";
+import type { GboGift } from "../schemas/vendor-gbo";
+import type { Product } from "../schemas/product";
+import { roundMoney } from "./vendor-pricing";
 
 /** SKU stored on cart/order lines for live GBO gifts: `gbo:US:10215`. */
 export const GBO_SKU_RE = /^gbo:([A-Za-z]{2}):(\d+)$/i;
@@ -18,6 +26,75 @@ export function isGboVendor(slug?: string | null): boolean {
 
 export function formatGboSku(country: string, productId: number): string {
   return `gbo:${country.trim().toUpperCase()}:${productId}`;
+}
+
+export function slugifyGboName(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+}
+
+export function formatGboProductSlug(country: string, productId: number, name?: string): string {
+  const iso = country.trim().toLowerCase();
+  const tail = name?.trim() ? `-${slugifyGboName(name)}` : "";
+  return `gbo-${iso}-${productId}${tail}`;
+}
+
+export function gboImageUrl(image?: string | null): string | undefined {
+  const raw = (image ?? "").trim();
+  if (!raw) return undefined;
+  if (raw.startsWith("https://") || raw.startsWith("http://")) return raw;
+  if (raw.startsWith("//")) return `https:${raw}`;
+  const path = raw.startsWith("/") ? raw : `/${raw}`;
+  return `https://www.giftbasketsoverseas.com${path}`;
+}
+
+/**
+ * Map a GBO catalog gift to a BlossomPot product.
+ * Sell at GBO retail (`price_retail`); `price` is reseller cost (≈10% off).
+ */
+export function gboGiftToProduct(country: string, gift: GboGift, nowIso?: string): Product {
+  const iso = country.trim().toUpperCase();
+  const productId = Number(gift.id);
+  const vendorCost = coerceGboNumber(gift.price) ?? 0;
+  const retail = coerceGboNumber(gift.price_retail);
+  const sell =
+    retail && retail > 0 ? roundMoney(retail) : roundMoney(Math.max(vendorCost, 0.01));
+  const ts = nowIso ?? new Date().toISOString();
+  const image = gboImageUrl(gift.image);
+  const contents = coerceGboString(gift.contents);
+  const descriptionParts = [coerceGboString(gift.description), contents ? `Includes: ${contents}` : ""]
+    .filter(Boolean)
+    .join("\n\n");
+  const days = coerceGboNumber(gift.delivery_days);
+  return {
+    slug: formatGboProductSlug(iso, productId, gift.name),
+    name: gift.name,
+    description: descriptionParts || gift.name,
+    shortDescription: contents?.slice(0, 320),
+    price: sell,
+    currency: "USD",
+    categorySlug: GBO_CATEGORY_SLUG,
+    images: image ? [image] : [],
+    sku: formatGboSku(iso, productId),
+    inventory: GBO_PRODUCT_INVENTORY,
+    tags: ["overseas", "gift-basket", iso.toLowerCase(), ...(gift.categories ?? []).slice(0, 8)],
+    vendorSlug: VENDOR_GBO,
+    ...(vendorCost > 0 ? { vendorCost: roundMoney(vendorCost) } : {}),
+    couponExcluded: true,
+    published: true,
+    indexable: false,
+    internationalDelivery: true,
+    fulfilledByName: "International delivery partner",
+    deliveryFee: 0,
+    ...(days && days > 0 && days <= 168 ? { prepTimeHours: Math.round(days) * 24 } : {}),
+    createdAt: ts,
+    updatedAt: ts,
+  };
 }
 
 export function parseGboSku(sku?: string | null): GboLineRef | null {

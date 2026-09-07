@@ -151,6 +151,12 @@ export const VENDOR_ORANGE_COUNTY = "orange-county" as const;
  */
 export const VENDOR_GBO = "gift-baskets-overseas" as const;
 
+/** Storefront category for GBO dropship gifts. */
+export const GBO_CATEGORY_SLUG = "overseas-gifts" as const;
+
+/** High inventory so GBO dropship SKUs never appear sold out. */
+export const GBO_PRODUCT_INVENTORY = 500;
+
 /** Default BlossomPot fulfillment key (catalog lines without product.vendorSlug). */
 export const VENDOR_BLOSSOMPOT = "blossompot" as const;
 

@@ -24,9 +24,12 @@ export const gboGiftSchema = z.object({
   name: z.string().min(1),
   delivery_days: z.union([z.number(), z.string()]).optional(),
   price: z.union([z.number(), z.string()]),
+  price_retail: z.union([z.number(), z.string()]).optional(),
   image: z.string().optional(),
   description: z.string().optional(),
   contents: z.string().optional(),
+  code: z.string().optional(),
+  delivery_price: z.union([z.number(), z.string()]).optional(),
   priority: z.union([z.number(), z.string()]).optional(),
   categories: z.array(z.string()).optional(),
 });
