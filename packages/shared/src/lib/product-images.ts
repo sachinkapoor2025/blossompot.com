@@ -155,3 +155,10 @@ export function isProductSearchIndexable(product: {
   if (isSampleCatalogProduct(product) && !sampleProductsAreIndexable()) return false;
   return true;
 }
+
+/** Published products shoppers can open, including the sample catalog. */
+export function isProductStorefrontVisible(product: {
+  published?: boolean;
+}): boolean {
+  return product.published !== false;
+}
