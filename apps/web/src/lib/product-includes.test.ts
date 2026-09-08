@@ -161,4 +161,24 @@ describe("getProductIncludes", () => {
       "Best quality at the most competitive rates",
     ]);
   });
+
+  it("returns partner includes for GBO gifts (no California warehouse)", () => {
+    assert.deepEqual(
+      getProductIncludes({
+        name: "Cheerful Plush Tan Bear",
+        description: "Huggable companion.\n\nIncludes: Plush bear",
+        categorySlug: "overseas-gifts",
+        slug: "gbo-us-27-cheerful-plush-tan-bear",
+        vendorSlug: "gift-baskets-overseas",
+        tags: [],
+      }),
+      [
+        "Cheerful Plush Tan Bear",
+        "Plush bear",
+        "Gift message option at checkout",
+        "Worldwide delivery included",
+        "Fulfilled by our international partner",
+      ]
+    );
+  });
 });

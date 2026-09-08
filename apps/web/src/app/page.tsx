@@ -1,13 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { categoryHref } from "@/lib/category-urls";
 import { api } from "@/lib/api";
 import { HomeHero } from "@/components/HomeHero";
 import { HomeBrandTaglines } from "@/components/HomeBrandTaglines";
 import { CustomerReviews } from "@/components/CustomerReviews";
 import { getGoogleReviews } from "@/lib/google-reviews";
-import { HomeProductList } from "@/components/HomeProductList";
-import { FastSellingSection } from "@/components/FastSellingSection";
 import { TrustStrip } from "@/components/TrustStrip";
 import { WhyTrustUsSection } from "@/components/WhyTrustUsSection";
 import { HomeFlowerGuideCta } from "@/components/flower-guide/HomeFlowerGuideCta";
@@ -15,14 +12,9 @@ import { HomeCategoryCarousel } from "@/components/HomeCategoryCarousel";
 import { HomeSeoSection } from "@/components/HomeSeoSection";
 import { buildHomeCategoryTiles } from "@/lib/home-category-carousel";
 import { JsonLd } from "@/components/JsonLd";
-import { site, homeCategoryOrder, faqs, homeBanners, countriesMenu } from "@/lib/site";
-import {
-  getCatalogProductsByCategory,
-  mergeProductsPreferExisting,
-  getCatalogProducts,
-} from "@/lib/catalog-fallback";
-import { pickHomeCategoryProducts } from "@/lib/home-category-products";
-import { loadProducts } from "@/lib/product-loader";
+import { faqs, homeBanners, countriesMenu } from "@/lib/site";
+import { loadGboStorefrontProducts } from "@/lib/product-loader";
+import { OverseasGiftGrid } from "@/components/OverseasGiftGrid";
 import { faqJsonLd, pageMetadata } from "@/lib/seo";
 import type { Product, Category } from "@blossompot/shared";
 
@@ -40,48 +32,18 @@ export const revalidate = 0;
 export default async function HomePage() {
   let products: Product[] = [];
   let categories: Category[] = [];
+  let catalogError = "";
 
   try {
-    const [liveProducts, categoriesData] = await Promise.all([
-      loadProducts(),
+    const [gboProducts, categoriesData] = await Promise.all([
+      loadGboStorefrontProducts("US"),
       api<{ categories: Category[] }>("/categories", { revalidate: false }),
     ]);
-    products = liveProducts;
+    products = gboProducts;
     categories = categoriesData.categories;
-  } catch {
-    products = getCatalogProducts();
-    categories = [];
+  } catch (err) {
+    catalogError = err instanceof Error ? err.message : "Gift catalog is temporarily unavailable.";
   }
-
-  for (const slug of homeCategoryOrder) {
-    products = mergeProductsPreferExisting(products, getCatalogProductsByCategory(slug));
-  }
-
-  if (products.length === 0) {
-    products = getCatalogProducts();
-  }
-
-  const homeCategoryDisplayNames: Record<(typeof homeCategoryOrder)[number], string> = {
-    flowers: "Fresh Flowers",
-    "flower-bouquets": "Signature Bouquets",
-    cakes: "Celebration Cakes",
-    "birthday-gifts": "Birthday Gifts",
-    "anniversary-gifts": "Anniversary Gifts",
-    "gift-hampers": "Gift Hampers",
-    "personalized-gifts": "Personalized Gifts",
-    "same-day-gifts": "Same-Day Gifts",
-  };
-
-  const productsByCategory = homeCategoryOrder.map((slug) => ({
-    slug,
-    name: homeCategoryDisplayNames[slug],
-    products: pickHomeCategoryProducts(products, slug),
-  }));
-
-  const bestsellers = [...products]
-    .filter((p) => p.published !== false)
-    .sort((a, b) => (b.unitsSold ?? 0) - (a.unitsSold ?? 0))
-    .slice(0, 8);
 
   const googleReviews = await getGoogleReviews();
   const categoryTiles = buildHomeCategoryTiles(products, categories);
@@ -97,14 +59,11 @@ export default async function HomePage() {
       <TrustStrip />
 
       <div className="max-w-7xl mx-auto px-4 pt-6 pb-2 flex flex-wrap justify-center gap-3">
-        <Link href="/flowers" className="btn-nav">
-          Shop Flowers
+        <Link href="/#gift-catalog" className="btn-nav bg-primary">
+          Shop gift baskets
         </Link>
-        <Link href="/same-day-delivery" className="btn-nav bg-primary">
-          Same-Day Delivery
-        </Link>
-        <Link href="/gift-hampers" className="btn-nav">
-          Explore Hampers
+        <Link href="/remember" className="btn-nav">
+          Remember occasions
         </Link>
       </div>
 
@@ -130,43 +89,21 @@ export default async function HomePage() {
         </ul>
       </section>
 
-      {bestsellers.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 py-10">
-          <div className="flex items-end justify-between gap-4 mb-6">
-            <div>
-              <h2 className="text-2xl font-bold text-primary">Best sellers</h2>
-              <p className="text-sm text-slate-600 mt-1">Customer favorites across flowers, cakes & gifts</p>
-            </div>
-            <Link href="/products" className="text-sm font-semibold text-nav hover:underline">
-              View all
-            </Link>
-          </div>
-          <HomeProductList products={bestsellers} />
-        </section>
-      )}
-
-      <FastSellingSection products={products} />
-
-      {productsByCategory.map(
-        (section) =>
-          section.products.length > 0 && (
-            <section key={section.slug} className="max-w-7xl mx-auto px-4 py-10 border-t border-[#eadfd8]">
-              <div className="flex items-end justify-between gap-4 mb-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-primary">{section.name}</h2>
-                  <p className="text-sm text-slate-600 mt-1">Handpicked for {site.name} shoppers</p>
-                </div>
-                <Link
-                  href={categoryHref(section.slug)}
-                  className="text-sm font-semibold text-nav hover:underline"
-                >
-                  Shop {section.name}
-                </Link>
-              </div>
-              <HomeProductList products={section.products} limit={8} />
-            </section>
-          )
-      )}
+      <section id="gift-catalog" className="max-w-7xl mx-auto px-4 py-10 scroll-mt-24">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-primary">Shop gift baskets</h2>
+          <p className="text-sm text-slate-600 mt-1">
+            International gifts with delivery included. Fulfilled by our worldwide partner.
+          </p>
+        </div>
+        {catalogError ? (
+          <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+            {catalogError}
+          </p>
+        ) : (
+          <OverseasGiftGrid products={products} />
+        )}
+      </section>
 
       <section className="max-w-7xl mx-auto px-4 py-12">
         <div className="rounded-3xl border border-primary/15 bg-gradient-to-br from-rose-50 via-white to-orange-50 p-8 sm:p-12">

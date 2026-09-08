@@ -3,14 +3,15 @@
 import {
   MAX_PRODUCT_ADDON_QUANTITY,
   PRODUCT_ADDONS,
+  cdnUploadUrl,
   sumAddonPrices,
   type ProductAddonDef,
   type ProductAddonSelection,
 } from "@blossompot/shared";
 import { useCurrency } from "@/lib/currency-context";
 
-const DRY_FRUITS = PRODUCT_ADDONS.filter((a) => a.group === "dry-fruits");
-const CHOCOLATES = PRODUCT_ADDONS.filter((a) => a.group === "chocolates");
+const CAKE_EXTRAS = PRODUCT_ADDONS.filter((a) => a.group === "cake-extras");
+const PERSONALIZATION = PRODUCT_ADDONS.filter((a) => a.group === "personalization");
 
 function qtyMap(selected: ProductAddonSelection[]): Map<string, number> {
   return new Map(selected.map((s) => [s.id, s.quantity]));
@@ -54,6 +55,13 @@ function AddonGroup({
                     className="mt-1 h-4 w-4 rounded border-slate-300 text-nav focus:ring-nav"
                     checked={checked}
                     onChange={() => onToggle(addon.id)}
+                  />
+                  <img
+                    src={cdnUploadUrl(addon.image)}
+                    alt={addon.name}
+                    width={56}
+                    height={56}
+                    className="h-14 w-14 shrink-0 rounded-md object-cover bg-white ring-1 ring-slate-200"
                   />
                   <span className="flex-1 min-w-0">
                     <span className="block text-sm font-semibold text-slate-900">{addon.name}</span>
@@ -105,7 +113,7 @@ function AddonGroup({
   );
 }
 
-/** BlossomPot-only dry fruit & chocolate add-ons (multi-select with quantity). */
+/** Cake extras and personalization add-ons with thumbnail images. */
 export function ProductAddonsPicker({
   selected,
   onChange,
@@ -153,22 +161,22 @@ export function ProductAddonsPicker({
   return (
     <div className={`rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-3 sm:px-4 sm:py-4 ${className}`}>
       <div className="mb-3">
-        <p className="text-sm font-bold text-primary">Add something sweet</p>
+        <p className="text-sm font-bold text-primary">Make it personal</p>
         <p className="text-xs text-slate-600 mt-0.5">
-          Optional dry fruits &amp; chocolates — choose how many of each to add.
+          Optional cake extras — candles, name printing, and cards.
         </p>
       </div>
       <div className="space-y-4">
         <AddonGroup
-          title="Dry fruits"
-          items={DRY_FRUITS}
+          title="Cake extras"
+          items={CAKE_EXTRAS}
           quantities={quantities}
           onToggle={toggle}
           onSetQuantity={setQuantity}
         />
         <AddonGroup
-          title="Chocolates"
-          items={CHOCOLATES}
+          title="Personalization"
+          items={PERSONALIZATION}
           quantities={quantities}
           onToggle={toggle}
           onSetQuantity={setQuantity}

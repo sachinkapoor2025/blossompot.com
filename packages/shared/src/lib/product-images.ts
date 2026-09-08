@@ -156,9 +156,13 @@ export function isProductSearchIndexable(product: {
   return true;
 }
 
-/** Published products shoppers can open, including the sample catalog. */
+/** Published products shoppers can open. Sample catalog SKUs stay off the storefront. */
 export function isProductStorefrontVisible(product: {
   published?: boolean;
+  isSampleProduct?: boolean;
+  tags?: string[];
 }): boolean {
-  return product.published !== false;
+  if (product.published === false) return false;
+  if (isSampleCatalogProduct(product)) return false;
+  return true;
 }

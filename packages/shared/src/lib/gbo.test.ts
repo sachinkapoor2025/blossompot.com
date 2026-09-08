@@ -44,6 +44,7 @@ describe("gbo helpers", () => {
     assert.equal(product.vendorSlug, "gift-baskets-overseas");
     assert.equal(product.internationalDelivery, true);
     assert.equal(product.couponExcluded, true);
+    assert.equal(product.allowsAddons, false);
     assert.equal(product.indexable, false);
   });
 

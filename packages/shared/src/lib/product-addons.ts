@@ -1,6 +1,7 @@
 import { VENDOR_ORANGE_COUNTY } from "../constants";
+import { isGboVendor, parseGboSku, parseGboSlug } from "./gbo";
 
-export type ProductAddonGroup = "dry-fruits" | "chocolates";
+export type ProductAddonGroup = "cake-extras" | "personalization";
 
 export type ProductAddonDef = {
   id: string;
@@ -9,6 +10,8 @@ export type ProductAddonDef = {
   group: ProductAddonGroup;
   /** Short weight / pack label for UI. */
   detail: string;
+  /** Path under CloudFront `/uploads/`. */
+  image: string;
 };
 
 /** Max packs of a single add-on per cart line. */
@@ -17,67 +20,36 @@ export const MAX_PRODUCT_ADDON_QUANTITY = 10;
 /** Fixed BlossomPot PDP add-on catalog (USD). Not Dynamo SKUs. */
 export const PRODUCT_ADDONS: readonly ProductAddonDef[] = [
   {
-    id: "badam-100g",
-    name: "Badam (Almonds) — 100 g",
-    priceUsd: 9,
-    group: "dry-fruits",
-    detail: "100 g",
+    id: "cake-candle",
+    name: "Cake candle",
+    priceUsd: 4,
+    group: "cake-extras",
+    detail: "Birthday candle set",
+    image: "editorial/addons/cake-candle.jpg",
   },
   {
-    id: "kaju-100g",
-    name: "Kaju (Cashews) — 100 g",
-    priceUsd: 9,
-    group: "dry-fruits",
-    detail: "100 g",
+    id: "name-printing",
+    name: "Name printing",
+    priceUsd: 8,
+    group: "personalization",
+    detail: "Print a name on the cake",
+    image: "editorial/addons/name-printing.jpg",
   },
   {
-    id: "pista-100g",
-    name: "Pista (Pistachios) — 100 g",
-    priceUsd: 9,
-    group: "dry-fruits",
-    detail: "100 g",
-  },
-  {
-    id: "badam-200g",
-    name: "Badam (Almonds) — 200 g",
-    priceUsd: 15,
-    group: "dry-fruits",
-    detail: "200 g",
-  },
-  {
-    id: "kaju-200g",
-    name: "Kaju (Cashews) — 200 g",
-    priceUsd: 15,
-    group: "dry-fruits",
-    detail: "200 g",
-  },
-  {
-    id: "pista-200g",
-    name: "Pista (Pistachios) — 200 g",
-    priceUsd: 15,
-    group: "dry-fruits",
-    detail: "200 g",
-  },
-  {
-    id: "hershey-2pc",
-    name: "Hershey’s chocolates (2 pcs)",
+    id: "greeting-card",
+    name: "Greeting card",
     priceUsd: 5,
-    group: "chocolates",
-    detail: "2 pcs",
+    group: "personalization",
+    detail: "Handwritten-style card",
+    image: "editorial/addons/greeting-card.jpg",
   },
   {
-    id: "lindt-5pc",
-    name: "Lindt Lindor chocolates (5 pcs)",
+    id: "message-plaque",
+    name: "Custom message plaque",
     priceUsd: 6,
-    group: "chocolates",
-    detail: "5 pcs",
-  },
-  {
-    id: "ferrero-3pc",
-    name: "Ferrero Rocher (3 pcs)",
-    priceUsd: 5,
-    group: "chocolates",
-    detail: "3 pcs",
+    group: "personalization",
+    detail: "Short message on a cake plaque",
+    image: "editorial/addons/message-plaque.jpg",
   },
 ] as const;
 
@@ -97,10 +69,16 @@ export function getProductAddon(id: string): ProductAddonDef | undefined {
 
 export function productAllowsAddons(product: {
   vendorSlug?: string | null;
+  slug?: string | null;
+  sku?: string | null;
 }): boolean {
+  if (isGboVendor(product.vendorSlug) || parseGboSlug(product.slug) || parseGboSku(product.sku)) {
+    return false;
+  }
   const v = product.vendorSlug?.trim();
   if (!v) return true;
-  return v !== VENDOR_ORANGE_COUNTY;
+  if (v === VENDOR_ORANGE_COUNTY) return false;
+  return true;
 }
 
 export type CartAddonLike = {
