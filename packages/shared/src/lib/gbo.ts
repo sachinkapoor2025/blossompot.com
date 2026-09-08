@@ -44,6 +44,81 @@ export function formatGboProductSlug(country: string, productId: number, name?: 
   return `gbo-${iso}-${productId}${tail}`;
 }
 
+function normalizeGboLabel(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+const PRIMARY_CATEGORY_ORDER = [
+  "cakes",
+  "flowers",
+  "flower-bouquets",
+  "birthday-gifts",
+  "valentines-day-gifts",
+  "anniversary-gifts",
+  "wedding-gifts",
+  "mothers-day-gifts",
+  "gift-hampers",
+  "personalized-gifts",
+  "same-day-gifts",
+  GBO_CATEGORY_SLUG,
+] as const;
+
+/**
+ * Map GBO gift tags onto BlossomPot nav categories so Flowers / Cakes / Hampers
+ * can list partner inventory (a gift can appear in more than one).
+ */
+export function mapGboGiftStorefrontCategories(gift: {
+  name?: string;
+  categories?: string[];
+}): { categorySlug: string; additionalCategorySlugs: string[] } {
+  const labels = (gift.categories ?? []).map((c) => normalizeGboLabel(String(c)));
+  const text = `${normalizeGboLabel(gift.name ?? "")} ${labels.join(" ")}`;
+  const matched = new Set<string>([GBO_CATEGORY_SLUG]);
+
+  if (/\bflower/.test(text)) matched.add("flowers");
+  if (/\bbouquet|arrangement/.test(text)) {
+    matched.add("flowers");
+    matched.add("flower-bouquets");
+  }
+  if (/\bcake|mooncake/.test(text)) matched.add("cakes");
+  if (/\bbirthday/.test(text)) matched.add("birthday-gifts");
+  if (/\banniversary/.test(text)) matched.add("anniversary-gifts");
+  if (/valentine/.test(text)) matched.add("valentines-day-gifts");
+  if (/\bwedding/.test(text)) matched.add("wedding-gifts");
+  if (/\bmother/.test(text)) matched.add("mothers-day-gifts");
+  if (
+    /\bgourmet|wine|champagne|chocolate|fruit basket|gift basket|gift tower|beer |spirits|meat and cheese|care package|hamper/.test(
+      text
+    )
+  ) {
+    matched.add("gift-hampers");
+  }
+  if (/\bcustom|spa |personalized|toys and games|accessories/.test(text)) {
+    matched.add("personalized-gifts");
+  }
+  if (matched.has("flowers") || matched.has("cakes")) matched.add("same-day-gifts");
+  if (matched.size === 1) matched.add("gift-hampers");
+
+  const categorySlug = PRIMARY_CATEGORY_ORDER.find((slug) => matched.has(slug)) ?? GBO_CATEGORY_SLUG;
+  const additionalCategorySlugs = [...matched].filter((slug) => slug !== categorySlug).sort();
+  return { categorySlug, additionalCategorySlugs };
+}
+
+export function productInStorefrontCategory(
+  product: { categorySlug?: string | null; additionalCategorySlugs?: string[] | null },
+  categorySlug: string
+): boolean {
+  const slug = categorySlug.trim();
+  if (!slug) return false;
+  if (product.categorySlug === slug) return true;
+  return product.additionalCategorySlugs?.includes(slug) ?? false;
+}
+
 export function gboImageUrl(image?: string | null): string | undefined {
   const raw = (image ?? "").trim();
   if (!raw) return undefined;
@@ -71,6 +146,7 @@ export function gboGiftToProduct(country: string, gift: GboGift, nowIso?: string
     .filter(Boolean)
     .join("\n\n");
   const days = coerceGboNumber(gift.delivery_days);
+  const storefrontCats = mapGboGiftStorefrontCategories(gift);
   return {
     slug: formatGboProductSlug(iso, productId, gift.name),
     name: gift.name,
@@ -78,7 +154,8 @@ export function gboGiftToProduct(country: string, gift: GboGift, nowIso?: string
     shortDescription: contents?.slice(0, 320),
     price: sell,
     currency: "USD",
-    categorySlug: GBO_CATEGORY_SLUG,
+    categorySlug: storefrontCats.categorySlug,
+    additionalCategorySlugs: storefrontCats.additionalCategorySlugs,
     images: image ? [image] : [],
     sku: formatGboSku(iso, productId),
     inventory: GBO_PRODUCT_INVENTORY,

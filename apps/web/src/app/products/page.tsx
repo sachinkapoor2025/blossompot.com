@@ -9,7 +9,7 @@ import { SearchTracker } from "@/components/SearchTracker";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { pageMetadata } from "@/lib/seo";
 import { loadProducts } from "@/lib/product-loader";
-import type { Product, Category } from "@blossompot/shared";
+import { productInStorefrontCategory, type Product, type Category } from "@blossompot/shared";
 import { categoryHref } from "@/lib/category-urls";
 import { homeCategoryOrder, orderCategories } from "@/lib/site";
 import { isRakhiRelatedCategorySlug, isRakhiRelatedProduct } from "@/lib/rakhi-filter";
@@ -119,7 +119,7 @@ export default async function ProductsPage({ searchParams }: Props) {
   const productsByCategory = homeCategoryOrder.map((slug) => ({
     slug,
     name: categoryMap.get(slug)?.name ?? slug.replace(/-/g, " "),
-    products: products.filter((p) => p.categorySlug === slug),
+    products: products.filter((p) => productInStorefrontCategory(p, slug)),
   }));
   const showGrouped = !search && !category;
 
