@@ -41,7 +41,7 @@ import type { Product, ProductAddonSelection } from "@blossompot/shared";
 import { FastSellingBanner } from "@/components/FastSellingBadge";
 import { looksLikeHtml, shortPlainDescription } from "@/lib/html-text";
 import { getProductIncludes } from "@/lib/product-includes";
-import { fulfillmentVendorSlug, VENDOR_GBO } from "@blossompot/shared";
+import { fulfillmentVendorSlug, isGboVendor, parseGboSlug, VENDOR_GBO } from "@blossompot/shared";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
 
 type Tab = "description" | "reviews" | "faq";
@@ -201,7 +201,8 @@ export function ProductDetailClient({
   const cartQuantity =
     cart?.items.filter((i) => i.productSlug === product.slug).reduce((s, i) => s + i.quantity, 0) ?? 0;
   const inCart = cartQuantity > 0;
-  const showAddons = product.allowsAddons === true;
+  const isGboProduct = isGboVendor(product.vendorSlug) || Boolean(parseGboSlug(product.slug));
+  const showAddons = product.allowsAddons === true && !isGboProduct;
   const lowStock = product.inventory > 0 && product.inventory <= LOW_STOCK_THRESHOLD;
   const fastSelling = isFastSelling(product);
   const unitsSold = getUnitsSold(product);
@@ -242,9 +243,11 @@ export function ProductDetailClient({
           {product.fulfilledByName ? (
             <p className="text-sm text-slate-600 mb-3">
               Fulfilled by: <span className="font-semibold text-primary">{product.fulfilledByName}</span>
-              <span className="ml-2 text-xs uppercase tracking-wide text-emerald-700 font-semibold">
-                Local Partner
-              </span>
+              {isGboProduct ? null : (
+                <span className="ml-2 text-xs uppercase tracking-wide text-emerald-700 font-semibold">
+                  Local Partner
+                </span>
+              )}
             </p>
           ) : null}
 
@@ -333,7 +336,11 @@ export function ProductDetailClient({
             </button>
           </div>
 
-          <TrustBadges variant="compact" className="mb-5" />
+          {isGboProduct ? (
+            <p className="mb-5 text-xs text-slate-600">Worldwide delivery included · Partner fulfillment</p>
+          ) : (
+            <TrustBadges variant="compact" className="mb-5" />
+          )}
 
           <ProductCareAccordions product={product} />
           {flowerGuide ? <LearnAboutFlower guide={flowerGuide} /> : null}

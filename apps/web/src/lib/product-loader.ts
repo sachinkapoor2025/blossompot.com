@@ -5,7 +5,6 @@ import {
   getCatalogProduct,
   getCatalogProducts,
   getCatalogProductsByCategory,
-  mergeProductsPreferExisting,
 } from "./catalog-fallback";
 import { isRakhiRelatedCategorySlug, isRakhiRelatedProduct } from "./rakhi-filter";
 
@@ -44,6 +43,17 @@ function memoryProduct(slug: string): Product | null {
 /** Catalog is OK for vendor SKUs that may not be in DynamoDB yet. */
 function allowCatalogFallback(product: Product): boolean {
   return Boolean(product.vendorSlug);
+}
+
+/** Live Gift Baskets Overseas catalog for the storefront (USA). */
+export async function loadGboStorefrontProducts(country = "US"): Promise<Product[]> {
+  const iso = country.trim().toUpperCase();
+  const data = await api<{ gifts: GboGift[] }>(`/gbo/gifts?country=${iso}`, FRESH_PRODUCT_FETCH);
+  return (data.gifts ?? []).map((gift) => {
+    const mapped = gboGiftToProduct(iso, gift);
+    const { vendorCost: _c, ...rest } = mapped;
+    return rememberProduct(rest as Product);
+  });
 }
 
 function isProductMissingError(err: unknown): boolean {
@@ -114,6 +124,7 @@ export async function loadProducts(params?: {
     const data = await api<{ products: Product[] }>(`/products${qs}`, FRESH_PRODUCT_FETCH);
     return rememberProducts(data.products.filter(isStorefrontVisible));
   } catch {
+    if (process.env.NODE_ENV === "production") return [];
     if (params?.category) {
       return getCatalogProductsByCategory(params.category).filter(isStorefrontVisible);
     }
@@ -132,9 +143,7 @@ export async function loadProductsByCategory(categorySlug: string): Promise<Prod
   } catch {
     products = [];
   }
-  return mergeProductsPreferExisting(products, getCatalogProductsByCategory(categorySlug)).filter(
-    isStorefrontVisible
-  );
+  return products.filter(isStorefrontVisible);
 }
 
 export async function loadFeaturedProducts(limit = 10): Promise<Product[]> {

@@ -1,10 +1,19 @@
-import type { Product } from "@blossompot/shared";
+import { GBO_CATEGORY_SLUG, isGboVendor, parseGboSlug, type Product } from "@blossompot/shared";
 import { looksLikeHtml, stripHtml } from "./html-text";
 
 type ProductLike = Pick<Product, "name" | "description" | "categorySlug" | "tags"> & {
   slug?: string;
+  vendorSlug?: string | null;
   additionalCategorySlugs?: string[];
 };
+
+function isGboProductLike(product: ProductLike): boolean {
+  return (
+    isGboVendor(product.vendorSlug) ||
+    product.categorySlug === GBO_CATEGORY_SLUG ||
+    Boolean(parseGboSlug(product.slug))
+  );
+}
 
 function hasChocolateSignal(text: string): boolean {
   return /chocolate|ferrero|hershey|lindor|lindt|kitkat|dairy\s*milk|snicker/i.test(text);
@@ -157,8 +166,29 @@ function giftDefaultLines(categorySlug: string, name: string): string[] {
   }
 }
 
+function gboIncludeLines(product: ProductLike): string[] {
+  const lines: string[] = [];
+  const name = product.name.trim();
+  if (name) lines.push(name);
+  const included = coerceGboContents(product.description);
+  if (included) lines.push(included);
+  lines.push("Gift message option at checkout");
+  lines.push("Worldwide delivery included");
+  lines.push("Fulfilled by our international partner");
+  return lines;
+}
+
+function coerceGboContents(description: string): string | null {
+  const m = description.match(/Includes:\s*([\s\S]+)/i);
+  const raw = (m?.[1] ?? "").replace(/\s+/g, " ").trim();
+  if (!raw) return null;
+  return raw.length > 180 ? `${raw.slice(0, 177)}…` : raw;
+}
+
 /** Customer-facing "What's included" lines — never inject Rakhi/Roli/Chawal defaults. */
 export function getProductIncludes(product: ProductLike): string[] {
+  if (isGboProductLike(product)) return gboIncludeLines(product);
+
   const { description, name, categorySlug, tags } = product;
 
   if (categorySlug === "gift-hampers") {

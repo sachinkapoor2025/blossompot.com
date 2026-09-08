@@ -86,6 +86,7 @@ export function gboGiftToProduct(country: string, gift: GboGift, nowIso?: string
     vendorSlug: VENDOR_GBO,
     ...(vendorCost > 0 ? { vendorCost: roundMoney(vendorCost) } : {}),
     couponExcluded: true,
+    allowsAddons: false,
     published: true,
     indexable: false,
     internationalDelivery: true,
