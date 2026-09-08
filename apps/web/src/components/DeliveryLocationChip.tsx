@@ -9,7 +9,7 @@ export function DeliveryLocationChip({ compact = false }: { compact?: boolean })
   return (
     <button
       type="button"
-      onClick={openSelector}
+      onClick={() => openSelector()}
       className={`inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white text-left hover:border-nav hover:bg-blue-50 transition ${
         compact ? "max-w-[7rem] shrink-0 px-2 py-1.5" : "max-w-[16rem] px-2.5 py-1"
       }`}

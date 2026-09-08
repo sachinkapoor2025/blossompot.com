@@ -41,7 +41,7 @@ export function LocationEmptyHint() {
         {message ??
           `No products are available for delivery to ${location.postalDisplay} yet.`}
       </p>
-      <button type="button" onClick={openSelector} className="mt-2 font-semibold text-nav underline">
+      <button type="button" onClick={() => openSelector()} className="mt-2 font-semibold text-nav underline">
         Change location
       </button>
     </div>

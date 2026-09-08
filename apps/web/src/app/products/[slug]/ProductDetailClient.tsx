@@ -329,7 +329,7 @@ export function ProductDetailClient({
             )}
             <button
               type="button"
-              onClick={delivery.openSelector}
+              onClick={() => delivery.openSelector()}
               className="mt-1 font-semibold text-nav underline underline-offset-2"
             >
               {delivery.location ? "Change location" : "Choose location"}

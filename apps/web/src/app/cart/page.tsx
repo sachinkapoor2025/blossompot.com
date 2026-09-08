@@ -205,7 +205,7 @@ export default function CartPage() {
                               "This item is no longer available for delivery to your selected location."}
                             <button
                               type="button"
-                              onClick={delivery.openSelector}
+                              onClick={() => delivery.openSelector()}
                               className="ml-2 font-semibold text-nav underline"
                             >
                               Change location
