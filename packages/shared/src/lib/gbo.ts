@@ -175,6 +175,26 @@ export function gboGiftToProduct(country: string, gift: GboGift, nowIso?: string
   };
 }
 
+export function productMatchesSearchQuery(
+  product: Pick<Product, "name" | "shortDescription" | "description" | "categorySlug" | "additionalCategorySlugs" | "tags">,
+  rawQuery: string
+): boolean {
+  const q = rawQuery.trim().toLowerCase();
+  if (!q) return true;
+  const haystack = [
+    product.name,
+    product.shortDescription,
+    product.description,
+    product.categorySlug,
+    ...(product.additionalCategorySlugs ?? []),
+    ...(product.tags ?? []),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  return haystack.includes(q);
+}
+
 export function parseGboSku(sku?: string | null): GboLineRef | null {
   const m = sku?.trim().match(GBO_SKU_RE);
   if (!m) return null;

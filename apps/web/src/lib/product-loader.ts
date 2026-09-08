@@ -1,4 +1,4 @@
-import { parseGboSlug, gboGiftToProduct, productInStorefrontCategory, type GboGift, type Product } from "@blossompot/shared";
+import { parseGboSlug, gboGiftToProduct, productInStorefrontCategory, productMatchesSearchQuery, type GboGift, type Product } from "@blossompot/shared";
 import { isProductStorefrontVisible } from "@blossompot/shared";
 import { api } from "./api";
 import {
@@ -137,10 +137,7 @@ export async function loadProducts(params?: {
       extra = gbo.filter((product) => productInStorefrontCategory(product, params.category as string));
     }
     if (params?.search) {
-      const q = params.search.trim().toLowerCase();
-      extra = extra.filter((product) =>
-        `${product.name} ${product.shortDescription ?? ""} ${product.description}`.toLowerCase().includes(q)
-      );
+      extra = extra.filter((product) => productMatchesSearchQuery(product, params.search as string));
     }
     return rememberProducts(mergeBySlug(db, extra).filter(isStorefrontVisible));
   } catch {
@@ -151,10 +148,7 @@ export async function loadProducts(params?: {
           return gbo.filter((product) => productInStorefrontCategory(product, params.category as string));
         }
         if (params?.search) {
-          const q = params.search.trim().toLowerCase();
-          return gbo.filter((product) =>
-            `${product.name} ${product.shortDescription ?? ""}`.toLowerCase().includes(q)
-          );
+          return gbo.filter((product) => productMatchesSearchQuery(product, params.search as string));
         }
         return gbo;
       } catch {

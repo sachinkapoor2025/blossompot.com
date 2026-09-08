@@ -13,6 +13,7 @@ import {
   parseGboLineRef,
   parseGboSku,
   parseGboSlug,
+  productMatchesSearchQuery,
 } from "./gbo";
 
 describe("gbo helpers", () => {
@@ -85,5 +86,19 @@ describe("gbo helpers", () => {
   it("clips gift card text to 180 chars", () => {
     assert.equal(clipGboGiftCardText("  hi  "), "hi");
     assert.equal(clipGboGiftCardText("x".repeat(200))?.length, 180);
+  });
+
+  it("matches GBO gifts in storefront search by name, contents, and tags", () => {
+    const product = gboGiftToProduct("us", {
+      id: 27,
+      name: "Cheerful Plush Tan Bear",
+      price: "10",
+      contents: "Plush teddy with chocolate",
+      categories: ["Birthday", "Hampers"],
+    });
+    assert.equal(productMatchesSearchQuery(product, "bear"), true);
+    assert.equal(productMatchesSearchQuery(product, "chocolate"), true);
+    assert.equal(productMatchesSearchQuery(product, "birthday"), true);
+    assert.equal(productMatchesSearchQuery(product, "rakhi"), false);
   });
 });
