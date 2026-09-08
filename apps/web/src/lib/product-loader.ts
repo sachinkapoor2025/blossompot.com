@@ -1,4 +1,4 @@
-import { parseGboSlug, gboGiftToProduct, type GboGift, type Product } from "@blossompot/shared";
+import { parseGboSlug, gboGiftToProduct, productInStorefrontCategory, productMatchesSearchQuery, type GboGift, type Product } from "@blossompot/shared";
 import { isProductStorefrontVisible } from "@blossompot/shared";
 import { api } from "./api";
 import {
@@ -54,6 +54,14 @@ export async function loadGboStorefrontProducts(country = "US"): Promise<Product
     const { vendorCost: _c, ...rest } = mapped;
     return rememberProduct(rest as Product);
   });
+}
+
+function mergeBySlug(primary: Product[], extra: Product[]): Product[] {
+  const bySlug = new Map(primary.map((product) => [product.slug, product]));
+  for (const product of extra) {
+    if (!bySlug.has(product.slug)) bySlug.set(product.slug, product);
+  }
+  return [...bySlug.values()];
 }
 
 function isProductMissingError(err: unknown): boolean {
@@ -122,9 +130,31 @@ export async function loadProducts(params?: {
 
   try {
     const data = await api<{ products: Product[] }>(`/products${qs}`, FRESH_PRODUCT_FETCH);
-    return rememberProducts(data.products.filter(isStorefrontVisible));
+    const db = rememberProducts(data.products.filter(isStorefrontVisible));
+    const gbo = await loadGboStorefrontProducts("US").catch(() => [] as Product[]);
+    let extra = gbo;
+    if (params?.category) {
+      extra = gbo.filter((product) => productInStorefrontCategory(product, params.category as string));
+    }
+    if (params?.search) {
+      extra = extra.filter((product) => productMatchesSearchQuery(product, params.search as string));
+    }
+    return rememberProducts(mergeBySlug(db, extra).filter(isStorefrontVisible));
   } catch {
-    if (process.env.NODE_ENV === "production") return [];
+    if (process.env.NODE_ENV === "production") {
+      try {
+        const gbo = await loadGboStorefrontProducts("US");
+        if (params?.category) {
+          return gbo.filter((product) => productInStorefrontCategory(product, params.category as string));
+        }
+        if (params?.search) {
+          return gbo.filter((product) => productMatchesSearchQuery(product, params.search as string));
+        }
+        return gbo;
+      } catch {
+        return [];
+      }
+    }
     if (params?.category) {
       return getCatalogProductsByCategory(params.category).filter(isStorefrontVisible);
     }

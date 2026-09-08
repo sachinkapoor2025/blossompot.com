@@ -91,9 +91,9 @@ export default async function HomePage() {
 
       <section id="gift-catalog" className="max-w-7xl mx-auto px-4 py-10 scroll-mt-24">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-primary">Shop gift baskets</h2>
+          <h2 className="text-2xl font-bold text-primary">Shop all gifts</h2>
           <p className="text-sm text-slate-600 mt-1">
-            International gifts with delivery included. Fulfilled by our worldwide partner.
+            {products.length} international gifts with delivery included. Scroll for more.
           </p>
         </div>
         {catalogError ? (

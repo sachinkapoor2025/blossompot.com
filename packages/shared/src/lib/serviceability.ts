@@ -1,4 +1,5 @@
 import { VENDOR_BLOSSOMPOT, VENDOR_ORANGE_COUNTY, VENDOR_GBO } from "../constants";
+import { isGboVendor, parseGboSku, parseGboSlug } from "./gbo";
 import { normalizePostal, normalizePrefix } from "./postal-countries";
 
 export const SERVICE_SCOPES = [
@@ -212,7 +213,20 @@ export function getServiceableVendors(
     .filter((m) => m.serviceable);
 }
 
-export function fulfillmentVendorSlug(product: { vendorSlug?: string | null }): string {
+export function fulfillmentVendorSlug(product: {
+  vendorSlug?: string | null;
+  internationalDelivery?: boolean;
+  slug?: string | null;
+  sku?: string | null;
+}): string {
+  if (
+    isGboVendor(product.vendorSlug) ||
+    product.internationalDelivery === true ||
+    parseGboSlug(product.slug) ||
+    parseGboSku(product.sku)
+  ) {
+    return VENDOR_GBO;
+  }
   const slug = product.vendorSlug?.trim();
   return slug || VENDOR_BLOSSOMPOT;
 }

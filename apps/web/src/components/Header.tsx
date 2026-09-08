@@ -16,9 +16,17 @@ import { SearchBar } from "@/components/SearchBar";
 import { SiteLogoLink } from "@/components/SiteLogo";
 import { DeliveryLocationChip } from "@/components/DeliveryLocationChip";
 import { DeliveryLocationBanner } from "@/components/DeliveryLocationBanner";
+import { useDeliveryLocation } from "@/lib/delivery-location-context";
+import { COUNTRY_GUIDE_HREF, useCountrySearch, useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
 
 function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const { openSelector } = useDeliveryLocation();
+  const q = query.trim().toLowerCase();
+  const visible = q
+    ? cityLinks.filter((c) => `${c.label} ${c.menuLabel ?? ""} ${c.slug}`.toLowerCase().includes(q))
+    : cityLinks;
 
   return (
     <div
@@ -38,7 +46,18 @@ function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
       </button>
       {open && (
         <div className="absolute top-full right-0 pt-1.5 z-[100]">
-          <div className="min-w-[220px] max-h-[min(70vh,360px)] overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-xl">
+          <div className="min-w-[260px] max-h-[min(70vh,420px)] overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-xl">
+            <p className="px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+              USA city pages
+            </p>
+            <div className="px-3 pb-2">
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search US cities…"
+                className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm"
+              />
+            </div>
             <Link
               href="/locations"
               className="block px-4 py-2.5 text-sm font-semibold text-nav hover:bg-blue-50 whitespace-nowrap"
@@ -47,9 +66,9 @@ function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
                 onNavigate?.();
               }}
             >
-              All locations
+              All US locations
             </Link>
-            {cityLinks.map((c) => (
+            {visible.map((c) => (
               <Link
                 key={c.slug}
                 href={cityNavHref(c)}
@@ -62,6 +81,16 @@ function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
                 {cityNavMenuLabel(c)}
               </Link>
             ))}
+            <button
+              type="button"
+              className="mt-1 w-full border-t border-slate-100 px-4 py-2.5 text-left text-sm font-semibold text-nav hover:bg-blue-50"
+              onClick={() => {
+                setOpen(false);
+                openSelector();
+              }}
+            >
+              Other country — enter postal code
+            </button>
           </div>
         </div>
       )}
@@ -77,6 +106,9 @@ function CountriesMenu({
   onNavigate?: () => void;
 }) {
   const [open, setOpen] = useState(false);
+  const { openSelector } = useDeliveryLocation();
+  const { countries, loaded } = useGboDeliveryCountries();
+  const { query, setQuery, filtered } = useCountrySearch(countries);
 
   return (
     <div
@@ -96,20 +128,53 @@ function CountriesMenu({
       </button>
       {open && (
         <div className="absolute top-full right-0 pt-1.5 z-[100]">
-          <div className="min-w-[240px] rounded-lg border border-slate-200 bg-white py-1 shadow-xl">
-            {countriesMenu.items.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-nav whitespace-nowrap"
-                onClick={() => {
-                  setOpen(false);
-                  onNavigate?.();
-                }}
-              >
-                {item.label}
-              </Link>
-            ))}
+          <div className="min-w-[280px] max-h-[min(70vh,420px)] overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-xl">
+            <p className="px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+              Delivery countries
+            </p>
+            <div className="px-3 pb-2">
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search countries…"
+                className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm"
+              />
+            </div>
+            {!loaded ? (
+              <p className="px-4 py-2 text-sm text-slate-500">Loading countries…</p>
+            ) : (
+              filtered.map((c) => {
+                const guide = COUNTRY_GUIDE_HREF[c.countryCode];
+                if (guide) {
+                  return (
+                    <Link
+                      key={c.countryCode}
+                      href={guide}
+                      className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-nav whitespace-nowrap"
+                      onClick={() => {
+                        setOpen(false);
+                        onNavigate?.();
+                      }}
+                    >
+                      {c.countryName}
+                    </Link>
+                  );
+                }
+                return (
+                  <button
+                    key={c.countryCode}
+                    type="button"
+                    className="block w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-blue-50 hover:text-nav whitespace-nowrap"
+                    onClick={() => {
+                      setOpen(false);
+                      openSelector({ countryCode: c.countryCode });
+                    }}
+                  >
+                    {c.countryName}
+                  </button>
+                );
+              })
+            )}
           </div>
         </div>
       )}
@@ -266,6 +331,13 @@ export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [citiesOpen, setCitiesOpen] = useState(false);
   const [countriesOpen, setCountriesOpen] = useState(false);
+  const [cityQuery, setCityQuery] = useState("");
+  const { openSelector } = useDeliveryLocation();
+  const { countries, loaded: countriesLoaded } = useGboDeliveryCountries();
+  const countrySearch = useCountrySearch(countries);
+  const cityVisible = cityQuery.trim()
+    ? cityLinks.filter((c) => `${c.label} ${c.menuLabel ?? ""} ${c.slug}`.toLowerCase().includes(cityQuery.trim().toLowerCase()))
+    : cityLinks;
 
   const isActive = (href: string, category?: string) => {
     if (href === "/") return pathname === "/" && !activeCategory;
@@ -441,14 +513,23 @@ export function Header() {
                 </button>
                 {citiesOpen && (
                   <div className="mt-1 ml-2 border-l-2 border-slate-100 pl-2 space-y-1">
+                    <p className="px-4 pt-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                      USA city pages
+                    </p>
+                    <input
+                      value={cityQuery}
+                      onChange={(e) => setCityQuery(e.target.value)}
+                      placeholder="Search US cities…"
+                      className="mx-2 mb-1 w-[calc(100%-1rem)] rounded-md border border-slate-200 px-2 py-1.5 text-sm"
+                    />
                     <Link
                       href="/locations"
                       onClick={closeMenu}
                       className="block rounded-lg px-4 py-2.5 text-sm font-semibold text-nav hover:bg-blue-50"
                     >
-                      All locations
+                      All US locations
                     </Link>
-                    {cityLinks.map((c) => (
+                    {cityVisible.map((c) => (
                       <Link
                         key={c.slug}
                         href={cityNavHref(c)}
@@ -458,6 +539,16 @@ export function Header() {
                         {cityNavMenuLabel(c)}
                       </Link>
                     ))}
+                    <button
+                      type="button"
+                      className="block w-full rounded-lg px-4 py-2.5 text-left text-sm font-semibold text-nav hover:bg-blue-50"
+                      onClick={() => {
+                        closeMenu();
+                        openSelector();
+                      }}
+                    >
+                      Other country — enter postal code
+                    </button>
                   </div>
                 )}
               </div>
@@ -476,21 +567,45 @@ export function Header() {
                   <span className={`text-xs transition-transform ${countriesOpen ? "rotate-180" : ""}`}>▼</span>
                 </button>
                 {countriesOpen && (
-                  <div className="mt-1 ml-2 border-l-2 border-slate-100 pl-2 space-y-1">
-                    {countriesMenu.items.map((item) => (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={closeMenu}
-                        className={`block rounded-lg px-4 py-2.5 text-sm ${
-                          pathname === item.href
-                            ? "bg-blue-50 text-nav font-semibold"
-                            : "text-slate-700 hover:bg-blue-50 hover:text-nav"
-                        }`}
-                      >
-                        {item.label}
-                      </Link>
-                    ))}
+                  <div className="mt-1 ml-2 max-h-72 overflow-y-auto border-l-2 border-slate-100 pl-2 space-y-1">
+                    <input
+                      value={countrySearch.query}
+                      onChange={(e) => countrySearch.setQuery(e.target.value)}
+                      placeholder="Search countries…"
+                      className="mx-2 mb-1 w-[calc(100%-1rem)] rounded-md border border-slate-200 px-2 py-1.5 text-sm"
+                    />
+                    {!countriesLoaded ? (
+                      <p className="px-4 py-2 text-sm text-slate-500">Loading countries…</p>
+                    ) : (
+                      countrySearch.filtered.map((c) => {
+                        const guide = COUNTRY_GUIDE_HREF[c.countryCode];
+                        if (guide) {
+                          return (
+                            <Link
+                              key={c.countryCode}
+                              href={guide}
+                              onClick={closeMenu}
+                              className="block rounded-lg px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-nav"
+                            >
+                              {c.countryName}
+                            </Link>
+                          );
+                        }
+                        return (
+                          <button
+                            key={c.countryCode}
+                            type="button"
+                            className="block w-full rounded-lg px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-blue-50 hover:text-nav"
+                            onClick={() => {
+                              closeMenu();
+                              openSelector({ countryCode: c.countryCode });
+                            }}
+                          >
+                            {c.countryName}
+                          </button>
+                        );
+                      })
+                    )}
                   </div>
                 )}
               </div>

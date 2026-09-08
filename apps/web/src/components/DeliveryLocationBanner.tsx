@@ -17,7 +17,7 @@ export function DeliveryLocationBanner() {
         <p>Select your delivery location to see products available near you.</p>
         <button
           type="button"
-          onClick={openSelector}
+          onClick={() => openSelector()}
           className="font-semibold text-nav underline underline-offset-2"
         >
           Choose location

@@ -7,9 +7,9 @@ export const GBO_PAYMENT_TYPES = ["monthlyBilling", "balance"] as const;
 export type GboPaymentType = (typeof GBO_PAYMENT_TYPES)[number];
 
 export const gboCountrySchema = z.object({
-  id: z.string().min(1),
+  id: z.coerce.string().min(1),
   country: z.string().min(1),
-  iso_code: z.string().min(2).max(2),
+  iso_code: z.string().trim().toUpperCase().length(2),
 });
 
 export const gboCategorySchema = z.object({

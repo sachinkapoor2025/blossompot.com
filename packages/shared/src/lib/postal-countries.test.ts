@@ -5,6 +5,7 @@ import {
   enabledDeliveryCountries,
   getDeliveryCountry,
   isValidPostal,
+  mergeGboDeliveryCountries,
 } from "./postal-countries";
 
 describe("delivery countries", () => {
@@ -28,10 +29,18 @@ describe("delivery countries", () => {
     assert.equal(isValidPostal("AE", "12"), false);
   });
 
-  it("does not include countries outside the served set", () => {
-    const codes = new Set(DELIVERY_COUNTRIES.map((c) => c.countryCode));
-    assert.equal(codes.has("IN"), false);
-    assert.equal(codes.has("CN"), false);
-    assert.equal(codes.has("BR"), false);
+  it("accepts GBO worldwide postals when the country is not in the curated list", () => {
+    assert.equal(isValidPostal("IN", "110001"), true);
+    assert.equal(isValidPostal("JP", "100-0001"), true);
+    assert.equal(isValidPostal("IN", "x"), false);
+  });
+
+  it("merges GBO countries onto the curated list", () => {
+    const merged = mergeGboDeliveryCountries([
+      { iso_code: "IN", country: "India" },
+      { iso_code: "US", country: "United States" },
+    ]);
+    assert.equal(merged.some((c) => c.countryCode === "IN"), true);
+    assert.equal(merged.find((c) => c.countryCode === "US")?.countryName, "United States");
   });
 });

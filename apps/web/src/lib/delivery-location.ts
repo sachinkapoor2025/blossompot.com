@@ -20,12 +20,14 @@ export function parseDeliveryLocationToken(raw: string | null | undefined): Stor
   const [countryCode, ...rest] = raw.split(":");
   const postalCode = rest.join(":").trim();
   if (!countryCode || !postalCode) return null;
-  const country = getDeliveryCountry(countryCode);
-  if (!country?.enabled || !isValidPostal(countryCode, postalCode)) return null;
+  const iso = countryCode.trim().toUpperCase();
+  const country = getDeliveryCountry(iso);
+  if (country && !country.enabled) return null;
+  if (!isValidPostal(iso, postalCode)) return null;
   return {
-    countryCode: country.countryCode,
+    countryCode: iso,
     postalCode,
-    postalDisplay: formatPostalDisplay(country.countryCode, postalCode),
+    postalDisplay: formatPostalDisplay(iso, postalCode),
   };
 }
 
@@ -108,7 +110,7 @@ export function deliveryCountryOptions() {
 }
 
 export function postalLabelFor(countryCode: string): string {
-  return getDeliveryCountry(countryCode)?.postalLabel ?? "Postal Code";
+  return getDeliveryCountry(countryCode)?.postalLabel ?? "Postal / ZIP";
 }
 
 export function headerLocationLabel(location: StoredDeliveryLocation): string {

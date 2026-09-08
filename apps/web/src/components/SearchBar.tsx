@@ -14,17 +14,19 @@ function SearchBarInner() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    const params = new URLSearchParams(searchParams.toString());
-    if (q) params.set("search", q);
-    else params.delete("search");
-    router.push(`/products?${params.toString()}`);
+    const trimmed = q.trim();
+    if (!trimmed) {
+      router.push("/products");
+      return;
+    }
+    router.push(`/products?search=${encodeURIComponent(trimmed)}`);
   };
 
   return (
     <form onSubmit={submit} className="relative w-full">
       <input
         type="search"
-        placeholder="Search products..."
+        placeholder="Search gifts, flowers, hampers…"
         value={q}
         onChange={(e) => setQ(e.target.value)}
         className="w-full border border-slate-200 rounded-full pl-4 pr-12 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-nav focus:ring-1 focus:ring-nav"

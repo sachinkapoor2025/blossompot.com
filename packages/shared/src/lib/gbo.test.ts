@@ -8,10 +8,12 @@ import {
   gboGiftToProduct,
   gboImageUrl,
   gboPartnerOrderId,
+  mapGboGiftStorefrontCategories,
   mapGboStatusToOrderStatus,
   parseGboLineRef,
   parseGboSku,
   parseGboSlug,
+  productMatchesSearchQuery,
 } from "./gbo";
 
 describe("gbo helpers", () => {
@@ -46,6 +48,18 @@ describe("gbo helpers", () => {
     assert.equal(product.couponExcluded, true);
     assert.equal(product.allowsAddons, false);
     assert.equal(product.indexable, false);
+    assert.equal(product.categorySlug, "gift-hampers");
+    assert.ok(product.additionalCategorySlugs?.includes("overseas-gifts"));
+  });
+
+  it("maps GBO flower tags onto Flowers / Bouquets nav categories", () => {
+    const mapped = mapGboGiftStorefrontCategories({
+      name: "Cheerful Plush Tan Bear",
+      categories: ["Flowers", "Birthday-Gifts"],
+    });
+    assert.equal(mapped.categorySlug, "flowers");
+    assert.ok(mapped.additionalCategorySlugs.includes("birthday-gifts"));
+    assert.ok(mapped.additionalCategorySlugs.includes("same-day-gifts"));
   });
 
   it("namespaces partner order ids", () => {
@@ -72,5 +86,19 @@ describe("gbo helpers", () => {
   it("clips gift card text to 180 chars", () => {
     assert.equal(clipGboGiftCardText("  hi  "), "hi");
     assert.equal(clipGboGiftCardText("x".repeat(200))?.length, 180);
+  });
+
+  it("matches GBO gifts in storefront search by name, contents, and tags", () => {
+    const product = gboGiftToProduct("us", {
+      id: 27,
+      name: "Cheerful Plush Tan Bear",
+      price: "10",
+      contents: "Plush teddy with chocolate",
+      categories: ["Birthday", "Hampers"],
+    });
+    assert.equal(productMatchesSearchQuery(product, "bear"), true);
+    assert.equal(productMatchesSearchQuery(product, "chocolate"), true);
+    assert.equal(productMatchesSearchQuery(product, "birthday"), true);
+    assert.equal(productMatchesSearchQuery(product, "rakhi"), false);
   });
 });
