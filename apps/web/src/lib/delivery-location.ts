@@ -112,7 +112,6 @@ export function deliveryCountryOptions() {
 export function postalLabelFor(countryCode: string): string {
   return getDeliveryCountry(countryCode)?.postalLabel ?? "Postal / ZIP";
 }
-}
 
 export function headerLocationLabel(location: StoredDeliveryLocation): string {
   return `Deliver to ${location.postalDisplay}`;

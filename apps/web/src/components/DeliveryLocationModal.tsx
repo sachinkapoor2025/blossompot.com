@@ -25,7 +25,7 @@ export function DeliveryLocationModal() {
 
   useEffect(() => {
     if (!selectorOpen) return;
-    setCountryCode(selectorCountryPrefill || location?.countryCode ?? "US");
+    setCountryCode(selectorCountryPrefill || location?.countryCode || "US");
     setPostalCode(location?.postalCode ?? "");
     setError("");
     setQuery("");
