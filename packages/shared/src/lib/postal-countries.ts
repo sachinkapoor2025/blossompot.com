@@ -446,12 +446,50 @@ export const DELIVERY_COUNTRIES: DeliveryCountryConfig[] = [
 
 const byCode = new Map(DELIVERY_COUNTRIES.map((c) => [c.countryCode, c]));
 
+/** Lenient postal check for GBO countries not in the curated DELIVERY_COUNTRIES list. */
+export const GBO_WORLDWIDE_POSTAL_RE = /^[A-Z0-9][A-Z0-9 \-]{2,15}$/i;
+
 export function getDeliveryCountry(code: string): DeliveryCountryConfig | undefined {
   return byCode.get(code.trim().toUpperCase());
 }
 
 export function enabledDeliveryCountries(): DeliveryCountryConfig[] {
   return DELIVERY_COUNTRIES.filter((c) => c.enabled);
+}
+
+export function resolveDeliveryCountry(code: string, countryName?: string): DeliveryCountryConfig {
+  return getDeliveryCountry(code) ?? fallbackDeliveryCountry(code, countryName);
+}
+
+/** Merge GBO `/countries` into curated postal configs (unknown ISO uses worldwide postal regex). */
+export function mergeGboDeliveryCountries(
+  gbo: Array<{ iso_code?: string; country?: string }>
+): DeliveryCountryConfig[] {
+  const byCode = new Map<string, DeliveryCountryConfig>();
+  for (const row of enabledDeliveryCountries()) {
+    byCode.set(row.countryCode, row);
+  }
+  for (const row of gbo) {
+    const iso = String(row.iso_code ?? "").trim().toUpperCase();
+    if (iso.length !== 2) continue;
+    const name = String(row.country ?? "").trim();
+    const existing = getDeliveryCountry(iso) ?? byCode.get(iso);
+    byCode.set(iso, existing ? { ...existing, countryName: name || existing.countryName } : fallbackDeliveryCountry(iso, name));
+  }
+  return [...byCode.values()].sort((a, b) => a.countryName.localeCompare(b.countryName));
+}
+
+export function fallbackDeliveryCountry(code: string, countryName?: string): DeliveryCountryConfig {
+  const countryCode = code.trim().toUpperCase();
+  return {
+    countryCode,
+    countryName: countryName?.trim() || countryCode,
+    postalLabel: "Postal / ZIP",
+    postalPlaceholder: "Postal code",
+    postalRegex: GBO_WORLDWIDE_POSTAL_RE,
+    currency: "USD",
+    enabled: true,
+  };
 }
 
 /** Normalize for matching. Keeps a display form separately. */
@@ -482,9 +520,11 @@ export function formatPostalDisplay(countryCode: string, raw: string): string {
 }
 
 export function isValidPostal(countryCode: string, raw: string): boolean {
+  const value = raw.trim();
+  if (!value) return false;
   const cfg = getDeliveryCountry(countryCode);
-  if (!cfg) return false;
-  return cfg.postalRegex.test(raw.trim());
+  if (cfg) return cfg.postalRegex.test(value);
+  return GBO_WORLDWIDE_POSTAL_RE.test(value);
 }
 
 export function normalizePrefix(raw: string): string {

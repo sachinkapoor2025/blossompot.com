@@ -3,28 +3,33 @@
 import { useEffect, useId, useState } from "react";
 import { formatPostalDisplay, isValidPostal } from "@blossompot/shared";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
-import {
-  deliveryCountryOptions,
-  dismissLocationPrompt,
-  postalLabelFor,
-} from "@/lib/delivery-location";
+import { postalLabelFor, dismissLocationPrompt } from "@/lib/delivery-location";
+import { useGboDeliveryCountries, useCountrySearch } from "@/lib/gbo-delivery-countries";
 
 export function DeliveryLocationModal() {
-  const { location, selectorOpen, closeSelector, setLocation } = useDeliveryLocation();
+  const { location, selectorOpen, selectorCountryPrefill, closeSelector, setLocation } = useDeliveryLocation();
   const titleId = useId();
+  const { countries } = useGboDeliveryCountries();
+  const { query, setQuery, filtered } = useCountrySearch(countries);
   const [countryCode, setCountryCode] = useState(location?.countryCode ?? "US");
   const [postalCode, setPostalCode] = useState(location?.postalCode ?? "");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const countries = deliveryCountryOptions();
   const postalLabel = postalLabelFor(countryCode);
+  const selected = countries.find((c) => c.countryCode === countryCode) ?? countries[0];
+  const selectOptions = filtered.some((c) => c.countryCode === countryCode)
+    ? filtered
+    : selected
+      ? [selected, ...filtered]
+      : filtered;
 
   useEffect(() => {
     if (!selectorOpen) return;
-    setCountryCode(location?.countryCode ?? "US");
+    setCountryCode(selectorCountryPrefill || location?.countryCode ?? "US");
     setPostalCode(location?.postalCode ?? "");
     setError("");
-  }, [selectorOpen, location]);
+    setQuery("");
+  }, [selectorOpen, location, selectorCountryPrefill, setQuery]);
 
   useEffect(() => {
     if (!selectorOpen) return;
@@ -93,7 +98,7 @@ export function DeliveryLocationModal() {
             Where should we deliver?
           </h2>
           <p className="mt-2 text-sm text-slate-600">
-            We use your delivery location to show products available in your area.
+            Gift Baskets Overseas delivers to 190+ countries. Pick the destination, then enter a postal code.
           </p>
         </div>
         <form
@@ -105,18 +110,28 @@ export function DeliveryLocationModal() {
         >
           <div className="space-y-4">
             <label className="block text-sm font-medium text-slate-800">
+              Search countries
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="India, Japan, Brazil…"
+                className="mt-1 w-full max-w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm"
+              />
+            </label>
+            <label className="block text-sm font-medium text-slate-800">
               Country
               <select
                 value={countryCode}
                 onChange={(e) => setCountryCode(e.target.value)}
                 className="mt-1 w-full max-w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm"
               >
-                {countries.map((c) => (
+                {selectOptions.map((c) => (
                   <option key={c.countryCode} value={c.countryCode}>
-                    {c.countryName}
+                    {c.countryName} ({c.countryCode})
                   </option>
                 ))}
               </select>
+              <span className="mt-1 block text-xs text-slate-500">{countries.length} countries</span>
             </label>
             <label className="block text-sm font-medium text-slate-800">
               {postalLabel}
@@ -125,7 +140,7 @@ export function DeliveryLocationModal() {
                 inputMode={["US", "AU", "AE", "DE", "FR", "IT", "ES"].includes(countryCode) ? "numeric" : "text"}
                 value={postalCode}
                 onChange={(e) => setPostalCode(e.target.value)}
-                placeholder={countries.find((c) => c.countryCode === countryCode)?.postalPlaceholder}
+                placeholder={selected?.postalPlaceholder ?? "Postal code"}
                 className="mt-1 w-full max-w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm"
               />
             </label>

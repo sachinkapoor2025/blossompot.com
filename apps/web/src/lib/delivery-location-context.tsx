@@ -32,7 +32,8 @@ type DeliveryLocationContextValue = {
   vendorSlugs: string[];
   message: string | null;
   selectorOpen: boolean;
-  openSelector: () => void;
+  selectorCountryPrefill: string | null;
+  openSelector: (opts?: { countryCode?: string }) => void;
   closeSelector: () => void;
   setLocation: (location: StoredDeliveryLocation) => Promise<CheckResponse>;
   checkLocation: (location: StoredDeliveryLocation) => Promise<CheckResponse>;
@@ -48,6 +49,7 @@ export function DeliveryLocationProvider({ children }: { children: ReactNode }) 
   const [vendorSlugs, setVendorSlugs] = useState<string[]>([]);
   const [message, setMessage] = useState<string | null>(null);
   const [selectorOpen, setSelectorOpen] = useState(false);
+  const [selectorCountryPrefill, setSelectorCountryPrefill] = useState<string | null>(null);
 
   const applyCheck = useCallback((next: StoredDeliveryLocation, data: CheckResponse) => {
     setStored(next);
@@ -112,12 +114,19 @@ export function DeliveryLocationProvider({ children }: { children: ReactNode }) 
       vendorSlugs,
       message,
       selectorOpen,
-      openSelector: () => setSelectorOpen(true),
-      closeSelector: () => setSelectorOpen(false),
+      selectorCountryPrefill,
+      openSelector: (opts) => {
+        setSelectorCountryPrefill(opts?.countryCode?.trim().toUpperCase() || null);
+        setSelectorOpen(true);
+      },
+      closeSelector: () => {
+        setSelectorOpen(false);
+        setSelectorCountryPrefill(null);
+      },
       setLocation,
       checkLocation,
     }),
-    [location, ready, checking, serviceable, vendorSlugs, message, selectorOpen, setLocation, checkLocation]
+    [location, ready, checking, serviceable, vendorSlugs, message, selectorOpen, selectorCountryPrefill, setLocation, checkLocation]
   );
 
   return <DeliveryLocationContext.Provider value={value}>{children}</DeliveryLocationContext.Provider>;

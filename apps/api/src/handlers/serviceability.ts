@@ -5,10 +5,10 @@ import {
   describeMatch,
   formatPostalDisplay,
   fulfillmentVendorSlug,
-  getDeliveryCountry,
   getServiceableVendors,
   isProductDeliverableToLocation,
   isValidPostal,
+  resolveDeliveryCountry,
   vendorServiceAreaImportRowSchema,
   vendorServiceAreaInputSchema,
 } from "@blossompot/shared";
@@ -39,8 +39,8 @@ export async function checkServiceability(event: APIGatewayProxyEventV2) {
   const parsed = checkServiceabilitySchema.safeParse(raw);
   if (!parsed.success) return badRequest(parsed.error.message);
 
-  const country = getDeliveryCountry(parsed.data.countryCode);
-  if (!country?.enabled) return badRequest("Unsupported country");
+  const country = resolveDeliveryCountry(parsed.data.countryCode);
+  if (!country.enabled) return badRequest("Unsupported country");
   if (!isValidPostal(parsed.data.countryCode, parsed.data.postalCode)) {
     return badRequest(`Enter a valid ${country.postalLabel.toLowerCase()}`);
   }
@@ -75,9 +75,7 @@ export async function checkServiceability(event: APIGatewayProxyEventV2) {
     })),
     message: serviceable
       ? `We can deliver to ${formatPostalDisplay(parsed.data.countryCode, parsed.data.postalCode)}.`
-      : parsed.data.countryCode === "US"
-        ? `We don't have a delivery partner for ${formatPostalDisplay(parsed.data.countryCode, parsed.data.postalCode)} yet.`
-        : "We currently fulfill gifts to United States addresses. Enter a US ZIP to see available products.",
+      : `We don't have a delivery partner for ${country.countryName} (${formatPostalDisplay(parsed.data.countryCode, parsed.data.postalCode)}) yet.`,
   });
 }
 
@@ -243,6 +241,6 @@ export function parseLocationQuery(event: APIGatewayProxyEventV2) {
   const countryCode = (q.country ?? q.countryCode ?? "").trim().toUpperCase();
   const postalCode = (q.postalCode ?? q.zip ?? "").trim();
   if (!countryCode || !postalCode) return null;
-  if (!getDeliveryCountry(countryCode) || !isValidPostal(countryCode, postalCode)) return null;
+  if (!isValidPostal(countryCode, postalCode)) return null;
   return { countryCode, postalCode, stateCode: q.state ?? q.stateCode, city: q.city };
 }
