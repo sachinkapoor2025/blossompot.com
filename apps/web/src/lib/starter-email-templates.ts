@@ -8,6 +8,10 @@ import {
   buildShopMoreSaveMoreEmailHtml,
   buildAnniversaryEmailHtml,
   buildBirthdayEmailHtml,
+  buildGiftingMarketingEmailHtml,
+  GIFTING_MARKETING_EMAIL_TEMPLATE_ID,
+  GIFTING_MARKETING_EMAIL_NAME,
+  GIFTING_MARKETING_EMAIL_SUBJECT,
   FREE_SHIPPING_EMAIL_CONFIG,
   SHOP_MORE_SAVE_MORE_EMAIL_CONFIG,
   ANNIVERSARY_EMAIL_CONFIG,
@@ -43,6 +47,12 @@ export const RAKHI_HAMPERS_USA_TEMPLATE_ID = "gift-hampers-usa";
 export const INDEPENDENCE_DAY_TEMPLATE_ID = "celebration-sale-usa";
 
 export const STARTER_EMAIL_TEMPLATES: StarterEmailTemplateMeta[] = [
+  {
+    templateId: GIFTING_MARKETING_EMAIL_TEMPLATE_ID,
+    name: GIFTING_MARKETING_EMAIL_NAME,
+    subject: GIFTING_MARKETING_EMAIL_SUBJECT,
+    buildHtml: () => buildGiftingMarketingEmailHtml(),
+  },
   {
     templateId: PREMIUM_GIFTS_TEMPLATE_ID,
     name: "Premium Gifts USA (Editable)",
