@@ -444,8 +444,8 @@ export function Header() {
 
       {/* Desktop nav */}
       <nav className="hidden md:block border-t border-slate-100 bg-white overflow-visible">
-        <div className="max-w-7xl mx-auto px-4 py-2.5">
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="max-w-7xl mx-auto px-3 py-2">
+          <div className="flex flex-nowrap items-center justify-center gap-1 lg:gap-1.5 [&_.btn-nav]:shrink-0 [&_.btn-nav]:px-3 [&_.btn-nav]:py-1.5 [&_.btn-nav]:text-[13px]">
             {navItems.map((item) => (
               <Link
                 key={item.href}
