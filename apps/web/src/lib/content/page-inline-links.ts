@@ -513,4 +513,34 @@ export const blogPageInlineLinks: Record<string, readonly { phrase: string; href
     { phrase: "Mother's Day", href: categoryHref("mothers-day-gifts") },
     { phrase: "UAE", href: "/flower-delivery-uae" },
   ],
+  "wedding-flower-trends": [
+    { phrase: "wedding flowers", href: categoryHref("wedding-gifts") },
+    { phrase: "roses", href: categoryHref("flower-bouquets") },
+    { phrase: "peonies", href: "/flower-guide/peony" },
+    { phrase: "flower meanings", href: "/flower-guide/flower-meanings" },
+  ],
+  "same-day-flower-delivery-near-me-blossompot": [
+    { phrase: "same-day", href: categoryHref("same-day-gifts") },
+    { phrase: "birthday", href: categoryHref("birthday-gifts") },
+    { phrase: "cakes", href: categoryHref("cakes") },
+    { phrase: "gift hampers", href: categoryHref("gift-hampers") },
+  ],
+  "what-to-put-in-a-luxury-gift-hamper": [
+    { phrase: "gift hamper", href: categoryHref("gift-hampers") },
+    { phrase: "flowers", href: categoryHref("flowers") },
+    { phrase: "personalized gifts", href: categoryHref("personalized-gifts") },
+    { phrase: "cakes", href: categoryHref("cakes") },
+  ],
+  "shipping-cakes-safely": [
+    { phrase: "cakes", href: categoryHref("cakes") },
+    { phrase: "same-day", href: categoryHref("same-day-gifts") },
+    { phrase: "birthday cake", href: categoryHref("cakes") },
+    { phrase: "flowers", href: categoryHref("flowers") },
+  ],
+  "flowers-and-cake-combos-for-every-celebration": [
+    { phrase: "flowers", href: categoryHref("flowers") },
+    { phrase: "cake", href: categoryHref("cakes") },
+    { phrase: "birthday", href: categoryHref("birthday-gifts") },
+    { phrase: "anniversary", href: categoryHref("anniversary-gifts") },
+  ],
 };

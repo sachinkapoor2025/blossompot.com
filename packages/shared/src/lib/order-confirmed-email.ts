@@ -91,7 +91,7 @@ export function orderConfirmedBannerUrl(): string {
 export const BLOSSOMPOT_SOCIAL_LINKS: { name: string; href: string; color: string; label: string }[] = [
   {
     name: "IG",
-    href: "https://www.instagram.com/blossompot10/",
+    href: "https://www.instagram.com/blossompot_official/",
     color: "#C13584",
     label: "Instagram",
   },

@@ -21,7 +21,7 @@ const SOCIAL_LINKS: {
 }[] = [
   {
     name: "Instagram",
-    href: "https://www.instagram.com/blossompot10/",
+    href: "https://www.instagram.com/blossompot_official/",
     label: "BlossomPot on Instagram",
     className: "rounded-[22%]",
     style: INSTAGRAM_GRADIENT,
