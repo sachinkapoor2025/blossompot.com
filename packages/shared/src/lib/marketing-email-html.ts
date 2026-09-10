@@ -129,7 +129,7 @@ export const DEFAULT_PREMIUM_MARKETING_EMAIL_CONTENT: MarketingEmailContent = {
   orderEmail: "order@blossompot.com",
   facebookUrl: "https://www.facebook.com/profile.php?id=61594220485535",
   facebookIconUrl: CDN_FB,
-  instagramUrl: "https://www.instagram.com/blossompot10/",
+  instagramUrl: "https://www.instagram.com/blossompot_official/",
   instagramIconUrl: CDN_IG,
   copyrightText: "© 2026 BlossomPot. All Rights Reserved.",
   unsubscribeLabel: "Unsubscribe",

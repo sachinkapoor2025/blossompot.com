@@ -128,7 +128,7 @@ export function organizationJsonLd() {
     ...(site.phone ? { telephone: site.phone } : {}),
     sameAs: [
       "https://www.facebook.com/profile.php?id=61594220485535",
-      "https://www.instagram.com/blossompot10/",
+      "https://www.instagram.com/blossompot_official/",
       "https://x.com/Blossompot10",
       "https://in.pinterest.com/blossompot10/_profile/",
       "https://www.youtube.com/@blossompot",

@@ -5,7 +5,8 @@
 
 import type { CartItem } from "../schemas/cart";
 import type { Order } from "../schemas/order";
-import { cdnUploadUrl, resolveProductImageUrl } from "./image-url";
+import { resolveProductImageUrl } from "./image-url";
+import { homePageBannerUrl } from "./home-page-banners";
 import { displayOrderRef } from "./order-number";
 
 const SITE_NAME = "BlossomPot";
@@ -83,15 +84,15 @@ export function orderReviewUrl(): string {
   return `${siteOrigin()}/reviews`;
 }
 
-/** Floral gifting banner — same editorial asset as the storefront hero. */
+/** Floral gifting banner — same asset as the storefront hero. */
 export function orderConfirmedBannerUrl(): string {
-  return cdnUploadUrl("editorial/home-banner-flowers.jpg");
+  return homePageBannerUrl("flowers");
 }
 
 export const BLOSSOMPOT_SOCIAL_LINKS: { name: string; href: string; color: string; label: string }[] = [
   {
     name: "IG",
-    href: "https://www.instagram.com/blossompot10/",
+    href: "https://www.instagram.com/blossompot_official/",
     color: "#C13584",
     label: "Instagram",
   },
