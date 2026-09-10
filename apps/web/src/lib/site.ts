@@ -134,19 +134,6 @@ export const countriesMenu = {
 
 export const homeBanners = [
   {
-    src: "/banners/home-banner-flowers.jpg",
-    alt: "Fresh flowers from blossompot.com — roses, mixed bouquets, and same-day delivery",
-    href: "/flowers",
-    layout: "full" as const,
-    imageFit: "contain" as const,
-    eyebrow: "BLOSSOMPOT.COM",
-    title: "Express your feelings with",
-    titleAccent: "fresh flowers",
-    description: "Roses, mixed bouquets, sunflowers and more for every occasion.",
-    cta: "Shop Flowers",
-    pill: "Premium quality · Same-day delivery · Freshness guaranteed",
-  },
-  {
     src: "/banners/home-banner-birthday.jpg",
     alt: "Birthday gifts from blossompot.com — flowers, cakes, plushies and more",
     href: "/birthday-gifts",
@@ -171,6 +158,19 @@ export const homeBanners = [
     description: "Chocolates, cookies, premium baskets and more for your loved ones.",
     cta: "Shop Gourmet Gifts",
     pill: "Premium selection · Irresistible flavors · Thoughtful delivery",
+  },
+  {
+    src: "/banners/home-banner-flowers.jpg",
+    alt: "Fresh flowers from blossompot.com — roses, mixed bouquets, and same-day delivery",
+    href: "/flowers",
+    layout: "full" as const,
+    imageFit: "contain" as const,
+    eyebrow: "BLOSSOMPOT.COM",
+    title: "Express your feelings with",
+    titleAccent: "fresh flowers",
+    description: "Roses, mixed bouquets, sunflowers and more for every occasion.",
+    cta: "Shop Flowers",
+    pill: "Premium quality · Same-day delivery · Freshness guaranteed",
   },
 ] as const;
 

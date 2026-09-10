@@ -94,6 +94,23 @@ const SOCIAL_LINKS: {
   },
 ];
 
+function uniqueByHref<T extends { href: string; label: string }>(items: readonly T[]): T[] {
+  const seen = new Set<string>();
+  const out: T[] = [];
+  for (const item of items) {
+    if (seen.has(item.href)) continue;
+    seen.add(item.href);
+    out.push(item);
+  }
+  return out;
+}
+
+/** Header categories first, then extra gift-set links — one entry per URL. */
+const footerShopLinks = uniqueByHref([
+  ...navItems.filter((n) => "category" in n),
+  ...giftSetsMenu.items,
+]);
+
 export function Footer() {
   return (
     <footer className="border-t border-primary/15 bg-[#f8eef2] text-slate-700 mt-auto">
@@ -139,22 +156,13 @@ export function Footer() {
           <div className="min-w-0 lg:col-span-2">
             <p className="font-semibold text-primary mb-3 sm:mb-4">Shop Gifts</p>
             <ul className="space-y-2 text-slate-600">
-              {giftSetsMenu.items.map((n) => (
+              {footerShopLinks.map((n) => (
                 <li key={n.href}>
                   <Link href={n.href} className="hover:text-primary hover:underline">
                     {n.label}
                   </Link>
                 </li>
               ))}
-              {navItems
-                .filter((n) => "category" in n)
-                .map((n) => (
-                  <li key={n.href}>
-                    <Link href={n.href} className="hover:text-primary hover:underline">
-                      {n.label}
-                    </Link>
-                  </li>
-                ))}
               <li>
                 <Link href="/products" className="hover:text-primary hover:underline">
                   All Products

@@ -27,7 +27,7 @@ export const HOME_PAGE_INDEPENDENCE_DAY_BANNER_ALT =
 
 /**
  * First homepage banner image for marketing emails.
- * Matches the flowers slide on the storefront carousel.
+ * Matches the first storefront carousel slide.
  */
 export function getFirstHomePageBannerForEmail(): {
   src: string;
@@ -35,8 +35,8 @@ export function getFirstHomePageBannerForEmail(): {
   href: string;
 } {
   return {
-    src: homePageBannerUrl("flowers"),
-    alt: "Fresh flowers from blossompot.com — roses, mixed bouquets, and same-day delivery",
-    href: `${SITE_ORIGIN}/flowers`,
+    src: homePageBannerUrl("birthday"),
+    alt: "Birthday gifts from blossompot.com — flowers, cakes, plushies and more",
+    href: `${SITE_ORIGIN}/birthday-gifts`,
   };
 }
