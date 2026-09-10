@@ -7,6 +7,7 @@
  */
 
 import { catalogImagesForProduct } from "./catalog-images";
+import { homePageBannerUrl } from "./home-page-banners";
 import { cdnUploadUrl } from "./image-url";
 import { BLOSSOMPOT_SOCIAL_LINKS } from "./order-confirmed-email";
 
@@ -106,7 +107,7 @@ export const GIFTING_MARKETING_EMAIL_CONFIG: GiftingMarketingEmailConfig = {
   logoHref: SITE,
   logoAlt: "BlossomPot",
   hero: {
-    imageUrl: cdnUploadUrl("editorial/home-banner-flowers.jpg"),
+    imageUrl: homePageBannerUrl("flowers"),
     imageAlt: "Fresh flowers and gifting from BlossomPot",
     imageHref: `${SITE}/flowers`,
     headline: "Send a Gift They'll Never Forget",

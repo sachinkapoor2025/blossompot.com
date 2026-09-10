@@ -7,7 +7,10 @@
  * Both builders emit table + inline-CSS HTML for Gmail / Outlook / Apple Mail.
  */
 
-import { getFirstHomePageBannerForEmail } from "./home-page-banners";
+import {
+  HOME_PAGE_INDEPENDENCE_DAY_BANNER_ALT,
+  HOME_PAGE_INDEPENDENCE_DAY_BANNER_URL,
+} from "./home-page-banners";
 import { cdnUploadUrl, resolveProductImageUrl } from "./image-url";
 
 const SITE = "https://www.blossompot.com";
@@ -238,7 +241,7 @@ export const BIRTHDAY_EMAIL_CONFIG = {
     "Birthday cakes, bright bouquets, and gift hampers delivered across the USA. Same-day options in select cities.",
   logoUrl: LOGO,
   logoHref: SITE,
-  heroImageUrl: cdnUploadUrl("editorial/home-banner-cakes.jpg"),
+  heroImageUrl: `${SITE}/banners/home-banner-birthday.jpg`,
   heroImageHref: `${SITE}/birthday-gifts`,
   heroImageAlt: "Birthday cakes and gifts from BlossomPot",
   offerEyebrow: "BIRTHDAY COLLECTION",
@@ -689,7 +692,11 @@ export const RAKHI_HAMPERS_USA_EMAIL_CONFIG = {
 } as const;
 
 /** ═══════════════ TEMPLATE 5 — India Independence Day Offer ═══════════════ */
-const independenceDayHomeBanner = getFirstHomePageBannerForEmail();
+const independenceDayHomeBanner = {
+  src: HOME_PAGE_INDEPENDENCE_DAY_BANNER_URL,
+  href: `${SITE}/products`,
+  alt: HOME_PAGE_INDEPENDENCE_DAY_BANNER_ALT,
+};
 
 export const INDEPENDENCE_DAY_EMAIL_CONFIG = {
   templateId: "india-independence-day-offer",

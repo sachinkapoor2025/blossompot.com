@@ -5,6 +5,16 @@
 
 export const SITE_ORIGIN = "https://www.blossompot.com";
 
+export const HOME_PAGE_BANNER_PATHS = {
+  flowers: "/banners/home-banner-flowers.jpg",
+  birthday: "/banners/home-banner-birthday.jpg",
+  gourmet: "/banners/home-banner-gourmet.jpg",
+} as const;
+
+export function homePageBannerUrl(key: keyof typeof HOME_PAGE_BANNER_PATHS): string {
+  return `${SITE_ORIGIN}${HOME_PAGE_BANNER_PATHS[key]}`;
+}
+
 /** Relative public path of the Independence Day homepage hero (first carousel slide while active). */
 export const HOME_PAGE_INDEPENDENCE_DAY_BANNER_PATH =
   "/banners/banner-independence-day-2026.png" as const;
@@ -17,7 +27,7 @@ export const HOME_PAGE_INDEPENDENCE_DAY_BANNER_ALT =
 
 /**
  * First homepage banner image for marketing emails.
- * Matches the Independence Day slide prepended by `getHomeBanners()` on the storefront.
+ * Matches the flowers slide on the storefront carousel.
  */
 export function getFirstHomePageBannerForEmail(): {
   src: string;
@@ -25,8 +35,8 @@ export function getFirstHomePageBannerForEmail(): {
   href: string;
 } {
   return {
-    src: HOME_PAGE_INDEPENDENCE_DAY_BANNER_URL,
-    alt: HOME_PAGE_INDEPENDENCE_DAY_BANNER_ALT,
-    href: `${SITE_ORIGIN}/products`,
+    src: homePageBannerUrl("flowers"),
+    alt: "Fresh flowers from blossompot.com — roses, mixed bouquets, and same-day delivery",
+    href: `${SITE_ORIGIN}/flowers`,
   };
 }
