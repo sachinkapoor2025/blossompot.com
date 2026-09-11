@@ -184,9 +184,16 @@ export function parseGboContentsLines(raw: string): string[] {
  * Sell at GBO retail (`price_retail`); `price` is reseller cost (~10% off).
  * Extra storefront margin is allowed — we do not cap sell price to vendor cost.
  */
+/** Numeric GBO gift id, or undefined when the upstream id is not a positive integer. */
+export function gboGiftNumericId(gift: { id: number | string }): number | undefined {
+  const n = coerceGboNumber(gift.id);
+  if (n == null || !Number.isInteger(n) || n <= 0) return undefined;
+  return n;
+}
+
 export function gboGiftToProduct(country: string, gift: GboGift, nowIso?: string): Product {
   const iso = country.trim().toUpperCase();
-  const productId = Number(gift.id);
+  const productId = gboGiftNumericId(gift) ?? 0;
   const vendorCost = coerceGboNumber(gift.price) ?? 0;
   const retail = coerceGboNumber(gift.price_retail);
   const sell =
@@ -258,9 +265,18 @@ export function parseGboSku(sku?: string | null): GboLineRef | null {
 }
 
 export function parseGboSlug(slug?: string | null): GboLineRef | null {
-  const m = slug?.trim().match(GBO_SLUG_RE);
+  let value = slug?.trim() ?? "";
+  if (!value) return null;
+  try {
+    value = decodeURIComponent(value);
+  } catch {
+    /* keep raw slug */
+  }
+  const m = value.match(GBO_SLUG_RE);
   if (!m) return null;
-  return { country: m[1]!.toUpperCase(), productId: Number(m[2]) };
+  const productId = Number(m[2]);
+  if (!Number.isInteger(productId) || productId <= 0) return null;
+  return { country: m[1]!.toUpperCase(), productId };
 }
 
 export function parseGboLineRef(item: {

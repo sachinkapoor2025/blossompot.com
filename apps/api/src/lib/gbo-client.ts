@@ -4,6 +4,7 @@ import {
   gboCountrySchema,
   gboCreateOrderResponseSchema,
   gboCreateOrderSchema,
+  gboGiftNumericId,
   gboGiftSchema,
   gboOrderDetailsSchema,
   type GboCategory,
@@ -204,6 +205,16 @@ export async function gboListGifts(
   return gifts;
 }
 
+function coerceGiftPayload(data: unknown): unknown {
+  if (Array.isArray(data)) return data[0];
+  if (data && typeof data === "object") {
+    const row = data as Record<string, unknown>;
+    if (row.gift && typeof row.gift === "object") return row.gift;
+    if (row.product && typeof row.product === "object") return row.product;
+  }
+  return data;
+}
+
 export async function gboGetGift(
   country: string,
   productId: number,
@@ -214,12 +225,35 @@ export async function gboGetGift(
     country_iso_alpha2: iso,
     product_id: String(productId),
   });
-  const data = await gboFetch(`/gift/get?${q.toString()}`, { sandbox: config?.sandbox, config });
-  const parsed = gboGiftSchema.safeParse(data);
+  const data = await gboFetch(`/gift/get?${q.toString()}`, {
+    sandbox: config?.sandbox,
+    config,
+    body: { country_iso_alpha2: iso, product_id: productId },
+  });
+  const parsed = gboGiftSchema.safeParse(coerceGiftPayload(data));
   if (!parsed.success) {
     throw new GboClientError("Unexpected gift payload from Gift Baskets Overseas", 502, data);
   }
   return parsed.data;
+}
+
+/**
+ * Resolve a gift for cart/PDP. `/gift/get` is flaky or returns "Product not found"
+ * for some catalog ids that still appear in `/gifts/get` — fall back to the list.
+ */
+export async function gboResolveGift(
+  country: string,
+  productId: number,
+  config?: GboClientConfig
+): Promise<GboGift> {
+  try {
+    return await gboGetGift(country, productId, config);
+  } catch (err) {
+    const gifts = await gboListGifts({ country }, config);
+    const found = gifts.find((gift) => gboGiftNumericId(gift) === productId);
+    if (found) return found;
+    throw err;
+  }
 }
 
 export async function gboCreateOrder(

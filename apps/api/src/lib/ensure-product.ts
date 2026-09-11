@@ -9,7 +9,12 @@ import { ensureGboProductInDb } from "./gbo-catalog";
 
 export async function ensureProductInDb(slug: string): Promise<Record<string, unknown> | null> {
   if (parseGboSlug(slug)) {
-    return ensureGboProductInDb(slug);
+    try {
+      return await ensureGboProductInDb(slug);
+    } catch (err) {
+      console.error("ensureGboProductInDb failed", slug, err);
+      return null;
+    }
   }
   const fromOc = await ensureOrangeCountyProductInDb(slug);
   if (fromOc) return fromOc;

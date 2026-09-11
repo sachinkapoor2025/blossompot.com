@@ -22,6 +22,13 @@ describe("gbo helpers", () => {
   it("parses sku and slug refs", () => {
     assert.deepEqual(parseGboSku("gbo:US:10215"), { country: "US", productId: 10215 });
     assert.deepEqual(parseGboSlug("gbo-gb-7-beary-special"), { country: "GB", productId: 7 });
+    assert.deepEqual(parseGboSlug("gbo-us-10215-natural-selection"), { country: "US", productId: 10215 });
+    assert.deepEqual(parseGboSlug(encodeURIComponent("gbo-us-3-the-peak-of-celebration")), {
+      country: "US",
+      productId: 3,
+    });
+    assert.equal(parseGboSlug("gbo-us-NaN-broken"), null);
+    assert.equal(parseGboSlug("signature-birthday-balloon-set"), null);
     assert.equal(parseGboSku("TFUSRH2026-16"), null);
     assert.deepEqual(parseGboLineRef({ sku: "gbo:in:9", productSlug: "other" }), {
       country: "IN",

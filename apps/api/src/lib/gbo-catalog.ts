@@ -15,7 +15,7 @@ import {
   type Product,
 } from "@blossompot/shared";
 import { docClient, PRODUCTS_TABLE, now } from "./db";
-import { gboGetGift } from "./gbo-client";
+import { gboResolveGift } from "./gbo-client";
 
 async function ensureGboCategory(ts: string) {
   const slug = GBO_CATEGORY_SLUG;
@@ -123,7 +123,7 @@ export async function ensureGboProductInDb(slug: string): Promise<Record<string,
   const ref = parseGboSlug(slug);
   if (!ref) return null;
 
-  const gift = await gboGetGift(ref.country, ref.productId);
+  const gift = await gboResolveGift(ref.country, ref.productId);
   const ts = now();
   const product = gboGiftToProduct(ref.country, gift, ts);
   await ensureGboCategory(ts);
