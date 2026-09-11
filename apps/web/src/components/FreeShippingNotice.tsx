@@ -30,10 +30,9 @@ export function FreeShippingNotice({ quote, formatMoney, currency, className = "
       <div
         className={`text-xs text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2 ${className}`}
       >
-        <p className="font-semibold">International shipping: {formatMoney(quote.charge, currency)}</p>
+        <p className="font-semibold">Shipping: {formatMoney(quote.charge, currency)}</p>
         <p className="mt-0.5 leading-snug text-slate-600">
-          Flat fee for international partner gifts only. Other sellers keep the usual free-shipping
-          tiers.
+          Flat $19 shipping for these gifts only. Other sellers keep the usual free-shipping tiers.
         </p>
       </div>
     );

@@ -10,6 +10,7 @@ import {
   gboPartnerOrderId,
   mapGboGiftStorefrontCategories,
   mapGboStatusToOrderStatus,
+  parseGboContentsLines,
   parseGboLineRef,
   parseGboSku,
   parseGboSlug,
@@ -29,6 +30,25 @@ describe("gbo helpers", () => {
     assert.equal(formatGboSku("us", 1), "gbo:US:1");
     assert.equal(formatGboProductSlug("US", 3, "The Peak of Celebration"), "gbo-us-3-the-peak-of-celebration");
     assert.equal(gboImageUrl("/img/a.jpg"), "https://www.giftbasketsoverseas.com/img/a.jpg");
+  });
+
+  it("strips GBO HTML contents into readable lines", () => {
+    const lines = parseGboContentsLines(
+      "<b>ATTENTION: Do not substitute brands without our approval</b> <b>- Apple AirPods Pro 2nd Generation;</b> - Bottle of Dry Red Wine 0,75 L (Italian, Argentinian, French Or Spanish)"
+    );
+    assert.deepEqual(lines, [
+      "Apple AirPods Pro 2nd Generation",
+      "Bottle of Dry Red Wine 0,75 L (Italian, Argentinian, French Or Spanish)",
+    ]);
+    const product = gboGiftToProduct("ve", {
+      id: 1,
+      name: "Wine and Apple AirPods Pro Deluxe Basket",
+      price: "10",
+      contents:
+        "<b>ATTENTION: Do not substitute brands without our approval</b><b>- Apple AirPods Pro 2nd Generation;</b>",
+    });
+    assert.equal(product.description.includes("<b>"), false);
+    assert.ok(product.description.includes("Apple AirPods Pro 2nd Generation"));
   });
 
   it("maps GBO gifts to storefront products at retail with reseller cost", () => {

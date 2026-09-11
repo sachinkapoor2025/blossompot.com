@@ -128,6 +128,57 @@ export function gboImageUrl(image?: string | null): string | undefined {
   return `https://www.giftbasketsoverseas.com${path}`;
 }
 
+function decodeGboEntities(value: string): string {
+  return value
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/gi, "'");
+}
+
+/** Turn partner HTML (bold/br/li) into readable plain text. */
+export function stripGboMarkup(raw: string): string {
+  return decodeGboEntities(
+    raw
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/(p|div|li|h[1-6]|tr|b|strong)>/gi, "\n")
+      .replace(/<li[^>]*>/gi, "\n")
+      .replace(/<[^>]+>/g, "")
+  )
+    .replace(/\u00a0/g, " ")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function isGboOpsNote(line: string): boolean {
+  return /^attention\b/i.test(line) || /do not substitute brands/i.test(line);
+}
+
+/**
+ * Customer-facing contents bullets from GBO `contents` / description HTML.
+ * Drops partner ops notes and does not truncate the list into a broken snippet.
+ */
+export function parseGboContentsLines(raw: string): string[] {
+  const fromIncludes = raw.match(/Includes:\s*([\s\S]+)/i);
+  const body = stripGboMarkup(fromIncludes ? fromIncludes[1]! : raw);
+  if (!body) return [];
+  const chunks = body
+    .split(/\n+|(?:;\s*)(?=-)|(?:\s+-\s+)/)
+    .map((line) =>
+      line
+        .replace(/^[-•*]+\s*/, "")
+        .replace(/;+\s*$/, "")
+        .replace(/\s+/g, " ")
+        .trim()
+    )
+    .filter((line) => line.length > 1 && !isGboOpsNote(line));
+  return [...new Set(chunks)].slice(0, 20);
+}
+
 /**
  * Map a GBO catalog gift to a BlossomPot product.
  * Sell at GBO retail (`price_retail`); `price` is reseller cost (~10% off).
@@ -142,17 +193,21 @@ export function gboGiftToProduct(country: string, gift: GboGift, nowIso?: string
     retail && retail > 0 ? roundMoney(retail) : roundMoney(Math.max(vendorCost, 0.01));
   const ts = nowIso ?? new Date().toISOString();
   const image = gboImageUrl(gift.image);
-  const contents = coerceGboString(gift.contents);
-  const descriptionParts = [coerceGboString(gift.description), contents ? `Includes: ${contents}` : ""]
-    .filter(Boolean)
-    .join("\n\n");
+  const descriptionPlain = coerceGboString(gift.description)
+    ? stripGboMarkup(coerceGboString(gift.description)!)
+    : "";
+  const contentsLines = parseGboContentsLines(coerceGboString(gift.contents) ?? "");
+  const descriptionParts = [
+    descriptionPlain,
+    contentsLines.length ? `Includes:\n${contentsLines.map((line) => `- ${line}`).join("\n")}` : "",
+  ].filter(Boolean);
   const days = coerceGboNumber(gift.delivery_days);
   const storefrontCats = mapGboGiftStorefrontCategories(gift);
   return {
     slug: formatGboProductSlug(iso, productId, gift.name),
     name: gift.name,
-    description: descriptionParts || gift.name,
-    shortDescription: contents?.slice(0, 320),
+    description: descriptionParts.join("\n\n") || gift.name,
+    shortDescription: (descriptionPlain || contentsLines[0] || gift.name).slice(0, 320),
     price: sell,
     currency: "USD",
     categorySlug: storefrontCats.categorySlug,
