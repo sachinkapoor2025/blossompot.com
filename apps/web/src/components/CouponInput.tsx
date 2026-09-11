@@ -4,13 +4,22 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 import { useSessionId } from "@/lib/session";
 import { formatCouponExpiry } from "@/lib/welcome-coupon";
+import {
+  applyPercentDiscount,
+  applyTrialPayableDiscount,
+  isTrialCouponKind,
+  trialTargetPayable,
+} from "@blossompot/shared";
 
 type Props = {
   email: string;
   phone?: string;
   /** Subtotal coupons may discount (excludes flash-sale / couponExcluded lines). */
   subtotal: number;
+  /** Merchandise + shipping (+ tax) before coupon — used for trial $1 codes. */
+  payableBeforeDiscount?: number;
   currency: "USD" | "INR";
+  usdInrRate?: number;
   formatMoney: (amount: number, currency: "USD" | "INR") => string;
   initialCode?: string;
   /** When true, flash-sale lines are in the cart — coupons skip those lines. */
@@ -23,7 +32,9 @@ export function CouponInput({
   email,
   phone = "",
   subtotal,
+  payableBeforeDiscount,
   currency,
+  usdInrRate = 0,
   formatMoney,
   initialCode = "",
   hasCouponExcludedItems = false,
@@ -39,15 +50,12 @@ export function CouponInput({
     discountPercent: number;
     expiresAt: string;
     discountAmount: number;
+    trial?: boolean;
   } | null>(null);
 
   const apply = async () => {
     const trimmed = code.trim().toUpperCase();
     if (!trimmed) return;
-    if (subtotal <= 0) {
-      setError("Coupons cannot be applied to flash sale items");
-      return;
-    }
     const hasEmail = Boolean(email.trim() && email.includes("@"));
     const hasPhone = phone.replace(/\D/g, "").length >= 7;
     if (!hasEmail && !hasPhone) {
@@ -63,6 +71,8 @@ export function CouponInput({
         discountPercent?: number;
         expiresAt?: string;
         error?: string;
+        kind?: "percent" | "trial";
+        targetUsd?: number;
       }>("/coupons/validate", {
         method: "POST",
         sessionId: sessionId ?? undefined,
@@ -73,16 +83,29 @@ export function CouponInput({
         }),
       });
 
-      if (!result.valid || !result.discountPercent || !result.code) {
+      if (!result.valid || !result.code) {
         throw new Error(result.error ?? "Invalid coupon");
       }
 
-      const discountAmount = Math.round(subtotal * (result.discountPercent / 100) * 100) / 100;
+      const trial = isTrialCouponKind(result.kind);
+      if (!trial && (!result.discountPercent || subtotal <= 0)) {
+        throw new Error(
+          subtotal <= 0 ? "Coupons cannot be applied to flash sale items" : result.error ?? "Invalid coupon"
+        );
+      }
+
+      const discountAmount = trial
+        ? applyTrialPayableDiscount(
+            payableBeforeDiscount ?? subtotal,
+            trialTargetPayable(currency, usdInrRate)
+          )
+        : applyPercentDiscount(subtotal, result.discountPercent!);
       setApplied({
         code: result.code,
-        discountPercent: result.discountPercent,
+        discountPercent: result.discountPercent ?? 0,
         expiresAt: result.expiresAt ?? "",
         discountAmount,
+        trial,
       });
       onApplied(discountAmount, result.code);
     } catch (err) {
@@ -112,7 +135,12 @@ export function CouponInput({
       {applied ? (
         <div className="text-sm space-y-1">
           <p className="text-green-700 font-medium">
-            {applied.code} applied — {applied.discountPercent}% off (−{formatMoney(applied.discountAmount, currency)})
+            {applied.trial
+              ? `${applied.code} applied — order total set to ${formatMoney(
+                  (payableBeforeDiscount ?? subtotal) - applied.discountAmount,
+                  currency
+                )} for testing`
+              : `${applied.code} applied — ${applied.discountPercent}% off (−${formatMoney(applied.discountAmount, currency)})`}
           </p>
           {applied.expiresAt && (
             <p className="text-xs text-slate-500">Expires {formatCouponExpiry(applied.expiresAt)}</p>
@@ -128,7 +156,7 @@ export function CouponInput({
               type="text"
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="GIFT-XXXXXX"
+              placeholder="GIFT-XXXXXX or TRIAL-XXXXXX"
               className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm uppercase"
             />
             <button

@@ -1046,7 +1046,9 @@ function CheckoutPageInner() {
                 email={address.email}
                 phone={address.phone}
                 subtotal={couponEligibleDisplaySubtotal}
+                payableBeforeDiscount={displaySubtotal + shippingCharge}
                 currency={displayCurrency}
+                usdInrRate={usdInrRate}
                 formatMoney={format}
                 hasCouponExcludedItems={hasCouponExcludedLines}
                 initialCode={savedCouponCode}

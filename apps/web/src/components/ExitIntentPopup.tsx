@@ -21,7 +21,9 @@ import { PhoneInput, buildPhoneValue } from "@/components/PhoneInput";
 import { useOptionalDeliveryLocation } from "@/lib/delivery-location-context";
 
 const STORAGE_KEY = "blossompot_daily_deal_shown";
-const SHOW_AFTER_MS = 10_000;
+const TIMER_START_KEY = "blossompot_daily_deal_timer_start";
+/** Wait after first landing before showing Discount of the Day. */
+const SHOW_AFTER_MS = 20_000;
 const SPIN_MS = 4200;
 
 const SEGMENTS = [...DAILY_DEAL_SEGMENTS];
@@ -96,18 +98,20 @@ export function ExitIntentPopup() {
   }, []);
 
   useEffect(() => {
-    if (!hasDeliveryLocation || locationSelectorOpen) {
-      setOpen(false);
+    if (pathname.startsWith("/admin") || pathname.startsWith("/ses-email") || pathname.startsWith("/checkout")) {
       return;
     }
-    if (pathname.startsWith("/admin") || pathname.startsWith("/ses-email") || pathname.startsWith("/checkout")) return;
     if (sessionStorage.getItem(STORAGE_KEY)) return;
 
-    const TIMER_START_KEY = "blossompot_daily_deal_timer_start";
     let startedAt = Number(sessionStorage.getItem(TIMER_START_KEY) || 0);
     if (!startedAt) {
       startedAt = Date.now();
       sessionStorage.setItem(TIMER_START_KEY, String(startedAt));
+    }
+
+    if (!hasDeliveryLocation || locationSelectorOpen) {
+      setOpen(false);
+      return;
     }
 
     const remaining = Math.max(0, SHOW_AFTER_MS - (Date.now() - startedAt));
@@ -115,6 +119,7 @@ export function ExitIntentPopup() {
       if (sessionStorage.getItem(STORAGE_KEY)) return;
       const path = window.location.pathname;
       if (path.startsWith("/admin") || path.startsWith("/ses-email") || path.startsWith("/checkout")) return;
+      if (!hasDeliveryLocation || locationSelectorOpen) return;
       sessionStorage.setItem(STORAGE_KEY, "1");
       setOpen(true);
       trackSessionHeartbeat("daily_deal_shown", SHOW_AFTER_MS, path);

@@ -62,6 +62,34 @@ export function dailyDealDayKey(date = new Date()): string {
 export const couponSourceSchema = z.enum(["welcome", "abandoned", "admin"]);
 export type CouponSource = z.infer<typeof couponSourceSchema>;
 
+/** Admin order-test coupon: payable total becomes $1 USD (or INR equivalent). */
+export const ADMIN_TRIAL_COUPON_KIND = "trial" as const;
+export const ADMIN_TRIAL_TARGET_USD = 1;
+export const ADMIN_TRIAL_COUPON_MINUTES = 20;
+
+export function isTrialCouponKind(kind: unknown): kind is typeof ADMIN_TRIAL_COUPON_KIND {
+  return kind === ADMIN_TRIAL_COUPON_KIND;
+}
+
+/** $1 USD, or the INR amount equal to $1 at the given rate. */
+export function trialTargetPayable(currency: "USD" | "INR", usdInrRate = 0): number {
+  if (currency === "INR") {
+    const rate = usdInrRate > 0 ? usdInrRate : 83;
+    return Math.round(ADMIN_TRIAL_TARGET_USD * rate * 100) / 100;
+  }
+  return ADMIN_TRIAL_TARGET_USD;
+}
+
+/** Discount so payable (subtotal + shipping + tax) equals the target. */
+export function applyTrialPayableDiscount(payable: number, targetPayable: number): number {
+  if (!(payable > targetPayable)) return 0;
+  return Math.round((payable - targetPayable) * 100) / 100;
+}
+
+export function applyPercentDiscount(subtotal: number, percent: number): number {
+  return Math.round(subtotal * (percent / 100) * 100) / 100;
+}
+
 /** Admin manual abandoned-cart coupons (WhatsApp / phone outreach). */
 export const ADMIN_MANUAL_COUPON_HOURS = 1;
 /** Default / baseline confirmed-sale discount (also the min for typed special offers). */
@@ -123,12 +151,9 @@ export const createAdminCouponSchema = z
     phone: z.string().trim().max(22).optional().or(z.literal("")),
     /** Full E.164 for WhatsApp outreach only; never used for coupon validation. */
     whatsappPhone: z.string().trim().max(22).optional().or(z.literal("")),
-    discountPercent: z
-      .number()
-      .int()
-      .refine(isAllowedAdminCouponDiscount, {
-        message: "Discount must be 7%–15% (outreach) or 20%–50% (confirmed / special offer)",
-      }),
+    /** Omit for percent coupons; set `trial` for $1 / 20-minute test codes. */
+    kind: z.enum(["percent", "trial"]).optional(),
+    discountPercent: z.number().int().optional(),
     /**
      * Optional explicit flag. When omitted, 20%–50% is treated as confirmed sale.
      * Confirmed-sale coupons get a longer validity window.
@@ -136,6 +161,15 @@ export const createAdminCouponSchema = z
     confirmedSale: z.boolean().optional(),
   })
   .superRefine((v, ctx) => {
+    if (v.kind !== "trial") {
+      if (!isAllowedAdminCouponDiscount(v.discountPercent ?? NaN)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Discount must be 7%–15% (outreach) or 20%–50% (confirmed / special offer)",
+          path: ["discountPercent"],
+        });
+      }
+    }
     const email = v.email?.trim() ?? "";
     const phoneDigits = (v.phone ?? "").replace(/\D/g, "");
     const hasEmail = Boolean(email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
@@ -169,7 +203,7 @@ export const couponSchema = z.object({
   code: z.string(),
   /** Optional when coupon is bound to phone (spin-the-wheel). */
   email: z.string().email().optional(),
-  discountPercent: z.number().int().min(1).max(100),
+  discountPercent: z.number().int().min(0).max(100),
   expiresAt: z.string(),
   createdAt: z.string(),
   sessionId: z.string().optional(),
@@ -186,6 +220,9 @@ export const couponSchema = z.object({
    * Longer expiry so the code is less likely to expire unused.
    */
   confirmedSale: z.boolean().optional(),
+  /** Admin test coupon: order total becomes $1 for 20 minutes. */
+  kind: z.enum(["percent", "trial"]).optional(),
+  targetUsd: z.number().positive().optional(),
 });
 
 export type StoreCoupon = z.infer<typeof couponSchema>;
@@ -213,4 +250,6 @@ export type CouponValidationResult = {
   discountPercent?: number;
   expiresAt?: string;
   error?: string;
+  kind?: "percent" | "trial";
+  targetUsd?: number;
 };

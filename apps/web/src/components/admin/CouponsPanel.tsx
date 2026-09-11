@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useApiClient, useAuth } from "@/lib/auth-context";
+import { useApiClient } from "@/lib/auth-context";
 import {
   ADMIN_OUTREACH_DISCOUNT_OPTIONS,
   ADMIN_CONFIRMED_SALE_DISCOUNT_PERCENT,
@@ -9,8 +9,10 @@ import {
   ADMIN_MANUAL_COUPON_HOURS,
   ADMIN_EXTREME_DISCOUNT_MIN,
   ADMIN_EXTREME_DISCOUNT_MAX,
+  ADMIN_TRIAL_COUPON_MINUTES,
   isAdminConfirmedSaleDiscount,
   isAdminExtremeDiscount,
+  isTrialCouponKind,
   type StoreCoupon,
 } from "@blossompot/shared";
 import { PhoneInput, buildPhoneValue } from "@/components/PhoneInput";
@@ -32,11 +34,10 @@ type CreateResult = {
   };
 };
 
-type DiscountMode = "outreach" | "special";
+type DiscountMode = "outreach" | "special" | "trial";
 
 export function CouponsPanel() {
   const api = useApiClient();
-  const { user } = useAuth();
   const [email, setEmail] = useState("");
   const [phoneCountry, setPhoneCountry] = useState("IN");
   const [phoneLocal, setPhoneLocal] = useState("");
@@ -56,7 +57,9 @@ export function CouponsPanel() {
   const discountPercent =
     discountMode === "outreach"
       ? outreachPercent
-      : Math.round(Number(specialPercent));
+      : discountMode === "special"
+        ? Math.round(Number(specialPercent))
+        : 0;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -105,7 +108,8 @@ export function CouponsPanel() {
     setLastWhatsAppLink("");
     setLastCode("");
     try {
-      const confirmedSale = isAdminConfirmedSaleDiscount(discountPercent);
+      const isTrial = discountMode === "trial";
+      const confirmedSale = !isTrial && isAdminConfirmedSaleDiscount(discountPercent);
       const hours = confirmedSale ? ADMIN_CONFIRMED_SALE_COUPON_HOURS : ADMIN_MANUAL_COUPON_HOURS;
       const res = await api<CreateResult>("/admin/coupons/abandoned", {
         method: "POST",
@@ -117,8 +121,12 @@ export function CouponsPanel() {
                 whatsappPhone: buildPhoneValue(phoneCountry, phoneLocal),
               }
             : {}),
-          discountPercent,
-          ...(confirmedSale ? { confirmedSale: true } : {}),
+          ...(isTrial
+            ? { kind: "trial" }
+            : {
+                discountPercent,
+                ...(confirmedSale ? { confirmedSale: true } : {}),
+              }),
         }),
       });
       setLastCode(res.coupon.code);
@@ -149,13 +157,17 @@ export function CouponsPanel() {
           : res.whatsapp.skipped
             ? "WhatsApp API not configured — use Open WhatsApp below"
             : `WhatsApp failed${res.whatsapp.error ? `: ${res.whatsapp.error}` : ""}`;
-      const saleLabel = isAdminExtremeDiscount(discountPercent)
-        ? " · Extreme discount"
-        : res.coupon.confirmedSale || confirmedSale
-          ? " · Confirmed sale"
-          : "";
+      const saleLabel = isTrial
+        ? " · Trial $1"
+        : isAdminExtremeDiscount(discountPercent)
+          ? " · Extreme discount"
+          : res.coupon.confirmedSale || confirmedSale
+            ? " · Confirmed sale"
+            : "";
       setMessage(
-        `Coupon ${res.coupon.code} created (${res.coupon.discountPercent}%${saleLabel} · expires in ${hours} hour${hours === 1 ? "" : "s"}). ${emailNotes}. ${waNote}.`
+        isTrial
+          ? `Trial coupon ${res.coupon.code} created — order total becomes $1 (or ₹ equivalent). Valid ${ADMIN_TRIAL_COUPON_MINUTES} minutes. Use the same email/phone at checkout.`
+          : `Coupon ${res.coupon.code} created (${res.coupon.discountPercent}%${saleLabel} · expires in ${hours} hour${hours === 1 ? "" : "s"}). ${emailNotes}. ${waNote}.`
       );
       setEmail("");
       setPhoneLocal("");
@@ -172,13 +184,11 @@ export function CouponsPanel() {
       <div>
         <h2 className="text-lg font-semibold text-slate-900">Coupons</h2>
         <p className="text-sm text-slate-500 mt-1">
-          Generate a coupon for outreach (7–15%, 1 hour) or a confirmed / special offer (
+          Generate a coupon for outreach (7–15%, 1 hour), a confirmed / special offer (
           {ADMIN_EXTREME_DISCOUNT_MIN}–{ADMIN_EXTREME_DISCOUNT_MAX}%,{" "}
-          {ADMIN_CONFIRMED_SALE_COUPON_HOURS} hours). Type any whole percent from{" "}
-          {ADMIN_EXTREME_DISCOUNT_MIN}–{ADMIN_EXTREME_DISCOUNT_MAX} for customers who need more than{" "}
-          {ADMIN_CONFIRMED_SALE_DISCOUNT_PERCENT}%. Discounts above {ADMIN_CONFIRMED_SALE_DISCOUNT_PERCENT}%
-          email the team with subject “Extreme discount offered”, including you (
-          {user?.email ?? "logged-in admin"}).
+          {ADMIN_CONFIRMED_SALE_COUPON_HOURS} hours), or a trial code that sets the order total to $1
+          for {ADMIN_TRIAL_COUPON_MINUTES} minutes (for payment testing). Bind the trial code to the
+          email or phone you will use at checkout.
         </p>
       </div>
 
@@ -234,6 +244,15 @@ export function CouponsPanel() {
               />
               Confirmed / special ({ADMIN_EXTREME_DISCOUNT_MIN}–{ADMIN_EXTREME_DISCOUNT_MAX}%)
             </label>
+            <label className="flex items-center gap-2 text-sm border rounded-lg px-3 py-2 cursor-pointer flex-1">
+              <input
+                type="radio"
+                name="discountMode"
+                checked={discountMode === "trial"}
+                onChange={() => setDiscountMode("trial")}
+              />
+              Trial ($1 · {ADMIN_TRIAL_COUPON_MINUTES} min)
+            </label>
           </div>
 
           {discountMode === "outreach" ? (
@@ -251,7 +270,7 @@ export function CouponsPanel() {
                 ))}
               </select>
             </label>
-          ) : (
+          ) : discountMode === "special" ? (
             <label className="block text-sm">
               Type discount percent ({ADMIN_EXTREME_DISCOUNT_MIN}–{ADMIN_EXTREME_DISCOUNT_MAX})
               <input
@@ -273,6 +292,12 @@ export function CouponsPanel() {
                 customer needs a higher offer — that sends an “Extreme discount offered” alert.
               </span>
             </label>
+          ) : (
+            <p className="text-sm text-slate-600 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+              Sets merchandise + shipping to <strong>$1 USD</strong> (or the INR equivalent) so you can
+              run a real payment test. Expires in {ADMIN_TRIAL_COUPON_MINUTES} minutes. One use. Must
+              match this email or phone at checkout.
+            </p>
           )}
         </fieldset>
 
@@ -311,11 +336,13 @@ export function CouponsPanel() {
         >
           {saving
             ? "Generating…"
-            : isAdminExtremeDiscount(discountPercent)
-              ? "Generate extreme-discount coupon"
-              : isAdminConfirmedSaleDiscount(discountPercent)
-                ? "Generate confirmed-sale coupon"
-                : "Generate coupon"}
+            : discountMode === "trial"
+              ? "Generate $1 trial coupon"
+              : isAdminExtremeDiscount(discountPercent)
+                ? "Generate extreme-discount coupon"
+                : isAdminConfirmedSaleDiscount(discountPercent)
+                  ? "Generate confirmed-sale coupon"
+                  : "Generate coupon"}
         </button>
       </form>
 
@@ -351,9 +378,11 @@ export function CouponsPanel() {
             {rows.slice(0, 50).map((c) => {
               const expired = new Date(c.expiresAt).getTime() < Date.now();
               const used = Boolean(c.usedAt);
-              const extreme = isAdminExtremeDiscount(c.discountPercent);
+              const trial = isTrialCouponKind(c.kind);
+              const extreme = !trial && isAdminExtremeDiscount(c.discountPercent);
               const confirmed =
-                Boolean(c.confirmedSale) || isAdminConfirmedSaleDiscount(c.discountPercent);
+                !trial &&
+                (Boolean(c.confirmedSale) || isAdminConfirmedSaleDiscount(c.discountPercent));
               const phoneVal =
                 "phone" in c && typeof (c as { phone?: string }).phone === "string"
                   ? (c as { phone?: string }).phone
@@ -363,7 +392,11 @@ export function CouponsPanel() {
                   <div>
                     <p className="font-mono font-medium flex flex-wrap items-center gap-2">
                       {c.code}
-                      {extreme ? (
+                      {trial ? (
+                        <span className="rounded bg-slate-800 text-white text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5">
+                          Trial $1
+                        </span>
+                      ) : extreme ? (
                         <span className="rounded bg-amber-700 text-white text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5">
                           Extreme
                         </span>
@@ -377,7 +410,7 @@ export function CouponsPanel() {
                       {[
                         c.email || null,
                         phoneVal || null,
-                        `${c.discountPercent}%`,
+                        trial ? "$1 total" : `${c.discountPercent}%`,
                         `by ${(c as { createdBy?: string }).createdBy ?? "—"}`,
                       ]
                         .filter(Boolean)
