@@ -1,12 +1,20 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { Suspense, useEffect, useId, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
 import { dismissLocationPrompt } from "@/lib/delivery-location";
 import { useGboDeliveryCountries, useCountrySearch } from "@/lib/gbo-delivery-countries";
 
 export function DeliveryLocationModal() {
+  return (
+    <Suspense fallback={null}>
+      <DeliveryLocationModalInner />
+    </Suspense>
+  );
+}
+
+function DeliveryLocationModalInner() {
   const { location, selectorOpen, selectorCountryPrefill, closeSelector, setLocation } = useDeliveryLocation();
   const router = useRouter();
   const pathname = usePathname();
