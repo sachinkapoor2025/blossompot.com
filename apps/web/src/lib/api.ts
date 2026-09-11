@@ -45,8 +45,14 @@ async function fetchWithRetry(url: string, init: RequestInit, attempts = 3): Pro
 function errorMessageFromBody(body: unknown, status: number): string {
   if (body && typeof body === "object") {
     const record = body as Record<string, unknown>;
-    if (typeof record.error === "string" && record.error.trim()) return record.error;
-    if (typeof record.message === "string" && record.message.trim()) return record.message;
+    if (typeof record.error === "string" && record.error.trim()) {
+      const raw = record.error.trim();
+      if (raw.startsWith("[") || raw.startsWith("{")) {
+        return status >= 500 ? "Something went wrong. Please try again." : "Could not add this gift. Please try again.";
+      }
+      return raw;
+    }
+    if (typeof record.message === "string" && record.message.trim()) return record.message.trim();
   }
   return `API error (${status})`;
 }

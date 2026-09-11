@@ -144,7 +144,7 @@ export function checkVendorServiceability(
   if (!vendorActive) {
     return { serviceable: false, reason: "inactive_vendor", vendorSlug };
   }
-  if (!location.countryCode?.trim() || !location.postalCode?.trim()) {
+  if (!location.countryCode?.trim()) {
     return { serviceable: false, reason: "invalid_location", vendorSlug };
   }
   const loc = normalizeDeliveryLocation(location);

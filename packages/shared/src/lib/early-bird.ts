@@ -5,8 +5,13 @@ export const EARLY_BIRD_DISCOUNT_PERCENT = 15 as const;
 export const EARLY_BIRD_ENDS_DATE = "2026-08-10";
 
 /**
- * Latest customer-selectable scheduled delivery date (inclusive).
- * Stored as YYYY-MM-DD in America/New_York calendar terms.
+ * How far ahead customers can schedule delivery (America/New_York calendar days).
+ * A fixed 2026-08-28 cap left every date greyed out after that campaign ended.
+ */
+export const SCHEDULE_DELIVERY_HORIZON_DAYS = 90;
+
+/**
+ * @deprecated Campaign-era cap. Use `scheduleDeliveryMaxDate()` for the live picker.
  */
 export const SCHEDULE_DELIVERY_MAX_DATE = "2026-08-28";
 
@@ -33,13 +38,25 @@ export function scheduleDeliveryMinDate(date = new Date()): string {
   return calendarDayKeyAmericaNy(date);
 }
 
+function addIsoDays(ymd: string, days: number): string {
+  const [y, m, d] = ymd.split("-").map(Number);
+  const next = new Date(Date.UTC(y!, m! - 1, d! + days));
+  return next.toISOString().slice(0, 10);
+}
+
+/** Latest selectable delivery date (inclusive) = today + horizon. */
+export function scheduleDeliveryMaxDate(date = new Date()): string {
+  return addIsoDays(scheduleDeliveryMinDate(date), SCHEDULE_DELIVERY_HORIZON_DAYS);
+}
+
 export function isValidScheduleDeliveryDate(
   value: string,
   now = new Date()
 ): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const min = scheduleDeliveryMinDate(now);
-  return value >= min && value <= SCHEDULE_DELIVERY_MAX_DATE;
+  const max = scheduleDeliveryMaxDate(now);
+  return value >= min && value <= max;
 }
 
 /** ISO timestamp at end of the selected America/New_York calendar day (approx 23:59:59.999 ET). */

@@ -1,6 +1,6 @@
 import {
-  SCHEDULE_DELIVERY_MAX_DATE,
   isValidScheduleDeliveryDate,
+  scheduleDeliveryMaxDate,
   scheduleDeliveryMinDate,
 } from "@blossompot/shared";
 
@@ -37,8 +37,9 @@ export function preferredDeliveryDateBounds(now = new Date()): {
   min: string;
   max: string;
 } {
-  return {
-    min: scheduleDeliveryMinDate(now),
-    max: SCHEDULE_DELIVERY_MAX_DATE,
-  };
+  const min = scheduleDeliveryMinDate(now);
+  let max = scheduleDeliveryMaxDate(now);
+  // Guard against a stale campaign cap (min > max greys out every day in the native picker).
+  if (max < min) max = min;
+  return { min, max };
 }

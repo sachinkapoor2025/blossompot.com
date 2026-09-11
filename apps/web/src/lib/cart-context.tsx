@@ -95,9 +95,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
         ...(addons?.length ? { addons } : {}),
         ...(() => {
           const loc = readDeliveryLocation();
-          return loc
-            ? { deliveryCountry: loc.countryCode, deliveryPostal: loc.postalCode }
-            : {};
+          if (!loc?.countryCode) return {};
+          return {
+            deliveryCountry: loc.countryCode,
+            ...(loc.postalCode.trim() ? { deliveryPostal: loc.postalCode } : {}),
+          };
         })(),
       }),
     });

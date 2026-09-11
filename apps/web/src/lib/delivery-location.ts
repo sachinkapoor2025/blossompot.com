@@ -19,15 +19,16 @@ export function parseDeliveryLocationToken(raw: string | null | undefined): Stor
   if (!raw) return null;
   const [countryCode, ...rest] = raw.split(":");
   const postalCode = rest.join(":").trim();
-  if (!countryCode || !postalCode) return null;
+  if (!countryCode) return null;
   const iso = countryCode.trim().toUpperCase();
+  if (!/^[A-Z]{2}$/.test(iso)) return null;
   const country = getDeliveryCountry(iso);
   if (country && !country.enabled) return null;
-  if (!isValidPostal(iso, postalCode)) return null;
+  if (postalCode && !isValidPostal(iso, postalCode)) return null;
   return {
     countryCode: iso,
     postalCode,
-    postalDisplay: formatPostalDisplay(iso, postalCode),
+    postalDisplay: postalCode ? formatPostalDisplay(iso, postalCode) : iso,
   };
 }
 
@@ -98,10 +99,8 @@ export function dismissLocationPrompt() {
 
 export function locationQueryString(location: StoredDeliveryLocation | null): string {
   if (!location) return "";
-  const q = new URLSearchParams({
-    country: location.countryCode,
-    postalCode: location.postalCode,
-  });
+  const q = new URLSearchParams({ country: location.countryCode });
+  if (location.postalCode.trim()) q.set("postalCode", location.postalCode);
   return `?${q.toString()}`;
 }
 
@@ -113,6 +112,7 @@ export function postalLabelFor(countryCode: string): string {
   return getDeliveryCountry(countryCode)?.postalLabel ?? "Postal / ZIP";
 }
 
-export function headerLocationLabel(location: StoredDeliveryLocation): string {
-  return `Deliver to ${location.postalDisplay}`;
+export function headerLocationLabel(location: StoredDeliveryLocation, countryName?: string): string {
+  if (location.postalCode) return `Deliver to ${location.postalDisplay}`;
+  return `Deliver to ${countryName || location.countryCode}`;
 }

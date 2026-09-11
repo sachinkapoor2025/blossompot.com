@@ -3,7 +3,7 @@ import { SERVICE_RULE_TYPES, SERVICE_SCOPES } from "../lib/serviceability";
 
 export const deliveryLocationInputSchema = z.object({
   countryCode: z.string().trim().min(2).max(2),
-  postalCode: z.string().trim().min(2).max(16),
+  postalCode: z.string().trim().max(16).optional().default(""),
   stateCode: z.string().trim().max(8).optional(),
   city: z.string().trim().max(80).optional(),
   lat: z.number().min(-90).max(90).optional(),

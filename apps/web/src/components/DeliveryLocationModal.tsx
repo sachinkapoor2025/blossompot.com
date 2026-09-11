@@ -1,35 +1,35 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
-import { formatPostalDisplay, isValidPostal } from "@blossompot/shared";
+import { Suspense, useEffect, useId, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
-import { postalLabelFor, dismissLocationPrompt } from "@/lib/delivery-location";
-import { useGboDeliveryCountries, useCountrySearch } from "@/lib/gbo-delivery-countries";
+import { dismissLocationPrompt } from "@/lib/delivery-location";
+import { useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
 
 export function DeliveryLocationModal() {
+  return (
+    <Suspense fallback={null}>
+      <DeliveryLocationModalInner />
+    </Suspense>
+  );
+}
+
+function DeliveryLocationModalInner() {
   const { location, selectorOpen, selectorCountryPrefill, closeSelector, setLocation } = useDeliveryLocation();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const titleId = useId();
   const { countries } = useGboDeliveryCountries();
-  const { query, setQuery, filtered } = useCountrySearch(countries);
   const [countryCode, setCountryCode] = useState(location?.countryCode ?? "US");
-  const [postalCode, setPostalCode] = useState(location?.postalCode ?? "");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const postalLabel = postalLabelFor(countryCode);
-  const selected = countries.find((c) => c.countryCode === countryCode) ?? countries[0];
-  const selectOptions = filtered.some((c) => c.countryCode === countryCode)
-    ? filtered
-    : selected
-      ? [selected, ...filtered]
-      : filtered;
 
   useEffect(() => {
     if (!selectorOpen) return;
     setCountryCode(selectorCountryPrefill || location?.countryCode || "US");
-    setPostalCode(location?.postalCode ?? "");
     setError("");
-    setQuery("");
-  }, [selectorOpen, location, selectorCountryPrefill, setQuery]);
+  }, [selectorOpen, location, selectorCountryPrefill]);
 
   useEffect(() => {
     if (!selectorOpen) return;
@@ -49,18 +49,18 @@ export function DeliveryLocationModal() {
 
   const submit = async () => {
     setError("");
-    if (!isValidPostal(countryCode, postalCode)) {
-      setError(`Enter a valid ${postalLabel.toLowerCase()}`);
-      return;
-    }
     setBusy(true);
     try {
       await setLocation({
         countryCode,
-        postalCode: postalCode.trim(),
-        postalDisplay: formatPostalDisplay(countryCode, postalCode),
+        postalCode: "",
+        postalDisplay: countryCode,
       });
       closeSelector();
+      const next = new URLSearchParams(searchParams.toString());
+      next.set("country", countryCode);
+      const qs = next.toString();
+      router.push(qs ? `${pathname}?${qs}` : pathname);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not check this location");
     } finally {
@@ -98,7 +98,8 @@ export function DeliveryLocationModal() {
             Where should we deliver?
           </h2>
           <p className="mt-2 text-sm text-slate-600">
-            Gift Baskets Overseas delivers to 190+ countries. Pick the destination, then enter a postal code.
+            Pick a country to browse gifts for that destination. We deliver country-wide — postal
+            code is only needed at checkout.
           </p>
         </div>
         <form
@@ -110,39 +111,19 @@ export function DeliveryLocationModal() {
         >
           <div className="space-y-4">
             <label className="block text-sm font-medium text-slate-800">
-              Search countries
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="India, Japan, Brazil…"
-                className="mt-1 w-full max-w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm"
-              />
-            </label>
-            <label className="block text-sm font-medium text-slate-800">
               Country
               <select
                 value={countryCode}
                 onChange={(e) => setCountryCode(e.target.value)}
                 className="mt-1 w-full max-w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm"
               >
-                {selectOptions.map((c) => (
+                {countries.map((c) => (
                   <option key={c.countryCode} value={c.countryCode}>
                     {c.countryName} ({c.countryCode})
                   </option>
                 ))}
               </select>
               <span className="mt-1 block text-xs text-slate-500">{countries.length} countries</span>
-            </label>
-            <label className="block text-sm font-medium text-slate-800">
-              {postalLabel}
-              <input
-                autoComplete="postal-code"
-                inputMode={["US", "AU", "AE", "DE", "FR", "IT", "ES"].includes(countryCode) ? "numeric" : "text"}
-                value={postalCode}
-                onChange={(e) => setPostalCode(e.target.value)}
-                placeholder={selected?.postalPlaceholder ?? "Postal code"}
-                className="mt-1 w-full max-w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm"
-              />
             </label>
             {error ? <p className="text-sm text-red-600">{error}</p> : null}
             <div className="flex gap-2">
@@ -151,7 +132,7 @@ export function DeliveryLocationModal() {
                 disabled={busy}
                 className="flex-1 rounded-lg bg-primary text-white font-semibold py-2.5 text-sm disabled:opacity-50"
               >
-                {busy ? "Checking…" : "Check availability"}
+                {busy ? "Checking…" : "See gifts"}
               </button>
               <button
                 type="button"

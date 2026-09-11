@@ -3,10 +3,12 @@ import {
   roundForCurrency,
   type ShopCurrency,
 } from "../currency";
+import { GBO_FLAT_SHIPPING_USD, VENDOR_GBO } from "../constants";
 import {
   FLASH_COMBO_SHIPPING_USD,
   isFlashComboProduct,
 } from "./flash-sale";
+import { isGboVendor, parseGboSku, parseGboSlug } from "./gbo";
 import { cartLineUnitTotal } from "./product-addons";
 
 /** Cart subtotal at or above this (USD) unlocks free shipping (above $13.99 → $14.00+). */
@@ -25,6 +27,7 @@ export const BELOW_THRESHOLD_SHIPPING_USD = 6.99;
 export const REDUCED_SHIPPING_USD = 3.99;
 
 export type FreeShippingTier = "low" | "mid" | "free";
+export type ShippingQuotePolicy = "threshold" | "gbo_flat" | "flash_combo";
 
 export type FreeShippingQuote = {
   /** Shipping charged to the customer in `currency`. */
@@ -46,6 +49,8 @@ export type FreeShippingQuote = {
   tier: FreeShippingTier;
   /** Shipping fee for the current bucket tier, in `currency`. */
   belowThresholdFeeInCurrency: number;
+  /** How this bucket was priced. GBO uses a flat fee; other vendors use the $6.99/$3.99/free table. */
+  policy?: ShippingQuotePolicy;
 };
 
 function toCurrency(
@@ -130,14 +135,31 @@ export function quoteFreeShippingThreshold(input: {
     midTierFeeInCurrency: midTierFee,
     tier,
     belowThresholdFeeInCurrency: charge,
+    policy: "threshold",
   };
 }
 
 /** Default vendor bucket for catalog SKUs without `vendorSlug` (BlossomPot). */
 export const SHIPPING_VENDOR_BLOSSOMPOT = "blossompot";
 
+export function isGboShippingItem(item: {
+  vendorSlug?: string;
+  productSlug?: string;
+  sku?: string;
+}): boolean {
+  return (
+    isGboVendor(item.vendorSlug) ||
+    Boolean(parseGboSlug(item.productSlug) || parseGboSku(item.sku))
+  );
+}
+
 /** Normalize cart/product vendor for per-vendor free-shipping buckets. */
-export function shippingVendorKey(item: { vendorSlug?: string }): string {
+export function shippingVendorKey(item: {
+  vendorSlug?: string;
+  productSlug?: string;
+  sku?: string;
+}): string {
+  if (isGboShippingItem(item)) return VENDOR_GBO;
   const slug = item.vendorSlug?.trim();
   return slug || SHIPPING_VENDOR_BLOSSOMPOT;
 }
@@ -214,6 +236,31 @@ function flashComboShippingQuote(
     midTierFeeInCurrency: toCurrency(REDUCED_SHIPPING_USD, currency, usdInrRate),
     tier: "low",
     belowThresholdFeeInCurrency: charge,
+    policy: "flash_combo",
+  };
+}
+
+function gboFlatShippingQuote(
+  currency: ShopCurrency,
+  usdInrRate: number
+): FreeShippingQuote {
+  const charge = toCurrency(GBO_FLAT_SHIPPING_USD, currency, usdInrRate);
+  return {
+    charge,
+    qualifiesForFreeShipping: false,
+    amountAwayFromFreeShipping: 0,
+    amountAwayFromReducedShipping: 0,
+    thresholdInCurrency: toCurrency(FREE_SHIPPING_MIN_SUBTOTAL_USD, currency, usdInrRate),
+    reducedThresholdInCurrency: toCurrency(
+      REDUCED_SHIPPING_MIN_SUBTOTAL_USD,
+      currency,
+      usdInrRate
+    ),
+    lowTierFeeInCurrency: toCurrency(BELOW_THRESHOLD_SHIPPING_USD, currency, usdInrRate),
+    midTierFeeInCurrency: toCurrency(REDUCED_SHIPPING_USD, currency, usdInrRate),
+    tier: "low",
+    belowThresholdFeeInCurrency: charge,
+    policy: "gbo_flat",
   };
 }
 
@@ -252,7 +299,10 @@ export function quoteAddressShipmentShipping(input: {
     byVendor.set(key, list);
   }
 
-  const perVendor = [...byVendor.values()].map((vendorItems) => {
+  const perVendor = [...byVendor.entries()].map(([vendorKey, vendorItems]) => {
+    if (vendorKey === VENDOR_GBO || vendorItems.every((i) => isGboShippingItem(i))) {
+      return gboFlatShippingQuote(input.currency, input.usdInrRate);
+    }
     const flashOnly =
       vendorItems.length > 0 &&
       vendorItems.every((i) => isFlashComboProduct(i.productSlug));

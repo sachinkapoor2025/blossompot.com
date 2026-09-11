@@ -173,12 +173,27 @@ describe("getProductIncludes", () => {
         tags: [],
       }),
       [
-        "Cheerful Plush Tan Bear",
         "Plush bear",
         "Gift message option at checkout",
-        "Worldwide delivery included",
+        "$19 shipping at checkout",
         "Fulfilled by our international partner",
       ]
     );
+  });
+
+  it("strips GBO HTML contents into clean include lines", () => {
+    const items = getProductIncludes({
+      name: "Wine and Apple AirPods Pro Deluxe Basket",
+      description:
+        "Present a luxurious combination.\n\nIncludes:\n- Apple AirPods Pro 2nd Generation\n- Bottle of Dry Red Wine 0,75 L (Italian, Argentinian, French Or Spanish)",
+      categorySlug: "gift-hampers",
+      slug: "gbo-ve-1-wine-airpods",
+      vendorSlug: "gift-baskets-overseas",
+      tags: [],
+    });
+    assert.ok(items.includes("Apple AirPods Pro 2nd Generation"));
+    assert.ok(items.some((line) => /Dry Red Wine/i.test(line)));
+    assert.equal(items.some((line) => /<b>|ATTENTION/i.test(line)), false);
+    assert.ok(items.includes("$19 shipping at checkout"));
   });
 });

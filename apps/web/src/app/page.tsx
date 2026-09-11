@@ -14,9 +14,10 @@ import { buildHomeCategoryTiles } from "@/lib/home-category-carousel";
 import { JsonLd } from "@/components/JsonLd";
 import { faqs, homeBanners, countriesMenu } from "@/lib/site";
 import { loadGboStorefrontProducts } from "@/lib/product-loader";
+import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { OverseasGiftGrid } from "@/components/OverseasGiftGrid";
 import { faqJsonLd, pageMetadata } from "@/lib/seo";
-import type { Product, Category } from "@blossompot/shared";
+import { resolveDeliveryCountry, type Product, type Category } from "@blossompot/shared";
 
 export const metadata: Metadata = pageMetadata({
   title: "BlossomPot — Flowers, Cakes & Gifts | USA, UK, Canada, Australia & UAE",
@@ -29,14 +30,21 @@ export const metadata: Metadata = pageMetadata({
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ country?: string }>;
+}) {
+  const params = await searchParams;
   let products: Product[] = [];
   let categories: Category[] = [];
   let catalogError = "";
+  const deliveryCountry = await getStorefrontDeliveryCountry(params.country);
+  const destinationName = resolveDeliveryCountry(deliveryCountry).countryName;
 
   try {
     const [gboProducts, categoriesData] = await Promise.all([
-      loadGboStorefrontProducts("US"),
+      loadGboStorefrontProducts(deliveryCountry),
       api<{ categories: Category[] }>("/categories", { revalidate: false }),
     ]);
     products = gboProducts;
@@ -93,7 +101,7 @@ export default async function HomePage() {
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-primary">Shop all gifts</h2>
           <p className="text-sm text-slate-600 mt-1">
-            {products.length} international gifts with delivery included. Scroll for more.
+            {products.length} international gifts for {destinationName}. Scroll for more.
           </p>
         </div>
         {catalogError ? (

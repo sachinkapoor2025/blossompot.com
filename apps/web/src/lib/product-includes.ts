@@ -167,22 +167,44 @@ function giftDefaultLines(categorySlug: string, name: string): string[] {
 }
 
 function gboIncludeLines(product: ProductLike): string[] {
-  const lines: string[] = [];
-  const name = product.name.trim();
-  if (name) lines.push(name);
-  const included = coerceGboContents(product.description);
-  if (included) lines.push(included);
+  const items = parseGboIncludeLines(product.description);
+  const lines = items.length > 0 ? [...items] : product.name.trim() ? [product.name.trim()] : [];
   lines.push("Gift message option at checkout");
-  lines.push("Worldwide delivery included");
+  lines.push("$19 shipping at checkout");
   lines.push("Fulfilled by our international partner");
   return lines;
 }
 
-function coerceGboContents(description: string): string | null {
-  const m = description.match(/Includes:\s*([\s\S]+)/i);
-  const raw = (m?.[1] ?? "").replace(/\s+/g, " ").trim();
-  if (!raw) return null;
-  return raw.length > 180 ? `${raw.slice(0, 177)}…` : raw;
+function parseGboIncludeLines(description: string): string[] {
+  const fromIncludes = description.match(/Includes:\s*([\s\S]+)/i);
+  const raw = fromIncludes ? fromIncludes[1]! : description;
+  const body = raw
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|li|h[1-6]|tr|b|strong)>/gi, "\n")
+    .replace(/<li[^>]*>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"');
+  return body
+    .split(/\n+|(?:;\s*)(?=-)|(?:\s+-\s+)/)
+    .map((line) =>
+      line
+        .replace(/^[-•*]+\s*/, "")
+        .replace(/;+\s*$/, "")
+        .replace(/\s+/g, " ")
+        .trim()
+    )
+    .filter(
+      (line) =>
+        line.length > 1 &&
+        !/^attention\b/i.test(line) &&
+        !/do not substitute brands/i.test(line)
+    )
+    .filter((line, i, all) => all.indexOf(line) === i)
+    .slice(0, 20);
 }
 
 /** Customer-facing "What's included" lines — never inject Rakhi/Roli/Chawal defaults. */

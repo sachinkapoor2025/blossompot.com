@@ -1,4 +1,4 @@
-import { parseGboSlug, gboGiftToProduct, productInStorefrontCategory, productMatchesSearchQuery, type GboGift, type Product } from "@blossompot/shared";
+import { parseGboSlug, gboGiftToProduct, productInStorefrontCategory, productMatchesSearchQuery, productVisibleForDeliveryCountry, type GboGift, type Product } from "@blossompot/shared";
 import { isProductStorefrontVisible } from "@blossompot/shared";
 import { api } from "./api";
 import {
@@ -7,6 +7,7 @@ import {
   getCatalogProductsByCategory,
 } from "./catalog-fallback";
 import { isRakhiRelatedCategorySlug, isRakhiRelatedProduct } from "./rakhi-filter";
+import { getStorefrontDeliveryCountry } from "./storefront-country";
 
 function isStorefrontVisible(product: Product): boolean {
   return !isRakhiRelatedProduct(product) && isProductStorefrontVisible(product);
@@ -45,9 +46,9 @@ function allowCatalogFallback(product: Product): boolean {
   return Boolean(product.vendorSlug);
 }
 
-/** Live Gift Baskets Overseas catalog for the storefront (USA). */
-export async function loadGboStorefrontProducts(country = "US"): Promise<Product[]> {
-  const iso = country.trim().toUpperCase();
+/** Live Gift Baskets Overseas catalog for the selected delivery country. */
+export async function loadGboStorefrontProducts(country?: string): Promise<Product[]> {
+  const iso = (country ?? (await getStorefrontDeliveryCountry())).trim().toUpperCase() || "US";
   const data = await api<{ gifts: GboGift[] }>(`/gbo/gifts?country=${iso}`, FRESH_PRODUCT_FETCH);
   return (data.gifts ?? []).map((gift) => {
     const mapped = gboGiftToProduct(iso, gift);
@@ -62,6 +63,10 @@ function mergeBySlug(primary: Product[], extra: Product[]): Product[] {
     if (!bySlug.has(product.slug)) bySlug.set(product.slug, product);
   }
   return [...bySlug.values()];
+}
+
+function forDeliveryCountry(products: Product[], country: string): Product[] {
+  return products.filter((product) => productVisibleForDeliveryCountry(product, country));
 }
 
 function isProductMissingError(err: unknown): boolean {
@@ -120,18 +125,21 @@ export async function loadProduct(slug: string): Promise<Product | null> {
 export async function loadProducts(params?: {
   category?: string;
   search?: string;
+  country?: string;
 }): Promise<Product[]> {
   if (params?.category && isRakhiRelatedCategorySlug(params.category)) return [];
 
+  const country = params?.country ?? (await getStorefrontDeliveryCountry());
   const query = new URLSearchParams();
   if (params?.category) query.set("category", params.category);
   if (params?.search) query.set("search", params.search);
-  const qs = query.toString() ? `?${query.toString()}` : "";
+  query.set("country", country);
+  const qs = `?${query.toString()}`;
 
   try {
     const data = await api<{ products: Product[] }>(`/products${qs}`, FRESH_PRODUCT_FETCH);
     const db = rememberProducts(data.products.filter(isStorefrontVisible));
-    const gbo = await loadGboStorefrontProducts("US").catch(() => [] as Product[]);
+    const gbo = await loadGboStorefrontProducts(country).catch(() => [] as Product[]);
     let extra = gbo;
     if (params?.category) {
       extra = gbo.filter((product) => productInStorefrontCategory(product, params.category as string));
@@ -139,11 +147,11 @@ export async function loadProducts(params?: {
     if (params?.search) {
       extra = extra.filter((product) => productMatchesSearchQuery(product, params.search as string));
     }
-    return rememberProducts(mergeBySlug(db, extra).filter(isStorefrontVisible));
+    return rememberProducts(forDeliveryCountry(mergeBySlug(db, extra), country).filter(isStorefrontVisible));
   } catch {
     if (process.env.NODE_ENV === "production") {
       try {
-        const gbo = await loadGboStorefrontProducts("US");
+        const gbo = await loadGboStorefrontProducts(country);
         if (params?.category) {
           return gbo.filter((product) => productInStorefrontCategory(product, params.category as string));
         }
@@ -156,9 +164,13 @@ export async function loadProducts(params?: {
       }
     }
     if (params?.category) {
-      return getCatalogProductsByCategory(params.category).filter(isStorefrontVisible);
+      return getCatalogProductsByCategory(params.category)
+        .filter(isStorefrontVisible)
+        .filter((product) => productVisibleForDeliveryCountry(product, country));
     }
-    return getCatalogProducts().filter(isStorefrontVisible);
+    return getCatalogProducts()
+      .filter(isStorefrontVisible)
+      .filter((product) => productVisibleForDeliveryCountry(product, country));
   }
 }
 
@@ -166,10 +178,10 @@ export async function loadProducts(params?: {
  * Category grids: live API first, then only add missing hamper/catalog SKUs.
  * Never overwrite an API product with bundled catalog prices.
  */
-export async function loadProductsByCategory(categorySlug: string): Promise<Product[]> {
+export async function loadProductsByCategory(categorySlug: string, country?: string): Promise<Product[]> {
   let products: Product[] = [];
   try {
-    products = await loadProducts({ category: categorySlug });
+    products = await loadProducts({ category: categorySlug, country });
   } catch {
     products = [];
   }

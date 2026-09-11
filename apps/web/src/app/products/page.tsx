@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 interface Props {
-  searchParams: Promise<{ search?: string; category?: string; sort?: string }>;
+  searchParams: Promise<{ search?: string; category?: string; sort?: string; country?: string }>;
 }
 
 const SORT_VALUES: ProductSort[] = ["featured", "price-asc", "price-desc", "name-asc", "name-desc"];
@@ -98,7 +98,7 @@ export default async function ProductsPage({ searchParams }: Props) {
 
   try {
     const [liveProducts, categoriesData] = await Promise.all([
-      loadProducts({ search, category }),
+      loadProducts({ search, category, country: params.country }),
       api<{ categories: Category[] }>("/categories", { revalidate: false }),
     ]);
     products = liveProducts.filter((p) => !isRakhiRelatedProduct(p));

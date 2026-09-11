@@ -10,10 +10,12 @@ import {
   gboPartnerOrderId,
   mapGboGiftStorefrontCategories,
   mapGboStatusToOrderStatus,
+  parseGboContentsLines,
   parseGboLineRef,
   parseGboSku,
   parseGboSlug,
   productMatchesSearchQuery,
+  productVisibleForDeliveryCountry,
 } from "./gbo";
 
 describe("gbo helpers", () => {
@@ -28,6 +30,25 @@ describe("gbo helpers", () => {
     assert.equal(formatGboSku("us", 1), "gbo:US:1");
     assert.equal(formatGboProductSlug("US", 3, "The Peak of Celebration"), "gbo-us-3-the-peak-of-celebration");
     assert.equal(gboImageUrl("/img/a.jpg"), "https://www.giftbasketsoverseas.com/img/a.jpg");
+  });
+
+  it("strips GBO HTML contents into readable lines", () => {
+    const lines = parseGboContentsLines(
+      "<b>ATTENTION: Do not substitute brands without our approval</b> <b>- Apple AirPods Pro 2nd Generation;</b> - Bottle of Dry Red Wine 0,75 L (Italian, Argentinian, French Or Spanish)"
+    );
+    assert.deepEqual(lines, [
+      "Apple AirPods Pro 2nd Generation",
+      "Bottle of Dry Red Wine 0,75 L (Italian, Argentinian, French Or Spanish)",
+    ]);
+    const product = gboGiftToProduct("ve", {
+      id: 1,
+      name: "Wine and Apple AirPods Pro Deluxe Basket",
+      price: "10",
+      contents:
+        "<b>ATTENTION: Do not substitute brands without our approval</b><b>- Apple AirPods Pro 2nd Generation;</b>",
+    });
+    assert.equal(product.description.includes("<b>"), false);
+    assert.ok(product.description.includes("Apple AirPods Pro 2nd Generation"));
   });
 
   it("maps GBO gifts to storefront products at retail with reseller cost", () => {
@@ -50,6 +71,32 @@ describe("gbo helpers", () => {
     assert.equal(product.indexable, false);
     assert.equal(product.categorySlug, "gift-hampers");
     assert.ok(product.additionalCategorySlugs?.includes("overseas-gifts"));
+    assert.equal(product.deliveryFee, 0);
+  });
+
+  it("filters storefront catalog by destination country", () => {
+    assert.equal(
+      productVisibleForDeliveryCountry(
+        { slug: "gbo-us-3-peak", sku: "gbo:US:3", vendorSlug: "gift-baskets-overseas" },
+        "AM"
+      ),
+      false
+    );
+    assert.equal(
+      productVisibleForDeliveryCountry(
+        { slug: "gbo-am-3-peak", sku: "gbo:AM:3", vendorSlug: "gift-baskets-overseas" },
+        "AM"
+      ),
+      true
+    );
+    assert.equal(
+      productVisibleForDeliveryCountry({ slug: "red-roses-dozen", sku: "BP-ROSES" }, "AM"),
+      false
+    );
+    assert.equal(
+      productVisibleForDeliveryCountry({ slug: "red-roses-dozen", sku: "BP-ROSES" }, "US"),
+      true
+    );
   });
 
   it("maps GBO flower tags onto Flowers / Bouquets nav categories", () => {

@@ -41,19 +41,24 @@ export async function checkServiceability(event: APIGatewayProxyEventV2) {
 
   const country = resolveDeliveryCountry(parsed.data.countryCode);
   if (!country.enabled) return badRequest("Unsupported country");
-  if (!isValidPostal(parsed.data.countryCode, parsed.data.postalCode)) {
+  const postal = (parsed.data.postalCode ?? "").trim();
+  if (postal && !isValidPostal(parsed.data.countryCode, postal)) {
     return badRequest(`Enter a valid ${country.postalLabel.toLowerCase()}`);
   }
 
   const { areas, activeVendorSlugs } = await loadCoverageBundle();
-  const vendors = getServiceableVendors(areas, parsed.data, activeVendorSlugs);
+  const location = { ...parsed.data, postalCode: postal };
+  const vendors = getServiceableVendors(areas, location, activeVendorSlugs);
   const serviceable = vendors.length > 0;
+  const where = postal
+    ? formatPostalDisplay(parsed.data.countryCode, postal)
+    : country.countryName;
 
   console.log(
     JSON.stringify({
       type: "SERVICEABILITY_CHECK",
       country: parsed.data.countryCode,
-      postal_code: parsed.data.postalCode.replace(/\s+/g, ""),
+      postal_code: postal.replace(/\s+/g, ""),
       result: serviceable,
       vendor_count: vendors.length,
       reason: serviceable ? "matched" : "no_matching_service_area",
@@ -65,7 +70,7 @@ export async function checkServiceability(event: APIGatewayProxyEventV2) {
     location: {
       country: country.countryName,
       countryCode: parsed.data.countryCode,
-      postalCode: formatPostalDisplay(parsed.data.countryCode, parsed.data.postalCode),
+      postalCode: postal ? formatPostalDisplay(parsed.data.countryCode, postal) : "",
       postalLabel: country.postalLabel,
     },
     vendors: vendors.map((v) => ({
@@ -74,8 +79,8 @@ export async function checkServiceability(event: APIGatewayProxyEventV2) {
       matchedRule: v.matchedRule,
     })),
     message: serviceable
-      ? `We can deliver to ${formatPostalDisplay(parsed.data.countryCode, parsed.data.postalCode)}.`
-      : `We don't have a delivery partner for ${country.countryName} (${formatPostalDisplay(parsed.data.countryCode, parsed.data.postalCode)}) yet.`,
+      ? `We can deliver to ${where}.`
+      : `We don't have a delivery partner for ${where} yet.`,
   });
 }
 
@@ -240,7 +245,7 @@ export function parseLocationQuery(event: APIGatewayProxyEventV2) {
   const q = event.queryStringParameters ?? {};
   const countryCode = (q.country ?? q.countryCode ?? "").trim().toUpperCase();
   const postalCode = (q.postalCode ?? q.zip ?? "").trim();
-  if (!countryCode || !postalCode) return null;
-  if (!isValidPostal(countryCode, postalCode)) return null;
+  if (!countryCode) return null;
+  if (postalCode && !isValidPostal(countryCode, postalCode)) return null;
   return { countryCode, postalCode, stateCode: q.state ?? q.stateCode, city: q.city };
 }

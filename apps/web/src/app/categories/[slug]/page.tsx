@@ -18,7 +18,7 @@ import { type Product, type Category } from "@blossompot/shared";
 
 interface Props {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ sort?: string }>;
+  searchParams: Promise<{ sort?: string; country?: string }>;
 }
 
 const SORT_VALUES: ProductSort[] = ["featured", "price-asc", "price-desc", "name-asc", "name-desc"];
@@ -76,7 +76,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CategoryPage({ params, searchParams }: Props) {
   const { slug } = await params;
-  const sort = resolveSort((await searchParams).sort);
+  const query = await searchParams;
+  const sort = resolveSort(query.sort);
 
   if (!isKnownCategorySlug(slug)) notFound();
 
@@ -86,12 +87,12 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   try {
     const [catData, categoryProducts] = await Promise.all([
       api<{ category: Category }>(`/categories/${slug}`, { revalidate: false }),
-      loadProductsByCategory(slug),
+      loadProductsByCategory(slug, query.country),
     ]);
     category = catData.category;
     products = categoryProducts;
   } catch {
-    products = await loadProductsByCategory(slug);
+    products = await loadProductsByCategory(slug, query.country);
   }
 
   const name = category?.name ?? slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
