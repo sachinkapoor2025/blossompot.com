@@ -937,7 +937,7 @@ export default function AdminProductsPage() {
                     "50",
                     "flowers,birthday",
                     "Premium Mixed Bouquet | BlossomPot",
-                    "Shop premium flowers with USA delivery",
+                    "Shop premium flowers with worldwide delivery",
                     "true",
                   ],
                 ])

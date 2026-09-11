@@ -36,7 +36,7 @@ export const site = {
   foundingDate: "2024",
   tagline: "Flowers ♥ Cakes ♥ Gifts — Delivering Smiles",
   description:
-    "BlossomPot.com — premium online gifting for flowers, bouquets, cakes, and curated gifts with fast USA delivery. Same-day options in select cities, elegant designs for birthdays, anniversaries, Valentine's Day, Mother's Day, and more.",
+    "BlossomPot.com — premium online gifting for flowers, bouquets, cakes, and curated gifts with worldwide delivery. Same-day options in select cities, elegant designs for birthdays, anniversaries, Valentine's Day, Mother's Day, and more.",
   supportEmail: "support@blossompot.com",
   phone: SUPPORT_PHONE_DISPLAY,
   whatsapp: SUPPORT_PHONE_DIGITS,
@@ -259,7 +259,7 @@ export const testimonials = [
 export const faqs = [
   {
     q: "What does BlossomPot deliver?",
-    a: "Flowers, bouquets, cakes, gift hampers, personalized gifts, plants, and occasion collections for birthdays, anniversaries, Valentine's Day, Mother's Day, weddings, and more — with USA delivery.",
+    a: "Flowers, bouquets, cakes, gift hampers, personalized gifts, plants, and occasion collections for birthdays, anniversaries, Valentine's Day, Mother's Day, weddings, and more — with worldwide delivery.",
   },
   {
     q: "Do you offer same-day delivery?",
@@ -271,7 +271,7 @@ export const faqs = [
   },
   {
     q: "Where does BlossomPot deliver?",
-    a: "We deliver gifts across the United States. Enter the recipient address at checkout to see available delivery windows.",
+    a: "We deliver gifts worldwide. Enter the recipient address at checkout to see available delivery windows for that country.",
   },
   {
     q: "What payment methods do you accept?",
@@ -306,8 +306,8 @@ export const faqs = [
     a: "Our goal is to provide fresh flowers and arrangements that are carefully prepared. The flowers are seasonal and naturally unique so exact varieties, colours or appearance may differ from time to time based on local availability.",
   },
   {
-    q: "Can I send a gift to anyone in any US state?",
-    a: "Yes. BlossomPot ships gifts to all 50 states, Washington D.C. and Puerto Rico. Availability of delivery and estimated delivery times will vary by recipient location.",
+    q: "Can I send a gift worldwide?",
+    a: "Yes. BlossomPot delivers gifts worldwide. Choose the recipient country at checkout — availability and estimated delivery times vary by location.",
   },
   {
     q: "Can I order flowers, cakes and other gifts in same order?",

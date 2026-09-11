@@ -48,9 +48,9 @@ export async function GET() {
 ${site.description}
 
 **Website:** ${siteUrl}
-**Primary buyers:** Customers ordering flowers, cakes, and gifts for USA delivery.
+**Primary buyers:** Customers ordering flowers, cakes, and gifts for worldwide delivery.
 **Catalog focus:** Flowers, bouquets, cakes, hampers, personalized gifts, and occasion collections.
-**Delivery:** Nationwide USA coverage with faster windows to major metros when available.
+**Delivery:** Worldwide coverage with faster windows to major cities when available.
 **Payments:** Stripe (USD), Razorpay (INR / UPI).
 
 ---

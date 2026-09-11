@@ -4,82 +4,82 @@ export const categoryPageSeo: Record<
   { title: string; description: string; h1: string }
 > = {
   flowers: {
-    title: "Send Flowers Online USA | Fresh Arrangements | BlossomPot",
+    title: "Send Flowers Online Worldwide | Fresh Arrangements | BlossomPot",
     description:
-      "Order fresh flowers for USA delivery. Birthdays, anniversaries, thank-yous, and everyday celebrations with premium packaging and clear shipping.",
-    h1: "Send Flowers Online — USA Delivery",
+      "Order fresh flowers for worldwide delivery. Birthdays, anniversaries, thank-yous, and everyday celebrations with premium packaging and clear shipping.",
+    h1: "Send Flowers Online — Worldwide Delivery",
   },
   "flower-bouquets": {
-    title: "Flower Bouquets USA Delivery | Signature Arrangements | BlossomPot",
+    title: "Flower Bouquets Worldwide Delivery | Signature Arrangements | BlossomPot",
     description:
-      "Shop signature flower bouquets for doorstep surprises across the USA. Elegant presentation and gift-message options.",
-    h1: "Flower Bouquets for USA Delivery",
+      "Shop signature flower bouquets for doorstep surprises worldwide. Elegant presentation and gift-message options.",
+    h1: "Flower Bouquets for Worldwide Delivery",
   },
   cakes: {
-    title: "Order Cakes Online USA | Birthday & Celebration Cakes | BlossomPot",
+    title: "Order Cakes Online Worldwide | Birthday & Celebration Cakes | BlossomPot",
     description:
-      "Order celebration cakes online for birthdays, anniversaries, and parties. Chocolate, red velvet, designer cakes with USA delivery.",
-    h1: "Celebration Cakes — USA Delivery",
+      "Order celebration cakes online for birthdays, anniversaries, and parties. Chocolate, red velvet, designer cakes with worldwide delivery.",
+    h1: "Celebration Cakes — Worldwide Delivery",
   },
   "birthday-gifts": {
-    title: "Birthday Gifts USA | Flowers, Cakes & Combos | BlossomPot",
+    title: "Birthday Gifts Worldwide | Flowers, Cakes & Combos | BlossomPot",
     description:
-      "Birthday gifts that feel complete — flowers, cakes, hampers, and combos curated for joyful celebrations across the USA.",
-    h1: "Birthday Gifts for USA Delivery",
+      "Birthday gifts that feel complete — flowers, cakes, hampers, and combos curated for joyful celebrations worldwide.",
+    h1: "Birthday Gifts for Worldwide Delivery",
   },
   "anniversary-gifts": {
-    title: "Anniversary Gifts USA | Roses, Cakes & More | BlossomPot",
+    title: "Anniversary Gifts Worldwide | Roses, Cakes & More | BlossomPot",
     description:
-      "Romantic anniversary gifts including roses, cakes, and curated boxes for couples celebrating across the USA.",
-    h1: "Anniversary Gifts — USA Delivery",
+      "Romantic anniversary gifts including roses, cakes, and curated boxes for couples celebrating worldwide.",
+    h1: "Anniversary Gifts — Worldwide Delivery",
   },
   "valentines-day-gifts": {
-    title: "Valentine's Day Gifts USA | Flowers & Chocolates | BlossomPot",
+    title: "Valentine's Day Gifts Worldwide | Flowers & Chocolates | BlossomPot",
     description:
       "Valentine's Day flowers, chocolates, and romantic gift sets designed for memorable February celebrations.",
-    h1: "Valentine's Day Gifts — USA Delivery",
+    h1: "Valentine's Day Gifts — Worldwide Delivery",
   },
   "mothers-day-gifts": {
-    title: "Mother's Day Gifts USA | Flowers & Plants | BlossomPot",
+    title: "Mother's Day Gifts Worldwide | Flowers & Plants | BlossomPot",
     description:
       "Mother's Day flowers, plants, and thoughtful gifts to show appreciation with elegance and warmth.",
-    h1: "Mother's Day Gifts — USA Delivery",
+    h1: "Mother's Day Gifts — Worldwide Delivery",
   },
   "wedding-gifts": {
-    title: "Wedding Gifts USA | Florals, Cakes & Hampers | BlossomPot",
+    title: "Wedding Gifts Worldwide | Florals, Cakes & Hampers | BlossomPot",
     description:
       "Wedding and engagement gifting — elegant florals, celebration cakes, and premium hampers for couples.",
-    h1: "Wedding Gifts — USA Delivery",
+    h1: "Wedding Gifts — Worldwide Delivery",
   },
   "gift-hampers": {
-    title: "Gift Hampers USA Delivery | Curated Boxes | BlossomPot",
+    title: "Gift Hampers Worldwide Delivery | Curated Boxes | BlossomPot",
     description:
-      "Order curated gift hampers online with sweets, treats, and thoughtful extras. Premium packaging and USA delivery.",
-    h1: "Gift Hampers — USA Delivery",
+      "Order curated gift hampers online with sweets, treats, and thoughtful extras. Premium packaging and worldwide delivery.",
+    h1: "Gift Hampers — Worldwide Delivery",
   },
   "personalized-gifts": {
-    title: "Personalized Gifts USA | Custom Messages | BlossomPot",
+    title: "Personalized Gifts Worldwide | Custom Messages | BlossomPot",
     description:
-      "Personalized gifts with custom messages for birthdays, anniversaries, and thank-yous — delivered across the USA.",
-    h1: "Personalized Gifts — USA Delivery",
+      "Personalized gifts with custom messages for birthdays, anniversaries, and thank-yous — delivered worldwide.",
+    h1: "Personalized Gifts — Worldwide Delivery",
   },
   "same-day-gifts": {
-    title: "Same-Day Gifts USA | Select Cities | BlossomPot",
+    title: "Same-Day Gifts | Select Cities | BlossomPot",
     description:
       "Same-day gift options in select US cities when you order before the local cut-off. Flowers, cakes, and more.",
     h1: "Same-Day Gifts — Select Cities",
   },
   plants: {
-    title: "Plants Delivery USA | Green Gifts | BlossomPot",
+    title: "Plants Delivery Worldwide | Green Gifts | BlossomPot",
     description:
-      "Send plants as thoughtful green gifts across the USA — perfect for thank-yous, housewarmings, and Mother's Day.",
-    h1: "Plants for USA Delivery",
+      "Send plants as thoughtful green gifts worldwide — perfect for thank-yous, housewarmings, and Mother's Day.",
+    h1: "Plants for Worldwide Delivery",
   },
   "celebration-gifts": {
-    title: "Celebration Gifts USA | Congrats & Thank You | BlossomPot",
+    title: "Celebration Gifts Worldwide | Congrats & Thank You | BlossomPot",
     description:
       "Celebration gifts for promotions, housewarmings, congratulations, and every reason to send something special.",
-    h1: "Celebration Gifts — USA Delivery",
+    h1: "Celebration Gifts — Worldwide Delivery",
   },
 };
 

@@ -86,7 +86,7 @@ export function ContactForm() {
         </div>
         <div className="border border-slate-200 rounded-xl p-6">
           <h2 className="font-bold text-primary mb-2">Delivery</h2>
-          <p className="text-slate-600 text-sm">5–7 business days across all 50 US states. Same-day dispatch on most orders.</p>
+          <p className="text-slate-600 text-sm">Worldwide delivery. Timing depends on the recipient country. Same-day options in select cities.</p>
         </div>
       </div>
 

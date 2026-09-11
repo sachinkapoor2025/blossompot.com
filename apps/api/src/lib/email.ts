@@ -600,7 +600,7 @@ Thank you for your order! Payment has been received.
 Order ID: ${order.orderId}
 Total: ${totalLabel}
 
-We deliver to all 50 US states in 5–7 business days after dispatch.
+We deliver worldwide. Timing depends on the recipient country and typically takes a few business days after dispatch.
 
 Questions? Reply to this email or WhatsApp us.
 
@@ -714,7 +714,7 @@ Thank you for your order! Payment has been received.
 Order ID: ${shortId}
 Total: ${total}
 
-We deliver to all 50 US states in 5–7 business days after dispatch.${footer}`,
+We deliver worldwide. Timing depends on the recipient country and typically takes a few business days after dispatch.${footer}`,
       };
     case ORDER_STATUS.ACCEPTED:
       return {
@@ -755,7 +755,7 @@ ${trackingLines || "Tracking details will appear on your order page shortly."}
 
 Order total: ${total}
 
-Typical USA delivery is 5–7 business days after dispatch (faster to many metros).${footer}`,
+Typical worldwide delivery is a few business days after dispatch (faster to many cities).${footer}`,
       };
     case ORDER_STATUS.IN_TRANSIT:
       return {
@@ -1054,7 +1054,7 @@ export async function sendReviewRequestEmail(order: Order): Promise<EmailSendRes
 
 We hope your gift order #${shortId} arrived safely and made your celebration special!
 
-We're BlossomPot — dedicated to thoughtful USA gifting — and your feedback helps other sisters trust us for USA gift delivery.
+We're BlossomPot — dedicated to thoughtful worldwide gifting — and your feedback helps others trust us for gift delivery.
 
 Would you take 30 seconds to share your experience?
 ${reviewUrl}
@@ -1137,7 +1137,7 @@ Valid until: ${expiryLabel}
 → https://www.blossompot.com/cart
 → https://www.blossompot.com/checkout
 
-Order early for on-time USA delivery.
+Order early for on-time worldwide delivery.
 
 — ${SITE_NAME} Team
 order@blossompot.com`;

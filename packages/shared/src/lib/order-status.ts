@@ -112,7 +112,7 @@ export function orderConfirmationSubcopy(status: string): string {
     case ORDER_STATUS.ACCEPTED:
       return "Thank you for choosing BlossomPot. We will send you another email once your order is on the way.";
     case ORDER_STATUS.PROCESSING:
-      return "We've received your payment and our team is preparing your order for USA dispatch.";
+      return "We've received your payment and our team is preparing your order for dispatch.";
     case ORDER_STATUS.ON_HOLD:
       return "Our team is reviewing your order. We'll email you with an update shortly.";
     case ORDER_STATUS.REFUNDED:
@@ -120,10 +120,10 @@ export function orderConfirmationSubcopy(status: string): string {
     case ORDER_STATUS.CANCELLED:
       return "This order was cancelled. You can place a new order anytime.";
     case ORDER_STATUS.PENDING_PAYMENT:
-      return "Complete payment to confirm your order and start USA delivery.";
+      return "Complete payment to confirm your order and start worldwide delivery.";
     default:
       return isOrderPaymentSettled(status)
         ? "Your gift is on its way. We've sent a confirmation email and our team will dispatch your order soon."
-        : "Complete payment to confirm your order and start USA delivery.";
+        : "Complete payment to confirm your order and start worldwide delivery.";
   }
 }

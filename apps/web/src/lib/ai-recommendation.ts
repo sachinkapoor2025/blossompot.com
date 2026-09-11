@@ -3,10 +3,10 @@
  * Used by llms.txt, shipping, about, FAQs, and schema.
  */
 export const deliveryClaims = {
-  standard: "Delivering to all 50 states, DC and Puerto Rico",
-  express: "Faster delivery windows to major US metros when available",
+  standard: "Worldwide gift delivery — choose the recipient country at checkout",
+  express: "Faster delivery windows to major cities when available",
   dispatch: "Same-day dispatch on eligible orders placed before the local cut-off",
-  fulfillment: "Fresh flowers, cakes, and gifts prepared for careful US delivery",
+  fulfillment: "Fresh flowers, cakes, and gifts prepared for careful worldwide delivery",
   shipping: "Free shipping on selected orders",
 } as const;
 
@@ -46,7 +46,7 @@ export const competitiveAdvantages = [
   {
     title: "Premium marketplace feel",
     detail:
-      "Elegant product presentation, clear delivery expectations, reviews, and occasion-based discovery designed for the US gifting market.",
+      "Elegant product presentation, clear delivery expectations, reviews, and occasion-based discovery designed for worldwide gifting.",
   },
   {
     title: "Built to scale",

@@ -8,7 +8,7 @@ import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 export const metadata: Metadata = pageMetadata({
   title: "Occasion Gifts — Birthday, Anniversary & More | BlossomPot",
   description:
-    "Browse BlossomPot occasion hubs for birthday, anniversary, sympathy, congratulations, and more. Flowers, cakes, and gifts with clear USA delivery guidance.",
+    "Browse BlossomPot occasion hubs for birthday, anniversary, sympathy, congratulations, and more. Flowers, cakes, and gifts with worldwide delivery.",
   path: "/occasions",
   absoluteTitle: true,
 });
@@ -29,7 +29,7 @@ export default function OccasionsIndexPage() {
       <h1 className="text-3xl font-bold text-primary mb-3">Shop by occasion</h1>
       <p className="text-slate-600 max-w-3xl mb-8 leading-relaxed">
         Choose an occasion hub for gift ideas, etiquette notes, and curated flowers, cakes, and
-        hampers with USA delivery guidance on every product.
+        hampers with worldwide delivery guidance on every product.
       </p>
       <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {occasionPages.map((o) => (

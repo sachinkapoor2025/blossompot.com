@@ -4,11 +4,11 @@ import { locationPublicPath } from "@/lib/content/seo-data";
 /** SEO-rich homepage copy — flowers, cakes & gifts. */
 export const homeSeoContent = {
   intro: {
-    heading: "Send Flowers, Cakes & Gifts Online — BlossomPot USA Delivery",
+    heading: "Send Flowers, Cakes & Gifts Online — Worldwide Delivery",
     paragraphs: [
-      "BlossomPot is an online gifting destination for flowers, bouquets, cakes, plants, and thoughtful gift hampers. Whether you are celebrating a birthday, anniversary, Valentine’s Day, Mother’s Day, or a simple thank-you, shop premium gifts with clear delivery expectations across the United States.",
-      "Browse florist-quality roses and mixed bouquets, celebration cakes, personalized boxes, and curated hampers — all in one marketplace-style experience designed for modern US gifting.",
-      "From same-day eligible gifts in select areas to nationwide delivery options, BlossomPot helps you send something beautiful without the guesswork.",
+      "BlossomPot is an online gifting destination for flowers, bouquets, cakes, plants, and thoughtful gift hampers. Whether you are celebrating a birthday, anniversary, Valentine’s Day, Mother’s Day, or a simple thank-you, shop premium gifts with worldwide delivery.",
+      "Browse florist-quality roses and mixed bouquets, celebration cakes, personalized boxes, and curated hampers — all in one marketplace-style experience designed for modern worldwide gifting.",
+      "From same-day eligible gifts in select areas to worldwide delivery options, BlossomPot helps you send something beautiful without the guesswork.",
     ],
   },
   categories: {

@@ -408,9 +408,9 @@ export function howToSendGiftJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "HowTo",
-    name: "How to send flowers, cakes & gifts online in the USA",
+    name: "How to send flowers, cakes & gifts online worldwide",
     description:
-      "Order flowers, cakes, bouquets, and curated gifts for delivery across the United States with BlossomPot.",
+      "Order flowers, cakes, bouquets, and curated gifts for worldwide delivery with BlossomPot.",
     totalTime: "P7D",
     step: [
       {
@@ -429,8 +429,8 @@ export function howToSendGiftJsonLd() {
       {
         "@type": "HowToStep",
         position: 3,
-        name: "Enter US delivery address",
-        text: "At checkout, enter the recipient's full US address — city, state, and ZIP code.",
+        name: "Enter delivery address",
+        text: "At checkout, enter the recipient's full address and country.",
         url: canonical("/shipping"),
       },
       {
@@ -442,8 +442,8 @@ export function howToSendGiftJsonLd() {
       {
         "@type": "HowToStep",
         position: 5,
-        name: "Receive delivery in USA",
-        text: "BlossomPot delivers across America with nationwide coverage and faster windows to major metros when available.",
+        name: "Receive worldwide delivery",
+        text: "BlossomPot delivers worldwide. Timing depends on the recipient country, with faster windows to many cities when available.",
       },
     ],
   };
@@ -458,7 +458,7 @@ export function contactPageJsonLd() {
     "@type": "ContactPage",
     name: `Contact ${site.name}`,
     url: canonical("/contact"),
-    description: `Contact ${site.name} for flower, cake, and gift delivery support across the USA.`,
+    description: `Contact ${site.name} for flower, cake, and gift delivery support worldwide.`,
     mainEntity: { "@id": `${siteUrl}/#organization` },
   };
 }

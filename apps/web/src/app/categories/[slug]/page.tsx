@@ -57,18 +57,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const data = await api<{ category: Category }>(`/categories/${slug}`, { revalidate: 3600 });
     const c = data.category;
     return pageMetadata({
-      title: `${c.name} | USA Delivery | BlossomPot`,
+      title: `${c.name} | Worldwide Delivery | BlossomPot`,
       description:
         c.seoDescription ??
         c.description?.slice(0, 160) ??
-        `Shop ${c.name} with fast USA delivery from BlossomPot — flowers, cakes, and thoughtful gifts.`,
+        `Shop ${c.name} with fast worldwide delivery from BlossomPot — flowers, cakes, and thoughtful gifts.`,
       path,
     });
   } catch {
     const label = slug.replace(/-/g, " ");
     return pageMetadata({
       title: `${label} | BlossomPot`,
-      description: `Shop ${label} with USA delivery from BlossomPot.`,
+      description: `Shop ${label} with worldwide delivery from BlossomPot.`,
       path,
     });
   }
@@ -108,10 +108,10 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   };
   const seoCategoryName = headingName[slug] ?? name;
   const pageSeo = getCategoryPageSeo(slug);
-  const h1 = pageSeo?.h1 ?? `${name} — USA Delivery`;
+  const h1 = pageSeo?.h1 ?? `${name} — Worldwide Delivery`;
   const baseDescription =
     category?.description?.trim() ||
-    `Browse our ${name} collection — flowers, cakes, and thoughtful gifts with USA delivery from BlossomPot.`;
+    `Browse our ${name} collection — flowers, cakes, and thoughtful gifts with worldwide delivery from BlossomPot.`;
   const extra = getCategoryContent(slug);
   const rich = getCategoryRichContent(slug);
 
@@ -127,7 +127,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         data={[
           breadcrumbJsonLd(crumbs.map((c) => ({ name: c.label, path: c.href ?? categoryHref(slug) }))),
           itemListJsonLd(
-            `${name} — BlossomPot USA`,
+            `${name} — BlossomPot`,
             products.map((p) => ({ name: p.name, path: `/products/${p.slug}` }))
           ),
           ...(rich ? [faqJsonLd(rich.faqs)] : []),
@@ -186,7 +186,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             <ul className="grid sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-2 text-sm text-slate-600">
               <li className="flex gap-2">
                 <span className="text-nav shrink-0">✓</span>
-                Nationwide USA delivery with clear shipping windows
+                Worldwide delivery with clear shipping windows
               </li>
               <li className="flex gap-2">
                 <span className="text-nav shrink-0">✓</span>

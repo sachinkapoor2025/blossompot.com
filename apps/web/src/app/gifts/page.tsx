@@ -8,7 +8,7 @@ import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 export const metadata: Metadata = pageMetadata({
   title: "Gift Guides — For Her, For Him & By Budget | BlossomPot",
   description:
-    "Browse BlossomPot gift guides by recipient and price. Flowers, cakes, and hampers with clear USA delivery expectations.",
+    "Browse BlossomPot gift guides by recipient and price. Flowers, cakes, and hampers with worldwide delivery.",
   path: "/gifts",
   absoluteTitle: true,
 });
@@ -31,7 +31,7 @@ export default function GiftsIndexPage() {
       <h1 className="text-3xl font-bold text-primary mb-3">Gift guides</h1>
       <p className="text-slate-600 max-w-3xl mb-8 leading-relaxed">
         Start with who you are shopping for or a budget band, then open a guide for curated flowers,
-        cakes, and hampers with USA delivery guidance.
+        cakes, and hampers with worldwide delivery guidance.
       </p>
 
       <h2 className="text-xl font-bold text-primary mb-3">By recipient</h2>

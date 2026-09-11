@@ -5,9 +5,9 @@ import { JsonLd } from "@/components/JsonLd";
 import { faqJsonLd, pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "FAQ — Flowers, Cakes & Gifts USA",
+  title: "FAQ — Flowers, Cakes & Gifts Worldwide",
   description:
-    "Frequently asked questions about BlossomPot: USA delivery windows, ordering from abroad, gift messages, payments, and returns.",
+    "Frequently asked questions about BlossomPot: worldwide delivery windows, gift messages, payments, and returns.",
   path: "/faq",
 });
 
@@ -17,7 +17,7 @@ export default function FaqPage() {
       <JsonLd data={faqJsonLd(faqs)} />
       <h1 className="text-3xl font-bold text-primary mb-2">Frequently Asked Questions</h1>
       <p className="text-slate-600 mb-8">
-        Everything you need to know about sending flowers, cakes, and gifts across the USA with {site.name}.
+        Everything you need to know about sending flowers, cakes, and gifts worldwide with {site.name}.
       </p>
       <div className="space-y-4">
         {faqs.map((f) => (

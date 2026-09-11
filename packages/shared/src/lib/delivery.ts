@@ -35,7 +35,7 @@ export function estimatedDeliveryRange(from = new Date()): { start: Date; end: D
 
 export function estimatedDeliveryLabel(from = new Date()): string {
   const { start, end } = estimatedDeliveryRange(from);
-  return `Arrives ${formatDeliveryDate(start)} – ${formatDeliveryDate(end)} (USA)`;
+  return `Arrives ${formatDeliveryDate(start)} – ${formatDeliveryDate(end)}`;
 }
 
 export function estimatedDeliveryShort(from = new Date()): string {
@@ -92,7 +92,7 @@ export function getDeliveryPromise(
     copy: {
       short: `Est. ${estimatedDeliveryShort(from)}`,
       label: estimatedDeliveryLabel(from),
-      banner: "USA delivery typically 5–7 business days · same-day in select cities",
+      banner: "Worldwide delivery · timing depends on destination · same-day in select cities",
     },
   };
 }
