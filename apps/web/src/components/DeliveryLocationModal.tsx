@@ -1,23 +1,22 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
-import { useRouter } from "next/navigation";
-import { formatPostalDisplay, isValidPostal } from "@blossompot/shared";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
-import { postalLabelFor, dismissLocationPrompt } from "@/lib/delivery-location";
+import { dismissLocationPrompt } from "@/lib/delivery-location";
 import { useGboDeliveryCountries, useCountrySearch } from "@/lib/gbo-delivery-countries";
 
 export function DeliveryLocationModal() {
   const { location, selectorOpen, selectorCountryPrefill, closeSelector, setLocation } = useDeliveryLocation();
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const titleId = useId();
   const { countries } = useGboDeliveryCountries();
   const { query, setQuery, filtered } = useCountrySearch(countries);
   const [countryCode, setCountryCode] = useState(location?.countryCode ?? "US");
-  const [postalCode, setPostalCode] = useState(location?.postalCode ?? "");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const postalLabel = postalLabelFor(countryCode);
   const selected = countries.find((c) => c.countryCode === countryCode) ?? countries[0];
   const selectOptions = filtered.some((c) => c.countryCode === countryCode)
     ? filtered
@@ -28,7 +27,6 @@ export function DeliveryLocationModal() {
   useEffect(() => {
     if (!selectorOpen) return;
     setCountryCode(selectorCountryPrefill || location?.countryCode || "US");
-    setPostalCode(location?.postalCode ?? "");
     setError("");
     setQuery("");
   }, [selectorOpen, location, selectorCountryPrefill, setQuery]);
@@ -51,20 +49,18 @@ export function DeliveryLocationModal() {
 
   const submit = async () => {
     setError("");
-    const trimmedPostal = postalCode.trim();
-    if (trimmedPostal && !isValidPostal(countryCode, trimmedPostal)) {
-      setError(`Enter a valid ${postalLabel.toLowerCase()}, or leave it blank`);
-      return;
-    }
     setBusy(true);
     try {
       await setLocation({
         countryCode,
-        postalCode: trimmedPostal,
-        postalDisplay: trimmedPostal ? formatPostalDisplay(countryCode, trimmedPostal) : countryCode,
+        postalCode: "",
+        postalDisplay: countryCode,
       });
       closeSelector();
-      router.refresh();
+      const next = new URLSearchParams(searchParams.toString());
+      next.set("country", countryCode);
+      const qs = next.toString();
+      router.push(qs ? `${pathname}?${qs}` : pathname);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not check this location");
     } finally {
@@ -102,8 +98,8 @@ export function DeliveryLocationModal() {
             Where should we deliver?
           </h2>
           <p className="mt-2 text-sm text-slate-600">
-            Pick a country to browse gifts for that destination. Postal code is optional — we deliver
-            country-wide.
+            Pick a country to browse gifts for that destination. We deliver country-wide — postal
+            code is only needed at checkout.
           </p>
         </div>
         <form
@@ -137,17 +133,6 @@ export function DeliveryLocationModal() {
                 ))}
               </select>
               <span className="mt-1 block text-xs text-slate-500">{countries.length} countries</span>
-            </label>
-            <label className="block text-sm font-medium text-slate-800">
-              {postalLabel} <span className="font-normal text-slate-500">(optional)</span>
-              <input
-                autoComplete="postal-code"
-                inputMode={["US", "AU", "AE", "DE", "FR", "IT", "ES"].includes(countryCode) ? "numeric" : "text"}
-                value={postalCode}
-                onChange={(e) => setPostalCode(e.target.value)}
-                placeholder={selected?.postalPlaceholder ?? "Postal code"}
-                className="mt-1 w-full max-w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm"
-              />
             </label>
             {error ? <p className="text-sm text-red-600">{error}</p> : null}
             <div className="flex gap-2">

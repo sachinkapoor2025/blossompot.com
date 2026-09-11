@@ -14,6 +14,7 @@ import {
   parseGboSku,
   parseGboSlug,
   productMatchesSearchQuery,
+  productVisibleForDeliveryCountry,
 } from "./gbo";
 
 describe("gbo helpers", () => {
@@ -50,6 +51,32 @@ describe("gbo helpers", () => {
     assert.equal(product.indexable, false);
     assert.equal(product.categorySlug, "gift-hampers");
     assert.ok(product.additionalCategorySlugs?.includes("overseas-gifts"));
+    assert.equal(product.deliveryFee, 0);
+  });
+
+  it("filters storefront catalog by destination country", () => {
+    assert.equal(
+      productVisibleForDeliveryCountry(
+        { slug: "gbo-us-3-peak", sku: "gbo:US:3", vendorSlug: "gift-baskets-overseas" },
+        "AM"
+      ),
+      false
+    );
+    assert.equal(
+      productVisibleForDeliveryCountry(
+        { slug: "gbo-am-3-peak", sku: "gbo:AM:3", vendorSlug: "gift-baskets-overseas" },
+        "AM"
+      ),
+      true
+    );
+    assert.equal(
+      productVisibleForDeliveryCountry({ slug: "red-roses-dozen", sku: "BP-ROSES" }, "AM"),
+      false
+    );
+    assert.equal(
+      productVisibleForDeliveryCountry({ slug: "red-roses-dozen", sku: "BP-ROSES" }, "US"),
+      true
+    );
   });
 
   it("maps GBO flower tags onto Flowers / Bouquets nav categories", () => {

@@ -245,7 +245,7 @@ export function parseLocationQuery(event: APIGatewayProxyEventV2) {
   const q = event.queryStringParameters ?? {};
   const countryCode = (q.country ?? q.countryCode ?? "").trim().toUpperCase();
   const postalCode = (q.postalCode ?? q.zip ?? "").trim();
-  if (!countryCode || !postalCode) return null;
-  if (!isValidPostal(countryCode, postalCode)) return null;
+  if (!countryCode) return null;
+  if (postalCode && !isValidPostal(countryCode, postalCode)) return null;
   return { countryCode, postalCode, stateCode: q.state ?? q.stateCode, city: q.city };
 }

@@ -86,4 +86,30 @@ describe("buildOrderShipments", () => {
     ]);
     assert.ok(err);
   });
+
+  it("charges flat $19 shipping for GBO-only shipments", () => {
+    const cart: CartItem[] = [
+      {
+        productSlug: "gbo-am-3-peak",
+        name: "Peak",
+        price: 80,
+        currency: "USD",
+        quantity: 1,
+        vendorSlug: "gift-baskets-overseas",
+        sku: "gbo:AM:3",
+      },
+    ];
+    const built = buildOrderShipments({
+      cartItems: cart,
+      checkoutShipments: [
+        { shippingAddress: addr("One"), items: [{ productSlug: "gbo-am-3-peak", quantity: 1 }] },
+      ],
+      currency: "USD",
+      usdInrRate: 96,
+    });
+    assert.ok(!("error" in built));
+    if ("error" in built) return;
+    assert.equal(built.shippingTotal, 19);
+    assert.equal(built.shipments[0].shipping, 19);
+  });
 });

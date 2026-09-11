@@ -261,8 +261,9 @@ export default function CartPage() {
               {showMixedVendorShippingException ? (
                 <p className="text-xs text-amber-900 bg-amber-50 border border-amber-100 rounded-md px-3 py-2">
                   Your items ship from different sellers, so shipping is checked separately for each
-                  — not on the cart total. Under $8 is $6.99, $8–$13.99 is $3.99, and above $13.99 is free
-                  per seller. Current shipping fee: {format(shippingCharge, currency)}.
+                  — not on the cart total. International partner gifts are a flat $19. Other sellers:
+                  under $8 is $6.99, $8–$13.99 is $3.99, and above $13.99 is free. Current shipping
+                  fee: {format(shippingCharge, currency)}.
                 </p>
               ) : (
                 <FreeShippingNotice

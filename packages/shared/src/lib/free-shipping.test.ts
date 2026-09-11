@@ -9,6 +9,7 @@ import {
   quoteFreeShippingThreshold,
   quoteShipmentsShipping,
 } from "./free-shipping";
+import { GBO_FLAT_SHIPPING_USD } from "../constants";
 
 describe("quoteFreeShippingThreshold", () => {
   it("charges $6.99 when cart is under $8", () => {
@@ -147,7 +148,38 @@ describe("quoteAddressShipmentShipping", () => {
       currency: "USD",
       usdInrRate: 96,
     });
-    // $3.99 alone would ship for $6.99; with $20 addon → free
     assert.equal(totalCharge, 0);
+  });
+
+  it("charges a flat $19 for Gift Baskets Overseas items only", () => {
+    const gboOnly = quoteAddressShipmentShipping({
+      items: [
+        {
+          price: 80,
+          quantity: 1,
+          vendorSlug: "gift-baskets-overseas",
+          productSlug: "gbo-am-3-peak",
+        },
+      ],
+      currency: "USD",
+      usdInrRate: 96,
+    });
+    assert.equal(gboOnly.totalCharge, GBO_FLAT_SHIPPING_USD);
+    assert.equal(gboOnly.perVendor[0]?.policy, "gbo_flat");
+
+    const mixed = quoteAddressShipmentShipping({
+      items: [
+        { price: 50, quantity: 1, productSlug: "red-roses-dozen" },
+        {
+          price: 80,
+          quantity: 1,
+          vendorSlug: "gift-baskets-overseas",
+          productSlug: "gbo-us-3-peak",
+        },
+      ],
+      currency: "USD",
+      usdInrRate: 96,
+    });
+    assert.equal(mixed.totalCharge, GBO_FLAT_SHIPPING_USD);
   });
 });

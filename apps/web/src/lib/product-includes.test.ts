@@ -176,7 +176,7 @@ describe("getProductIncludes", () => {
         "Cheerful Plush Tan Bear",
         "Plush bear",
         "Gift message option at checkout",
-        "Worldwide delivery included",
+        "$19 international shipping at checkout",
         "Fulfilled by our international partner",
       ]
     );

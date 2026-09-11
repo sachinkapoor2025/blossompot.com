@@ -337,7 +337,7 @@ export function ProductDetailClient({
           </div>
 
           {isGboProduct ? (
-            <p className="mb-5 text-xs text-slate-600">Worldwide delivery included · Partner fulfillment</p>
+            <p className="mb-5 text-xs text-slate-600">$19 international shipping · Partner fulfillment</p>
           ) : (
             <TrustBadges variant="compact" className="mb-5" />
           )}

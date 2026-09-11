@@ -169,7 +169,7 @@ export function gboGiftToProduct(country: string, gift: GboGift, nowIso?: string
     indexable: false,
     internationalDelivery: true,
     fulfilledByName: "International delivery partner",
-    deliveryFee: 0,
+    deliveryFee: 0, // customer shipping is charged at checkout (GBO_FLAT_SHIPPING_USD)
     ...(days && days > 0 && days <= 168 ? { prepTimeHours: Math.round(days) * 24 } : {}),
     createdAt: ts,
     updatedAt: ts,
@@ -213,6 +213,53 @@ export function parseGboLineRef(item: {
   productSlug?: string | null;
 }): GboLineRef | null {
   return parseGboSku(item.sku) ?? parseGboSlug(item.productSlug);
+}
+
+/** True when a catalog/cart line is fulfilled by Gift Baskets Overseas. */
+export function isGboCatalogProduct(product: {
+  vendorSlug?: string | null;
+  internationalDelivery?: boolean;
+  slug?: string | null;
+  sku?: string | null;
+}): boolean {
+  return (
+    isGboVendor(product.vendorSlug) ||
+    product.internationalDelivery === true ||
+    Boolean(parseGboSku(product.sku) || parseGboSlug(product.slug))
+  );
+}
+
+/**
+ * Destination catalog for a product. Local BlossomPot SKUs are US-only;
+ * GBO SKUs are tagged `gbo:{CC}:{id}`.
+ */
+export function catalogProductCountry(product: {
+  vendorSlug?: string | null;
+  internationalDelivery?: boolean;
+  slug?: string | null;
+  sku?: string | null;
+}): string | null {
+  const ref = parseGboSku(product.sku) ?? parseGboSlug(product.slug);
+  if (ref) return ref.country;
+  if (isGboCatalogProduct(product)) return null;
+  return "US";
+}
+
+/** Keep the selected country's GBO catalog; hide US-only SKUs abroad. */
+export function productVisibleForDeliveryCountry(
+  product: {
+    vendorSlug?: string | null;
+    internationalDelivery?: boolean;
+    slug?: string | null;
+    sku?: string | null;
+  },
+  country: string
+): boolean {
+  const iso = country.trim().toUpperCase();
+  if (!/^[A-Z]{2}$/.test(iso)) return true;
+  const dest = catalogProductCountry(product);
+  if (!dest) return true;
+  return dest === iso;
 }
 
 /**

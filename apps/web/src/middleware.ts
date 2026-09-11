@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { classifyUserAgent } from "@/lib/crawler-policy";
+import {
+  DELIVERY_LOCATION_COOKIE,
+  deliveryLocationToken,
+  parseDeliveryLocationToken,
+} from "@/lib/delivery-location";
 
 /**
  * Edge 301: apex → www.
@@ -23,6 +28,26 @@ export function middleware(request: NextRequest) {
   if (classified.crawlerId) {
     response.headers.set("x-blossompot-crawler", classified.crawlerId);
   }
+
+  const country = request.nextUrl.searchParams.get("country")?.trim().toUpperCase();
+  if (country && /^[A-Z]{2}$/.test(country)) {
+    const existing = parseDeliveryLocationToken(
+      request.cookies.get(DELIVERY_LOCATION_COOKIE)?.value
+    );
+    const postalCode = existing?.countryCode === country ? existing.postalCode : "";
+    response.cookies.set({
+      name: DELIVERY_LOCATION_COOKIE,
+      value: deliveryLocationToken({
+        countryCode: country,
+        postalCode,
+        postalDisplay: postalCode || country,
+      }),
+      path: "/",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 365,
+    });
+  }
+
   return response;
 }
 

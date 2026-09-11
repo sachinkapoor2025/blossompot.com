@@ -30,7 +30,7 @@ export function ScheduleDeliveryPicker({
   /** Dynamic noun from product category, e.g. flowers / cake / gift */
   productNoun?: string;
 }) {
-  const [{ min, max }] = useState(() => preferredDeliveryDateBounds());
+  const { min, max } = preferredDeliveryDateBounds();
   const [value, setValue] = useState("");
 
   useEffect(() => {

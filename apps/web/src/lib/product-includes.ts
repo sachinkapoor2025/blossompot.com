@@ -173,7 +173,7 @@ function gboIncludeLines(product: ProductLike): string[] {
   const included = coerceGboContents(product.description);
   if (included) lines.push(included);
   lines.push("Gift message option at checkout");
-  lines.push("Worldwide delivery included");
+  lines.push("$19 international shipping at checkout");
   lines.push("Fulfilled by our international partner");
   return lines;
 }

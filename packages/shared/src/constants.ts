@@ -151,6 +151,9 @@ export const VENDOR_ORANGE_COUNTY = "orange-county" as const;
  */
 export const VENDOR_GBO = "gift-baskets-overseas" as const;
 
+/** Flat customer shipping for GBO lines only (does not apply to other vendors). */
+export const GBO_FLAT_SHIPPING_USD = 19 as const;
+
 /** Storefront category for GBO dropship gifts. */
 export const GBO_CATEGORY_SLUG = "overseas-gifts" as const;
 
