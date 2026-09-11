@@ -99,10 +99,8 @@ export function dismissLocationPrompt() {
 
 export function locationQueryString(location: StoredDeliveryLocation | null): string {
   if (!location) return "";
-  const q = new URLSearchParams({
-    country: location.countryCode,
-    postalCode: location.postalCode,
-  });
+  const q = new URLSearchParams({ country: location.countryCode });
+  if (location.postalCode.trim()) q.set("postalCode", location.postalCode);
   return `?${q.toString()}`;
 }
 

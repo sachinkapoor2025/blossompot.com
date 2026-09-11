@@ -98,10 +98,10 @@ export async function getCartHandler(event: APIGatewayProxyEventV2) {
   }
   const country = event.queryStringParameters?.country ?? event.queryStringParameters?.countryCode;
   const postal = event.queryStringParameters?.postalCode ?? event.queryStringParameters?.zip;
-  if (country && postal && items.length) {
+  if (country && items.length) {
     const evals = await evaluateProductsForLocation(
       items.map((i) => ({ slug: i.productSlug, vendorSlug: i.vendorSlug })),
-      { countryCode: country, postalCode: postal }
+      { countryCode: country, postalCode: postal ?? "" }
     );
     const bySlug = new Map(evals.map((e) => [e.slug, e]));
     const flagged = items.map((item) => {
@@ -110,7 +110,9 @@ export async function getCartHandler(event: APIGatewayProxyEventV2) {
         ? {
             ...item,
             unavailableForLocation: true,
-            unavailableReason: `No longer available for delivery to ${formatPostalDisplay(country, postal)}.`,
+            unavailableReason: `No longer available for delivery to ${
+              postal ? formatPostalDisplay(country, postal) : country
+            }.`,
           }
         : item;
     });
@@ -128,7 +130,9 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
 
   const body = JSON.parse(event.body ?? "{}");
   const parsed = addToCartSchema.safeParse(body);
-  if (!parsed.success) return badRequest(parsed.error.message);
+  if (!parsed.success) {
+    return badRequest(parsed.error.issues[0]?.message ?? "Could not add this gift to your cart");
+  }
 
   const [productResult, cart] = await Promise.all([
     docClient.send(
@@ -181,7 +185,7 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
     return badRequest("This 24-hour flash offer has ended");
   }
 
-  if (parsed.data.deliveryCountry && parsed.data.deliveryPostal) {
+  if (parsed.data.deliveryCountry) {
     const [row] = await evaluateProductsForLocation(
       [
         {
@@ -190,15 +194,13 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
           inventory: product.inventory,
         },
       ],
-      { countryCode: parsed.data.deliveryCountry, postalCode: parsed.data.deliveryPostal }
+      { countryCode: parsed.data.deliveryCountry, postalCode: parsed.data.deliveryPostal ?? "" }
     );
     if (row && !row.deliverable) {
-      return badRequest(
-        `This product is currently not available for delivery to ${formatPostalDisplay(
-          parsed.data.deliveryCountry,
-          parsed.data.deliveryPostal
-        )}.`
-      );
+      const where = parsed.data.deliveryPostal
+        ? formatPostalDisplay(parsed.data.deliveryCountry, parsed.data.deliveryPostal)
+        : parsed.data.deliveryCountry;
+      return badRequest(`This product is currently not available for delivery to ${where}.`);
     }
   }
 
