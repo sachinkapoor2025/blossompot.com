@@ -13,6 +13,11 @@ import {
   pickDailyDealDiscount,
   dailyDealDayKey,
   normalizePhone,
+  applyPercentDiscount as sharedApplyPercentDiscount,
+  ADMIN_TRIAL_COUPON_KIND,
+  ADMIN_TRIAL_COUPON_MINUTES,
+  ADMIN_TRIAL_TARGET_USD,
+  isTrialCouponKind,
   type CouponValidationResult,
   type WelcomeCoupon,
   type StoreCoupon,
@@ -27,12 +32,12 @@ import {
   sendWhatsAppMessage,
 } from "../lib/whatsapp";
 
-function generateCode(): string {
+function generateCode(prefix = "GIFT"): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   const bytes = randomBytes(6);
   let suffix = "";
   for (let i = 0; i < 6; i++) suffix += chars[bytes[i]! % chars.length];
-  return `GIFT-${suffix}`;
+  return `${prefix}-${suffix}`;
 }
 
 function welcomeExpiresAt(from = new Date()): string {
@@ -147,6 +152,9 @@ export async function validateCouponRecord(
     code: coupon.code,
     discountPercent: coupon.discountPercent,
     expiresAt: coupon.expiresAt,
+    ...(isTrialCouponKind(coupon.kind)
+      ? { kind: ADMIN_TRIAL_COUPON_KIND, targetUsd: coupon.targetUsd ?? ADMIN_TRIAL_TARGET_USD }
+      : { kind: "percent" as const }),
   };
 }
 
@@ -398,7 +406,7 @@ export async function markCouponUsed(code: string, orderId: string): Promise<voi
 }
 
 export function applyPercentDiscount(subtotal: number, percent: number): number {
-  return Math.round(subtotal * (percent / 100) * 100) / 100;
+  return sharedApplyPercentDiscount(subtotal, percent);
 }
 
 export async function validateCouponHandler(event: APIGatewayProxyEventV2) {
@@ -467,13 +475,17 @@ export async function createAdminAbandonedCoupon(event: APIGatewayProxyEventV2) 
     return badRequest("Enter a customer email or mobile number");
   }
 
-  const discountPercent = parsed.data.discountPercent;
+  const isTrial = parsed.data.kind === "trial";
+  const discountPercent = isTrial ? 0 : parsed.data.discountPercent!;
   const confirmedSale =
-    parsed.data.confirmedSale === true || isAdminConfirmedSaleDiscount(discountPercent);
-  const hours = adminCouponHoursForDiscount(discountPercent);
+    !isTrial &&
+    (parsed.data.confirmedSale === true || isAdminConfirmedSaleDiscount(discountPercent));
+  const hours = isTrial ? ADMIN_TRIAL_COUPON_MINUTES / 60 : adminCouponHoursForDiscount(discountPercent);
   const timestamp = now();
-  const expiresAt = new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
-  const code = generateCode();
+  const expiresAt = isTrial
+    ? new Date(Date.now() + ADMIN_TRIAL_COUPON_MINUTES * 60 * 1000).toISOString()
+    : new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
+  const code = generateCode(isTrial ? "TRIAL" : "GIFT");
 
   const coupon: StoreCoupon & { PK: string; SK: string } = {
     PK: couponKeys.pk(code),
@@ -487,6 +499,9 @@ export async function createAdminAbandonedCoupon(event: APIGatewayProxyEventV2) 
     source: "admin",
     createdBy: auth.email,
     ...(confirmedSale ? { confirmedSale: true } : {}),
+    ...(isTrial
+      ? { kind: ADMIN_TRIAL_COUPON_KIND, targetUsd: ADMIN_TRIAL_TARGET_USD }
+      : {}),
   };
 
   try {
@@ -502,6 +517,14 @@ export async function createAdminAbandonedCoupon(event: APIGatewayProxyEventV2) 
     return serverError("Could not create coupon — please try again");
   }
 
+  const skippedChannel = {
+    ok: false,
+    skipped: true as const,
+    deepLink: "",
+    provider: undefined as string | undefined,
+    error: "Skipped for trial coupon",
+  };
+
   const waMessage = abandonedCouponWhatsAppMessage({
     code,
     discountPercent,
@@ -510,37 +533,44 @@ export async function createAdminAbandonedCoupon(event: APIGatewayProxyEventV2) 
   });
   // Prefer Twilio: Meta free-form text is blocked outside the 24h care window
   // for business-initiated coupon messages (email still works independently).
-  const whatsapp = whatsappPhone
-    ? await sendWhatsAppMessage({
-        phone: whatsappPhone,
-        message: waMessage,
-        prefer: "twilio",
-      })
-    : {
-        ok: false,
-        skipped: true as const,
-        deepLink: "",
-        provider: undefined as string | undefined,
-        error: "No phone provided",
-      };
-  if (whatsappPhone && !whatsapp.ok && !whatsapp.skipped) {
+  const whatsapp = isTrial
+    ? skippedChannel
+    : whatsappPhone
+      ? await sendWhatsAppMessage({
+          phone: whatsappPhone,
+          message: waMessage,
+          prefer: "twilio",
+        })
+      : {
+          ok: false,
+          skipped: true as const,
+          deepLink: "",
+          provider: undefined as string | undefined,
+          error: "No phone provided",
+        };
+  if (!isTrial && whatsappPhone && !whatsapp.ok && !whatsapp.skipped) {
     console.error("createAdminAbandonedCoupon WhatsApp failed", {
       error: whatsapp.error,
       provider: whatsapp.provider,
     });
   }
 
-  const emails = await sendAdminAbandonedCouponEmails({
-    customerEmail: email,
-    phone: phone ?? whatsappPhone,
-    code,
-    discountPercent,
-    expiresAt,
-    hours,
-    confirmedSale,
-    createdByAdminEmail: auth.email,
-    whatsappDeepLink: whatsapp.deepLink || undefined,
-  });
+  const emails = isTrial
+    ? {
+        customer: { ok: true, skipped: true as const },
+        notify: { ok: true, skipped: true as const },
+      }
+    : await sendAdminAbandonedCouponEmails({
+        customerEmail: email,
+        phone: phone ?? whatsappPhone,
+        code,
+        discountPercent,
+        expiresAt,
+        hours,
+        confirmedSale,
+        createdByAdminEmail: auth.email,
+        whatsappDeepLink: whatsapp.deepLink || undefined,
+      });
 
   return ok({
     coupon: {
@@ -553,6 +583,9 @@ export async function createAdminAbandonedCoupon(event: APIGatewayProxyEventV2) 
       createdBy: auth.email,
       source: "admin" as const,
       confirmedSale,
+      ...(isTrial
+        ? { kind: ADMIN_TRIAL_COUPON_KIND, targetUsd: ADMIN_TRIAL_TARGET_USD }
+        : {}),
     },
     emails: {
       customerOk: emails.customer.ok,

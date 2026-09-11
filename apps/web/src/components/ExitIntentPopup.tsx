@@ -20,8 +20,10 @@ import { ConfettiBurst } from "@/components/ConfettiBurst";
 import { PhoneInput, buildPhoneValue } from "@/components/PhoneInput";
 import { useOptionalDeliveryLocation } from "@/lib/delivery-location-context";
 
-const STORAGE_KEY = "blossompot_daily_deal_shown";
-const SHOW_AFTER_MS = 10_000;
+const STORAGE_KEY = "blossompot_daily_deal_shown_v20";
+const TIMER_START_KEY = "blossompot_daily_deal_timer_v20";
+/** Wait after first landing before showing Discount of the Day. */
+const SHOW_AFTER_MS = 20_000;
 const SPIN_MS = 4200;
 
 const SEGMENTS = [...DAILY_DEAL_SEGMENTS];
@@ -69,7 +71,6 @@ type CouponResult = {
 export function ExitIntentPopup() {
   const pathname = usePathname();
   const delivery = useOptionalDeliveryLocation();
-  const hasDeliveryLocation = Boolean(delivery?.location);
   const locationSelectorOpen = Boolean(delivery?.selectorOpen);
   const [open, setOpen] = useState(false);
   const [countryIso, setCountryIso] = useState(DEFAULT_COUNTRY_ISO);
@@ -96,18 +97,20 @@ export function ExitIntentPopup() {
   }, []);
 
   useEffect(() => {
-    if (!hasDeliveryLocation || locationSelectorOpen) {
-      setOpen(false);
+    if (pathname.startsWith("/admin") || pathname.startsWith("/ses-email") || pathname.startsWith("/checkout")) {
       return;
     }
-    if (pathname.startsWith("/admin") || pathname.startsWith("/ses-email") || pathname.startsWith("/checkout")) return;
     if (sessionStorage.getItem(STORAGE_KEY)) return;
 
-    const TIMER_START_KEY = "blossompot_daily_deal_timer_start";
     let startedAt = Number(sessionStorage.getItem(TIMER_START_KEY) || 0);
     if (!startedAt) {
       startedAt = Date.now();
       sessionStorage.setItem(TIMER_START_KEY, String(startedAt));
+    }
+
+    if (locationSelectorOpen) {
+      setOpen(false);
+      return;
     }
 
     const remaining = Math.max(0, SHOW_AFTER_MS - (Date.now() - startedAt));
@@ -121,7 +124,7 @@ export function ExitIntentPopup() {
     }, remaining);
 
     return () => window.clearTimeout(timer);
-  }, [pathname, hasDeliveryLocation, locationSelectorOpen]);
+  }, [pathname, locationSelectorOpen]);
 
   const copyCode = async () => {
     if (!coupon) return;

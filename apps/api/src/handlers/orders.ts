@@ -14,6 +14,9 @@ import {
   cartSubtotal,
   couponEligibleSubtotal,
   buildOrderShipments,
+  applyTrialPayableDiscount,
+  trialTargetPayable,
+  isTrialCouponKind,
   singleCheckoutShipment,
   isValidScheduleDeliveryDate,
   preferredDeliveryDateToIso,
@@ -324,15 +327,21 @@ export async function checkout(event: APIGatewayProxyEventV2) {
       return badRequest("Phone or email is required to apply a coupon");
     }
     const eligibleSubtotal = couponEligibleSubtotal(orderItems as CartItem[]);
-    if (eligibleSubtotal <= 0) {
-      return badRequest("Coupons cannot be applied to flash sale items");
-    }
     const coupon = await validateCouponRecord(parsed.data.couponCode, {
       email: checkoutEmail,
       phone: checkoutPhone,
     });
     if (!coupon.valid) return badRequest(coupon.error ?? "Invalid coupon code");
-    discount = applyPercentDiscount(eligibleSubtotal, coupon.discountPercent!);
+    if (isTrialCouponKind(coupon.kind)) {
+      const payable = Math.round((subtotal + shipping + tax) * 100) / 100;
+      const target = trialTargetPayable(checkoutCurrency as "USD" | "INR", usdInrRate);
+      discount = applyTrialPayableDiscount(payable, target);
+    } else {
+      if (eligibleSubtotal <= 0) {
+        return badRequest("Coupons cannot be applied to flash sale items");
+      }
+      discount = applyPercentDiscount(eligibleSubtotal, coupon.discountPercent!);
+    }
     couponCode = coupon.code;
   }
 
