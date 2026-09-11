@@ -230,10 +230,10 @@ Your exclusive code:
 
 Enter this code at checkout on https://www.blossompot.com/checkout
 
-One spin per mobile number per day. Shop premium gifts with delivery to all 50 US states:
+One spin per mobile number per day. Shop premium gifts with worldwide delivery:
 https://www.blossompot.com/products
 
-Order early for on-time USA delivery.
+Order early for on-time worldwide delivery.
 
 — ${SITE_NAME} Team
 order@blossompot.com`,
