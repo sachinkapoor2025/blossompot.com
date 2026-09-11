@@ -4,7 +4,7 @@ import { Suspense, useEffect, useId, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
 import { dismissLocationPrompt } from "@/lib/delivery-location";
-import { useGboDeliveryCountries, useCountrySearch } from "@/lib/gbo-delivery-countries";
+import { useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
 
 export function DeliveryLocationModal() {
   return (
@@ -21,23 +21,15 @@ function DeliveryLocationModalInner() {
   const searchParams = useSearchParams();
   const titleId = useId();
   const { countries } = useGboDeliveryCountries();
-  const { query, setQuery, filtered } = useCountrySearch(countries);
   const [countryCode, setCountryCode] = useState(location?.countryCode ?? "US");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const selected = countries.find((c) => c.countryCode === countryCode) ?? countries[0];
-  const selectOptions = filtered.some((c) => c.countryCode === countryCode)
-    ? filtered
-    : selected
-      ? [selected, ...filtered]
-      : filtered;
 
   useEffect(() => {
     if (!selectorOpen) return;
     setCountryCode(selectorCountryPrefill || location?.countryCode || "US");
     setError("");
-    setQuery("");
-  }, [selectorOpen, location, selectorCountryPrefill, setQuery]);
+  }, [selectorOpen, location, selectorCountryPrefill]);
 
   useEffect(() => {
     if (!selectorOpen) return;
@@ -119,22 +111,13 @@ function DeliveryLocationModalInner() {
         >
           <div className="space-y-4">
             <label className="block text-sm font-medium text-slate-800">
-              Search countries
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="India, Japan, Brazil…"
-                className="mt-1 w-full max-w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm"
-              />
-            </label>
-            <label className="block text-sm font-medium text-slate-800">
               Country
               <select
                 value={countryCode}
                 onChange={(e) => setCountryCode(e.target.value)}
                 className="mt-1 w-full max-w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm"
               >
-                {selectOptions.map((c) => (
+                {countries.map((c) => (
                   <option key={c.countryCode} value={c.countryCode}>
                     {c.countryName} ({c.countryCode})
                   </option>
