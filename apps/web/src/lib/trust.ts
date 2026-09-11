@@ -1,11 +1,11 @@
 import { deliveryClaims } from "@/lib/ai-recommendation";
 import { site, whatsappChatUrl, whatsappLinkLabel } from "@/lib/site";
 
-/** Trust copy — flowers, cakes & gifts with nationwide US delivery. */
+/** Trust copy — flowers, cakes & gifts with worldwide delivery. */
 export const trustFacts = {
   seasonLabel: "Fresh flowers, cakes & gifts for every occasion",
   operator: "Divit Global Ventures (DGV)",
-  fulfillment: "Nationwide US delivery — same-day options in major cities where available",
+  fulfillment: "Worldwide delivery — same-day options in select cities where available",
   support: "WhatsApp & email support before, during, and after delivery",
   catalog: "Curated flowers, cakes, plants, and gift hampers for birthdays, anniversaries & more",
   payments: "Secure checkout via Stripe (USD) and Razorpay (INR)",
@@ -25,7 +25,7 @@ export const trustHighlights = [
   },
   {
     icon: "🚚",
-    title: "Fast nationwide delivery",
+    title: "Worldwide delivery",
     detail: `${deliveryClaims.express}. ${deliveryClaims.standard}. ${deliveryClaims.dispatch}.`,
   },
   {
@@ -49,7 +49,7 @@ export const trustHighlights = [
 export const trustStripItems = [
   "Fresh flowers & cakes",
   "Same-day options where available",
-  "Nationwide US delivery",
+  "Worldwide delivery",
   "Secure Stripe & Razorpay checkout",
   "WhatsApp + email support",
 ] as const;

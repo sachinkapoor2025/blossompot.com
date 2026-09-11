@@ -5,7 +5,7 @@ import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
   title: "Terms & Conditions",
-  description: `Terms and conditions for shopping on ${site.name} — flowers, cakes, and gifts with USA delivery.`,
+  description: `Terms and conditions for shopping on ${site.name} — flowers, cakes, and gifts with worldwide delivery.`,
   path: "/terms",
 });
 

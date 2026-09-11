@@ -144,7 +144,7 @@ export function ShippingAddressForm({
       <div>
         <h2 className="text-lg font-bold text-slate-900">Shipping Address</h2>
         <p className="text-sm text-slate-600 mt-1">
-          Enter the US delivery address for your brother or recipient. We ship domestically within all 50 states.
+          Enter the recipient’s delivery address. We deliver gifts worldwide — timing depends on the destination country.
         </p>
       </div>
 

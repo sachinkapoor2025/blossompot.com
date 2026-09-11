@@ -35,19 +35,19 @@ function matchesAnyKeyword(product: Product, keywords: string[]): boolean {
 export const COLLECTIONS: CollectionDefinition[] = [
   {
     slug: "red-roses",
-    title: "Red Roses Delivery USA | BlossomPot",
+    title: "Red Roses Delivery Worldwide | BlossomPot",
     h1: "Red Rose Bouquets",
-    description: "Shop classic red rose arrangements for USA delivery — birthdays, anniversaries, and romantic surprises.",
-    intro: "Choose elegant red rose bouquets with clear USA shipping guidance on every product.",
+    description: "Shop classic red rose arrangements for worldwide delivery — birthdays, anniversaries, and romantic surprises.",
+    intro: "Choose elegant red rose bouquets with clear worldwide shipping guidance on every product.",
     filter: (products) =>
       products.filter((p) => matchesAnyKeyword(p, ["red rose", "roses"]) || inCategory(p, "flowers")).slice(0, 36),
   },
   {
     slug: "birthday-flowers",
-    title: "Birthday Flowers USA | BlossomPot",
+    title: "Birthday Flowers Worldwide | BlossomPot",
     h1: "Birthday Flowers & Gifts",
-    description: "Bright birthday flower arrangements and gift combos with USA delivery.",
-    intro: "Celebrate with colorful blooms and celebration-ready gifts shipped across America.",
+    description: "Bright birthday flower arrangements and gift combos with worldwide delivery.",
+    intro: "Celebrate with colorful blooms and celebration-ready gifts shipped worldwide.",
     filter: (products) =>
       products
         .filter((p) => inCategory(p, "birthday-gifts") || matchesAnyKeyword(p, ["birthday"]))
@@ -55,9 +55,9 @@ export const COLLECTIONS: CollectionDefinition[] = [
   },
   {
     slug: "anniversary-roses",
-    title: "Anniversary Roses & Gifts USA | BlossomPot",
+    title: "Anniversary Roses & Gifts Worldwide | BlossomPot",
     h1: "Anniversary Roses & Romantic Gifts",
-    description: "Romantic anniversary flowers, roses, and gift sets for USA delivery.",
+    description: "Romantic anniversary flowers, roses, and gift sets for worldwide delivery.",
     intro: "Mark milestones with roses, mixed bouquets, and dessert pairings.",
     filter: (products) =>
       products
@@ -66,33 +66,33 @@ export const COLLECTIONS: CollectionDefinition[] = [
   },
   {
     slug: "gift-hampers",
-    title: "Gift Hampers USA | BlossomPot",
+    title: "Gift Hampers Worldwide | BlossomPot",
     h1: "Curated Gift Hampers",
-    description: "Curated gift hampers and celebration boxes with USA delivery.",
+    description: "Curated gift hampers and celebration boxes with worldwide delivery.",
     intro: "Thoughtful hampers for thank-yous, birthdays, and corporate gestures.",
     filter: (products) => products.filter((p) => inCategory(p, "gift-hampers")).slice(0, 36),
   },
   {
     slug: "under-50",
-    title: "Gifts Under $50 USA | BlossomPot",
+    title: "Gifts Under $50 Worldwide | BlossomPot",
     h1: "Gifts Under $50",
-    description: "Flowers, cakes, and gifts under $50 with USA delivery options.",
+    description: "Flowers, cakes, and gifts under $50 with worldwide delivery options.",
     intro: "Budget-friendly picks that still feel polished and ready to gift.",
     filter: (products) =>
       products.filter((p) => usdPrice(p) <= 50).sort(byUpdatedDesc).slice(0, 36),
   },
   {
     slug: "under-100",
-    title: "Gifts Under $100 USA | BlossomPot",
+    title: "Gifts Under $100 Worldwide | BlossomPot",
     h1: "Gifts Under $100",
-    description: "Premium flowers, cakes, and gift sets under $100 for USA delivery.",
+    description: "Premium flowers, cakes, and gift sets under $100 for worldwide delivery.",
     intro: "A wider selection for celebrations when you want more presence without overspending.",
     filter: (products) =>
       products.filter((p) => usdPrice(p) <= 100).sort(byUpdatedDesc).slice(0, 36),
   },
   {
     slug: "same-day-gifts",
-    title: "Same-Day Gift Ideas USA | BlossomPot",
+    title: "Same-Day Gift Ideas Worldwide | BlossomPot",
     h1: "Same-Day Eligible Gifts",
     description: "Gifts that may qualify for same-day delivery in select ZIP codes.",
     intro: "Browse options that can support same-day windows where coverage allows.",
@@ -101,9 +101,9 @@ export const COLLECTIONS: CollectionDefinition[] = [
   },
   {
     slug: "cakes",
-    title: "Celebration Cakes USA | BlossomPot",
+    title: "Celebration Cakes Worldwide | BlossomPot",
     h1: "Celebration Cakes",
-    description: "Birthday and celebration cakes with USA delivery guidance.",
+    description: "Birthday and celebration cakes with worldwide delivery guidance.",
     intro: "Pair cakes with flowers or send dessert on its own for birthdays and thank-yous.",
     filter: (products) => products.filter((p) => inCategory(p, "cakes")).slice(0, 36),
   },

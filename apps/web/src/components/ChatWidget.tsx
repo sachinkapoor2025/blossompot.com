@@ -12,14 +12,14 @@ const STORAGE_KEY = "blossompot_chat_messages";
 
 const QUICK_PROMPTS = [
   "What gifts do you sell?",
-  "How long is USA delivery?",
+  "How long is worldwide delivery?",
   "Do you offer same-day options?",
   "Can I add a gift message?",
 ] as const;
 
 const WELCOME: ChatMessage = {
   role: "assistant",
-  content: `Hi! I'm the BlossomPot Assistant. I can help you choose flowers, cakes, and gifts, explain USA delivery windows, and answer shipping or payment questions.\n\nWhat would you like to know?`,
+  content: `Hi! I'm the BlossomPot Assistant. I can help you choose flowers, cakes, and gifts, explain worldwide delivery windows, and answer shipping or payment questions.\n\nWhat would you like to know?`,
 };
 
 function loadStoredMessages(): ChatMessage[] {

@@ -30,31 +30,31 @@ function resolveSort(raw?: string): ProductSort {
 
 const CATEGORY_SEO: Record<string, { title: string; description: string }> = {
   flowers: {
-    title: "Flowers USA — Fresh Arrangements | BlossomPot",
-    description: "Shop fresh flowers and bouquets with USA delivery. Birthday, anniversary, and everyday gifts.",
+    title: "Flowers Worldwide — Fresh Arrangements | BlossomPot",
+    description: "Shop fresh flowers and bouquets with worldwide delivery. Birthday, anniversary, and everyday gifts.",
   },
   "flower-bouquets": {
-    title: "Flower Bouquets USA | BlossomPot",
-    description: "Designer flower bouquets for USA delivery — romantic, celebratory, and thank-you styles.",
+    title: "Flower Bouquets Worldwide | BlossomPot",
+    description: "Designer flower bouquets for worldwide delivery — romantic, celebratory, and thank-you styles.",
   },
   cakes: {
-    title: "Celebration Cakes USA | BlossomPot",
-    description: "Birthday and celebration cakes with clear USA delivery guidance from BlossomPot.",
+    title: "Celebration Cakes Worldwide | BlossomPot",
+    description: "Birthday and celebration cakes with clear worldwide delivery guidance from BlossomPot.",
   },
   "gift-hampers": {
-    title: "Gift Hampers USA | BlossomPot",
-    description: "Curated gift hampers and celebration boxes shipped across the United States.",
+    title: "Gift Hampers Worldwide | BlossomPot",
+    description: "Curated gift hampers and celebration boxes shipped worldwide.",
   },
   "birthday-gifts": {
-    title: "Birthday Gifts USA | BlossomPot",
-    description: "Birthday flowers, cakes, and gift combos with USA delivery options.",
+    title: "Birthday Gifts Worldwide | BlossomPot",
+    description: "Birthday flowers, cakes, and gift combos with worldwide delivery options.",
   },
   "anniversary-gifts": {
-    title: "Anniversary Gifts USA | BlossomPot",
-    description: "Anniversary roses, bouquets, and romantic gifts for USA delivery.",
+    title: "Anniversary Gifts Worldwide | BlossomPot",
+    description: "Anniversary roses, bouquets, and romantic gifts for worldwide delivery.",
   },
   "same-day-gifts": {
-    title: "Same-Day Gifts USA | BlossomPot",
+    title: "Same-Day Gifts | Select Cities | BlossomPot",
     description: "Same-day eligible gifts in select ZIP codes — confirm cut-off at checkout.",
   },
 };
@@ -64,8 +64,8 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   if (params.search) {
     // Search result URLs stay usable but are noindexed; canonical points at the shop hub.
     return pageMetadata({
-      title: `Search: ${params.search} — Flowers & Gifts USA`,
-      description: `Search results for "${params.search}" — flowers, cakes, and gifts with USA delivery from BlossomPot.`,
+      title: `Search: ${params.search} — Flowers & Gifts Worldwide`,
+      description: `Search results for "${params.search}" — flowers, cakes, and gifts with worldwide delivery from BlossomPot.`,
       path: "/products",
       noIndex: true,
     });
@@ -80,9 +80,9 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     });
   }
   return pageMetadata({
-    title: "Shop Flowers, Cakes & Gifts — USA Delivery | BlossomPot",
+    title: "Shop Flowers, Cakes & Gifts — Worldwide Delivery | BlossomPot",
     description:
-      "Browse flowers, bouquets, cakes, and curated gift hampers. Birthday, anniversary, Valentine’s, and same-day options with clear USA delivery guidance.",
+      "Browse flowers, bouquets, cakes, and curated gift hampers. Birthday, anniversary, Valentine’s, and same-day options with clear worldwide delivery guidance.",
     path: "/products",
   });
 }
@@ -138,7 +138,7 @@ export default async function ProductsPage({ searchParams }: Props) {
       {!search && !category && (
         <p className="text-slate-600 mb-8 max-w-2xl">
           Flowers, bouquets, cakes, and curated gifts for birthdays, anniversaries, and everyday thank-yous —
-          with clear USA delivery expectations. Enter the recipient address at checkout to see available
+          with clear worldwide delivery expectations. Enter the recipient address at checkout to see available
           windows.
         </p>
       )}

@@ -6,7 +6,7 @@ import { siteUrl } from "@/lib/env";
 
 export const metadata: Metadata = pageMetadata({
   title: "Press — BlossomPot Media Kit",
-  description: `Media resources, brand story, and contact information for journalists covering ${site.name} — flowers, cakes, and gifts with USA delivery.`,
+  description: `Media resources, brand story, and contact information for journalists covering ${site.name} — flowers, cakes, and gifts with worldwide delivery.`,
   path: "/press",
 });
 
@@ -24,7 +24,7 @@ export default function PressPage() {
             product page.
           </p>
           <ul className="list-disc pl-5 space-y-1">
-            <li>Flowers, bouquets, cakes, and gift hampers for USA delivery</li>
+            <li>Flowers, bouquets, cakes, and gift hampers for worldwide delivery</li>
             <li>Occasion collections for birthdays, anniversaries, and celebrations</li>
             <li>Secure checkout in USD (Stripe) and INR (Razorpay)</li>
           </ul>

@@ -129,7 +129,11 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
   if (!userKey) return unauthorized("Session or auth required");
 
   const body = JSON.parse(event.body ?? "{}");
-  const parsed = addToCartSchema.safeParse(body);
+  const parsed = addToCartSchema.safeParse({
+    ...body,
+    productSlug:
+      typeof body.productSlug === "string" ? body.productSlug.trim() : body.productSlug,
+  });
   if (!parsed.success) {
     return badRequest(parsed.error.issues[0]?.message ?? "Could not add this gift to your cart");
   }

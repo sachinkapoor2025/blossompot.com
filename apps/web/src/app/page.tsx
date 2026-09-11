@@ -22,7 +22,7 @@ import { resolveDeliveryCountry, type Product, type Category } from "@blossompot
 export const metadata: Metadata = pageMetadata({
   title: "BlossomPot — Flowers, Cakes & Gifts | USA, UK, Canada, Australia & UAE",
   description:
-    "Order fresh flowers, cakes, and gift hampers online. Shoppers in the USA, UK, Canada, Australia, and UAE send gifts with fast USA delivery. Same-day options in select cities.",
+    "Order fresh flowers, cakes, and gift hampers online with worldwide delivery. Shoppers in the USA, UK, Canada, Australia, UAE, and beyond can send gifts internationally. Same-day options in select cities.",
   path: "/",
   absoluteTitle: true,
 });
@@ -149,7 +149,7 @@ export default async function HomePage({
         <div className="rounded-3xl bg-gradient-to-br from-primary via-[#9e2d55] to-accent text-white p-8 sm:p-12 text-center shadow-lg shadow-primary/20">
           <h2 className="text-2xl sm:text-3xl font-bold">Send a gift that feels personal</h2>
           <p className="mt-3 text-white/90 max-w-2xl mx-auto">
-            From same-day bouquets to anniversary hampers, BlossomPot helps you celebrate across all 50 states, DC and Puerto Rico.
+            From same-day bouquets to anniversary hampers, BlossomPot helps you celebrate with worldwide delivery.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Link

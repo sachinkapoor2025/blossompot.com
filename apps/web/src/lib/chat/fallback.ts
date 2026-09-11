@@ -2,7 +2,7 @@ import { site, navItems, faqs, giftSetsMenu, whatsappLinkLabel } from "@/lib/sit
 import { categoryHref } from "@/lib/category-urls";
 import { siteUrl } from "@/lib/env";
 
-const OFF_TOPIC_REPLY = `I'm here specifically to help with BlossomPot — flowers, cakes, and gifts for USA delivery, our products, shipping, and orders. Is there something about gift delivery I can help with?
+const OFF_TOPIC_REPLY = `I'm here specifically to help with BlossomPot — flowers, cakes, and gifts for worldwide delivery, our products, shipping, and orders. Is there something about gift delivery I can help with?
 
 Browse our catalog: [All Products](${siteUrl}/products) · ${whatsappLinkLabel()}`;
 
@@ -17,11 +17,11 @@ function categoriesReply(): string {
       .map((n) => `- [${n.label}](${siteUrl}${n.href})`),
   ].join("\n");
 
-  return `We sell premium flowers, cakes, and gifts for USA delivery:\n\n${links}\n- [All Products](${siteUrl}/products)\n\nPopular picks include [Flowers](${siteUrl}${categoryHref("flowers")}), [Cakes](${siteUrl}${categoryHref("cakes")}), and [Gift Hampers](${siteUrl}${categoryHref("gift-hampers")}).`;
+  return `We sell premium flowers, cakes, and gifts for worldwide delivery:\n\n${links}\n- [All Products](${siteUrl}/products)\n\nPopular picks include [Flowers](${siteUrl}${categoryHref("flowers")}), [Cakes](${siteUrl}${categoryHref("cakes")}), and [Gift Hampers](${siteUrl}${categoryHref("gift-hampers")}).`;
 }
 
 function deliveryReply(): string {
-  return `We deliver gifts across the United States. Nationwide delivery is available to all 50 states, with faster windows to major metros when available. Same-day options appear in select cities when you order before the local cut-off.\n\nMore details: [Shipping & Delivery](${siteUrl}/shipping)`;
+  return `We deliver gifts worldwide. Timing depends on the recipient country. Same-day options appear in select cities when you order before the local cut-off.\n\nMore details: [Shipping & Delivery](${siteUrl}/shipping)`;
 }
 
 function occasionReply(): string {
@@ -29,7 +29,7 @@ function occasionReply(): string {
 }
 
 function orderFromAbroadReply(): string {
-  return `Yes! You can order from India, the UK, Canada, Australia, and worldwide.\n\nEnter your recipient's USA delivery address at checkout. We fulfill for US delivery — clear tracking and responsive support.\n\nReady to shop? [Browse all gifts](${siteUrl}/products)`;
+  return `Yes! You can order from India, the UK, Canada, Australia, and worldwide.\n\nEnter the recipient address at checkout and choose their country. Tracking and support are included.\n\nReady to shop? [Browse all gifts](${siteUrl}/products)`;
 }
 
 function paymentReply(): string {
@@ -37,7 +37,7 @@ function paymentReply(): string {
 }
 
 function greetingReply(): string {
-  return `Welcome to BlossomPot! I can help you find flowers, cakes, and gifts, explain USA delivery, or answer questions about shipping and payment.\n\nPopular picks:\n- [Flowers](${siteUrl}${categoryHref("flowers")})\n- [Cakes](${siteUrl}${categoryHref("cakes")})\n- [Gift Hampers](${siteUrl}${categoryHref("gift-hampers")})\n\nWhat would you like to know?`;
+  return `Welcome to BlossomPot! I can help you find flowers, cakes, and gifts, explain worldwide delivery, or answer questions about shipping and payment.\n\nPopular picks:\n- [Flowers](${siteUrl}${categoryHref("flowers")})\n- [Cakes](${siteUrl}${categoryHref("cakes")})\n- [Gift Hampers](${siteUrl}${categoryHref("gift-hampers")})\n\nWhat would you like to know?`;
 }
 
 function findFaqMatch(query: string): string | null {
@@ -89,15 +89,15 @@ export function fallbackChatReply(userMessage: string): string {
   }
 
   if (/cake|chocolate|dessert/.test(q)) {
-    return `Our [Cakes](${siteUrl}${categoryHref("cakes")}) collection covers chocolate, red velvet, designer birthday cakes, and more — with USA delivery and gift-message options.\n\n[Shop cakes](${siteUrl}${categoryHref("cakes")})`;
+    return `Our [Cakes](${siteUrl}${categoryHref("cakes")}) collection covers chocolate, red velvet, designer birthday cakes, and more — with worldwide delivery and gift-message options.\n\n[Shop cakes](${siteUrl}${categoryHref("cakes")})`;
   }
 
   if (/flower|bouquet|rose|bloom/.test(q)) {
-    return `Browse [Flowers](${siteUrl}${categoryHref("flowers")}) and [Flower Bouquets](${siteUrl}${categoryHref("flower-bouquets")}) for birthdays, anniversaries, and everyday surprises — delivered across the USA.\n\n[Shop flowers](${siteUrl}${categoryHref("flowers")})`;
+    return `Browse [Flowers](${siteUrl}${categoryHref("flowers")}) and [Flower Bouquets](${siteUrl}${categoryHref("flower-bouquets")}) for birthdays, anniversaries, and everyday surprises — delivered worldwide.\n\n[Shop flowers](${siteUrl}${categoryHref("flowers")})`;
   }
 
   const faqAnswer = findFaqMatch(q);
   if (faqAnswer) return faqAnswer;
 
-  return `Thanks for your question! BlossomPot delivers flowers, cakes, and thoughtful gifts across the United States.\n\n- [Shop all gifts](${siteUrl}/products)\n- [Shipping info](${siteUrl}/shipping)\n- [FAQ](${siteUrl}/faq)\n\nFor order help: ${whatsappLinkLabel()} or ${site.supportEmail}`;
+  return `Thanks for your question! BlossomPot delivers flowers, cakes, and thoughtful gifts worldwide.\n\n- [Shop all gifts](${siteUrl}/products)\n- [Shipping info](${siteUrl}/shipping)\n- [FAQ](${siteUrl}/faq)\n\nFor order help: ${whatsappLinkLabel()} or ${site.supportEmail}`;
 }

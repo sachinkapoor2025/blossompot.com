@@ -9,9 +9,9 @@ import { deliveryClaims } from "@/lib/ai-recommendation";
 import { footerGeoLinks } from "@/lib/content/geo/locations";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Gift Shipping & Delivery USA — Flowers, Cakes & More",
+  title: "Gift Shipping & Delivery Worldwide — Flowers, Cakes & More",
   description:
-    "BlossomPot delivers flowers, cakes, and gifts to all 50 states, DC and Puerto Rico. Nationwide coverage, faster windows to major metros when available, and same-day options where the local cut-off allows.",
+    "BlossomPot delivers flowers, cakes, and gifts worldwide. Choose the recipient country at checkout. Same-day options appear where the local cut-off allows.",
   path: "/shipping",
 });
 
@@ -25,9 +25,8 @@ export default function ShippingPage() {
       <h1 className="text-3xl font-bold text-primary mb-6">Shipping & Delivery</h1>
       <div className="space-y-6 text-slate-700 leading-relaxed">
         <p>
-          {site.name} delivers premium flowers, cakes, and gifts across the{" "}
-          <strong>United States</strong> — delivering to all 50 states, DC and Puerto Rico — with clear
-          delivery expectations and careful packaging.
+          {site.name} delivers premium flowers, cakes, and gifts <strong>worldwide</strong>. Choose the
+          recipient country at checkout to see delivery windows for that destination.
         </p>
         <h2 className="text-xl font-bold text-primary">Delivery times</h2>
         <ul className="list-disc list-inside space-y-2">
@@ -35,7 +34,7 @@ export default function ShippingPage() {
             <strong>Express:</strong> {deliveryClaims.express}
           </li>
           <li>
-            <strong>Nationwide:</strong> {deliveryClaims.standard}
+            <strong>Worldwide:</strong> {deliveryClaims.standard}
           </li>
           <li>
             <strong>Dispatch:</strong> {deliveryClaims.dispatch}
@@ -52,10 +51,10 @@ export default function ShippingPage() {
             { usedHrefs, currentPath: "/shipping", max: 4 }
           )}
         </p>
-        <h2 className="text-xl font-bold text-primary">Ordering from outside the USA</h2>
+        <h2 className="text-xl font-bold text-primary">United States destinations</h2>
         <p>
           {applyInlineLinks(
-            `Customers in India, the United Kingdom, Canada, Australia, and worldwide can order on ${site.domain}. Enter your recipient's US delivery address at checkout — we fulfill for delivery inside America. Country guides: locations hub.`,
+            `Customers sending gifts to the United States can use our US city and state pages for ZIP-level timing. Enter the US recipient address at checkout. Country guides: locations hub.`,
             inlineLinks,
             { usedHrefs, currentPath: "/shipping", max: 4 }
           )}

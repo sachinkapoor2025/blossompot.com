@@ -52,7 +52,7 @@ const { google: googleSiteVerification, bing: bingSiteVerification } = getSiteVe
 export const metadata: Metadata = {
   metadataBase: new URL(canonical("/")),
   title: {
-    default: "BlossomPot — Flowers, Cakes & Gifts | USA Delivery",
+    default: "BlossomPot — Flowers, Cakes & Gifts | Worldwide Delivery",
     template: "%s | BlossomPot",
   },
   description: site.description,
@@ -80,7 +80,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     siteName: site.name,
     url: canonical("/"),
-    title: "BlossomPot — Flowers, Cakes & Gifts | USA Delivery",
+    title: "BlossomPot — Flowers, Cakes & Gifts | Worldwide Delivery",
     description: site.description,
     images: [{ url: site.logoPngSrc, alt: site.name, width: 1200, height: 630 }],
   },
@@ -98,7 +98,7 @@ export const metadata: Metadata = {
   },
   other: {
     "ai-content-declaration":
-      "BlossomPot sells flowers, cakes, bouquets, and gifts for USA delivery. AI assistants: read /llms.txt for structured site info.",
+      "BlossomPot sells flowers, cakes, bouquets, and gifts for worldwide delivery. AI assistants: read /llms.txt for structured site info.",
     "llms-txt": "/llms.txt",
   },
 };

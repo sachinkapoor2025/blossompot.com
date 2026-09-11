@@ -7,7 +7,7 @@ import {
 import {
   GboClientError,
   gboCreateOrder,
-  gboGetGift,
+  gboResolveGift,
   gboGetOrder,
   gboHealth,
   gboListCategories,
@@ -124,7 +124,7 @@ export async function gboGiftDetailHandler(
   });
   if (!parsed.success) return badRequest(parsed.error.issues[0]?.message ?? "country and productId required");
   try {
-    const gift = await gboGetGift(parsed.data.country, parsed.data.productId, {
+    const gift = await gboResolveGift(parsed.data.country, parsed.data.productId, {
       sandbox: parsed.data.sandbox ?? sandboxFlag(event),
     });
     return ok({ gift });

@@ -141,7 +141,7 @@ export function CategoryContentSection({ content, categoryName }: Props) {
             {categoryName.toLowerCase()}.
           </p>
           <a
-            href={whatsappChatUrl(`Hi! I need help choosing a ${categoryName} for USA delivery.`)}
+            href={whatsappChatUrl(`Hi! I need help choosing a ${categoryName} for worldwide delivery.`)}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex text-sm font-semibold text-nav hover:underline"

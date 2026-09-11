@@ -1,4 +1,4 @@
-import { parseGboSlug, gboGiftToProduct, productInStorefrontCategory, productMatchesSearchQuery, productVisibleForDeliveryCountry, type GboGift, type Product } from "@blossompot/shared";
+import { parseGboSlug, gboGiftToProduct, gboGiftNumericId, productInStorefrontCategory, productMatchesSearchQuery, productVisibleForDeliveryCountry, type GboGift, type Product } from "@blossompot/shared";
 import { isProductStorefrontVisible } from "@blossompot/shared";
 import { api } from "./api";
 import {
@@ -50,11 +50,13 @@ function allowCatalogFallback(product: Product): boolean {
 export async function loadGboStorefrontProducts(country?: string): Promise<Product[]> {
   const iso = (country ?? (await getStorefrontDeliveryCountry())).trim().toUpperCase() || "US";
   const data = await api<{ gifts: GboGift[] }>(`/gbo/gifts?country=${iso}`, FRESH_PRODUCT_FETCH);
-  return (data.gifts ?? []).map((gift) => {
-    const mapped = gboGiftToProduct(iso, gift);
-    const { vendorCost: _c, ...rest } = mapped;
-    return rememberProduct(rest as Product);
-  });
+  return (data.gifts ?? [])
+    .filter((gift) => gboGiftNumericId(gift) != null)
+    .map((gift) => {
+      const mapped = gboGiftToProduct(iso, gift);
+      const { vendorCost: _c, ...rest } = mapped;
+      return rememberProduct(rest as Product);
+    });
 }
 
 function mergeBySlug(primary: Product[], extra: Product[]): Product[] {

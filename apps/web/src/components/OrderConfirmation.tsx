@@ -346,9 +346,9 @@ export function OrderConfirmation({ order, paid }: OrderConfirmationProps) {
                 <TruckIcon />
               </div>
               <div>
-                <p className="font-semibold text-slate-900 text-sm">USA delivery</p>
+                <p className="font-semibold text-slate-900 text-sm">Worldwide delivery</p>
                 <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                  Ships domestically within America. Express 2–3 days to major metros; 5–7 days nationwide.
+                  Ships to the recipient country you chose at checkout. Timing depends on destination.
                 </p>
               </div>
             </div>

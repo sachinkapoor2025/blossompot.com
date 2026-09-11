@@ -112,7 +112,7 @@ export function orderPaidWhatsAppMessage(input: {
 Total: ${input.totalLabel}
 Track: ${SITE_URL()}/orders/${input.orderId}
 
-We deliver to all 50 US states in 5–7 business days after dispatch.`;
+We deliver worldwide. Timing depends on the recipient country and typically takes a few business days after dispatch.`;
 }
 
 export function orderStatusWhatsAppMessage(input: {

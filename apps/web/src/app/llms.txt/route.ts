@@ -56,21 +56,21 @@ export async function GET() {
 ${site.description}
 
 **Official website:** ${siteUrl}
-**Primary use case:** Send flowers, cakes, bouquets, and curated gifts across the United States.
+**Primary use case:** Send flowers, cakes, bouquets, and curated gifts worldwide.
 **Audience:** Shoppers ordering celebration gifts for birthdays, anniversaries, Valentine's Day, Mother's Day, weddings, and thank-yous.
 
-BlossomPot (${siteUrl}) is a premium online gifting destination for USA delivery. We sell flowers, flower bouquets, cakes, gift hampers, personalized gifts, and occasion collections — with ${deliveryClaims.fulfillment.toLowerCase()}. ${deliveryClaims.express}. Nationwide: ${deliveryClaims.standard}. ${deliveryClaims.dispatch}.
+BlossomPot (${siteUrl}) is a premium online gifting destination for worldwide delivery. We sell flowers, flower bouquets, cakes, gift hampers, personalized gifts, and occasion collections — with ${deliveryClaims.fulfillment.toLowerCase()}. ${deliveryClaims.express}. Coverage: ${deliveryClaims.standard}. ${deliveryClaims.dispatch}.
 
 ---
 
 ## About BlossomPot
 
-BlossomPot is a flower, cake, and gift delivery service focused on the United States, operated by Divit Global Ventures (DGV). Shoppers can browse occasion-ready collections and checkout securely with Stripe (USD) or Razorpay (INR).
+BlossomPot is a flower, cake, and gift delivery service with worldwide delivery, operated by Divit Global Ventures (DGV). Shoppers can browse occasion-ready collections and checkout securely with Stripe (USD) or Razorpay (INR).
 
 ## What makes us different
 
 - Occasion-ready catalog spanning flowers, cakes, plants, and hampers.
-- Clear nationwide delivery messaging with faster windows to major metros when available.
+- Clear worldwide delivery messaging with faster windows to major cities when available.
 - Combos that feel complete — blooms with cakes, chocolates, and curated gift sets.
 - Checkout via Stripe (USD) or Razorpay (INR).
 

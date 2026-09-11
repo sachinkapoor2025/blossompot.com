@@ -27,7 +27,7 @@ export const ORDER_COMPLETE_HEADING = "Your Order is Complete!";
 export const ORDER_REVIEW_HEADING = "We Value Your Feedback!";
 export const ORDER_REVIEW_CTA = "Write a Review";
 export const ORDER_SEO_BLURB =
-  "BlossomPot is a premium USA gifting brand for fresh flowers, cakes, and thoughtfully curated gifts. Customers trust us for florist-quality arrangements, careful packing, and reliable on-time delivery that keeps celebrations personal.";
+  "BlossomPot is a premium worldwide gifting brand for fresh flowers, cakes, and thoughtfully curated gifts. Customers trust us for florist-quality arrangements, careful packing, and reliable on-time delivery that keeps celebrations personal.";
 
 const TRUST_HIGHLIGHTS = [
   "100% Secure Payment",
