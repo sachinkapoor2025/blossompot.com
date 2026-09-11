@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SCHEDULE_DELIVERY_MAX_DATE } from "@blossompot/shared";
+import { SCHEDULE_DELIVERY_HORIZON_DAYS, scheduleDeliveryMaxDate } from "@blossompot/shared";
 import {
   loadPreferredDeliveryDate,
   preferredDeliveryDateBounds,
@@ -49,8 +49,9 @@ export function ScheduleDeliveryPicker({
       </label>
       {!compact && (
         <p className="text-xs text-slate-600 mb-2">
-          Choose when you want your {productNoun} delivered. Latest available date:{" "}
-          <strong>{formatLong(SCHEDULE_DELIVERY_MAX_DATE)}</strong>.
+          Choose when you want your {productNoun} delivered. You can pick any date in the next{" "}
+          {SCHEDULE_DELIVERY_HORIZON_DAYS} days (through{" "}
+          <strong>{formatLong(scheduleDeliveryMaxDate())}</strong>).
         </p>
       )}
       <input

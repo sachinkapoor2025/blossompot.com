@@ -1,8 +1,10 @@
 /** Re-export schedule-delivery helpers (canonical impl lives in early-bird for shared day keys). */
 export {
+  SCHEDULE_DELIVERY_HORIZON_DAYS,
   SCHEDULE_DELIVERY_MAX_DATE,
   calendarDayKeyAmericaNy,
   scheduleDeliveryMinDate,
+  scheduleDeliveryMaxDate,
   isValidScheduleDeliveryDate,
   preferredDeliveryDateToIso,
 } from "./early-bird";

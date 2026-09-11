@@ -78,7 +78,7 @@ export const checkoutSchema = z.object({
   usdInrRate: z.number().positive().max(200).optional(),
   /** Welcome or promo coupon (e.g. GIFT-ABC123). */
   couponCode: z.string().min(4).max(32).optional(),
-  /** Customer-requested delivery date (YYYY-MM-DD), max 2026-08-28. */
+  /** Customer-requested delivery date (YYYY-MM-DD), within the live 90-day window. */
   preferredDeliveryDate: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD")

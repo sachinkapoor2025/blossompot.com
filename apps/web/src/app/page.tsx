@@ -14,6 +14,7 @@ import { buildHomeCategoryTiles } from "@/lib/home-category-carousel";
 import { JsonLd } from "@/components/JsonLd";
 import { faqs, homeBanners, countriesMenu } from "@/lib/site";
 import { loadGboStorefrontProducts } from "@/lib/product-loader";
+import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { OverseasGiftGrid } from "@/components/OverseasGiftGrid";
 import { faqJsonLd, pageMetadata } from "@/lib/seo";
 import type { Product, Category } from "@blossompot/shared";
@@ -36,7 +37,7 @@ export default async function HomePage() {
 
   try {
     const [gboProducts, categoriesData] = await Promise.all([
-      loadGboStorefrontProducts("US"),
+      loadGboStorefrontProducts(await getStorefrontDeliveryCountry()),
       api<{ categories: Category[] }>("/categories", { revalidate: false }),
     ]);
     products = gboProducts;

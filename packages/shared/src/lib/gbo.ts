@@ -130,7 +130,8 @@ export function gboImageUrl(image?: string | null): string | undefined {
 
 /**
  * Map a GBO catalog gift to a BlossomPot product.
- * Sell at GBO retail (`price_retail`); `price` is reseller cost (≈10% off).
+ * Sell at GBO retail (`price_retail`); `price` is reseller cost (~10% off).
+ * Extra storefront margin is allowed — we do not cap sell price to vendor cost.
  */
 export function gboGiftToProduct(country: string, gift: GboGift, nowIso?: string): Product {
   const iso = country.trim().toUpperCase();

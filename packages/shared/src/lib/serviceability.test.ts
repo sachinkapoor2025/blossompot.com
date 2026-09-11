@@ -125,4 +125,10 @@ describe("serviceability engine", () => {
     assert.equal(r.serviceable, true);
     assert.equal(r.matchedRule?.countryCode, "GB");
   });
+
+  it("treats Gift Baskets Overseas as country-wide without a postal code", () => {
+    const r = checkVendorServiceability(VENDOR_GBO, [], { countryCode: "AM", postalCode: "" });
+    assert.equal(r.serviceable, true);
+    assert.equal(r.matchedRule?.countryCode, "AM");
+  });
 });

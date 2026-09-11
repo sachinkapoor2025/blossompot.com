@@ -1,6 +1,6 @@
 import {
-  SCHEDULE_DELIVERY_MAX_DATE,
   isValidScheduleDeliveryDate,
+  scheduleDeliveryMaxDate,
   scheduleDeliveryMinDate,
 } from "@blossompot/shared";
 
@@ -39,6 +39,6 @@ export function preferredDeliveryDateBounds(now = new Date()): {
 } {
   return {
     min: scheduleDeliveryMinDate(now),
-    max: SCHEDULE_DELIVERY_MAX_DATE,
+    max: scheduleDeliveryMaxDate(now),
   };
 }

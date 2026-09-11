@@ -7,6 +7,7 @@ import {
   getCatalogProductsByCategory,
 } from "./catalog-fallback";
 import { isRakhiRelatedCategorySlug, isRakhiRelatedProduct } from "./rakhi-filter";
+import { getStorefrontDeliveryCountry } from "./storefront-country";
 
 function isStorefrontVisible(product: Product): boolean {
   return !isRakhiRelatedProduct(product) && isProductStorefrontVisible(product);
@@ -45,9 +46,9 @@ function allowCatalogFallback(product: Product): boolean {
   return Boolean(product.vendorSlug);
 }
 
-/** Live Gift Baskets Overseas catalog for the storefront (USA). */
-export async function loadGboStorefrontProducts(country = "US"): Promise<Product[]> {
-  const iso = country.trim().toUpperCase();
+/** Live Gift Baskets Overseas catalog for the selected delivery country. */
+export async function loadGboStorefrontProducts(country?: string): Promise<Product[]> {
+  const iso = (country ?? (await getStorefrontDeliveryCountry())).trim().toUpperCase() || "US";
   const data = await api<{ gifts: GboGift[] }>(`/gbo/gifts?country=${iso}`, FRESH_PRODUCT_FETCH);
   return (data.gifts ?? []).map((gift) => {
     const mapped = gboGiftToProduct(iso, gift);
@@ -120,6 +121,7 @@ export async function loadProduct(slug: string): Promise<Product | null> {
 export async function loadProducts(params?: {
   category?: string;
   search?: string;
+  country?: string;
 }): Promise<Product[]> {
   if (params?.category && isRakhiRelatedCategorySlug(params.category)) return [];
 
@@ -127,11 +129,12 @@ export async function loadProducts(params?: {
   if (params?.category) query.set("category", params.category);
   if (params?.search) query.set("search", params.search);
   const qs = query.toString() ? `?${query.toString()}` : "";
+  const country = params?.country ?? (await getStorefrontDeliveryCountry());
 
   try {
     const data = await api<{ products: Product[] }>(`/products${qs}`, FRESH_PRODUCT_FETCH);
     const db = rememberProducts(data.products.filter(isStorefrontVisible));
-    const gbo = await loadGboStorefrontProducts("US").catch(() => [] as Product[]);
+    const gbo = await loadGboStorefrontProducts(country).catch(() => [] as Product[]);
     let extra = gbo;
     if (params?.category) {
       extra = gbo.filter((product) => productInStorefrontCategory(product, params.category as string));
@@ -143,7 +146,7 @@ export async function loadProducts(params?: {
   } catch {
     if (process.env.NODE_ENV === "production") {
       try {
-        const gbo = await loadGboStorefrontProducts("US");
+        const gbo = await loadGboStorefrontProducts(country);
         if (params?.category) {
           return gbo.filter((product) => productInStorefrontCategory(product, params.category as string));
         }

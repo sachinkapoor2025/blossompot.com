@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
+import { useRouter } from "next/navigation";
 import { formatPostalDisplay, isValidPostal } from "@blossompot/shared";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
 import { postalLabelFor, dismissLocationPrompt } from "@/lib/delivery-location";
@@ -8,6 +9,7 @@ import { useGboDeliveryCountries, useCountrySearch } from "@/lib/gbo-delivery-co
 
 export function DeliveryLocationModal() {
   const { location, selectorOpen, selectorCountryPrefill, closeSelector, setLocation } = useDeliveryLocation();
+  const router = useRouter();
   const titleId = useId();
   const { countries } = useGboDeliveryCountries();
   const { query, setQuery, filtered } = useCountrySearch(countries);
@@ -49,18 +51,20 @@ export function DeliveryLocationModal() {
 
   const submit = async () => {
     setError("");
-    if (!isValidPostal(countryCode, postalCode)) {
-      setError(`Enter a valid ${postalLabel.toLowerCase()}`);
+    const trimmedPostal = postalCode.trim();
+    if (trimmedPostal && !isValidPostal(countryCode, trimmedPostal)) {
+      setError(`Enter a valid ${postalLabel.toLowerCase()}, or leave it blank`);
       return;
     }
     setBusy(true);
     try {
       await setLocation({
         countryCode,
-        postalCode: postalCode.trim(),
-        postalDisplay: formatPostalDisplay(countryCode, postalCode),
+        postalCode: trimmedPostal,
+        postalDisplay: trimmedPostal ? formatPostalDisplay(countryCode, trimmedPostal) : countryCode,
       });
       closeSelector();
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not check this location");
     } finally {
@@ -98,7 +102,8 @@ export function DeliveryLocationModal() {
             Where should we deliver?
           </h2>
           <p className="mt-2 text-sm text-slate-600">
-            Gift Baskets Overseas delivers to 190+ countries. Pick the destination, then enter a postal code.
+            Pick a country to browse gifts for that destination. Postal code is optional — we deliver
+            country-wide.
           </p>
         </div>
         <form
@@ -134,7 +139,7 @@ export function DeliveryLocationModal() {
               <span className="mt-1 block text-xs text-slate-500">{countries.length} countries</span>
             </label>
             <label className="block text-sm font-medium text-slate-800">
-              {postalLabel}
+              {postalLabel} <span className="font-normal text-slate-500">(optional)</span>
               <input
                 autoComplete="postal-code"
                 inputMode={["US", "AU", "AE", "DE", "FR", "IT", "ES"].includes(countryCode) ? "numeric" : "text"}
@@ -151,7 +156,7 @@ export function DeliveryLocationModal() {
                 disabled={busy}
                 className="flex-1 rounded-lg bg-primary text-white font-semibold py-2.5 text-sm disabled:opacity-50"
               >
-                {busy ? "Checking…" : "Check availability"}
+                {busy ? "Checking…" : "See gifts"}
               </button>
               <button
                 type="button"
