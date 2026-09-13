@@ -67,7 +67,7 @@ export default async function HomePage({
       <TrustStrip />
 
       <div className="max-w-7xl mx-auto px-4 pt-6 pb-2 flex flex-wrap justify-center gap-3">
-        <Link href="/#gift-catalog" className="btn-nav bg-primary">
+        <Link href="/#gift-catalog" className="btn-nav bg-primary text-white hover:bg-primary-deep hover:text-white">
           Shop gift baskets
         </Link>
         <Link href="/remember" className="btn-nav">

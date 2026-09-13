@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { AddToCartControl } from "@/components/AddToCartControl";
@@ -45,6 +45,8 @@ import { ProductBuyBox } from "@/components/product/ProductBuyBox";
 import { ProductProofLine } from "@/components/product/ProductProofLine";
 import { ProductPriceBlock } from "@/components/product/ProductPriceBlock";
 import { ProductDeliveryCard } from "@/components/product/ProductDeliveryCard";
+import { useStorefrontHeaderOffset } from "@/components/product/useStorefrontHeaderOffset";
+import { PdpPinnedAddToCart } from "@/components/product/PdpPinnedAddToCart";
 
 const INCLUDES_PREVIEW_COUNT = 6;
 
@@ -101,7 +103,10 @@ function ShareButton({ title, url }: { title: string; url: string }) {
   return (
     <button
       type="button"
-      onClick={() => void share()}
+      onClick={(e) => {
+        e.stopPropagation();
+        void share();
+      }}
       aria-label="Share product"
       title={copied ? "Link copied!" : "Share"}
       className="flex h-12 w-12 shrink-0 items-center justify-center rounded border-2 border-primary/30 bg-surface text-primary hover:bg-petal transition active:scale-95"
@@ -170,6 +175,8 @@ export function ProductDetailClient({
   const { cart, itemCount } = useCart();
   const { format } = useCurrency();
   const delivery = useDeliveryLocation();
+  const galleryStickyTop = useStorefrontHeaderOffset();
+  const pdpSectionRef = useRef<HTMLDivElement>(null);
   const locationSet = Boolean(delivery.location);
   const vendorKey = product.internationalDelivery
     ? VENDOR_GBO
@@ -286,9 +293,18 @@ export function ProductDetailClient({
   return (
     <>
     <div className="max-w-6xl mx-auto px-4 py-6 pb-24 md:pb-12">
-      <div className="grid md:grid-cols-2 gap-8 lg:gap-10 items-start">
-        <div>
-          <ProductImageGallery images={galleryImages} alt={product.name} />
+      <div ref={pdpSectionRef} className="grid md:grid-cols-2 gap-8 lg:gap-10 items-start">
+        <div className="md:sticky md:self-start" style={{ top: galleryStickyTop }}>
+          <ProductImageGallery
+            images={galleryImages}
+            alt={product.name}
+            overlay={
+              <>
+                <WishlistButton product={product} variant="toolbar" />
+                {productUrl ? <ShareButton title={product.name} url={productUrl} /> : null}
+              </>
+            }
+          />
         </div>
 
         <div>
@@ -396,7 +412,7 @@ export function ProductDetailClient({
                   </span>
                 </Link>
 
-                <div className="flex-1 min-w-[13rem] max-w-[18rem]">
+                <PdpPinnedAddToCart sectionRef={pdpSectionRef} className="flex-1 min-w-[13rem] max-w-[18rem]">
                   <AddToCartControl
                     productSlug={product.slug}
                     disabled={addToCartDisabled}
@@ -405,12 +421,7 @@ export function ProductDetailClient({
                     getContact={getContact}
                     addons={addons}
                   />
-                </div>
-
-                <div className="flex items-center gap-2 sm:ml-auto">
-                  <WishlistButton product={product} variant="toolbar" />
-                  {productUrl ? <ShareButton title={product.name} url={productUrl} /> : null}
-                </div>
+                </PdpPinnedAddToCart>
               </div>
 
               <div className="grid grid-cols-2 gap-2 max-w-md">
@@ -431,7 +442,7 @@ export function ProductDetailClient({
           ) : (
             <div className="mb-3">
               <div className="flex items-stretch gap-2 mb-3">
-                <div className="flex-1 min-w-0">
+                <PdpPinnedAddToCart sectionRef={pdpSectionRef} className="flex-1 min-w-0">
                   <AddToCartControl
                     productSlug={product.slug}
                     disabled={addToCartDisabled}
@@ -440,9 +451,7 @@ export function ProductDetailClient({
                     getContact={getContact}
                     addons={addons}
                   />
-                </div>
-                <WishlistButton product={product} variant="toolbar" />
-                {productUrl ? <ShareButton title={product.name} url={productUrl} /> : <div className="w-12 shrink-0" />}
+                </PdpPinnedAddToCart>
               </div>
             </div>
           )}
@@ -464,11 +473,9 @@ export function ProductDetailClient({
               description="Optional extras — candles, name printing, and cards. They are not required to add this gift to your cart."
             />
           ) : null}
-        </div>
-      </div>
 
-      <section className="mt-10 pt-8 border-t border-line" aria-label="Product details">
-        <DetailsBlock title="About this gift" defaultOpen>
+          <section className="mt-10 pt-8 border-t border-line" aria-label="Product details">
+            <DetailsBlock title="About this gift" defaultOpen>
           {descriptionIsHtml ? (
             <article
               className="product-html-description text-ink leading-relaxed max-w-4xl prose prose-slate prose-a:text-nav prose-strong:text-ink prose-ul:my-3 prose-li:my-0.5"
@@ -574,7 +581,9 @@ export function ProductDetailClient({
             />
           </div>
         </DetailsBlock>
-      </section>
+          </section>
+        </div>
+      </div>
 
       {relatedProducts.length > 0 && (
         <section className="mt-10 pt-8 border-t border-line">

@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BlossomPot — Flipkart-style Add to Cart demo</title>
+  <style>
+    :root {
+      --ink: rgb(58 36 51);
+      --muted: rgb(107 90 98);
+      --ivory: rgb(251 246 238);
+      --surface: #fff;
+      --line: rgb(232 221 226);
+      --primary: rgb(196 30 92);
+      --primary-deep: rgb(150 17 72);
+      --accent: rgb(23 138 76);
+      --gold: rgb(227 160 18);
+      --petal: rgb(255 244 246);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--ivory);
+      color: var(--ink);
+    }
+
+    .promo {
+      background: var(--primary);
+      color: #fff;
+      text-align: center;
+      font-size: 0.875rem;
+      padding: 0.5rem 0.75rem;
+    }
+    .loc-banner {
+      background: var(--ivory);
+      border-bottom: 1px solid var(--line);
+      color: var(--ink);
+    }
+    .loc-banner-inner {
+      max-width: 80rem;
+      margin: 0 auto;
+      padding: 0.5rem 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+    }
+    .loc-banner button {
+      background: none;
+      border: 0;
+      color: var(--primary);
+      font-weight: 700;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .store-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255,255,255,0.9);
+      border-bottom: 1px solid rgba(196,30,92,0.1);
+      box-shadow: 0 1px 8px rgba(196,30,92,0.05);
+      backdrop-filter: blur(10px);
+    }
+    .header-top {
+      display: none;
+      max-width: 80rem;
+      margin: 0 auto;
+      padding: 0.65rem 1rem;
+      grid-template-columns: auto minmax(0,1fr) auto;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    @media (min-width: 768px) {
+      .header-top { display: grid; }
+    }
+    .logo-img {
+      height: 6.25rem;
+      width: auto;
+      max-width: 280px;
+      object-fit: contain;
+      object-position: left;
+      display: block;
+    }
+    .search {
+      position: relative;
+      width: 100%;
+      max-width: 42rem;
+      margin: 0 auto;
+    }
+    .search input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.65rem 3rem 0.65rem 1rem;
+      font-size: 0.875rem;
+      color: var(--ink);
+      background: #fff;
+    }
+    .search input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px var(--primary);
+    }
+    .search button {
+      position: absolute;
+      right: 0.25rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 2.25rem;
+      height: 2.25rem;
+      border: 0;
+      background: transparent;
+      color: var(--primary);
+      cursor: pointer;
+    }
+    .header-actions {
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+    .loc-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      max-width: 16rem;
+      padding: 0.25rem 0.65rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      margin-top: 0.25rem;
+    }
+    .loc-chip small { display: block; font-size: 10px; color: var(--primary); font-weight: 600; }
+    .loc-chip b { display: block; font-size: 12px; }
+    .h-act {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      min-width: 4.5rem;
+      padding: 0 0.65rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+      text-align: center;
+    }
+    .h-act svg { width: 1.5rem; height: 1.5rem; }
+    .cart-ico { position: relative; }
+    .cart-badge {
+      position: absolute;
+      top: -6px;
+      right: -8px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      width: 1rem;
+      height: 1rem;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .header-nav {
+      display: none;
+      border-top: 1px solid var(--line);
+      background: #fff;
+    }
+    @media (min-width: 768px) {
+      .header-nav { display: block; }
+    }
+    .header-nav-inner {
+      max-width: 80rem;
+      margin: 0 auto;
+      padding: 0.5rem 0.75rem;
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+    }
+    .btn-nav {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: #fff;
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 13px;
+      padding: 0.35rem 0.75rem;
+      border: 1px solid rgba(196,30,92,0.15);
+      white-space: nowrap;
+      text-decoration: none;
+    }
+    .compare { font-size: 1.125rem; color: var(--muted); text-decoration: line-through; margin-right: 0.65rem; }
+    .off { font-size: 0.875rem; font-weight: 700; color: var(--accent); margin-left: 0.5rem; }
+    .flash {
+      display: flex;
+      gap: 0.75rem;
+      border: 1px solid rgba(232,90,60,0.2);
+      background: var(--ivory);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .flash strong { color: rgb(232 90 60); font-size: 0.875rem; }
+    .flash p { margin: 0.2rem 0 0; font-size: 0.75rem; color: var(--muted); }
+    .link { color: var(--primary); font-weight: 700; font-size: 0.875rem; background: none; border: 0; text-decoration: underline; cursor: pointer; padding: 0; }
+    .est {
+      margin-top: 0.75rem;
+      background: #f6fbf7;
+      border-radius: 8px;
+      padding: 0.65rem 0.75rem;
+      font-size: 0.875rem;
+    }
+    .date-box { margin-top: 0.75rem; font-size: 0.875rem; }
+    .date-box input {
+      width: 100%;
+      margin-top: 0.35rem;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0.55rem 0.65rem;
+    }
+    .cta-row { display: flex; align-items: stretch; gap: 0.5rem; margin-bottom: 1rem; }
+    .cta-slot { flex: 1; min-width: 0; margin-bottom: 0; }
+    .icon-btn {
+      width: 3rem;
+      height: 3rem;
+      border: 2px solid rgba(196,30,92,0.3);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .currency {
+      position: fixed;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      background: #1e1b4b;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 6px 0 0 6px;
+      overflow: hidden;
+    }
+    .currency span { padding: 0.45rem 0.4rem; }
+    .currency .on { background: #312e81; }
+    .float-wa, .float-chat {
+      position: fixed;
+      right: 1.25rem;
+      z-index: 50;
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+    .float-wa { bottom: 1.25rem; background: #25d366; }
+    .float-chat { bottom: 4.75rem; background: var(--primary); }
+    .mobile-bar { display: block; }
+    @media (min-width: 768px) {
+      .mobile-bar { display: none; }
+    }
+    .mobile-row {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.5rem 0.4rem;
+    }
+    .mobile-logo { height: 2.25rem; width: auto; }
+    .mobile-search {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      border-top: 1px solid var(--line);
+    }
+    .crumbs {
+      max-width: 72rem;
+      margin: 0.75rem auto 0;
+      padding: 0 1rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .banner {
+      max-width: 72rem;
+      margin: 1rem auto 0;
+      padding: 0 1rem;
+    }
+    .banner p {
+      margin: 0;
+      padding: 0.75rem 1rem;
+      background: var(--petal);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      color: var(--ink);
+    }
+    .banner strong { color: var(--primary); }
+
+    .pdp {
+      max-width: 72rem;
+      margin: 0 auto;
+      padding: 1.25rem 1rem 6rem;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+    @media (min-width: 768px) {
+      .pdp { grid-template-columns: 1fr 1fr; gap: 2.5rem; }
+    }
+
+    .gallery {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    @media (min-width: 768px) {
+      .gallery { position: sticky; top: 13.5rem; }
+    }
+    .hero {
+      aspect-ratio: 1;
+      background:
+        radial-gradient(circle at 30% 20%, #fff 0, transparent 40%),
+        linear-gradient(160deg, #f8dce6, #f3e7d3 55%, #e8f0e4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5rem;
+    }
+    .thumbs { display: flex; gap: 0.5rem; padding: 0.75rem; }
+    .thumbs i {
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 8px;
+      background: var(--petal);
+      border: 1px solid var(--line);
+      display: block;
+    }
+
+    h1 { font-family: Georgia, serif; font-size: 1.75rem; margin: 0 0 0.5rem; line-height: 1.2; }
+    .proof { color: var(--muted); font-size: 0.875rem; margin: 0 0 1rem; }
+    .stars { color: var(--gold); }
+    .price { font-size: 1.75rem; font-weight: 800; color: var(--primary-deep); margin: 0; }
+    .save { color: var(--accent); font-weight: 700; font-size: 0.875rem; margin: 0.25rem 0 1rem; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 1rem;
+    }
+    .card h2 { font-size: 0.875rem; margin: 0 0 0.4rem; }
+    .card p { margin: 0; font-size: 0.875rem; color: var(--muted); }
+    .ok { color: var(--accent); }
+
+    .cta-slot.is-reserved { /* height set in JS while button is pinned */ }
+    .deal-bg { display: none; }
+
+    .atc {
+      width: 100%;
+      border: 0;
+      border-radius: 6px;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.875rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.9rem 1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(196, 30, 92, 0.25);
+    }
+    .atc:hover { background: var(--primary-deep); }
+
+    /* Flipkart-style: Buy at is the bar BACKGROUND. Add to Cart stays in its own row. */
+    .dock.is-pinned {
+      position: fixed;
+      z-index: 40;
+      bottom: 0;
+    }
+    .dock.is-pinned .deal-bg {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--primary);
+      color: #fff;
+      padding: 0.55rem 1rem;
+      font-size: 0.9rem;
+      box-shadow: 0 -8px 24px rgba(58, 36, 51, 0.1);
+      cursor: pointer;
+    }
+    .dock.is-pinned .deal-bg b { font-size: 1.05rem; }
+    .dock.is-pinned .deal-save { font-size: 0.8rem; font-weight: 600; opacity: 0.92; }
+    .dock.is-pinned .dock-actions {
+      display: none;
+    }
+    .col-right.is-docked { padding-bottom: 3.25rem; }
+
+    .block { padding: 1.25rem 0; border-top: 1px solid var(--line); }
+    .block h3 { margin: 0 0 0.5rem; font-size: 1.05rem; }
+    .block p { margin: 0 0 0.6rem; color: var(--muted); font-size: 0.95rem; line-height: 1.55; }
+
+    .related {
+      max-width: 72rem;
+      margin: 0 auto;
+      padding: 0 1rem 4rem;
+      border-top: 1px solid var(--line);
+    }
+    .related h2 { font-size: 1.1rem; }
+    .related-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    @media (min-width: 768px) {
+      .related-grid { grid-template-columns: repeat(5, 1fr); }
+    }
+    .tile {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      height: 8rem;
+    }
+
+    .hud {
+      position: fixed;
+      top: 14.5rem;
+      right: 0.75rem;
+      z-index: 60;
+      background: var(--ink);
+      color: #fff;
+      font-size: 12px;
+      padding: 0.45rem 0.65rem;
+      border-radius: 6px;
+      max-width: 14rem;
+    }
+    .hud b { color: #ffd2e2; }
+
+    footer {
+      background: var(--ink);
+      color: #fff;
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 767px) {
+      .atc.is-pinned { display: none; }
+      .mobile-note { display: block !important; }
+    }
+    .mobile-note { display: none; font-size: 0.8rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="promo">
+    Same-day gifting in select cities · Free shipping on orders $75+ · Shop flowers, cakes &amp; hampers
+  </div>
+
+  <header class="store-header">
+    <div class="loc-banner">
+      <div class="loc-banner-inner">
+        <p style="margin:0">Select your delivery location to see products available near you.</p>
+        <button type="button">Choose location</button>
+      </div>
+    </div>
+    <div class="mobile-bar">
+      <div class="mobile-row">
+        <span style="padding:0.5rem;color:var(--primary);font-size:1.25rem">☰</span>
+        <img class="mobile-logo" src="/logo.png" alt="BlossomPot" />
+        <span style="margin-left:auto;display:flex;gap:0.75rem;color:var(--primary);padding-right:0.5rem">♡ 🛒</span>
+      </div>
+      <div class="mobile-search">
+        <div class="loc-chip"><span>📍</span><span><b>Deliver</b></span></div>
+        <div class="search" style="flex:1"><input placeholder="Search gifts, flowers, hampers…" /></div>
+      </div>
+    </div>
+
+    <div class="header-top">
+      <img class="logo-img" src="/logo.png" alt="BlossomPot" />
+      <form class="search" action="#" onsubmit="return false">
+        <input type="search" placeholder="Search gifts, flowers, hampers…" />
+        <button type="button" aria-label="Search">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z" /></svg>
+        </button>
+      </form>
+      <div class="header-actions">
+        <div class="loc-chip">
+          <span>📍</span>
+          <span><b>Deliver to…</b><small>Change</small></span>
+        </div>
+        <a class="h-act" href="#">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1" /></svg>
+          Vendor Account
+        </a>
+        <a class="h-act" href="#">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+          Account
+        </a>
+        <a class="h-act" href="#">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+          Wish Lists
+        </a>
+        <a class="h-act" href="#">
+          <span class="cart-ico">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+            <span class="cart-badge">0</span>
+          </span>
+          Cart
+        </a>
+      </div>
+    </div>
+
+    <nav class="header-nav">
+      <div class="header-nav-inner">
+        <a class="btn-nav" href="#">Home</a>
+        <a class="btn-nav" href="#">Flowers</a>
+        <a class="btn-nav" href="#">Bouquets</a>
+        <a class="btn-nav" href="#">Cakes</a>
+        <a class="btn-nav" href="#">Birthday</a>
+        <a class="btn-nav" href="#">Anniversary</a>
+        <a class="btn-nav" href="#">Valentine's</a>
+        <a class="btn-nav" href="#">Hampers</a>
+        <a class="btn-nav" href="#">Overseas</a>
+        <a class="btn-nav" href="#">Same-Day</a>
+        <a class="btn-nav" href="#">Remember</a>
+        <a class="btn-nav" href="#">Cities ▼</a>
+        <a class="btn-nav" href="#">Countries ▼</a>
+      </div>
+    </nav>
+  </header>
+
+  <p class="crumbs">Home / Shop Flowers Online — Worldwide Delivery / Sunny Tulip Bunch</p>
+
+  <div class="hud" id="hud">State: <b>loading…</b></div>
+  <div class="currency"><span class="on">USD</span><span>INR</span></div>
+  <div class="float-chat">💬</div>
+  <div class="float-wa">✆</div>
+
+  <div class="pdp" id="pdpSection">
+    <div class="gallery">
+      <div class="hero" style="background:linear-gradient(180deg,#d7eefc,#8ec6e8 40%,#f4f7fb)"></div>
+      <div class="thumbs"><i></i><i></i><i></i></div>
+    </div>
+
+    <div class="col-right" id="rightCol">
+      <h1>Sunny Tulip Bunch</h1>
+      <p class="proof"><span class="stars">★★★★★</span> 5.0 · 5 customer stories · 126+ purchased</p>
+      <p class="price"><span class="compare">$46.99</span>$32.55<span class="off">31% OFF</span></p>
+      <p class="save">You save $14.44</p>
+
+      <div class="flash">
+        <div>🔥</div>
+        <div>
+          <strong>Fast Selling — 126+ sisters chose this!</strong>
+          <p>This gift is trending on BlossomPot. 10+ sold — order soon while stock lasts.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Deliver this gift</h2>
+        <p>Select a delivery location to confirm availability.</p>
+        <p style="margin-top:0.35rem"><button class="link" type="button">Choose location</button></p>
+        <div class="est">Estimated delivery: Arrives Sep 18, 2026 – Sep 22, 2026</div>
+        <div class="date-box">
+          Schedule delivery
+          <input type="date" value="2026-09-18" />
+        </div>
+      </div>
+
+      <p class="mobile-note">On mobile this demo does not pin the button (BlossomPot already has a mobile sticky bar).</p>
+
+      <div class="cta-row">
+        <div class="cta-slot" id="ctaSlot">
+          <div class="dock" id="dock">
+            <div class="deal-bg" id="dealBg">
+              <span>Buy at <b>$32.55</b></span>
+              <span class="deal-save">You save $14.44</span>
+            </div>
+            <div class="dock-actions">
+              <button type="button" class="atc" id="atc">Add to cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="icon-btn">♡</div>
+        <div class="icon-btn">↗</div>
+      </div>
+
+      <section class="block">
+        <h3>What's included</h3>
+        <p>✓ 12 long-stem red roses</p>
+        <p>✓ Seasonal greenery and wrap</p>
+        <p>✓ Care card</p>
+      </section>
+
+      <section class="block">
+        <h3>About this gift</h3>
+        <p>A classic dozen red roses — the same purchase button you saw at the bottom is this one button. It is not a copy.</p>
+        <p>Keep scrolling. The button stays available until you reach this purchase row, then it lands here.</p>
+        <p>This block exists so the original Add to Cart starts below the first viewport on a typical laptop, like a real PDP with delivery details above the CTA.</p>
+      </section>
+
+      <section class="block">
+        <h3>Care & delivery</h3>
+        <p>Trim stems, fresh water, keep cool. Same-day windows depend on the delivery location already shown above.</p>
+      </section>
+
+      <section class="block">
+        <h3>Customer stories</h3>
+        <p>“Arrived on time and looked just like the photo.” ★★★★★</p>
+        <p>“Easy to order for my mom.” ★★★★★</p>
+      </section>
+
+      <section class="block">
+        <h3>Common questions</h3>
+        <p>Can I add a note? Yes — optional extras stay on the real product page.</p>
+        <p>This HTML file does not call the BlossomPot API.</p>
+      </section>
+    </div>
+  </div>
+
+  <div class="related">
+    <h2>You might also like</h2>
+    <div class="related-grid">
+      <div class="tile"></div>
+      <div class="tile"></div>
+      <div class="tile"></div>
+      <div class="tile"></div>
+      <div class="tile"></div>
+    </div>
+  </div>
+
+  <footer>Footer — the docked button should not cover this once you leave the product section.</footer>
+
+  <script>
+    (function () {
+      var slot = document.getElementById("ctaSlot");
+      var dock = document.getElementById("dock");
+      var btn = document.getElementById("atc");
+      var section = document.getElementById("pdpSection");
+      var rightCol = document.getElementById("rightCol");
+      var hud = document.getElementById("hud");
+      var desktop = window.matchMedia("(min-width: 768px)");
+      var slotInView = true;
+      var sectionInView = true;
+      var pinned = false;
+      var slotHeight = 0;
+      var slotWidth = 0;
+
+      function isDesktop() {
+        return desktop.matches;
+      }
+
+      function measureSlot() {
+        if (pinned) return;
+        slotWidth = slot.offsetWidth;
+        slotHeight = btn.offsetHeight;
+      }
+
+      function placePinned() {
+        var r = rightCol.getBoundingClientRect();
+        dock.style.left = r.left + "px";
+        dock.style.width = r.width + "px";
+        dock.style.right = "auto";
+      }
+
+      function clearPinnedStyles() {
+        dock.style.left = "";
+        dock.style.width = "";
+        dock.style.right = "";
+      }
+
+      function sync() {
+        var next = isDesktop() && !slotInView && sectionInView;
+        if (next && !pinned) measureSlot();
+        pinned = next;
+        dock.classList.toggle("is-pinned", pinned);
+        rightCol.classList.toggle("is-docked", pinned);
+        slot.classList.toggle("is-reserved", pinned);
+        slot.style.minHeight = pinned && slotHeight ? slotHeight + "px" : "";
+        slot.style.width = pinned && slotWidth ? slotWidth + "px" : "";
+        slot.style.flex = pinned ? "0 0 auto" : "";
+        if (pinned) {
+          dock.style.setProperty("--atc-width", slotWidth + "px");
+          placePinned();
+        } else {
+          dock.style.removeProperty("--atc-width");
+          clearPinnedStyles();
+        }
+        hud.innerHTML = pinned
+          ? 'State: <b>STICKY</b> — Buy at background only (not stacked with Add to Cart)'
+          : 'State: <b>IN PLACE</b> — original Add to Cart only';
+      }
+
+      function readBoxes() {
+        var vh = window.innerHeight;
+        var sr = slot.getBoundingClientRect();
+        var pr = section.getBoundingClientRect();
+        slotInView = sr.bottom > 0 && sr.top < vh;
+        sectionInView = pr.bottom > 0 && pr.top < vh;
+        if (!pinned) measureSlot();
+        sync();
+      }
+
+      document.getElementById("dealBg").addEventListener("click", function () {
+        btn.click();
+      });
+      btn.addEventListener("click", function () {
+        btn.textContent = "Added";
+        setTimeout(function () {
+          btn.textContent = "Add to cart";
+        }, 1200);
+      });
+
+      readBoxes();
+
+      if ("IntersectionObserver" in window) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.target === slot) slotInView = e.isIntersecting;
+            if (e.target === section) sectionInView = e.isIntersecting;
+          });
+          sync();
+        }, { threshold: 0 });
+        io.observe(slot);
+        io.observe(section);
+      } else {
+        window.addEventListener("scroll", readBoxes, { passive: true });
+      }
+
+      window.addEventListener("resize", function () {
+        if (pinned) placePinned();
+        else readBoxes();
+      });
+      desktop.addEventListener("change", readBoxes);
+    })();
+  </script>
+</body>
+</html>

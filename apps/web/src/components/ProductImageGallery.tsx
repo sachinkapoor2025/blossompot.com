@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { resolveImageUrls } from "@/lib/images";
 import { site } from "@/lib/site";
 import {
@@ -11,6 +11,7 @@ import {
 interface ProductImageGalleryProps {
   images: string[];
   alt: string;
+  overlay?: ReactNode;
 }
 
 const ZOOM_LEVEL = 2.5;
@@ -60,7 +61,20 @@ function useDesktopHoverZoom() {
   return isDesktop;
 }
 
-export function ProductImageGallery({ images, alt }: ProductImageGalleryProps) {
+function GalleryOverlay({ children }: { children: ReactNode }) {
+  return (
+    <div
+      className="absolute top-4 right-4 z-10 flex flex-col items-end gap-2"
+      onClick={(e) => e.stopPropagation()}
+      onKeyDown={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function ProductImageGallery({ images, alt, overlay }: ProductImageGalleryProps) {
   const [selected, setSelected] = useState(0);
   const [lightbox, setLightbox] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
@@ -214,9 +228,10 @@ export function ProductImageGallery({ images, alt }: ProductImageGalleryProps) {
 
   if (!current) {
     return (
-      <div className="aspect-square bg-surface rounded-xl flex items-center justify-center border border-line">
+      <div className="relative aspect-square bg-surface rounded-xl flex items-center justify-center border border-line">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={site.logoSrc} alt={site.name} className="h-2/3 w-2/3 object-contain p-6" />
+        {overlay ? <GalleryOverlay>{overlay}</GalleryOverlay> : null}
       </div>
     );
   }
@@ -250,6 +265,8 @@ export function ProductImageGallery({ images, alt }: ProductImageGalleryProps) {
             className="w-full h-full object-contain p-2 transition-transform duration-200 group-hover:scale-[1.02] md:group-hover:scale-100 select-none"
             draggable={false}
           />
+
+          {overlay ? <GalleryOverlay>{overlay}</GalleryOverlay> : null}
 
           {showZoom && (
             <>
