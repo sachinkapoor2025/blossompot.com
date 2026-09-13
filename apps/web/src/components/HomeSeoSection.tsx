@@ -9,12 +9,12 @@ export function HomeSeoSection() {
   const usedHrefs = new Set<string>();
 
   return (
-    <section className="bg-slate-50 border-y border-slate-200" aria-labelledby="home-seo-heading">
+    <section className="bg-ivory border-y border-line" aria-labelledby="home-seo-heading">
       <div className="max-w-7xl mx-auto px-4 py-12 sm:py-16">
         <div className="grid lg:grid-cols-2 gap-10 xl:gap-14">
-          <article className="space-y-8 text-slate-700 leading-relaxed">
+          <article className="space-y-8 text-ink leading-relaxed">
             <header>
-              <h2 id="home-seo-heading" className="text-2xl font-bold text-primary mb-4">
+              <h2 id="home-seo-heading" className="text-2xl font-bold text-ink mb-4">
                 {intro.heading}
               </h2>
               {intro.paragraphs.map((para, i) => (
@@ -25,7 +25,7 @@ export function HomeSeoSection() {
             </header>
 
             <section>
-              <h3 className="text-xl font-semibold text-primary mb-3">{delivery.heading}</h3>
+              <h3 className="text-xl font-semibold text-ink mb-3">{delivery.heading}</h3>
               {delivery.paragraphs.map((para, i) => (
                 <p key={i} className="mb-4">
                   {applyInlineLinks(para, homepageInlineLinks, { usedHrefs, currentPath: "/", max: 4 })}
@@ -36,7 +36,7 @@ export function HomeSeoSection() {
                   <Link
                     key={city.href}
                     href={city.href}
-                    className="text-xs sm:text-sm px-2.5 py-1 rounded-full border border-slate-200 bg-white text-slate-600 hover:border-nav hover:text-nav transition"
+                    className="text-xs sm:text-sm px-2.5 py-1 rounded-full border border-line bg-surface text-muted hover:border-primary hover:text-primary transition"
                   >
                     Gifts to {city.label}
                   </Link>
@@ -46,16 +46,16 @@ export function HomeSeoSection() {
           </article>
 
           <aside className="space-y-6">
-            <section className="bg-white border border-slate-200 rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-primary mb-2">{categories.heading}</h3>
-              <p className="text-slate-600 text-sm mb-4">{categories.intro}</p>
+            <section className="bg-surface border border-line rounded-xl p-6">
+              <h3 className="text-lg font-semibold text-ink mb-2">{categories.heading}</h3>
+              <p className="text-muted text-sm mb-4">{categories.intro}</p>
               <ul className="space-y-3 text-sm">
                 {categories.links.map((item) => (
                   <li key={item.href}>
                     <Link href={item.href} className="font-semibold text-nav hover:underline">
                       {item.label}
                     </Link>
-                    <p className="text-slate-500 mt-0.5">{item.text}</p>
+                    <p className="text-muted mt-0.5">{item.text}</p>
                   </li>
                 ))}
               </ul>
@@ -66,12 +66,12 @@ export function HomeSeoSection() {
               </p>
             </section>
 
-            <section className="bg-white border border-slate-200 rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-primary mb-4">{howItWorks.heading}</h3>
-              <ol className="space-y-3 text-sm list-decimal list-inside marker:font-semibold marker:text-nav">
+            <section className="bg-surface border border-line rounded-xl p-6">
+              <h3 className="text-lg font-semibold text-ink mb-4">{howItWorks.heading}</h3>
+              <ol className="space-y-3 text-sm list-decimal list-inside marker:font-semibold marker:text-primary">
                 {howItWorks.steps.map((step) => (
                   <li key={step.title} className="pl-1">
-                    <span className="font-semibold text-primary">{step.title.replace(/^\d+\.\s*/, "")}</span>
+                    <span className="font-semibold text-ink">{step.title.replace(/^\d+\.\s*/, "")}</span>
                     {" — "}
                     {step.text}
                   </li>
@@ -90,7 +90,7 @@ export function HomeSeoSection() {
               </p>
             </section>
 
-            <section className="bg-nav text-white rounded-xl p-6">
+            <section className="bg-primary text-white rounded-xl p-6">
               <h3 className="text-lg font-semibold mb-2">Ready to send a gift across the USA?</h3>
               <p className="text-sm text-white/90 mb-4">
                 Browse flowers, cakes, and hampers above — or reach out and we&apos;ll help you pick the right surprise.
@@ -98,7 +98,7 @@ export function HomeSeoSection() {
               <div className="flex flex-wrap gap-3 text-sm">
                 <Link
                   href="/products"
-                  className="bg-white text-nav px-4 py-2 rounded-lg font-medium hover:bg-slate-100"
+                  className="bg-surface text-primary px-4 py-2 rounded-lg font-medium hover:bg-petal"
                 >
                   Shop all gifts
                 </Link>
@@ -115,18 +115,18 @@ export function HomeSeoSection() {
           </aside>
         </div>
 
-        <section className="mt-12 pt-10 border-t border-slate-200">
+        <section className="mt-12 pt-10 border-t border-line">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-            <h3 className="text-xl font-semibold text-primary">{faqs.heading}</h3>
+            <h3 className="text-xl font-semibold text-ink">{faqs.heading}</h3>
             <Link href="/faq" className="text-sm text-nav font-semibold hover:underline">
               View all FAQs →
             </Link>
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             {faqs.items.map((faq) => (
-              <div key={faq.q} className="bg-white border border-slate-100 rounded-xl p-5">
-                <h4 className="font-semibold text-primary text-sm mb-2">{faq.q}</h4>
-                <p className="text-sm text-slate-600 leading-relaxed">{faq.a}</p>
+              <div key={faq.q} className="bg-surface border border-line rounded-xl p-5">
+                <h4 className="font-semibold text-ink text-sm mb-2">{faq.q}</h4>
+                <p className="text-sm text-muted leading-relaxed">{faq.a}</p>
               </div>
             ))}
           </div>

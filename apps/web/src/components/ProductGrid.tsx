@@ -67,7 +67,7 @@ export function ProductGrid({
           <button
             type="button"
             onClick={() => setShown((n) => Math.min(n + HOME_CATALOG_PAGE_SIZE, sorted.length))}
-            className="rounded-lg bg-nav px-5 py-2.5 text-sm font-semibold text-white hover:bg-nav/90"
+            className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-deep"
           >
             Show more
           </button>

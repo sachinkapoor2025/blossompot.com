@@ -72,7 +72,7 @@ function DeliveryLocationModalInner() {
     <div className="fixed inset-0 z-[80] flex items-center justify-center overflow-hidden px-3 sm:px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))]">
       <button
         type="button"
-        className="absolute inset-0 bg-slate-900/40"
+        className="absolute inset-0 bg-ink/40"
         aria-label="Close delivery location"
         onClick={close}
       />
@@ -80,24 +80,24 @@ function DeliveryLocationModalInner() {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative z-10 flex w-full max-w-md min-h-0 max-h-[calc(100vh-1.5rem)] flex-col overflow-hidden rounded-2xl bg-white shadow-xl"
+        className="relative z-10 flex w-full max-w-md min-h-0 max-h-[calc(100vh-1.5rem)] flex-col overflow-hidden rounded-2xl bg-surface shadow-xl"
         style={{ maxHeight: "calc(100svh - 1.5rem)" }}
       >
-        <div className="relative shrink-0 border-b border-slate-100 px-5 pb-3 pt-5 pr-14 sm:px-6">
+        <div className="relative shrink-0 border-b border-line px-5 pb-3 pt-5 pr-14 sm:px-6">
           <button
             type="button"
             onClick={close}
-            className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+            className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full text-muted hover:bg-petal hover:text-ink"
             aria-label="Close"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
-          <h2 id={titleId} className="text-xl font-bold text-primary pr-2">
+          <h2 id={titleId} className="text-xl font-bold text-ink pr-2">
             Where should we deliver?
           </h2>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-sm text-muted">
             Pick a country to browse gifts for that destination. We deliver country-wide — postal
             code is only needed at checkout.
           </p>
@@ -110,12 +110,12 @@ function DeliveryLocationModalInner() {
           }}
         >
           <div className="space-y-4">
-            <label className="block text-sm font-medium text-slate-800">
+            <label className="block text-sm font-medium text-ink">
               Country
               <select
                 value={countryCode}
                 onChange={(e) => setCountryCode(e.target.value)}
-                className="mt-1 w-full max-w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm"
+                className="mt-1 w-full max-w-full rounded-lg border border-line bg-surface px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent"
               >
                 {countries.map((c) => (
                   <option key={c.countryCode} value={c.countryCode}>
@@ -123,21 +123,21 @@ function DeliveryLocationModalInner() {
                   </option>
                 ))}
               </select>
-              <span className="mt-1 block text-xs text-slate-500">{countries.length} countries</span>
+              <span className="mt-1 block text-xs text-muted">{countries.length} countries</span>
             </label>
-            {error ? <p className="text-sm text-red-600">{error}</p> : null}
+            {error ? <p className="text-sm text-sale">{error}</p> : null}
             <div className="flex gap-2">
               <button
                 type="submit"
                 disabled={busy}
-                className="flex-1 rounded-lg bg-primary text-white font-semibold py-2.5 text-sm disabled:opacity-50"
+                className="flex-1 rounded-lg bg-primary text-white font-semibold py-2.5 text-sm hover:bg-primary-deep disabled:opacity-40"
               >
                 {busy ? "Checking…" : "See gifts"}
               </button>
               <button
                 type="button"
                 onClick={close}
-                className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700"
+                className="rounded-lg border border-line px-4 py-2.5 text-sm font-medium text-ink hover:bg-petal"
               >
                 Not now
               </button>

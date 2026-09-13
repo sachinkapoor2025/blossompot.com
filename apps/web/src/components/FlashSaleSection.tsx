@@ -44,7 +44,7 @@ function TimerBlock({
       }`}
     >
       <div
-        className={`w-full rounded-xl sm:rounded-2xl bg-gradient-to-b from-[#244f88] to-primary shadow-[0_10px_28px_rgba(24,58,104,0.4)] ring-1 ring-white/20 ${
+        className={`w-full rounded-xl sm:rounded-2xl bg-primary shadow-md shadow-primary/30 ring-1 ring-white/20 ${
           compact ? "px-2 py-2" : "px-3 py-3 sm:py-3.5"
         }`}
       >
@@ -80,14 +80,14 @@ function OfferTimer({
       className={
         variant === "overlay"
           ? "rounded-xl bg-black/55 backdrop-blur-sm px-3 py-2.5 border border-white/20"
-          : "rounded-2xl border border-rose-200 bg-white/90 px-4 py-4 sm:px-6 sm:py-5 shadow-md w-full max-w-xl"
+          : "rounded-2xl border border-line bg-surface px-4 py-4 sm:px-6 sm:py-5 shadow-md w-full max-w-xl"
       }
     >
       <p
         className={`font-bold uppercase tracking-[0.2em] mb-2 ${
           compact
             ? "text-[10px] text-white text-center"
-            : "text-[11px] text-accent text-center sm:text-left mb-3"
+            : "text-[11px] text-promo text-center sm:text-left mb-3"
         }`}
       >
         Offer ends in
@@ -100,7 +100,7 @@ function OfferTimer({
         <TimerBlock value={remaining.h} label="Hrs" compact={compact} />
         <span
           className={`font-bold ${
-            compact ? "pb-5 text-lg text-white/80" : "pb-7 text-2xl text-accent/60"
+            compact ? "pb-5 text-lg text-white/80" : "pb-7 text-2xl text-promo/60"
           }`}
         >
           :
@@ -108,7 +108,7 @@ function OfferTimer({
         <TimerBlock value={remaining.m} label="Min" compact={compact} />
         <span
           className={`font-bold ${
-            compact ? "pb-5 text-lg text-white/80" : "pb-7 text-2xl text-accent/60"
+            compact ? "pb-5 text-lg text-white/80" : "pb-7 text-2xl text-promo/60"
           }`}
         >
           :
@@ -142,32 +142,24 @@ export function FlashSaleSection({ product }: { product: Product | null }) {
   const shippingLabel = format(FLASH_COMBO_SALE.shippingUsd, "USD");
 
   return (
-    <section className="relative overflow-hidden border-y border-rose-200/80 bg-gradient-to-br from-rose-50 via-white to-amber-50">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.07]"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 20% 20%, #e11d48 0, transparent 40%), radial-gradient(circle at 80% 0%, #d97706 0, transparent 35%)",
-        }}
-      />
+    <section className="relative overflow-hidden border-y border-line bg-ivory">
       <div className="relative max-w-7xl mx-auto px-4 py-8 sm:py-10">
         {/* Mobile: heading → image+timer → details. Desktop: image | details (unchanged). */}
         <div className="grid lg:grid-cols-[minmax(280px,420px)_1fr] gap-5 lg:gap-10 items-center">
           {/* Mobile-only headline above image */}
           <div className="lg:hidden text-center">
-            <p className="text-xs font-bold tracking-[0.2em] uppercase text-accent mb-1.5">
+            <p className="text-xs font-bold tracking-[0.2em] uppercase text-promo mb-1.5">
               {FLASH_COMBO_SALE.title}
             </p>
-            <h2 className="font-serif text-2xl sm:text-3xl text-primary leading-tight">
+            <h2 className="font-serif text-2xl sm:text-3xl text-ink leading-tight">
               {FLASH_COMBO_SALE.headline}
             </h2>
           </div>
 
           {/* Image card — timer overlays on mobile only */}
           <div className="w-full max-w-md mx-auto lg:mx-0 order-none">
-            <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
-              <div className="relative aspect-square w-full overflow-hidden bg-slate-50">
+            <div className="border border-line rounded-xl overflow-hidden bg-surface shadow-sm">
+              <div className="relative aspect-square w-full overflow-hidden bg-ivory">
                 <Link href={`/products/${product.slug}`} className="absolute inset-0 block">
                   <ProductImageRotator
                     images={gallery}
@@ -177,7 +169,7 @@ export function FlashSaleSection({ product }: { product: Product | null }) {
                     className="absolute inset-0 h-full w-full"
                   />
                 </Link>
-                <span className="absolute top-3 left-3 z-10 bg-accent text-white text-xs font-bold px-2.5 py-1 rounded lg:inline-block">
+                <span className="absolute top-3 left-3 z-10 bg-promo text-white text-xs font-bold px-2.5 py-1 rounded lg:inline-block">
                   {FLASH_COMBO_SALE.title}
                 </span>
                 {/* Timer on image — mobile only */}
@@ -186,15 +178,15 @@ export function FlashSaleSection({ product }: { product: Product | null }) {
                 </div>
               </div>
               <Link href={`/products/${product.slug}`} className="block px-3 py-3 lg:block">
-                <h3 className="font-semibold text-sm text-slate-900 line-clamp-2 hover:text-nav">
+                <h3 className="font-semibold text-sm text-ink line-clamp-2 hover:text-nav">
                   {product.name}
                 </h3>
                 <div className="mt-2 flex items-center gap-2">
-                  <span className="text-nav font-bold">
+                  <span className="text-primary-deep font-bold">
                     {format(product.price, product.currency)}
                   </span>
                   {product.compareAtPrice && product.compareAtPrice > product.price && (
-                    <span className="text-xs text-slate-400 line-through">
+                    <span className="text-xs text-muted line-through">
                       {format(product.compareAtPrice, product.currency)}
                     </span>
                   )}
@@ -207,20 +199,20 @@ export function FlashSaleSection({ product }: { product: Product | null }) {
           <div className="flex flex-col justify-center min-w-0">
             {/* Desktop headline (hidden on mobile — already shown above) */}
             <div className="hidden lg:block">
-              <p className="text-xs font-bold tracking-[0.2em] uppercase text-accent mb-2">
+              <p className="text-xs font-bold tracking-[0.2em] uppercase text-promo mb-2">
                 {FLASH_COMBO_SALE.title}
               </p>
-              <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-primary leading-tight mb-3">
+              <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-ink leading-tight mb-3">
                 {FLASH_COMBO_SALE.headline}
               </h2>
             </div>
 
-            <p className="text-slate-600 text-sm sm:text-base mb-4 max-w-xl">
+            <p className="text-muted text-sm sm:text-base mb-4 max-w-xl">
               Limited combo offer — see product details for what’s included +
               See product details for contents. No coupon codes on this offer.
             </p>
 
-            <ul className="text-sm text-slate-700 space-y-1.5 mb-5 columns-1 sm:columns-2 gap-x-8 max-w-xl">
+            <ul className="text-sm text-ink space-y-1.5 mb-5 columns-1 sm:columns-2 gap-x-8 max-w-xl">
               {FLASH_COMBO_SALE.includes.map((line) => (
                 <li key={line} className="flex gap-2 break-inside-avoid mb-1.5">
                   <span className="text-accent font-bold">✓</span>
@@ -230,17 +222,17 @@ export function FlashSaleSection({ product }: { product: Product | null }) {
             </ul>
 
             <div className="mb-3">
-              <p className="text-xs uppercase tracking-wide text-slate-500 mb-1">Flash price</p>
+              <p className="text-xs uppercase tracking-wide text-muted mb-1">Flash price</p>
               <div className="flex flex-wrap items-baseline gap-2">
-                <span className="text-3xl sm:text-4xl font-bold text-accent">
+                <span className="text-3xl sm:text-4xl font-bold text-primary-deep">
                   {format(product.price, product.currency)}
                 </span>
                 {product.compareAtPrice && product.compareAtPrice > product.price && (
-                  <span className="text-slate-400 line-through text-lg">
+                  <span className="text-muted line-through text-lg">
                     {format(product.compareAtPrice, product.currency)}
                   </span>
                 )}
-                <span className="text-sm font-semibold text-primary">
+                <span className="text-sm font-semibold text-muted">
                   + {shippingLabel} shipping
                 </span>
               </div>

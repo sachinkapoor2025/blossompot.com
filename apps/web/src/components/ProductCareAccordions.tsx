@@ -27,7 +27,7 @@ const SHIPPING_DELIVERY_POINTS = [
 function ChevronIcon({ open }: { open: boolean }) {
   return (
     <svg
-      className={`h-4 w-4 text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
+      className={`h-4 w-4 text-muted transition-transform ${open ? "rotate-180" : ""}`}
       viewBox="0 0 20 20"
       fill="currentColor"
       aria-hidden
@@ -43,7 +43,7 @@ function ChevronIcon({ open }: { open: boolean }) {
 
 function NotepadIcon() {
   return (
-    <svg className="h-5 w-5 text-slate-800 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+    <svg className="h-5 w-5 text-ink shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -55,7 +55,7 @@ function NotepadIcon() {
 
 function ScooterIcon() {
   return (
-    <svg className="h-5 w-5 text-slate-800 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+    <svg className="h-5 w-5 text-ink shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -75,13 +75,13 @@ type AccordionProps = {
 function InfoAccordion({ title, icon, items, defaultOpen = false }: AccordionProps) {
   return (
     <details
-      className="group border-b border-slate-200 py-3 first:border-t first:border-slate-200"
+      className="group border-b border-line py-3 first:border-t first:border-line"
       {...(defaultOpen ? { open: true } : {})}
     >
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 select-none [&::-webkit-details-marker]:hidden">
         <span className="flex items-center gap-2.5 min-w-0">
           {icon}
-          <span className="font-semibold text-slate-900 text-sm sm:text-base">{title}</span>
+          <span className="font-semibold text-ink text-sm sm:text-base">{title}</span>
         </span>
         <span className="group-open:hidden">
           <ChevronIcon open={false} />
@@ -90,7 +90,7 @@ function InfoAccordion({ title, icon, items, defaultOpen = false }: AccordionPro
           <ChevronIcon open />
         </span>
       </summary>
-      <ul className="mt-3 space-y-2 pl-1 text-sm text-slate-600 leading-relaxed list-disc list-inside marker:text-slate-300">
+      <ul className="mt-3 space-y-2 pl-1 text-sm text-muted leading-relaxed list-disc list-inside marker:text-line">
         {items.map((line) => (
           <li key={line}>{line}</li>
         ))}

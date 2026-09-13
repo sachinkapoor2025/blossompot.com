@@ -46,8 +46,8 @@ function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
       </button>
       {open && (
         <div className="absolute top-full right-0 pt-1.5 z-[100]">
-          <div className="min-w-[260px] max-h-[min(70vh,420px)] overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-xl">
-            <p className="px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+          <div className="min-w-[260px] max-h-[min(70vh,420px)] overflow-y-auto rounded-lg border border-line bg-surface py-1 shadow-xl">
+            <p className="px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted">
               USA city pages
             </p>
             <div className="px-3 pb-2">
@@ -55,12 +55,12 @@ function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search US cities…"
-                className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm"
+                className="w-full rounded-md border border-line px-2 py-1.5 text-sm"
               />
             </div>
             <Link
               href="/locations"
-              className="block px-4 py-2.5 text-sm font-semibold text-nav hover:bg-blue-50 whitespace-nowrap"
+              className="block px-4 py-2.5 text-sm font-semibold text-nav hover:bg-petal whitespace-nowrap"
               onClick={() => {
                 setOpen(false);
                 onNavigate?.();
@@ -72,7 +72,7 @@ function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
               <Link
                 key={c.slug}
                 href={cityNavHref(c)}
-                className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-nav whitespace-nowrap"
+                className="block px-4 py-2.5 text-sm text-ink hover:bg-petal hover:text-nav whitespace-nowrap"
                 onClick={() => {
                   setOpen(false);
                   onNavigate?.();
@@ -83,7 +83,7 @@ function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
             ))}
             <button
               type="button"
-              className="mt-1 w-full border-t border-slate-100 px-4 py-2.5 text-left text-sm font-semibold text-nav hover:bg-blue-50"
+              className="mt-1 w-full border-t border-line px-4 py-2.5 text-left text-sm font-semibold text-nav hover:bg-petal"
               onClick={() => {
                 setOpen(false);
                 openSelector();
@@ -128,8 +128,8 @@ function CountriesMenu({
       </button>
       {open && (
         <div className="absolute top-full right-0 pt-1.5 z-[100]">
-          <div className="min-w-[280px] max-h-[min(70vh,420px)] overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-xl">
-            <p className="px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+          <div className="min-w-[280px] max-h-[min(70vh,420px)] overflow-y-auto rounded-lg border border-line bg-surface py-1 shadow-xl">
+            <p className="px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted">
               Delivery countries
             </p>
             <div className="px-3 pb-2">
@@ -137,11 +137,11 @@ function CountriesMenu({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search countries…"
-                className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm"
+                className="w-full rounded-md border border-line px-2 py-1.5 text-sm"
               />
             </div>
             {!loaded ? (
-              <p className="px-4 py-2 text-sm text-slate-500">Loading countries…</p>
+              <p className="px-4 py-2 text-sm text-muted">Loading countries…</p>
             ) : (
               filtered.map((c) => {
                 const guide = COUNTRY_GUIDE_HREF[c.countryCode];
@@ -150,7 +150,7 @@ function CountriesMenu({
                     <Link
                       key={c.countryCode}
                       href={guide}
-                      className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-nav whitespace-nowrap"
+                      className="block px-4 py-2.5 text-sm text-ink hover:bg-petal hover:text-nav whitespace-nowrap"
                       onClick={() => {
                         setOpen(false);
                         onNavigate?.();
@@ -164,7 +164,7 @@ function CountriesMenu({
                   <button
                     key={c.countryCode}
                     type="button"
-                    className="block w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-blue-50 hover:text-nav whitespace-nowrap"
+                    className="block w-full px-4 py-2.5 text-left text-sm text-ink hover:bg-petal hover:text-nav whitespace-nowrap"
                     onClick={() => {
                       setOpen(false);
                       openSelector({ countryCode: c.countryCode });
@@ -268,7 +268,7 @@ function CartLink() {
         />
       </svg>
       {itemCount > 0 && (
-        <span className="absolute top-1 right-0.5 bg-accent text-white text-[10px] rounded-full min-w-4 h-4 px-0.5 flex items-center justify-center font-bold">
+        <span className="absolute top-1 right-0.5 bg-primary text-white text-[10px] rounded-full min-w-4 h-4 px-0.5 flex items-center justify-center font-bold">
           {itemCount}
         </span>
       )}
@@ -314,7 +314,7 @@ function DesktopCartAction() {
           />
         </svg>
         {itemCount > 0 && (
-          <span className="absolute -top-1.5 -right-2 bg-accent text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
+          <span className="absolute -top-1.5 -right-2 bg-primary text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
             {itemCount}
           </span>
         )}
@@ -372,7 +372,7 @@ export function Header() {
   }, [menuOpen]);
 
   return (
-    <header className={`border-b border-primary/10 bg-white/90 backdrop-blur-md sticky top-0 shadow-sm shadow-primary/5 overflow-visible ${menuOpen ? "z-[70]" : "z-50"}`}>
+    <header className={`border-b border-primary/10 bg-surface/90 backdrop-blur-md sticky top-0 shadow-sm shadow-primary/5 overflow-visible ${menuOpen ? "z-[70]" : "z-50"}`}>
       <DeliveryLocationBanner />
       {/* Mobile top bar */}
       <div className="md:hidden min-w-0 overflow-x-clip">
@@ -397,7 +397,7 @@ export function Header() {
           </div>
         </div>
 
-        <div className="flex min-w-0 items-center gap-2 border-t border-slate-100 bg-white px-3 py-2">
+        <div className="flex min-w-0 items-center gap-2 border-t border-line bg-surface px-3 py-2">
           <DeliveryLocationChip compact />
           <div className="min-w-0 flex-1">
             <SearchBar />
@@ -443,7 +443,7 @@ export function Header() {
       </div>
 
       {/* Desktop nav */}
-      <nav className="hidden md:block border-t border-slate-100 bg-white overflow-visible">
+      <nav className="hidden md:block border-t border-line bg-surface overflow-visible">
         <div className="max-w-7xl mx-auto px-3 py-2">
           <div className="flex flex-nowrap items-center justify-center gap-1 lg:gap-1.5 [&_.btn-nav]:shrink-0 [&_.btn-nav]:px-3 [&_.btn-nav]:py-1.5 [&_.btn-nav]:text-[13px]">
             {navItems.map((item) => (
@@ -464,17 +464,17 @@ export function Header() {
       {/* Mobile slide-out menu */}
       {menuOpen && (
         <aside
-          className="md:hidden fixed inset-0 z-[70] flex h-[100dvh] w-full max-w-full flex-col overflow-hidden bg-white"
+          className="md:hidden fixed inset-0 z-[70] flex h-[100dvh] w-full max-w-full flex-col overflow-hidden bg-surface"
           style={{ height: "100svh" }}
           role="dialog"
           aria-modal="true"
           aria-label="Menu"
         >
-          <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+          <div className="flex shrink-0 items-center justify-between border-b border-line px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
             <span className="font-semibold text-primary">Menu</span>
             <button
               type="button"
-              className="flex h-11 w-11 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-nav"
+              className="flex h-11 w-11 items-center justify-center rounded-full text-muted hover:bg-petal hover:text-nav"
               aria-label="Close menu"
               onClick={closeMenu}
             >
@@ -493,7 +493,7 @@ export function Header() {
                   className={`block rounded-lg px-4 py-3 text-sm font-semibold ${
                     isActive(item.href, "category" in item ? item.category : undefined)
                       ? "bg-nav text-white"
-                      : "text-primary hover:bg-blue-50 hover:text-nav"
+                      : "text-primary hover:bg-petal hover:text-nav"
                   }`}
                 >
                   {item.label}
@@ -505,27 +505,27 @@ export function Header() {
                   type="button"
                   onClick={() => setCitiesOpen((v) => !v)}
                   className={`w-full flex items-center justify-between rounded-lg px-4 py-3 text-sm font-semibold ${
-                    citiesOpen ? "bg-nav text-white" : "text-primary hover:bg-blue-50 hover:text-nav"
+                    citiesOpen ? "bg-nav text-white" : "text-primary hover:bg-petal hover:text-nav"
                   }`}
                 >
                   Cities
                   <span className={`text-xs transition-transform ${citiesOpen ? "rotate-180" : ""}`}>▼</span>
                 </button>
                 {citiesOpen && (
-                  <div className="mt-1 ml-2 border-l-2 border-slate-100 pl-2 space-y-1">
-                    <p className="px-4 pt-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                  <div className="mt-1 ml-2 border-l-2 border-line pl-2 space-y-1">
+                    <p className="px-4 pt-2 text-[11px] font-semibold uppercase tracking-wide text-muted">
                       USA city pages
                     </p>
                     <input
                       value={cityQuery}
                       onChange={(e) => setCityQuery(e.target.value)}
                       placeholder="Search US cities…"
-                      className="mx-2 mb-1 w-[calc(100%-1rem)] rounded-md border border-slate-200 px-2 py-1.5 text-sm"
+                      className="mx-2 mb-1 w-[calc(100%-1rem)] rounded-md border border-line px-2 py-1.5 text-sm"
                     />
                     <Link
                       href="/locations"
                       onClick={closeMenu}
-                      className="block rounded-lg px-4 py-2.5 text-sm font-semibold text-nav hover:bg-blue-50"
+                      className="block rounded-lg px-4 py-2.5 text-sm font-semibold text-nav hover:bg-petal"
                     >
                       All US locations
                     </Link>
@@ -534,14 +534,14 @@ export function Header() {
                         key={c.slug}
                         href={cityNavHref(c)}
                         onClick={closeMenu}
-                        className="block rounded-lg px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-nav"
+                        className="block rounded-lg px-4 py-2.5 text-sm text-ink hover:bg-petal hover:text-nav"
                       >
                         {cityNavMenuLabel(c)}
                       </Link>
                     ))}
                     <button
                       type="button"
-                      className="block w-full rounded-lg px-4 py-2.5 text-left text-sm font-semibold text-nav hover:bg-blue-50"
+                      className="block w-full rounded-lg px-4 py-2.5 text-left text-sm font-semibold text-nav hover:bg-petal"
                       onClick={() => {
                         closeMenu();
                         openSelector();
@@ -560,22 +560,22 @@ export function Header() {
                   className={`w-full flex items-center justify-between rounded-lg px-4 py-3 text-sm font-semibold ${
                     isCountriesActive || countriesOpen
                       ? "bg-nav text-white"
-                      : "text-primary hover:bg-blue-50 hover:text-nav"
+                      : "text-primary hover:bg-petal hover:text-nav"
                   }`}
                 >
                   {countriesMenu.label}
                   <span className={`text-xs transition-transform ${countriesOpen ? "rotate-180" : ""}`}>▼</span>
                 </button>
                 {countriesOpen && (
-                  <div className="mt-1 ml-2 max-h-72 overflow-y-auto border-l-2 border-slate-100 pl-2 space-y-1">
+                  <div className="mt-1 ml-2 max-h-72 overflow-y-auto border-l-2 border-line pl-2 space-y-1">
                     <input
                       value={countrySearch.query}
                       onChange={(e) => countrySearch.setQuery(e.target.value)}
                       placeholder="Search countries…"
-                      className="mx-2 mb-1 w-[calc(100%-1rem)] rounded-md border border-slate-200 px-2 py-1.5 text-sm"
+                      className="mx-2 mb-1 w-[calc(100%-1rem)] rounded-md border border-line px-2 py-1.5 text-sm"
                     />
                     {!countriesLoaded ? (
-                      <p className="px-4 py-2 text-sm text-slate-500">Loading countries…</p>
+                      <p className="px-4 py-2 text-sm text-muted">Loading countries…</p>
                     ) : (
                       countrySearch.filtered.map((c) => {
                         const guide = COUNTRY_GUIDE_HREF[c.countryCode];
@@ -585,7 +585,7 @@ export function Header() {
                               key={c.countryCode}
                               href={guide}
                               onClick={closeMenu}
-                              className="block rounded-lg px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-nav"
+                              className="block rounded-lg px-4 py-2.5 text-sm text-ink hover:bg-petal hover:text-nav"
                             >
                               {c.countryName}
                             </Link>
@@ -595,7 +595,7 @@ export function Header() {
                           <button
                             key={c.countryCode}
                             type="button"
-                            className="block w-full rounded-lg px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-blue-50 hover:text-nav"
+                            className="block w-full rounded-lg px-4 py-2.5 text-left text-sm text-ink hover:bg-petal hover:text-nav"
                             onClick={() => {
                               closeMenu();
                               openSelector({ countryCode: c.countryCode });
@@ -613,38 +613,38 @@ export function Header() {
               <Link
                 href="/vendor"
                 onClick={closeMenu}
-                className="block rounded-lg px-4 py-3 text-sm font-semibold text-primary hover:bg-rose-50"
+                className="block rounded-lg px-4 py-3 text-sm font-semibold text-primary hover:bg-petal"
               >
                 Vendor Account
               </Link>
               <Link
                 href="/become-a-vendor"
                 onClick={closeMenu}
-                className="block rounded-lg px-4 py-3 text-sm font-semibold text-primary hover:bg-rose-50"
+                className="block rounded-lg px-4 py-3 text-sm font-semibold text-primary hover:bg-petal"
               >
                 Become a Vendor
               </Link>
             </nav>
 
-            <div className="grid shrink-0 grid-cols-3 border-t border-slate-100 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+            <div className="grid shrink-0 grid-cols-3 border-t border-line pb-[max(0.5rem,env(safe-area-inset-bottom))]">
               <Link
                 href="/account"
                 onClick={closeMenu}
-                className="flex flex-col items-center gap-1 px-2 py-3 text-xs font-semibold text-primary hover:bg-slate-50"
+                className="flex flex-col items-center gap-1 px-2 py-3 text-xs font-semibold text-primary hover:bg-petal"
               >
                 Account
               </Link>
               <Link
                 href="/wishlist"
                 onClick={closeMenu}
-                className="flex flex-col items-center gap-1 px-2 py-3 text-xs font-semibold text-primary hover:bg-slate-50"
+                className="flex flex-col items-center gap-1 px-2 py-3 text-xs font-semibold text-primary hover:bg-petal"
               >
                 Wishlist
               </Link>
               <Link
                 href="/cart"
                 onClick={closeMenu}
-                className="flex flex-col items-center gap-1 px-2 py-3 text-xs font-semibold text-primary hover:bg-slate-50"
+                className="flex flex-col items-center gap-1 px-2 py-3 text-xs font-semibold text-primary hover:bg-petal"
               >
                 Cart
               </Link>

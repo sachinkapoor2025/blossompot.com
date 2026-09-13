@@ -214,7 +214,7 @@ export function ProductImageGallery({ images, alt }: ProductImageGalleryProps) {
 
   if (!current) {
     return (
-      <div className="aspect-square bg-white rounded-xl flex items-center justify-center border border-slate-100">
+      <div className="aspect-square bg-surface rounded-xl flex items-center justify-center border border-line">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={site.logoSrc} alt={site.name} className="h-2/3 w-2/3 object-contain p-6" />
       </div>
@@ -228,7 +228,7 @@ export function ProductImageGallery({ images, alt }: ProductImageGalleryProps) {
       <div className="space-y-3">
         <div
           ref={containerRef}
-          className="relative aspect-square bg-slate-50 rounded-xl overflow-hidden border border-slate-100 cursor-zoom-in md:cursor-crosshair group"
+          className="relative aspect-square bg-ivory rounded-xl overflow-hidden border border-line cursor-zoom-in md:cursor-crosshair group"
           onClick={() => setLightbox(true)}
           onMouseEnter={() => isDesktop && setIsHovering(true)}
           onMouseLeave={clearZoom}
@@ -264,7 +264,7 @@ export function ProductImageGallery({ images, alt }: ProductImageGalleryProps) {
                 aria-hidden
               />
               <div
-                className="absolute bottom-3 right-3 z-[3] hidden md:block rounded-lg border-2 border-slate-200 bg-white shadow-lg overflow-hidden pointer-events-none"
+                className="absolute bottom-3 right-3 z-[3] hidden md:block rounded-lg border-2 border-line bg-surface shadow-lg overflow-hidden pointer-events-none"
                 style={{
                   width: ZOOM_PANEL_SIZE,
                   height: ZOOM_PANEL_SIZE,
@@ -302,7 +302,7 @@ export function ProductImageGallery({ images, alt }: ProductImageGalleryProps) {
             </>
           )}
 
-          <span className="absolute bottom-3 right-3 text-[11px] bg-white/90 text-slate-600 px-2 py-0.5 rounded shadow-sm md:hidden">
+          <span className="absolute bottom-3 right-3 text-[11px] bg-surface/90 text-muted px-2 py-0.5 rounded shadow-sm md:hidden">
             Tap to zoom
           </span>
         </div>
@@ -317,7 +317,7 @@ export function ProductImageGallery({ images, alt }: ProductImageGalleryProps) {
                 aria-current={i === selected ? "true" : undefined}
                 onClick={() => setSelected(i)}
                 className={`shrink-0 w-[4.5rem] h-[4.5rem] rounded-lg overflow-hidden border-2 transition ${
-                  i === selected ? "border-nav ring-2 ring-nav/20" : "border-slate-200 hover:border-slate-300"
+                  i === selected ? "border-primary ring-2 ring-primary/20" : "border-line hover:border-primary/40"
                 }`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -63,13 +63,13 @@ export function HomeCategoryCarousel({ tiles }: { tiles: HomeCategoryTile[] }) {
   if (tiles.length === 0) return null;
 
   return (
-    <section className="bg-[#f7f1ea] border-y border-[#eadfd8]" aria-labelledby={labelId}>
+    <section className="bg-ivory border-y border-line" aria-labelledby={labelId}>
       <div className="max-w-7xl mx-auto px-4 py-8 sm:py-10">
         <div className="text-center mb-5">
-          <p id={labelId} className="font-display text-2xl sm:text-3xl text-primary">
+          <p id={labelId} className="font-display text-2xl sm:text-3xl text-ink">
             Shop BlossomPot gifts
           </p>
-          <p className="mt-1 text-sm text-slate-600">Flowers, cakes, and gifts for every celebration</p>
+          <p className="mt-1 text-sm text-muted">Flowers, cakes, and gifts for every celebration</p>
         </div>
 
         {pageCount > 1 ? (
@@ -78,7 +78,7 @@ export function HomeCategoryCarousel({ tiles }: { tiles: HomeCategoryTile[] }) {
               <span
                 key={i}
                 className={`h-1.5 rounded-full transition-all ${
-                  i === page ? "w-6 bg-primary" : "w-1.5 bg-slate-300"
+                  i === page ? "w-6 bg-primary" : "w-1.5 bg-line"
                 }`}
               />
             ))}
@@ -91,7 +91,7 @@ export function HomeCategoryCarousel({ tiles }: { tiles: HomeCategoryTile[] }) {
               <button
                 type="button"
                 onClick={() => scrollByPage(-1)}
-                className="absolute left-0 top-1/2 z-10 -translate-y-1/2 -translate-x-1 sm:-translate-x-3 flex h-10 w-10 items-center justify-center rounded-full bg-white text-primary shadow-md border border-[#eadfd8] hover:bg-petal"
+                className="absolute left-0 top-1/2 z-10 -translate-y-1/2 -translate-x-1 sm:-translate-x-3 flex h-10 w-10 items-center justify-center rounded-full bg-surface text-primary shadow-md border border-line hover:bg-petal"
                 aria-label="Previous categories"
               >
                 <ArrowIcon dir="prev" />
@@ -99,7 +99,7 @@ export function HomeCategoryCarousel({ tiles }: { tiles: HomeCategoryTile[] }) {
               <button
                 type="button"
                 onClick={() => scrollByPage(1)}
-                className="absolute right-0 top-1/2 z-10 -translate-y-1/2 translate-x-1 sm:translate-x-3 flex h-10 w-10 items-center justify-center rounded-full bg-white text-primary shadow-md border border-[#eadfd8] hover:bg-petal"
+                className="absolute right-0 top-1/2 z-10 -translate-y-1/2 translate-x-1 sm:translate-x-3 flex h-10 w-10 items-center justify-center rounded-full bg-surface text-primary shadow-md border border-line hover:bg-petal"
                 aria-label="Next categories"
               >
                 <ArrowIcon dir="next" />
@@ -114,7 +114,7 @@ export function HomeCategoryCarousel({ tiles }: { tiles: HomeCategoryTile[] }) {
             {tiles.map((tile) => (
               <li key={tile.slug} className="snap-start shrink-0 w-[112px] sm:w-[132px]">
                 <Link href={tile.href} className="group block text-center">
-                  <span className="block overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-[#eadfd8] aspect-square">
+                  <span className="block overflow-hidden rounded-2xl bg-surface shadow-sm ring-1 ring-line aspect-square">
                     <SafeStoreImage
                       src={tile.image}
                       alt={tile.alt}
@@ -123,7 +123,7 @@ export function HomeCategoryCarousel({ tiles }: { tiles: HomeCategoryTile[] }) {
                       className="h-full w-full object-cover group-hover:scale-[1.04] transition duration-300"
                     />
                   </span>
-                  <span className="mt-2 block text-sm font-medium text-slate-800 group-hover:text-primary">
+                  <span className="mt-2 block text-sm font-medium text-ink group-hover:text-primary">
                     {tile.label}
                   </span>
                 </Link>

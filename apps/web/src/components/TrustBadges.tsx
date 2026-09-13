@@ -18,17 +18,17 @@ export function TrustBadges({ variant = "full", className = "" }: { variant?: Va
             <Link
               key={item.label}
               href={item.href}
-              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-700 hover:border-nav"
+              className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-2.5 py-1 text-[11px] font-medium text-ink hover:border-accent/40"
             >
-              <span aria-hidden>{item.icon}</span>
+              <span aria-hidden className="text-accent">{item.icon}</span>
               {item.label}
             </Link>
           ) : (
             <span
               key={item.label}
-              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-700"
+              className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-2.5 py-1 text-[11px] font-medium text-ink"
             >
-              <span aria-hidden>{item.icon}</span>
+              <span aria-hidden className="text-accent">{item.icon}</span>
               {item.label}
             </span>
           )
@@ -42,24 +42,24 @@ export function TrustBadges({ variant = "full", className = "" }: { variant?: Va
       {items.map((item) => {
         const inner = (
           <>
-            <span className="text-lg" aria-hidden>
+            <span className="text-lg text-accent" aria-hidden>
               {item.icon}
             </span>
-            <span className="text-[11px] font-semibold text-slate-700 leading-tight">{item.label}</span>
+            <span className="text-[11px] font-semibold text-muted leading-tight">{item.label}</span>
           </>
         );
         return "href" in item && item.href ? (
           <Link
             key={item.label}
             href={item.href}
-            className="flex flex-col items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-3 text-center hover:border-nav transition"
+            className="flex flex-col items-center gap-1 rounded-lg border border-line bg-surface px-2 py-3 text-center hover:border-accent/40 transition"
           >
             {inner}
           </Link>
         ) : (
           <div
             key={item.label}
-            className="flex flex-col items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-3 text-center"
+            className="flex flex-col items-center gap-1 rounded-lg border border-line bg-surface px-2 py-3 text-center"
           >
             {inner}
           </div>

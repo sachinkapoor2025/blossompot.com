@@ -7,7 +7,7 @@ function StarRating({ rating }: { rating: number }) {
       {Array.from({ length: 5 }, (_, i) => (
         <svg
           key={i}
-          className={`w-3.5 h-3.5 ${i < rating ? "text-amber-400" : "text-slate-200"}`}
+          className={`w-3.5 h-3.5 ${i < rating ? "text-gold" : "text-line"}`}
           viewBox="0 0 20 20"
           fill="currentColor"
           aria-hidden
@@ -28,21 +28,21 @@ export function ProductReviewsPreview() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         <StarRating rating={Math.round(avg)} />
-        <span className="text-sm font-semibold text-slate-800">{avg.toFixed(1)} / 5</span>
-        <span className="text-xs text-slate-500">from {testimonials.length} customer stories</span>
+        <span className="text-sm font-semibold text-ink">{avg.toFixed(1)} / 5</span>
+        <span className="text-xs text-muted">from {testimonials.length} customer stories</span>
       </div>
       <ul className="space-y-3">
         {preview.map((t) => (
-          <li key={t.name} className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-3">
+          <li key={t.name} className="rounded-lg border border-line bg-ivory px-3 py-3">
             <div className="flex items-center gap-2 mb-1">
-              <span className="font-semibold text-sm text-slate-800">{t.name}</span>
+              <span className="font-semibold text-sm text-ink">{t.name}</span>
               <StarRating rating={t.rating} />
             </div>
-            <p className="text-sm text-slate-600 leading-relaxed line-clamp-3">{t.text}</p>
+            <p className="text-sm text-muted leading-relaxed line-clamp-3">{t.text}</p>
           </li>
         ))}
       </ul>
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-muted">
         Real experiences from BlossomPot customers.{" "}
         <Link href="/reviews" className="text-nav font-semibold hover:underline">
           Write a review after delivery →

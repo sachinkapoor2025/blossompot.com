@@ -15,11 +15,11 @@ export function CategoryContentSection({ content, categoryName }: Props) {
   const usedHrefs = new Set<string>();
 
   return (
-    <div className="mt-12 pt-10 border-t border-slate-200">
+    <div className="mt-12 pt-10 border-t border-line">
       <div className="grid lg:grid-cols-3 gap-10 xl:gap-12 items-start">
-        <article className="lg:col-span-2 space-y-8 text-slate-700 leading-relaxed">
+        <article className="lg:col-span-2 space-y-8 text-ink leading-relaxed">
           <header>
-            <h2 className="text-2xl font-bold text-primary mb-4">{content.headline}</h2>
+            <h2 className="text-2xl font-bold text-ink mb-4">{content.headline}</h2>
             {content.intro.map((p, i) => (
               <p key={i} className="mb-4">
                 {applyInlineLinks(p, inlineLinks, { usedHrefs, currentPath: categoryHref(content.slug), max: 4 })}
@@ -28,7 +28,7 @@ export function CategoryContentSection({ content, categoryName }: Props) {
           </header>
 
           <section>
-            <h3 className="text-xl font-semibold text-primary mb-3">{content.delivery.heading}</h3>
+            <h3 className="text-xl font-semibold text-ink mb-3">{content.delivery.heading}</h3>
             {content.delivery.paragraphs.map((p, i) => (
               <p key={i} className="mb-3">
                 {applyInlineLinks(p, inlineLinks, { usedHrefs, max: 4 })}
@@ -37,9 +37,9 @@ export function CategoryContentSection({ content, categoryName }: Props) {
           </section>
 
           <section>
-            <h3 className="text-xl font-semibold text-primary mb-3">{content.highlights.heading}</h3>
+            <h3 className="text-xl font-semibold text-ink mb-3">{content.highlights.heading}</h3>
             {content.highlights.paragraphs && content.highlights.paragraphs.length > 0 ? (
-              <div className="space-y-3 text-slate-700 leading-relaxed">
+              <div className="space-y-3 text-ink leading-relaxed">
                 {content.highlights.paragraphs.map((p, i) => (
                   <p key={i}>{p}</p>
                 ))}
@@ -48,7 +48,7 @@ export function CategoryContentSection({ content, categoryName }: Props) {
               <ul className="grid sm:grid-cols-2 gap-2 text-sm">
                 {content.highlights.items.map((item) => (
                   <li key={item} className="flex items-start gap-2">
-                    <span className="text-nav mt-0.5 shrink-0">✓</span>
+                    <span className="text-accent mt-0.5 shrink-0">✓</span>
                     {item}
                   </li>
                 ))}
@@ -58,7 +58,7 @@ export function CategoryContentSection({ content, categoryName }: Props) {
 
           {content.tradition && (
             <section>
-              <h3 className="text-xl font-semibold text-primary mb-3">{content.tradition.heading}</h3>
+              <h3 className="text-xl font-semibold text-ink mb-3">{content.tradition.heading}</h3>
               {content.tradition.paragraphs.map((p, i) => (
                 <p key={i} className="mb-3">
                   {applyInlineLinks(p, inlineLinks, { usedHrefs, max: 4 })}
@@ -68,8 +68,8 @@ export function CategoryContentSection({ content, categoryName }: Props) {
           )}
 
           <div className="grid sm:grid-cols-2 gap-6">
-            <section className="bg-slate-50 rounded-xl p-6 h-full">
-              <h3 className="text-lg font-semibold text-primary mb-4">{content.whyUs.heading}</h3>
+            <section className="bg-ivory rounded-xl p-6 h-full">
+              <h3 className="text-lg font-semibold text-ink mb-4">{content.whyUs.heading}</h3>
               <ul className="space-y-2 text-sm">
                 {content.whyUs.bullets.map((b) => (
                   <li key={b} className="flex items-start gap-2">
@@ -80,9 +80,9 @@ export function CategoryContentSection({ content, categoryName }: Props) {
               </ul>
             </section>
 
-            <section className="bg-white border border-slate-200 rounded-xl p-6 h-full">
-              <h3 className="text-lg font-semibold text-primary mb-4">{content.howTo.heading}</h3>
-              <ol className="space-y-3 text-sm list-decimal list-inside marker:font-semibold marker:text-nav">
+            <section className="bg-surface border border-line rounded-xl p-6 h-full">
+              <h3 className="text-lg font-semibold text-ink mb-4">{content.howTo.heading}</h3>
+              <ol className="space-y-3 text-sm list-decimal list-inside marker:font-semibold marker:text-primary">
                 {content.howTo.steps.map((step, i) => (
                   <li key={i} className="pl-1">
                     {step}
@@ -94,7 +94,7 @@ export function CategoryContentSection({ content, categoryName }: Props) {
         </article>
 
         <aside className="lg:sticky lg:top-24">
-          <section className="bg-nav text-white rounded-xl p-6">
+          <section className="bg-primary text-white rounded-xl p-6">
             <h3 className="text-lg font-semibold mb-2">Need help choosing {categoryName}?</h3>
             <p className="text-sm text-white/90 mb-4">
               Our team helps you pick the perfect {categoryName.toLowerCase()} and confirm US delivery addresses.
@@ -102,7 +102,7 @@ export function CategoryContentSection({ content, categoryName }: Props) {
             <div className="flex flex-wrap gap-3 text-sm">
               <Link
                 href="/contact"
-                className="bg-white text-nav px-4 py-2 rounded-lg font-medium hover:bg-slate-100"
+                className="bg-surface text-primary px-4 py-2 rounded-lg font-medium hover:bg-petal"
               >
                 Contact us
               </Link>
@@ -120,23 +120,23 @@ export function CategoryContentSection({ content, categoryName }: Props) {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6 mt-10">
-        <section className="bg-white border border-slate-200 rounded-xl p-6">
-          <h2 className="text-lg font-semibold text-primary mb-4">Explore More Collections</h2>
+        <section className="bg-surface border border-line rounded-xl p-6">
+          <h2 className="text-lg font-semibold text-ink mb-4">Explore More Collections</h2>
           <ul className="space-y-3 text-sm">
             {content.relatedCategories.map((cat) => (
               <li key={cat.href}>
                 <Link href={cat.href} className="font-medium text-nav hover:underline">
                   {cat.label}
                 </Link>
-                <p className="text-slate-500 mt-0.5">{cat.text}</p>
+                <p className="text-muted mt-0.5">{cat.text}</p>
               </li>
             ))}
           </ul>
         </section>
 
-        <section className="bg-slate-50 border border-slate-200 rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-primary mb-3">Need help choosing?</h3>
-          <p className="text-sm text-slate-600 leading-relaxed mb-4">
+        <section className="bg-ivory border border-line rounded-xl p-6">
+          <h3 className="text-lg font-semibold text-ink mb-3">Need help choosing?</h3>
+          <p className="text-sm text-muted leading-relaxed mb-4">
             Message us on WhatsApp for sizing, delivery timing, or gift recommendations for{" "}
             {categoryName.toLowerCase()}.
           </p>
@@ -151,15 +151,15 @@ export function CategoryContentSection({ content, categoryName }: Props) {
         </section>
       </div>
 
-      <section className="mt-10 pt-8 border-t border-slate-200">
-        <h2 className="text-xl font-semibold text-primary mb-6">
+      <section className="mt-10 pt-8 border-t border-line">
+        <h2 className="text-xl font-semibold text-ink mb-6">
           Frequently Asked Questions — {categoryName}
         </h2>
         <div className="grid md:grid-cols-2 gap-6">
           {content.faqs.map((faq) => (
-            <div key={faq.q} className="bg-white border border-slate-100 rounded-xl p-5">
-              <h4 className="font-semibold text-primary text-sm mb-2">{faq.q}</h4>
-              <p className="text-sm text-slate-600 leading-relaxed">{faq.a}</p>
+            <div key={faq.q} className="bg-surface border border-line rounded-xl p-5">
+              <h4 className="font-semibold text-ink text-sm mb-2">{faq.q}</h4>
+              <p className="text-sm text-muted leading-relaxed">{faq.a}</p>
             </div>
           ))}
         </div>

@@ -34,7 +34,7 @@ function AddonGroup({
 
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">{title}</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted mb-2">{title}</p>
       <ul className="space-y-2">
         {items.map((addon) => {
           const qty = quantities.get(addon.id) ?? 0;
@@ -45,14 +45,14 @@ function AddonGroup({
               <div
                 className={`rounded-lg border px-3 py-2.5 transition ${
                   checked
-                    ? "border-nav bg-blue-50/60 ring-1 ring-nav/30"
-                    : "border-slate-200 bg-white hover:border-slate-300"
+                    ? "border-accent bg-accent/5 ring-1 ring-accent/30"
+                    : "border-line bg-surface hover:border-primary/30"
                 }`}
               >
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input
                     type="checkbox"
-                    className="mt-1 h-4 w-4 rounded border-slate-300 text-nav focus:ring-nav"
+                    className="mt-1 h-4 w-4 rounded border-line text-accent focus:ring-accent"
                     checked={checked}
                     onChange={() => onToggle(addon.id)}
                   />
@@ -61,11 +61,11 @@ function AddonGroup({
                     alt={addon.name}
                     width={56}
                     height={56}
-                    className="h-14 w-14 shrink-0 rounded-md object-cover bg-white ring-1 ring-slate-200"
+                    className="h-14 w-14 shrink-0 rounded-md object-cover bg-surface ring-1 ring-line"
                   />
                   <span className="flex-1 min-w-0">
-                    <span className="block text-sm font-semibold text-slate-900">{addon.name}</span>
-                    <span className="block text-xs text-slate-500 mt-0.5">{addon.detail}</span>
+                    <span className="block text-sm font-semibold text-ink">{addon.name}</span>
+                    <span className="block text-xs text-muted mt-0.5">{addon.detail}</span>
                   </span>
                   <span className="shrink-0 text-sm font-bold text-primary tabular-nums">
                     +{format(checked ? linePrice : addon.priceUsd, "USD")}
@@ -73,12 +73,12 @@ function AddonGroup({
                 </label>
                 {checked ? (
                   <div className="mt-2 ml-7 flex items-center gap-2">
-                    <span className="text-xs text-slate-500">Qty</span>
-                    <div className="inline-flex items-center rounded-full border border-slate-200 bg-white">
+                    <span className="text-xs text-muted">Qty</span>
+                    <div className="inline-flex items-center rounded-full border border-line bg-surface">
                       <button
                         type="button"
                         aria-label={`Decrease ${addon.name}`}
-                        className="flex h-8 w-8 items-center justify-center text-slate-700 hover:bg-slate-50 rounded-l-full disabled:opacity-40"
+                        className="flex h-8 w-8 items-center justify-center text-ink hover:bg-petal rounded-l-full disabled:opacity-40"
                         disabled={qty <= 1}
                         onClick={() => onSetQuantity(addon.id, qty - 1)}
                       >
@@ -90,7 +90,7 @@ function AddonGroup({
                       <button
                         type="button"
                         aria-label={`Increase ${addon.name}`}
-                        className="flex h-8 w-8 items-center justify-center text-slate-700 hover:bg-slate-50 rounded-r-full disabled:opacity-40"
+                        className="flex h-8 w-8 items-center justify-center text-ink hover:bg-petal rounded-r-full disabled:opacity-40"
                         disabled={qty >= MAX_PRODUCT_ADDON_QUANTITY}
                         onClick={() => onSetQuantity(addon.id, qty + 1)}
                       >
@@ -98,7 +98,7 @@ function AddonGroup({
                       </button>
                     </div>
                     {qty > 1 ? (
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-muted">
                         {format(addon.priceUsd, "USD")} each
                       </span>
                     ) : null}
@@ -118,10 +118,14 @@ export function ProductAddonsPicker({
   selected,
   onChange,
   className = "",
+  heading = "Make it personal",
+  description = "Optional cake extras — candles, name printing, and cards.",
 }: {
   selected: ProductAddonSelection[];
   onChange: (next: ProductAddonSelection[]) => void;
   className?: string;
+  heading?: string;
+  description?: string;
 }) {
   const { format } = useCurrency();
   const quantities = qtyMap(selected);
@@ -159,12 +163,10 @@ export function ProductAddonsPicker({
   };
 
   return (
-    <div className={`rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-3 sm:px-4 sm:py-4 ${className}`}>
+    <div className={`rounded-lg border border-line bg-surface px-3 py-3 sm:px-4 sm:py-4 ${className}`}>
       <div className="mb-3">
-        <p className="text-sm font-bold text-primary">Make it personal</p>
-        <p className="text-xs text-slate-600 mt-0.5">
-          Optional cake extras — candles, name printing, and cards.
-        </p>
+        <p className="text-sm font-bold text-ink">{heading}</p>
+        <p className="text-xs text-muted mt-0.5">{description}</p>
       </div>
       <div className="space-y-4">
         <AddonGroup
@@ -183,7 +185,7 @@ export function ProductAddonsPicker({
         />
       </div>
       {addonsTotal > 0 ? (
-        <p className="mt-3 pt-3 border-t border-slate-200 text-sm font-semibold text-slate-800 flex justify-between gap-3">
+        <p className="mt-3 pt-3 border-t border-line text-sm font-semibold text-ink flex justify-between gap-3">
           <span>Add-ons total</span>
           <span className="text-primary tabular-nums">+{format(addonsTotal, "USD")}</span>
         </p>

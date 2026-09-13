@@ -46,10 +46,10 @@ export function StickyAddToCartBar({
   const displayPrice = showCombined ? product.price + addonsUsdTotal : product.price;
 
   return (
-    <div className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+    <div className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-line bg-surface/95 backdrop-blur px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(58,36,51,0.08)]">
       <div className="flex items-center gap-3 max-w-6xl mx-auto">
         <div className="min-w-0 flex-1">
-          <p className="text-xs text-slate-500 truncate">{product.name}</p>
+          <p className="text-xs text-muted truncate">{product.name}</p>
           <p className="font-bold text-primary">{format(displayPrice, product.currency)}</p>
         </div>
         <div className="w-[9.5rem] shrink-0">

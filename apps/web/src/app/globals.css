@@ -3,29 +3,35 @@
 @import "tailwindcss/utilities";
 
 :root {
-  /* Fresh florist mood: peony bloom + cut foliage (impulse-friendly, not muddy burgundy) */
-  --foreground: #243028;
-  --background: #f3faf5;
-  --primary: #c23a6b;
-  --nav: #e07a9a;
-  --accent: #2f8f6b;
-  --muted: #5c6b63;
-  --cream: #f3faf5;
-  --berry: #c23a6b;
-  --blush: #e07a9a;
-  --sage: #2f8f6b;
-  --petal: #fff5f8;
-  --marigold: #e5a23a;
-  --primary-deep: #9e2d55;
+  /* Semantic palette — RGB channels so Tailwind opacity modifiers work */
+  --foreground: 58 36 51;
+  --background: 251 246 238;
+  --surface: 255 255 255;
+  --muted: 107 90 98;
+  --border: 232 221 226;
+
+  --primary: 196 30 92;
+  --primary-deep: 150 17 72;
+  --nav: 166 22 78;
+
+  --accent: 23 138 76;
+  --success: 23 138 76;
+
+  --promo: 232 90 60;
+  --sale: 214 31 60;
+  --gold: 227 160 18;
+
+  --petal: 255 244 246;
+  --cream: 251 246 238;
+  --berry: 196 30 92;
+  --blush: 166 22 78;
+  --sage: 23 138 76;
+  --marigold: 227 160 18;
 }
 
 body {
-  color: var(--foreground);
-  background:
-    radial-gradient(1200px 520px at 12% -8%, rgba(224, 122, 154, 0.16), transparent 58%),
-    radial-gradient(900px 480px at 92% 0%, rgba(47, 143, 107, 0.12), transparent 55%),
-    linear-gradient(180deg, #f7fcf8 0%, #f3faf5 42%, #fff8fb 100%);
-  background-attachment: fixed;
+  color: rgb(var(--foreground));
+  background-color: rgb(var(--background));
   font-family: var(--font-sans), "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -38,13 +44,13 @@ h3,
 
 @layer components {
   .btn-nav {
-    @apply inline-flex items-center justify-center rounded-full bg-nav text-white font-semibold text-sm px-4 py-2 transition whitespace-nowrap shadow-sm shadow-nav/25 hover:bg-primary hover:shadow-md hover:shadow-primary/25 hover:-translate-y-0.5;
+    @apply inline-flex items-center justify-center rounded-full bg-white text-primary font-semibold text-sm px-4 py-2 transition whitespace-nowrap border border-primary/15 shadow-none hover:bg-petal hover:text-primary hover:border-primary/30;
   }
   .btn-nav-active {
-    @apply bg-primary shadow-md shadow-primary/30;
+    @apply bg-primary text-white border-primary shadow-sm shadow-primary/20 hover:bg-primary-deep hover:text-white hover:border-primary-deep;
   }
   .btn-cart {
-    @apply inline-flex items-center justify-center rounded-full bg-primary text-white font-semibold text-sm px-5 py-2.5 transition disabled:opacity-50 shadow-md shadow-primary/30 hover:brightness-110 hover:shadow-lg hover:shadow-primary/35 hover:-translate-y-0.5;
+    @apply inline-flex items-center justify-center rounded-full bg-primary text-white font-semibold text-sm px-5 py-2.5 transition disabled:opacity-40 disabled:shadow-none shadow-md shadow-primary/30 hover:bg-primary-deep hover:shadow-lg hover:shadow-primary/35 hover:-translate-y-0.5;
   }
 }
 
@@ -60,11 +66,11 @@ h3,
 @keyframes early-bird-claim-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 3px rgba(194, 58, 107, 0.22), 0 6px 16px rgba(194, 58, 107, 0.35);
+    box-shadow: 0 0 0 3px rgba(196, 30, 92, 0.22), 0 6px 16px rgba(196, 30, 92, 0.35);
     transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 0 6px rgba(194, 58, 107, 0.12), 0 8px 22px rgba(194, 58, 107, 0.45);
+    box-shadow: 0 0 0 6px rgba(196, 30, 92, 0.12), 0 8px 22px rgba(196, 30, 92, 0.45);
     transform: scale(1.03);
   }
 }
@@ -75,7 +81,7 @@ h3,
     text-shadow: 0 0 0 transparent, 0 1px 1px rgba(0, 0, 0, 0.35);
   }
   50% {
-    text-shadow: 0 0 12px rgba(224, 122, 154, 0.85), 0 1px 1px rgba(0, 0, 0, 0.35);
+    text-shadow: 0 0 12px rgba(232, 90, 60, 0.85), 0 1px 1px rgba(0, 0, 0, 0.35);
   }
 }
 

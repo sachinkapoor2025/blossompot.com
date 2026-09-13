@@ -133,10 +133,10 @@ export default async function ProductsPage({ searchParams }: Props) {
         ]}
       />
       <div className="mb-4">
-        <h1 className="text-3xl font-bold text-primary">{h1}</h1>
+        <h1 className="text-3xl font-bold text-ink">{h1}</h1>
       </div>
       {!search && !category && (
-        <p className="text-slate-600 mb-8 max-w-2xl">
+        <p className="text-muted mb-8 max-w-2xl">
           Flowers, bouquets, cakes, and curated gifts for birthdays, anniversaries, and everyday thank-yous —
           with clear worldwide delivery expectations. Enter the recipient address at checkout to see available
           windows.
@@ -147,7 +147,7 @@ export default async function ProductsPage({ searchParams }: Props) {
         <div className="flex flex-wrap gap-2 mb-8">
           <Link
             href="/products"
-            className={`px-3 py-1 rounded-full text-sm border ${!category ? "bg-nav text-white border-nav" : "border-slate-300 hover:border-nav"}`}
+            className={`px-3 py-1 rounded-full text-sm border ${!category ? "bg-primary text-white border-primary" : "border-line text-ink hover:border-primary"}`}
           >
             All
           </Link>
@@ -155,7 +155,7 @@ export default async function ProductsPage({ searchParams }: Props) {
             <Link
               key={c.slug}
               href={categoryHref(c.slug)}
-              className={`px-3 py-1 rounded-full text-sm border ${category === c.slug ? "bg-nav text-white border-nav" : "border-slate-300 hover:border-nav"}`}
+              className={`px-3 py-1 rounded-full text-sm border ${category === c.slug ? "bg-primary text-white border-primary" : "border-line text-ink hover:border-primary"}`}
             >
               {c.name}
             </Link>
@@ -164,14 +164,14 @@ export default async function ProductsPage({ searchParams }: Props) {
       )}
 
       {products.length === 0 ? (
-        <p className="text-slate-600">No products found. Try another category or search term.</p>
+        <p className="text-muted">No products found. Try another category or search term.</p>
       ) : showGrouped ? (
         <div className="space-y-10">
           {productsByCategory.map((section) =>
             section.products.length > 0 ? (
               <section key={section.slug}>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-primary capitalize">{section.name}</h2>
+                  <h2 className="text-xl font-bold text-ink capitalize">{section.name}</h2>
                   <Link href={categoryHref(section.slug)} className="text-nav font-semibold text-sm hover:underline">
                     View All →
                   </Link>

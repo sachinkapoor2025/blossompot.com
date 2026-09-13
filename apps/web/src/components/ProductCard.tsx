@@ -12,13 +12,13 @@ export function ProductCard({ product }: { product: Product }) {
   const discount = getDiscountPercent(product.price, product.compareAtPrice);
 
   return (
-    <div className="group border border-primary/10 rounded-xl overflow-hidden bg-white relative shadow-sm shadow-primary/5 hover:shadow-xl hover:shadow-primary/15 hover:border-primary/25 hover:-translate-y-0.5 transition-all duration-300">
+    <div className="group border border-line rounded-xl overflow-hidden bg-surface relative shadow-sm shadow-primary/5 hover:shadow-xl hover:shadow-primary/15 hover:border-primary/25 hover:-translate-y-0.5 transition-all duration-300">
       {discount && (
-        <span className="absolute top-3 left-3 z-10 bg-accent text-white text-xs font-bold px-2 py-1 rounded shadow-sm shadow-accent/30">
+        <span className="absolute top-3 left-3 z-10 bg-accent text-white text-xs font-bold px-2 py-1 rounded shadow-sm ring-1 ring-white/70">
           {discount}% OFF
         </span>
       )}
-      <div className="relative aspect-square bg-gradient-to-b from-petal to-white flex items-center justify-center text-slate-400">
+      <div className="relative aspect-square bg-ivory flex items-center justify-center text-muted">
         <WishlistButton product={product} />
         <Link href={`/products/${product.slug}`} className="absolute inset-0 block">
           <ProductImageRotator
@@ -30,13 +30,13 @@ export function ProductCard({ product }: { product: Product }) {
         </Link>
       </div>
       <Link href={`/products/${product.slug}`} className="block p-4">
-        <h3 className="font-semibold text-slate-900 group-hover:text-primary line-clamp-2 min-h-[2.5rem] transition-colors">
+        <h3 className="font-semibold text-ink group-hover:text-primary line-clamp-2 min-h-[2.5rem] transition-colors">
           {product.name}
         </h3>
         <div className="mt-2 flex items-center gap-2 w-full">
-          <p className="text-primary font-bold">{format(product.price, product.currency)}</p>
+          <p className="text-primary-deep font-bold">{format(product.price, product.currency)}</p>
           {product.compareAtPrice && product.compareAtPrice > product.price && (
-            <p className="text-sm text-slate-400 line-through">
+            <p className="text-sm text-muted line-through">
               {format(product.compareAtPrice, product.currency)}
             </p>
           )}

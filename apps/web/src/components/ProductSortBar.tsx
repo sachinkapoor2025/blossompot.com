@@ -33,14 +33,14 @@ export function ProductSortBar({ className = "" }: { className?: string }) {
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <label htmlFor="product-sort" className="text-sm text-slate-600 whitespace-nowrap">
+      <label htmlFor="product-sort" className="text-sm text-muted whitespace-nowrap">
         Sort by
       </label>
       <select
         id="product-sort"
         value={current}
         onChange={(e) => onChange(e.target.value as ProductSort)}
-        className="text-sm border border-slate-300 rounded-lg px-3 py-1.5 bg-white"
+        className="text-sm border border-line rounded-lg px-3 py-1.5 bg-surface text-ink"
       >
         {OPTIONS.map((o) => (
           <option key={o.value} value={o.value}>

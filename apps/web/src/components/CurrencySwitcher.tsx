@@ -21,7 +21,7 @@ function CurrencyButton({
       aria-pressed={active}
       aria-label={`Show prices in ${label}`}
       className={`w-11 sm:w-12 py-3 sm:py-3.5 text-[11px] sm:text-xs font-bold tracking-wide text-white transition-colors ${
-        active ? activeClass : "bg-slate-800/90 hover:bg-slate-800"
+        active ? activeClass : "bg-ink/90 hover:bg-ink"
       }`}
     >
       {label}
@@ -60,7 +60,7 @@ export function CurrencySwitcher() {
         label="INR"
         active={displayCurrency === "INR"}
         onClick={() => setDisplayCurrency("INR")}
-        activeClass="bg-[#f88379]"
+        activeClass="bg-primary-deep"
       />
     </div>
   );

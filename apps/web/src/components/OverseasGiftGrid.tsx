@@ -39,12 +39,12 @@ export function OverseasGiftGrid({
 
   return (
     <div>
-      <p className="mb-4 text-sm text-slate-500">
+      <p className="mb-4 text-sm text-muted">
         Showing {visible.length} of {products.length} gift{products.length === 1 ? "" : "s"}
       </p>
 
       {products.length === 0 ? (
-        <p className="rounded-xl border border-slate-200 bg-white px-4 py-8 text-center text-slate-600">
+        <p className="rounded-xl border border-line bg-surface px-4 py-8 text-center text-muted">
           No gifts are available right now. Try again shortly.
         </p>
       ) : (
@@ -62,7 +62,7 @@ export function OverseasGiftGrid({
           <button
             type="button"
             onClick={() => setShown((n) => Math.min(n + pageSize, products.length))}
-            className="rounded-lg bg-nav px-5 py-2.5 text-sm font-semibold text-white hover:bg-nav/90"
+            className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-deep"
           >
             Show more
           </button>

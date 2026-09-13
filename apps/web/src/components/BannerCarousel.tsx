@@ -73,11 +73,11 @@ const TRUST_FEATURES = [
 function Eyebrow({ text }: { text: string }) {
   return (
     <div className="flex items-center justify-center lg:justify-start gap-3 mb-4">
-      <span className="h-px w-8 sm:w-12 bg-gradient-to-r from-transparent to-nav/60" aria-hidden />
-      <p className="text-[10px] sm:text-xs font-bold tracking-[0.2em] text-primary/80 uppercase text-center lg:text-left">
+      <span className="h-px w-8 sm:w-12 bg-line" aria-hidden />
+      <p className="text-[10px] sm:text-xs font-bold tracking-[0.2em] text-muted uppercase text-center lg:text-left">
         {text}
       </p>
-      <span className="h-px w-8 sm:w-12 bg-gradient-to-l from-transparent to-nav/60" aria-hidden />
+      <span className="h-px w-8 sm:w-12 bg-line" aria-hidden />
     </div>
   );
 }
@@ -154,7 +154,7 @@ export function BannerCarousel({
       onMouseLeave={() => setPaused(false)}
       aria-label="Featured promotions"
     >
-      <div className="relative overflow-hidden bg-white border-b border-slate-100">
+      <div className="relative overflow-hidden bg-surface border-b border-line">
         <div
           className={
             isFull
@@ -166,8 +166,8 @@ export function BannerCarousel({
             <div
               className={
                 isFull
-                  ? "relative w-full aspect-[2/1] overflow-hidden rounded-xl sm:rounded-2xl bg-slate-50"
-                  : "relative w-full aspect-[5/2] sm:aspect-[1024/420] overflow-hidden bg-slate-900/5"
+                  ? "relative w-full aspect-[2/1] overflow-hidden rounded-xl sm:rounded-2xl bg-ivory"
+                  : "relative w-full aspect-[5/2] sm:aspect-[1024/420] overflow-hidden bg-ivory"
               }
             >
               {/* Server LCP image for slide 0 */}
@@ -206,7 +206,7 @@ export function BannerCarousel({
                   <button
                     type="button"
                     onClick={() => goTo(index - 1)}
-                    className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-primary shadow-md border border-blue-100 hover:bg-nav hover:text-white transition"
+                    className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-surface/95 text-primary shadow-md border border-line hover:bg-primary hover:text-white transition"
                     aria-label="Previous slide"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
@@ -216,7 +216,7 @@ export function BannerCarousel({
                   <button
                     type="button"
                     onClick={() => goTo(index + 1)}
-                    className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-primary shadow-md border border-blue-100 hover:bg-nav hover:text-white transition"
+                    className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-surface/95 text-primary shadow-md border border-line hover:bg-primary hover:text-white transition"
                     aria-label="Next slide"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
@@ -233,19 +233,19 @@ export function BannerCarousel({
               <div key={banner.src}>
                 <Eyebrow text={banner.eyebrow} />
 
-                <p className="font-serif text-3xl sm:text-4xl lg:text-[2.65rem] leading-tight text-primary mb-4">
+                <p className="font-serif text-3xl sm:text-4xl lg:text-[2.65rem] leading-tight text-ink mb-4">
                   {banner.title}{" "}
-                  <span className="text-nav italic">{banner.titleAccent}</span>
+                  <span className="text-primary italic">{banner.titleAccent}</span>
                 </p>
 
-                <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-md mx-auto lg:mx-0 mb-6">
+                <p className="text-muted text-sm sm:text-base leading-relaxed max-w-md mx-auto lg:mx-0 mb-6">
                   {banner.description}
                 </p>
 
                 {banner.href && (
                   <Link
                     href={banner.href}
-                    className="inline-flex items-center justify-center rounded-full bg-nav text-white font-semibold text-sm px-7 py-3 hover:bg-primary transition shadow-md shadow-nav/25"
+                    className="inline-flex items-center justify-center rounded-full bg-primary text-white font-semibold text-sm px-7 py-3 hover:bg-primary-deep transition shadow-md shadow-primary/25"
                   >
                     {banner.cta}
                     <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -257,12 +257,12 @@ export function BannerCarousel({
                 <ul className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8 max-w-lg mx-auto lg:mx-0">
                   {TRUST_FEATURES.map((f) => (
                     <li key={f.label} className="flex flex-col items-center lg:items-start gap-2">
-                      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white border border-blue-100 text-nav shadow-sm">
+                      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-surface border border-line text-accent shadow-sm">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.75}>
                           {f.icon}
                         </svg>
                       </span>
-                      <span className="text-[11px] font-semibold text-primary/90 leading-tight text-center lg:text-left">
+                      <span className="text-[11px] font-semibold text-ink leading-tight text-center lg:text-left">
                         {f.label}
                       </span>
                     </li>
@@ -278,27 +278,27 @@ export function BannerCarousel({
             <ul className="sm:hidden grid grid-cols-4 gap-2 px-4 pb-4">
               {TRUST_FEATURES.map((f) => (
                 <li key={f.label} className="flex flex-col items-center gap-1.5">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white border border-blue-100 text-nav">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-surface border border-line text-accent">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.75}>
                       {f.icon}
                     </svg>
                   </span>
-                  <span className="text-[9px] font-semibold text-primary/80 text-center leading-tight">{f.label}</span>
+                  <span className="text-[9px] font-semibold text-ink text-center leading-tight">{f.label}</span>
                 </li>
               ))}
             </ul>
 
             <div className="px-4 sm:px-6 pb-4 sm:pb-5 max-w-7xl mx-auto">
-              <div className="flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-blue-100/80 via-sky-50 to-blue-100/80 border border-blue-100 px-4 sm:px-6 py-3 text-center">
+              <div className="flex items-center justify-center gap-2 rounded-full bg-ivory border border-line px-4 sm:px-6 py-3 text-center">
                 <svg className="w-4 h-4 text-accent shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                 </svg>
-                <p className="text-xs sm:text-sm text-primary font-medium leading-snug">
+                <p className="text-xs sm:text-sm text-ink font-medium leading-snug">
                   {banner.pill.split("·").map((part, i, arr) => (
                     <span key={i}>
                       {i > 0 && " · "}
                       {i === arr.length - 1 ? (
-                        <span className="text-nav font-semibold">{part.trim()}</span>
+                        <span className="text-primary font-semibold">{part.trim()}</span>
                       ) : (
                         part.trim()
                       )}
@@ -312,7 +312,7 @@ export function BannerCarousel({
       </div>
 
       {banners.length > 1 && (
-        <div className="flex justify-center items-center gap-2 py-3 bg-white" role="tablist" aria-label="Banner slides">
+        <div className="flex justify-center items-center gap-2 py-3 bg-surface" role="tablist" aria-label="Banner slides">
           {banners.map((_, i) => (
             <button
               key={i}
@@ -322,7 +322,7 @@ export function BannerCarousel({
               aria-label={`Slide ${i + 1}`}
               onClick={() => goTo(i)}
               className={`h-2 rounded-full transition-all duration-300 ${
-                i === index ? "w-8 bg-nav" : "w-2 bg-slate-300 hover:bg-slate-400"
+                i === index ? "w-8 bg-primary" : "w-2 bg-line hover:bg-muted"
               }`}
             />
           ))}

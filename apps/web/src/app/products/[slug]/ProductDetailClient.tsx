@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { AddToCartControl } from "@/components/AddToCartControl";
@@ -19,12 +19,10 @@ import { ExploreMoreSection } from "@/components/ExploreMoreSection";
 import { HomeProductCard } from "@/components/HomeProductCard";
 import { useCart } from "@/lib/cart-context";
 import { productFaqsForCategory, type ProductFaq } from "@/lib/content/product-faqs";
-import { testimonials } from "@/lib/site";
 import {
   LOW_STOCK_THRESHOLD,
   isFastSelling,
   getUnitsSold,
-  estimatedDeliveryLabel,
   sumAddonPrices,
   getProductAddon,
   isFlashComboProduct,
@@ -43,26 +41,42 @@ import { looksLikeHtml, shortPlainDescription } from "@/lib/html-text";
 import { getProductIncludes } from "@/lib/product-includes";
 import { fulfillmentVendorSlug, isGboVendor, parseGboSlug, VENDOR_GBO } from "@blossompot/shared";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
+import { ProductBuyBox } from "@/components/product/ProductBuyBox";
+import { ProductProofLine } from "@/components/product/ProductProofLine";
+import { ProductPriceBlock } from "@/components/product/ProductPriceBlock";
+import { ProductDeliveryCard } from "@/components/product/ProductDeliveryCard";
 
-type Tab = "description" | "reviews" | "faq";
+const INCLUDES_PREVIEW_COUNT = 6;
 
-/** "What's included" checklist under the title — hampers, single, combo, kids, etc. */
+/** "What's included" checklist — same data as before, with an optional Show more. */
 function ProductIncludesPreview({ product }: { product: Product }) {
   const items = getProductIncludes(product);
+  const [expanded, setExpanded] = useState(false);
   if (items.length === 0) return null;
   const heading =
     product.categorySlug === "gift-hampers" ? "What's included in this hamper" : "What's included";
+  const canCollapse = items.length > INCLUDES_PREVIEW_COUNT;
+  const visible = canCollapse && !expanded ? items.slice(0, INCLUDES_PREVIEW_COUNT) : items;
   return (
-    <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-      <p className="text-sm font-semibold text-primary mb-2">{heading}</p>
-      <ul className="grid sm:grid-cols-2 gap-x-4 gap-y-1.5 text-sm text-slate-700">
-        {items.map((item) => (
+    <div className="mb-4 rounded-lg border border-line bg-surface px-4 py-3">
+      <p className="text-sm font-semibold text-ink mb-2">{heading}</p>
+      <ul className="grid sm:grid-cols-2 gap-x-4 gap-y-1.5 text-sm text-ink">
+        {visible.map((item) => (
           <li key={item} className="flex gap-2">
-            <span className="text-nav shrink-0">✓</span>
+            <span className="text-accent shrink-0">✓</span>
             <span>{item}</span>
           </li>
         ))}
       </ul>
+      {canCollapse ? (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="mt-2 text-sm font-semibold text-nav underline underline-offset-2"
+        >
+          {expanded ? "Show less" : `Show ${items.length - INCLUDES_PREVIEW_COUNT} more`}
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -90,7 +104,7 @@ function ShareButton({ title, url }: { title: string; url: string }) {
       onClick={() => void share()}
       aria-label="Share product"
       title={copied ? "Link copied!" : "Share"}
-      className="flex h-12 w-12 shrink-0 items-center justify-center rounded border-2 border-nav bg-white text-nav hover:bg-blue-50 transition active:scale-95"
+      className="flex h-12 w-12 shrink-0 items-center justify-center rounded border-2 border-primary/30 bg-surface text-primary hover:bg-petal transition active:scale-95"
     >
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} aria-hidden>
         <path
@@ -100,6 +114,37 @@ function ShareButton({ title, url }: { title: string; url: string }) {
         />
       </svg>
     </button>
+  );
+}
+
+function DetailsBlock({
+  id,
+  title,
+  children,
+  defaultOpen = false,
+}: {
+  id?: string;
+  title: string;
+  children: ReactNode;
+  defaultOpen?: boolean;
+}) {
+  return (
+    <details
+      id={id}
+      className="group border-b border-line py-3 first:border-t first:border-line"
+      {...(defaultOpen ? { open: true } : {})}
+    >
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 select-none font-semibold text-ink text-sm sm:text-base [&::-webkit-details-marker]:hidden">
+        {title}
+        <span className="text-muted text-lg leading-none group-open:hidden" aria-hidden>
+          +
+        </span>
+        <span className="text-muted text-lg leading-none hidden group-open:inline" aria-hidden>
+          −
+        </span>
+      </summary>
+      <div className="mt-3">{children}</div>
+    </details>
   );
 }
 
@@ -136,10 +181,8 @@ export function ProductDetailClient({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [tab, setTab] = useState<Tab>("description");
   const [productUrl, setProductUrl] = useState("");
   const [galleryImages, setGalleryImages] = useState(product.images ?? []);
-  const [selectedVariant, setSelectedVariant] = useState(0);
   const [addons, setAddons] = useState<ProductAddonSelection[]>([]);
 
   useEffect(() => {
@@ -196,6 +239,10 @@ export function ProductDetailClient({
       ? format(product.compareAtPrice, product.currency)
       : null;
   const discount = getDiscountPercent(product.price, product.compareAtPrice);
+  const youSave =
+    product.compareAtPrice && product.compareAtPrice > product.price
+      ? format(product.compareAtPrice - product.price, product.currency)
+      : null;
   const summary = shortPlainDescription(product.description);
   const descriptionIsHtml = looksLikeHtml(product.description);
   const cartQuantity =
@@ -204,8 +251,15 @@ export function ProductDetailClient({
   const isGboProduct = isGboVendor(product.vendorSlug) || Boolean(parseGboSlug(product.slug));
   const showAddons = product.allowsAddons === true && !isGboProduct;
   const lowStock = product.inventory > 0 && product.inventory <= LOW_STOCK_THRESHOLD;
+  const outOfStock = product.inventory <= 0;
   const fastSelling = isFastSelling(product);
   const unitsSold = getUnitsSold(product);
+  const displayVariants = product.variants && product.variants.length > 0 ? product.variants : null;
+
+  const addToCartDisabled =
+    product.inventory <= 0 ||
+    !deliverable ||
+    (isFlashComboProduct(product.slug) && !isFlashComboSaleActive());
 
   const contactFields = () => ({
     name: name.trim() || undefined,
@@ -238,115 +292,91 @@ export function ProductDetailClient({
         </div>
 
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-primary mb-3 leading-tight">{product.name}</h1>
+          <ProductBuyBox>
+            <h1 className="text-2xl sm:text-3xl font-bold text-ink mb-2 leading-tight">{product.name}</h1>
 
-          {product.fulfilledByName ? (
-            <p className="text-sm text-slate-600 mb-3">
-              Fulfilled by: <span className="font-semibold text-primary">{product.fulfilledByName}</span>
-              {isGboProduct ? null : (
-                <span className="ml-2 text-xs uppercase tracking-wide text-emerald-700 font-semibold">
-                  Local Partner
-                </span>
-              )}
-            </p>
-          ) : null}
+            <ProductProofLine unitsSold={unitsSold} fastSelling={fastSelling} />
 
-          {isFlashComboProduct(product.slug) && isFlashComboSaleActive() && (
-            <p className="text-sm font-semibold text-accent bg-rose-50 border border-rose-100 rounded-md px-3 py-2 mb-3">
-              24-hour flash sale — ends {flashComboSaleEndsAt().toLocaleString()}. See product details for
-              what's included. Shipping{" "}
-              {format(FLASH_COMBO_SHIPPING_USD, "USD")}. Coupon codes do not apply.
-            </p>
-          )}
-          {isFlashComboProduct(product.slug) && !isFlashComboSaleActive() && (
-            <p className="text-sm font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded-md px-3 py-2 mb-3">
-              This 24-hour flash offer has ended.
-            </p>
-          )}
-
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-4">
-            {comparePrice && <span className="text-lg text-slate-400 line-through">{comparePrice}</span>}
-            <span className="text-2xl sm:text-3xl font-bold text-primary">{displayTotal}</span>
-            {addonsUsdTotal > 0 && product.currency === "USD" ? (
-              <span className="text-sm text-slate-500">
-                includes +{format(addonsUsdTotal, "USD")} add-ons
-              </span>
+            {product.fulfilledByName ? (
+              <p className="text-xs text-muted mb-3">
+                Fulfilled by {product.fulfilledByName}
+                {isGboProduct ? null : " · Local partner"}
+              </p>
             ) : null}
-            {discount !== null && (
-              <span className="text-sm font-semibold text-green-600">{discount}% OFF</span>
-            )}
-          </div>
 
-          {product.variants && product.variants.length > 0 ? (
+            {isFlashComboProduct(product.slug) && isFlashComboSaleActive() && (
+              <p className="text-sm font-semibold text-promo bg-ivory border border-promo/20 rounded-md px-3 py-2 mb-3">
+                24-hour flash sale — ends {flashComboSaleEndsAt().toLocaleString()}. See product details for
+                what's included. Shipping{" "}
+                {format(FLASH_COMBO_SHIPPING_USD, "USD")}. Coupon codes do not apply.
+              </p>
+            )}
+            {isFlashComboProduct(product.slug) && !isFlashComboSaleActive() && (
+              <p className="text-sm font-semibold text-ink bg-ivory border border-line rounded-md px-3 py-2 mb-3">
+                This 24-hour flash offer has ended.
+              </p>
+            )}
+
+            <ProductPriceBlock
+              currentPrice={displayTotal}
+              comparePrice={comparePrice}
+              discountPercent={discount}
+              youSave={youSave}
+              addonsNote={
+                addonsUsdTotal > 0 && product.currency === "USD"
+                  ? `includes +${format(addonsUsdTotal, "USD")} add-ons`
+                  : null
+              }
+            />
+
+            {fastSelling && <FastSellingBanner unitsSold={unitsSold} />}
+
+            {outOfStock ? (
+              <p className="text-sm font-semibold text-ink bg-ivory border border-line rounded-md px-3 py-2 mb-3">
+                Out of stock
+              </p>
+            ) : null}
+
+            {lowStock && (
+              <p className="text-sm font-semibold text-promo bg-ivory border border-promo/20 rounded-md px-3 py-2 mb-3">
+                Only {product.inventory} left in stock — order soon for on-time delivery
+              </p>
+            )}
+          </ProductBuyBox>
+
+          <ProductDeliveryCard
+            location={delivery.location}
+            deliverable={deliverable}
+            onOpenSelector={() => delivery.openSelector()}
+            isGboProduct={isGboProduct}
+            estimate={<EstimatedDeliveryNote variant="banner" prefix="Estimated delivery:" />}
+            datePicker={
+              <ScheduleDeliveryPicker
+                className="!border-0 !bg-transparent !p-0 mb-0"
+                compact
+                productNoun={productNoun}
+              />
+            }
+          />
+
+          {displayVariants ? (
             <div className="mb-4">
-              <p className="text-sm font-medium text-slate-800 mb-2">Options</p>
-              <div className="flex flex-wrap gap-2">
-                {product.variants.map((v, i) => (
-                  <button
+              <p className="text-sm font-medium text-ink">Product details</p>
+              <p className="text-xs text-muted mb-2">
+                Informational only — these notes do not change the item added to your cart.
+              </p>
+              <ul className="flex flex-wrap gap-2">
+                {displayVariants.map((v, i) => (
+                  <li
                     key={`${v.label}-${i}`}
-                    type="button"
-                    onClick={() => setSelectedVariant(i)}
-                    className={`rounded-full border px-3 py-1.5 text-xs font-medium ${
-                      selectedVariant === i
-                        ? "border-primary bg-primary text-white"
-                        : "border-slate-300 bg-white text-slate-700"
-                    }`}
+                    className="rounded-full border border-line bg-ivory px-3 py-1.5 text-xs font-medium text-ink"
                   >
                     {v.label}
                     {v.price != null ? ` · ${format(v.price, product.currency)}` : ""}
-                  </button>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
-          ) : null}
-
-          <p className="text-slate-600 text-sm sm:text-base mb-3 leading-relaxed">{summary}</p>
-          <ProductIncludesPreview product={product} />
-
-          {fastSelling && <FastSellingBanner unitsSold={unitsSold} />}
-
-          {lowStock && (
-            <p className="text-sm font-semibold text-orange-700 bg-orange-50 border border-orange-100 rounded-md px-3 py-2 mb-3">
-              Only {product.inventory} left in stock — order soon for on-time delivery
-            </p>
-          )}
-
-          <EstimatedDeliveryNote variant="banner" prefix="Estimated delivery:" className="mb-4" />
-
-          <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm">
-            {delivery.location ? (
-              deliverable ? (
-                <p className="text-green-800">
-                  ✓ Available for delivery to {delivery.location.postalDisplay}
-                </p>
-              ) : (
-                <p className="text-amber-900">
-                  This product is currently not available for delivery to {delivery.location.postalDisplay}.
-                </p>
-              )
-            ) : (
-              <p className="text-slate-700">Select a delivery location to confirm availability.</p>
-            )}
-            <button
-              type="button"
-              onClick={() => delivery.openSelector()}
-              className="mt-1 font-semibold text-nav underline underline-offset-2"
-            >
-              {delivery.location ? "Change location" : "Choose location"}
-            </button>
-          </div>
-
-          {isGboProduct ? (
-            <p className="mb-5 text-xs text-slate-600">$19 shipping · Partner fulfillment</p>
-          ) : (
-            <TrustBadges variant="compact" className="mb-5" />
-          )}
-
-          <ProductCareAccordions product={product} />
-          {flowerGuide ? <LearnAboutFlower guide={flowerGuide} /> : null}
-
-          {showAddons ? (
-            <ProductAddonsPicker selected={addons} onChange={setAddons} className="mb-4" />
           ) : null}
 
           {inCart ? (
@@ -354,9 +384,9 @@ export function ProductDetailClient({
               <div className="flex flex-wrap items-center gap-3 mb-3">
                 <Link
                   href="/cart"
-                  className="flex items-center gap-2 text-green-700 hover:text-green-800 shrink-0"
+                  className="flex items-center gap-2 text-accent hover:text-accent/80 shrink-0"
                 >
-                  <span className="flex h-5 w-5 items-center justify-center rounded bg-green-600 text-white">
+                  <span className="flex h-5 w-5 items-center justify-center rounded bg-accent text-white">
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3} aria-hidden>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
@@ -369,11 +399,7 @@ export function ProductDetailClient({
                 <div className="flex-1 min-w-[13rem] max-w-[18rem]">
                   <AddToCartControl
                     productSlug={product.slug}
-                    disabled={
-                      product.inventory <= 0 ||
-                      !deliverable ||
-                      (isFlashComboProduct(product.slug) && !isFlashComboSaleActive())
-                    }
+                    disabled={addToCartDisabled}
                     fullWidth
                     variant="detail"
                     getContact={getContact}
@@ -390,7 +416,7 @@ export function ProductDetailClient({
               <div className="grid grid-cols-2 gap-2 max-w-md">
                 <Link
                   href="/cart"
-                  className="inline-flex items-center justify-center rounded-md border-2 border-nav bg-white text-nav font-bold text-sm uppercase tracking-wide py-3 hover:bg-blue-50 transition"
+                  className="inline-flex items-center justify-center rounded-md border-2 border-primary bg-surface text-primary font-bold text-sm uppercase tracking-wide py-3 hover:bg-petal transition"
                 >
                   View Cart
                 </Link>
@@ -408,11 +434,7 @@ export function ProductDetailClient({
                 <div className="flex-1 min-w-0">
                   <AddToCartControl
                     productSlug={product.slug}
-                    disabled={
-                      product.inventory <= 0 ||
-                      !deliverable ||
-                      (isFlashComboProduct(product.slug) && !isFlashComboSaleActive())
-                    }
+                    disabled={addToCartDisabled}
                     fullWidth
                     variant="detail"
                     getContact={getContact}
@@ -425,163 +447,138 @@ export function ProductDetailClient({
             </div>
           )}
 
-          <ScheduleDeliveryPicker className="mb-5" productNoun={productNoun} />
+          {isGboProduct ? null : <TrustBadges variant="compact" className="mb-4" />}
 
+          {summary ? (
+            <p className="text-muted text-sm sm:text-base mb-3 leading-relaxed">{summary}</p>
+          ) : null}
+
+          <ProductIncludesPreview product={product} />
+
+          {showAddons ? (
+            <ProductAddonsPicker
+              selected={addons}
+              onChange={setAddons}
+              className="mb-4"
+              heading="Make it more special"
+              description="Optional extras — candles, name printing, and cards. They are not required to add this gift to your cart."
+            />
+          ) : null}
         </div>
       </div>
 
-      <section className="mt-10 pt-8 border-t border-slate-200">
-        <div className="flex gap-6 border-b border-slate-200 mb-6">
-          <button
-            type="button"
-            onClick={() => setTab("description")}
-            className={`pb-3 text-sm font-semibold border-b-2 -mb-px transition ${
-              tab === "description"
-                ? "border-primary text-primary"
-                : "border-transparent text-slate-500 hover:text-primary"
-            }`}
-          >
-            Description
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab("reviews")}
-            className={`pb-3 text-sm font-semibold border-b-2 -mb-px transition ${
-              tab === "reviews"
-                ? "border-primary text-primary"
-                : "border-transparent text-slate-500 hover:text-primary"
-            }`}
-          >
-            Reviews ({testimonials.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab("faq")}
-            className={`pb-3 text-sm font-semibold border-b-2 -mb-px transition ${
-              tab === "faq"
-                ? "border-primary text-primary"
-                : "border-transparent text-slate-500 hover:text-primary"
-            }`}
-          >
-            FAQ
-          </button>
+      <section className="mt-10 pt-8 border-t border-line" aria-label="Product details">
+        <DetailsBlock title="About this gift" defaultOpen>
+          {descriptionIsHtml ? (
+            <article
+              className="product-html-description text-ink leading-relaxed max-w-4xl prose prose-slate prose-a:text-nav prose-strong:text-ink prose-ul:my-3 prose-li:my-0.5"
+              dangerouslySetInnerHTML={{ __html: product.description }}
+            />
+          ) : (
+            <article className="text-ink leading-relaxed space-y-4 max-w-4xl">
+              {product.description.split(/(?<=\.)\s+/).map((para, i) => (
+                <p key={i}>{para}</p>
+              ))}
+            </article>
+          )}
+          {product.tags && product.tags.length > 0 ? (
+            <div className="mt-6">
+              <p className="text-xs font-semibold text-muted uppercase mb-3">Related searches</p>
+              <div className="flex flex-wrap gap-2">
+                {Array.from(new Set(product.tags)).map((tag) => (
+                  <span key={tag} className="px-3 py-1.5 bg-petal text-ink text-xs rounded-full">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </DetailsBlock>
+
+        <div className="border-b border-line">
+          <ProductCareAccordions product={product} className="mb-0" />
         </div>
 
-        {tab === "description" ? (
-          <div className="space-y-8">
-            {descriptionIsHtml ? (
-              <article
-                className="product-html-description text-slate-700 leading-relaxed max-w-4xl prose prose-slate prose-a:text-nav prose-strong:text-primary prose-ul:my-3 prose-li:my-0.5"
-                dangerouslySetInnerHTML={{ __html: product.description }}
-              />
-            ) : (
-              <article className="text-slate-700 leading-relaxed space-y-4 max-w-4xl">
-                {product.description.split(/(?<=\.)\s+/).map((para, i) => (
-                  <p key={i}>{para}</p>
-                ))}
-              </article>
-            )}
+        {flowerGuide ? (
+          <DetailsBlock title={`Learn about ${flowerGuide.name}`}>
+            <LearnAboutFlower guide={flowerGuide} />
+          </DetailsBlock>
+        ) : null}
 
-            {product.tags && product.tags.length > 0 && (
-              <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase mb-3">Related searches</p>
-                <div className="flex flex-wrap gap-2">
-                  {product.tags.map((tag) => (
-                    <span key={tag} className="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs rounded-full">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Explore More sits immediately after Related searches for description-tab readers. */}
-            <ExploreMoreSection
-              productSlug={product.slug}
-              categorySlug={product.categorySlug}
-              occasion={product.occasion}
-            />
-
-            <div className="max-w-md space-y-3">
-              <LeadCaptureInput
-                label="Your name (helps us assist you)"
-                placeholder="Start typing your name..."
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onDebouncedChange={(value) =>
-                  captureLead({
-                    name: value,
-                    email: email || undefined,
-                    phone: phone || undefined,
-                    page: `/products/${product.slug}`,
-                    productSlug: product.slug,
-                    source: "product",
-                  })
-                }
-              />
-              <LeadCaptureInput
-                label="Email (optional — for order updates)"
-                placeholder="you@example.com"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onDebouncedChange={(value) =>
-                  captureLead({
-                    name: name || undefined,
-                    email: value,
-                    phone: phone || undefined,
-                    page: `/products/${product.slug}`,
-                    productSlug: product.slug,
-                    source: "product",
-                  })
-                }
-              />
-              <LeadCaptureInput
-                label="Phone (optional — WhatsApp support)"
-                placeholder="+1 555 000 0000"
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                onDebouncedChange={(value) =>
-                  captureLead({
-                    name: name || undefined,
-                    email: email || undefined,
-                    phone: value,
-                    page: `/products/${product.slug}`,
-                    productSlug: product.slug,
-                    source: "product",
-                  })
-                }
-              />
-            </div>
-
-          </div>
-        ) : tab === "reviews" ? (
+        <DetailsBlock id="customer-reviews" title="Customer stories" defaultOpen>
           <ProductReviewsPreview />
-        ) : (
-          <dl className="space-y-5 max-w-2xl">
+        </DetailsBlock>
+
+        <DetailsBlock title="Common questions">
+          <dl className="space-y-4 max-w-2xl">
             {pageFaqs.map((f) => (
               <div key={f.q}>
-                <dt className="font-semibold text-slate-900">{f.q}</dt>
-                <dd className="text-slate-600 mt-2 leading-relaxed">{f.a}</dd>
+                <dt className="font-semibold text-ink text-sm">{f.q}</dt>
+                <dd className="text-sm text-muted mt-1 leading-relaxed">{f.a}</dd>
               </div>
             ))}
           </dl>
-        )}
+        </DetailsBlock>
 
-        {/* Always in the document (not tab-gated) so crawlers and other tabs still get internal links. */}
-        {tab !== "description" ? (
-          <ExploreMoreSection
-            productSlug={product.slug}
-            categorySlug={product.categorySlug}
-            occasion={product.occasion}
-          />
-        ) : null}
+        <DetailsBlock title="Need help with this gift?">
+          <div className="max-w-md space-y-3">
+            <LeadCaptureInput
+              label="Your name (helps us assist you)"
+              placeholder="Start typing your name..."
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onDebouncedChange={(value) =>
+                captureLead({
+                  name: value,
+                  email: email || undefined,
+                  phone: phone || undefined,
+                  page: `/products/${product.slug}`,
+                  productSlug: product.slug,
+                  source: "product",
+                })
+              }
+            />
+            <LeadCaptureInput
+              label="Email (optional — for order updates)"
+              placeholder="you@example.com"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onDebouncedChange={(value) =>
+                captureLead({
+                  name: name || undefined,
+                  email: value,
+                  phone: phone || undefined,
+                  page: `/products/${product.slug}`,
+                  productSlug: product.slug,
+                  source: "product",
+                })
+              }
+            />
+            <LeadCaptureInput
+              label="Phone (optional — WhatsApp support)"
+              placeholder="+1 555 000 0000"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              onDebouncedChange={(value) =>
+                captureLead({
+                  name: name || undefined,
+                  email: email || undefined,
+                  phone: value,
+                  page: `/products/${product.slug}`,
+                  productSlug: product.slug,
+                  source: "product",
+                })
+              }
+            />
+          </div>
+        </DetailsBlock>
       </section>
 
       {relatedProducts.length > 0 && (
-        <section className="mt-10 pt-8 border-t border-slate-200">
-          <h2 className="text-lg font-bold text-primary mb-4">You might also like</h2>
+        <section className="mt-10 pt-8 border-t border-line">
+          <h2 className="text-lg font-bold text-ink mb-4">You might also like</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-stretch">
             {relatedProducts.map((p) => (
               <HomeProductCard key={p.slug} product={p} />
@@ -590,17 +587,12 @@ export function ProductDetailClient({
         </section>
       )}
 
-      <section className="mt-10 pt-8 border-t border-slate-200">
-        <h2 className="text-lg font-bold text-primary mb-4">Common questions</h2>
-        <dl className="space-y-4 max-w-2xl">
-          {pageFaqs.map((f) => (
-            <div key={f.q}>
-              <dt className="font-semibold text-slate-800 text-sm">{f.q}</dt>
-              <dd className="text-sm text-slate-600 mt-1 leading-relaxed">{f.a}</dd>
-            </div>
-          ))}
-        </dl>
-      </section>
+      {/* Always in the document so crawlers still get internal links. */}
+      <ExploreMoreSection
+        productSlug={product.slug}
+        categorySlug={product.categorySlug}
+        occasion={product.occasion}
+      />
     </div>
     <StickyAddToCartBar
       product={product}

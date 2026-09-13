@@ -24,12 +24,12 @@ export function HomeProductCard({
   const fastSelling = showFastSellingBadge || isFastSelling(product);
 
   return (
-    <div className="border border-slate-200 rounded-xl overflow-hidden bg-white hover:shadow-md transition-shadow relative flex h-full flex-col">
-      <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-slate-50">
+    <div className="border border-line rounded-xl overflow-hidden bg-surface hover:shadow-md transition-shadow relative flex h-full flex-col">
+      <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-ivory">
         {/* Badges stacked top-left; wishlist alone top-right — no overlap on mobile */}
         <div className="absolute top-2 left-2 z-10 flex flex-col items-start gap-1 max-w-[70%] pointer-events-none">
           {discount !== null && (
-            <span className="bg-accent text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded shadow-sm">
+            <span className="bg-accent text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded shadow-sm ring-1 ring-white/70">
               {discount}% OFF
             </span>
           )}
@@ -47,27 +47,27 @@ export function HomeProductCard({
       </div>
       <Link href={`/products/${product.slug}`} className="block flex-1">
         <div className="p-3 flex h-full flex-col">
-          <h3 className="font-semibold text-sm text-slate-900 line-clamp-2 min-h-[2.75rem] hover:text-nav">
+          <h3 className="font-semibold text-sm text-ink line-clamp-2 min-h-[2.75rem] hover:text-nav">
             {product.name}
           </h3>
           <div className="mt-2 flex items-center gap-2 w-full">
-            <span className="text-nav font-bold">{format(product.price, product.currency)}</span>
+            <span className="text-primary-deep font-bold">{format(product.price, product.currency)}</span>
             {product.compareAtPrice && product.compareAtPrice > product.price && (
-              <span className="text-xs text-slate-400 line-through">
+              <span className="text-xs text-muted line-through">
                 {format(product.compareAtPrice, product.currency)}
               </span>
             )}
             {discount !== null && (
-              <span className="text-xs font-semibold text-green-600 ml-auto shrink-0">{discount}% OFF</span>
+              <span className="text-xs font-semibold text-accent ml-auto shrink-0">{discount}% OFF</span>
             )}
           </div>
         </div>
       </Link>
       <div className="mt-auto px-3 pb-3">
         {delivery?.location ? (
-          <p className="text-[11px] text-green-700 mb-1">✓ Available for {delivery.location.postalDisplay}</p>
+          <p className="text-[11px] text-accent mb-1">✓ Available for {delivery.location.postalDisplay}</p>
         ) : (
-          <p className="text-[11px] text-slate-500 mb-1">Check delivery</p>
+          <p className="text-[11px] text-muted mb-1">Check delivery</p>
         )}
         <AddToCartControl productSlug={product.slug} disabled={product.inventory <= 0} />
       </div>

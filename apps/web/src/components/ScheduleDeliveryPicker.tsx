@@ -43,12 +43,12 @@ export function ScheduleDeliveryPicker({
   };
 
   return (
-    <div className={`rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 ${className}`}>
-      <label htmlFor="schedule-delivery-date" className="block text-sm font-semibold text-primary mb-1">
+    <div className={`rounded-lg border border-line bg-ivory px-3 py-3 ${className}`}>
+      <label htmlFor="schedule-delivery-date" className="block text-sm font-semibold text-ink mb-1">
         Schedule delivery
       </label>
       {!compact && (
-        <p className="text-xs text-slate-600 mb-2">
+        <p className="text-xs text-muted mb-2">
           Choose when you want your {productNoun} delivered. You can pick any date in the next{" "}
           {SCHEDULE_DELIVERY_HORIZON_DAYS} days (through{" "}
           <strong>{formatLong(scheduleDeliveryMaxDate())}</strong>).
@@ -61,14 +61,14 @@ export function ScheduleDeliveryPicker({
         max={max}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full max-w-xs rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-nav"
+        className="w-full max-w-xs rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent"
       />
       {value ? (
-        <p className="text-xs text-green-700 mt-2 font-medium">
+        <p className="text-xs text-accent mt-2 font-medium">
           Preferred delivery: {formatLong(value)}
         </p>
       ) : (
-        <p className="text-xs text-slate-500 mt-2">Optional — you can also set this at checkout.</p>
+        <p className="text-xs text-muted mt-2">Optional — you can also set this at checkout.</p>
       )}
     </div>
   );

@@ -36,7 +36,7 @@ function StarRating({ rating }: { rating: number }) {
       {Array.from({ length: 5 }, (_, i) => (
         <svg
           key={i}
-          className={`h-4 w-4 shrink-0 ${i < rating ? "text-amber-400" : "text-slate-200"}`}
+          className={`h-4 w-4 shrink-0 ${i < rating ? "text-gold" : "text-line"}`}
           viewBox="0 0 20 20"
           fill="currentColor"
           aria-hidden
@@ -62,16 +62,16 @@ export function CustomerReviews({ data }: CustomerReviewsProps) {
 
   return (
     <section
-      className="overflow-x-clip border-y border-[#eadfd8] bg-gradient-to-b from-[#fff8f5] to-white"
+      className="overflow-x-clip border-y border-line bg-ivory"
       aria-labelledby="customer-reviews-heading"
     >
       <div className="mx-auto max-w-7xl px-4 py-12 md:py-16">
         <div className="mx-auto mb-8 max-w-2xl text-center md:mb-10">
           <p className="mb-2 text-xs font-bold uppercase tracking-widest text-nav">Loved by gifters</p>
-          <h2 id="customer-reviews-heading" className="text-2xl font-bold text-primary md:text-3xl">
+          <h2 id="customer-reviews-heading" className="text-2xl font-bold text-ink md:text-3xl">
             Customer reviews
           </h2>
-          <p className="mt-3 text-sm leading-relaxed text-slate-600 md:text-base">
+          <p className="mt-3 text-sm leading-relaxed text-muted md:text-base">
             {isGoogle && data.rating != null && data.totalCount != null
               ? `${data.rating.toFixed(1)}★ on Google · ${data.totalCount.toLocaleString()} reviews`
               : `${average.toFixed(1)} out of 5 from recent BlossomPot customers`}
@@ -82,16 +82,16 @@ export function CustomerReviews({ data }: CustomerReviewsProps) {
           {reviews.map((review) => (
             <article
               key={review.id}
-              className="flex min-w-0 flex-col rounded-2xl border border-primary/10 bg-white p-5 shadow-sm"
+              className="flex min-w-0 flex-col rounded-2xl border border-line bg-surface p-5 shadow-sm"
             >
               <StarRating rating={review.rating} />
-              <p className="mt-3 flex-1 break-words text-sm leading-relaxed text-slate-600">
+              <p className="mt-3 flex-1 break-words text-sm leading-relaxed text-muted">
                 “{review.text}”
               </p>
-              <div className="mt-4 border-t border-slate-100 pt-3">
-                <p className="truncate font-semibold text-slate-800">{review.name}</p>
+              <div className="mt-4 border-t border-line pt-3">
+                <p className="truncate font-semibold text-ink">{review.name}</p>
                 {review.dateLabel ? (
-                  <p className="mt-0.5 text-xs text-slate-400">{review.dateLabel}</p>
+                  <p className="mt-0.5 text-xs text-muted">{review.dateLabel}</p>
                 ) : null}
               </div>
             </article>

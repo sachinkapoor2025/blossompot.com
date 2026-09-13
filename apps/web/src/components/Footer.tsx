@@ -113,25 +113,25 @@ const footerShopLinks = uniqueByHref([
 
 export function Footer() {
   return (
-    <footer className="border-t border-primary/15 bg-[#f8eef2] text-slate-700 mt-auto">
+    <footer className="border-t border-line bg-ivory text-ink mt-auto">
       <div className="max-w-7xl mx-auto px-4 py-10 sm:py-12">
         <div className="grid grid-cols-2 lg:grid-cols-12 gap-x-6 gap-y-8 sm:gap-x-8 sm:gap-y-10 text-sm">
           {/* Brand + contact — full width on mobile, one column on desktop */}
           <div className="col-span-2 lg:col-span-3">
             <SiteLogoLink size="desktop" className="mb-5" />
-            <p className="text-slate-600 leading-relaxed mb-4 max-w-xs">
+            <p className="text-muted leading-relaxed mb-4 max-w-xs">
               Flowers, cakes, and thoughtful gifts delivered across the USA. Premium online gifting for every celebration.
             </p>
-            <div className="space-y-2 text-slate-700">
+            <div className="space-y-2 text-ink">
               <p>
-                <span className="text-slate-500 text-xs uppercase tracking-wide block mb-0.5">Email</span>
+                <span className="text-muted text-xs uppercase tracking-wide block mb-0.5">Email</span>
                 <a href={`mailto:${site.supportEmail}`} className="font-medium text-primary hover:underline">
                   {site.supportEmail}
                 </a>
               </p>
             </div>
             <div className="mt-5">
-              <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">Follow us</p>
+              <p className="text-xs uppercase tracking-wide text-muted mb-2">Follow us</p>
               <ul className="flex flex-wrap items-center gap-2.5 sm:gap-3" aria-label="Social media">
                 {SOCIAL_LINKS.map((social) => (
                   <li key={social.name}>
@@ -155,7 +155,7 @@ export function Footer() {
           {/* Shop */}
           <div className="min-w-0 lg:col-span-2">
             <p className="font-semibold text-primary mb-3 sm:mb-4">Shop Gifts</p>
-            <ul className="space-y-2 text-slate-600">
+            <ul className="space-y-2 text-muted">
               {footerShopLinks.map((n) => (
                 <li key={n.href}>
                   <Link href={n.href} className="hover:text-primary hover:underline">
@@ -174,7 +174,7 @@ export function Footer() {
           {/* Help */}
           <div className="min-w-0 lg:col-span-2">
             <p className="font-semibold text-primary mb-3 sm:mb-4">Help &amp; Info</p>
-            <ul className="space-y-2 text-slate-600">
+            <ul className="space-y-2 text-muted">
               <li><Link href="/remember" className="hover:text-primary hover:underline">Never Forget an Occasion</Link></li>
               <li><Link href="/forgot-occasion" className="hover:text-primary hover:underline">Forgot a Special Occasion?</Link></li>
               <li><Link href="/same-day-delivery" className="hover:text-primary hover:underline">Same-Day Delivery</Link></li>
@@ -196,7 +196,7 @@ export function Footer() {
           {/* Geo hubs — top states + index */}
           <div className="col-span-2 lg:col-span-5 min-w-0">
             <p className="font-semibold text-primary mb-3 sm:mb-4">Deliver to</p>
-            <ul className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2 text-slate-600">
+            <ul className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2 text-muted">
               {countriesMenu.items.map((item) => (
                 <li key={item.href} className="col-span-1">
                   <Link href={item.href} className="hover:text-primary hover:underline">
@@ -205,7 +205,7 @@ export function Footer() {
                 </li>
               ))}
               <li className="col-span-2 sm:col-span-3 pt-2">
-                <span className="text-xs uppercase tracking-wide text-slate-500">USA cities &amp; states</span>
+                <span className="text-xs uppercase tracking-wide text-muted">USA cities &amp; states</span>
               </li>
               {footerGeoLinks(12).map((c) => (
                 <li key={c.href}>
@@ -229,20 +229,20 @@ export function Footer() {
         </div>
 
         {/* Payments row */}
-        <div className="mt-10 pt-8 border-t border-primary/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="mt-10 pt-8 border-t border-line flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">Accepted payments</p>
+            <p className="text-xs uppercase tracking-wide text-muted mb-2">Accepted payments</p>
             <PaymentMethodIcons />
           </div>
-          <p className="text-xs text-slate-500 max-w-md">
+          <p className="text-xs text-muted max-w-md">
             Secure checkout with encrypted payment processing. Prices shown in USD or INR at checkout.
           </p>
         </div>
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-primary/10 bg-[#f1dce4]">
-        <div className="max-w-7xl mx-auto px-4 py-5 flex flex-col gap-3 text-xs text-slate-500">
+      <div className="border-t border-line bg-petal">
+        <div className="max-w-7xl mx-auto px-4 py-5 flex flex-col gap-3 text-xs text-muted">
           <p className="text-center sm:text-left">
             Operated by {trustFacts.operator}.{" "}
             <Link href="/about" className="text-primary hover:underline underline-offset-2">

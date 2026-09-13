@@ -92,7 +92,7 @@ export function AddToCartControl({
     return (
       <div className={className}>
         {error && <p className="text-xs text-red-600 mb-1">{error}</p>}
-        {addedNote && <p className="text-xs text-green-700 mb-1">{addedNote}</p>}
+        {addedNote && <p className="text-xs text-accent mb-1">{addedNote}</p>}
         <button
           type="button"
           onClick={(e) => {
@@ -107,7 +107,7 @@ export function AddToCartControl({
           disabled={disabled || busy || !sessionReady}
           className={
             isDetail
-              ? `w-full rounded-md bg-primary text-white font-bold text-sm uppercase tracking-wide py-3.5 shadow-md shadow-primary/25 hover:brightness-110 transition disabled:opacity-50`
+              ? `w-full rounded-md bg-primary text-white font-bold text-sm uppercase tracking-wide py-3.5 shadow-md shadow-primary/25 hover:bg-primary-deep transition disabled:opacity-40 disabled:shadow-none`
               : `btn-cart ${fullWidth ? "w-full" : ""} text-xs sm:text-sm px-3 py-2 sm:px-5 sm:py-2.5`
           }
         >

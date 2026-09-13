@@ -77,8 +77,8 @@ export default async function HomePage({
 
       <section className="max-w-7xl mx-auto px-4 pt-8 pb-2">
         <div className="text-center mb-5">
-          <h2 className="text-2xl font-bold text-primary">Flower delivery by country</h2>
-          <p className="text-sm text-slate-600 mt-1 max-w-2xl mx-auto">
+          <h2 className="text-2xl font-bold text-ink">Flower delivery by country</h2>
+          <p className="text-sm text-muted mt-1 max-w-2xl mx-auto">
             BlossomPot serves shoppers in the USA, UK, Canada, Australia, and the UAE. Open a country
             page for local ordering notes, occasions, and flower collections.
           </p>
@@ -88,7 +88,7 @@ export default async function HomePage({
             <li key={item.href}>
               <Link
                 href={item.href}
-                className="flex min-h-[4.5rem] items-center justify-center rounded-xl border border-primary/15 bg-white px-3 py-3 text-center text-sm font-semibold text-primary hover:border-primary/40 hover:bg-petal/70"
+                className="flex min-h-[4.5rem] items-center justify-center rounded-xl border border-line bg-surface px-3 py-3 text-center text-sm font-semibold text-primary hover:border-primary/40 hover:bg-petal"
               >
                 {item.label}
               </Link>
@@ -99,13 +99,13 @@ export default async function HomePage({
 
       <section id="gift-catalog" className="max-w-7xl mx-auto px-4 py-10 scroll-mt-24">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-primary">Shop all gifts</h2>
-          <p className="text-sm text-slate-600 mt-1">
+          <h2 className="text-2xl font-bold text-ink">Shop all gifts</h2>
+          <p className="text-sm text-muted mt-1">
             {products.length} international gifts for {destinationName}. Scroll for more.
           </p>
         </div>
         {catalogError ? (
-          <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+          <p className="rounded-xl border border-promo/25 bg-ivory px-4 py-3 text-sm text-ink">
             {catalogError}
           </p>
         ) : (
@@ -114,13 +114,13 @@ export default async function HomePage({
       </section>
 
       <section className="max-w-7xl mx-auto px-4 py-12">
-        <div className="rounded-3xl border border-primary/15 bg-gradient-to-br from-rose-50 via-white to-orange-50 p-8 sm:p-12">
-          <p className="text-xs uppercase tracking-[0.2em] text-primary/70">Personal gifting assistant</p>
-          <p className="mt-2 text-2xl sm:text-4xl font-bold text-primary">Never forget a special occasion again.</p>
-          <p className="mt-3 text-slate-600 max-w-2xl">
+        <div className="rounded-3xl border border-line bg-surface p-8 sm:p-12">
+          <p className="text-xs uppercase tracking-[0.2em] text-muted">Personal gifting assistant</p>
+          <p className="mt-2 text-2xl sm:text-4xl font-bold text-ink">Never forget a special occasion again.</p>
+          <p className="mt-3 text-muted max-w-2xl">
             You tell us the dates. We remember them, help you choose the perfect gift, and make sure your special moments don&apos;t get forgotten.
           </p>
-          <ol className="mt-6 grid gap-3 sm:grid-cols-5 text-sm text-slate-700">
+          <ol className="mt-6 grid gap-3 sm:grid-cols-5 text-sm text-ink">
             <li><strong>1.</strong> Add your people</li>
             <li><strong>2.</strong> Save their dates</li>
             <li><strong>3.</strong> We remind you</li>
@@ -128,10 +128,10 @@ export default async function HomePage({
             <li><strong>5.</strong> We deliver</li>
           </ol>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="/remember" className="inline-flex min-h-11 items-center rounded-full bg-nav px-5 text-sm font-semibold text-white">
+            <Link href="/remember" className="inline-flex min-h-11 items-center rounded-full bg-primary px-5 text-sm font-semibold text-white">
               Start Remembering
             </Link>
-            <Link href="/forgot-occasion" className="inline-flex min-h-11 items-center rounded-full border border-primary/30 px-5 text-sm font-semibold text-primary">
+            <Link href="/forgot-occasion" className="inline-flex min-h-11 items-center rounded-full border border-line px-5 text-sm font-semibold text-primary">
               Forgot a special occasion?
             </Link>
           </div>
@@ -146,7 +146,7 @@ export default async function HomePage({
       <HomeSeoSection />
 
       <section className="max-w-7xl mx-auto px-4 py-12">
-        <div className="rounded-3xl bg-gradient-to-br from-primary via-[#9e2d55] to-accent text-white p-8 sm:p-12 text-center shadow-lg shadow-primary/20">
+        <div className="rounded-3xl bg-primary text-white p-8 sm:p-12 text-center shadow-lg shadow-primary/20">
           <h2 className="text-2xl sm:text-3xl font-bold">Send a gift that feels personal</h2>
           <p className="mt-3 text-white/90 max-w-2xl mx-auto">
             From same-day bouquets to anniversary hampers, BlossomPot helps you celebrate with worldwide delivery.
@@ -154,7 +154,7 @@ export default async function HomePage({
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Link
               href="/anniversary-gifts"
-              className="inline-flex rounded-full bg-white text-primary font-semibold text-sm px-5 py-2.5 hover:bg-orange-50"
+              className="inline-flex rounded-full bg-surface text-primary font-semibold text-sm px-5 py-2.5 hover:bg-petal"
             >
               Shop Anniversary Gifts
             </Link>
@@ -168,10 +168,10 @@ export default async function HomePage({
         </div>
       </section>
 
-      <section className="max-w-7xl mx-auto px-4 py-12 border-t border-[#eadfd8]">
+      <section className="max-w-7xl mx-auto px-4 py-12 border-t border-line">
         <div className="max-w-xl mx-auto text-center">
-          <h2 className="text-2xl font-bold text-primary">Stay in bloom</h2>
-          <p className="mt-2 text-sm text-slate-600">
+          <h2 className="text-2xl font-bold text-ink">Stay in bloom</h2>
+          <p className="mt-2 text-sm text-muted">
             Occasion ideas, delivery tips, and seasonal collections — join the BlossomPot list.
           </p>
           <Link href="/contact" className="btn-nav mt-5">
@@ -181,17 +181,17 @@ export default async function HomePage({
       </section>
 
       <section className="max-w-3xl mx-auto px-4 pb-16">
-        <h2 className="text-xl font-bold text-primary mb-4">Frequently asked questions</h2>
+        <h2 className="text-xl font-bold text-ink mb-4">Frequently asked questions</h2>
         <div className="space-y-4">
           {faqs.map((f) => (
             <div key={f.q}>
-              <p className="font-semibold text-primary text-sm">{f.q}</p>
-              <p className="text-sm text-slate-600 mt-1">{f.a}</p>
+              <p className="font-semibold text-ink text-sm">{f.q}</p>
+              <p className="text-sm text-muted mt-1">{f.a}</p>
             </div>
           ))}
         </div>
         {categories.length > 0 && (
-          <p className="text-xs text-slate-400 mt-8">{categories.length} categories available in catalog</p>
+          <p className="text-xs text-muted mt-8">{categories.length} categories available in catalog</p>
         )}
       </section>
     </div>

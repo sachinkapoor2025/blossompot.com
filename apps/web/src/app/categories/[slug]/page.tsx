@@ -134,12 +134,12 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         ]}
       />
       <Breadcrumbs items={crumbs} />
-      <h1 className="text-3xl font-bold text-primary mb-8">{h1}</h1>
+      <h1 className="text-3xl font-bold text-ink mb-8">{h1}</h1>
 
       {products.length > 0 ? (
         <ProductGrid products={products} sort={sort} />
       ) : (
-        <p className="text-slate-500">
+        <p className="text-muted">
           Products loading soon.{" "}
           <Link href="/products" className="text-nav hover:underline">
             Browse all gifts
@@ -151,8 +151,8 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         <CategoryContentSection content={rich} categoryName={seoCategoryName} />
       ) : (
         <>
-          <section className="mt-12 pt-10 border-t border-slate-200">
-            <div className="grid lg:grid-cols-2 gap-x-12 gap-y-6 text-slate-700 leading-relaxed">
+          <section className="mt-12 pt-10 border-t border-line">
+            <div className="grid lg:grid-cols-2 gap-x-12 gap-y-6 text-ink leading-relaxed">
               <div className="space-y-4">
                 {baseDescription.split(/(?<=\.)\s+/).map((para, i) => (
                   <p key={i}>{para}</p>
@@ -165,11 +165,11 @@ export default async function CategoryPage({ params, searchParams }: Props) {
                 <div className="space-y-6">
                   {extra.sections.map((section) => (
                     <div key={section.heading}>
-                      <h2 className="text-lg font-bold text-primary mb-3">{section.heading}</h2>
+                      <h2 className="text-lg font-bold text-ink mb-3">{section.heading}</h2>
                       <ul className="space-y-2 text-sm">
                         {section.paragraphs.map((item, i) => (
                           <li key={i} className="flex gap-2">
-                            <span className="text-nav mt-1 shrink-0">•</span>
+                            <span className="text-accent mt-1 shrink-0">•</span>
                             <span>{item}</span>
                           </li>
                         ))}
@@ -181,23 +181,23 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             </div>
           </section>
 
-          <section className="mt-10 p-6 bg-slate-50 rounded-xl">
-            <h2 className="font-semibold text-primary mb-3">Why order {seoCategoryName} from BlossomPot?</h2>
-            <ul className="grid sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-2 text-sm text-slate-600">
+          <section className="mt-10 p-6 bg-ivory rounded-xl">
+            <h2 className="font-semibold text-ink mb-3">Why order {seoCategoryName} from BlossomPot?</h2>
+            <ul className="grid sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-2 text-sm text-muted">
               <li className="flex gap-2">
-                <span className="text-nav shrink-0">✓</span>
+                <span className="text-accent shrink-0">✓</span>
                 Worldwide delivery with clear shipping windows
               </li>
               <li className="flex gap-2">
-                <span className="text-nav shrink-0">✓</span>
+                <span className="text-accent shrink-0">✓</span>
                 Order from the USA or abroad — we deliver to US addresses
               </li>
               <li className="flex gap-2">
-                <span className="text-nav shrink-0">✓</span>
+                <span className="text-accent shrink-0">✓</span>
                 Gift messages available on most products
               </li>
               <li className="flex gap-2">
-                <span className="text-nav shrink-0">✓</span>
+                <span className="text-accent shrink-0">✓</span>
                 Secure checkout with Razorpay and Stripe
               </li>
             </ul>

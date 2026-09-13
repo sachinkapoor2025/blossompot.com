@@ -19,13 +19,13 @@ export function FastSellingSection({ products, limit = 10 }: FastSellingSectionP
   if (fastSelling.length === 0) return null;
 
   return (
-    <section className="bg-gradient-to-br from-orange-50 via-amber-50/80 to-white border-y border-orange-100/80">
+    <section className="bg-ivory border-y border-promo/20">
       <div className="max-w-7xl mx-auto px-4 py-10">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-orange-600 mb-1">Trending now</p>
-            <p className="text-2xl md:text-3xl font-bold text-primary">Fast Selling Gifts</p>
-            <ul className="text-sm text-slate-600 mt-2 max-w-xl list-disc pl-5 space-y-1">
+            <p className="text-xs font-bold uppercase tracking-widest text-promo mb-1">Trending now</p>
+            <p className="text-2xl md:text-3xl font-bold text-ink">Fast Selling Gifts</p>
+            <ul className="text-sm text-muted mt-2 max-w-xl list-disc pl-5 space-y-1">
               <li>Most-ordered gifts right now ({FAST_SELLING_THRESHOLD}+ sold each)</li>
               <li>Popular picks — order before they sell out</li>
             </ul>
