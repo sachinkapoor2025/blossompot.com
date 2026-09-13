@@ -543,4 +543,34 @@ export const blogPageInlineLinks: Record<string, readonly { phrase: string; href
     { phrase: "birthday", href: categoryHref("birthday-gifts") },
     { phrase: "anniversary", href: categoryHref("anniversary-gifts") },
   ],
+  "flower-delivery-sydney": [
+    { phrase: "flowers", href: categoryHref("flowers") },
+    { phrase: "birthday", href: categoryHref("birthday-gifts") },
+    { phrase: "Mother's Day", href: categoryHref("mothers-day-gifts") },
+    { phrase: "Australia", href: "/flower-delivery-australia" },
+  ],
+  "flower-delivery-melbourne": [
+    { phrase: "flowers", href: categoryHref("flowers") },
+    { phrase: "birthday", href: categoryHref("birthday-gifts") },
+    { phrase: "Mother's Day", href: categoryHref("mothers-day-gifts") },
+    { phrase: "Australia", href: "/flower-delivery-australia" },
+  ],
+  "flower-delivery-australia": [
+    { phrase: "flowers", href: categoryHref("flowers") },
+    { phrase: "birthday", href: categoryHref("birthday-gifts") },
+    { phrase: "same-day", href: categoryHref("same-day-gifts") },
+    { phrase: "Australia", href: "/flower-delivery-australia" },
+  ],
+  "national-day-gifts-uae": [
+    { phrase: "gift hampers", href: categoryHref("gift-hampers") },
+    { phrase: "flowers", href: categoryHref("flowers") },
+    { phrase: "cakes", href: categoryHref("cakes") },
+    { phrase: "UAE", href: "/flower-delivery-uae" },
+  ],
+  "eid-al-fitr-flowers-and-gifts": [
+    { phrase: "flowers", href: categoryHref("flowers") },
+    { phrase: "gift hampers", href: categoryHref("gift-hampers") },
+    { phrase: "cakes", href: categoryHref("cakes") },
+    { phrase: "UAE", href: "/flower-delivery-uae" },
+  ],
 };
