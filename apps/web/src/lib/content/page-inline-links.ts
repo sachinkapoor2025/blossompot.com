@@ -573,4 +573,28 @@ export const blogPageInlineLinks: Record<string, readonly { phrase: string; href
     { phrase: "cakes", href: categoryHref("cakes") },
     { phrase: "UAE", href: "/flower-delivery-uae" },
   ],
+  "wedding-flower-trends-this-season": [
+    { phrase: "wedding flowers", href: categoryHref("wedding-gifts") },
+    { phrase: "peonies", href: "/flower-guide/peony" },
+    { phrase: "roses", href: categoryHref("flower-bouquets") },
+    { phrase: "flower meanings", href: "/flower-guide/flower-meanings" },
+  ],
+  "romantic-flower-gift-ideas-for-your-partner": [
+    { phrase: "red roses", href: categoryHref("flower-bouquets") },
+    { phrase: "anniversary", href: categoryHref("anniversary-gifts") },
+    { phrase: "Valentine's Day", href: categoryHref("valentines-day-gifts") },
+    { phrase: "gift basket", href: categoryHref("gift-hampers") },
+  ],
+  "how-to-choose-the-perfect-gift-hamper-for-any-occasion": [
+    { phrase: "gift hamper", href: categoryHref("gift-hampers") },
+    { phrase: "birthday", href: categoryHref("birthday-gifts") },
+    { phrase: "flowers", href: categoryHref("flowers") },
+    { phrase: "personalized", href: categoryHref("personalized-gifts") },
+  ],
+  "same-day-flower-cake-and-gift-delivery": [
+    { phrase: "same-day", href: categoryHref("same-day-gifts") },
+    { phrase: "flowers", href: categoryHref("flowers") },
+    { phrase: "cakes", href: categoryHref("cakes") },
+    { phrase: "gift hampers", href: categoryHref("gift-hampers") },
+  ],
 };
