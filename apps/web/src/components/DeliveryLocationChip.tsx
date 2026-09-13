@@ -20,7 +20,7 @@ export function DeliveryLocationChip({ compact = false }: { compact?: boolean })
       type="button"
       onClick={() => openSelector()}
       className={`inline-flex items-center gap-1.5 rounded-full border border-line bg-surface text-left hover:border-primary hover:bg-petal transition ${
-        compact ? "max-w-[7rem] shrink-0 px-2 py-1.5" : "max-w-[16rem] px-2.5 py-1"
+        compact ? "max-w-[7rem] shrink-0 px-2 py-1.5" : "max-w-[18rem] px-2.5 py-1.5"
       }`}
       aria-label={location ? `Change delivery location, currently ${label}` : "Choose delivery location"}
     >
@@ -32,10 +32,10 @@ export function DeliveryLocationChip({ compact = false }: { compact?: boolean })
           </span>
         ) : (
           <>
-            <span className="block truncate text-[11px] sm:text-xs font-semibold text-ink">
+            <span className="block truncate text-[11px] sm:text-xs md:text-sm font-semibold text-ink">
               {location ? label : "Deliver to…"}
             </span>
-            <span className="block text-[10px] text-nav font-medium">
+            <span className="block text-[10px] md:text-xs text-nav font-medium">
               {checking ? "Checking…" : "Change"}
             </span>
           </>

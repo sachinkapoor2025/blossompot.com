@@ -10,11 +10,11 @@ export function HomeSeoSection() {
 
   return (
     <section className="bg-ivory border-y border-line" aria-labelledby="home-seo-heading">
-      <div className="max-w-7xl mx-auto px-4 py-12 sm:py-16">
+      <div className="store-wrap py-12 sm:py-16">
         <div className="grid lg:grid-cols-2 gap-10 xl:gap-14">
           <article className="space-y-8 text-ink leading-relaxed">
             <header>
-              <h2 id="home-seo-heading" className="text-2xl font-bold text-ink mb-4">
+              <h2 id="home-seo-heading" className="type-section font-bold text-ink mb-4">
                 {intro.heading}
               </h2>
               {intro.paragraphs.map((para, i) => (
@@ -25,7 +25,7 @@ export function HomeSeoSection() {
             </header>
 
             <section>
-              <h3 className="text-xl font-semibold text-ink mb-3">{delivery.heading}</h3>
+              <h3 className="text-xl md:text-2xl font-semibold text-ink mb-3">{delivery.heading}</h3>
               {delivery.paragraphs.map((para, i) => (
                 <p key={i} className="mb-4">
                   {applyInlineLinks(para, homepageInlineLinks, { usedHrefs, currentPath: "/", max: 4 })}
@@ -117,7 +117,7 @@ export function HomeSeoSection() {
 
         <section className="mt-12 pt-10 border-t border-line">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-            <h3 className="text-xl font-semibold text-ink">{faqs.heading}</h3>
+            <h3 className="text-xl md:text-2xl font-semibold text-ink">{faqs.heading}</h3>
             <Link href="/faq" className="text-sm text-nav font-semibold hover:underline">
               View all FAQs →
             </Link>

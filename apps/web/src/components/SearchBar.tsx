@@ -29,7 +29,7 @@ function SearchBarInner() {
         placeholder="Search gifts, flowers, hampers…"
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        className="w-full border border-line rounded-full pl-4 pr-12 py-2.5 text-sm text-ink placeholder:text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+        className="type-search w-full border border-line rounded-full pl-4 pr-12 py-2.5 md:py-3 md:pl-5 text-ink placeholder:text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
       />
       <button
         type="submit"

@@ -74,7 +74,7 @@ function Eyebrow({ text }: { text: string }) {
   return (
     <div className="flex items-center justify-center lg:justify-start gap-3 mb-4">
       <span className="h-px w-8 sm:w-12 bg-line" aria-hidden />
-      <p className="text-[10px] sm:text-xs font-bold tracking-[0.2em] text-muted uppercase text-center lg:text-left">
+      <p className="type-support font-bold tracking-[0.2em] text-muted uppercase text-center lg:text-left">
         {text}
       </p>
       <span className="h-px w-8 sm:w-12 bg-line" aria-hidden />
@@ -158,8 +158,8 @@ export function BannerCarousel({
         <div
           className={
             isFull
-              ? "relative max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4"
-              : "relative max-w-7xl mx-auto lg:grid lg:grid-cols-[2fr_3fr] lg:gap-6 lg:items-center lg:px-4 lg:py-4"
+              ? "store-wrap relative py-3 sm:py-4 lg:py-6"
+              : "store-wrap relative lg:grid lg:grid-cols-[2fr_3fr] lg:gap-8 lg:items-center lg:py-6"
           }
         >
           <div className={isFull ? "relative w-full" : "order-1 lg:order-2 relative w-full"}>
@@ -233,19 +233,19 @@ export function BannerCarousel({
               <div key={banner.src}>
                 <Eyebrow text={banner.eyebrow} />
 
-                <p className="font-serif text-3xl sm:text-4xl lg:text-[2.65rem] leading-tight text-ink mb-4">
+                <p className="type-hero font-serif leading-tight text-ink mb-4">
                   {banner.title}{" "}
                   <span className="text-primary italic">{banner.titleAccent}</span>
                 </p>
 
-                <p className="text-muted text-sm sm:text-base leading-relaxed max-w-md mx-auto lg:mx-0 mb-6">
+                <p className="text-muted text-sm sm:text-base md:text-lg leading-relaxed max-w-md mx-auto lg:mx-0 mb-6">
                   {banner.description}
                 </p>
 
                 {banner.href && (
                   <Link
                     href={banner.href}
-                    className="inline-flex items-center justify-center rounded-full bg-primary text-white font-semibold text-sm px-7 py-3 hover:bg-primary-deep transition shadow-md shadow-primary/25"
+                    className="type-cta inline-flex items-center justify-center rounded-full bg-primary text-white font-semibold px-7 py-3 md:px-8 md:py-3.5 hover:bg-primary-deep transition shadow-md shadow-primary/25"
                   >
                     {banner.cta}
                     <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -262,7 +262,7 @@ export function BannerCarousel({
                           {f.icon}
                         </svg>
                       </span>
-                      <span className="text-[11px] font-semibold text-ink leading-tight text-center lg:text-left">
+                      <span className="type-product-body font-semibold text-ink leading-tight text-center lg:text-left">
                         {f.label}
                       </span>
                     </li>
@@ -288,12 +288,12 @@ export function BannerCarousel({
               ))}
             </ul>
 
-            <div className="px-4 sm:px-6 pb-4 sm:pb-5 max-w-7xl mx-auto">
+            <div className="store-wrap pb-4 sm:pb-5">
               <div className="flex items-center justify-center gap-2 rounded-full bg-ivory border border-line px-4 sm:px-6 py-3 text-center">
                 <svg className="w-4 h-4 text-accent shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                 </svg>
-                <p className="text-xs sm:text-sm text-ink font-medium leading-snug">
+                <p className="type-support text-ink font-medium leading-snug">
                   {banner.pill.split("·").map((part, i, arr) => (
                     <span key={i}>
                       {i > 0 && " · "}

@@ -64,12 +64,12 @@ export function HomeCategoryCarousel({ tiles }: { tiles: HomeCategoryTile[] }) {
 
   return (
     <section className="bg-ivory border-y border-line" aria-labelledby={labelId}>
-      <div className="max-w-7xl mx-auto px-4 py-8 sm:py-10">
-        <div className="text-center mb-5">
-          <p id={labelId} className="font-display text-2xl sm:text-3xl text-ink">
+      <div className="store-wrap py-8 sm:py-10 lg:py-12">
+        <div className="text-center mb-5 md:mb-7">
+          <p id={labelId} className="type-section font-display text-ink">
             Shop BlossomPot gifts
           </p>
-          <p className="mt-1 text-sm text-muted">Flowers, cakes, and gifts for every celebration</p>
+          <p className="type-body mt-1 text-muted">Flowers, cakes, and gifts for every celebration</p>
         </div>
 
         {pageCount > 1 ? (
@@ -112,7 +112,7 @@ export function HomeCategoryCarousel({ tiles }: { tiles: HomeCategoryTile[] }) {
             className="flex gap-4 sm:gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2 px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           >
             {tiles.map((tile) => (
-              <li key={tile.slug} className="snap-start shrink-0 w-[112px] sm:w-[132px]">
+              <li key={tile.slug} className="snap-start shrink-0 w-[112px] sm:w-[132px] lg:w-[160px] xl:w-[176px]">
                 <Link href={tile.href} className="group block text-center">
                   <span className="block overflow-hidden rounded-2xl bg-surface shadow-sm ring-1 ring-line aspect-square">
                     <SafeStoreImage
@@ -123,7 +123,7 @@ export function HomeCategoryCarousel({ tiles }: { tiles: HomeCategoryTile[] }) {
                       className="h-full w-full object-cover group-hover:scale-[1.04] transition duration-300"
                     />
                   </span>
-                  <span className="mt-2 block text-sm font-medium text-ink group-hover:text-primary">
+                  <span className="type-product-title mt-2 block font-medium text-ink group-hover:text-primary">
                     {tile.label}
                   </span>
                 </Link>

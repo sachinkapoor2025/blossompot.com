@@ -295,7 +295,7 @@ function DesktopHeaderAction({
       }`}
     >
       {children}
-      <span className="text-xs font-medium leading-tight">{label}</span>
+      <span className="type-utility font-medium leading-tight">{label}</span>
     </Link>
   );
 }
@@ -319,7 +319,7 @@ function DesktopCartAction() {
           </span>
         )}
       </span>
-      <span className="text-xs font-medium leading-none">Cart</span>
+      <span className="type-utility font-medium leading-none">Cart</span>
     </Link>
   );
 }
@@ -406,14 +406,14 @@ export function Header() {
       </div>
 
       {/* Desktop top bar */}
-      <div className="hidden md:grid max-w-7xl mx-auto px-4 py-2.5 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-6">
+      <div className="store-wrap hidden md:grid py-3 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-6 lg:gap-8">
         <SiteLogoLink size="desktop" priority />
 
         <div className="w-full max-w-2xl mx-auto">
           <SearchBar />
         </div>
 
-        <div className="flex items-start justify-end shrink-0 gap-2">
+        <div className="flex items-start justify-end shrink-0 gap-2 lg:gap-3">
           <div className="pt-1">
             <DeliveryLocationChip />
           </div>
@@ -444,8 +444,8 @@ export function Header() {
 
       {/* Desktop nav */}
       <nav className="hidden md:block border-t border-line bg-surface overflow-visible">
-        <div className="max-w-7xl mx-auto px-3 py-2">
-          <div className="flex flex-nowrap items-center justify-center gap-1 lg:gap-1.5 [&_.btn-nav]:shrink-0 [&_.btn-nav]:px-3 [&_.btn-nav]:py-1.5 [&_.btn-nav]:text-[13px]">
+        <div className="store-wrap py-2.5">
+          <div className="flex flex-nowrap items-center justify-center gap-1.5 xl:gap-2 [&_.btn-nav]:shrink-0 [&_.btn-nav]:px-3 [&_.btn-nav]:py-2 xl:[&_.btn-nav]:px-3.5 [&_.btn-nav]:text-store-nav">
             {navItems.map((item) => (
               <Link
                 key={item.href}

@@ -6,8 +6,8 @@ export function TrustStrip() {
       className="bg-ivory border-y border-line"
       aria-label="Why customers trust BlossomPot"
     >
-      <div className="max-w-7xl mx-auto px-4 py-3">
-        <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs sm:text-sm text-ink">
+      <div className="store-wrap py-3 md:py-4">
+        <ul className="type-support flex flex-wrap items-center justify-center gap-x-4 gap-y-2 md:gap-x-6 text-ink">
           {trustStripItems.map((item, i) => (
             <li key={item} className="flex items-center gap-4">
               {i > 0 && (

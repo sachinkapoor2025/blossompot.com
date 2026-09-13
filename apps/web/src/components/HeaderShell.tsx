@@ -7,7 +7,7 @@ import { Header } from "./Header";
 function HeaderFallback() {
   return (
     <header className="border-b border-line bg-surface h-24">
-      <div className="max-w-7xl mx-auto px-4 py-3">
+      <div className="store-wrap py-3">
         <div className="h-11 w-36 bg-ivory rounded animate-pulse" />
       </div>
     </header>

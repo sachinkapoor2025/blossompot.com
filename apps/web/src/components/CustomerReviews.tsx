@@ -65,13 +65,13 @@ export function CustomerReviews({ data }: CustomerReviewsProps) {
       className="overflow-x-clip border-y border-line bg-ivory"
       aria-labelledby="customer-reviews-heading"
     >
-      <div className="mx-auto max-w-7xl px-4 py-12 md:py-16">
+      <div className="store-wrap py-12 md:py-16">
         <div className="mx-auto mb-8 max-w-2xl text-center md:mb-10">
-          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-nav">Loved by gifters</p>
-          <h2 id="customer-reviews-heading" className="text-2xl font-bold text-ink md:text-3xl">
+          <p className="type-support mb-2 font-bold uppercase tracking-widest text-nav">Loved by gifters</p>
+          <h2 id="customer-reviews-heading" className="type-section font-bold text-ink">
             Customer reviews
           </h2>
-          <p className="mt-3 text-sm leading-relaxed text-muted md:text-base">
+          <p className="type-body mt-3 leading-relaxed text-muted">
             {isGoogle && data.rating != null && data.totalCount != null
               ? `${data.rating.toFixed(1)}★ on Google · ${data.totalCount.toLocaleString()} reviews`
               : `${average.toFixed(1)} out of 5 from recent BlossomPot customers`}
@@ -85,7 +85,7 @@ export function CustomerReviews({ data }: CustomerReviewsProps) {
               className="flex min-w-0 flex-col rounded-2xl border border-line bg-surface p-5 shadow-sm"
             >
               <StarRating rating={review.rating} />
-              <p className="mt-3 flex-1 break-words text-sm leading-relaxed text-muted">
+              <p className="type-body mt-3 flex-1 break-words leading-relaxed text-muted">
                 “{review.text}”
               </p>
               <div className="mt-4 border-t border-line pt-3">
@@ -99,7 +99,7 @@ export function CustomerReviews({ data }: CustomerReviewsProps) {
         </div>
 
         <p className="mt-8 text-center">
-          <Link href="/reviews" className="text-sm font-semibold text-nav hover:underline">
+          <Link href="/reviews" className="type-cta font-semibold text-nav hover:underline">
             Read all reviews or share yours →
           </Link>
         </p>

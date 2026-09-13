@@ -14,7 +14,7 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <div className="group border border-line rounded-xl overflow-hidden bg-surface relative shadow-sm shadow-primary/5 hover:shadow-xl hover:shadow-primary/15 hover:border-primary/25 hover:-translate-y-0.5 transition-all duration-300">
       {discount && (
-        <span className="absolute top-3 left-3 z-10 bg-accent text-white text-xs font-bold px-2 py-1 rounded shadow-sm ring-1 ring-white/70">
+        <span className="absolute top-3 left-3 z-10 bg-accent text-white text-xs md:text-[13px] font-bold px-2 py-1 rounded shadow-sm ring-1 ring-white/70">
           {discount}% OFF
         </span>
       )}
@@ -30,18 +30,18 @@ export function ProductCard({ product }: { product: Product }) {
         </Link>
       </div>
       <Link href={`/products/${product.slug}`} className="block p-4">
-        <h3 className="font-semibold text-ink group-hover:text-primary line-clamp-2 min-h-[2.5rem] transition-colors">
+        <h3 className="type-product-title font-semibold text-ink group-hover:text-primary line-clamp-2 min-h-[2.5rem] md:min-h-[3.15rem] transition-colors">
           {product.name}
         </h3>
         <div className="mt-2 flex items-center gap-2 w-full">
-          <p className="text-primary-deep font-bold">{format(product.price, product.currency)}</p>
+          <p className="type-price text-primary-deep font-bold">{format(product.price, product.currency)}</p>
           {product.compareAtPrice && product.compareAtPrice > product.price && (
-            <p className="text-sm text-muted line-through">
+            <p className="type-product-body text-muted line-through">
               {format(product.compareAtPrice, product.currency)}
             </p>
           )}
           {discount !== null && (
-            <span className="text-xs font-semibold text-accent ml-auto shrink-0">{discount}% OFF</span>
+            <span className="type-support font-semibold text-accent ml-auto shrink-0">{discount}% OFF</span>
           )}
         </div>
       </Link>

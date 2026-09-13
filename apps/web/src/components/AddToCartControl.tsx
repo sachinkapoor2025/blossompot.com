@@ -108,7 +108,7 @@ export function AddToCartControl({
           className={
             isDetail
               ? `w-full rounded-md bg-primary text-white font-bold text-sm uppercase tracking-wide py-3.5 shadow-md shadow-primary/25 hover:bg-primary-deep transition disabled:opacity-40 disabled:shadow-none`
-              : `btn-cart ${fullWidth ? "w-full" : ""} text-xs sm:text-sm px-3 py-2 sm:px-5 sm:py-2.5`
+              : `btn-cart ${fullWidth ? "w-full" : ""} text-xs sm:text-sm md:text-store-nav px-3 py-2 sm:px-5 sm:py-2.5`
           }
         >
           {isDetail ? addLabel.toUpperCase() : addLabel}
@@ -208,7 +208,7 @@ export function AddToCartControl({
         <Link
           href="/cart"
           onClick={(e) => e.stopPropagation()}
-          className="block text-center text-nav text-sm font-semibold mt-2 hover:underline"
+          className="type-cta block text-center text-nav font-semibold mt-2 hover:underline"
         >
           View Cart
         </Link>

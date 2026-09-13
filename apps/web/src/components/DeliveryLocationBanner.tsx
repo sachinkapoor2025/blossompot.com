@@ -13,7 +13,7 @@ export function DeliveryLocationBanner() {
 
   return (
     <div className="bg-ivory border-b border-line text-ink">
-      <div className="max-w-7xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-2 text-sm">
+      <div className="store-wrap py-2 md:py-2.5 flex flex-wrap items-center justify-between gap-2 type-nav">
         <p>Select your delivery location to see products available near you.</p>
         <button
           type="button"

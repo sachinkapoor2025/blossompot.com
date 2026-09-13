@@ -10,7 +10,7 @@ const LOGO = {
   desktop: {
     width: 280,
     height: 200,
-    className: "h-[6.25rem] w-auto max-w-[280px] object-contain object-left",
+    className: "h-[6.25rem] w-auto max-w-[280px] object-contain object-left xl:h-[6.75rem] xl:max-w-[300px]",
   },
   mobile: {
     width: 210,

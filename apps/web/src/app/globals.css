@@ -43,14 +43,58 @@ h3,
 }
 
 @layer components {
+  /* Storefront type hierarchy — mobile keeps the first size; md+ is laptop/desktop. */
+  .type-promo {
+    @apply text-xs sm:text-sm md:text-store-nav;
+  }
+  .type-nav {
+    @apply text-sm md:text-store-nav lg:text-store-body;
+  }
+  .type-search {
+    @apply text-sm md:text-store-nav lg:text-store-body;
+  }
+  .type-utility {
+    @apply text-xs md:text-sm;
+  }
+  .type-hero {
+    @apply text-3xl sm:text-4xl md:text-5xl lg:text-store-hero;
+  }
+  .type-section {
+    @apply text-2xl md:text-3xl lg:text-store-section;
+  }
+  .type-product-title {
+    @apply text-sm md:text-store-title;
+  }
+  .type-body {
+    @apply text-sm md:text-store-nav lg:text-store-body;
+  }
+  .type-product-body {
+    @apply text-xs md:text-store-nav;
+  }
+  .type-price {
+    @apply text-base md:text-xl lg:text-store-price;
+  }
+  .type-cta {
+    @apply text-sm md:text-store-nav;
+  }
+  .type-support {
+    @apply text-xs md:text-sm;
+  }
+  .type-footer {
+    @apply text-sm md:text-store-nav;
+  }
+  .store-wrap {
+    @apply mx-auto w-full max-w-7xl px-4 md:px-6 xl:max-w-store xl:px-8;
+  }
+
   .btn-nav {
-    @apply inline-flex items-center justify-center rounded-full bg-white text-primary font-semibold text-sm px-4 py-2 transition whitespace-nowrap border border-primary/15 shadow-none hover:bg-petal hover:text-primary hover:border-primary/30;
+    @apply inline-flex items-center justify-center rounded-full bg-white text-primary font-semibold text-sm md:text-store-nav px-4 py-2 transition whitespace-nowrap border border-primary/15 shadow-none hover:bg-petal hover:text-primary hover:border-primary/30;
   }
   .btn-nav-active {
     @apply bg-primary text-white border-primary shadow-sm shadow-primary/20 hover:bg-primary-deep hover:text-white hover:border-primary-deep;
   }
   .btn-cart {
-    @apply inline-flex items-center justify-center rounded-full bg-primary text-white font-semibold text-sm px-5 py-2.5 transition disabled:opacity-40 disabled:shadow-none shadow-md shadow-primary/30 hover:bg-primary-deep hover:shadow-lg hover:shadow-primary/35 hover:-translate-y-0.5;
+    @apply inline-flex items-center justify-center rounded-full bg-primary text-white font-semibold text-sm md:text-store-nav px-5 py-2.5 transition disabled:opacity-40 disabled:shadow-none shadow-md shadow-primary/30 hover:bg-primary-deep hover:shadow-lg hover:shadow-primary/35 hover:-translate-y-0.5;
   }
 }
 

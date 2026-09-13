@@ -114,8 +114,8 @@ const footerShopLinks = uniqueByHref([
 export function Footer() {
   return (
     <footer className="border-t border-line bg-ivory text-ink mt-auto">
-      <div className="max-w-7xl mx-auto px-4 py-10 sm:py-12">
-        <div className="grid grid-cols-2 lg:grid-cols-12 gap-x-6 gap-y-8 sm:gap-x-8 sm:gap-y-10 text-sm">
+      <div className="store-wrap py-10 sm:py-12">
+        <div className="type-footer grid grid-cols-2 lg:grid-cols-12 gap-x-6 gap-y-8 sm:gap-x-8 sm:gap-y-10">
           {/* Brand + contact — full width on mobile, one column on desktop */}
           <div className="col-span-2 lg:col-span-3">
             <SiteLogoLink size="desktop" className="mb-5" />
@@ -242,7 +242,7 @@ export function Footer() {
 
       {/* Bottom bar */}
       <div className="border-t border-line bg-petal">
-        <div className="max-w-7xl mx-auto px-4 py-5 flex flex-col gap-3 text-xs text-muted">
+        <div className="store-wrap py-5 flex flex-col gap-3 type-support text-muted">
           <p className="text-center sm:text-left">
             Operated by {trustFacts.operator}.{" "}
             <Link href="/about" className="text-primary hover:underline underline-offset-2">
