@@ -3,30 +3,36 @@
 @import "tailwindcss/utilities";
 
 :root {
-  /* Semantic palette — RGB channels so Tailwind opacity modifiers work */
-  --foreground: 58 36 51;
-  --background: 251 246 238;
+  /* Elegant Botanical — RGB channels so Tailwind opacity modifiers work
+     primary #0F5C43 · primary-deep #084534 · nav #0F5C43
+     accent/success #287A55 · gold/promo/marigold #C9A45C · sale #C84B4B
+     foreground #24332C · muted #68736D · border #DDD9CF
+     background/cream #F8F3EA · surface #FFFFFF
+     sage #A8B8A0 · petal (soft sage) #DCE6D7
+     berry (floral blush) #E8B8B8 · blush (soft blush) #F6E5E3 */
+  --foreground: 36 51 44;
+  --background: 248 243 234;
   --surface: 255 255 255;
-  --muted: 107 90 98;
-  --border: 232 221 226;
+  --muted: 104 115 109;
+  --border: 221 217 207;
 
-  --primary: 196 30 92;
-  --primary-deep: 150 17 72;
-  --nav: 166 22 78;
+  --primary: 15 92 67;
+  --primary-deep: 8 69 52;
+  --nav: 15 92 67;
 
-  --accent: 23 138 76;
-  --success: 23 138 76;
+  --accent: 40 122 85;
+  --success: 40 122 85;
 
-  --promo: 232 90 60;
-  --sale: 214 31 60;
-  --gold: 227 160 18;
+  --promo: 201 164 92;
+  --sale: 200 75 75;
+  --gold: 201 164 92;
 
-  --petal: 255 244 246;
-  --cream: 251 246 238;
-  --berry: 196 30 92;
-  --blush: 166 22 78;
-  --sage: 23 138 76;
-  --marigold: 227 160 18;
+  --petal: 220 230 215;
+  --cream: 248 243 234;
+  --berry: 232 184 184;
+  --blush: 246 229 227;
+  --sage: 168 184 160;
+  --marigold: 201 164 92;
 }
 
 body {
@@ -110,11 +116,11 @@ h3,
 @keyframes early-bird-claim-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 3px rgba(196, 30, 92, 0.22), 0 6px 16px rgba(196, 30, 92, 0.35);
+    box-shadow: 0 0 0 3px rgba(15, 92, 67, 0.22), 0 6px 16px rgba(15, 92, 67, 0.35);
     transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 0 6px rgba(196, 30, 92, 0.12), 0 8px 22px rgba(196, 30, 92, 0.45);
+    box-shadow: 0 0 0 6px rgba(15, 92, 67, 0.12), 0 8px 22px rgba(15, 92, 67, 0.45);
     transform: scale(1.03);
   }
 }
@@ -125,7 +131,7 @@ h3,
     text-shadow: 0 0 0 transparent, 0 1px 1px rgba(0, 0, 0, 0.35);
   }
   50% {
-    text-shadow: 0 0 12px rgba(232, 90, 60, 0.85), 0 1px 1px rgba(0, 0, 0, 0.35);
+    text-shadow: 0 0 12px rgba(201, 164, 92, 0.85), 0 1px 1px rgba(0, 0, 0, 0.35);
   }
 }
 

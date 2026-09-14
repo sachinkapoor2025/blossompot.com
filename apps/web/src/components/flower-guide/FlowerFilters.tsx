@@ -22,13 +22,13 @@ function Select({
   onChange: (name: string, value: string) => void;
 }) {
   return (
-    <label className="block text-xs font-medium text-slate-600">
+    <label className="block text-xs font-medium text-muted">
       {label}
       <select
         name={name}
         value={value}
         onChange={(e) => onChange(name, e.target.value)}
-        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm text-slate-800"
+        className="mt-1 w-full rounded-lg border border-line bg-surface px-2 py-2 text-sm text-ink"
       >
         <option value="">Any</option>
         {options.map((o) => (
@@ -54,13 +54,13 @@ export function FlowerFilters() {
   };
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 rounded-2xl border border-[#eadfd8] bg-white p-4">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 rounded-2xl border border-line bg-surface p-4">
       <Select label="Colour" name="colour" value={params.get("colour") ?? ""} options={COLOURS} onChange={update} />
       <Select label="Season" name="season" value={params.get("season") ?? ""} options={SEASONS} onChange={update} />
       <Select label="Occasion" name="occasion" value={params.get("occasion") ?? ""} options={OCCASIONS} onChange={update} />
       <Select label="Fragrance" name="fragrance" value={params.get("fragrance") ?? ""} options={FRAGRANCE} onChange={update} />
       <Select label="Longevity" name="longevity" value={params.get("longevity") ?? ""} options={LONGEVITY} onChange={update} />
-      <label className="flex items-end gap-2 text-sm text-slate-700 pb-2">
+      <label className="flex items-end gap-2 text-sm text-ink pb-2">
         <input
           type="checkbox"
           checked={params.get("petFriendly") === "1"}

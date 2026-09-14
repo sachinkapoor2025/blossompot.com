@@ -61,7 +61,7 @@ export function GiftingHome({
       </section>
 
       {!data.subscriptionActive && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <div className="rounded-xl border border-gold/30 bg-ivory px-4 py-3 text-sm text-ink">
           Start a BlossomPot membership to save people, dates, and reminders.{" "}
           <Link href="/account?tab=membership" className="font-semibold underline">
             Choose a plan
@@ -72,7 +72,7 @@ export function GiftingHome({
       {data.openChoice && (
         <Link
           href={`/gifting/choose/${data.openChoice.token}`}
-          className="block rounded-xl border border-primary/20 bg-rose-50 px-4 py-3 text-sm text-primary"
+          className="block rounded-xl border border-primary/20 bg-blush px-4 py-3 text-sm text-primary"
         >
           A gift choice window is open for {data.openChoice.occasionTitle}. Tap to choose before it expires.
         </Link>
@@ -85,15 +85,15 @@ export function GiftingHome({
           ["Gifts sent", String(data.stats.giftsSent)],
           ["Blossom Points", String(data.stats.points)],
         ].map(([label, value]) => (
-          <div key={label} className="rounded-xl border border-slate-200 bg-white p-4">
+          <div key={label} className="rounded-xl border border-line bg-surface p-4">
             <p className="text-2xl font-bold text-primary">{value}</p>
-            <p className="text-xs text-slate-500 mt-1">{label}</p>
+            <p className="text-xs text-muted mt-1">{label}</p>
           </div>
         ))}
       </div>
 
       {streak > 0 && (
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-muted">
           You&apos;ve made {streak} special moment{streak === 1 ? "" : "s"} unforgettable! 🌸
         </p>
       )}

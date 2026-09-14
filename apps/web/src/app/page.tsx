@@ -105,7 +105,7 @@ export default async function HomePage({
           </p>
         </div>
         {catalogError ? (
-          <p className="type-body rounded-xl border border-promo/25 bg-ivory px-4 py-3 text-ink">
+          <p className="type-body rounded-xl border border-sale/25 bg-ivory px-4 py-3 text-ink">
             {catalogError}
           </p>
         ) : (

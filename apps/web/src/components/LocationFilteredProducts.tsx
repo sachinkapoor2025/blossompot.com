@@ -36,7 +36,7 @@ export function LocationEmptyHint() {
   const { location, openSelector, message } = useDeliveryLocation();
   if (!location) return null;
   return (
-    <div className="rounded-xl border border-promo/25 bg-ivory px-4 py-3 text-sm text-ink">
+    <div className="rounded-xl border border-sale/25 bg-ivory px-4 py-3 text-sm text-ink">
       <p>
         {message ??
           `No products are available for delivery to ${location.postalDisplay} yet.`}

@@ -34,11 +34,11 @@ export function ProductDeliveryCard({
 
       {location ? (
         deliverable ? (
-          <p className="text-sm text-accent">
+          <p className="text-sm text-primary">
             ✓ Available for delivery to {location.postalDisplay}
           </p>
         ) : (
-          <p className="text-sm text-promo">
+          <p className="text-sm text-sale">
             This product is currently not available for delivery to {location.postalDisplay}.
           </p>
         )

@@ -65,7 +65,7 @@ export function HomeProductCard({
       </Link>
       <div className="mt-auto px-3 pb-3 md:px-4 md:pb-4">
         {delivery?.location ? (
-          <p className="type-product-body text-accent mb-1">✓ Available for {delivery.location.postalDisplay}</p>
+          <p className="type-product-body text-primary mb-1">✓ Available for {delivery.location.postalDisplay}</p>
         ) : (
           <p className="type-product-body text-muted mb-1">Check delivery</p>
         )}

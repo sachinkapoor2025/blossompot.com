@@ -33,7 +33,7 @@ function SearchBarInner() {
       />
       <button
         type="submit"
-        className="absolute right-1 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full text-nav hover:text-primary md:p-2"
+        className="absolute right-1 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full text-primary hover:text-primary-deep md:p-2"
         aria-label="Search"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>

@@ -354,7 +354,7 @@ export function ProductDetailClient({
             ) : null}
 
             {lowStock && (
-              <p className="text-sm font-semibold text-promo bg-ivory border border-promo/20 rounded-md px-3 py-2 mb-3">
+              <p className="text-sm font-semibold text-sale bg-ivory border border-sale/20 rounded-md px-3 py-2 mb-3">
                 Only {product.inventory} left in stock — order soon for on-time delivery
               </p>
             )}

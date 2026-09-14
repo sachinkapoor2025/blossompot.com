@@ -372,7 +372,7 @@ export function Header() {
   }, [menuOpen]);
 
   return (
-    <header className={`border-b border-primary/10 bg-surface/90 backdrop-blur-md sticky top-0 shadow-sm shadow-primary/5 overflow-visible ${menuOpen ? "z-[70]" : "z-50"}`}>
+    <header className={`border-b border-line bg-surface/90 backdrop-blur-md sticky top-0 shadow-sm shadow-ink/5 overflow-visible ${menuOpen ? "z-[70]" : "z-50"}`}>
       <DeliveryLocationBanner />
       {/* Mobile top bar */}
       <div className="md:hidden min-w-0 overflow-x-clip">

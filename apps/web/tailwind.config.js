@@ -15,6 +15,8 @@ module.exports = {
         sale: "rgb(var(--sale) / <alpha-value>)",
         gold: "rgb(var(--gold) / <alpha-value>)",
         petal: "rgb(var(--petal) / <alpha-value>)",
+        sage: "rgb(var(--sage) / <alpha-value>)",
+        blush: "rgb(var(--blush) / <alpha-value>)",
         ink: "rgb(var(--foreground) / <alpha-value>)",
         muted: "rgb(var(--muted) / <alpha-value>)",
         surface: "rgb(var(--surface) / <alpha-value>)",
