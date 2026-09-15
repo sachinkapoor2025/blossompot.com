@@ -20,9 +20,9 @@ import { faqJsonLd, pageMetadata } from "@/lib/seo";
 import { resolveDeliveryCountry, type Product, type Category } from "@blossompot/shared";
 
 export const metadata: Metadata = pageMetadata({
-  title: "BlossomPot — Flowers, Cakes & Gifts | USA, UK, Canada, Australia & UAE",
+  title: "BlossomPot — Flowers, Cakes & Gifts, Delivered Worldwide",
   description:
-    "Order fresh flowers, cakes, and gift hampers online with worldwide delivery. Shoppers in the USA, UK, Canada, Australia, UAE, and beyond can send gifts internationally. Same-day options in select cities.",
+    "Order fresh flowers, cakes, and gift hampers with worldwide delivery. Same-day options in select cities, secure checkout, and gifts for every celebration — shop online today.",
   path: "/",
   absoluteTitle: true,
 });
