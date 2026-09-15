@@ -64,11 +64,9 @@ export function HomeProductCard({
         </div>
       </Link>
       <div className="mt-auto px-3 pb-3">
-        {delivery?.location ? (
-          <p className="text-[11px] text-green-700 mb-1">✓ Available for {delivery.location.postalDisplay}</p>
-        ) : (
+        {!delivery?.location ? (
           <p className="text-[11px] text-slate-500 mb-1">Check delivery</p>
-        )}
+        ) : null}
         <AddToCartControl productSlug={product.slug} disabled={product.inventory <= 0} />
       </div>
     </div>

@@ -315,11 +315,7 @@ export function ProductDetailClient({
 
           <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm">
             {delivery.location ? (
-              deliverable ? (
-                <p className="text-green-800">
-                  ✓ Available for delivery to {delivery.location.postalDisplay}
-                </p>
-              ) : (
+              deliverable ? null : (
                 <p className="text-amber-900">
                   This product is currently not available for delivery to {delivery.location.postalDisplay}.
                 </p>
