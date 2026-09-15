@@ -4,10 +4,7 @@ import { useEffect, useState } from "react";
 import type { ShippingAddress } from "@blossompot/shared";
 import { LeadCaptureInput } from "@/components/LeadCaptureInput";
 import { PhoneInput, buildPhoneValue } from "@/components/PhoneInput";
-import {
-  DEFAULT_COUNTRY_ISO,
-  orderedCountryDialCodes,
-} from "@/lib/country-codes";
+import { orderedCountryDialCodes } from "@/lib/country-codes";
 import {
   US_STATES,
   emptyShippingAddress,
@@ -20,7 +17,7 @@ import {
 
 function splitPhone(phone: string): { iso: string; local: string } {
   const digits = phone.replace(/\D/g, "");
-  if (!digits) return { iso: DEFAULT_COUNTRY_ISO, local: "" };
+  if (!digits) return { iso: "", local: "" };
 
   const countries = orderedCountryDialCodes();
   const byDialLen = [...countries].sort(
@@ -32,7 +29,7 @@ function splitPhone(phone: string): { iso: string; local: string } {
       return { iso: c.iso, local: digits.slice(code.length) };
     }
   }
-  return { iso: DEFAULT_COUNTRY_ISO, local: digits };
+  return { iso: "", local: digits };
 }
 
 interface Props {
@@ -52,7 +49,7 @@ export function ShippingAddressForm({
 }: Props) {
   const [saved, setSaved] = useState<SavedShippingAddress[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [phoneCountry, setPhoneCountry] = useState(DEFAULT_COUNTRY_ISO);
+  const [phoneCountry, setPhoneCountry] = useState("");
   const [phoneLocal, setPhoneLocal] = useState("");
 
   useEffect(() => {
@@ -65,7 +62,7 @@ export function ShippingAddressForm({
     const incoming = value.phone ?? "";
     const current = buildPhoneValue(phoneCountry, phoneLocal);
     if (!incoming && !phoneLocal) {
-      if (phoneCountry !== DEFAULT_COUNTRY_ISO) setPhoneCountry(DEFAULT_COUNTRY_ISO);
+      if (phoneCountry) setPhoneCountry("");
       return;
     }
     if (incoming === current) return;
@@ -277,8 +274,7 @@ export function ShippingAddressForm({
               inputClassName="border-slate-300 focus:outline-none focus:ring-2 focus:ring-accent"
             />
             <p className="text-xs text-slate-500 mt-1">
-              United States (+1) is selected by default. Country code is for contact; coupons match
-              the mobile number.
+              Country code is for contact; coupons match the mobile number.
             </p>
           </div>
           <LeadCaptureInput

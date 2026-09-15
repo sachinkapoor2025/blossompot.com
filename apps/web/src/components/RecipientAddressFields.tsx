@@ -4,15 +4,12 @@ import { useEffect, useState } from "react";
 import type { ShippingAddress } from "@blossompot/shared";
 import { LeadCaptureInput } from "@/components/LeadCaptureInput";
 import { PhoneInput, buildPhoneValue } from "@/components/PhoneInput";
-import {
-  DEFAULT_COUNTRY_ISO,
-  orderedCountryDialCodes,
-} from "@/lib/country-codes";
+import { orderedCountryDialCodes } from "@/lib/country-codes";
 import { US_STATES } from "@/lib/shipping-address";
 
 function splitPhone(phone: string): { iso: string; local: string } {
   const digits = phone.replace(/\D/g, "");
-  if (!digits) return { iso: DEFAULT_COUNTRY_ISO, local: "" };
+  if (!digits) return { iso: "", local: "" };
   const countries = orderedCountryDialCodes();
   const byDialLen = [...countries].sort(
     (a, b) => b.dial.replace(/\D/g, "").length - a.dial.replace(/\D/g, "").length
@@ -23,7 +20,7 @@ function splitPhone(phone: string): { iso: string; local: string } {
       return { iso: c.iso, local: digits.slice(code.length) };
     }
   }
-  return { iso: DEFAULT_COUNTRY_ISO, local: digits };
+  return { iso: "", local: digits };
 }
 
 type Props = {
@@ -38,7 +35,7 @@ export function RecipientAddressFields({
   onChange,
   title = "Delivery address for this gift",
 }: Props) {
-  const [phoneCountry, setPhoneCountry] = useState(DEFAULT_COUNTRY_ISO);
+  const [phoneCountry, setPhoneCountry] = useState("");
   const [phoneLocal, setPhoneLocal] = useState("");
 
   useEffect(() => {
