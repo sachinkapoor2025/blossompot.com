@@ -52,7 +52,7 @@ const { google: googleSiteVerification, bing: bingSiteVerification } = getSiteVe
 export const metadata: Metadata = {
   metadataBase: new URL(canonical("/")),
   title: {
-    default: "BlossomPot — Flowers, Cakes & Gifts | Worldwide Delivery",
+    default: "BlossomPot — Flowers, Cakes & Gifts, Delivered Worldwide",
     template: "%s | BlossomPot",
   },
   description: site.description,
@@ -80,7 +80,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     siteName: site.name,
     url: canonical("/"),
-    title: "BlossomPot — Flowers, Cakes & Gifts | Worldwide Delivery",
+    title: "BlossomPot — Flowers, Cakes & Gifts, Delivered Worldwide",
     description: site.description,
     images: [{ url: site.logoPngSrc, alt: site.name, width: 1200, height: 630 }],
   },

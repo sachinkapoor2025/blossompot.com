@@ -18,25 +18,25 @@ export const categoryPageSeo: Record<
   cakes: {
     title: "Order Cakes Online Worldwide | Birthday & Celebration Cakes | BlossomPot",
     description:
-      "Order celebration cakes online for birthdays, anniversaries, and parties. Chocolate, red velvet, designer cakes with worldwide delivery.",
+      "Order cakes online worldwide for birthdays, anniversaries and special celebrations. Shop chocolate, red velvet, designer and specialty cakes with global delivery.",
     h1: "Celebration Cakes — Worldwide Delivery",
   },
   "birthday-gifts": {
     title: "Birthday Gifts Worldwide | Flowers, Cakes & Combos | BlossomPot",
     description:
-      "Birthday gifts that feel complete — flowers, cakes, hampers, and combos curated for joyful celebrations worldwide.",
+      "Send birthday gifts worldwide with BlossomPot. Shop fresh flowers, delicious cakes, gift hampers and combos for joyful birthday celebrations.",
     h1: "Birthday Gifts for Worldwide Delivery",
   },
   "anniversary-gifts": {
     title: "Anniversary Gifts Worldwide | Roses, Cakes & More | BlossomPot",
     description:
-      "Romantic anniversary gifts including roses, cakes, and curated boxes for couples celebrating worldwide.",
+      "Send romantic anniversary gifts worldwide with BlossomPot. Discover roses, flowers, cakes and thoughtful gift boxes perfect for celebrating love.",
     h1: "Anniversary Gifts — Worldwide Delivery",
   },
   "valentines-day-gifts": {
-    title: "Valentine's Day Gifts Worldwide | Flowers & Chocolates | BlossomPot",
+    title: "Valentine’s Day Gifts Worldwide | Flowers & Chocolates | BlossomPot",
     description:
-      "Valentine's Day flowers, chocolates, and romantic gift sets designed for memorable February celebrations.",
+      "Send Valentine’s Day gifts worldwide with BlossomPot. Shop fresh flowers, chocolates and romantic gift sets for memorable celebrations.",
     h1: "Valentine's Day Gifts — Worldwide Delivery",
   },
   "mothers-day-gifts": {
@@ -54,7 +54,7 @@ export const categoryPageSeo: Record<
   "gift-hampers": {
     title: "Gift Hampers Worldwide Delivery | Curated Boxes | BlossomPot",
     description:
-      "Order curated gift hampers online with sweets, treats, and thoughtful extras. Premium packaging and worldwide delivery.",
+      "Shop gift hampers with worldwide delivery from BlossomPot. Discover curated gift boxes filled with thoughtful treats, perfect for every occasion.",
     h1: "Gift Hampers — Worldwide Delivery",
   },
   "personalized-gifts": {
@@ -64,9 +64,9 @@ export const categoryPageSeo: Record<
     h1: "Personalized Gifts — Worldwide Delivery",
   },
   "same-day-gifts": {
-    title: "Same-Day Gifts | Select Cities | BlossomPot",
+    title: "Same-Day Gift Delivery | Flowers, Cakes & More | BlossomPot",
     description:
-      "Same-day gift options in select US cities when you order before the local cut-off. Flowers, cakes, and more.",
+      "Send flowers, cakes and gifts with same-day delivery in select locations. Order before the local cut-off time for fast, thoughtful celebrations.",
     h1: "Same-Day Gifts — Select Cities",
   },
   plants: {
