@@ -6,7 +6,7 @@ import {
   deliveryLocationToken,
   parseDeliveryLocationToken,
 } from "@/lib/delivery-location";
-import { LOCATION_SEO_HEADER, parseLocationShopPath } from "@/lib/location-seo-urls";
+import { LOCATION_SEO_HEADER, locationShopRewritePath, parseLocationShopPath } from "@/lib/location-seo-urls";
 
 /**
  * Edge 301: apex → www.
@@ -26,8 +26,7 @@ export function middleware(request: NextRequest) {
   const locationShop = parseLocationShopPath(request.nextUrl.pathname);
   if (locationShop) {
     const url = request.nextUrl.clone();
-    url.pathname =
-      locationShop.kind === "gifts-catalog" ? "/products" : `/categories/${locationShop.internalSlug}`;
+    url.pathname = locationShopRewritePath(locationShop);
     url.searchParams.set("country", locationShop.countryIso);
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set(LOCATION_SEO_HEADER, request.nextUrl.pathname.replace(/\/+$/, "") || "/");

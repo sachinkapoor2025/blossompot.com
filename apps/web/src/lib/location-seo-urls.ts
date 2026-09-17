@@ -213,6 +213,12 @@ export function parseLocationShopPath(pathname: string): ParsedLocationShopPath 
   return { kind: "category", internalSlug, countryIso, stem };
 }
 
+/** Internal rewrite target. Use public category paths so /categories/* 301s do not strip the SEO URL. */
+export function locationShopRewritePath(parsed: ParsedLocationShopPath): string {
+  if (parsed.kind === "gifts-catalog") return "/products";
+  return categoryHref(parsed.internalSlug);
+}
+
 export function categoryLocationHref(internalSlug: string, countryIso: string): string {
   const stem = CATEGORY_LOCATION_STEM[internalSlug] ?? CATEGORY_PUBLIC_SLUG[internalSlug] ?? internalSlug;
   return `/${stem}-to-${countrySeoSlug(countryIso)}`;
