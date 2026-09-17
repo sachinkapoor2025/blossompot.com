@@ -3,6 +3,11 @@ import { api } from "@/lib/api";
 import { isProductSearchIndexable, type Product } from "@blossompot/shared";
 import { siteUrl } from "@/lib/env";
 import { categoryHref } from "@/lib/category-urls";
+import {
+  categoryLocationHref,
+  giftsCatalogLocationHref,
+  PRIMARY_LOCATION_SITEMAP_ISOS,
+} from "@/lib/location-seo-urls";
 import { getCatalogProducts } from "@/lib/catalog-fallback";
 import { categoryOrder } from "@/lib/site";
 import { listAllBlogPosts } from "@/lib/content/blog-posts";
@@ -65,6 +70,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "weekly" as const,
     priority: 0.85,
   }));
+
+  const categoryLocationRoutes = PRIMARY_LOCATION_SITEMAP_ISOS.flatMap((iso) => [
+    ...categoryOrder.map((slug) => ({
+      url: `${siteUrl}${categoryLocationHref(slug, iso)}`,
+      lastModified: now,
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    })),
+    {
+      url: `${siteUrl}${giftsCatalogLocationHref(iso)}`,
+      lastModified: now,
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    },
+  ]);
 
   // City geo URLs live in /sitemap-geo.xml; keep state hubs here for discovery.
   const locationRoutes = publishedGeoLocations()
@@ -138,6 +158,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...staticRoutes,
     ...categoryRoutes,
+    ...categoryLocationRoutes,
     ...locationRoutes,
     ...internationalRoutes,
     ...occasionRoutes,

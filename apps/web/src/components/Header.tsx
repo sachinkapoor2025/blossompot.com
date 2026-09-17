@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import { categoryHref } from "@/lib/category-urls";
+import { categoryLocationHref, parseLocationShopPath } from "@/lib/location-seo-urls";
 import {
   navItems,
   cityLinks,
@@ -332,7 +333,7 @@ export function Header() {
   const [citiesOpen, setCitiesOpen] = useState(false);
   const [countriesOpen, setCountriesOpen] = useState(false);
   const [cityQuery, setCityQuery] = useState("");
-  const { openSelector } = useDeliveryLocation();
+  const { openSelector, location } = useDeliveryLocation();
   const { countries, loaded: countriesLoaded } = useGboDeliveryCountries();
   const countrySearch = useCountrySearch(countries);
   const cityVisible = cityQuery.trim()
@@ -342,12 +343,21 @@ export function Header() {
   const isActive = (href: string, category?: string) => {
     if (href === "/") return pathname === "/" && !activeCategory;
     if (category) {
+      const located = parseLocationShopPath(pathname);
       return (
         (pathname === "/products" && activeCategory === category) ||
-        pathname === categoryHref(category)
+        pathname === categoryHref(category) ||
+        (located?.kind === "category" && located.internalSlug === category)
       );
     }
     return pathname.startsWith(href.split("?")[0]) && href !== "/";
+  };
+
+  const navHref = (item: (typeof navItems)[number]) => {
+    if ("category" in item && item.category && location?.countryCode) {
+      return categoryLocationHref(item.category, location.countryCode);
+    }
+    return item.href;
   };
 
   const isCountriesActive = countriesMenu.items.some((item) => pathname === item.href);
@@ -449,7 +459,7 @@ export function Header() {
             {navItems.map((item) => (
               <Link
                 key={item.href}
-                href={item.href}
+                href={navHref(item)}
                 className={`btn-nav ${isActive(item.href, "category" in item ? item.category : undefined) ? "btn-nav-active" : ""}`}
               >
                 {item.label}
@@ -488,7 +498,7 @@ export function Header() {
               {navItems.map((item) => (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  href={navHref(item)}
                   onClick={closeMenu}
                   className={`block rounded-lg px-4 py-3 text-sm font-semibold ${
                     isActive(item.href, "category" in item ? item.category : undefined)

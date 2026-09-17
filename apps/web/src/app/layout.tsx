@@ -14,6 +14,7 @@ import { TrackingProvider } from "@/components/TrackingProvider";
 import { JsonLd } from "@/components/JsonLd";
 import { BlossomPotPromoBar } from "@/components/BlossomPotPromoBar";
 import { ClientDeferredWidgets } from "@/components/ClientDeferredWidgets";
+import { LocationCategoryUrlSync } from "@/components/LocationCategoryUrlSync";
 import { AnalyticsScripts, GoogleAnalytics } from "@/components/AnalyticsScripts";
 import { MetaPixel } from "@/components/MetaPixel";
 import { site } from "@/lib/site";
@@ -131,6 +132,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <WishlistProvider>
             <CurrencyProvider>
             <TrackingProvider />
+            <LocationCategoryUrlSync />
             <BlossomPotPromoBar />
             <HeaderShell />
             <main className="flex-1">{children}</main>

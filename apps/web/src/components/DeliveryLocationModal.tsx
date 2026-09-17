@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
 import { dismissLocationPrompt } from "@/lib/delivery-location";
 import { useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
+import { normalizePathname, shopPathForLocation } from "@/lib/location-seo-urls";
 
 export function DeliveryLocationModal() {
   return (
@@ -57,10 +58,15 @@ function DeliveryLocationModalInner() {
         postalDisplay: countryCode,
       });
       closeSelector();
+      const nextPath = shopPathForLocation(pathname, countryCode);
       const next = new URLSearchParams(searchParams.toString());
-      next.set("country", countryCode);
+      if (nextPath !== normalizePathname(pathname)) {
+        next.delete("country");
+      } else {
+        next.set("country", countryCode);
+      }
       const qs = next.toString();
-      router.push(qs ? `${pathname}?${qs}` : pathname);
+      router.push(qs ? `${nextPath}?${qs}` : nextPath);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not check this location");
     } finally {

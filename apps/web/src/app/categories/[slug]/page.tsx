@@ -11,6 +11,7 @@ import { getCategoryContent } from "@/lib/content/category-content";
 import { getCategoryPageSeo } from "@/lib/content/category-seo";
 import { getCategoryRichContent } from "@/lib/content/category-rich-content";
 import { categoryHref } from "@/lib/category-urls";
+import { requestSeoPath } from "@/lib/request-seo-path";
 import { loadProductsByCategory } from "@/lib/product-loader";
 import { categoryOrder } from "@/lib/site";
 import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, pageMetadata } from "@/lib/seo";
@@ -42,7 +43,7 @@ export const revalidate = 0;
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const seo = getCategoryPageSeo(slug);
-  const path = categoryHref(slug);
+  const path = await requestSeoPath(categoryHref(slug));
 
   if (seo) {
     return pageMetadata({

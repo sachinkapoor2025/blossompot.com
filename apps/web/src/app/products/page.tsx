@@ -8,6 +8,7 @@ import type { ProductSort } from "@/components/ProductSortBar";
 import { SearchTracker } from "@/components/SearchTracker";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { pageMetadata } from "@/lib/seo";
+import { requestSeoPath } from "@/lib/request-seo-path";
 import { loadProducts } from "@/lib/product-loader";
 import { productInStorefrontCategory, type Product, type Category } from "@blossompot/shared";
 import { categoryHref } from "@/lib/category-urls";
@@ -61,12 +62,13 @@ const CATEGORY_SEO: Record<string, { title: string; description: string }> = {
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const params = await searchParams;
+  const seoPath = await requestSeoPath("/products");
   if (params.search) {
     // Search result URLs stay usable but are noindexed; canonical points at the shop hub.
     return pageMetadata({
       title: `Search: ${params.search} — Flowers & Gifts Worldwide`,
       description: `Search results for "${params.search}" — flowers, cakes, and gifts with worldwide delivery from BlossomPot.`,
-      path: "/products",
+      path: seoPath,
       noIndex: true,
     });
   }
@@ -83,7 +85,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     title: "Shop Flowers, Cakes & Gifts — Worldwide Delivery | BlossomPot",
     description:
       "Browse flowers, bouquets, cakes, and curated gift hampers. Birthday, anniversary, Valentine’s, and same-day options with clear worldwide delivery guidance.",
-    path: "/products",
+    path: seoPath,
   });
 }
 
