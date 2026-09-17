@@ -12,7 +12,7 @@ import { requestSeoPath } from "@/lib/request-seo-path";
 import { loadProducts } from "@/lib/product-loader";
 import { productInStorefrontCategory, type Product, type Category } from "@blossompot/shared";
 import { categoryHref } from "@/lib/category-urls";
-import { localizeShopCopy, locationShopHeading } from "@/lib/location-seo-urls";
+import { localizeShopCopy, localizeShopText, locationShopHeading } from "@/lib/location-seo-urls";
 import { homeCategoryOrder, orderCategories } from "@/lib/site";
 import { isRakhiRelatedCategorySlug, isRakhiRelatedProduct } from "@/lib/rakhi-filter";
 
@@ -152,10 +152,10 @@ export default async function ProductsPage({ searchParams }: Props) {
       </div>
       {!search && !category && (
         <p className="text-slate-600 mb-8 max-w-2xl">
-          {localizeShopCopy(seoPath, {
-            description:
-              "Flowers, bouquets, cakes, and curated gifts for birthdays, anniversaries, and everyday thank-yous — with clear worldwide delivery expectations. Enter the recipient address at checkout to see available windows.",
-          }).description}
+          {localizeShopText(
+            seoPath,
+            "Flowers, bouquets, cakes, and curated gifts for birthdays, anniversaries, and everyday thank-yous — with clear worldwide delivery expectations. Enter the recipient address at checkout to see available windows."
+          )}
         </p>
       )}
 

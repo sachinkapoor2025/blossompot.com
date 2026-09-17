@@ -19,5 +19,5 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "**/* 2.ts", "**/* 2.tsx", "**/* 2.json"]
+  "exclude": ["node_modules", "**/*.test.ts", "**/* 2.ts", "**/* 2.tsx", "**/* 2.json"]
 }

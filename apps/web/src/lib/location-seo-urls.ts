@@ -289,19 +289,25 @@ function rewriteWorldwideCopy(value: string, country: string): string {
     .replace(/worldwide/g, country);
 }
 
+export function localizeShopText(path: string, text: string): string {
+  const parsed = parseLocationShopPath(path);
+  if (!parsed) return text;
+  return rewriteWorldwideCopy(text, countryDisplayName(parsed.countryIso));
+}
+
 /** Keep location shop pages unique vs generic worldwide copy. Canonical path is unchanged. */
-export function localizeShopCopy<T extends { title?: string; description?: string; h1?: string }>(
+export function localizeShopCopy(
   path: string,
-  copy: T
-): T {
+  copy: { title: string; description: string; h1?: string }
+): { title: string; description: string; h1?: string } {
   const parsed = parseLocationShopPath(path);
   if (!parsed) return copy;
   const country = countryDisplayName(parsed.countryIso);
-  const next = { ...copy };
-  if (typeof next.title === "string") next.title = rewriteWorldwideCopy(next.title, country);
-  if (typeof next.description === "string") next.description = rewriteWorldwideCopy(next.description, country);
-  if (typeof next.h1 === "string") next.h1 = rewriteWorldwideCopy(next.h1, country);
-  return next;
+  return {
+    title: rewriteWorldwideCopy(copy.title, country),
+    description: rewriteWorldwideCopy(copy.description, country),
+    h1: copy.h1 ? rewriteWorldwideCopy(copy.h1, country) : copy.h1,
+  };
 }
 
 export function locationShopHeading(path: string, heading: string): string {
