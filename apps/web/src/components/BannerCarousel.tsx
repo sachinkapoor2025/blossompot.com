@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback, type ReactNode } from "react";
-import Link from "next/link";
 import Image from "next/image";
+import { ShopLocationLink } from "@/components/ShopLocationLink";
 
 export interface HomeBanner {
   src: string;
@@ -109,9 +109,9 @@ function SlideImage({
   );
   if (banner.href) {
     return (
-      <Link href={banner.href} className="block h-full w-full" tabIndex={priority ? 0 : -1}>
+      <ShopLocationLink href={banner.href} className="block h-full w-full">
         {img}
-      </Link>
+      </ShopLocationLink>
     );
   }
   return img;
@@ -243,7 +243,7 @@ export function BannerCarousel({
                 </p>
 
                 {banner.href && (
-                  <Link
+                  <ShopLocationLink
                     href={banner.href}
                     className="inline-flex items-center justify-center rounded-full bg-nav text-white font-semibold text-sm px-7 py-3 hover:bg-primary transition shadow-md shadow-nav/25"
                   >
@@ -251,7 +251,7 @@ export function BannerCarousel({
                     <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
-                  </Link>
+                  </ShopLocationLink>
                 )}
 
                 <ul className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8 max-w-lg mx-auto lg:mx-0">

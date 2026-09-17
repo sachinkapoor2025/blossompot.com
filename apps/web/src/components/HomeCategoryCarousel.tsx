@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import Link from "next/link";
+import { ShopLocationLink } from "@/components/ShopLocationLink";
 import { SafeStoreImage } from "@/components/SafeStoreImage";
 import type { HomeCategoryTile } from "@/lib/home-category-carousel";
 
@@ -113,7 +113,7 @@ export function HomeCategoryCarousel({ tiles }: { tiles: HomeCategoryTile[] }) {
           >
             {tiles.map((tile) => (
               <li key={tile.slug} className="snap-start shrink-0 w-[112px] sm:w-[132px]">
-                <Link href={tile.href} className="group block text-center">
+                <ShopLocationLink href={tile.href} category={tile.slug} className="group block text-center">
                   <span className="block overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-[#eadfd8] aspect-square">
                     <SafeStoreImage
                       src={tile.image}
@@ -126,7 +126,7 @@ export function HomeCategoryCarousel({ tiles }: { tiles: HomeCategoryTile[] }) {
                   <span className="mt-2 block text-sm font-medium text-slate-800 group-hover:text-primary">
                     {tile.label}
                   </span>
-                </Link>
+                </ShopLocationLink>
               </li>
             ))}
           </ul>

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { api } from "@/lib/api";
 import { HomeProductCard } from "@/components/HomeProductCard";
 import { LocationEmptyHint, LocationFilteredProducts } from "@/components/LocationFilteredProducts";
+import { ShopLocationLink } from "@/components/ShopLocationLink";
 import { ProductGrid } from "@/components/ProductGrid";
 import type { ProductSort } from "@/components/ProductSortBar";
 import { SearchTracker } from "@/components/SearchTracker";
@@ -12,6 +12,7 @@ import { requestSeoPath } from "@/lib/request-seo-path";
 import { loadProducts } from "@/lib/product-loader";
 import { productInStorefrontCategory, type Product, type Category } from "@blossompot/shared";
 import { categoryHref } from "@/lib/category-urls";
+import { localizeShopCopy, locationShopHeading } from "@/lib/location-seo-urls";
 import { homeCategoryOrder, orderCategories } from "@/lib/site";
 import { isRakhiRelatedCategorySlug, isRakhiRelatedProduct } from "@/lib/rakhi-filter";
 
@@ -65,15 +66,19 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   const seoPath = await requestSeoPath("/products");
   if (params.search) {
     // Search result URLs stay usable but are noindexed; canonical points at the shop hub.
-    return pageMetadata({
+    const copy = localizeShopCopy(seoPath, {
       title: `Search: ${params.search} — Flowers & Gifts Worldwide`,
       description: `Search results for "${params.search}" — flowers, cakes, and gifts with worldwide delivery from BlossomPot.`,
+    });
+    return pageMetadata({
+      title: copy.title,
+      description: copy.description,
       path: seoPath,
       noIndex: true,
     });
   }
   if (params.category && CATEGORY_SEO[params.category]) {
-    const seo = CATEGORY_SEO[params.category];
+    const seo = localizeShopCopy(seoPath, CATEGORY_SEO[params.category]);
     return pageMetadata({
       title: seo.title,
       description: seo.description,
@@ -81,10 +86,14 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
       noIndex: true,
     });
   }
-  return pageMetadata({
+  const shopSeo = localizeShopCopy(seoPath, {
     title: "Shop Flowers, Cakes & Gifts — Worldwide Delivery | BlossomPot",
     description:
       "Browse flowers, bouquets, cakes, and curated gift hampers. Birthday, anniversary, Valentine’s, and same-day options with clear worldwide delivery guidance.",
+  });
+  return pageMetadata({
+    title: shopSeo.title,
+    description: shopSeo.description,
     path: seoPath,
   });
 }
@@ -110,11 +119,15 @@ export default async function ProductsPage({ searchParams }: Props) {
     categories = [];
   }
 
-  const h1 = search
-    ? `Search: ${search}`
-    : category
-      ? categories.find((c) => c.slug === category)?.name ?? category.replace(/-/g, " ")
-      : "Shop Flowers, Cakes & Gifts";
+  const seoPath = await requestSeoPath("/products");
+  const h1 = locationShopHeading(
+    seoPath,
+    search
+      ? `Search: ${search}`
+      : category
+        ? categories.find((c) => c.slug === category)?.name ?? category.replace(/-/g, " ")
+        : "Shop Flowers, Cakes & Gifts"
+  );
 
   const sortedCategories = orderCategories(categories);
   const categoryMap = new Map(categories.map((c) => [c.slug, c]));
@@ -139,28 +152,31 @@ export default async function ProductsPage({ searchParams }: Props) {
       </div>
       {!search && !category && (
         <p className="text-slate-600 mb-8 max-w-2xl">
-          Flowers, bouquets, cakes, and curated gifts for birthdays, anniversaries, and everyday thank-yous —
-          with clear worldwide delivery expectations. Enter the recipient address at checkout to see available
-          windows.
+          {localizeShopCopy(seoPath, {
+            description:
+              "Flowers, bouquets, cakes, and curated gifts for birthdays, anniversaries, and everyday thank-yous — with clear worldwide delivery expectations. Enter the recipient address at checkout to see available windows.",
+          }).description}
         </p>
       )}
 
       {categories.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-8">
-          <Link
+          <ShopLocationLink
             href="/products"
+            catalog
             className={`px-3 py-1 rounded-full text-sm border ${!category ? "bg-nav text-white border-nav" : "border-slate-300 hover:border-nav"}`}
           >
             All
-          </Link>
+          </ShopLocationLink>
           {sortedCategories.map((c) => (
-            <Link
+            <ShopLocationLink
               key={c.slug}
               href={categoryHref(c.slug)}
+              category={c.slug}
               className={`px-3 py-1 rounded-full text-sm border ${category === c.slug ? "bg-nav text-white border-nav" : "border-slate-300 hover:border-nav"}`}
             >
               {c.name}
-            </Link>
+            </ShopLocationLink>
           ))}
         </div>
       )}
@@ -174,9 +190,9 @@ export default async function ProductsPage({ searchParams }: Props) {
               <section key={section.slug}>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-bold text-primary capitalize">{section.name}</h2>
-                  <Link href={categoryHref(section.slug)} className="text-nav font-semibold text-sm hover:underline">
+                  <ShopLocationLink href={categoryHref(section.slug)} category={section.slug} className="text-nav font-semibold text-sm hover:underline">
                     View All →
-                  </Link>
+                  </ShopLocationLink>
                 </div>
                 <LocationFilteredProducts products={section.products}>
                   {({ products: visible, emptyBecauseLocation }) =>

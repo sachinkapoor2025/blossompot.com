@@ -454,14 +454,14 @@ export function buildGiftingMarketingEmailHtml(
                 Featured Gift
               </div>
               <div style="width:48px;height:3px;background-color:${PRIMARY};margin:0 auto 20px auto;border-radius:2px;font-size:0;line-height:0;">&nbsp;</div>
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;background-color:${WHITE};border:1px solid ${LINE};border-radius:18px;">
                 <tr>
-                  <td class="stack-col" width="48%" valign="middle" style="width:48%;padding:0 12px 0 0;">
+                  <td class="stack-col" width="48%" valign="middle" style="width:48%;padding:16px 12px 16px 16px;">
                     <a href="${escAttr(featured.href)}" target="_blank" style="text-decoration:none;">
-                      <img class="fluid" src="${escAttr(featured.imageUrl)}" width="260" alt="${escAttr(featured.imageAlt)}" style="display:block;width:100%;max-width:260px;height:auto;border:0;border-radius:16px;margin:0 auto;" />
+                      <img class="fluid" src="${escAttr(featured.imageUrl)}" width="260" alt="${escAttr(featured.imageAlt)}" style="display:block;width:100%;max-width:260px;height:auto;border:0;border-radius:14px;margin:0 auto;" />
                     </a>
                   </td>
-                  <td class="stack-col featured-pad" width="52%" valign="middle" style="width:52%;padding:8px 0 0 12px;text-align:left;">
+                  <td class="stack-col featured-pad" width="52%" valign="middle" style="width:52%;padding:20px 20px 20px 8px;text-align:left;">
                     <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;line-height:28px;font-weight:bold;color:${INK};padding-bottom:10px;">
                       ${escapeHtml(featured.name)}
                     </div>

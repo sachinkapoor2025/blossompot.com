@@ -1,4 +1,4 @@
-import { CATEGORY_PUBLIC_SLUG, categoryHref } from "@/lib/category-urls";
+import { CATEGORY_PUBLIC_SLUG, categoryHref } from "./category-urls";
 
 /** Pretty country slugs for category URLs (`/flowers-to-usa`). ISO-2 lowercase is the fallback. */
 const ISO_TO_SLUG: Record<string, string> = {
@@ -236,6 +236,84 @@ export function internalSlugFromCategoryPath(pathname: string): string | null {
   return null;
 }
 
+const ISO_DISPLAY_NAME: Record<string, string> = {
+  US: "USA",
+  GB: "UK",
+  AE: "UAE",
+  CA: "Canada",
+  AU: "Australia",
+  IN: "India",
+  NZ: "New Zealand",
+  IE: "Ireland",
+  SG: "Singapore",
+  DE: "Germany",
+  FR: "France",
+  IT: "Italy",
+  ES: "Spain",
+  NL: "Netherlands",
+  PK: "Pakistan",
+  BD: "Bangladesh",
+  NP: "Nepal",
+  LK: "Sri Lanka",
+  ZA: "South Africa",
+  MX: "Mexico",
+  BR: "Brazil",
+  JP: "Japan",
+  PH: "Philippines",
+  MY: "Malaysia",
+  HK: "Hong Kong",
+  NG: "Nigeria",
+  KE: "Kenya",
+  SA: "Saudi Arabia",
+  QA: "Qatar",
+  KW: "Kuwait",
+  OM: "Oman",
+  BH: "Bahrain",
+};
+
+export function countryDisplayName(countryIso: string): string {
+  const iso = countryIso.trim().toUpperCase();
+  if (ISO_DISPLAY_NAME[iso]) return ISO_DISPLAY_NAME[iso];
+  return countrySeoSlug(iso)
+    .split("-")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function rewriteWorldwideCopy(value: string, country: string): string {
+  return value
+    .replace(/Worldwide Delivery/g, `Delivery to ${country}`)
+    .replace(/worldwide delivery/g, `delivery to ${country}`)
+    .replace(/Worldwide/g, country)
+    .replace(/worldwide/g, country);
+}
+
+/** Keep location shop pages unique vs generic worldwide copy. Canonical path is unchanged. */
+export function localizeShopCopy<T extends { title?: string; description?: string; h1?: string }>(
+  path: string,
+  copy: T
+): T {
+  const parsed = parseLocationShopPath(path);
+  if (!parsed) return copy;
+  const country = countryDisplayName(parsed.countryIso);
+  const next = { ...copy };
+  if (typeof next.title === "string") next.title = rewriteWorldwideCopy(next.title, country);
+  if (typeof next.description === "string") next.description = rewriteWorldwideCopy(next.description, country);
+  if (typeof next.h1 === "string") next.h1 = rewriteWorldwideCopy(next.h1, country);
+  return next;
+}
+
+export function locationShopHeading(path: string, heading: string): string {
+  const parsed = parseLocationShopPath(path);
+  if (!parsed) return heading;
+  const country = countryDisplayName(parsed.countryIso);
+  const rewritten = rewriteWorldwideCopy(heading, country);
+  if (rewritten !== heading) return rewritten;
+  if (heading.toLowerCase().includes(country.toLowerCase())) return heading;
+  return `${heading} to ${country}`;
+}
+
 export function isLocationUrlExemptPath(pathname: string): boolean {
   const p = normalizePathname(pathname);
   if (p === "/") return true;
@@ -244,6 +322,7 @@ export function isLocationUrlExemptPath(pathname: string): boolean {
   if (p === "/delivery-locations" || p.startsWith("/delivery-locations/")) return true;
   if (p.startsWith("/flower-delivery-")) return true;
   if (p === "/cities" || p.startsWith("/cities/")) return true;
+  if (p === "/countries" || p.startsWith("/countries/")) return true;
   const giftsTo = p.match(/^\/gifts-to-([a-z0-9-]+)$/);
   if (giftsTo && isExistingGiftsToSeoPage(giftsTo[1])) return true;
   return false;

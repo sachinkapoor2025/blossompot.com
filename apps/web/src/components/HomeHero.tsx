@@ -1,7 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 import type { HomeBanner } from "@/components/BannerCarousel";
 import { BannerCarousel } from "@/components/BannerCarousel";
+import { ShopLocationLink } from "@/components/ShopLocationLink";
 
 /**
  * Server component wrapper: first banner image is rendered on the server and
@@ -28,9 +28,9 @@ export function HomeHero({ banners }: { banners: readonly HomeBanner[] }) {
   );
 
   const lcpImage = first.href ? (
-    <Link href={first.href} className="block h-full w-full">
+    <ShopLocationLink href={first.href} className="block h-full w-full">
       {image}
-    </Link>
+    </ShopLocationLink>
   ) : (
     image
   );
