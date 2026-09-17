@@ -21,6 +21,9 @@ describe("gifting marketing email", () => {
     assert.match(html, /Classic Red Rose Bouquet/);
     assert.match(html, /\$49\.99/);
     assert.match(html, /https:\/\/www\.blossompot\.com\/products\/classic-red-rose-bouquet/);
+    assert.match(html, /catalog\/roses-red-1\.jpg/);
+    assert.match(html, /catalog\/cake-chocolate-1\.jpg/);
+    assert.match(html, /catalog\/hamper-1\.jpg/);
     assert.match(html, /{{unsubscribe}}/);
     assert.match(html, /support@blossompot\.com/);
     assert.doesNotMatch(html, /16692603819/);
