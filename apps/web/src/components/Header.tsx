@@ -333,7 +333,7 @@ export function Header() {
   const [citiesOpen, setCitiesOpen] = useState(false);
   const [countriesOpen, setCountriesOpen] = useState(false);
   const [cityQuery, setCityQuery] = useState("");
-  const { openSelector, location } = useDeliveryLocation();
+  const { openSelector, location: deliveryLocation } = useDeliveryLocation();
   const { countries, loaded: countriesLoaded } = useGboDeliveryCountries();
   const countrySearch = useCountrySearch(countries);
   const cityVisible = cityQuery.trim()
@@ -354,8 +354,8 @@ export function Header() {
   };
 
   const navHref = (item: (typeof navItems)[number]) => {
-    if ("category" in item && item.category && location?.countryCode) {
-      return categoryLocationHref(item.category, location.countryCode);
+    if ("category" in item && item.category && deliveryLocation?.countryCode) {
+      return categoryLocationHref(item.category, deliveryLocation.countryCode);
     }
     return item.href;
   };

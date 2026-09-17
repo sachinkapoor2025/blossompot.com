@@ -160,7 +160,7 @@ export function Footer() {
                 <li key={n.href}>
                   <ShopLocationLink
                     href={n.href}
-                    category={"category" in n ? n.category : undefined}
+                    category={"category" in n && typeof n.category === "string" ? n.category : undefined}
                     className="hover:text-primary hover:underline"
                   >
                     {n.label}

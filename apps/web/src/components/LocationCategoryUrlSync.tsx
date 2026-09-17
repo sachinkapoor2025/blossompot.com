@@ -1,12 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useOptionalDeliveryLocation } from "@/lib/delivery-location-context";
 import { preserveShopQuery, shopPathForLocation } from "@/lib/location-seo-urls";
 
 /** Keeps category/shop URLs in sync with the selected delivery country. */
 export function LocationCategoryUrlSync() {
+  return (
+    <Suspense fallback={null}>
+      <LocationCategoryUrlSyncInner />
+    </Suspense>
+  );
+}
+
+function LocationCategoryUrlSyncInner() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
