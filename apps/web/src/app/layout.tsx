@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import localFont from "next/font/local";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
@@ -132,13 +133,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <WishlistProvider>
             <CurrencyProvider>
             <TrackingProvider />
-            <LocationCategoryUrlSync />
+            <Suspense fallback={null}>
+              <LocationCategoryUrlSync />
+            </Suspense>
             <BlossomPotPromoBar />
             <HeaderShell />
             <main className="flex-1">{children}</main>
             <FooterShell />
             <CurrencySwitcher />
-            <ClientDeferredWidgets />
+            <Suspense fallback={null}>
+              <ClientDeferredWidgets />
+            </Suspense>
             <WhatsAppFloat />
             </CurrencyProvider>
             </WishlistProvider>

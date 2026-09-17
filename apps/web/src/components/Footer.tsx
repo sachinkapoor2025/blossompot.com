@@ -3,6 +3,7 @@ import Link from "next/link";
 import { site, navItems, giftSetsMenu, countriesMenu } from "@/lib/site";
 import { PaymentMethodIcons } from "@/components/PaymentMethodIcons";
 import { ShopLocationLink } from "@/components/ShopLocationLink";
+import { SiteLogoLink } from "@/components/SiteLogo";
 import { trustFacts } from "@/lib/trust";
 import { footerGeoLinks } from "@/lib/content/geo/locations";
 

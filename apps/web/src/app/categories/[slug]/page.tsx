@@ -37,10 +37,6 @@ function isKnownCategorySlug(slug: string): boolean {
   return (categoryOrder as readonly string[]).includes(slug);
 }
 
-export function generateStaticParams() {
-  return categoryOrder.map((slug) => ({ slug }));
-}
-
 /** Match PDP: always use live product prices (no stale ISR listing HTML). */
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
