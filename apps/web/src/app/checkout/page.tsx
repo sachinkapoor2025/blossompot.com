@@ -48,6 +48,7 @@ import {
   cartLineUnitTotal,
   cartHasCouponExcludedItems,
   isFlashComboProduct,
+  checkoutCurrencyForDisplay,
   type Order,
   type RateQuote,
   type ShippingAddress,
@@ -80,6 +81,7 @@ function CheckoutPageInner() {
   const locationBlocked = (cart?.items ?? []).some((item) => item.unavailableForLocation);
   const { user, token } = useAuth();
   const { format, displayCurrency, convert, usdInrRate } = useCurrency();
+  const payCurrency = checkoutCurrencyForDisplay(displayCurrency);
   const sessionId = useSessionId();
   const captureLeadDebounced = useDebouncedLeadCapture(sessionId);
   const captureLeadNow = useLeadCapture(sessionId);
@@ -198,11 +200,11 @@ function CheckoutPageInner() {
   ]);
 
   useEffect(() => {
-    if (displayCurrency === "INR") setPaymentMethod("razorpay");
-    else if (displayCurrency === "USD") setPaymentMethod("stripe");
+    if (payCurrency === "INR") setPaymentMethod("razorpay");
+    else setPaymentMethod("stripe");
     setStripeCheckout(null);
     setRazorpayPayment(null);
-  }, [displayCurrency]);
+  }, [payCurrency]);
 
   const markRazorpayReady = useCallback(() => {
     setRazorpayReady(true);
@@ -657,8 +659,8 @@ function CheckoutPageInner() {
         token,
         body: JSON.stringify({
           paymentMethod,
-          checkoutCurrency: displayCurrency,
-          ...(displayCurrency === "INR" ? { usdInrRate } : {}),
+          checkoutCurrency: payCurrency,
+          ...(payCurrency === "INR" ? { usdInrRate } : {}),
           shippingAddress: payload,
           shipments,
           attribution: getAttributionSnapshotForCheckout(),
@@ -1072,7 +1074,7 @@ function CheckoutPageInner() {
                   setStripeCheckout(null);
                   setRazorpayPayment(null);
                 }}
-                checkoutCurrency={displayCurrency}
+                checkoutCurrency={payCurrency}
               />
             </div>
 

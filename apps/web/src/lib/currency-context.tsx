@@ -11,12 +11,17 @@ import {
 } from "react";
 import {
   DEFAULT_USD_INR_RATE,
+  DEFAULT_USD_RATES,
   fetchLiveUsdInrRate,
+  fetchLiveUsdRates,
   convertCurrency,
+  currencyForCountryCode,
+  displayCurrencyLocale,
   normalizeDisplayCurrency,
   type DisplayCurrency,
 } from "@blossompot/shared";
 import { getApiUrl } from "./env";
+import { useOptionalDeliveryLocation } from "./delivery-location-context";
 
 export type { DisplayCurrency };
 
@@ -24,7 +29,8 @@ const STORAGE_KEY = "hr_ecom_currency";
 const MANUAL_KEY = "hr_ecom_currency_manual";
 const RATE_CACHE_KEY = "hr_ecom_usd_inr_rate";
 const RATE_CACHE_AT_KEY = "hr_ecom_usd_inr_rate_at";
-const RATE_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour — match API FX cache
+const RATES_CACHE_KEY = "hr_ecom_usd_fx_rates";
+const RATE_CACHE_TTL_MS = 60 * 60 * 1000;
 const ENV_FALLBACK = Number(process.env.NEXT_PUBLIC_USD_INR_RATE) || DEFAULT_USD_INR_RATE;
 
 interface CurrencyContextValue {
@@ -59,7 +65,6 @@ async function fetchUsdInrRate(): Promise<{ rate: number; source: string }> {
   if (sessionCached) return { rate: sessionCached, source: "session-cache" };
 
   try {
-    // Prefer HTTP cache; API also caches the quote for ≥1 hour server-side.
     const res = await fetch(`${getApiUrl()}/config/usd-inr-rate`, { cache: "force-cache" });
     if (!res.ok) throw new Error("api rate failed");
     const data = (await res.json()) as { rate?: number; source?: string };
@@ -86,13 +91,14 @@ async function fetchUsdInrRate(): Promise<{ rate: number; source: string }> {
 }
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
+  const delivery = useOptionalDeliveryLocation();
   const [displayCurrency, setDisplayCurrencyState] = useState<DisplayCurrency>(() => {
     if (typeof window === "undefined") return "USD";
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === "USD" || saved === "INR") return saved;
-    return "USD";
+    return saved ? normalizeDisplayCurrency(saved) : "USD";
   });
   const [usdInrRate, setUsdInrRate] = useState(ENV_FALLBACK);
+  const [usdRates, setUsdRates] = useState<Partial<Record<DisplayCurrency, number>>>(DEFAULT_USD_RATES);
   const [rateSource, setRateSource] = useState("loading");
   const [rateLoading, setRateLoading] = useState(true);
 
@@ -101,25 +107,47 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     setUsdInrRate(rate);
     setRateSource(source);
     setRateLoading(false);
+    try {
+      const cachedFx = sessionStorage.getItem(RATES_CACHE_KEY);
+      if (cachedFx) {
+        const parsed = JSON.parse(cachedFx) as Partial<Record<DisplayCurrency, number>>;
+        setUsdRates({ ...DEFAULT_USD_RATES, ...parsed, INR: rate, USD: 1 });
+      }
+      const live = await fetchLiveUsdRates();
+      if (live?.rates) {
+        const next = { ...DEFAULT_USD_RATES, ...live.rates, INR: rate, USD: 1 };
+        setUsdRates(next);
+        sessionStorage.setItem(RATES_CACHE_KEY, JSON.stringify(next));
+      }
+    } catch {
+      setUsdRates((prev) => ({ ...DEFAULT_USD_RATES, ...prev, INR: rate, USD: 1 }));
+    }
   }, []);
 
   useEffect(() => {
     const init = async () => {
+      if (delivery && !delivery.ready) return;
+      if (delivery?.location?.countryCode) {
+        setDisplayCurrencyState(currencyForCountryCode(delivery.location.countryCode));
+        return;
+      }
       const manual = localStorage.getItem(MANUAL_KEY) === "true";
       if (manual) {
         const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved === "USD" || saved === "INR") setDisplayCurrencyState(saved);
+        if (saved) setDisplayCurrencyState(normalizeDisplayCurrency(saved));
         return;
       }
       try {
         const res = await fetch("/api/geo", { cache: "no-store" });
         if (res.ok) {
-          const data = (await res.json()) as { currency?: string };
-          if (data.currency === "INR" || data.currency === "USD") {
-            setDisplayCurrencyState(data.currency);
-            // Persist geo default so next visit starts in INR for India visitors (no USD flash).
-            localStorage.setItem(STORAGE_KEY, data.currency);
-          }
+          const data = (await res.json()) as { currency?: string; country?: string };
+          const next = data.country
+            ? currencyForCountryCode(data.country)
+            : data.currency
+              ? normalizeDisplayCurrency(data.currency)
+              : "USD";
+          setDisplayCurrencyState(next);
+          localStorage.setItem(STORAGE_KEY, next);
         }
       } catch {
         /* keep prior / USD */
@@ -134,7 +162,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     }, RATE_CACHE_TTL_MS);
 
     return () => clearInterval(interval);
-  }, [refreshRate]);
+  }, [refreshRate, delivery?.ready, delivery?.location?.countryCode]);
 
   const setDisplayCurrency = useCallback((c: DisplayCurrency) => {
     setDisplayCurrencyState(c);
@@ -148,15 +176,16 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         amount,
         normalizeDisplayCurrency(typeof from === "string" ? from : from),
         displayCurrency,
-        usdInrRate
+        usdInrRate,
+        usdRates
       ),
-    [displayCurrency, usdInrRate]
+    [displayCurrency, usdInrRate, usdRates]
   );
 
   const format = useCallback(
     (amount: number, from: DisplayCurrency | string) => {
       const value = convert(amount, from);
-      return new Intl.NumberFormat(displayCurrency === "INR" ? "en-IN" : "en-US", {
+      return new Intl.NumberFormat(displayCurrencyLocale(displayCurrency), {
         style: "currency",
         currency: displayCurrency,
         maximumFractionDigits: displayCurrency === "INR" ? 0 : 2,

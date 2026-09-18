@@ -121,7 +121,7 @@ export function Footer() {
           <div className="col-span-2 lg:col-span-3">
             <SiteLogoLink size="desktop" className="mb-5" />
             <p className="text-slate-600 leading-relaxed mb-4 max-w-xs">
-              Flowers, cakes, and thoughtful gifts delivered across the USA. Premium online gifting for every celebration.
+              Flowers, cakes, and thoughtful gifts delivered across the Worldwide. Premium online gifting for every celebration.
             </p>
             <div className="space-y-2 text-slate-700">
               <p>

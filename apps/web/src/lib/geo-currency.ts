@@ -1,5 +1,10 @@
 import { headers } from "next/headers";
-import { parseViewerGeoFromHeaders, type ViewerGeo } from "@blossompot/shared";
+import {
+  currencyForCountryCode,
+  parseViewerGeoFromHeaders,
+  type DisplayCurrency,
+  type ViewerGeo,
+} from "@blossompot/shared";
 
 /** Full geo from CloudFront edge headers on Amplify (country, region, city). */
 export async function detectViewerGeo(): Promise<ViewerGeo & { country: string }> {
@@ -19,7 +24,6 @@ export async function detectViewerCountry(): Promise<string> {
 }
 
 /** Map visitor country to default storefront currency. */
-export function defaultCurrencyForCountry(country: string): "USD" | "INR" {
-  if (country === "IN") return "INR";
-  return "USD";
+export function defaultCurrencyForCountry(country: string): DisplayCurrency {
+  return currencyForCountryCode(country);
 }

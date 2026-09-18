@@ -1,8 +1,8 @@
 import {
-  convertCurrencyAmount,
-  roundForCurrency,
-  type ShopCurrency,
-} from "../currency";
+  convertCurrency,
+  roundDisplayAmount,
+  type DisplayCurrency,
+} from "./currency-display";
 import { GBO_FLAT_SHIPPING_USD, VENDOR_GBO } from "../constants";
 import {
   FLASH_COMBO_SHIPPING_USD,
@@ -55,23 +55,18 @@ export type FreeShippingQuote = {
 
 function toCurrency(
   amountUsd: number,
-  currency: ShopCurrency,
+  currency: DisplayCurrency,
   usdInrRate: number
 ): number {
-  if (currency === "USD") return roundForCurrency(amountUsd, "USD");
-  return roundForCurrency(
-    convertCurrencyAmount(amountUsd, "USD", "INR", usdInrRate),
-    "INR"
-  );
+  return convertCurrency(amountUsd, "USD", currency, usdInrRate);
 }
 
 function toUsd(
   amount: number,
-  currency: ShopCurrency,
+  currency: DisplayCurrency,
   usdInrRate: number
 ): number {
-  if (currency === "USD") return amount;
-  return convertCurrencyAmount(amount, "INR", "USD", usdInrRate);
+  return convertCurrency(amount, currency, "USD", usdInrRate);
 }
 
 /**
@@ -83,7 +78,7 @@ function toUsd(
  */
 export function quoteFreeShippingThreshold(input: {
   subtotal: number;
-  currency: ShopCurrency;
+  currency: DisplayCurrency;
   usdInrRate: number;
 }): FreeShippingQuote {
   const { subtotal, currency, usdInrRate } = input;
@@ -118,10 +113,10 @@ export function quoteFreeShippingThreshold(input: {
 
   const amountAwayFromFreeShipping = qualifiesForFreeShipping
     ? 0
-    : Math.max(0, roundForCurrency(thresholdInCurrency - subtotal, currency));
+    : Math.max(0, roundDisplayAmount(thresholdInCurrency - subtotal, currency));
   const amountAwayFromReducedShipping =
     tier === "low"
-      ? Math.max(0, roundForCurrency(reducedThresholdInCurrency - subtotal, currency))
+      ? Math.max(0, roundDisplayAmount(reducedThresholdInCurrency - subtotal, currency))
       : 0;
 
   return {
@@ -170,7 +165,7 @@ export function shippingVendorKey(item: {
  */
 export function quoteShipmentsShipping(input: {
   shipmentSubtotals: number[];
-  currency: ShopCurrency;
+  currency: DisplayCurrency;
   usdInrRate: number;
 }): {
   totalCharge: number;
@@ -183,7 +178,7 @@ export function quoteShipmentsShipping(input: {
       usdInrRate: input.usdInrRate,
     })
   );
-  const totalCharge = roundForCurrency(
+  const totalCharge = roundDisplayAmount(
     perShipment.reduce((sum, q) => sum + q.charge, 0),
     input.currency
   );
@@ -211,7 +206,7 @@ export function vendorSubtotalsForItems(
 }
 
 function flashComboShippingQuote(
-  currency: ShopCurrency,
+  currency: DisplayCurrency,
   usdInrRate: number
 ): FreeShippingQuote {
   const charge = toCurrency(FLASH_COMBO_SHIPPING_USD, currency, usdInrRate);
@@ -241,7 +236,7 @@ function flashComboShippingQuote(
 }
 
 function gboFlatShippingQuote(
-  currency: ShopCurrency,
+  currency: DisplayCurrency,
   usdInrRate: number
 ): FreeShippingQuote {
   const charge = toCurrency(GBO_FLAT_SHIPPING_USD, currency, usdInrRate);
@@ -277,7 +272,7 @@ export function quoteAddressShipmentShipping(input: {
     productSlug?: string;
     addons?: Array<{ price: number; quantity: number }>;
   }>;
-  currency: ShopCurrency;
+  currency: DisplayCurrency;
   usdInrRate: number;
 }): {
   totalCharge: number;
@@ -321,7 +316,7 @@ export function quoteAddressShipmentShipping(input: {
     });
   });
 
-  const totalCharge = roundForCurrency(
+  const totalCharge = roundDisplayAmount(
     perVendor.reduce((sum, q) => sum + q.charge, 0),
     input.currency
   );

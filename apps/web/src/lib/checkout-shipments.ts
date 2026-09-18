@@ -8,7 +8,7 @@ import {
   type CheckoutShipment,
   type FreeShippingQuote,
   type ShippingAddress,
-  type ShopCurrency,
+  type DisplayCurrency,
 } from "@blossompot/shared";
 import { emptyShippingAddress } from "@/lib/shipping-address";
 
@@ -152,7 +152,7 @@ export function shipmentSubtotalsFromUnits(
 export function quoteShippingFromDeliveryUnits(
   units: DeliveryUnit[],
   primary: ShippingAddress,
-  currency: ShopCurrency,
+  currency: DisplayCurrency,
   usdInrRate: number
 ): { totalCharge: number; perShipment: FreeShippingQuote[] } {
   const groups = new Map<
