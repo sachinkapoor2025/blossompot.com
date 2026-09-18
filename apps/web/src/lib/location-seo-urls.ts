@@ -367,3 +367,30 @@ export function preserveShopQuery(path: string, search: string): string {
 }
 
 export const PRIMARY_LOCATION_SITEMAP_ISOS = ["US", "GB", "CA", "AU", "AE"] as const;
+
+/** Country ISO if `/gifts-to-{slug}` is a shop catalog URL, not a city/state SEO page. */
+export function giftsCatalogCountryIso(locationSlug: string): string | null {
+  const parsed = parseLocationShopPath(`/gifts-to-${locationSlug.trim().toLowerCase()}`);
+  return parsed?.kind === "gifts-catalog" ? parsed.countryIso : null;
+}
+
+/**
+ * Specific `/gifts-to-{country}` rewrites must run before the generic city rewrite
+ * (`/gifts-to-:slug` → `/locations/:slug`) so Shop All Gifts / All Products do not 500.
+ */
+export function giftsCatalogCountryRewrites(): { source: string; destination: string }[] {
+  const seen = new Set<string>();
+  const rules: { source: string; destination: string }[] = [];
+  const add = (slug: string, iso: string) => {
+    const key = slug.trim().toLowerCase();
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    rules.push({ source: `/gifts-to-${key}`, destination: `/products?country=${iso}` });
+  };
+  for (const [iso, slug] of Object.entries(ISO_TO_SLUG)) add(slug, iso);
+  for (const slug of GIFTS_CATALOG_COUNTRY_SLUGS) {
+    const iso = isoFromCountrySeoSlug(slug);
+    if (iso) add(slug, iso);
+  }
+  return rules;
+}

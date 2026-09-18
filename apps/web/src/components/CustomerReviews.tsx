@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { testimonials } from "@/lib/site";
 import type { GoogleReviewsPayload } from "@/lib/google-reviews";
+import { CountryReviewSources } from "@/components/CountryReviewSources";
 
 type ReviewItem = {
   id: string;
@@ -103,6 +104,9 @@ export function CustomerReviews({ data }: CustomerReviewsProps) {
             Read all reviews or share yours →
           </Link>
         </p>
+        <div className="mx-auto mt-8 max-w-3xl">
+          <CountryReviewSources compact />
+        </div>
       </div>
     </section>
   );

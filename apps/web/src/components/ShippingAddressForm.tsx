@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { ShippingAddress } from "@blossompot/shared";
+import { currencyForCountryCode, type ShippingAddress } from "@blossompot/shared";
 import { LeadCaptureInput } from "@/components/LeadCaptureInput";
 import { PhoneInput, buildPhoneValue } from "@/components/PhoneInput";
+import { CountryRegionFields } from "@/components/CountryRegionFields";
 import { orderedCountryDialCodes } from "@/lib/country-codes";
+import { regionOptionsForCountry } from "@/lib/checkout-regions";
+import { useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
+import { useCurrency } from "@/lib/currency-context";
 import {
-  US_STATES,
   emptyShippingAddress,
   loadSavedAddresses,
   saveShippingAddress,
@@ -51,6 +54,8 @@ export function ShippingAddressForm({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [phoneCountry, setPhoneCountry] = useState("");
   const [phoneLocal, setPhoneLocal] = useState("");
+  const { countries } = useGboDeliveryCountries();
+  const { setDisplayCurrency } = useCurrency();
 
   useEffect(() => {
     const addresses = loadSavedAddresses();
@@ -91,6 +96,16 @@ export function ShippingAddressForm({
     }
   };
 
+  const changeCountry = (iso: string) => {
+    const next = iso.trim().toUpperCase();
+    const regions = regionOptionsForCountry(next);
+    const nextState = regions?.some((r) => r.code === value.state) ? value.state : "";
+    const nextPhone = buildPhoneValue(next, phoneLocal);
+    setPhoneCountry(next);
+    onChange({ ...value, country: next, state: nextState, phone: nextPhone });
+    setDisplayCurrency(currencyForCountryCode(next));
+  };
+
   const useSaved = (address: SavedShippingAddress) => {
     setSelectedId(address.id);
     onChange({
@@ -100,7 +115,7 @@ export function ShippingAddressForm({
       city: address.city,
       state: address.state,
       postalCode: address.postalCode,
-      country: "US",
+      country: address.country || "US",
       phone: address.phone,
       email: address.email,
       // Keep sister/sender details across address picks
@@ -113,6 +128,7 @@ export function ShippingAddressForm({
     setSelectedId(null);
     onChange({
       ...emptyShippingAddress(),
+      country: value.country,
       email: value.email,
       phone: value.phone,
       senderName: value.senderName,
@@ -300,44 +316,31 @@ export function ShippingAddressForm({
               autoComplete="address-level2"
             />
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">State</label>
-              <select
-                value={value.state}
-                onChange={(e) => update("state", e.target.value)}
-                required
-                autoComplete="address-level1"
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent bg-white"
-              >
-                <option value="">Select state</option>
-                {US_STATES.map((s) => (
-                  <option key={s.code} value={s.code}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <LeadCaptureInput
-              label="ZIP code"
-              value={value.postalCode}
-              onChange={(e) => update("postalCode", e.target.value)}
-              required
-              autoComplete="postal-code"
-              inputMode="numeric"
-            />
-            <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Country</label>
               <select
-                value="US"
-                disabled
+                value={value.country}
+                onChange={(e) => changeCountry(e.target.value)}
+                required
+                autoComplete="country"
                 aria-label="Country"
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 bg-slate-50 text-slate-600 cursor-not-allowed"
+                className="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-accent"
               >
-                <option value="US">United States</option>
+                {countries.map((c) => (
+                  <option key={c.countryCode} value={c.countryCode}>
+                    {c.countryName}
+                  </option>
+                ))}
+                {value.country && !countries.some((c) => c.countryCode === value.country) ? (
+                  <option value={value.country}>{value.country}</option>
+                ) : null}
               </select>
             </div>
           </div>
+          <CountryRegionFields
+            countryIso={value.country}
+            value={value}
+            onChange={({ state, postalCode }) => onChange({ ...value, state, postalCode })}
+          />
 
           <div className="flex flex-wrap items-center gap-4 pt-1">
             <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">

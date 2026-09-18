@@ -10,6 +10,8 @@ import {
   locationShopRewritePath,
   parseLocationShopPath,
   shopPathForLocation,
+  giftsCatalogCountryIso,
+  giftsCatalogCountryRewrites,
 } from "./location-seo-urls";
 
 describe("location SEO shop URLs", () => {
@@ -70,5 +72,13 @@ describe("location SEO shop URLs", () => {
     assert.match(copy.description, /USA/);
     assert.equal(copy.h1, "Send Flowers Online — Delivery to USA");
     assert.equal(locationShopHeading("/gifts-to-uk", "Shop Flowers, Cakes & Gifts"), "Shop Flowers, Cakes & Gifts to UK");
+  });
+
+  it("rewrites country catalog gifts-to URLs to /products before city pages", () => {
+    assert.equal(giftsCatalogCountryIso("usa"), "US");
+    assert.equal(giftsCatalogCountryIso("uk"), "GB");
+    assert.equal(giftsCatalogCountryIso("california"), null);
+    const usa = giftsCatalogCountryRewrites().find((r) => r.source === "/gifts-to-usa");
+    assert.deepEqual(usa, { source: "/gifts-to-usa", destination: "/products?country=US" });
   });
 });

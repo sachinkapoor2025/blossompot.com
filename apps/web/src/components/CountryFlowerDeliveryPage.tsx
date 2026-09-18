@@ -100,6 +100,22 @@ export async function CountryFlowerDeliveryPage({
       />
       <Breadcrumbs items={crumbs} />
       <h1 className="text-3xl font-bold text-primary mb-3">{page.h1}</h1>
+
+      {featured.length > 0 ? (
+        <section className="mb-10">
+          <h2 className="text-xl font-bold text-primary mb-3">Featured gifts for {page.countryName}</h2>
+          <p className="text-slate-700 mb-4 max-w-3xl leading-relaxed">
+            A rotating selection from the live {site.name} catalog — flowers first, then cakes and hampers.
+            Open any product for current price, inventory, and delivery timing.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {featured.map((product) => (
+              <HomeProductCard key={product.slug} product={product} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <p className="text-slate-600 mb-6 max-w-3xl leading-relaxed">
         {applyInlineLinks(page.intro, inlineLinks, { usedHrefs, currentPath: page.href, max: 4 })}
       </p>
@@ -133,21 +149,6 @@ export async function CountryFlowerDeliveryPage({
           ))}
         </ul>
       </section>
-
-      {featured.length > 0 ? (
-        <section className="mb-10">
-          <h2 className="text-xl font-bold text-primary mb-3">Featured gifts for {page.countryName}</h2>
-          <p className="text-slate-700 mb-4 max-w-3xl leading-relaxed">
-            A rotating selection from the live {site.name} catalog — flowers first, then cakes and hampers.
-            Open any product for current price, inventory, and delivery timing.
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {featured.map((product) => (
-              <HomeProductCard key={product.slug} product={product} />
-            ))}
-          </div>
-        </section>
-      ) : null}
 
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-4">{page.occasionsHeading}</h2>

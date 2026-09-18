@@ -2,7 +2,9 @@
 
 import type { ShippingAddress } from "@blossompot/shared";
 import { LeadCaptureInput } from "@/components/LeadCaptureInput";
-import { US_STATES } from "@/lib/shipping-address";
+import { CountryRegionFields } from "@/components/CountryRegionFields";
+import { regionOptionsForCountry } from "@/lib/checkout-regions";
+import { useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
 
 export function AddressFormFields({
   value,
@@ -11,8 +13,15 @@ export function AddressFormFields({
   value: ShippingAddress;
   onChange: (value: ShippingAddress) => void;
 }) {
+  const { countries } = useGboDeliveryCountries();
   const update = (field: keyof ShippingAddress, fieldValue: string) => {
     onChange({ ...value, [field]: fieldValue });
+  };
+  const changeCountry = (iso: string) => {
+    const next = iso.trim().toUpperCase();
+    const regions = regionOptionsForCountry(next);
+    const nextState = regions?.some((r) => r.code === value.state) ? value.state : "";
+    onChange({ ...value, country: next, state: nextState });
   };
 
   return (
@@ -61,41 +70,26 @@ export function AddressFormFields({
           autoComplete="address-level2"
         />
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">State</label>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Country</label>
           <select
-            value={value.state}
-            onChange={(e) => update("state", e.target.value)}
+            value={value.country}
+            onChange={(e) => changeCountry(e.target.value)}
             required
             className="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent bg-white"
           >
-            <option value="">Select state</option>
-            {US_STATES.map((s) => (
-              <option key={s.code} value={s.code}>
-                {s.name}
+            {countries.map((c) => (
+              <option key={c.countryCode} value={c.countryCode}>
+                {c.countryName}
               </option>
             ))}
           </select>
         </div>
       </div>
-      <div className="grid sm:grid-cols-2 gap-4">
-        <LeadCaptureInput
-          label="ZIP code"
-          value={value.postalCode}
-          onChange={(e) => update("postalCode", e.target.value)}
-          required
-          inputMode="numeric"
-          autoComplete="postal-code"
-        />
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Country</label>
-          <input
-            type="text"
-            value="United States"
-            readOnly
-            className="w-full border border-slate-200 rounded-lg px-3 py-2 bg-slate-50 text-slate-600"
-          />
-        </div>
-      </div>
+      <CountryRegionFields
+        countryIso={value.country}
+        value={value}
+        onChange={({ state, postalCode }) => onChange({ ...value, state, postalCode })}
+      />
     </div>
   );
 }

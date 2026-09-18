@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { applyInlineLinks } from "@/lib/inline-links";
+import { ShopLocationLink } from "@/components/ShopLocationLink";
 import { homepageInlineLinks } from "@/lib/content/page-inline-links";
 import { whatsappChatUrl } from "@/lib/site";
 import { homeSeoContent } from "@/lib/content/home-seo";
@@ -60,9 +61,9 @@ export function HomeSeoSection() {
                 ))}
               </ul>
               <p className="mt-4 text-sm">
-                <Link href="/products" className="text-nav font-semibold hover:underline">
+                <ShopLocationLink href="/products" catalog className="text-nav font-semibold hover:underline">
                   View all gifts →
-                </Link>
+                </ShopLocationLink>
               </p>
             </section>
 
@@ -96,12 +97,13 @@ export function HomeSeoSection() {
                 Browse flowers, cakes, and hampers above — or reach out and we&apos;ll help you pick the right surprise.
               </p>
               <div className="flex flex-wrap gap-3 text-sm">
-                <Link
+                <ShopLocationLink
                   href="/products"
+                  catalog
                   className="bg-white text-nav px-4 py-2 rounded-lg font-medium hover:bg-slate-100"
                 >
                   Shop all gifts
-                </Link>
+                </ShopLocationLink>
                 <a
                   href={whatsappChatUrl("Hi BlossomPot, I want to send a gift in the USA.")}
                   target="_blank"

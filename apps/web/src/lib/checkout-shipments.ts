@@ -59,7 +59,7 @@ function withSender(
 ): CheckoutShipment["shippingAddress"] {
   return {
     ...address,
-    country: "US",
+    country: (address.country || primary.country || "US").trim().toUpperCase().slice(0, 2),
     senderName: (primary.senderName ?? "").trim() || "Sender",
     senderMessage:
       (primary.senderMessage ?? "").trim() ||

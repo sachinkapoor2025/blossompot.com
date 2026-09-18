@@ -117,6 +117,16 @@ export function StateGeoTemplate({
       />
       <Breadcrumbs items={crumbs} />
       <h1 className="text-3xl font-bold text-primary mb-3">{geoPageH1(geo)}</h1>
+
+      <VisualHeading as={compactSeo ? "p" : "h2"} className="text-xl font-bold text-primary mb-3">
+        Flower delivery {place} — featured gifts
+      </VisualHeading>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-10">
+        {products.map((p) => (
+          <HomeProductCard key={p.slug} product={p} />
+        ))}
+      </div>
+
       <p className="text-slate-600 mb-4 max-w-3xl leading-relaxed">
         {applyInlineLinks(geo.introParagraph, statePageInlineLinks, { usedHrefs, currentPath: path, max: 4 })}
       </p>
@@ -145,15 +155,6 @@ export function StateGeoTemplate({
           ))}
         </ul>
       </section>
-
-      <VisualHeading as={compactSeo ? "p" : "h2"} className="text-xl font-bold text-primary mb-3">
-        Flower delivery {place} — featured gifts
-      </VisualHeading>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {products.map((p) => (
-          <HomeProductCard key={p.slug} product={p} />
-        ))}
-      </div>
 
       <section className="mt-12 grid md:grid-cols-2 gap-6">
         <div>
@@ -244,6 +245,16 @@ export function CityGeoTemplate({
       />
       <Breadcrumbs items={crumbs} />
       <h1 className="text-3xl font-bold text-primary mb-3">{geoPageH1(geo)}</h1>
+
+      <h2 className="text-xl font-bold text-primary mb-3">
+        Flower delivery {geo.name} — featured gifts
+      </h2>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-10">
+        {products.map((p) => (
+          <HomeProductCard key={p.slug} product={p} />
+        ))}
+      </div>
+
       <p className="text-slate-600 mb-4 max-w-3xl leading-relaxed">
         {applyInlineLinks(geo.introParagraph, cityPageInlineLinks, { usedHrefs, currentPath: path, max: 4 })}
       </p>
@@ -267,15 +278,6 @@ export function CityGeoTemplate({
             ZIP prefixes with documented coverage: {geo.zipPrefixes.join(", ")}.
           </p>
         )}
-      </div>
-
-      <h2 className="text-xl font-bold text-primary mb-3">
-        Flower delivery {geo.name} — featured gifts
-      </h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {products.map((p) => (
-          <HomeProductCard key={p.slug} product={p} />
-        ))}
       </div>
 
       <section className="mt-12 grid md:grid-cols-2 gap-6">

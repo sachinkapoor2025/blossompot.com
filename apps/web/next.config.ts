@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { categoryRedirectRules, categoryRewriteRules } from "./src/lib/category-urls";
+import { giftsCatalogCountryRewrites } from "./src/lib/location-seo-urls";
 import { legacyRedirectRules } from "./src/lib/legacy-urls";
 import { STOREFRONT_CSP, STOREFRONT_SECURITY_HEADERS } from "./src/lib/security-headers";
 
@@ -52,6 +53,7 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       ...categoryRewriteRules(),
+      ...giftsCatalogCountryRewrites(),
       { source: "/gifts-to-:slug", destination: "/locations/:slug" },
     ];
   },

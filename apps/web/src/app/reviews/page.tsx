@@ -3,15 +3,17 @@ import Link from "next/link";
 import { GoogleReviews } from "@/components/GoogleReviews";
 import { getGoogleReviews } from "@/lib/google-reviews";
 import { ReviewForm } from "@/components/ReviewForm";
+import { CountryReviewSources } from "@/components/CountryReviewSources";
 import { JsonLd } from "@/components/JsonLd";
 import { trustFacts } from "@/lib/trust";
 import { site } from "@/lib/site";
 import { pageMetadata, canonical } from "@/lib/seo";
+import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Customer Reviews — Flowers, Cakes & Gifts USA",
+  title: "Customer Reviews — Flowers, Cakes & Gifts Worldwide",
   description:
-    "Read verified Google reviews of BlossomPot flower, cake, and gift delivery across the USA. Share your experience after delivery.",
+    "Read customer reviews of BlossomPot flower, cake, and gift delivery worldwide. Find Google, Trustpilot, and local review sites for your country, and share your experience after delivery.",
   path: "/reviews",
 });
 
@@ -23,7 +25,7 @@ function reviewsPageJsonLd(ratingValue: number, reviewCount: number) {
     "@type": "WebPage",
     name: `Customer Reviews — ${site.name}`,
     url: canonical("/reviews"),
-    description: "Customer reviews for BlossomPot USA flower, cake, and gift delivery.",
+    description: "Customer reviews for BlossomPot flower, cake, and gift delivery worldwide.",
     mainEntity: {
       "@type": "Organization",
       name: site.name,
@@ -39,6 +41,7 @@ function reviewsPageJsonLd(ratingValue: number, reviewCount: number) {
 
 export default async function ReviewsPage() {
   const googleReviews = await getGoogleReviews();
+  const country = await getStorefrontDeliveryCountry();
   const hasLiveGoogle =
     googleReviews.source === "google" &&
     typeof googleReviews.rating === "number" &&
@@ -55,7 +58,8 @@ export default async function ReviewsPage() {
           {trustFacts.seasonLabel} — we&apos;re building trust one delivery at a time. Customers order from
           BlossomPot for {trustFacts.fulfillment.toLowerCase()}.
         </p>
-        <p className="text-sm text-slate-500">
+        <CountryReviewSources countryCode={country} />
+        <p className="text-sm text-slate-500 mt-6">
           Received your gift?{" "}
           <a href="#write-review" className="text-nav font-semibold hover:underline">
             Write a review below

@@ -49,6 +49,8 @@ import {
   cartHasCouponExcludedItems,
   isFlashComboProduct,
   checkoutCurrencyForDisplay,
+  isValidPostal,
+  getDeliveryCountry,
   type Order,
   type RateQuote,
   type ShippingAddress,
@@ -383,12 +385,15 @@ function CheckoutPageInner() {
   }, [user, token, sessionId]);
 
   useEffect(() => {
-    if (!delivery.location || delivery.location.countryCode !== "US") return;
-    setAddress((current) =>
-      current.postalCode
-        ? current
-        : { ...current, postalCode: delivery.location!.postalDisplay, country: "US" }
-    );
+    if (!delivery.location?.countryCode) return;
+    setAddress((current) => {
+      if (current.line1) return current;
+      return {
+        ...current,
+        country: delivery.location!.countryCode,
+        postalCode: current.postalCode || delivery.location!.postalDisplay,
+      };
+    });
   }, [delivery.location]);
 
   const captureField = (field: string, value: string) => {
@@ -532,7 +537,7 @@ function CheckoutPageInner() {
 
     const payload = {
       ...address,
-      country: "US" as const,
+      country: (address.country || "US").trim().toUpperCase().slice(0, 2),
       label: address.name,
       isDefault: true,
       phone: address.phone.trim(),
@@ -627,12 +632,16 @@ function CheckoutPageInner() {
 
       const payload: ShippingAddress = {
         ...address,
-        country: "US",
+        country: (address.country || "US").trim().toUpperCase().slice(0, 2),
         phone,
         senderName,
         senderMessage,
         ...(address.line2?.trim() ? { line2: address.line2.trim() } : { line2: undefined }),
       };
+      if (!isValidPostal(payload.country, payload.postalCode)) {
+        const label = getDeliveryCountry(payload.country)?.postalLabel ?? "postal code";
+        throw new Error(`Enter a valid ${label} for the selected country.`);
+      }
 
       const unitsError = validateDeliveryUnits(deliveryUnits, payload);
       if (unitsError) throw new Error(unitsError);
