@@ -327,6 +327,7 @@ export function isLocationUrlExemptPath(pathname: string): boolean {
   if (p === "/locations" || p.startsWith("/locations/")) return true;
   if (p === "/delivery-locations" || p.startsWith("/delivery-locations/")) return true;
   if (p.startsWith("/flower-delivery-")) return true;
+  if (p === "/gift-catalog") return true;
   if (p === "/cities" || p.startsWith("/cities/")) return true;
   if (p === "/countries" || p.startsWith("/countries/")) return true;
   const giftsTo = p.match(/^\/gifts-to-([a-z0-9-]+)$/);

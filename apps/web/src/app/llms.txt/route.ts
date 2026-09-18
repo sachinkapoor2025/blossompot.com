@@ -99,6 +99,7 @@ ${categories.join("\n")}
 ## Key pages
 
 - **Home:** ${siteUrl}/
+- **Gift catalog:** ${siteUrl}/gift-catalog
 - **Shop all gifts:** ${siteUrl}/products
 - **Locations hub (international + USA):** ${siteUrl}/locations
 - **Delivery locations index (USA):** ${siteUrl}/delivery-locations

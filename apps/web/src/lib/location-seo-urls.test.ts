@@ -50,6 +50,7 @@ describe("location SEO shop URLs", () => {
     assert.equal(isLocationUrlExemptPath("/cities"), true);
     assert.equal(isLocationUrlExemptPath("/countries"), true);
     assert.equal(isLocationUrlExemptPath("/flower-delivery-usa"), true);
+    assert.equal(isLocationUrlExemptPath("/gift-catalog"), true);
     assert.equal(shopPathForLocation("/", "US"), "/");
     assert.equal(shopPathForLocation("/remember", "GB"), "/remember");
   });

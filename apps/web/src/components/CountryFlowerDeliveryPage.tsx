@@ -22,8 +22,13 @@ const FLOWER_CATEGORY_SLUGS = new Set(["flowers", "flower-bouquets"]);
 
 function pickCountryProducts(products: Product[], slug: CountryFlowerDeliverySlug): Product[] {
   const visible = products.filter((p) => p.published !== false);
+  const flowers = visible.filter((p) => FLOWER_CATEGORY_SLUGS.has(p.categorySlug));
+  if (slug === "usa") {
+    const pool = flowers.length > 0 ? flowers : visible;
+    return shuffleForCity(pool, `flower-delivery-${slug}`).slice(0, 24);
+  }
   const flowersFirst = [
-    ...visible.filter((p) => FLOWER_CATEGORY_SLUGS.has(p.categorySlug)),
+    ...flowers,
     ...visible.filter((p) => !FLOWER_CATEGORY_SLUGS.has(p.categorySlug)),
   ];
   return shuffleForCity(flowersFirst, `flower-delivery-${slug}`).slice(0, 10);
@@ -43,6 +48,7 @@ export async function CountryFlowerDeliveryPage({
   }
   products = mergeProductsPreferExisting(products, getCatalogProducts());
   const featured = pickCountryProducts(products, country);
+  const productsFirst = country === "usa";
   const otherCountries = otherCountryFlowerDeliveryLinks(country);
   const inlineLinks = countryPageInlineLinks[country] ?? [];
   const usedHrefs = new Set<string>();
@@ -50,6 +56,25 @@ export async function CountryFlowerDeliveryPage({
     { label: "Home", href: "/" },
     { label: page.menuLabel },
   ];
+
+  const productSection =
+    featured.length > 0 ? (
+      <section className="mb-10">
+        <h2 className="text-xl font-bold text-primary mb-3">
+          {productsFirst ? `Flower gifts for ${page.countryName}` : `Featured gifts for ${page.countryName}`}
+        </h2>
+        <p className="text-slate-700 mb-4 max-w-3xl leading-relaxed">
+          {productsFirst
+            ? `Shop flowers available for ${page.countryName} delivery. Open any product for current price, inventory, and delivery timing.`
+            : `A rotating selection from the live ${site.name} catalog — flowers first, then cakes and hampers. Open any product for current price, inventory, and delivery timing.`}
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {featured.map((product) => (
+            <HomeProductCard key={product.slug} product={product} />
+          ))}
+        </div>
+      </section>
+    ) : null;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
@@ -99,22 +124,9 @@ export async function CountryFlowerDeliveryPage({
         ]}
       />
       <Breadcrumbs items={crumbs} />
+      {productsFirst ? productSection : null}
       <h1 className="text-3xl font-bold text-primary mb-3">{page.h1}</h1>
-
-      {featured.length > 0 ? (
-        <section className="mb-10">
-          <h2 className="text-xl font-bold text-primary mb-3">Featured gifts for {page.countryName}</h2>
-          <p className="text-slate-700 mb-4 max-w-3xl leading-relaxed">
-            A rotating selection from the live {site.name} catalog — flowers first, then cakes and hampers.
-            Open any product for current price, inventory, and delivery timing.
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {featured.map((product) => (
-              <HomeProductCard key={product.slug} product={product} />
-            ))}
-          </div>
-        </section>
-      ) : null}
+      {productsFirst ? null : productSection}
 
       <p className="text-slate-600 mb-6 max-w-3xl leading-relaxed">
         {applyInlineLinks(page.intro, inlineLinks, { usedHrefs, currentPath: page.href, max: 4 })}

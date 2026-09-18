@@ -153,7 +153,7 @@ export const GIFTING_MARKETING_EMAIL_CONFIG: GiftingMarketingEmailConfig = {
     message:
       "Make someone's day special with a thoughtful gift. We deliver beautiful gifts to 200+ countries worldwide.",
     ctaText: "Send a Gift",
-    ctaHref: `${SITE}/#gift-catalog`,
+    ctaHref: `${SITE}/gift-catalog`,
   },
   featured: {
     imageUrl: FEATURED_ROSES[0] ?? IMG_ROSES,
