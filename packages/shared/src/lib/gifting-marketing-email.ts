@@ -17,16 +17,21 @@ const FB_ICON = `${SITE}/email-templates/icons/facebook.png`;
 const IG_ICON = `${SITE}/email-templates/icons/instagram.png`;
 
 const PRIMARY = "#C23A6B";
-const PRIMARY_DARK = "#9E2E57";
-const BLUSH = "#F8EEF2";
-const CREAM = "#FFF8F5";
-const INK = "#2A1F24";
-const MUTED = "#6B5560";
-const LINE = "#EBD5DC";
-const PAGE_BG = "#F4E8EC";
+const PRIMARY_DARK = "#9E2D55";
+const PETAL = "#FFF5F8";
+const CREAM = "#F7FCF8";
+const INK = "#243028";
+const MUTED = "#5C6B63";
+const LINE = "#E8D4DC";
+const PAGE_BG = "#F3FAF5";
 const WHITE = "#ffffff";
 const FOOTER_BG = "#1A3D34";
 const GOLD = "#E8C9A0";
+const SAGE = "#2F8F6B";
+
+const IMG_ROSES = cdnUploadUrl("catalog/roses-red-1.jpg");
+const IMG_CAKE = cdnUploadUrl("catalog/cake-chocolate-1.jpg");
+const IMG_HAMPER = cdnUploadUrl("catalog/hamper-1.jpg");
 
 const FEATURED_ROSES = catalogImagesForProduct({
   name: "Classic Red Rose Bouquet",
@@ -121,7 +126,7 @@ export const GIFTING_MARKETING_EMAIL_CONFIG: GiftingMarketingEmailConfig = {
     {
       name: "Flowers",
       description: "Fresh bouquets for every occasion.",
-      imageUrl: cdnUploadUrl("editorial/tile-flowers.jpg"),
+      imageUrl: IMG_ROSES,
       imageAlt: "Shop flowers",
       href: `${SITE}/flowers`,
       buttonText: "Shop Flowers",
@@ -129,7 +134,7 @@ export const GIFTING_MARKETING_EMAIL_CONFIG: GiftingMarketingEmailConfig = {
     {
       name: "Cakes",
       description: "Celebration cakes delivered fresh.",
-      imageUrl: cdnUploadUrl("editorial/tile-cakes.jpg"),
+      imageUrl: IMG_CAKE,
       imageAlt: "Shop cakes",
       href: `${SITE}/cakes`,
       buttonText: "Shop Cakes",
@@ -137,7 +142,7 @@ export const GIFTING_MARKETING_EMAIL_CONFIG: GiftingMarketingEmailConfig = {
     {
       name: "Gift Hampers",
       description: "Curated treats in one beautiful gift.",
-      imageUrl: cdnUploadUrl("editorial/tile-hampers.jpg"),
+      imageUrl: IMG_HAMPER,
       imageAlt: "Shop gift hampers",
       href: `${SITE}/gift-hampers`,
       buttonText: "Shop Hampers",
@@ -148,10 +153,10 @@ export const GIFTING_MARKETING_EMAIL_CONFIG: GiftingMarketingEmailConfig = {
     message:
       "Make someone's day special with a thoughtful gift. We deliver beautiful gifts to 200+ countries worldwide.",
     ctaText: "Send a Gift",
-    ctaHref: `${SITE}/#gift-catalog`,
+    ctaHref: `${SITE}/gift-catalog`,
   },
   featured: {
-    imageUrl: FEATURED_ROSES[0] ?? cdnUploadUrl("catalog/roses-red-1.jpg"),
+    imageUrl: FEATURED_ROSES[0] ?? IMG_ROSES,
     imageAlt: "Classic Red Rose Bouquet",
     name: "Classic Red Rose Bouquet",
     description:
@@ -205,21 +210,21 @@ function escAttr(value: string): string {
 
 function ctaButton(href: string, label: string, opts?: { width?: number; fill?: string }) {
   const fill = opts?.fill ?? PRIMARY;
-  const width = opts?.width ?? 180;
+  const width = opts?.width ?? 200;
   const safeHref = escAttr(href);
   const safeLabel = escapeHtml(label);
   return `
                     <!--[if mso]>
-                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${safeHref}" style="height:48px;v-text-anchor:middle;width:${width}px;" arcsize="17%" stroke="f" fillcolor="${fill}">
+                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${safeHref}" style="height:48px;v-text-anchor:middle;width:${width}px;" arcsize="50%" stroke="f" fillcolor="${fill}">
                       <w:anchorlock/>
-                      <center style="color:#ffffff;font-family:Georgia, 'Times New Roman', serif;font-size:15px;font-weight:bold;">${safeLabel}</center>
+                      <center style="color:#ffffff;font-family:Arial, Helvetica, sans-serif;font-size:14px;font-weight:bold;">${safeLabel}</center>
                     </v:roundrect>
                     <![endif]-->
                     <!--[if !mso]><!-- -->
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:0 auto;">
                       <tr>
-                        <td align="center" bgcolor="${fill}" style="background-color:${fill};border-radius:8px;">
-                          <a href="${safeHref}" target="_blank" style="display:inline-block;padding:14px 28px;font-family:Georgia,'Times New Roman',serif;font-size:15px;line-height:20px;font-weight:bold;color:#ffffff;text-decoration:none;border-radius:8px;">
+                        <td align="center" bgcolor="${fill}" style="background-color:${fill};border-radius:28px;">
+                          <a href="${safeHref}" target="_blank" style="display:inline-block;padding:14px 32px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:20px;font-weight:bold;letter-spacing:0.4px;color:#ffffff;text-decoration:none;border-radius:28px;">
                             ${safeLabel}
                           </a>
                         </td>
@@ -231,22 +236,22 @@ function ctaButton(href: string, label: string, opts?: { width?: number; fill?: 
 function categoryCard(cat: GiftingEmailCategory): string {
   const href = escAttr(cat.href);
   return `
-                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;background-color:${WHITE};border:1px solid ${LINE};border-radius:12px;overflow:hidden;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;background-color:${WHITE};border:1px solid ${LINE};border-radius:16px;overflow:hidden;">
                       <tr>
-                        <td align="center" style="padding:0;line-height:0;font-size:0;background-color:${BLUSH};">
+                        <td align="center" style="padding:0;line-height:0;font-size:0;background-color:${PETAL};">
                           <a href="${href}" target="_blank" style="text-decoration:none;">
-                            <img class="fluid" src="${escAttr(cat.imageUrl)}" width="180" alt="${escAttr(cat.imageAlt)}" style="display:block;width:100%;max-width:180px;height:auto;border:0;margin:0 auto;" />
+                            <img class="fluid" src="${escAttr(cat.imageUrl)}" width="188" alt="${escAttr(cat.imageAlt)}" style="display:block;width:100%;max-width:188px;height:auto;border:0;margin:0 auto;" />
                           </a>
                         </td>
                       </tr>
                       <tr>
-                        <td align="center" style="padding:14px 12px 18px 12px;">
-                          <div style="font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:20px;font-weight:bold;color:${INK};padding-bottom:6px;">${escapeHtml(cat.name)}</div>
-                          <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:17px;color:${MUTED};padding-bottom:12px;">${escapeHtml(cat.description)}</div>
+                        <td align="center" style="padding:16px 14px 20px 14px;">
+                          <div style="font-family:Georgia,'Times New Roman',serif;font-size:18px;line-height:22px;font-weight:bold;color:${INK};padding-bottom:6px;">${escapeHtml(cat.name)}</div>
+                          <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:${MUTED};padding-bottom:14px;">${escapeHtml(cat.description)}</div>
                           <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
                             <tr>
-                              <td align="center" bgcolor="${PRIMARY}" style="background-color:${PRIMARY};border-radius:6px;">
-                                <a href="${href}" target="_blank" style="display:inline-block;padding:8px 14px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:16px;font-weight:bold;color:#ffffff;text-decoration:none;border-radius:6px;">${escapeHtml(cat.buttonText)}</a>
+                              <td align="center" bgcolor="${PRIMARY}" style="background-color:${PRIMARY};border-radius:22px;">
+                                <a href="${href}" target="_blank" style="display:inline-block;padding:9px 16px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:16px;font-weight:bold;color:#ffffff;text-decoration:none;border-radius:22px;">${escapeHtml(cat.buttonText)}</a>
                               </td>
                             </tr>
                           </table>
@@ -325,7 +330,7 @@ export function buildGiftingMarketingEmailHtml(
   const { hero, worldwide, featured, footer } = cfg;
   const priceRow = featured.priceLabel
     ? `
-              <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;line-height:28px;font-weight:bold;color:${PRIMARY};padding-bottom:16px;">
+              <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:30px;font-weight:bold;color:${PRIMARY};padding:4px 0 16px 0;">
                 ${escapeHtml(featured.priceLabel)}
               </div>`
     : "";
@@ -357,10 +362,11 @@ export function buildGiftingMarketingEmailHtml(
     @media only screen and (max-width: 620px) {
       .email-container { width: 100% !important; max-width: 100% !important; }
       .fluid { width: 100% !important; max-width: 100% !important; height: auto !important; }
-      .stack-col { display: block !important; width: 100% !important; max-width: 100% !important; padding-left: 0 !important; padding-right: 0 !important; padding-bottom: 12px !important; }
-      .mobile-pad { padding-left: 18px !important; padding-right: 18px !important; }
+      .stack-col { display: block !important; width: 100% !important; max-width: 100% !important; padding-left: 0 !important; padding-right: 0 !important; padding-bottom: 16px !important; }
+      .mobile-pad { padding-left: 20px !important; padding-right: 20px !important; }
       .hero-title { font-size: 26px !important; line-height: 32px !important; }
       .section-title { font-size: 22px !important; line-height: 28px !important; }
+      .featured-pad { padding: 20px 4px 8px 4px !important; text-align: center !important; }
     }
   </style>
 </head>
@@ -370,21 +376,25 @@ export function buildGiftingMarketingEmailHtml(
   </div>
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;background-color:${PAGE_BG};">
     <tr>
-      <td align="center" style="padding:20px 10px;">
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="email-container" style="border-collapse:collapse;width:600px;max-width:600px;background-color:${WHITE};border-radius:16px;overflow:hidden;">
+      <td align="center" style="padding:24px 12px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="email-container" style="border-collapse:collapse;width:600px;max-width:600px;background-color:${WHITE};border-radius:20px;overflow:hidden;">
           <tr>
-            <td align="center" bgcolor="${CREAM}" style="padding:20px 24px 14px 24px;background-color:${CREAM};">
+            <td align="center" bgcolor="${WHITE}" style="padding:22px 28px 12px 28px;background-color:${WHITE};">
               <a href="${escAttr(cfg.logoHref)}" target="_blank" style="text-decoration:none;">
-                <img src="${escAttr(cfg.logoUrl)}" width="168" alt="${escAttr(cfg.logoAlt)}" style="display:block;width:168px;max-width:70%;height:auto;border:0;margin:0 auto;" />
+                <img src="${escAttr(cfg.logoUrl)}" width="176" alt="${escAttr(cfg.logoAlt)}" style="display:block;width:176px;max-width:72%;height:auto;border:0;margin:0 auto;" />
               </a>
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:16px;letter-spacing:2.2px;text-transform:uppercase;color:${SAGE};padding-top:10px;">
+                Flowers · Cakes · Gifts
+              </div>
             </td>
           </tr>
           <tr>
-            <td height="5" style="height:5px;line-height:5px;font-size:0;background-color:${PRIMARY};">
+            <td height="4" style="height:4px;line-height:4px;font-size:0;background-color:${PRIMARY};">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
                 <tr>
-                  <td width="70%" height="5" bgcolor="${PRIMARY}" style="background-color:${PRIMARY};font-size:0;line-height:5px;">&nbsp;</td>
-                  <td width="30%" height="5" bgcolor="${PRIMARY_DARK}" style="background-color:${PRIMARY_DARK};font-size:0;line-height:5px;">&nbsp;</td>
+                  <td width="62%" height="4" bgcolor="${PRIMARY}" style="background-color:${PRIMARY};font-size:0;line-height:4px;">&nbsp;</td>
+                  <td width="22%" height="4" bgcolor="${SAGE}" style="background-color:${SAGE};font-size:0;line-height:4px;">&nbsp;</td>
+                  <td width="16%" height="4" bgcolor="${PRIMARY_DARK}" style="background-color:${PRIMARY_DARK};font-size:0;line-height:4px;">&nbsp;</td>
                 </tr>
               </table>
             </td>
@@ -399,24 +409,25 @@ export function buildGiftingMarketingEmailHtml(
             </td>
           </tr>
           <tr>
-            <td class="mobile-pad" align="center" bgcolor="${BLUSH}" style="padding:32px 28px 30px 28px;background-color:${BLUSH};">
-              <div class="hero-title" style="font-family:Georgia,'Times New Roman',serif;font-size:30px;line-height:36px;font-weight:bold;color:${INK};padding-bottom:10px;">
+            <td class="mobile-pad" align="center" bgcolor="${PETAL}" style="padding:36px 32px 34px 32px;background-color:${PETAL};">
+              <div class="hero-title" style="font-family:Georgia,'Times New Roman',serif;font-size:32px;line-height:38px;font-weight:bold;color:${INK};padding-bottom:12px;">
                 ${escapeHtml(hero.headline)}
               </div>
-              <div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:23px;color:${MUTED};padding:0 4px 20px 4px;">
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:${MUTED};padding:0 8px 22px 8px;max-width:480px;margin:0 auto;">
                 ${escapeHtml(hero.message)}
               </div>
-              ${ctaButton(hero.ctaHref, hero.ctaText, { width: 160 })}
+              ${ctaButton(hero.ctaHref, hero.ctaText, { width: 180 })}
             </td>
           </tr>
 
           <!-- Top categories -->
           <tr>
-            <td class="mobile-pad" style="padding:32px 20px 28px 20px;background-color:${WHITE};">
-              <div class="section-title" style="font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:30px;font-weight:bold;color:${INK};text-align:center;padding-bottom:6px;">
+            <td class="mobile-pad" style="padding:36px 20px 32px 20px;background-color:${WHITE};">
+              <div class="section-title" style="font-family:Georgia,'Times New Roman',serif;font-size:26px;line-height:32px;font-weight:bold;color:${INK};text-align:center;padding-bottom:8px;">
                 ${escapeHtml(cfg.categoriesHeading)}
               </div>
-              <div style="font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:20px;color:${MUTED};text-align:center;padding-bottom:20px;">
+              <div style="width:48px;height:3px;background-color:${PRIMARY};margin:0 auto 12px auto;border-radius:2px;font-size:0;line-height:0;">&nbsp;</div>
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:21px;color:${MUTED};text-align:center;padding-bottom:22px;">
                 ${escapeHtml(cfg.categoriesSubheading)}
               </div>
               ${categoriesRow(cfg.categories)}
@@ -425,34 +436,43 @@ export function buildGiftingMarketingEmailHtml(
 
           <!-- Worldwide delivery -->
           <tr>
-            <td class="mobile-pad" align="center" bgcolor="${PRIMARY}" style="padding:36px 28px 34px 28px;background-color:${PRIMARY};">
-              <div class="section-title" style="font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:30px;font-weight:bold;color:#ffffff;padding-bottom:10px;">
+            <td class="mobile-pad" align="center" bgcolor="${SAGE}" style="padding:40px 32px 38px 32px;background-color:${SAGE};">
+              <div class="section-title" style="font-family:Georgia,'Times New Roman',serif;font-size:26px;line-height:32px;font-weight:bold;color:#ffffff;padding-bottom:12px;">
                 ${escapeHtml(worldwide.heading)}
               </div>
-              <div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:23px;color:#FDECF2;padding:0 4px 20px 4px;">
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#EAF6F0;padding:0 6px 22px 6px;">
                 ${escapeHtml(worldwide.message)}
               </div>
-              ${ctaButton(worldwide.ctaHref, worldwide.ctaText, { fill: PRIMARY_DARK, width: 170 })}
+              ${ctaButton(worldwide.ctaHref, worldwide.ctaText, { fill: PRIMARY, width: 180 })}
             </td>
           </tr>
 
           <!-- Featured product -->
           <tr>
-            <td class="mobile-pad" align="center" style="padding:32px 24px 36px 24px;background-color:${CREAM};">
-              <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:16px;letter-spacing:2px;text-transform:uppercase;color:${PRIMARY};font-weight:bold;padding-bottom:12px;">
+            <td class="mobile-pad" style="padding:36px 24px 40px 24px;background-color:${CREAM};">
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:16px;letter-spacing:2.4px;text-transform:uppercase;color:${PRIMARY};font-weight:bold;text-align:center;padding-bottom:8px;">
                 Featured Gift
               </div>
-              <a href="${escAttr(featured.href)}" target="_blank" style="text-decoration:none;">
-                <img class="fluid" src="${escAttr(featured.imageUrl)}" width="520" alt="${escAttr(featured.imageAlt)}" style="display:block;width:100%;max-width:520px;height:auto;border:0;border-radius:12px;margin:0 auto 18px auto;" />
-              </a>
-              <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;line-height:28px;font-weight:bold;color:${INK};padding-bottom:8px;">
-                ${escapeHtml(featured.name)}
-              </div>
-              <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:22px;color:${MUTED};padding:0 8px 12px 8px;">
-                ${escapeHtml(featured.description)}
-              </div>
-              ${priceRow}
-              ${ctaButton(featured.href, featured.ctaText, { width: 160 })}
+              <div style="width:48px;height:3px;background-color:${PRIMARY};margin:0 auto 20px auto;border-radius:2px;font-size:0;line-height:0;">&nbsp;</div>
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;background-color:${WHITE};border:1px solid ${LINE};border-radius:18px;">
+                <tr>
+                  <td class="stack-col" width="48%" valign="middle" style="width:48%;padding:16px 12px 16px 16px;">
+                    <a href="${escAttr(featured.href)}" target="_blank" style="text-decoration:none;">
+                      <img class="fluid" src="${escAttr(featured.imageUrl)}" width="260" alt="${escAttr(featured.imageAlt)}" style="display:block;width:100%;max-width:260px;height:auto;border:0;border-radius:14px;margin:0 auto;" />
+                    </a>
+                  </td>
+                  <td class="stack-col featured-pad" width="52%" valign="middle" style="width:52%;padding:20px 20px 20px 8px;text-align:left;">
+                    <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;line-height:28px;font-weight:bold;color:${INK};padding-bottom:10px;">
+                      ${escapeHtml(featured.name)}
+                    </div>
+                    <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:22px;color:${MUTED};padding-bottom:4px;">
+                      ${escapeHtml(featured.description)}
+                    </div>
+                    ${priceRow}
+                    ${ctaButton(featured.href, featured.ctaText, { width: 170 })}
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
 

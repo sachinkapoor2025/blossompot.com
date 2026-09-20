@@ -7,8 +7,11 @@ import { formatCouponExpiry } from "@/lib/welcome-coupon";
 import {
   applyPercentDiscount,
   applyTrialPayableDiscount,
+  checkoutCurrencyForDisplay,
+  convertCurrency,
   isTrialCouponKind,
   trialTargetPayable,
+  type DisplayCurrency,
 } from "@blossompot/shared";
 
 type Props = {
@@ -18,9 +21,9 @@ type Props = {
   subtotal: number;
   /** Merchandise + shipping (+ tax) before coupon — used for trial $1 codes. */
   payableBeforeDiscount?: number;
-  currency: "USD" | "INR";
+  currency: DisplayCurrency;
   usdInrRate?: number;
-  formatMoney: (amount: number, currency: "USD" | "INR") => string;
+  formatMoney: (amount: number, currency: DisplayCurrency) => string;
   initialCode?: string;
   /** When true, flash-sale lines are in the cart — coupons skip those lines. */
   hasCouponExcludedItems?: boolean;
@@ -94,10 +97,13 @@ export function CouponInput({
         );
       }
 
+      const shopCurrency = checkoutCurrencyForDisplay(currency);
+      const targetInShop = trialTargetPayable(shopCurrency, usdInrRate);
+      const targetInDisplay = convertCurrency(targetInShop, shopCurrency, currency, usdInrRate);
       const discountAmount = trial
         ? applyTrialPayableDiscount(
             payableBeforeDiscount ?? subtotal,
-            trialTargetPayable(currency, usdInrRate)
+            targetInDisplay
           )
         : applyPercentDiscount(subtotal, result.discountPercent!);
       setApplied({

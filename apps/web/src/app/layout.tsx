@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import localFont from "next/font/local";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
@@ -14,6 +15,8 @@ import { TrackingProvider } from "@/components/TrackingProvider";
 import { JsonLd } from "@/components/JsonLd";
 import { BlossomPotPromoBar } from "@/components/BlossomPotPromoBar";
 import { ClientDeferredWidgets } from "@/components/ClientDeferredWidgets";
+import { LocationCategoryUrlSync } from "@/components/LocationCategoryUrlSync";
+import { GiftCatalogHashRedirect } from "@/components/GiftCatalogHashRedirect";
 import { AnalyticsScripts, GoogleAnalytics } from "@/components/AnalyticsScripts";
 import { MetaPixel } from "@/components/MetaPixel";
 import { site } from "@/lib/site";
@@ -131,12 +134,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <WishlistProvider>
             <CurrencyProvider>
             <TrackingProvider />
+            <Suspense fallback={null}>
+              <LocationCategoryUrlSync />
+            </Suspense>
+            <GiftCatalogHashRedirect />
             <BlossomPotPromoBar />
             <HeaderShell />
             <main className="flex-1">{children}</main>
             <FooterShell />
             <CurrencySwitcher />
-            <ClientDeferredWidgets />
+            <Suspense fallback={null}>
+              <ClientDeferredWidgets />
+            </Suspense>
             <WhatsAppFloat />
             </CurrencyProvider>
             </WishlistProvider>

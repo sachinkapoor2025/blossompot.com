@@ -14,7 +14,9 @@ import {
 import { getCatalogProducts, mergeProductsPreferExisting } from "@/lib/catalog-fallback";
 import { shuffleForCity } from "@/lib/city-products";
 import { loadProducts } from "@/lib/product-loader";
+import { giftsCatalogCountryIso } from "@/lib/location-seo-urls";
 import { pageMetadata } from "@/lib/seo";
+import ProductsPage, { generateMetadata as generateProductsMetadata } from "../../products/page";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -29,6 +31,12 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  const catalogIso = giftsCatalogCountryIso(slug);
+  if (catalogIso && !getGeoLocation(slug)) {
+    return generateProductsMetadata({
+      searchParams: Promise.resolve({ country: catalogIso }),
+    });
+  }
   const geo = getGeoLocation(slug);
   if (!geo || !assertGeoLocationComplete(geo) || !isGeoPublished(geo)) {
     return { title: "Gift Delivery", robots: { index: false, follow: false } };
@@ -43,6 +51,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function SeoLocationPage({ params }: Props) {
   const { slug } = await params;
+  const catalogIso = giftsCatalogCountryIso(slug);
+  if (catalogIso && !getGeoLocation(slug)) {
+    return <ProductsPage searchParams={Promise.resolve({ country: catalogIso })} />;
+  }
+
   const geo = getGeoLocation(slug);
   if (!geo || !assertGeoLocationComplete(geo) || !isGeoPublished(geo)) notFound();
 

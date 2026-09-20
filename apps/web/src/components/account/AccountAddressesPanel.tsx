@@ -94,7 +94,7 @@ export function AccountAddressesPanel({
 
     const payload = {
       ...form,
-      country: "US",
+      country: form.country || "US",
       label: label || form.name,
       isDefault,
       ...(form.phone?.trim() ? { phone: form.phone.trim() } : {}),

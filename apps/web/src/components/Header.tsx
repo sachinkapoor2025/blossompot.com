@@ -5,13 +5,14 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import { categoryHref } from "@/lib/category-urls";
+import { categoryLocationHref, parseLocationShopPath } from "@/lib/location-seo-urls";
 import {
   navItems,
-  cityLinks,
   cityNavHref,
   cityNavMenuLabel,
   countriesMenu,
 } from "@/lib/site";
+import { cityMenuForCountry, filterCityMenuLinks } from "@/lib/city-menu-for-location";
 import { SearchBar } from "@/components/SearchBar";
 import { SiteLogoLink } from "@/components/SiteLogo";
 import { DeliveryLocationChip } from "@/components/DeliveryLocationChip";
@@ -22,11 +23,13 @@ import { COUNTRY_GUIDE_HREF, useCountrySearch, useGboDeliveryCountries } from "@
 function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const { openSelector } = useDeliveryLocation();
-  const q = query.trim().toLowerCase();
-  const visible = q
-    ? cityLinks.filter((c) => `${c.label} ${c.menuLabel ?? ""} ${c.slug}`.toLowerCase().includes(q))
-    : cityLinks;
+  const { openSelector, location } = useDeliveryLocation();
+  const menu = cityMenuForCountry(location?.countryCode);
+  const visible = filterCityMenuLinks(menu.links, query);
+
+  useEffect(() => {
+    setQuery("");
+  }, [location?.countryCode]);
 
   return (
     <div
@@ -48,39 +51,43 @@ function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
         <div className="absolute top-full right-0 pt-1.5 z-[100]">
           <div className="min-w-[260px] max-h-[min(70vh,420px)] overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-xl">
             <p className="px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-              USA city pages
+              {menu.heading}
             </p>
             <div className="px-3 pb-2">
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search US cities…"
+                placeholder={menu.searchPlaceholder}
                 className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm"
               />
             </div>
             <Link
-              href="/locations"
+              href={menu.allHref}
               className="block px-4 py-2.5 text-sm font-semibold text-nav hover:bg-blue-50 whitespace-nowrap"
               onClick={() => {
                 setOpen(false);
                 onNavigate?.();
               }}
             >
-              All US locations
+              {menu.allLabel}
             </Link>
-            {visible.map((c) => (
-              <Link
-                key={c.slug}
-                href={cityNavHref(c)}
-                className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-nav whitespace-nowrap"
-                onClick={() => {
-                  setOpen(false);
-                  onNavigate?.();
-                }}
-              >
-                {cityNavMenuLabel(c)}
-              </Link>
-            ))}
+            {visible.length === 0 ? (
+              <p className="px-4 py-2.5 text-sm text-slate-500">No city pages for this location yet.</p>
+            ) : (
+              visible.map((c) => (
+                <Link
+                  key={c.slug}
+                  href={cityNavHref(c)}
+                  className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-nav whitespace-nowrap"
+                  onClick={() => {
+                    setOpen(false);
+                    onNavigate?.();
+                  }}
+                >
+                  {cityNavMenuLabel(c)}
+                </Link>
+              ))
+            )}
             <button
               type="button"
               className="mt-1 w-full border-t border-slate-100 px-4 py-2.5 text-left text-sm font-semibold text-nav hover:bg-blue-50"
@@ -332,22 +339,34 @@ export function Header() {
   const [citiesOpen, setCitiesOpen] = useState(false);
   const [countriesOpen, setCountriesOpen] = useState(false);
   const [cityQuery, setCityQuery] = useState("");
-  const { openSelector } = useDeliveryLocation();
+  const { openSelector, location: deliveryLocation } = useDeliveryLocation();
   const { countries, loaded: countriesLoaded } = useGboDeliveryCountries();
   const countrySearch = useCountrySearch(countries);
-  const cityVisible = cityQuery.trim()
-    ? cityLinks.filter((c) => `${c.label} ${c.menuLabel ?? ""} ${c.slug}`.toLowerCase().includes(cityQuery.trim().toLowerCase()))
-    : cityLinks;
+  const cityMenu = cityMenuForCountry(deliveryLocation?.countryCode);
+  const cityVisible = filterCityMenuLinks(cityMenu.links, cityQuery);
+
+  useEffect(() => {
+    setCityQuery("");
+  }, [deliveryLocation?.countryCode]);
 
   const isActive = (href: string, category?: string) => {
     if (href === "/") return pathname === "/" && !activeCategory;
     if (category) {
+      const located = parseLocationShopPath(pathname);
       return (
         (pathname === "/products" && activeCategory === category) ||
-        pathname === categoryHref(category)
+        pathname === categoryHref(category) ||
+        (located?.kind === "category" && located.internalSlug === category)
       );
     }
     return pathname.startsWith(href.split("?")[0]) && href !== "/";
+  };
+
+  const navHref = (item: (typeof navItems)[number]) => {
+    if ("category" in item && item.category && deliveryLocation?.countryCode) {
+      return categoryLocationHref(item.category, deliveryLocation.countryCode);
+    }
+    return item.href;
   };
 
   const isCountriesActive = countriesMenu.items.some((item) => pathname === item.href);
@@ -449,7 +468,7 @@ export function Header() {
             {navItems.map((item) => (
               <Link
                 key={item.href}
-                href={item.href}
+                href={navHref(item)}
                 className={`btn-nav ${isActive(item.href, "category" in item ? item.category : undefined) ? "btn-nav-active" : ""}`}
               >
                 {item.label}
@@ -488,7 +507,7 @@ export function Header() {
               {navItems.map((item) => (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  href={navHref(item)}
                   onClick={closeMenu}
                   className={`block rounded-lg px-4 py-3 text-sm font-semibold ${
                     isActive(item.href, "category" in item ? item.category : undefined)
@@ -514,31 +533,35 @@ export function Header() {
                 {citiesOpen && (
                   <div className="mt-1 ml-2 border-l-2 border-slate-100 pl-2 space-y-1">
                     <p className="px-4 pt-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                      USA city pages
+                      {cityMenu.heading}
                     </p>
                     <input
                       value={cityQuery}
                       onChange={(e) => setCityQuery(e.target.value)}
-                      placeholder="Search US cities…"
+                      placeholder={cityMenu.searchPlaceholder}
                       className="mx-2 mb-1 w-[calc(100%-1rem)] rounded-md border border-slate-200 px-2 py-1.5 text-sm"
                     />
                     <Link
-                      href="/locations"
+                      href={cityMenu.allHref}
                       onClick={closeMenu}
                       className="block rounded-lg px-4 py-2.5 text-sm font-semibold text-nav hover:bg-blue-50"
                     >
-                      All US locations
+                      {cityMenu.allLabel}
                     </Link>
-                    {cityVisible.map((c) => (
-                      <Link
-                        key={c.slug}
-                        href={cityNavHref(c)}
-                        onClick={closeMenu}
-                        className="block rounded-lg px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-nav"
-                      >
-                        {cityNavMenuLabel(c)}
-                      </Link>
-                    ))}
+                    {cityVisible.length === 0 ? (
+                      <p className="px-4 py-2.5 text-sm text-slate-500">No city pages for this location yet.</p>
+                    ) : (
+                      cityVisible.map((c) => (
+                        <Link
+                          key={c.slug}
+                          href={cityNavHref(c)}
+                          onClick={closeMenu}
+                          className="block rounded-lg px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-nav"
+                        >
+                          {cityNavMenuLabel(c)}
+                        </Link>
+                      ))
+                    )}
                     <button
                       type="button"
                       className="block w-full rounded-lg px-4 py-2.5 text-left text-sm font-semibold text-nav hover:bg-blue-50"

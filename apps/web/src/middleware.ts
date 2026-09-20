@@ -6,6 +6,7 @@ import {
   deliveryLocationToken,
   parseDeliveryLocationToken,
 } from "@/lib/delivery-location";
+import { LOCATION_SEO_HEADER, locationShopRewritePath, parseLocationShopPath } from "@/lib/location-seo-urls";
 
 /**
  * Edge 301: apex → www.
@@ -22,33 +23,52 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(dest, 301);
   }
 
+  const locationShop = parseLocationShopPath(request.nextUrl.pathname);
+  if (locationShop) {
+    const url = request.nextUrl.clone();
+    url.pathname = locationShopRewritePath(locationShop);
+    url.searchParams.set("country", locationShop.countryIso);
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set(LOCATION_SEO_HEADER, request.nextUrl.pathname.replace(/\/+$/, "") || "/");
+    const response = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
+    applyDeliveryCountryCookie(response, request, locationShop.countryIso);
+    stampBotHeaders(response, request);
+    return response;
+  }
+
   const response = NextResponse.next();
+  stampBotHeaders(response, request);
+
+  const country = request.nextUrl.searchParams.get("country")?.trim().toUpperCase();
+  if (country && /^[A-Z]{2}$/.test(country)) {
+    applyDeliveryCountryCookie(response, request, country);
+  }
+
+  return response;
+}
+
+function stampBotHeaders(response: NextResponse, request: NextRequest) {
   const classified = classifyUserAgent(request.headers.get("user-agent"));
   response.headers.set("x-blossompot-bot-class", classified.class);
   if (classified.crawlerId) {
     response.headers.set("x-blossompot-crawler", classified.crawlerId);
   }
+}
 
-  const country = request.nextUrl.searchParams.get("country")?.trim().toUpperCase();
-  if (country && /^[A-Z]{2}$/.test(country)) {
-    const existing = parseDeliveryLocationToken(
-      request.cookies.get(DELIVERY_LOCATION_COOKIE)?.value
-    );
-    const postalCode = existing?.countryCode === country ? existing.postalCode : "";
-    response.cookies.set({
-      name: DELIVERY_LOCATION_COOKIE,
-      value: deliveryLocationToken({
-        countryCode: country,
-        postalCode,
-        postalDisplay: postalCode || country,
-      }),
-      path: "/",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 365,
-    });
-  }
-
-  return response;
+function applyDeliveryCountryCookie(response: NextResponse, request: NextRequest, country: string) {
+  const existing = parseDeliveryLocationToken(request.cookies.get(DELIVERY_LOCATION_COOKIE)?.value);
+  const postalCode = existing?.countryCode === country ? existing.postalCode : "";
+  response.cookies.set({
+    name: DELIVERY_LOCATION_COOKIE,
+    value: deliveryLocationToken({
+      countryCode: country,
+      postalCode,
+      postalDisplay: postalCode || country,
+    }),
+    path: "/",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 365,
+  });
 }
 
 export const config = {

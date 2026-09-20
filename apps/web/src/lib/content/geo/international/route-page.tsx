@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { InternationalLocationPage } from "@/components/geo/InternationalLocationPage";
 import { pageMetadata } from "@/lib/seo";
+import { getCatalogProducts, mergeProductsPreferExisting } from "@/lib/catalog-fallback";
+import { shuffleForCity } from "@/lib/city-products";
+import { loadProducts } from "@/lib/product-loader";
+import type { Product } from "@blossompot/shared";
 import {
   generateParamsForMarket,
   isInternationalIndexable,
@@ -42,7 +46,7 @@ export async function internationalMetadata(
   };
 }
 
-export function InternationalMarketPage({
+export async function InternationalMarketPage({
   market,
   segments,
 }: {
@@ -51,5 +55,15 @@ export function InternationalMarketPage({
 }) {
   const loc = resolveInternationalPath(market, segments ?? []);
   if (!loc || !isInternationalIndexable(loc)) notFound();
-  return <InternationalLocationPage loc={resolveLocation(loc)} />;
+  let products: Product[] = [];
+  try {
+    products = await loadProducts();
+  } catch {
+    products = [];
+  }
+  products = shuffleForCity(
+    mergeProductsPreferExisting(products, getCatalogProducts()),
+    loc.slug
+  ).slice(0, 20);
+  return <InternationalLocationPage loc={resolveLocation(loc)} products={products} />;
 }

@@ -2,6 +2,7 @@ import type { CSSProperties, ReactNode } from "react";
 import Link from "next/link";
 import { site, navItems, giftSetsMenu, countriesMenu } from "@/lib/site";
 import { PaymentMethodIcons } from "@/components/PaymentMethodIcons";
+import { ShopLocationLink } from "@/components/ShopLocationLink";
 import { SiteLogoLink } from "@/components/SiteLogo";
 import { trustFacts } from "@/lib/trust";
 import { footerGeoLinks } from "@/lib/content/geo/locations";
@@ -120,7 +121,7 @@ export function Footer() {
           <div className="col-span-2 lg:col-span-3">
             <SiteLogoLink size="desktop" className="mb-5" />
             <p className="text-slate-600 leading-relaxed mb-4 max-w-xs">
-              Flowers, cakes, and thoughtful gifts delivered across the USA. Premium online gifting for every celebration.
+              Flowers, cakes, and thoughtful gifts delivered across the Worldwide. Premium online gifting for every celebration.
             </p>
             <div className="space-y-2 text-slate-700">
               <p>
@@ -158,15 +159,19 @@ export function Footer() {
             <ul className="space-y-2 text-slate-600">
               {footerShopLinks.map((n) => (
                 <li key={n.href}>
-                  <Link href={n.href} className="hover:text-primary hover:underline">
+                  <ShopLocationLink
+                    href={n.href}
+                    category={"category" in n && typeof n.category === "string" ? n.category : undefined}
+                    className="hover:text-primary hover:underline"
+                  >
                     {n.label}
-                  </Link>
+                  </ShopLocationLink>
                 </li>
               ))}
               <li>
-                <Link href="/products" className="hover:text-primary hover:underline">
+                <ShopLocationLink href="/products" catalog className="hover:text-primary hover:underline">
                   All Products
-                </Link>
+                </ShopLocationLink>
               </li>
             </ul>
           </div>
@@ -177,8 +182,16 @@ export function Footer() {
             <ul className="space-y-2 text-slate-600">
               <li><Link href="/remember" className="hover:text-primary hover:underline">Never Forget an Occasion</Link></li>
               <li><Link href="/forgot-occasion" className="hover:text-primary hover:underline">Forgot a Special Occasion?</Link></li>
-              <li><Link href="/same-day-delivery" className="hover:text-primary hover:underline">Same-Day Delivery</Link></li>
-              <li><Link href="/flowers" className="hover:text-primary hover:underline">Send Flowers</Link></li>
+              <li>
+                <ShopLocationLink href="/same-day-delivery" category="same-day-gifts" className="hover:text-primary hover:underline">
+                  Same-Day Delivery
+                </ShopLocationLink>
+              </li>
+              <li>
+                <ShopLocationLink href="/flowers" category="flowers" className="hover:text-primary hover:underline">
+                  Send Flowers
+                </ShopLocationLink>
+              </li>
               <li><Link href="/flower-guide" className="hover:text-primary hover:underline">Flower Guide</Link></li>
               <li><Link href="/blog" className="hover:text-primary hover:underline">Blog &amp; Guides</Link></li>
               <li><Link href="/shipping" className="hover:text-primary hover:underline">Shipping &amp; Delivery</Link></li>

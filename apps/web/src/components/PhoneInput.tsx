@@ -46,14 +46,14 @@ export function PhoneInput({
   selectClassName = "",
   inputClassName = "",
 }: PhoneInputProps) {
-  const selected = COUNTRIES.find((c) => c.iso === countryIso) ?? COUNTRIES[0];
+  const selected = COUNTRIES.find((c) => c.iso === countryIso);
 
   return (
     <div className={className}>
       {label ? <label className="block text-sm font-medium mb-1">{label}</label> : null}
       <div className="flex gap-2">
         <select
-          value={selected.iso}
+          value={selected?.iso ?? ""}
           onChange={(e) => onCountryChange(e.target.value)}
           aria-label="Country code"
           disabled={disabled}
@@ -62,6 +62,7 @@ export function PhoneInput({
             compact ? "w-[4.75rem]" : "w-[min(100%,11rem)]"
           } shrink-0 border border-slate-300 rounded-lg px-1.5 py-2 text-sm bg-white disabled:opacity-60 ${selectClassName}`}
         >
+          <option value="">{compact ? "" : "Country code"}</option>
           {COUNTRIES.map((c) => (
             <option key={c.iso} value={c.iso} title={`${c.dial} ${c.name}`}>
               {optionLabel(c, compact)}
@@ -86,6 +87,10 @@ export function PhoneInput({
 
 export function buildPhoneValue(countryIso: string, localNumber: string): string {
   const country = COUNTRIES.find((c) => c.iso === countryIso);
-  if (!country) return formatE164("+91", localNumber);
+  if (!country) {
+    const digits = localNumber.replace(/\D/g, "");
+    if (!digits) return "";
+    return localNumber.trim().startsWith("+") ? `+${digits}` : digits;
+  }
   return formatE164(country.dial, localNumber);
 }

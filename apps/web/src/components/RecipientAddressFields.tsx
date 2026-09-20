@@ -4,15 +4,14 @@ import { useEffect, useState } from "react";
 import type { ShippingAddress } from "@blossompot/shared";
 import { LeadCaptureInput } from "@/components/LeadCaptureInput";
 import { PhoneInput, buildPhoneValue } from "@/components/PhoneInput";
-import {
-  DEFAULT_COUNTRY_ISO,
-  orderedCountryDialCodes,
-} from "@/lib/country-codes";
-import { US_STATES } from "@/lib/shipping-address";
+import { CountryRegionFields } from "@/components/CountryRegionFields";
+import { orderedCountryDialCodes } from "@/lib/country-codes";
+import { regionOptionsForCountry } from "@/lib/checkout-regions";
+import { useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
 
 function splitPhone(phone: string): { iso: string; local: string } {
   const digits = phone.replace(/\D/g, "");
-  if (!digits) return { iso: DEFAULT_COUNTRY_ISO, local: "" };
+  if (!digits) return { iso: "", local: "" };
   const countries = orderedCountryDialCodes();
   const byDialLen = [...countries].sort(
     (a, b) => b.dial.replace(/\D/g, "").length - a.dial.replace(/\D/g, "").length
@@ -23,7 +22,7 @@ function splitPhone(phone: string): { iso: string; local: string } {
       return { iso: c.iso, local: digits.slice(code.length) };
     }
   }
-  return { iso: DEFAULT_COUNTRY_ISO, local: digits };
+  return { iso: "", local: digits };
 }
 
 type Props = {
@@ -38,8 +37,9 @@ export function RecipientAddressFields({
   onChange,
   title = "Delivery address for this gift",
 }: Props) {
-  const [phoneCountry, setPhoneCountry] = useState(DEFAULT_COUNTRY_ISO);
+  const [phoneCountry, setPhoneCountry] = useState("");
   const [phoneLocal, setPhoneLocal] = useState("");
+  const { countries } = useGboDeliveryCountries();
 
   useEffect(() => {
     const incoming = value.phone ?? "";
@@ -53,7 +53,20 @@ export function RecipientAddressFields({
   }, [value.phone]);
 
   const update = (field: keyof ShippingAddress, fieldValue: string) => {
-    onChange({ ...value, [field]: fieldValue, country: "US" });
+    onChange({ ...value, [field]: fieldValue });
+  };
+
+  const changeCountry = (iso: string) => {
+    const next = iso.trim().toUpperCase();
+    const regions = regionOptionsForCountry(next);
+    const nextState = regions?.some((r) => r.code === value.state) ? value.state : "";
+    setPhoneCountry(next);
+    onChange({
+      ...value,
+      country: next,
+      state: nextState,
+      phone: buildPhoneValue(next, phoneLocal),
+    });
   };
 
   return (
@@ -118,28 +131,25 @@ export function RecipientAddressFields({
           autoComplete="address-level2"
         />
         <label className="block text-sm">
-          <span className="font-medium text-slate-700">State</span>
+          <span className="font-medium text-slate-700">Country</span>
           <select
-            value={value.state}
-            onChange={(e) => update("state", e.target.value)}
+            value={value.country}
+            onChange={(e) => changeCountry(e.target.value)}
             required
-            className="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            className="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent bg-white"
           >
-            <option value="">Select</option>
-            {US_STATES.map((s) => (
-              <option key={s.code} value={s.code}>
-                {s.name}
+            {countries.map((c) => (
+              <option key={c.countryCode} value={c.countryCode}>
+                {c.countryName}
               </option>
             ))}
           </select>
         </label>
       </div>
-      <LeadCaptureInput
-        label="ZIP code"
-        value={value.postalCode}
-        onChange={(e) => update("postalCode", e.target.value)}
-        required
-        autoComplete="postal-code"
+      <CountryRegionFields
+        countryIso={value.country}
+        value={value}
+        onChange={({ state, postalCode }) => onChange({ ...value, state, postalCode })}
       />
     </div>
   );

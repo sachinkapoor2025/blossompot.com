@@ -3,6 +3,8 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
 import { AnswerBlock } from "@/components/AnswerBlock";
 import { LocationSelector } from "@/components/geo/LocationSelector";
+import { HomeProductCard } from "@/components/HomeProductCard";
+import type { Product } from "@blossompot/shared";
 import {
   childLocations,
   internationalJsonLd,
@@ -32,7 +34,13 @@ const usaHubs = [
   { label: "Illinois", slug: "illinois" },
 ];
 
-export function InternationalLocationPage({ loc }: { loc: ResolvedLocation }) {
+export function InternationalLocationPage({
+  loc,
+  products = [],
+}: {
+  loc: ResolvedLocation;
+  products?: Product[];
+}) {
   const children = childLocations(loc);
   const related = relatedLocationLinks(loc);
   const crumbs = loc.crumbs.map((c, i) =>
@@ -44,6 +52,18 @@ export function InternationalLocationPage({ loc }: { loc: ResolvedLocation }) {
       <JsonLd data={internationalJsonLd(loc)} />
       <Breadcrumbs items={crumbs} />
       <h1 className="text-3xl font-bold text-primary mb-3">{loc.h1}</h1>
+
+      {products.length > 0 ? (
+        <section className="mb-10">
+          <h2 className="text-xl font-bold text-primary mb-3">Shop gifts from {loc.label}</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {products.map((p) => (
+              <HomeProductCard key={p.slug} product={p} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <p className="text-slate-600 mb-6 max-w-3xl leading-relaxed">{loc.intro}</p>
 
       <div className="mb-8 rounded-xl border border-primary/15 bg-petal/80 px-4 py-3 text-sm text-slate-800">

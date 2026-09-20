@@ -81,28 +81,28 @@ export const DEFAULT_PREMIUM_MARKETING_EMAIL_CONTENT: MarketingEmailContent = {
     {
       name: "Flowers",
       description: "Fresh arrangements for birthdays and thank-yous.",
-      imageUrl: cdnUploadUrl("2026/05/pink-multi-stone-rakhi-to-usa.jpeg"),
+      imageUrl: cdnUploadUrl("catalog/roses-red-1.jpg"),
       href: `${SITE}/flowers`,
       buttonText: "Shop Now",
     },
     {
       name: "Bhaiya Bhabhi",
       description: "Matching sets for brother and bhabhi.",
-      imageUrl: cdnUploadUrl("2026/05/anniversary-gifts-e1779468666580.jpeg"),
+      imageUrl: cdnUploadUrl("catalog/roses-pink-1.jpg"),
       href: `${SITE}/anniversary-gifts`,
       buttonText: "Shop Now",
     },
     {
       name: "Cakes",
       description: "Playful designs little brothers adore.",
-      imageUrl: cdnUploadUrl("2026/04/BRO-Kids-gift-e1775564401163.jpg"),
+      imageUrl: cdnUploadUrl("catalog/cake-chocolate-1.jpg"),
       href: `${SITE}/cakes`,
       buttonText: "Shop Now",
     },
     {
       name: "Gift Hampers",
       description: "Curated hampers for celebrations.",
-      imageUrl: cdnUploadUrl("2026/05/fercho.png"),
+      imageUrl: cdnUploadUrl("catalog/hamper-1.jpg"),
       href: `${SITE}/gift-hampers`,
       buttonText: "Shop Now",
     },
@@ -189,7 +189,7 @@ function categoryCard(cat: MarketingEmailCategory): string {
                       <tr>
                         <td align="center" style="padding:0;line-height:0;font-size:0;background-color:#fffaf2;">
                           <a href="${href}" target="_blank" style="text-decoration:none;">
-                            <img class="category-img fluid" src="${img}" width="130" alt="${name}" style="display:block;width:100%;max-width:130px;height:auto;border:0;margin:0 auto;" />
+                            <img class="category-img fluid" src="${img}" width="140" alt="${name}" style="display:block;width:100%;max-width:140px;height:auto;border:0;margin:0 auto;" />
                           </a>
                         </td>
                       </tr>
@@ -199,8 +199,8 @@ function categoryCard(cat: MarketingEmailCategory): string {
                           <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:16px;color:#6b5e4e;padding-bottom:12px;">${desc}</div>
                           <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
                             <tr>
-                              <td align="center" bgcolor="#c9a227" style="background-color:#c9a227;border-radius:6px;">
-                                <a href="${href}" target="_blank" style="display:inline-block;padding:8px 12px;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:14px;font-weight:bold;color:#183a68;text-decoration:none;border-radius:6px;">${btn}</a>
+                              <td align="center" bgcolor="#c9a227" style="background-color:#c9a227;border-radius:20px;">
+                                <a href="${href}" target="_blank" style="display:inline-block;padding:8px 14px;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:14px;font-weight:bold;color:#183a68;text-decoration:none;border-radius:20px;">${btn}</a>
                               </td>
                             </tr>
                           </table>

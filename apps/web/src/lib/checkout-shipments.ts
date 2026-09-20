@@ -8,7 +8,7 @@ import {
   type CheckoutShipment,
   type FreeShippingQuote,
   type ShippingAddress,
-  type ShopCurrency,
+  type DisplayCurrency,
 } from "@blossompot/shared";
 import { emptyShippingAddress } from "@/lib/shipping-address";
 
@@ -59,7 +59,7 @@ function withSender(
 ): CheckoutShipment["shippingAddress"] {
   return {
     ...address,
-    country: "US",
+    country: (address.country || primary.country || "US").trim().toUpperCase().slice(0, 2),
     senderName: (primary.senderName ?? "").trim() || "Sender",
     senderMessage:
       (primary.senderMessage ?? "").trim() ||
@@ -152,7 +152,7 @@ export function shipmentSubtotalsFromUnits(
 export function quoteShippingFromDeliveryUnits(
   units: DeliveryUnit[],
   primary: ShippingAddress,
-  currency: ShopCurrency,
+  currency: DisplayCurrency,
   usdInrRate: number
 ): { totalCharge: number; perShipment: FreeShippingQuote[] } {
   const groups = new Map<

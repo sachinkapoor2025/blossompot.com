@@ -15,7 +15,6 @@ import { JsonLd } from "@/components/JsonLd";
 import { faqs, homeBanners, countriesMenu } from "@/lib/site";
 import { loadGboStorefrontProducts } from "@/lib/product-loader";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
-import { OverseasGiftGrid } from "@/components/OverseasGiftGrid";
 import { faqJsonLd, pageMetadata } from "@/lib/seo";
 import { resolveDeliveryCountry, type Product, type Category } from "@blossompot/shared";
 
@@ -67,7 +66,7 @@ export default async function HomePage({
       <TrustStrip />
 
       <div className="max-w-7xl mx-auto px-4 pt-6 pb-2 flex flex-wrap justify-center gap-3">
-        <Link href="/#gift-catalog" className="btn-nav bg-primary">
+        <Link href="/gift-catalog" className="btn-nav bg-primary">
           Shop gift baskets
         </Link>
         <Link href="/remember" className="btn-nav">
@@ -97,11 +96,11 @@ export default async function HomePage({
         </ul>
       </section>
 
-      <section id="gift-catalog" className="max-w-7xl mx-auto px-4 py-10 scroll-mt-24">
+      <section className="max-w-7xl mx-auto px-4 py-10">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-primary">Shop all gifts</h2>
+          <h2 className="text-2xl font-bold text-primary">Gift catalog</h2>
           <p className="text-sm text-slate-600 mt-1">
-            {products.length} international gifts for {destinationName}. Scroll for more.
+            Browse flowers, cakes, and hampers for {destinationName} — open the full catalog to shop.
           </p>
         </div>
         {catalogError ? (
@@ -109,8 +108,13 @@ export default async function HomePage({
             {catalogError}
           </p>
         ) : (
-          <OverseasGiftGrid products={products} />
+          <p className="text-sm text-slate-600 mb-4">
+            {products.length} international gifts available for {destinationName}.
+          </p>
         )}
+        <Link href="/gift-catalog" className="btn-nav bg-primary inline-flex">
+          Open gift catalog
+        </Link>
       </section>
 
       <section className="max-w-7xl mx-auto px-4 py-12">

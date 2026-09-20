@@ -11,6 +11,12 @@ import { getCategoryContent } from "@/lib/content/category-content";
 import { getCategoryPageSeo } from "@/lib/content/category-seo";
 import { getCategoryRichContent } from "@/lib/content/category-rich-content";
 import { categoryHref } from "@/lib/category-urls";
+import {
+  giftsCatalogLocationHref,
+  localizeShopCopy,
+  parseLocationShopPath,
+} from "@/lib/location-seo-urls";
+import { requestSeoPath } from "@/lib/request-seo-path";
 import { loadProductsByCategory } from "@/lib/product-loader";
 import { categoryOrder } from "@/lib/site";
 import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, pageMetadata } from "@/lib/seo";
@@ -31,10 +37,6 @@ function isKnownCategorySlug(slug: string): boolean {
   return (categoryOrder as readonly string[]).includes(slug);
 }
 
-export function generateStaticParams() {
-  return categoryOrder.map((slug) => ({ slug }));
-}
-
 /** Match PDP: always use live product prices (no stale ISR listing HTML). */
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -42,12 +44,13 @@ export const revalidate = 0;
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const seo = getCategoryPageSeo(slug);
-  const path = categoryHref(slug);
+  const path = await requestSeoPath(categoryHref(slug));
 
   if (seo) {
+    const localized = localizeShopCopy(path, seo);
     return pageMetadata({
-      title: seo.title,
-      description: seo.description,
+      title: localized.title,
+      description: localized.description,
       path,
       absoluteTitle: true,
     });
@@ -56,19 +59,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const data = await api<{ category: Category }>(`/categories/${slug}`, { revalidate: 3600 });
     const c = data.category;
-    return pageMetadata({
+    const fallback = localizeShopCopy(path, {
       title: `${c.name} | Worldwide Delivery | BlossomPot`,
       description:
         c.seoDescription ??
         c.description?.slice(0, 160) ??
         `Shop ${c.name} with fast worldwide delivery from BlossomPot — flowers, cakes, and thoughtful gifts.`,
+    });
+    return pageMetadata({
+      title: fallback.title,
+      description: fallback.description,
       path,
     });
   } catch {
     const label = slug.replace(/-/g, " ");
-    return pageMetadata({
+    const fallback = localizeShopCopy(path, {
       title: `${label} | BlossomPot`,
       description: `Shop ${label} with worldwide delivery from BlossomPot.`,
+    });
+    return pageMetadata({
+      title: fallback.title,
+      description: fallback.description,
       path,
     });
   }
@@ -107,17 +118,20 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     "valentines-day-gifts": "Valentine's Day Gifts",
   };
   const seoCategoryName = headingName[slug] ?? name;
-  const pageSeo = getCategoryPageSeo(slug);
-  const h1 = pageSeo?.h1 ?? `${name} — Worldwide Delivery`;
+  const seoPath = await requestSeoPath(categoryHref(slug));
+  const located = parseLocationShopPath(seoPath);
+  const pageSeo = localizeShopCopy(seoPath, getCategoryPageSeo(slug) ?? { title: "", description: "", h1: `${name} — Worldwide Delivery` });
+  const h1 = pageSeo.h1 || `${name} — Worldwide Delivery`;
   const baseDescription =
     category?.description?.trim() ||
     `Browse our ${name} collection — flowers, cakes, and thoughtful gifts with worldwide delivery from BlossomPot.`;
   const extra = getCategoryContent(slug);
   const rich = getCategoryRichContent(slug);
+  const shopHref = located ? giftsCatalogLocationHref(located.countryIso) : "/products";
 
   const crumbs = [
     { label: "Home", href: "/" },
-    { label: "Shop", href: "/products" },
+    { label: "Shop", href: shopHref },
     { label: name },
   ];
 
@@ -141,7 +155,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       ) : (
         <p className="text-slate-500">
           Products loading soon.{" "}
-          <Link href="/products" className="text-nav hover:underline">
+          <Link href={shopHref} className="text-nav hover:underline">
             Browse all gifts
           </Link>
         </p>
