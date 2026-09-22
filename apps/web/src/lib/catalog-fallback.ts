@@ -1,5 +1,7 @@
 import {
+  isSampleCatalogProduct,
   productAllowsAddons,
+  productVisibleForDeliveryCountry,
   resolveProductImageUrls,
   stripVendorPrivateFields,
   withCompetitiveStorefrontPricing,
@@ -31,15 +33,13 @@ function loadCatalogFile(filename: string): Product[] {
   return data.products ?? [];
 }
 
-/** Read bundled catalog JSON — excludes legacy Rakhi SKUs from the storefront. */
+/** Read bundled catalog JSON — real BlossomPot SKUs only (never the sample marketplace dump). */
 export function getCatalogProducts(): Product[] {
   if (cached) return cached;
   const bySlug = new Map<string, Product>();
-  for (const product of [
-    ...loadCatalogFile("blossompot-catalog.json"),
-    ...loadCatalogFile("sample-marketplace-catalog.json"),
-  ]) {
+  for (const product of loadCatalogFile("blossompot-catalog.json")) {
     if (isRakhiRelatedProduct(product)) continue;
+    if (isSampleCatalogProduct(product)) continue;
     const allowsAddons = productAllowsAddons(product);
     const publicProduct = stripVendorPrivateFields(product) as Product;
     publicProduct.allowsAddons = allowsAddons;
@@ -77,11 +77,26 @@ export function mergeProductsPreferExisting(
   additions: Product[]
 ): Product[] {
   const bySlug = new Map(
-    existing.filter((p) => !isRakhiRelatedProduct(p)).map((product) => [product.slug, product])
+    existing
+      .filter((p) => !isRakhiRelatedProduct(p) && !isSampleCatalogProduct(p))
+      .map((product) => [product.slug, product])
   );
   for (const product of additions) {
     if (isRakhiRelatedProduct(product)) continue;
+    if (isSampleCatalogProduct(product)) continue;
     if (!bySlug.has(product.slug)) bySlug.set(product.slug, product);
   }
   return [...bySlug.values()];
+}
+
+/** Bundled catalog SKUs allowed for this delivery country (US local SKUs stay US-only). */
+export function getCatalogProductsForCountry(country: string): Product[] {
+  return getCatalogProducts().filter((product) => productVisibleForDeliveryCountry(product, country));
+}
+
+/** Merge live results with country-safe catalog fallback; never re-inject other countries. */
+export function mergeProductsForCountry(existing: Product[], country: string): Product[] {
+  return mergeProductsPreferExisting(existing, getCatalogProductsForCountry(country)).filter((product) =>
+    productVisibleForDeliveryCountry(product, country)
+  );
 }

@@ -155,12 +155,18 @@ export async function loadProducts(params?: {
       try {
         const gbo = await loadGboStorefrontProducts(country);
         if (params?.category) {
-          return gbo.filter((product) => productInStorefrontCategory(product, params.category as string));
+          return forDeliveryCountry(
+            gbo.filter((product) => productInStorefrontCategory(product, params.category as string)),
+            country
+          );
         }
         if (params?.search) {
-          return gbo.filter((product) => productMatchesSearchQuery(product, params.search as string));
+          return forDeliveryCountry(
+            gbo.filter((product) => productMatchesSearchQuery(product, params.search as string)),
+            country
+          );
         }
-        return gbo;
+        return forDeliveryCountry(gbo, country);
       } catch {
         return [];
       }

@@ -501,6 +501,25 @@ const PAGES: Record<CountryFlowerDeliverySlug, CountryFlowerDeliveryContent> = {
 export const countryFlowerDeliveryPages: CountryFlowerDeliveryContent[] =
   countriesMenu.items.map((item) => PAGES[item.slug]);
 
+export function flowerDeliveryCountryIso(slug: CountryFlowerDeliverySlug): string {
+  const map: Record<CountryFlowerDeliverySlug, string> = {
+    usa: "US",
+    uk: "GB",
+    canada: "CA",
+    australia: "AU",
+    uae: "AE",
+  };
+  return map[slug];
+}
+
+export function flowerDeliverySlugForIso(countryIso: string): CountryFlowerDeliverySlug | null {
+  const iso = countryIso.trim().toUpperCase();
+  const found = (Object.keys(PAGES) as CountryFlowerDeliverySlug[]).find(
+    (slug) => flowerDeliveryCountryIso(slug) === iso
+  );
+  return found ?? null;
+}
+
 export function getCountryFlowerDelivery(
   slug: CountryFlowerDeliverySlug
 ): CountryFlowerDeliveryContent {

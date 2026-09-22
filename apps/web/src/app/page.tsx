@@ -13,10 +13,11 @@ import { HomeSeoSection } from "@/components/HomeSeoSection";
 import { buildHomeCategoryTiles } from "@/lib/home-category-carousel";
 import { JsonLd } from "@/components/JsonLd";
 import { faqs, homeBanners, countriesMenu } from "@/lib/site";
-import { loadGboStorefrontProducts } from "@/lib/product-loader";
+import { loadProducts } from "@/lib/product-loader";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { faqJsonLd, pageMetadata } from "@/lib/seo";
 import { resolveDeliveryCountry, type Product, type Category } from "@blossompot/shared";
+import { flowerDeliverySlugForIso } from "@/lib/content/country-flower-delivery";
 
 export const metadata: Metadata = pageMetadata({
   title: "BlossomPot — Flowers, Cakes & Gifts, Delivered Worldwide",
@@ -42,11 +43,11 @@ export default async function HomePage({
   const destinationName = resolveDeliveryCountry(deliveryCountry).countryName;
 
   try {
-    const [gboProducts, categoriesData] = await Promise.all([
-      loadGboStorefrontProducts(deliveryCountry),
+    const [liveProducts, categoriesData] = await Promise.all([
+      loadProducts({ country: deliveryCountry }),
       api<{ categories: Category[] }>("/categories", { revalidate: false }),
     ]);
-    products = gboProducts;
+    products = liveProducts;
     categories = categoriesData.categories;
   } catch (err) {
     catalogError = err instanceof Error ? err.message : "Gift catalog is temporarily unavailable.";
@@ -54,6 +55,10 @@ export default async function HomePage({
 
   const googleReviews = await getGoogleReviews();
   const categoryTiles = buildHomeCategoryTiles(products, categories);
+  const selectedFlowerSlug = flowerDeliverySlugForIso(deliveryCountry);
+  const countryPages = selectedFlowerSlug
+    ? countriesMenu.items.filter((item) => item.slug === selectedFlowerSlug)
+    : [];
 
   return (
     <div>
@@ -74,16 +79,17 @@ export default async function HomePage({
         </Link>
       </div>
 
+      {countryPages.length > 0 ? (
       <section className="max-w-7xl mx-auto px-4 pt-8 pb-2">
         <div className="text-center mb-5">
-          <h2 className="text-2xl font-bold text-primary">Flower delivery by country</h2>
+          <h2 className="text-2xl font-bold text-primary">Flower delivery in {destinationName}</h2>
           <p className="text-sm text-slate-600 mt-1 max-w-2xl mx-auto">
-            BlossomPot serves shoppers in the USA, UK, Canada, Australia, and the UAE. Open a country
-            page for local ordering notes, occasions, and flower collections.
+            Open the {destinationName} flower delivery page for local ordering notes, occasions, and
+            collections for this destination.
           </p>
         </div>
-        <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          {countriesMenu.items.map((item) => (
+        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-w-3xl mx-auto">
+          {countryPages.map((item) => (
             <li key={item.href}>
               <Link
                 href={item.href}
@@ -95,6 +101,7 @@ export default async function HomePage({
           ))}
         </ul>
       </section>
+      ) : null}
 
       <section className="max-w-7xl mx-auto px-4 py-10">
         <div className="mb-6">
@@ -109,7 +116,7 @@ export default async function HomePage({
           </p>
         ) : (
           <p className="text-sm text-slate-600 mb-4">
-            {products.length} international gifts available for {destinationName}.
+            {products.length} gifts available for {destinationName}.
           </p>
         )}
         <Link href="/gift-catalog" className="btn-nav bg-primary inline-flex">
@@ -147,13 +154,13 @@ export default async function HomePage({
       <CustomerReviews data={googleReviews} />
 
       <HomeFlowerGuideCta />
-      <HomeSeoSection />
+      <HomeSeoSection countryIso={deliveryCountry} />
 
       <section className="max-w-7xl mx-auto px-4 py-12">
         <div className="rounded-3xl bg-gradient-to-br from-primary via-[#9e2d55] to-accent text-white p-8 sm:p-12 text-center shadow-lg shadow-primary/20">
           <h2 className="text-2xl sm:text-3xl font-bold">Send a gift that feels personal</h2>
           <p className="mt-3 text-white/90 max-w-2xl mx-auto">
-            From same-day bouquets to anniversary hampers, BlossomPot helps you celebrate with worldwide delivery.
+            From same-day bouquets to anniversary hampers, BlossomPot helps you celebrate with delivery to {destinationName}.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Link

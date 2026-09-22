@@ -2,7 +2,7 @@
 
 import { useState, useEffect, type ReactNode } from "react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import { categoryHref } from "@/lib/category-urls";
 import { categoryLocationHref, parseLocationShopPath } from "@/lib/location-seo-urls";
@@ -113,9 +113,22 @@ function CountriesMenu({
   onNavigate?: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const { openSelector } = useDeliveryLocation();
+  const { setLocation } = useDeliveryLocation();
+  const router = useRouter();
   const { countries, loaded } = useGboDeliveryCountries();
   const { query, setQuery, filtered } = useCountrySearch(countries);
+
+  const chooseCountry = async (countryCode: string, href?: string) => {
+    setOpen(false);
+    onNavigate?.();
+    await setLocation({
+      countryCode,
+      postalCode: "",
+      postalDisplay: countryCode,
+    });
+    const path = href?.split("?")[0] || "/";
+    router.push(`${path}?country=${countryCode}`);
+  };
 
   return (
     <div
@@ -152,29 +165,13 @@ function CountriesMenu({
             ) : (
               filtered.map((c) => {
                 const guide = COUNTRY_GUIDE_HREF[c.countryCode];
-                if (guide) {
-                  return (
-                    <Link
-                      key={c.countryCode}
-                      href={guide}
-                      className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-nav whitespace-nowrap"
-                      onClick={() => {
-                        setOpen(false);
-                        onNavigate?.();
-                      }}
-                    >
-                      {c.countryName}
-                    </Link>
-                  );
-                }
                 return (
                   <button
                     key={c.countryCode}
                     type="button"
                     className="block w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-blue-50 hover:text-nav whitespace-nowrap"
                     onClick={() => {
-                      setOpen(false);
-                      openSelector({ countryCode: c.countryCode });
+                      void chooseCountry(c.countryCode, guide);
                     }}
                   >
                     {c.countryName}
@@ -333,13 +330,14 @@ function DesktopCartAction() {
 
 export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const activeCategory = searchParams.get("category");
   const [menuOpen, setMenuOpen] = useState(false);
   const [citiesOpen, setCitiesOpen] = useState(false);
   const [countriesOpen, setCountriesOpen] = useState(false);
   const [cityQuery, setCityQuery] = useState("");
-  const { openSelector, location: deliveryLocation } = useDeliveryLocation();
+  const { openSelector, setLocation, location: deliveryLocation } = useDeliveryLocation();
   const { countries, loaded: countriesLoaded } = useGboDeliveryCountries();
   const countrySearch = useCountrySearch(countries);
   const cityMenu = cityMenuForCountry(deliveryLocation?.countryCode);
@@ -602,18 +600,6 @@ export function Header() {
                     ) : (
                       countrySearch.filtered.map((c) => {
                         const guide = COUNTRY_GUIDE_HREF[c.countryCode];
-                        if (guide) {
-                          return (
-                            <Link
-                              key={c.countryCode}
-                              href={guide}
-                              onClick={closeMenu}
-                              className="block rounded-lg px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-nav"
-                            >
-                              {c.countryName}
-                            </Link>
-                          );
-                        }
                         return (
                           <button
                             key={c.countryCode}
@@ -621,7 +607,14 @@ export function Header() {
                             className="block w-full rounded-lg px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-blue-50 hover:text-nav"
                             onClick={() => {
                               closeMenu();
-                              openSelector({ countryCode: c.countryCode });
+                              void setLocation({
+                                countryCode: c.countryCode,
+                                postalCode: "",
+                                postalDisplay: c.countryCode,
+                              }).then(() => {
+                                const path = guide?.split("?")[0] || "/";
+                                router.push(`${path}?country=${c.countryCode}`);
+                              });
                             }}
                           >
                             {c.countryName}

@@ -5,6 +5,7 @@ import {
   giftsCatalogLocationHref,
   isExistingGiftsToSeoPage,
   isLocationUrlExemptPath,
+  localizeCopyForCountry,
   localizeShopCopy,
   locationShopHeading,
   locationShopRewritePath,
@@ -73,6 +74,7 @@ describe("location SEO shop URLs", () => {
     assert.match(copy.description, /USA/);
     assert.equal(copy.h1, "Send Flowers Online — Delivery to USA");
     assert.equal(locationShopHeading("/gifts-to-uk", "Shop Flowers, Cakes & Gifts"), "Shop Flowers, Cakes & Gifts to UK");
+    assert.match(localizeCopyForCountry("Shop with worldwide delivery.", "GB"), /UK/);
   });
 
   it("rewrites country catalog gifts-to URLs to /products before city pages", () => {

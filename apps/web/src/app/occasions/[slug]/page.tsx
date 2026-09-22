@@ -11,11 +11,12 @@ import {
   occasionCategoryHref,
   type OccasionPage,
 } from "@/lib/content/occasions";
-import { getCatalogProducts, mergeProductsPreferExisting } from "@/lib/catalog-fallback";
+import { mergeProductsForCountry } from "@/lib/catalog-fallback";
 import { loadProducts } from "@/lib/product-loader";
+import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, pageMetadata } from "@/lib/seo";
 import { site } from "@/lib/site";
-import type { Product } from "@blossompot/shared";
+import { isProductStorefrontVisible, type Product } from "@blossompot/shared";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -47,7 +48,7 @@ function filterOccasionProducts(products: Product[], occasion: OccasionPage): Pr
     t.toLowerCase()
   );
   const matched = products.filter((p) => {
-    if (p.published === false) return false;
+    if (!isProductStorefrontVisible(p)) return false;
     if (p.categorySlug === occasion.categorySlug) return true;
     if (p.additionalCategorySlugs?.includes(occasion.categorySlug)) return true;
     const hay = `${p.name} ${(p.tags ?? []).join(" ")} ${p.categorySlug}`.toLowerCase();
@@ -67,7 +68,8 @@ export default async function OccasionSlugPage({ params }: Props) {
   } catch {
     products = [];
   }
-  products = mergeProductsPreferExisting(products, getCatalogProducts());
+  const countryIso = await getStorefrontDeliveryCountry();
+  products = mergeProductsForCountry(products, countryIso);
   const filtered = filterOccasionProducts(products, occasion);
   const categoryHref = occasionCategoryHref(occasion);
   const path = `/occasions/${slug}`;

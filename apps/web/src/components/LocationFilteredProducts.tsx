@@ -1,7 +1,12 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { fulfillmentVendorSlug, type Product } from "@blossompot/shared";
+import {
+  fulfillmentVendorSlug,
+  isGboCatalogProduct,
+  productVisibleForDeliveryCountry,
+  type Product,
+} from "@blossompot/shared";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
 
 export function useLocationFilteredProducts(products: Product[]) {
@@ -10,7 +15,12 @@ export function useLocationFilteredProducts(products: Product[]) {
     return { products, filtered: false, emptyBecauseLocation: false };
   }
   const allowed = new Set(vendorSlugs);
-  const next = products.filter((p) => allowed.has(fulfillmentVendorSlug(p)));
+  const next = products.filter((p) => {
+    if (!productVisibleForDeliveryCountry(p, location.countryCode)) return false;
+    if (isGboCatalogProduct(p)) return true;
+    if (allowed.size === 0) return true;
+    return allowed.has(fulfillmentVendorSlug(p));
+  });
   return {
     products: next,
     filtered: true,

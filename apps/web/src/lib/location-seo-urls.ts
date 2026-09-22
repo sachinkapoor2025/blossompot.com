@@ -281,6 +281,10 @@ export function countryDisplayName(countryIso: string): string {
     .join(" ");
 }
 
+export function localizeCopyForCountry(text: string, countryIso: string): string {
+  return rewriteWorldwideCopy(text, countryDisplayName(countryIso));
+}
+
 function rewriteWorldwideCopy(value: string, country: string): string {
   return value
     .replace(/Worldwide Delivery/g, `Delivery to ${country}`)

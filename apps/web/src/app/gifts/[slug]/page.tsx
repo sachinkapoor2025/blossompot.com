@@ -12,11 +12,12 @@ import {
   type GiftGuidePage as GiftGuideConfig,
   type RecipientGiftPage,
 } from "@/lib/content/recipients";
-import { getCatalogProducts, mergeProductsPreferExisting } from "@/lib/catalog-fallback";
+import { mergeProductsForCountry } from "@/lib/catalog-fallback";
 import { loadProducts } from "@/lib/product-loader";
+import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, pageMetadata } from "@/lib/seo";
 import { site } from "@/lib/site";
-import type { Product } from "@blossompot/shared";
+import { isProductStorefrontVisible, type Product } from "@blossompot/shared";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -44,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 function filterGiftProducts(products: Product[], page: GiftGuideConfig): Product[] {
-  const published = products.filter((p) => p.published !== false);
+  const published = products.filter((p) => isProductStorefrontVisible(p));
 
   if (page.kind === "price") {
     return published.filter((p) => p.price <= page.maxPrice).slice(0, 30);
@@ -72,7 +73,8 @@ export default async function GiftSlugPage({ params }: Props) {
   } catch {
     products = [];
   }
-  products = mergeProductsPreferExisting(products, getCatalogProducts());
+  const countryIso = await getStorefrontDeliveryCountry();
+  products = mergeProductsForCountry(products, countryIso);
   const filtered = filterGiftProducts(products, page);
   const categoryHref = giftGuideCategoryHref(page);
   const path = `/gifts/${slug}`;
