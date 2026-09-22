@@ -1,5 +1,8 @@
 import { categoryHref } from "@/lib/category-urls";
 import { locationPublicPath } from "@/lib/content/seo-data";
+import { cityMenuForCountry } from "@/lib/city-menu-for-location";
+import { countryDisplayName, localizeCopyForCountry } from "@/lib/location-seo-urls";
+import { cityNavHref } from "@/lib/site";
 
 /** SEO-rich homepage copy — flowers, cakes & gifts. */
 export const homeSeoContent = {
@@ -110,3 +113,38 @@ export const homeSeoContent = {
     ],
   },
 } as const;
+
+export function homeSeoContentForCountry(countryIso: string) {
+  const iso = countryIso.trim().toUpperCase() || "US";
+  if (iso === "US") return homeSeoContent;
+
+  const country = countryDisplayName(iso);
+  const cities = cityMenuForCountry(iso);
+  const cityLinks = cities.links.slice(0, 8).map((city) => ({
+    label: city.menuLabel ?? city.label,
+    href: city.href ?? cityNavHref(city),
+  }));
+
+  return {
+    ...homeSeoContent,
+    intro: {
+      heading: localizeCopyForCountry(homeSeoContent.intro.heading, iso),
+      paragraphs: homeSeoContent.intro.paragraphs.map((para) => localizeCopyForCountry(para, iso)),
+    },
+    delivery: {
+      heading: `Gift Delivery in ${country}`,
+      paragraphs: [
+        `BlossomPot delivers flowers, cakes, and gift hampers to ${country}. Shop gifts available for this destination and enter the recipient address at checkout.`,
+        "Looking for urgency? Check delivery guidance on each product page before you order — timing depends on the destination.",
+      ],
+    },
+    cities: {
+      heading: `Popular Gift Delivery Destinations in ${country}`,
+      intro: `Start with a ${country} city page or browse the full location list for this country.`,
+      links: [
+        ...cityLinks,
+        { label: cities.allLabel, href: cities.allHref },
+      ],
+    },
+  };
+}

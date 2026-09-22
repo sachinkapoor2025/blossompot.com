@@ -128,9 +128,21 @@ export function resolveProductGalleryWithFallback(
 }
 
 /** True when a product is part of the temporary sample marketplace catalog. */
-export function isSampleCatalogProduct(product: { isSampleProduct?: boolean; tags?: string[] }): boolean {
+export function isSampleCatalogProduct(product: {
+  isSampleProduct?: boolean;
+  tags?: string[];
+  vendorSlug?: string | null;
+  fulfilledByName?: string | null;
+  sku?: string | null;
+}): boolean {
   if (product.isSampleProduct === true) return true;
-  return (product.tags ?? []).includes("sample-product");
+  if ((product.tags ?? []).includes("sample-product")) return true;
+  const vendor = (product.vendorSlug ?? "").toLowerCase();
+  if (vendor.startsWith("sample-")) return true;
+  if ((product.fulfilledByName ?? "").includes("SAMPLE VENDOR")) return true;
+  const sku = (product.sku ?? "").toUpperCase();
+  if (sku.startsWith("SMP-") || sku.startsWith("SAMPLE-")) return true;
+  return false;
 }
 
 /**
@@ -149,6 +161,9 @@ export function isProductSearchIndexable(product: {
   tags?: string[];
   indexable?: boolean;
   published?: boolean;
+  vendorSlug?: string | null;
+  fulfilledByName?: string | null;
+  sku?: string | null;
 }): boolean {
   if (product.published === false) return false;
   if (product.indexable === false) return false;
@@ -161,6 +176,9 @@ export function isProductStorefrontVisible(product: {
   published?: boolean;
   isSampleProduct?: boolean;
   tags?: string[];
+  vendorSlug?: string | null;
+  fulfilledByName?: string | null;
+  sku?: string | null;
 }): boolean {
   if (product.published === false) return false;
   if (isSampleCatalogProduct(product)) return false;

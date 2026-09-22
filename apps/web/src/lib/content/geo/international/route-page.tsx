@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { InternationalLocationPage } from "@/components/geo/InternationalLocationPage";
 import { pageMetadata } from "@/lib/seo";
-import { getCatalogProducts, mergeProductsPreferExisting } from "@/lib/catalog-fallback";
+import { mergeProductsForCountry } from "@/lib/catalog-fallback";
 import { shuffleForCity } from "@/lib/city-products";
 import { loadProducts } from "@/lib/product-loader";
 import type { Product } from "@blossompot/shared";
@@ -55,15 +55,13 @@ export async function InternationalMarketPage({
 }) {
   const loc = resolveInternationalPath(market, segments ?? []);
   if (!loc || !isInternationalIndexable(loc)) notFound();
+  const countryIso = loc.isoCountry?.trim().toUpperCase() || "US";
   let products: Product[] = [];
   try {
-    products = await loadProducts();
+    products = await loadProducts({ country: countryIso });
   } catch {
     products = [];
   }
-  products = shuffleForCity(
-    mergeProductsPreferExisting(products, getCatalogProducts()),
-    loc.slug
-  ).slice(0, 20);
+  products = shuffleForCity(mergeProductsForCountry(products, countryIso), loc.slug).slice(0, 20);
   return <InternationalLocationPage loc={resolveLocation(loc)} products={products} />;
 }

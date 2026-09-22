@@ -11,7 +11,7 @@ import {
   isGeoPublished,
   publishedGeoLocations,
 } from "@/lib/content/geo/locations";
-import { getCatalogProducts, mergeProductsPreferExisting } from "@/lib/catalog-fallback";
+import { mergeProductsForCountry } from "@/lib/catalog-fallback";
 import { shuffleForCity } from "@/lib/city-products";
 import { loadProducts } from "@/lib/product-loader";
 import { giftsCatalogCountryIso } from "@/lib/location-seo-urls";
@@ -61,11 +61,11 @@ export default async function SeoLocationPage({ params }: Props) {
 
   let products: Product[] = [];
   try {
-    products = await loadProducts();
+    products = await loadProducts({ country: "US" });
   } catch {
     products = [];
   }
-  products = mergeProductsPreferExisting(products, getCatalogProducts());
+  products = mergeProductsForCountry(products, "US");
   const cityProducts = shuffleForCity(products, slug).slice(0, 24);
   const path = locationPublicPath(slug);
 

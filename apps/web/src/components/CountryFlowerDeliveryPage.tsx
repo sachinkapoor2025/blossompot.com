@@ -1,16 +1,17 @@
 import Link from "next/link";
-import type { Product } from "@blossompot/shared";
+import { isProductStorefrontVisible, type Product } from "@blossompot/shared";
 import { AnswerBlock } from "@/components/AnswerBlock";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { HomeProductCard } from "@/components/HomeProductCard";
 import { JsonLd } from "@/components/JsonLd";
 import {
+  flowerDeliveryCountryIso,
   getCountryFlowerDelivery,
   otherCountryFlowerDeliveryLinks,
   type CountryFlowerDeliverySlug,
 } from "@/lib/content/country-flower-delivery";
 import { countryPageInlineLinks } from "@/lib/content/page-inline-links";
-import { getCatalogProducts, mergeProductsPreferExisting } from "@/lib/catalog-fallback";
+import { mergeProductsForCountry } from "@/lib/catalog-fallback";
 import { shuffleForCity } from "@/lib/city-products";
 import { applyInlineLinks } from "@/lib/inline-links";
 import { loadProducts } from "@/lib/product-loader";
@@ -21,7 +22,7 @@ import { siteUrl } from "@/lib/env";
 const FLOWER_CATEGORY_SLUGS = new Set(["flowers", "flower-bouquets"]);
 
 function pickCountryProducts(products: Product[], slug: CountryFlowerDeliverySlug): Product[] {
-  const visible = products.filter((p) => p.published !== false);
+  const visible = products.filter((p) => isProductStorefrontVisible(p));
   const flowers = visible.filter((p) => FLOWER_CATEGORY_SLUGS.has(p.categorySlug));
   if (slug === "usa") {
     const pool = flowers.length > 0 ? flowers : visible;
@@ -40,13 +41,14 @@ export async function CountryFlowerDeliveryPage({
   country: CountryFlowerDeliverySlug;
 }) {
   const page = getCountryFlowerDelivery(country);
+  const countryIso = flowerDeliveryCountryIso(country);
   let products: Product[] = [];
   try {
-    products = await loadProducts();
+    products = await loadProducts({ country: countryIso });
   } catch {
     products = [];
   }
-  products = mergeProductsPreferExisting(products, getCatalogProducts());
+  products = mergeProductsForCountry(products, countryIso);
   const featured = pickCountryProducts(products, country);
   const productsFirst = country === "usa";
   const otherCountries = otherCountryFlowerDeliveryLinks(country);

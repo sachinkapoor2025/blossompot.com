@@ -9,9 +9,10 @@ import {
   getCollection,
 } from "@/lib/collections";
 import { loadProducts } from "@/lib/product-loader";
-import { getCatalogProducts, mergeProductsPreferExisting } from "@/lib/catalog-fallback";
+import { mergeProductsForCountry } from "@/lib/catalog-fallback";
+import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
-import type { Product } from "@blossompot/shared";
+import { isProductStorefrontVisible, type Product } from "@blossompot/shared";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -46,8 +47,9 @@ export default async function CollectionPage({ params }: Props) {
   } catch {
     products = [];
   }
-  products = mergeProductsPreferExisting(products, getCatalogProducts());
-  const filtered = collection.filter(products).filter((p) => p.published !== false);
+  const countryIso = await getStorefrontDeliveryCountry();
+  products = mergeProductsForCountry(products, countryIso);
+  const filtered = collection.filter(products).filter((p) => isProductStorefrontVisible(p));
 
   const crumbs = [
     { label: "Home", href: "/" },

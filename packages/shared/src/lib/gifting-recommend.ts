@@ -1,4 +1,5 @@
 import type { GiftHistoryEntry, GiftRecipient, GiftRecommendation, GiftingGiftCategory } from "../schemas/gifting";
+import { isSampleCatalogProduct } from "./product-images";
 
 export interface RecommendableProduct {
   slug: string;
@@ -199,7 +200,7 @@ export function recommendGifts(
 ): GiftRecommendation[] {
   const preferred = categoryFromAction(context.preferredCategory);
   const scored = products
-    .filter((p) => p.published !== false)
+    .filter((p) => p.published !== false && !isSampleCatalogProduct(p))
     .map((product) => {
       const { score, reasons } = scoreGiftProduct(product, { ...context, preferredCategory: preferred });
       return {

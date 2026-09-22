@@ -1,4 +1,4 @@
-import type { Product } from "@blossompot/shared";
+import { isProductStorefrontVisible, type Product } from "@blossompot/shared";
 import { publishedFlowerGuides } from "./published";
 import type { FlowerGuide } from "./types";
 
@@ -32,7 +32,7 @@ export function productsForFlower(products: Product[], guide: FlowerGuide, limit
     .map((n) => n.toLowerCase())
     .filter((n) => n.length > 2);
   const scored = products
-    .filter((p) => p.published !== false)
+    .filter((p) => isProductStorefrontVisible(p))
     .map((p) => {
       const hay = haystack(p);
       const score = needles.reduce((sum, n) => sum + (hay.includes(n) ? n.length : 0), 0);

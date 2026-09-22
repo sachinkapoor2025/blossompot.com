@@ -3,11 +3,14 @@ import { applyInlineLinks } from "@/lib/inline-links";
 import { ShopLocationLink } from "@/components/ShopLocationLink";
 import { homepageInlineLinks } from "@/lib/content/page-inline-links";
 import { whatsappChatUrl } from "@/lib/site";
-import { homeSeoContent } from "@/lib/content/home-seo";
+import { homeSeoContentForCountry } from "@/lib/content/home-seo";
+import { countryDisplayName } from "@/lib/location-seo-urls";
 
-export function HomeSeoSection() {
-  const { intro, categories, delivery, howItWorks, cities, faqs } = homeSeoContent;
+export function HomeSeoSection({ countryIso = "US" }: { countryIso?: string }) {
+  const { intro, categories, delivery, howItWorks, cities, faqs } = homeSeoContentForCountry(countryIso);
   const usedHrefs = new Set<string>();
+  const countryName = countryDisplayName(countryIso);
+  const usa = countryIso.trim().toUpperCase() === "US";
 
   return (
     <section className="bg-slate-50 border-y border-slate-200" aria-labelledby="home-seo-heading">
@@ -39,7 +42,9 @@ export function HomeSeoSection() {
                     href={city.href}
                     className="text-xs sm:text-sm px-2.5 py-1 rounded-full border border-slate-200 bg-white text-slate-600 hover:border-nav hover:text-nav transition"
                   >
-                    Gifts to {city.label}
+                    {/^(all |international )/i.test(city.label)
+                      ? city.label
+                      : `Gifts to ${city.label.replace(/^Gifts to /i, "")}`}
                   </Link>
                 ))}
               </div>
@@ -53,9 +58,9 @@ export function HomeSeoSection() {
               <ul className="space-y-3 text-sm">
                 {categories.links.map((item) => (
                   <li key={item.href}>
-                    <Link href={item.href} className="font-semibold text-nav hover:underline">
+                    <ShopLocationLink href={item.href} className="font-semibold text-nav hover:underline">
                       {item.label}
-                    </Link>
+                    </ShopLocationLink>
                     <p className="text-slate-500 mt-0.5">{item.text}</p>
                   </li>
                 ))}
@@ -82,17 +87,19 @@ export function HomeSeoSection() {
                 <Link href="/shipping" className="text-nav font-semibold hover:underline">
                   Shipping details →
                 </Link>
-                <Link href="/flowers" className="text-nav font-semibold hover:underline">
+                <ShopLocationLink href="/flowers" className="text-nav font-semibold hover:underline">
                   Shop flowers →
-                </Link>
-                <Link href="/cakes" className="text-nav font-semibold hover:underline">
+                </ShopLocationLink>
+                <ShopLocationLink href="/cakes" className="text-nav font-semibold hover:underline">
                   Shop cakes →
-                </Link>
+                </ShopLocationLink>
               </p>
             </section>
 
             <section className="bg-nav text-white rounded-xl p-6">
-              <h3 className="text-lg font-semibold mb-2">Ready to send a gift across the USA?</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                Ready to send a gift {usa ? "across the USA" : `to ${countryName}`}?
+              </h3>
               <p className="text-sm text-white/90 mb-4">
                 Browse flowers, cakes, and hampers above — or reach out and we&apos;ll help you pick the right surprise.
               </p>
@@ -105,7 +112,11 @@ export function HomeSeoSection() {
                   Shop all gifts
                 </ShopLocationLink>
                 <a
-                  href={whatsappChatUrl("Hi BlossomPot, I want to send a gift in the USA.")}
+                  href={whatsappChatUrl(
+                    usa
+                      ? "Hi BlossomPot, I want to send a gift in the USA."
+                      : `Hi BlossomPot, I want to send a gift to ${countryName}.`
+                  )}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="border border-white/60 px-4 py-2 rounded-lg hover:bg-white/10"

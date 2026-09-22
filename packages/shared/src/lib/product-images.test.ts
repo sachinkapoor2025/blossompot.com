@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   PRODUCT_IMAGE_MIN_EDGE_PX,
+  isProductStorefrontVisible,
+  isSampleCatalogProduct,
   mergeProductImages,
   resolveProductImagesForUpsert,
   selectDisplayableProductImages,
@@ -87,5 +89,22 @@ describe("resolveProductImageUrl", () => {
       resolveProductImageUrl("https://blossompot.com/wp-content/uploads/2026/03/photo.jpg"),
       "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/photo.jpg"
     );
+  });
+});
+
+describe("sample catalog visibility", () => {
+  it("treats flagged, tagged, vendor, and SMP SKUs as samples", () => {
+    assert.equal(isSampleCatalogProduct({ isSampleProduct: true }), true);
+    assert.equal(isSampleCatalogProduct({ tags: ["sample-product"] }), true);
+    assert.equal(isSampleCatalogProduct({ vendorSlug: "sample-la-florist" }), true);
+    assert.equal(isSampleCatalogProduct({ fulfilledByName: "SAMPLE VENDOR — Demo" }), true);
+    assert.equal(isSampleCatalogProduct({ sku: "SMP-00012" }), true);
+    assert.equal(isSampleCatalogProduct({ slug: "classic-red-rose-bouquet", sku: "BP-ROSES" }), false);
+  });
+
+  it("keeps sample SKUs off the public storefront", () => {
+    assert.equal(isProductStorefrontVisible({ isSampleProduct: true, published: true }), false);
+    assert.equal(isProductStorefrontVisible({ sku: "SMP-00001", published: true }), false);
+    assert.equal(isProductStorefrontVisible({ slug: "classic-red-rose-bouquet", published: true }), true);
   });
 });
