@@ -29,17 +29,20 @@ export function resolveProductImageUrl(url: string | undefined | null, cdnBase?:
   if (!trimmed) return "";
 
   const cdn = getProductCdnBase(cdnBase);
+
+  // TF USA photos ship with the Next app under public/uploads/tf-usa — they are not on CloudFront.
+  // Keep (or restore) a same-origin path so listings/PDP/admin all load the files Amplify deploys.
+  const tfUsa = trimmed.match(/\/uploads\/tf-usa\/(.+)$/i);
+  if (tfUsa) return `/uploads/tf-usa/${tfUsa[1]}`;
+  if (/^uploads\/tf-usa\//i.test(trimmed)) return `/${trimmed.replace(/^\/+/, "")}`;
+
   if (trimmed.startsWith(cdn)) return trimmed;
 
   const uploadsMatch = trimmed.match(/\/wp-content\/uploads\/(.+)$/i);
   if (uploadsMatch) return cdnUploadUrl(uploadsMatch[1], cdn);
 
   // Relative storefront uploads (e.g. Orange County hampers under /uploads/orange-county/…).
-  // TF USA imports live in apps/web/public — keep local paths in development so listing/PDP images load.
   if (trimmed.startsWith("/uploads/")) {
-    if (process.env.NODE_ENV !== "production" && trimmed.startsWith("/uploads/tf-usa/")) {
-      return trimmed;
-    }
     return `${cdn}${trimmed}`;
   }
   if (/^uploads\//i.test(trimmed)) {
