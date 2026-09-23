@@ -5,7 +5,7 @@ import { pageMetadata } from "@/lib/seo";
 import { mergeProductsForCountry } from "@/lib/catalog-fallback";
 import { shuffleForCity } from "@/lib/city-products";
 import { loadProducts } from "@/lib/product-loader";
-import type { Product } from "@blossompot/shared";
+import { isProductStorefrontVisible, type Product } from "@blossompot/shared";
 import {
   generateParamsForMarket,
   isInternationalIndexable,
@@ -62,6 +62,9 @@ export async function InternationalMarketPage({
   } catch {
     products = [];
   }
-  products = shuffleForCity(mergeProductsForCountry(products, countryIso), loc.slug).slice(0, 20);
+  products = shuffleForCity(
+    mergeProductsForCountry(products, countryIso).filter((p) => isProductStorefrontVisible(p)),
+    loc.slug
+  ).slice(0, 20);
   return <InternationalLocationPage loc={resolveLocation(loc)} products={products} />;
 }

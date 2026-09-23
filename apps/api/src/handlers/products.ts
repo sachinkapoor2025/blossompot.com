@@ -5,6 +5,8 @@ import {
   updateProductSchema,
   bulkProductRowSchema,
   productKeys,
+  marketplaceVendorKeys,
+  vendorCoverageKeys,
   DEFAULT_PRODUCT_INVENTORY,
   withCompetitiveStorefrontPricing,
   stripVendorPrivateFields,
@@ -19,7 +21,7 @@ import {
   VENDOR_GBO,
   type Product,
 } from "@blossompot/shared";
-import { docClient, PRODUCTS_TABLE, now, slugify } from "../lib/db";
+import { docClient, PRODUCTS_TABLE, CONFIG_TABLE, now, slugify } from "../lib/db";
 import { ok, okCached, created, badRequest, notFound, forbidden } from "../lib/response";
 import { evaluateProductsForLocation, parseLocationQuery } from "./serviceability";
 import { getAuth, requireAdmin } from "../lib/auth";
@@ -400,7 +402,123 @@ export async function listAdminProducts(event: APIGatewayProxyEventV2) {
   });
 }
 
-/** Admin: permanently delete all isSampleProduct rows (+ sample reviews on those slugs). */
+async function scanAllProductTableItems(): Promise<Record<string, unknown>[]> {
+  const items: Record<string, unknown>[] = [];
+  let ExclusiveStartKey: Record<string, unknown> | undefined;
+  do {
+    const result = await docClient.send(
+      new ScanCommand({
+        TableName: PRODUCTS_TABLE,
+        FilterExpression: "begins_with(PK, :prefix)",
+        ExpressionAttributeValues: { ":prefix": "PRODUCT#" },
+        ExclusiveStartKey,
+      })
+    );
+    if (result.Items?.length) items.push(...result.Items);
+    ExclusiveStartKey = result.LastEvaluatedKey as Record<string, unknown> | undefined;
+  } while (ExclusiveStartKey);
+  return items;
+}
+
+function isSampleMarketplaceVendor(item: Record<string, unknown>): boolean {
+  if (item.isSampleVendor === true) return true;
+  const slug = String(item.vendorSlug ?? "").toLowerCase();
+  if (slug.startsWith("sample-")) return true;
+  const vendorId = String(item.vendorId ?? "").toLowerCase();
+  if (vendorId.startsWith("sample-")) return true;
+  const email = String(item.email ?? "").toLowerCase();
+  if (email.endsWith("@sample.blossompot.local")) return true;
+  const name = String(item.businessName ?? "");
+  if (name.includes("SAMPLE VENDOR")) return true;
+  return false;
+}
+
+async function deleteSampleMarketplaceVendors(): Promise<{
+  deletedVendors: number;
+  deletedVendorLookups: number;
+  deletedCoverage: number;
+}> {
+  const items: Record<string, unknown>[] = [];
+  let ExclusiveStartKey: Record<string, unknown> | undefined;
+  do {
+    const result = await docClient.send(
+      new ScanCommand({
+        TableName: CONFIG_TABLE,
+        ExclusiveStartKey,
+      })
+    );
+    if (result.Items?.length) items.push(...result.Items);
+    ExclusiveStartKey = result.LastEvaluatedKey as Record<string, unknown> | undefined;
+  } while (ExclusiveStartKey);
+
+  const vendorMetas = items.filter(
+    (i) => String(i.PK ?? "").startsWith("MVENDOR#") && String(i.SK ?? "") === "META" && isSampleMarketplaceVendor(i)
+  );
+  const vendorIds = new Set(vendorMetas.map((v) => String(v.vendorId ?? "")));
+  const vendorSlugs = new Set(
+    vendorMetas.map((v) => String(v.vendorSlug ?? "")).filter(Boolean)
+  );
+
+  let deletedVendors = 0;
+  let deletedVendorLookups = 0;
+  let deletedCoverage = 0;
+
+  for (const item of items) {
+    const pk = String(item.PK ?? "");
+    const sk = String(item.SK ?? "");
+    const vendorId = String(item.vendorId ?? "");
+    const slugFromPk = pk.startsWith("MVENDORSLUG#") ? pk.slice("MVENDORSLUG#".length) : "";
+    const emailFromPk = pk.startsWith("MVENDOREMAIL#") ? pk.slice("MVENDOREMAIL#".length) : "";
+    const coverageSlug = pk.startsWith("VCOV#") ? pk.slice("VCOV#".length) : "";
+
+    const dropVendorMeta = pk.startsWith("MVENDOR#") && vendorIds.has(pk.slice("MVENDOR#".length));
+    const dropSlug =
+      Boolean(slugFromPk) && (vendorSlugs.has(slugFromPk) || slugFromPk.startsWith("sample-"));
+    const dropEmail =
+      Boolean(emailFromPk) &&
+      (emailFromPk.endsWith("@sample.blossompot.local") || vendorIds.has(vendorId));
+    const dropCoverage = Boolean(coverageSlug) && vendorSlugs.has(coverageSlug);
+
+    if (!dropVendorMeta && !dropSlug && !dropEmail && !dropCoverage) continue;
+
+    await docClient.send(
+      new DeleteCommand({
+        TableName: CONFIG_TABLE,
+        Key: { PK: pk, SK: sk },
+      })
+    );
+    if (dropVendorMeta && sk === "META") deletedVendors++;
+    else if (dropCoverage) deletedCoverage++;
+    else deletedVendorLookups++;
+  }
+
+  // Coverage / slug rows may exist even if vendor META was already removed.
+  for (const slug of vendorSlugs) {
+    await docClient.send(
+      new DeleteCommand({
+        TableName: CONFIG_TABLE,
+        Key: { PK: marketplaceVendorKeys.slugPk(slug), SK: marketplaceVendorKeys.slugSk() },
+      })
+    );
+    const email = `${slug}@sample.blossompot.local`;
+    await docClient.send(
+      new DeleteCommand({
+        TableName: CONFIG_TABLE,
+        Key: { PK: marketplaceVendorKeys.emailPk(email), SK: marketplaceVendorKeys.emailSk() },
+      })
+    );
+    await docClient.send(
+      new DeleteCommand({
+        TableName: CONFIG_TABLE,
+        Key: { PK: vendorCoverageKeys.pk(slug), SK: vendorCoverageKeys.metaSk() },
+      })
+    );
+  }
+
+  return { deletedVendors, deletedVendorLookups, deletedCoverage };
+}
+
+/** Admin: permanently delete all sample-vendor products (+ sample reviews on those slugs). */
 export async function deleteAllSampleProducts(event: APIGatewayProxyEventV2) {
   if (!requireAdmin(event)) return forbidden();
   const body = JSON.parse(event.body ?? "{}") as { confirm?: string };
@@ -408,15 +526,7 @@ export async function deleteAllSampleProducts(event: APIGatewayProxyEventV2) {
     return badRequest('Pass confirm: "REMOVE_ALL_SAMPLE_PRODUCTS" to proceed');
   }
 
-  const result = await docClient.send(
-    new ScanCommand({
-      TableName: PRODUCTS_TABLE,
-      FilterExpression: "begins_with(PK, :prefix)",
-      ExpressionAttributeValues: { ":prefix": "PRODUCT#" },
-    })
-  );
-
-  const items = result.Items ?? [];
+  const items = await scanAllProductTableItems();
   const sampleMetas = items.filter(
     (i) => i.SK === "META" && isSampleCatalogProduct(i as Product)
   ) as Product[];
@@ -444,8 +554,15 @@ export async function deleteAllSampleProducts(event: APIGatewayProxyEventV2) {
     else deletedReviews++;
   }
 
+  const vendors = await deleteSampleMarketplaceVendors();
+
   invalidateProductListCache();
-  return ok({ deletedProducts, deletedReviews, confirm: body.confirm });
+  return ok({
+    deletedProducts,
+    deletedReviews,
+    ...vendors,
+    confirm: body.confirm,
+  });
 }
 
 /** Admin: mark a sample product as real (clears sample flag; keeps images/data). */
