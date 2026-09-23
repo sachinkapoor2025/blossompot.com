@@ -14,6 +14,8 @@ import {
   resolveProductImagesForUpsert,
   isProductStorefrontVisible,
   isSampleCatalogProduct,
+  productInStorefrontCategory,
+  dedupeStorefrontProducts,
   VENDOR_GBO,
   type Product,
 } from "@blossompot/shared";
@@ -24,6 +26,27 @@ import { getAuth, requireAdmin } from "../lib/auth";
 import { withResolvedProductImages, resolveProductImageUrl } from "../lib/images";
 import { syncInventoryAlertState } from "../lib/inventory";
 import { ensureProductInDb } from "../lib/ensure-product";
+import { listBundledCatalogProducts } from "../lib/blossompot-catalog";
+
+function mergeBundledCatalogProducts(items: Product[], category?: string): Product[] {
+  const bySlug = new Map(items.map((product) => [product.slug, product]));
+  const stamp = "2026-09-23T00:00:00.000Z";
+  for (const bundled of listBundledCatalogProducts()) {
+    if (bySlug.has(bundled.slug)) continue;
+    if (category && !productInStorefrontCategory(bundled, category)) continue;
+    bySlug.set(bundled.slug, {
+      ...bundled,
+      currency: bundled.currency ?? "USD",
+      inventory: bundled.inventory ?? DEFAULT_PRODUCT_INVENTORY,
+      tags: bundled.tags ?? [],
+      images: bundled.images ?? [],
+      published: bundled.published !== false,
+      createdAt: stamp,
+      updatedAt: stamp,
+    } as Product);
+  }
+  return [...bySlug.values()];
+}
 
 function forStorefront(product: Product): Product {
   const allowsAddons = productAllowsAddons(product);
@@ -167,6 +190,8 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
   } else {
     items = await scanAllProducts();
   }
+
+  items = dedupeStorefrontProducts(mergeBundledCatalogProducts(items, category));
 
   items = items.filter(
     (p) => p.published !== false && (p.inventory ?? 0) > 0 && isProductStorefrontVisible(p)

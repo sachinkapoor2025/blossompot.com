@@ -10,7 +10,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { pageMetadata } from "@/lib/seo";
 import { requestSeoPath } from "@/lib/request-seo-path";
 import { loadProducts } from "@/lib/product-loader";
-import { productInStorefrontCategory, type Product, type Category } from "@blossompot/shared";
+import { groupStorefrontProductsOnce, type Product, type Category } from "@blossompot/shared";
 import { categoryHref } from "@/lib/category-urls";
 import { localizeShopCopy, localizeShopText, locationShopHeading } from "@/lib/location-seo-urls";
 import { homeCategoryOrder, orderCategories } from "@/lib/site";
@@ -131,10 +131,11 @@ export default async function ProductsPage({ searchParams }: Props) {
 
   const sortedCategories = orderCategories(categories);
   const categoryMap = new Map(categories.map((c) => [c.slug, c]));
+  const grouped = groupStorefrontProductsOnce(products, homeCategoryOrder);
   const productsByCategory = homeCategoryOrder.map((slug) => ({
     slug,
     name: categoryMap.get(slug)?.name ?? slug.replace(/-/g, " "),
-    products: products.filter((p) => productInStorefrontCategory(p, slug)),
+    products: grouped.get(slug) ?? [],
   }));
   const showGrouped = !search && !category;
 

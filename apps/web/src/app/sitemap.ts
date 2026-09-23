@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { api } from "@/lib/api";
-import { isProductSearchIndexable, type Product } from "@blossompot/shared";
+import { isProductSearchIndexable, dedupeStorefrontProducts, type Product } from "@blossompot/shared";
 import { siteUrl } from "@/lib/env";
 import { categoryHref } from "@/lib/category-urls";
 import {
@@ -24,7 +24,7 @@ function mergeProducts(apiProducts: Product[]): Product[] {
   for (const p of getCatalogProducts()) {
     if (!bySlug.has(p.slug)) bySlug.set(p.slug, p);
   }
-  return [...bySlug.values()].filter((p) => isProductSearchIndexable(p));
+  return dedupeStorefrontProducts([...bySlug.values()].filter((p) => isProductSearchIndexable(p)));
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

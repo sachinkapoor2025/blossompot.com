@@ -5,11 +5,14 @@ import {
   resolveProductImageUrls,
   stripVendorPrivateFields,
   withCompetitiveStorefrontPricing,
+  dedupeStorefrontProducts,
   type Product,
 } from "@blossompot/shared";
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
 import { isRakhiRelatedCategorySlug, isRakhiRelatedProduct } from "./rakhi-filter";
+import blossompotCatalog from "../../../../scripts/data/blossompot-catalog.json";
+import tfUsaCatalog from "../../../../scripts/data/tf-usa-catalog.json";
 
 interface CatalogFile {
   products: Product[];
@@ -33,29 +36,37 @@ function loadCatalogFile(filename: string): Product[] {
   return data.products ?? [];
 }
 
+function ingestCatalogProducts(
+  bySlug: Map<string, Product>,
+  products: unknown,
+  options: { fillMissingOnly?: boolean } = {}
+) {
+  if (!Array.isArray(products)) return;
+  for (const row of products) {
+    const product = row as Product;
+    if (!product?.slug) continue;
+    if (options.fillMissingOnly && bySlug.has(product.slug)) continue;
+    if (isRakhiRelatedProduct(product)) continue;
+    if (isSampleCatalogProduct(product)) continue;
+    const allowsAddons = productAllowsAddons(product);
+    const publicProduct = stripVendorPrivateFields(product) as Product;
+    publicProduct.allowsAddons = allowsAddons;
+    publicProduct.images = resolveProductImageUrls(publicProduct.images);
+    publicProduct.createdAt = product.createdAt || "2026-09-23T00:00:00.000Z";
+    publicProduct.updatedAt = product.updatedAt || publicProduct.createdAt;
+    bySlug.set(product.slug, withCompetitiveStorefrontPricing(publicProduct));
+  }
+}
+
 /** Read bundled catalog JSON — real BlossomPot SKUs only (never the sample marketplace dump). */
 export function getCatalogProducts(): Product[] {
   if (cached) return cached;
   const bySlug = new Map<string, Product>();
-  for (const product of loadCatalogFile("blossompot-catalog.json")) {
-    if (isRakhiRelatedProduct(product)) continue;
-    if (isSampleCatalogProduct(product)) continue;
-    const allowsAddons = productAllowsAddons(product);
-    const publicProduct = stripVendorPrivateFields(product) as Product;
-    publicProduct.allowsAddons = allowsAddons;
-    publicProduct.images = resolveProductImageUrls(publicProduct.images);
-    bySlug.set(product.slug, withCompetitiveStorefrontPricing(publicProduct));
-  }
-  for (const product of loadCatalogFile("tf-usa-catalog.json")) {
-    if (isRakhiRelatedProduct(product)) continue;
-    if (isSampleCatalogProduct(product)) continue;
-    const allowsAddons = productAllowsAddons(product);
-    const publicProduct = stripVendorPrivateFields(product) as Product;
-    publicProduct.allowsAddons = allowsAddons;
-    publicProduct.images = resolveProductImageUrls(publicProduct.images);
-    bySlug.set(product.slug, withCompetitiveStorefrontPricing(publicProduct));
-  }
-  cached = [...bySlug.values()];
+  ingestCatalogProducts(bySlug, (blossompotCatalog as { products?: unknown }).products);
+  ingestCatalogProducts(bySlug, (tfUsaCatalog as { products?: unknown }).products, { fillMissingOnly: true });
+  ingestCatalogProducts(bySlug, loadCatalogFile("blossompot-catalog.json"));
+  ingestCatalogProducts(bySlug, loadCatalogFile("tf-usa-catalog.json"), { fillMissingOnly: true });
+  cached = dedupeStorefrontProducts([...bySlug.values()]);
   return cached;
 }
 
@@ -74,7 +85,7 @@ export function getCatalogProductsByCategory(categorySlug: string): Product[] {
   for (const product of getCatalogProducts()) {
     if (productInCategory(product, categorySlug)) bySlug.set(product.slug, product);
   }
-  return [...bySlug.values()];
+  return dedupeStorefrontProducts([...bySlug.values()]);
 }
 
 /**
@@ -95,10 +106,8 @@ export function mergeProductsPreferExisting(
     if (isSampleCatalogProduct(product)) continue;
     if (!bySlug.has(product.slug)) bySlug.set(product.slug, product);
   }
-  return [...bySlug.values()];
+  return dedupeStorefrontProducts([...bySlug.values()]);
 }
-
-/** Bundled catalog SKUs allowed for this delivery country (US local SKUs stay US-only). */
 export function getCatalogProductsForCountry(country: string): Product[] {
   return getCatalogProducts().filter((product) => productVisibleForDeliveryCountry(product, country));
 }
