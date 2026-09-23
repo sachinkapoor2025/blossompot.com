@@ -113,6 +113,7 @@ describe("sample catalog visibility", () => {
     assert.equal(isSampleCatalogProduct({ vendorSlug: "sample-la-florist" }), true);
     assert.equal(isSampleCatalogProduct({ fulfilledByName: "SAMPLE VENDOR — Demo" }), true);
     assert.equal(isSampleCatalogProduct({ sku: "SMP-00012" }), true);
+    assert.equal(isSampleCatalogProduct({ slug: "sample-blush-rose-bouquet" }), true);
     assert.equal(isSampleCatalogProduct({ slug: "classic-red-rose-bouquet", sku: "BP-ROSES" }), false);
   });
 

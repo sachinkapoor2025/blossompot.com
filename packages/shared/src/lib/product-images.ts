@@ -134,6 +134,7 @@ export function isSampleCatalogProduct(product: {
   vendorSlug?: string | null;
   fulfilledByName?: string | null;
   sku?: string | null;
+  slug?: string | null;
 }): boolean {
   if (product.isSampleProduct === true) return true;
   if ((product.tags ?? []).includes("sample-product")) return true;
@@ -142,6 +143,8 @@ export function isSampleCatalogProduct(product: {
   if ((product.fulfilledByName ?? "").includes("SAMPLE VENDOR")) return true;
   const sku = (product.sku ?? "").toUpperCase();
   if (sku.startsWith("SMP-") || sku.startsWith("SAMPLE-")) return true;
+  const slug = (product.slug ?? "").toLowerCase();
+  if (slug.startsWith("sample-")) return true;
   return false;
 }
 
@@ -164,6 +167,7 @@ export function isProductSearchIndexable(product: {
   vendorSlug?: string | null;
   fulfilledByName?: string | null;
   sku?: string | null;
+  slug?: string | null;
 }): boolean {
   if (product.published === false) return false;
   if (product.indexable === false) return false;
@@ -179,6 +183,7 @@ export function isProductStorefrontVisible(product: {
   vendorSlug?: string | null;
   fulfilledByName?: string | null;
   sku?: string | null;
+  slug?: string | null;
 }): boolean {
   if (product.published === false) return false;
   if (isSampleCatalogProduct(product)) return false;

@@ -15,6 +15,7 @@
     "seed": "tsx scripts/seed.ts",
     "seed:sample-products": "tsx scripts/seed-sample-products.ts",
     "seed:sample-products:dry": "tsx scripts/seed-sample-products.ts --dry-run --write-json",
+    "purge:sample-products": "tsx scripts/purge-sample-products.ts",
     "validate:sample-products": "tsx scripts/validate-sample-products.ts",
     "geo:generate": "python3 scripts/geo/generate-geo-content.py",
     "geo:validate": "python3 scripts/geo/generate-geo-content.py --validate-only",
