@@ -115,11 +115,38 @@ describe("sample catalog visibility", () => {
     assert.equal(isSampleCatalogProduct({ sku: "SMP-00012" }), true);
     assert.equal(isSampleCatalogProduct({ slug: "sample-blush-rose-bouquet" }), true);
     assert.equal(isSampleCatalogProduct({ slug: "classic-red-rose-bouquet", sku: "BP-ROSES" }), false);
+    assert.equal(
+      isSampleCatalogProduct({
+        slug: "classic-red-rose-bouquet",
+        images: ["https://images.unsplash.com/photo-1518895949257-7621c3c786d7"],
+      }),
+      true
+    );
+    assert.equal(
+      isSampleCatalogProduct({
+        sku: "TFFF2601",
+        tags: ["tf-usa"],
+        images: ["/uploads/tf-usa/TFFF2601/TFFF2601.jpg"],
+      }),
+      false
+    );
+    assert.equal(
+      isSampleCatalogProduct({ sku: "gbo:US:3", images: ["https://www.giftbasketsoverseas.com/x.webp"] }),
+      false
+    );
   });
 
   it("keeps sample SKUs off the public storefront", () => {
     assert.equal(isProductStorefrontVisible({ isSampleProduct: true, published: true }), false);
     assert.equal(isProductStorefrontVisible({ sku: "SMP-00001", published: true }), false);
-    assert.equal(isProductStorefrontVisible({ slug: "classic-red-rose-bouquet", published: true }), true);
+    assert.equal(
+      isProductStorefrontVisible({
+        slug: "classic-red-rose-bouquet",
+        images: ["https://images.unsplash.com/photo-x"],
+        published: true,
+      }),
+      false
+    );
+    assert.equal(isProductStorefrontVisible({ slug: "classic-red-rose-bouquet", sku: "BP-ROSES", published: true }), true);
   });
 });

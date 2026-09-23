@@ -1,5 +1,4 @@
 import { getApiUrl, getSiteUrl, getCdnUrl } from "@/lib/env";
-import { getCatalogProducts } from "@/lib/catalog-fallback";
 import { stripHtml } from "@/lib/html-text";
 import { isProductStorefrontVisible, dedupeStorefrontProducts } from "@blossompot/shared";
 
@@ -45,25 +44,7 @@ export async function GET() {
     products = [];
   }
 
-  const bySlug = new Map(products.map((p) => [p.slug, p]));
-  for (const p of getCatalogProducts()) {
-    if (!bySlug.has(p.slug)) {
-      bySlug.set(p.slug, {
-        slug: p.slug,
-        name: p.name,
-        description: p.description,
-        price: p.price,
-        currency: p.currency,
-        images: p.images,
-        sku: p.sku,
-        inventory: p.inventory,
-        categorySlug: p.categorySlug,
-      });
-    }
-  }
-  products = dedupeStorefrontProducts(
-    [...bySlug.values()].filter((p) => isProductStorefrontVisible({ sku: p.sku }))
-  );
+  products = dedupeStorefrontProducts(products.filter((p) => isProductStorefrontVisible({ sku: p.sku, slug: p.slug })));
 
   const items = products
     .map((p) => {

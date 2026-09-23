@@ -112,9 +112,14 @@ export function getCatalogProductsForCountry(country: string): Product[] {
   return getCatalogProducts().filter((product) => productVisibleForDeliveryCountry(product, country));
 }
 
-/** Merge live results with country-safe catalog fallback; never re-inject other countries. */
+/** Keep API (and live GBO) results for this country — never inject bundled JSON SKUs. */
 export function mergeProductsForCountry(existing: Product[], country: string): Product[] {
-  return mergeProductsPreferExisting(existing, getCatalogProductsForCountry(country)).filter((product) =>
-    productVisibleForDeliveryCountry(product, country)
+  return dedupeStorefrontProducts(
+    existing.filter(
+      (product) =>
+        !isRakhiRelatedProduct(product) &&
+        !isSampleCatalogProduct(product) &&
+        productVisibleForDeliveryCountry(product, country)
+    )
   );
 }

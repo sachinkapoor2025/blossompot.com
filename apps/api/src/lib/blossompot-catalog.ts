@@ -5,7 +5,7 @@
  * Same pattern as orange-county-catalog.ts for hampers.
  */
 import { PutCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
-import { productKeys, categoryKeys, DEFAULT_PRODUCT_INVENTORY } from "@blossompot/shared";
+import { productKeys, categoryKeys, DEFAULT_PRODUCT_INVENTORY, isSampleCatalogProduct } from "@blossompot/shared";
 import { docClient, PRODUCTS_TABLE, now } from "./db";
 import catalogJson from "../data/blossompot-catalog.json";
 
@@ -46,9 +46,9 @@ export function getBundledUsarakhiProduct(slug: string): CatalogProduct | undefi
   return bySlug.get(slug);
 }
 
-/** Published bundled SKUs (including TF USA) used to fill storefront lists before Dynamo import. */
+/** Published live bundled SKUs (TF USA). Unsplash demo rows are not persisted or listed. */
 export function listBundledCatalogProducts(): CatalogProduct[] {
-  return [...bySlug.values()].filter((p) => p.published !== false);
+  return [...bySlug.values()].filter((p) => p.published !== false && !isSampleCatalogProduct(p));
 }
 
 /**
