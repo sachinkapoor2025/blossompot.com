@@ -26,7 +26,7 @@ import { getAuth, requireAdmin } from "../lib/auth";
 import { withResolvedProductImages, resolveProductImageUrl } from "../lib/images";
 import { syncInventoryAlertState } from "../lib/inventory";
 import { ensureProductInDb } from "../lib/ensure-product";
-import { listBundledCatalogProducts } from "../lib/blossompot-catalog";
+import { listBundledCatalogProducts, persistMissingBundledCatalogProducts } from "../lib/blossompot-catalog";
 
 function mergeBundledCatalogProducts(items: Product[], category?: string): Product[] {
   const bySlug = new Map(items.map((product) => [product.slug, product]));
@@ -319,6 +319,13 @@ export async function updateProduct(event: APIGatewayProxyEventV2) {
       Key: { PK: productKeys.pk(slug), SK: productKeys.sk() },
     })
   );
+  if (!existing.Item) {
+    const upserted = await ensureProductInDb(slug);
+    if (upserted) {
+      existing.Item = upserted;
+      invalidateProductListCache((upserted as Product).categorySlug);
+    }
+  }
   if (!existing.Item) return notFound("Product not found");
 
   const previous = existing.Item as Product;
@@ -363,17 +370,17 @@ export async function listAdminProducts(event: APIGatewayProxyEventV2) {
 
   const sampleFilter = (event.queryStringParameters?.sample ?? "all").toLowerCase();
 
-  const result = await docClient.send(
-    new ScanCommand({
-      TableName: PRODUCTS_TABLE,
-      FilterExpression: "begins_with(PK, :prefix) AND SK = :sk",
-      ExpressionAttributeValues: { ":prefix": "PRODUCT#", ":sk": "META" },
-    })
-  );
+  let items = await scanAllProducts();
+  const persisted = await persistMissingBundledCatalogProducts(new Set(items.map((p) => p.slug)));
+  if (persisted.length > 0) {
+    invalidateProductListCache();
+    items = [...persisted.map((row) => row as Product), ...items];
+  }
+  items = mergeBundledCatalogProducts(items);
+  items.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
-  let items = ((result.Items ?? []) as Product[]).sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-  );
+  const sampleCount = items.filter((p) => isSampleCatalogProduct(p)).length;
+  const realCount = items.length - sampleCount;
 
   if (sampleFilter === "true" || sampleFilter === "sample") {
     items = items.filter((p) => isSampleCatalogProduct(p));
@@ -381,17 +388,13 @@ export async function listAdminProducts(event: APIGatewayProxyEventV2) {
     items = items.filter((p) => !isSampleCatalogProduct(p));
   }
 
-  const sampleCount = ((result.Items ?? []) as Product[]).filter((p) =>
-    isSampleCatalogProduct(p)
-  ).length;
-
   return ok({
     products: items.map(withResolvedProductImages),
     meta: {
-      totalScanned: result.Items?.length ?? 0,
+      totalScanned: items.length,
       returned: items.length,
       sampleCount,
-      realCount: (result.Items?.length ?? 0) - sampleCount,
+      realCount,
       sampleFilter,
     },
   });
