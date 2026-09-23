@@ -121,28 +121,9 @@ export async function ensureUsarakhiCategoriesInDb(): Promise<number> {
   return created;
 }
 
-/**
- * If the slug exists in the bundled catalog but not in DynamoDB, create it.
- * Does not overwrite existing products (prices/inventory stay admin-controlled).
- */
-export async function ensureUsarakhiCatalogProductInDb(
-  slug: string
-): Promise<Record<string, unknown> | null> {
-  const bundled = bySlug.get(slug);
-  if (!bundled) return null;
-
-  const key = { PK: productKeys.pk(slug), SK: productKeys.sk() };
-  const existing = await docClient.send(
-    new GetCommand({
-      TableName: PRODUCTS_TABLE,
-      Key: key,
-    })
-  );
-  if (existing.Item) return existing.Item as Record<string, unknown>;
-
-  const ts = now();
+function catalogProductToDbItem(bundled: CatalogProduct, ts: string) {
   const categorySlug = bundled.categorySlug;
-  const item = {
+  return {
     name: bundled.name,
     slug: bundled.slug,
     description: bundled.description,
@@ -162,17 +143,67 @@ export async function ensureUsarakhiCatalogProductInDb(
     seoTitle: bundled.seoTitle,
     seoDescription: bundled.seoDescription,
     published: bundled.published !== false,
-    PK: productKeys.pk(slug),
+    PK: productKeys.pk(bundled.slug),
     SK: productKeys.sk(),
     GSI1PK: productKeys.gsi1pk(categorySlug),
-    GSI1SK: productKeys.gsi1sk(slug),
+    GSI1SK: productKeys.gsi1sk(bundled.slug),
     createdAt: ts,
     updatedAt: ts,
   };
+}
 
+/**
+ * If the slug exists in the bundled catalog but not in DynamoDB, create it.
+ * Does not overwrite existing products (prices/inventory stay admin-controlled).
+ */
+export async function ensureUsarakhiCatalogProductInDb(
+  slug: string
+): Promise<Record<string, unknown> | null> {
+  const bundled = bySlug.get(slug);
+  if (!bundled) return null;
+
+  const key = { PK: productKeys.pk(slug), SK: productKeys.sk() };
+  const existing = await docClient.send(
+    new GetCommand({
+      TableName: PRODUCTS_TABLE,
+      Key: key,
+    })
+  );
+  if (existing.Item) return existing.Item as Record<string, unknown>;
+
+  const item = catalogProductToDbItem(bundled, now());
   await docClient.send(new PutCommand({ TableName: PRODUCTS_TABLE, Item: item }));
   console.log(`upserted blossompot catalog product ${slug}`);
   return item;
+}
+
+/** Create Dynamo rows for bundled catalog SKUs that are not in the table yet. */
+export async function persistMissingBundledCatalogProducts(
+  existingSlugs: Set<string>
+): Promise<Record<string, unknown>[]> {
+  const missing = listBundledCatalogProducts().filter((product) => !existingSlugs.has(product.slug));
+  if (missing.length === 0) return [];
+
+  const ts = now();
+  const written = await Promise.all(
+    missing.map(async (bundled) => {
+      const item = catalogProductToDbItem(bundled, ts);
+      try {
+        await docClient.send(
+          new PutCommand({
+            TableName: PRODUCTS_TABLE,
+            Item: item,
+            ConditionExpression: "attribute_not_exists(PK)",
+          })
+        );
+        console.log(`upserted blossompot catalog product ${bundled.slug}`);
+        return item as Record<string, unknown>;
+      } catch {
+        return null;
+      }
+    })
+  );
+  return written.filter((item): item is Record<string, unknown> => item != null);
 }
 
 
