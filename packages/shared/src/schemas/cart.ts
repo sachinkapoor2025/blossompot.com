@@ -29,6 +29,10 @@ export const cartItemSchema = z.object({
   couponExcluded: z.boolean().optional(),
   /** Optional BlossomPot dry-fruit / chocolate extras on this line. */
   addons: z.array(cartItemAddonSchema).max(20).optional(),
+  /** Per-unit sheet shipping (USD catalog, converted at checkout). 0 = free sheet shipping. */
+  shippingFee: z.number().min(0).optional(),
+  /** Selected cake / day-wise shipping label from the sheet. */
+  shippingOptionLabel: z.string().min(1).max(80).optional(),
   /** Set by GET /cart when the current delivery location cannot fulfill this line. */
   unavailableForLocation: z.boolean().optional(),
   unavailableReason: z.string().optional(),
@@ -53,6 +57,8 @@ export const addToCartSchema = z.object({
    * Plain string ids still accepted (= quantity 1).
    */
   addons: z.array(addToCartAddonSchema).max(20).optional(),
+  /** Cake day-wise shipping choice; ignored when the product has a single sheet fee. */
+  shippingOptionLabel: z.string().trim().min(1).max(80).optional(),
   /** Optional delivery location for server-side serviceability (country; postal is optional). */
   deliveryCountry: z.string().trim().min(2).max(2).optional(),
   deliveryPostal: z

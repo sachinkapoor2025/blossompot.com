@@ -182,4 +182,45 @@ describe("quoteAddressShipmentShipping", () => {
     });
     assert.equal(mixed.totalCharge, GBO_FLAT_SHIPPING_USD);
   });
+
+  it("uses sheet shipping for catalog lines and does not add $40 or the $6.99 table", () => {
+    const flower = quoteAddressShipmentShipping({
+      items: [{ price: 89.99, quantity: 1, shippingFee: 5, productSlug: "sweet-moments-bouquet" }],
+      currency: "USD",
+      usdInrRate: 96,
+    });
+    assert.equal(flower.totalCharge, 5);
+    assert.equal(flower.perVendor[0]?.policy, "catalog");
+
+    const cake = quoteAddressShipmentShipping({
+      items: [
+        {
+          price: 114.25,
+          quantity: 1,
+          shippingFee: 15.99,
+          productSlug: "new-york-cheesecake",
+        },
+      ],
+      currency: "USD",
+      usdInrRate: 96,
+    });
+    assert.equal(cake.totalCharge, 15.99);
+
+    const freeHamper = quoteAddressShipmentShipping({
+      items: [{ price: 107.49, quantity: 1, shippingFee: 0, productSlug: "happy-candy-box" }],
+      currency: "USD",
+      usdInrRate: 96,
+    });
+    assert.equal(freeHamper.totalCharge, 0);
+
+    const mixedCart = quoteAddressShipmentShipping({
+      items: [
+        { price: 89.99, quantity: 1, shippingFee: 5, productSlug: "sweet-moments-bouquet" },
+        { price: 3.99, quantity: 1, productSlug: "classic-red-rose-bouquet" },
+      ],
+      currency: "USD",
+      usdInrRate: 96,
+    });
+    assert.equal(mixedCart.totalCharge, 5 + BELOW_THRESHOLD_SHIPPING_USD);
+  });
 });

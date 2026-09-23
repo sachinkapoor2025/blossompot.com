@@ -772,6 +772,8 @@ function CheckoutPageInner() {
         deliveryUnits.map((u) => ({
           ...u,
           price: convert(u.price, cartCurrency),
+          shippingFee:
+            u.shippingFee != null ? convert(u.shippingFee, cartCurrency) : undefined,
         })),
         address,
         displayCurrency,

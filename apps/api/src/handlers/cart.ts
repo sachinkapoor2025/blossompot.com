@@ -6,8 +6,11 @@ import {
   cartKeys,
   productKeys,
   applyCompetitivePriceReduction,
-  cartAddonSignature,
+  cartLineOptionsSignature,
   cartLineUnitTotal,
+  productHasCatalogShipping,
+  resolveCatalogShippingFee,
+  resolveCatalogShippingLabel,
   productAllowsAddons,
   resolveProductAddons,
   isFlashComboProduct,
@@ -179,6 +182,8 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
     couponExcluded?: boolean;
     tags?: string[];
     categorySlug?: string;
+    deliveryFee?: number;
+    shippingOptions?: Array<{ label: string; price: number }>;
   };
 
   if (product.inventory < parsed.data.quantity) {
@@ -215,7 +220,13 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
   const resolved = resolveProductAddons(requestedAddons);
   if (!resolved.ok) return badRequest(resolved.error);
   const addons = resolved.addons;
-  const signature = cartAddonSignature(addons);
+  const shippingOptionLabel = productHasCatalogShipping(product)
+    ? resolveCatalogShippingLabel(product, parsed.data.shippingOptionLabel)
+    : undefined;
+  const catalogShippingFee = productHasCatalogShipping(product)
+    ? resolveCatalogShippingFee(product, shippingOptionLabel)
+    : undefined;
+  const signature = cartLineOptionsSignature(addons, shippingOptionLabel);
 
   // Vendor / hamper / flash fixed-price deals — do not stack competitive cuts.
   const skipCompetitive =
@@ -233,7 +244,7 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
   const existingIdx = cart.items.findIndex(
     (i) =>
       i.productSlug === parsed.data.productSlug &&
-      cartAddonSignature(i.addons) === signature
+      cartLineOptionsSignature(i.addons, i.shippingOptionLabel) === signature
   );
 
   const item: CartItem = {
@@ -251,6 +262,8 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
     ...(product.sku ? { sku: product.sku } : {}),
     ...(couponExcluded ? { couponExcluded: true } : {}),
     ...(addons.length ? { addons } : {}),
+    ...(catalogShippingFee != null ? { shippingFee: catalogShippingFee } : {}),
+    ...(shippingOptionLabel ? { shippingOptionLabel } : {}),
   };
 
   if (existingIdx >= 0) {

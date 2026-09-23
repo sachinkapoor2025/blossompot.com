@@ -46,6 +46,15 @@ export function getCatalogProducts(): Product[] {
     publicProduct.images = resolveProductImageUrls(publicProduct.images);
     bySlug.set(product.slug, withCompetitiveStorefrontPricing(publicProduct));
   }
+  for (const product of loadCatalogFile("tf-usa-catalog.json")) {
+    if (isRakhiRelatedProduct(product)) continue;
+    if (isSampleCatalogProduct(product)) continue;
+    const allowsAddons = productAllowsAddons(product);
+    const publicProduct = stripVendorPrivateFields(product) as Product;
+    publicProduct.allowsAddons = allowsAddons;
+    publicProduct.images = resolveProductImageUrls(publicProduct.images);
+    bySlug.set(product.slug, withCompetitiveStorefrontPricing(publicProduct));
+  }
   cached = [...bySlug.values()];
   return cached;
 }
