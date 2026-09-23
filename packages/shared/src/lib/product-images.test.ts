@@ -85,6 +85,18 @@ describe("resolveProductImageUrl", () => {
     );
   });
 
+  it("keeps TF USA photos on the storefront origin instead of CloudFront", () => {
+    const cdn = getProductCdnBase();
+    assert.equal(
+      resolveProductImageUrl("/uploads/tf-usa/TFFF2602/TFFF2602.png"),
+      "/uploads/tf-usa/TFFF2602/TFFF2602.png"
+    );
+    assert.equal(
+      resolveProductImageUrl(`${cdn}/uploads/tf-usa/TFFF2602/TFFF2602.png`),
+      "/uploads/tf-usa/TFFF2602/TFFF2602.png"
+    );
+  });
+
   it("rewrites legacy WordPress upload URLs to the CDN", () => {
     const cdn = getProductCdnBase();
     assert.equal(
