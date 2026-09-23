@@ -12,7 +12,7 @@ import {
   cityNavMenuLabel,
   countriesMenu,
 } from "@/lib/site";
-import { cityMenuForCountry, filterCityMenuLinks } from "@/lib/city-menu-for-location";
+import { cityMenuForCountry, countryIsoFromPathname, filterCityMenuLinks } from "@/lib/city-menu-for-location";
 import { SearchBar } from "@/components/SearchBar";
 import { SiteLogoLink } from "@/components/SiteLogo";
 import { DeliveryLocationChip } from "@/components/DeliveryLocationChip";
@@ -24,12 +24,16 @@ function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const { openSelector, location } = useDeliveryLocation();
-  const menu = cityMenuForCountry(location?.countryCode);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const menu = cityMenuForCountry(
+    countryIsoFromPathname(pathname, searchParams.get("country")) ?? location?.countryCode
+  );
   const visible = filterCityMenuLinks(menu.links, query);
 
   useEffect(() => {
     setQuery("");
-  }, [location?.countryCode]);
+  }, [menu.heading]);
 
   return (
     <div
@@ -340,12 +344,14 @@ export function Header() {
   const { openSelector, setLocation, location: deliveryLocation } = useDeliveryLocation();
   const { countries, loaded: countriesLoaded } = useGboDeliveryCountries();
   const countrySearch = useCountrySearch(countries);
-  const cityMenu = cityMenuForCountry(deliveryLocation?.countryCode);
+  const cityCountryIso =
+    countryIsoFromPathname(pathname, searchParams.get("country")) ?? deliveryLocation?.countryCode;
+  const cityMenu = cityMenuForCountry(cityCountryIso);
   const cityVisible = filterCityMenuLinks(cityMenu.links, cityQuery);
 
   useEffect(() => {
     setCityQuery("");
-  }, [deliveryLocation?.countryCode]);
+  }, [cityCountryIso]);
 
   const isActive = (href: string, category?: string) => {
     if (href === "/") return pathname === "/" && !activeCategory;
