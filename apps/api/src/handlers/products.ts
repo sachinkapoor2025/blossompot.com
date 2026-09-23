@@ -194,7 +194,7 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
     items = await scanAllProducts();
   }
 
-  items = dedupeStorefrontProducts(mergeBundledCatalogProducts(items, category));
+  items = dedupeStorefrontProducts(items);
 
   items = items.filter(
     (p) => p.published !== false && (p.inventory ?? 0) > 0 && isProductStorefrontVisible(p)

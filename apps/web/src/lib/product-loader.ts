@@ -11,12 +11,6 @@ import {
   type Product,
 } from "@blossompot/shared";
 import { api } from "./api";
-import {
-  getCatalogProduct,
-  getCatalogProducts,
-  getCatalogProductsByCategory,
-  getCatalogProductsForCountry,
-} from "./catalog-fallback";
 import { isRakhiRelatedCategorySlug, isRakhiRelatedProduct } from "./rakhi-filter";
 import { getStorefrontDeliveryCountry } from "./storefront-country";
 
@@ -52,11 +46,6 @@ function memoryProduct(slug: string): Product | null {
   return hit.product;
 }
 
-/** Catalog is OK for vendor SKUs that may not be in DynamoDB yet. */
-function allowCatalogFallback(product: Product): boolean {
-  return Boolean(product.vendorSlug) || Boolean(product.couponExcluded) || (product.tags ?? []).includes("tf-usa");
-}
-
 /** Live Gift Baskets Overseas catalog for the selected delivery country. */
 export async function loadGboStorefrontProducts(country?: string): Promise<Product[]> {
   const iso = (country ?? (await getStorefrontDeliveryCountry())).trim().toUpperCase() || "US";
@@ -88,9 +77,8 @@ function isProductMissingError(err: unknown): boolean {
 }
 
 /**
- * Authoritative storefront product: API first for standard SKUs.
- * On API 404 for a bundled catalog slug, fall back so PDPs do not hard-redirect home.
- * Do not fall back on transient API failures — that reintroduced stale catalog prices.
+ * Authoritative storefront product: live API (Dynamo / GBO) only.
+ * Bundled catalog JSON is seed data, not a public listing source.
  */
 export async function loadProduct(slug: string): Promise<Product | null> {
   try {
@@ -102,12 +90,6 @@ export async function loadProduct(slug: string): Promise<Product | null> {
     if (stale) {
       if (!isStorefrontVisible(stale)) return null;
       return stale;
-    }
-
-    const catalog = getCatalogProduct(slug);
-    if (catalog && !isStorefrontVisible(catalog)) return null;
-    if (catalog && (allowCatalogFallback(catalog) || isProductMissingError(err))) {
-      return catalog;
     }
 
     const gboRef = parseGboSlug(slug);
@@ -127,31 +109,14 @@ export async function loadProduct(slug: string): Promise<Product | null> {
       }
     }
 
-    if (process.env.NODE_ENV !== "production") {
-      return catalog && isStorefrontVisible(catalog) ? catalog : null;
-    }
+    if (isProductMissingError(err)) return null;
     return null;
   }
 }
 
-function mergeLiveWithCatalog(
-  live: Product[],
-  country: string,
-  params?: { category?: string; search?: string }
-): Product[] {
-  let extra = getCatalogProductsForCountry(country).filter(isStorefrontVisible);
-  if (params?.category) {
-    extra = extra.filter((product) => productInStorefrontCategory(product, params.category as string));
-  }
-  if (params?.search) {
-    extra = extra.filter((product) => productMatchesSearchQuery(product, params.search as string));
-  }
-  const liveSlugs = new Set(live.map((product) => product.slug));
-  const newcomers = extra.filter((product) => !liveSlugs.has(product.slug));
+function filterLiveForCountry(live: Product[], country: string): Product[] {
   return rememberProducts(
-    dedupeStorefrontProducts(
-      forDeliveryCountry([...newcomers, ...live], country).filter(isStorefrontVisible)
-    )
+    dedupeStorefrontProducts(forDeliveryCountry(live, country).filter(isStorefrontVisible))
   );
 }
 
@@ -181,28 +146,21 @@ export async function loadProducts(params?: {
     if (params?.search) {
       extra = extra.filter((product) => productMatchesSearchQuery(product, params.search as string));
     }
-    return mergeLiveWithCatalog(mergeBySlug(db, extra), country, params);
+    return filterLiveForCountry(mergeBySlug(db, extra), country);
   } catch {
-    if (process.env.NODE_ENV === "production") {
-      try {
-        const gbo = await loadGboStorefrontProducts(country);
-        return mergeLiveWithCatalog(gbo, country, params);
-      } catch {
-        return mergeLiveWithCatalog([], country, params);
+    try {
+      const gbo = await loadGboStorefrontProducts(country);
+      let extra = gbo;
+      if (params?.category) {
+        extra = gbo.filter((product) => productInStorefrontCategory(product, params.category as string));
       }
+      if (params?.search) {
+        extra = extra.filter((product) => productMatchesSearchQuery(product, params.search as string));
+      }
+      return filterLiveForCountry(extra, country);
+    } catch {
+      return [];
     }
-    if (params?.category) {
-      return dedupeStorefrontProducts(
-        getCatalogProductsByCategory(params.category)
-          .filter(isStorefrontVisible)
-          .filter((product) => productVisibleForDeliveryCountry(product, country))
-      );
-    }
-    return dedupeStorefrontProducts(
-      getCatalogProducts()
-        .filter(isStorefrontVisible)
-        .filter((product) => productVisibleForDeliveryCountry(product, country))
-    );
   }
 }
 
@@ -230,11 +188,7 @@ export async function loadRelatedProducts(categorySlug: string, excludeSlug: str
   return products.filter((p) => p.slug !== excludeSlug).slice(0, 5);
 }
 
-/** Prefer catalog slugs at build time — avoids CI/API rate-limit prerender failures. */
+/** Listings are on-demand from the live products API — do not prerender JSON seed SKUs. */
 export function getStaticProductSlugs(): string[] {
-  const fromCatalog = dedupeStorefrontProducts(getCatalogProducts().filter(isStorefrontVisible)).map(
-    (p) => p.slug
-  );
-  if (fromCatalog.length > 0) return fromCatalog;
   return [];
 }

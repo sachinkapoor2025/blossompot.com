@@ -1,9 +1,9 @@
 /**
- * Delete every DynamoDB product (and SAMPLE VENDOR account) mapped to the
- * demo marketplace vendors (`vendorSlug` starting with `sample-`, SKU SMP-/SAMPLE-,
- * isSampleProduct, tag sample-product, fulfilledByName containing SAMPLE VENDOR).
+ * Delete every DynamoDB product mapped as sample/demo:
+ * SAMPLE VENDOR (`sample-*`, SMP-/SAMPLE- SKUs) and Unsplash/Picsum seed catalog
+ * rows with no live vendor SKU.
  *
- * Does NOT delete GBO, TF USA, Orange County, or bundled BlossomPot catalog SKUs.
+ * Does NOT delete GBO, TF USA, or Orange County products.
  *
  * Usage:
  *   npm run purge:sample-products -- --dry-run

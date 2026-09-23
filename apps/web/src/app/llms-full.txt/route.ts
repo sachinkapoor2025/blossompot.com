@@ -1,7 +1,6 @@
 import { api } from "@/lib/api";
 import { site, navItems, faqs, giftSetsMenu } from "@/lib/site";
 import { siteUrl } from "@/lib/env";
-import { getCatalogProducts } from "@/lib/catalog-fallback";
 import { stripHtml } from "@/lib/html-text";
 import { isProductSearchIndexable, dedupeStorefrontProducts, type Product } from "@blossompot/shared";
 
@@ -18,11 +17,7 @@ export async function GET() {
     products = [];
   }
 
-  const bySlug = new Map(products.map((p) => [p.slug, p]));
-  for (const p of getCatalogProducts()) {
-    if (!bySlug.has(p.slug)) bySlug.set(p.slug, p);
-  }
-  products = dedupeStorefrontProducts([...bySlug.values()].filter((p) => isProductSearchIndexable(p)));
+  products = dedupeStorefrontProducts(products.filter((p) => isProductSearchIndexable(p)));
 
   const categories = [
     ...giftSetsMenu.items.map((n) => `- ${n.label}: ${siteUrl}${n.href}`),
