@@ -17,6 +17,7 @@ import {
   isProductStorefrontVisible,
   isSampleCatalogProduct,
   productInStorefrontCategory,
+  productVisibleForDeliveryCountry,
   dedupeStorefrontProducts,
   VENDOR_GBO,
   type Product,
@@ -208,11 +209,17 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
   }
 
   const location = parseLocationQuery(event);
+  if (location?.countryCode) {
+    items = items.filter((p) => productVisibleForDeliveryCountry(p, location.countryCode));
+  }
   let products = items.map(forStorefront);
-  if (location) {
+  if (location?.postalCode) {
     const evals = await evaluateProductsForLocation(items, location);
     const deliverable = new Set(evals.filter((e) => e.deliverable).map((e) => e.slug));
     products = products.filter((p) => deliverable.has(p.slug));
+    return ok({ products, location, filtered: true });
+  }
+  if (location?.countryCode) {
     return ok({ products, location, filtered: true });
   }
 
@@ -229,7 +236,10 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
   const cached = productGetCache.get(slug);
   if (cached && nowMs - cached.at < PRODUCT_GET_CACHE_TTL_MS) {
     const location = parseLocationQuery(event);
-    if (location) {
+    if (location?.countryCode && !productVisibleForDeliveryCountry(cached.product, location.countryCode)) {
+      return notFound("Product not found");
+    }
+    if (location?.postalCode) {
       const [evalRow] = await evaluateProductsForLocation([cached.product], location);
       return ok({
         product: forStorefront(cached.product),
@@ -266,7 +276,10 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
   if (!isProductStorefrontVisible(product)) return notFound("Product not found");
   productGetCache.set(slug, { at: nowMs, product });
   const location = parseLocationQuery(event);
-  if (location) {
+  if (location?.countryCode && !productVisibleForDeliveryCountry(product, location.countryCode)) {
+    return notFound("Product not found");
+  }
+  if (location?.postalCode) {
     const [evalRow] = await evaluateProductsForLocation([product], location);
     return ok({
       product: forStorefront(product),

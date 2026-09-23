@@ -6,7 +6,12 @@ import {
   deliveryLocationToken,
   parseDeliveryLocationToken,
 } from "@/lib/delivery-location";
-import { LOCATION_SEO_HEADER, locationShopRewritePath, parseLocationShopPath } from "@/lib/location-seo-urls";
+import {
+  LOCATION_SEO_HEADER,
+  countryIsoFromPathname,
+  locationShopRewritePath,
+  parseLocationShopPath,
+} from "@/lib/location-seo-urls";
 
 /**
  * Edge 301: apex → www.
@@ -39,7 +44,9 @@ export function middleware(request: NextRequest) {
   const response = NextResponse.next();
   stampBotHeaders(response, request);
 
-  const country = request.nextUrl.searchParams.get("country")?.trim().toUpperCase();
+  const country =
+    countryIsoFromPathname(request.nextUrl.pathname, request.nextUrl.searchParams.get("country")) ??
+    request.nextUrl.searchParams.get("country")?.trim().toUpperCase();
   if (country && /^[A-Z]{2}$/.test(country)) {
     applyDeliveryCountryCookie(response, request, country);
   }

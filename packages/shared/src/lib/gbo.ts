@@ -329,8 +329,10 @@ export function productVisibleForDeliveryCountry(
   const iso = country.trim().toUpperCase();
   if (!/^[A-Z]{2}$/.test(iso)) return true;
   const dest = catalogProductCountry(product);
-  if (!dest) return true;
-  return dest === iso;
+  if (dest) return dest === iso;
+  // Untagged international rows are not a country's catalog.
+  if (isGboCatalogProduct(product)) return false;
+  return iso === "US";
 }
 
 /**

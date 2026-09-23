@@ -213,6 +213,37 @@ export function parseLocationShopPath(pathname: string): ParsedLocationShopPath 
   return { kind: "category", internalSlug, countryIso, stem };
 }
 
+const FLOWER_DELIVERY_PATH_ISO: Record<string, string> = {
+  "/flower-delivery-usa": "US",
+  "/flower-delivery-uk": "GB",
+  "/flower-delivery-canada": "CA",
+  "/flower-delivery-australia": "AU",
+  "/flower-delivery-uae": "AE",
+};
+
+/** Country of a country landing, location hub, or shop URL. */
+export function countryIsoFromPathname(pathname: string, searchCountry?: string | null): string | null {
+  const path = normalizePathname(pathname);
+  if (FLOWER_DELIVERY_PATH_ISO[path]) return FLOWER_DELIVERY_PATH_ISO[path];
+
+  const shop = parseLocationShopPath(path);
+  if (shop) return shop.countryIso;
+
+  if (path.startsWith("/locations/europe/united-kingdom")) return "GB";
+  if (path.startsWith("/locations/europe/ireland")) return "IE";
+  if (path.startsWith("/locations/europe/germany")) return "DE";
+  if (path.startsWith("/locations/europe/france")) return "FR";
+  if (path.startsWith("/locations/europe/netherlands")) return "NL";
+  if (path.startsWith("/locations/europe/belgium")) return "BE";
+  if (path.startsWith("/locations/canada")) return "CA";
+  if (path.startsWith("/locations/australia")) return "AU";
+  if (path.startsWith("/locations/united-states")) return "US";
+
+  const fromQuery = searchCountry?.trim().toUpperCase();
+  if (fromQuery && /^[A-Z]{2}$/.test(fromQuery)) return fromQuery;
+  return null;
+}
+
 /** Internal rewrite target. Use public category paths so /categories/* 301s do not strip the SEO URL. */
 export function locationShopRewritePath(parsed: ParsedLocationShopPath): string {
   if (parsed.kind === "gifts-catalog") return "/products";

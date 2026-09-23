@@ -1,5 +1,9 @@
 import Link from "next/link";
-import { isProductStorefrontVisible, type Product } from "@blossompot/shared";
+import {
+  isProductStorefrontVisible,
+  productVisibleForDeliveryCountry,
+  type Product,
+} from "@blossompot/shared";
 import { AnswerBlock } from "@/components/AnswerBlock";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { HomeProductCard } from "@/components/HomeProductCard";
@@ -16,13 +20,17 @@ import { shuffleForCity } from "@/lib/city-products";
 import { applyInlineLinks } from "@/lib/inline-links";
 import { loadProducts } from "@/lib/product-loader";
 import { breadcrumbJsonLd, canonical, faqJsonLd, itemListJsonLd } from "@/lib/seo";
-import { site } from "@/lib/site";
+import { site, cityNavHref } from "@/lib/site";
+import { cityMenuForCountry } from "@/lib/city-menu-for-location";
 import { siteUrl } from "@/lib/env";
 
 const FLOWER_CATEGORY_SLUGS = new Set(["flowers", "flower-bouquets"]);
 
 function pickCountryProducts(products: Product[], slug: CountryFlowerDeliverySlug): Product[] {
-  const visible = products.filter((p) => isProductStorefrontVisible(p));
+  const countryIso = flowerDeliveryCountryIso(slug);
+  const visible = products.filter(
+    (p) => isProductStorefrontVisible(p) && productVisibleForDeliveryCountry(p, countryIso)
+  );
   const flowers = visible.filter((p) => FLOWER_CATEGORY_SLUGS.has(p.categorySlug));
   if (slug === "usa") {
     const pool = flowers.length > 0 ? flowers : visible;
@@ -50,6 +58,11 @@ export async function CountryFlowerDeliveryPage({
   }
   products = mergeProductsForCountry(products, countryIso);
   const featured = pickCountryProducts(products, country);
+  const cityMenu = cityMenuForCountry(countryIso);
+  const countryCityLinks = cityMenu.links.map((city) => ({
+    label: city.label,
+    href: cityNavHref(city),
+  }));
   const productsFirst = country === "usa";
   const otherCountries = otherCountryFlowerDeliveryLinks(country);
   const inlineLinks = countryPageInlineLinks[country] ?? [];
@@ -185,8 +198,8 @@ export async function CountryFlowerDeliveryPage({
           {applyInlineLinks(page.citiesIntro, inlineLinks, { usedHrefs, currentPath: page.href, max: 4 })}
         </p>
         <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
-          {page.cityLinks.map((link) => (
-            <li key={link.href}>
+          {countryCityLinks.map((link) => (
+            <li key={`${link.href}-${link.label}`}>
               <Link href={link.href} className="text-nav hover:underline">
                 {link.label}
               </Link>

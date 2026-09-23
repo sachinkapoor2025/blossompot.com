@@ -5,7 +5,11 @@ import { pageMetadata } from "@/lib/seo";
 import { mergeProductsForCountry } from "@/lib/catalog-fallback";
 import { shuffleForCity } from "@/lib/city-products";
 import { loadProducts } from "@/lib/product-loader";
-import { isProductStorefrontVisible, type Product } from "@blossompot/shared";
+import {
+  isProductStorefrontVisible,
+  productVisibleForDeliveryCountry,
+  type Product,
+} from "@blossompot/shared";
 import {
   generateParamsForMarket,
   isInternationalIndexable,
@@ -55,16 +59,20 @@ export async function InternationalMarketPage({
 }) {
   const loc = resolveInternationalPath(market, segments ?? []);
   if (!loc || !isInternationalIndexable(loc)) notFound();
-  const countryIso = loc.isoCountry?.trim().toUpperCase() || "US";
+  const countryIso = loc.isoCountry?.trim().toUpperCase() ?? "";
   let products: Product[] = [];
-  try {
-    products = await loadProducts({ country: countryIso });
-  } catch {
-    products = [];
+  if (/^[A-Z]{2}$/.test(countryIso)) {
+    try {
+      products = await loadProducts({ country: countryIso });
+    } catch {
+      products = [];
+    }
+    products = shuffleForCity(
+      mergeProductsForCountry(products, countryIso).filter(
+        (p) => isProductStorefrontVisible(p) && productVisibleForDeliveryCountry(p, countryIso)
+      ),
+      loc.slug
+    ).slice(0, 20);
   }
-  products = shuffleForCity(
-    mergeProductsForCountry(products, countryIso).filter((p) => isProductStorefrontVisible(p)),
-    loc.slug
-  ).slice(0, 20);
   return <InternationalLocationPage loc={resolveLocation(loc)} products={products} />;
 }
