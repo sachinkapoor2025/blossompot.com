@@ -30,6 +30,9 @@ type CatalogProduct = {
   inventory?: number;
   tags?: string[];
   couponExcluded?: boolean;
+  deliveryFee?: number;
+  shippingNote?: string;
+  shippingOptions?: Array<{ label: string; price: number }>;
   seoTitle?: string;
   seoDescription?: string;
   published?: boolean;
@@ -148,6 +151,9 @@ export async function ensureUsarakhiCatalogProductInDb(
     inventory: bundled.inventory ?? DEFAULT_PRODUCT_INVENTORY,
     tags: bundled.tags ?? [],
     ...(bundled.couponExcluded ? { couponExcluded: true } : {}),
+    ...(bundled.deliveryFee != null ? { deliveryFee: bundled.deliveryFee } : {}),
+    ...(bundled.shippingNote ? { shippingNote: bundled.shippingNote } : {}),
+    ...(bundled.shippingOptions?.length ? { shippingOptions: bundled.shippingOptions } : {}),
     seoTitle: bundled.seoTitle,
     seoDescription: bundled.seoDescription,
     published: bundled.published !== false,

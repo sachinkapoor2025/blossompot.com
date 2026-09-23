@@ -8,7 +8,7 @@ import {
   resolveProductImagesForUpsert,
   selectDisplayableProductImages,
 } from "./product-images";
-import { resolveProductImageUrl } from "./image-url";
+import { resolveProductImageUrl, getProductCdnBase } from "./image-url";
 
 describe("selectDisplayableProductImages", () => {
   it("drops tiny thumbnails when sharper frames exist", () => {
@@ -78,16 +78,18 @@ describe("mergeProductImages / resolveProductImagesForUpsert", () => {
 
 describe("resolveProductImageUrl", () => {
   it("rewrites relative /uploads paths to the product CDN", () => {
+    const cdn = getProductCdnBase();
     assert.equal(
       resolveProductImageUrl("/uploads/orange-county/TFUSA007/TFUSA007.jpg"),
-      "https://d301af4ndyn9qx.cloudfront.net/uploads/orange-county/TFUSA007/TFUSA007.jpg"
+      `${cdn}/uploads/orange-county/TFUSA007/TFUSA007.jpg`
     );
   });
 
   it("rewrites legacy WordPress upload URLs to the CDN", () => {
+    const cdn = getProductCdnBase();
     assert.equal(
       resolveProductImageUrl("https://blossompot.com/wp-content/uploads/2026/03/photo.jpg"),
-      "https://d301af4ndyn9qx.cloudfront.net/uploads/2026/03/photo.jpg"
+      `${cdn}/uploads/2026/03/photo.jpg`
     );
   });
 });

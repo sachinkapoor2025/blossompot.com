@@ -33,11 +33,13 @@ function CartQuantityControls({
   productSlug,
   quantity,
   addons,
+  shippingOptionLabel,
 }: {
   lineId: string;
   productSlug: string;
   quantity: number;
   addons?: { id: string; quantity: number }[];
+  shippingOptionLabel?: string;
 }) {
   const { addItem, updateItem, removeItem } = useCart();
   const [busy, setBusy] = useState(false);
@@ -70,7 +72,7 @@ function CartQuantityControls({
           type="button"
           disabled={busy}
           aria-label="Increase quantity"
-          onClick={() => void run(() => addItem(productSlug, 1, undefined, addons))}
+          onClick={() => void run(() => addItem(productSlug, 1, undefined, addons, shippingOptionLabel))}
           className="px-3 py-2 text-primary font-bold hover:bg-violet-200/60 disabled:opacity-50 transition"
         >
           +
@@ -131,6 +133,10 @@ export default function CartPage() {
       quantity: i.quantity,
       vendorSlug: i.vendorSlug,
       productSlug: i.productSlug,
+      shippingFee:
+        i.shippingFee != null
+          ? convert(i.shippingFee, (i.currency ?? cartCurrency) as DisplayCurrency)
+          : undefined,
     })),
     currency,
     usdInrRate,
@@ -213,11 +219,20 @@ export default function CartPage() {
                           </p>
                         ) : null}
                         <AddonList item={item} format={format} />
+                        {item.shippingFee != null ? (
+                          <p className="text-xs text-slate-600">
+                            Shipping{item.shippingOptionLabel ? ` (${item.shippingOptionLabel})` : ""}:{" "}
+                            {item.shippingFee === 0
+                              ? "Free"
+                              : format(item.shippingFee * item.quantity, lineCurrency)}
+                          </p>
+                        ) : null}
                         <CartQuantityControls
                           lineId={lineKey}
                           productSlug={item.productSlug}
                           quantity={item.quantity}
                           addons={item.addons?.map((a) => ({ id: a.id, quantity: a.quantity }))}
+                          shippingOptionLabel={item.shippingOptionLabel}
                         />
                       </div>
 

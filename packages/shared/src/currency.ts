@@ -49,6 +49,14 @@ export function convertCartItemsToCurrency(
           })),
         }
       : {}),
+    ...(item.shippingFee != null
+      ? {
+          shippingFee: roundForCurrency(
+            convertCurrencyAmount(item.shippingFee, from, to, rate),
+            to
+          ),
+        }
+      : {}),
   }));
 }
 

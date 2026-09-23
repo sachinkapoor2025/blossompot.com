@@ -5,7 +5,7 @@ import { api } from "./api";
 import { getOrCreateSessionId, useSessionId } from "./session";
 import { useAuth } from "./auth-context";
 import { trackCartAdd, trackCartRemove } from "./track";
-import { cartAddonSignature, type Cart, type ProductAddonSelection } from "@blossompot/shared";
+import { cartLineOptionsSignature, type Cart, type ProductAddonSelection } from "@blossompot/shared";
 import { DELIVERY_LOCATION_EVENT, locationQueryString, readDeliveryLocation } from "./delivery-location";
 
 interface CartContextValue {
@@ -17,15 +17,23 @@ interface CartContextValue {
     productSlug: string,
     quantity?: number,
     contact?: { name?: string; email?: string; phone?: string },
-    addons?: ProductAddonSelection[]
+    addons?: ProductAddonSelection[],
+    shippingOptionLabel?: string
   ) => Promise<void>;
   updateItem: (lineId: string, quantity: number) => Promise<void>;
   removeItem: (lineId: string) => Promise<void>;
   itemCount: number;
   /** Quantity for a product line matching the given add-on selections. */
-  quantityFor: (productSlug: string, addons?: ProductAddonSelection[]) => number;
-  /** lineId for product + addon signature, if present. */
-  lineIdFor: (productSlug: string, addons?: ProductAddonSelection[]) => string | undefined;
+  quantityFor: (
+    productSlug: string,
+    addons?: ProductAddonSelection[],
+    shippingOptionLabel?: string
+  ) => number;
+  lineIdFor: (
+    productSlug: string,
+    addons?: ProductAddonSelection[],
+    shippingOptionLabel?: string
+  ) => string | undefined;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -77,7 +85,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     productSlug: string,
     quantity = 1,
     contact?: { name?: string; email?: string; phone?: string },
-    addons?: ProductAddonSelection[]
+    addons?: ProductAddonSelection[],
+    shippingOptionLabel?: string
   ) => {
     const sid = resolveSessionId();
     if (!sid) throw new Error("Session not ready — please try again");
@@ -93,6 +102,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         ...(contact?.email ? { email: contact.email } : {}),
         ...(contact?.phone ? { phone: contact.phone } : {}),
         ...(addons?.length ? { addons } : {}),
+        ...(shippingOptionLabel ? { shippingOptionLabel } : {}),
         ...(() => {
           const loc = readDeliveryLocation();
           if (!loc?.countryCode) return {};
@@ -104,9 +114,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }),
     });
     setCart(normalizeCart(data.cart));
-    const sig = cartAddonSignature(addons);
+    const sig = cartLineOptionsSignature(addons, shippingOptionLabel);
     const added = data.cart.items.find(
-      (i) => i.productSlug === productSlug && cartAddonSignature(i.addons) === sig
+      (i) =>
+        i.productSlug === productSlug &&
+        cartLineOptionsSignature(i.addons, i.shippingOptionLabel) === sig
     );
     trackCartAdd(
       productSlug,
@@ -145,19 +157,31 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setCart(normalizeCart(data.cart));
   };
 
-  const quantityFor = (productSlug: string, addons?: ProductAddonSelection[]) => {
-    const sig = cartAddonSignature(addons);
+  const quantityFor = (
+    productSlug: string,
+    addons?: ProductAddonSelection[],
+    shippingOptionLabel?: string
+  ) => {
+    const sig = cartLineOptionsSignature(addons, shippingOptionLabel);
     return (
       cart?.items.find(
-        (i) => i.productSlug === productSlug && cartAddonSignature(i.addons) === sig
+        (i) =>
+          i.productSlug === productSlug &&
+          cartLineOptionsSignature(i.addons, i.shippingOptionLabel) === sig
       )?.quantity ?? 0
     );
   };
 
-  const lineIdFor = (productSlug: string, addons?: ProductAddonSelection[]) => {
-    const sig = cartAddonSignature(addons);
+  const lineIdFor = (
+    productSlug: string,
+    addons?: ProductAddonSelection[],
+    shippingOptionLabel?: string
+  ) => {
+    const sig = cartLineOptionsSignature(addons, shippingOptionLabel);
     const item = cart?.items.find(
-      (i) => i.productSlug === productSlug && cartAddonSignature(i.addons) === sig
+      (i) =>
+        i.productSlug === productSlug &&
+        cartLineOptionsSignature(i.addons, i.shippingOptionLabel) === sig
     );
     return item?.lineId ?? (sig === "" ? item?.productSlug : undefined);
   };

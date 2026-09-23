@@ -207,11 +207,29 @@ function parseGboIncludeLines(description: string): string[] {
     .slice(0, 20);
 }
 
+function includeLinesFromPlain(description: string): string[] {
+  const text = looksLikeHtml(description)
+    ? stripHtml(description.replace(/<\/(p|li|div|h[1-6])>/gi, "\n"))
+    : description;
+  return text
+    .split(/\n+/)
+    .map((line) => line.replace(/^[-•*]+\s*/, "").replace(/\s+/g, " ").trim())
+    .filter((line) => line.length > 1);
+}
+
 /** Customer-facing "What's included" lines — never inject Rakhi/Roli/Chawal defaults. */
 export function getProductIncludes(product: ProductLike): string[] {
   if (isGboProductLike(product)) return gboIncludeLines(product);
 
   const { description, name, categorySlug, tags } = product;
+  const isTfUsa = tags?.includes("tf-usa");
+
+  if (isTfUsa) {
+    const fromHtml = looksLikeHtml(description) ? fromHtmlList(description) : [];
+    const fromText = includeLinesFromPlain(description);
+    const items = (fromHtml.length ? fromHtml : fromText).map((l) => l.trim()).filter(Boolean);
+    return items.length > 0 ? items : [name.trim()].filter(Boolean);
+  }
 
   if (categorySlug === "gift-hampers") {
     const hamper = hamperIncludeLines(description);

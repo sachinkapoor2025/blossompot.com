@@ -20,6 +20,7 @@ export type DeliveryUnit = {
   image?: string;
   /** Copied from cart — drives per-vendor free-shipping buckets. */
   vendorSlug?: string;
+  shippingFee?: number;
   useSameAddress: boolean;
   address: ShippingAddress;
 };
@@ -45,6 +46,7 @@ export function expandCartToDeliveryUnits(
         price: unitPrice,
         image: item.image,
         vendorSlug: item.vendorSlug,
+        shippingFee: item.shippingFee,
         useSameAddress: prev?.useSameAddress ?? true,
         address: prev?.address ?? emptyShippingAddress(),
       });
@@ -157,7 +159,13 @@ export function quoteShippingFromDeliveryUnits(
 ): { totalCharge: number; perShipment: FreeShippingQuote[] } {
   const groups = new Map<
     string,
-    Array<{ price: number; quantity: number; vendorSlug?: string; productSlug: string }>
+    Array<{
+      price: number;
+      quantity: number;
+      vendorSlug?: string;
+      productSlug: string;
+      shippingFee?: number;
+    }>
   >();
 
   for (const unit of units) {
@@ -173,6 +181,7 @@ export function quoteShippingFromDeliveryUnits(
       quantity: 1,
       vendorSlug: unit.vendorSlug,
       productSlug: unit.productSlug,
+      shippingFee: unit.shippingFee,
     });
     groups.set(groupKey, list);
   }

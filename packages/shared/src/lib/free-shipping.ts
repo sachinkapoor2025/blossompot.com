@@ -27,7 +27,7 @@ export const BELOW_THRESHOLD_SHIPPING_USD = 6.99;
 export const REDUCED_SHIPPING_USD = 3.99;
 
 export type FreeShippingTier = "low" | "mid" | "free";
-export type ShippingQuotePolicy = "threshold" | "gbo_flat" | "flash_combo";
+export type ShippingQuotePolicy = "threshold" | "gbo_flat" | "flash_combo" | "catalog";
 
 export type FreeShippingQuote = {
   /** Shipping charged to the customer in `currency`. */
@@ -264,6 +264,30 @@ function gboFlatShippingQuote(
  * address (BlossomPot vs Orange County, etc.), then sum.
  * Flash-combo-only buckets use a flat $1 shipping fee.
  */
+function catalogShippingQuote(
+  charge: number,
+  currency: DisplayCurrency,
+  usdInrRate: number
+): FreeShippingQuote {
+  return {
+    charge,
+    qualifiesForFreeShipping: charge === 0,
+    amountAwayFromFreeShipping: 0,
+    amountAwayFromReducedShipping: 0,
+    thresholdInCurrency: toCurrency(FREE_SHIPPING_MIN_SUBTOTAL_USD, currency, usdInrRate),
+    reducedThresholdInCurrency: toCurrency(
+      REDUCED_SHIPPING_MIN_SUBTOTAL_USD,
+      currency,
+      usdInrRate
+    ),
+    lowTierFeeInCurrency: toCurrency(BELOW_THRESHOLD_SHIPPING_USD, currency, usdInrRate),
+    midTierFeeInCurrency: toCurrency(REDUCED_SHIPPING_USD, currency, usdInrRate),
+    tier: charge === 0 ? "free" : "low",
+    belowThresholdFeeInCurrency: charge,
+    policy: "catalog",
+  };
+}
+
 export function quoteAddressShipmentShipping(input: {
   items: Array<{
     price: number;
@@ -271,6 +295,8 @@ export function quoteAddressShipmentShipping(input: {
     vendorSlug?: string;
     productSlug?: string;
     addons?: Array<{ price: number; quantity: number }>;
+    /** Already expressed in `currency`. Present (including 0) means sheet shipping, not the threshold table. */
+    shippingFee?: number;
   }>;
   currency: DisplayCurrency;
   usdInrRate: number;
@@ -278,6 +304,14 @@ export function quoteAddressShipmentShipping(input: {
   totalCharge: number;
   perVendor: FreeShippingQuote[];
 } {
+  const catalogItems = input.items.filter((i) => i.shippingFee != null);
+  const otherItems = input.items.filter((i) => i.shippingFee == null);
+
+  const catalogCharge = roundDisplayAmount(
+    catalogItems.reduce((sum, i) => sum + (i.shippingFee ?? 0) * i.quantity, 0),
+    input.currency
+  );
+
   const byVendor = new Map<
     string,
     Array<{
@@ -287,7 +321,7 @@ export function quoteAddressShipmentShipping(input: {
       addons?: Array<{ price: number; quantity: number }>;
     }>
   >();
-  for (const item of input.items) {
+  for (const item of otherItems) {
     const key = shippingVendorKey(item);
     const list = byVendor.get(key) ?? [];
     list.push(item);
@@ -304,7 +338,6 @@ export function quoteAddressShipmentShipping(input: {
     if (flashOnly) {
       return flashComboShippingQuote(input.currency, input.usdInrRate);
     }
-    // Must include add-ons — otherwise Razorpay totals diverge from checkout UI.
     const subtotal = vendorItems.reduce(
       (sum, i) => sum + cartLineUnitTotal(i) * i.quantity,
       0
@@ -315,6 +348,10 @@ export function quoteAddressShipmentShipping(input: {
       usdInrRate: input.usdInrRate,
     });
   });
+
+  if (catalogItems.length > 0) {
+    perVendor.unshift(catalogShippingQuote(catalogCharge, input.currency, input.usdInrRate));
+  }
 
   const totalCharge = roundDisplayAmount(
     perVendor.reduce((sum, q) => sum + q.charge, 0),

@@ -31,6 +31,7 @@ import {
   isFlashComboSaleActive,
   flashComboSaleEndsAt,
   FLASH_COMBO_SHIPPING_USD,
+  resolveCatalogShippingFee,
 } from "@blossompot/shared";
 import { EstimatedDeliveryNote } from "@/components/EstimatedDeliveryNote";
 import { ProductCareAccordions } from "@/components/ProductCareAccordions";
@@ -141,6 +142,10 @@ export function ProductDetailClient({
   const [galleryImages, setGalleryImages] = useState(product.images ?? []);
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [addons, setAddons] = useState<ProductAddonSelection[]>([]);
+  const [shippingOptionLabel, setShippingOptionLabel] = useState(
+    product.shippingOptions?.find((o) => o.label === "2nd Day")?.label ??
+      product.shippingOptions?.[0]?.label
+  );
 
   useEffect(() => {
     setGalleryImages(product.images ?? []);
@@ -184,6 +189,7 @@ export function ProductDetailClient({
       };
     })
   );
+  const catalogShipFee = resolveCatalogShippingFee(product, shippingOptionLabel);
   /** Add-on catalog is USD; show combined display when shopper has extras selected. */
   const displayTotal =
     addonsUsdTotal > 0 && product.currency === "USD"
@@ -300,6 +306,36 @@ export function ProductDetailClient({
             </div>
           ) : null}
 
+          {product.shippingOptions && product.shippingOptions.length > 0 ? (
+            <div className="mb-4">
+              <p className="text-sm font-medium text-slate-800 mb-2">Shipping (day-wise — not added to product price)</p>
+              <div className="flex flex-wrap gap-2">
+                {product.shippingOptions.map((option) => (
+                  <button
+                    key={option.label}
+                    type="button"
+                    onClick={() => setShippingOptionLabel(option.label)}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-medium ${
+                      shippingOptionLabel === option.label
+                        ? "border-primary bg-primary text-white"
+                        : "border-slate-300 bg-white text-slate-700"
+                    }`}
+                  >
+                    {option.label} · {format(option.price, product.currency)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : catalogShipFee != null ? (
+            <p className="mb-4 text-sm text-slate-600">
+              Shipping: {catalogShipFee === 0 ? "Free" : format(catalogShipFee, product.currency)}{" "}
+              (charged separately at checkout)
+            </p>
+          ) : null}
+          {product.shippingNote ? (
+            <p className="mb-4 whitespace-pre-line text-xs text-slate-500">{product.shippingNote}</p>
+          ) : null}
+
           <p className="text-slate-600 text-sm sm:text-base mb-3 leading-relaxed">{summary}</p>
           <ProductIncludesPreview product={product} />
 
@@ -372,8 +408,9 @@ export function ProductDetailClient({
                     }
                     fullWidth
                     variant="detail"
-                    getContact={getContact}
+                    shippingOptionLabel={shippingOptionLabel}
                     addons={addons}
+                    getContact={getContact}
                   />
                 </div>
 
@@ -411,8 +448,9 @@ export function ProductDetailClient({
                     }
                     fullWidth
                     variant="detail"
-                    getContact={getContact}
+                    shippingOptionLabel={shippingOptionLabel}
                     addons={addons}
+                    getContact={getContact}
                   />
                 </div>
                 <WishlistButton product={product} variant="toolbar" />
@@ -602,6 +640,7 @@ export function ProductDetailClient({
       product={product}
       getContact={getContact}
       addons={addons}
+      shippingOptionLabel={shippingOptionLabel}
       disabled={!deliverable}
     />
     </>
