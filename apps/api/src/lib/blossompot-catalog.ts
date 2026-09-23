@@ -46,6 +46,11 @@ export function getBundledUsarakhiProduct(slug: string): CatalogProduct | undefi
   return bySlug.get(slug);
 }
 
+/** Published bundled SKUs (including TF USA) used to fill storefront lists before Dynamo import. */
+export function listBundledCatalogProducts(): CatalogProduct[] {
+  return [...bySlug.values()].filter((p) => p.published !== false);
+}
+
 /**
  * Ensure WooCommerce/catalog categories exist in Dynamo with GSI1 list keys.
  * Creates missing rows only — does not overwrite admin edits.

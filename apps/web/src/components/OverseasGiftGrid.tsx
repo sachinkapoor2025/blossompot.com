@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { HomeProductCard } from "@/components/HomeProductCard";
 import type { Product } from "@blossompot/shared";
+import { dedupeStorefrontProducts } from "@blossompot/shared";
 
 export const HOME_CATALOG_PAGE_SIZE = 50;
 
@@ -13,6 +14,7 @@ export function OverseasGiftGrid({
   products: Product[];
   pageSize?: number;
 }) {
+  const unique = dedupeStorefrontProducts(products);
   const [shown, setShown] = useState(pageSize);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -22,28 +24,28 @@ export function OverseasGiftGrid({
 
   useEffect(() => {
     const el = sentinelRef.current;
-    if (!el || shown >= products.length) return;
+    if (!el || shown >= unique.length) return;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries.some((entry) => entry.isIntersecting)) {
-          setShown((n) => Math.min(n + pageSize, products.length));
+          setShown((n) => Math.min(n + pageSize, unique.length));
         }
       },
       { rootMargin: "600px 0px" }
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [shown, products.length, pageSize]);
+  }, [shown, unique.length, pageSize]);
 
-  const visible = products.slice(0, shown);
+  const visible = unique.slice(0, shown);
 
   return (
     <div>
       <p className="mb-4 text-sm text-slate-500">
-        Showing {visible.length} of {products.length} gift{products.length === 1 ? "" : "s"}
+        Showing {visible.length} of {unique.length} gift{unique.length === 1 ? "" : "s"}
       </p>
 
-      {products.length === 0 ? (
+      {unique.length === 0 ? (
         <p className="rounded-xl border border-slate-200 bg-white px-4 py-8 text-center text-slate-600">
           No gifts are available right now. Try again shortly.
         </p>
@@ -57,11 +59,11 @@ export function OverseasGiftGrid({
         </ul>
       )}
 
-      {shown < products.length ? (
+      {shown < unique.length ? (
         <div ref={sentinelRef} className="mt-8 flex justify-center">
           <button
             type="button"
-            onClick={() => setShown((n) => Math.min(n + pageSize, products.length))}
+            onClick={() => setShown((n) => Math.min(n + pageSize, unique.length))}
             className="rounded-lg bg-nav px-5 py-2.5 text-sm font-semibold text-white hover:bg-nav/90"
           >
             Show more

@@ -3,6 +3,7 @@
 import { HomeProductCard } from "@/components/HomeProductCard";
 import { LocationEmptyHint, useLocationFilteredProducts } from "@/components/LocationFilteredProducts";
 import type { Product } from "@blossompot/shared";
+import { dedupeStorefrontProducts } from "@blossompot/shared";
 
 export function HomeProductList({
   products,
@@ -13,7 +14,7 @@ export function HomeProductList({
   limit?: number;
   className?: string;
 }) {
-  const visible = useLocationFilteredProducts(products);
+  const visible = useLocationFilteredProducts(dedupeStorefrontProducts(products));
   const items = typeof limit === "number" ? visible.products.slice(0, limit) : visible.products;
   if (visible.emptyBecauseLocation) return <LocationEmptyHint />;
   return (

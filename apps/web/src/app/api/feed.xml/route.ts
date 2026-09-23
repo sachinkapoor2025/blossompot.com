@@ -1,7 +1,7 @@
 import { getApiUrl, getSiteUrl, getCdnUrl } from "@/lib/env";
 import { getCatalogProducts } from "@/lib/catalog-fallback";
 import { stripHtml } from "@/lib/html-text";
-import { isProductStorefrontVisible } from "@blossompot/shared";
+import { isProductStorefrontVisible, dedupeStorefrontProducts } from "@blossompot/shared";
 
 type FeedProduct = {
   slug: string;
@@ -61,7 +61,9 @@ export async function GET() {
       });
     }
   }
-  products = [...bySlug.values()].filter((p) => isProductStorefrontVisible({ sku: p.sku }));
+  products = dedupeStorefrontProducts(
+    [...bySlug.values()].filter((p) => isProductStorefrontVisible({ sku: p.sku }))
+  );
 
   const items = products
     .map((p) => {

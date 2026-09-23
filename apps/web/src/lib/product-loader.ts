@@ -1,10 +1,21 @@
-import { parseGboSlug, gboGiftToProduct, gboGiftNumericId, productInStorefrontCategory, productMatchesSearchQuery, productVisibleForDeliveryCountry, type GboGift, type Product } from "@blossompot/shared";
-import { isProductStorefrontVisible } from "@blossompot/shared";
+import {
+  parseGboSlug,
+  gboGiftToProduct,
+  gboGiftNumericId,
+  productInStorefrontCategory,
+  productMatchesSearchQuery,
+  productVisibleForDeliveryCountry,
+  dedupeStorefrontProducts,
+  isProductStorefrontVisible,
+  type GboGift,
+  type Product,
+} from "@blossompot/shared";
 import { api } from "./api";
 import {
   getCatalogProduct,
   getCatalogProducts,
   getCatalogProductsByCategory,
+  getCatalogProductsForCountry,
 } from "./catalog-fallback";
 import { isRakhiRelatedCategorySlug, isRakhiRelatedProduct } from "./rakhi-filter";
 import { getStorefrontDeliveryCountry } from "./storefront-country";
@@ -43,7 +54,7 @@ function memoryProduct(slug: string): Product | null {
 
 /** Catalog is OK for vendor SKUs that may not be in DynamoDB yet. */
 function allowCatalogFallback(product: Product): boolean {
-  return Boolean(product.vendorSlug);
+  return Boolean(product.vendorSlug) || Boolean(product.couponExcluded) || (product.tags ?? []).includes("tf-usa");
 }
 
 /** Live Gift Baskets Overseas catalog for the selected delivery country. */
@@ -123,6 +134,27 @@ export async function loadProduct(slug: string): Promise<Product | null> {
   }
 }
 
+function mergeLiveWithCatalog(
+  live: Product[],
+  country: string,
+  params?: { category?: string; search?: string }
+): Product[] {
+  let extra = getCatalogProductsForCountry(country).filter(isStorefrontVisible);
+  if (params?.category) {
+    extra = extra.filter((product) => productInStorefrontCategory(product, params.category as string));
+  }
+  if (params?.search) {
+    extra = extra.filter((product) => productMatchesSearchQuery(product, params.search as string));
+  }
+  const liveSlugs = new Set(live.map((product) => product.slug));
+  const newcomers = extra.filter((product) => !liveSlugs.has(product.slug));
+  return rememberProducts(
+    dedupeStorefrontProducts(
+      forDeliveryCountry([...newcomers, ...live], country).filter(isStorefrontVisible)
+    )
+  );
+}
+
 /** Shared list loader — same API + cache policy as `loadProduct` (PDP). */
 export async function loadProducts(params?: {
   category?: string;
@@ -149,36 +181,28 @@ export async function loadProducts(params?: {
     if (params?.search) {
       extra = extra.filter((product) => productMatchesSearchQuery(product, params.search as string));
     }
-    return rememberProducts(forDeliveryCountry(mergeBySlug(db, extra), country).filter(isStorefrontVisible));
+    return mergeLiveWithCatalog(mergeBySlug(db, extra), country, params);
   } catch {
     if (process.env.NODE_ENV === "production") {
       try {
         const gbo = await loadGboStorefrontProducts(country);
-        if (params?.category) {
-          return forDeliveryCountry(
-            gbo.filter((product) => productInStorefrontCategory(product, params.category as string)),
-            country
-          );
-        }
-        if (params?.search) {
-          return forDeliveryCountry(
-            gbo.filter((product) => productMatchesSearchQuery(product, params.search as string)),
-            country
-          );
-        }
-        return forDeliveryCountry(gbo, country);
+        return mergeLiveWithCatalog(gbo, country, params);
       } catch {
-        return [];
+        return mergeLiveWithCatalog([], country, params);
       }
     }
     if (params?.category) {
-      return getCatalogProductsByCategory(params.category)
-        .filter(isStorefrontVisible)
-        .filter((product) => productVisibleForDeliveryCountry(product, country));
+      return dedupeStorefrontProducts(
+        getCatalogProductsByCategory(params.category)
+          .filter(isStorefrontVisible)
+          .filter((product) => productVisibleForDeliveryCountry(product, country))
+      );
     }
-    return getCatalogProducts()
-      .filter(isStorefrontVisible)
-      .filter((product) => productVisibleForDeliveryCountry(product, country));
+    return dedupeStorefrontProducts(
+      getCatalogProducts()
+        .filter(isStorefrontVisible)
+        .filter((product) => productVisibleForDeliveryCountry(product, country))
+    );
   }
 }
 
@@ -193,7 +217,7 @@ export async function loadProductsByCategory(categorySlug: string, country?: str
   } catch {
     products = [];
   }
-  return products.filter(isStorefrontVisible);
+  return dedupeStorefrontProducts(products.filter(isStorefrontVisible));
 }
 
 export async function loadFeaturedProducts(limit = 10): Promise<Product[]> {
@@ -208,9 +232,9 @@ export async function loadRelatedProducts(categorySlug: string, excludeSlug: str
 
 /** Prefer catalog slugs at build time — avoids CI/API rate-limit prerender failures. */
 export function getStaticProductSlugs(): string[] {
-  const fromCatalog = getCatalogProducts()
-    .filter(isStorefrontVisible)
-    .map((p) => p.slug);
+  const fromCatalog = dedupeStorefrontProducts(getCatalogProducts().filter(isStorefrontVisible)).map(
+    (p) => p.slug
+  );
   if (fromCatalog.length > 0) return fromCatalog;
   return [];
 }
