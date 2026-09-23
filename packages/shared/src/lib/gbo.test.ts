@@ -104,6 +104,17 @@ describe("gbo helpers", () => {
       productVisibleForDeliveryCountry({ slug: "red-roses-dozen", sku: "BP-ROSES" }, "US"),
       true
     );
+    assert.equal(
+      productVisibleForDeliveryCountry(
+        { slug: "gbo-us-3-peak", sku: "gbo:US:3", internationalDelivery: true },
+        "GB"
+      ),
+      false
+    );
+    assert.equal(
+      productVisibleForDeliveryCountry({ internationalDelivery: true, slug: "overseas-gift" }, "GB"),
+      false
+    );
   });
 
   it("maps GBO flower tags onto Flowers / Bouquets nav categories", () => {
