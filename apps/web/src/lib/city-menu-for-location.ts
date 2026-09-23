@@ -1,6 +1,9 @@
 import { getDeliveryCountry } from "@blossompot/shared";
-import { internationalPath, publishedInternationalLocations } from "@/lib/content/geo/international";
-import { cityLinks, type CityNavLink } from "@/lib/site";
+import { internationalPath, publishedInternationalLocations } from "./content/geo/international";
+import { countryIsoFromPathname } from "./location-seo-urls";
+import { cityLinks, type CityNavLink } from "./site";
+
+export { countryIsoFromPathname };
 
 export type CityMenuContent = {
   heading: string;
@@ -23,8 +26,10 @@ const COUNTRY_HUB: Record<string, { href: string; label: string }> = {
   BE: { href: "/locations/europe/belgium", label: "Belgium locations" },
 };
 
-const UAE_FALLBACK: CityNavLink[] = [
-  { label: "UAE", slug: "uae", href: "/flower-delivery-uae", menuLabel: "Flower delivery from UAE" },
+const UAE_CITIES: CityNavLink[] = [
+  { label: "Dubai", slug: "dubai", href: "/flower-delivery-uae", menuLabel: "Dubai" },
+  { label: "Abu Dhabi", slug: "abu-dhabi", href: "/flower-delivery-uae", menuLabel: "Abu Dhabi" },
+  { label: "Sharjah", slug: "sharjah", href: "/flower-delivery-uae", menuLabel: "Sharjah" },
 ];
 
 function countryName(iso: string): string {
@@ -39,7 +44,7 @@ function intlCitiesForCountry(iso: string): CityNavLink[] {
     label: loc.name,
     slug: loc.slug,
     href: internationalPath(loc),
-    menuLabel: loc.label,
+    menuLabel: loc.name,
   }));
 }
 
@@ -56,7 +61,7 @@ export function cityMenuForCountry(countryCode: string | null | undefined): City
     };
   }
 
-  const links = iso === "AE" ? UAE_FALLBACK : intlCitiesForCountry(iso);
+  const links = iso === "AE" ? UAE_CITIES : intlCitiesForCountry(iso);
   const hub = COUNTRY_HUB[iso];
   const name = countryName(iso);
 

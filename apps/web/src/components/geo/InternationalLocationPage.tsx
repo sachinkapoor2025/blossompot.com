@@ -13,7 +13,6 @@ import {
   type ResolvedLocation,
 } from "@/lib/content/geo/international";
 import { categoryHref } from "@/lib/category-urls";
-import { locationPublicPath } from "@/lib/content/seo-data";
 
 const serviceLinks = [
   { label: "Flowers", href: categoryHref("flowers") },
@@ -24,14 +23,6 @@ const serviceLinks = [
   { label: "Shipping", href: "/shipping" },
   { label: "FAQ", href: "/faq" },
   { label: "Contact", href: "/contact" },
-];
-
-const usaHubs = [
-  { label: "California", slug: "california" },
-  { label: "Texas", slug: "texas" },
-  { label: "Florida", slug: "florida" },
-  { label: "New York", slug: "new-york" },
-  { label: "Illinois", slug: "illinois" },
 ];
 
 export function InternationalLocationPage({
@@ -97,29 +88,7 @@ export function InternationalLocationPage({
         </ul>
       </section>
 
-      {loc.serviceMode !== "destination" ? (
-        <section className="mb-10">
-          <h2 className="text-xl font-bold text-primary mb-3">Popular US destinations</h2>
-          <p className="text-slate-700 mb-3 max-w-3xl leading-relaxed">
-            After you order from {loc.label}, timing depends on the recipient ZIP. These US hubs are
-            canonical destination pages (existing URLs, not duplicates).
-          </p>
-          <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
-            {usaHubs.map((hub) => (
-              <li key={hub.slug}>
-                <Link href={locationPublicPath(hub.slug)} className="text-nav hover:underline">
-                  Gifts to {hub.label}
-                </Link>
-              </li>
-            ))}
-            <li>
-              <Link href="/delivery-locations" className="text-nav hover:underline font-medium">
-                All USA locations
-              </Link>
-            </li>
-          </ul>
-        </section>
-      ) : (
+      {loc.serviceMode === "destination" ? (
         <section className="mb-10">
           <h2 className="text-xl font-bold text-primary mb-3">USA state and city pages</h2>
           <p className="text-slate-700 mb-3 max-w-3xl leading-relaxed">
@@ -132,7 +101,7 @@ export function InternationalLocationPage({
             </Link>
           </p>
         </section>
-      )}
+      ) : null}
 
       {children.length > 0 ? (
         <section className="mb-10">
