@@ -117,10 +117,14 @@ function CountriesMenu({
   onNavigate?: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const { setLocation } = useDeliveryLocation();
+  const { setLocation, location } = useDeliveryLocation();
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { countries, loaded } = useGboDeliveryCountries();
   const { query, setQuery, filtered } = useCountrySearch(countries);
+  const selectedCountry =
+    countryIsoFromPathname(pathname, searchParams.get("country")) ?? location?.countryCode;
 
   const chooseCountry = async (countryCode: string, href?: string) => {
     setOpen(false);
@@ -173,7 +177,11 @@ function CountriesMenu({
                   <button
                     key={c.countryCode}
                     type="button"
-                    className="block w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-blue-50 hover:text-nav whitespace-nowrap"
+                    className={`block w-full px-4 py-2.5 text-left text-sm whitespace-nowrap ${
+                      c.countryCode === selectedCountry
+                        ? "bg-blue-50 font-semibold text-nav"
+                        : "text-slate-700 hover:bg-blue-50 hover:text-nav"
+                    }`}
                     onClick={() => {
                       void chooseCountry(c.countryCode, guide);
                     }}
@@ -367,8 +375,8 @@ export function Header() {
   };
 
   const navHref = (item: (typeof navItems)[number]) => {
-    if ("category" in item && item.category && deliveryLocation?.countryCode) {
-      return categoryLocationHref(item.category, deliveryLocation.countryCode);
+    if ("category" in item && item.category && cityCountryIso) {
+      return categoryLocationHref(item.category, cityCountryIso);
     }
     return item.href;
   };
@@ -610,7 +618,11 @@ export function Header() {
                           <button
                             key={c.countryCode}
                             type="button"
-                            className="block w-full rounded-lg px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-blue-50 hover:text-nav"
+                            className={`block w-full rounded-lg px-4 py-2.5 text-left text-sm ${
+                              c.countryCode === cityCountryIso
+                                ? "bg-blue-50 font-semibold text-nav"
+                                : "text-slate-700 hover:bg-blue-50 hover:text-nav"
+                            }`}
                             onClick={() => {
                               closeMenu();
                               void setLocation({

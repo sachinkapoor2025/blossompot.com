@@ -10,6 +10,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { pageMetadata } from "@/lib/seo";
 import { requestSeoPath } from "@/lib/request-seo-path";
 import { loadProducts } from "@/lib/product-loader";
+import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { groupStorefrontProductsOnce, type Product, type Category } from "@blossompot/shared";
 import { categoryHref } from "@/lib/category-urls";
 import { localizeShopCopy, localizeShopText, locationShopHeading } from "@/lib/location-seo-urls";
@@ -103,13 +104,14 @@ export default async function ProductsPage({ searchParams }: Props) {
   const search = params.search;
   const category = params.category;
   const sort = resolveSort(params.sort);
+  const deliveryCountry = await getStorefrontDeliveryCountry(params.country);
 
   let products: Product[] = [];
   let categories: Category[] = [];
 
   try {
     const [liveProducts, categoriesData] = await Promise.all([
-      loadProducts({ search, category, country: params.country }),
+      loadProducts({ search, category, country: deliveryCountry }),
       api<{ categories: Category[] }>("/categories", { revalidate: false }),
     ]);
     products = liveProducts.filter((p) => !isRakhiRelatedProduct(p));

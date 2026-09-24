@@ -2,10 +2,13 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
+import { withCountryQuery } from "@/lib/location-seo-urls";
+import { useStorefrontCountryIso } from "@/lib/use-storefront-country";
 
 function SearchBarInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const countryIso = useStorefrontCountryIso(searchParams.get("country"));
   const [q, setQ] = useState(searchParams.get("search") ?? "");
 
   useEffect(() => {
@@ -15,11 +18,10 @@ function SearchBarInner() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = q.trim();
-    if (!trimmed) {
-      router.push("/products");
-      return;
-    }
-    router.push(`/products?search=${encodeURIComponent(trimmed)}`);
+    const dest = trimmed
+      ? `/products?search=${encodeURIComponent(trimmed)}`
+      : "/products";
+    router.push(withCountryQuery(dest, countryIso));
   };
 
   return (

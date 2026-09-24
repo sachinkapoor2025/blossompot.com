@@ -18,6 +18,7 @@ import {
 } from "@/lib/location-seo-urls";
 import { requestSeoPath } from "@/lib/request-seo-path";
 import { loadProductsByCategory } from "@/lib/product-loader";
+import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { categoryOrder } from "@/lib/site";
 import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, pageMetadata } from "@/lib/seo";
 import { type Product, type Category } from "@blossompot/shared";
@@ -89,6 +90,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const query = await searchParams;
   const sort = resolveSort(query.sort);
+  const deliveryCountry = await getStorefrontDeliveryCountry(query.country);
 
   if (!isKnownCategorySlug(slug)) notFound();
 
@@ -98,12 +100,12 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   try {
     const [catData, categoryProducts] = await Promise.all([
       api<{ category: Category }>(`/categories/${slug}`, { revalidate: false }),
-      loadProductsByCategory(slug, query.country),
+      loadProductsByCategory(slug, deliveryCountry),
     ]);
     category = catData.category;
     products = categoryProducts;
   } catch {
-    products = await loadProductsByCategory(slug, query.country);
+    products = await loadProductsByCategory(slug, deliveryCountry);
   }
 
   const name = category?.name ?? slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());

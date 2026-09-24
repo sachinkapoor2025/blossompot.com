@@ -1,5 +1,6 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { DELIVERY_LOCATION_COOKIE, parseDeliveryLocationToken } from "./delivery-location";
+import { STOREFRONT_COUNTRY_HEADER } from "./location-seo-urls";
 
 export function normalizeStorefrontCountry(raw?: string | string[] | null): string | null {
   const value = Array.isArray(raw) ? raw[0] : raw;
@@ -16,12 +17,18 @@ function decodeCookieValue(raw: string): string {
   }
 }
 
-/** ISO-2 country from ?country= or the delivery-location cookie. Defaults to US. */
+/** ISO-2 country from ?country=, middleware header, or the delivery-location cookie. Defaults to US. */
 export async function getStorefrontDeliveryCountry(
   preferred?: string | string[] | null
 ): Promise<string> {
   const fromQuery = normalizeStorefrontCountry(preferred);
   if (fromQuery) return fromQuery;
+  try {
+    const fromHeader = normalizeStorefrontCountry((await headers()).get(STOREFRONT_COUNTRY_HEADER));
+    if (fromHeader) return fromHeader;
+  } catch {
+    /* headers() unavailable outside a request */
+  }
   try {
     const raw = (await cookies()).get(DELIVERY_LOCATION_COOKIE)?.value;
     const loc = parseDeliveryLocationToken(raw ? decodeCookieValue(raw) : "");

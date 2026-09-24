@@ -48,8 +48,21 @@ export const COUNTRY_GUIDE_HREF: Record<string, string> = {
   AE: "/flower-delivery-uae",
 };
 
+export const FEATURED_COUNTRY_CODES = ["US", "GB", "CA", "AU", "AE"] as const;
+
+export function orderCountriesForMenu(countries: DeliveryCountryConfig[], query: string) {
+  const filtered = filterDeliveryCountries(countries, query);
+  if (query.trim()) return filtered;
+  const featured = FEATURED_COUNTRY_CODES.map((code) =>
+    filtered.find((c) => c.countryCode === code)
+  ).filter((c): c is DeliveryCountryConfig => Boolean(c));
+  const featuredSet = new Set(featured.map((c) => c.countryCode));
+  const rest = filtered.filter((c) => !featuredSet.has(c.countryCode));
+  return [...featured, ...rest];
+}
+
 export function useCountrySearch(countries: DeliveryCountryConfig[]) {
   const [query, setQuery] = useState("");
-  const filtered = useMemo(() => filterDeliveryCountries(countries, query), [countries, query]);
+  const filtered = useMemo(() => orderCountriesForMenu(countries, query), [countries, query]);
   return { query, setQuery, filtered };
 }

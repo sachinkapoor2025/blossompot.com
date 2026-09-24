@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { useOptionalDeliveryLocation } from "@/lib/delivery-location-context";
 import { categoryLocationHref, giftsCatalogLocationHref, shopPathForLocation } from "@/lib/location-seo-urls";
+import { useStorefrontCountryIso } from "@/lib/use-storefront-country";
 
 export function ShopLocationLink({
   href,
@@ -18,8 +18,7 @@ export function ShopLocationLink({
   className?: string;
   children: ReactNode;
 }) {
-  const delivery = useOptionalDeliveryLocation();
-  const country = delivery?.location?.countryCode ?? null;
+  const country = useStorefrontCountryIso();
   let dest = href;
   if (country && category) dest = categoryLocationHref(category, country);
   else if (country && catalog) dest = giftsCatalogLocationHref(country);
