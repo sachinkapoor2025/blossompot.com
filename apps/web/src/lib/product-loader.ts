@@ -183,8 +183,12 @@ export async function loadFeaturedProducts(limit = 10): Promise<Product[]> {
   return products.slice(0, limit);
 }
 
-export async function loadRelatedProducts(categorySlug: string, excludeSlug: string): Promise<Product[]> {
-  const products = await loadProductsByCategory(categorySlug);
+export async function loadRelatedProducts(
+  categorySlug: string,
+  excludeSlug: string,
+  country?: string
+): Promise<Product[]> {
+  const products = await loadProductsByCategory(categorySlug, country);
   return products.filter((p) => p.slug !== excludeSlug).slice(0, 5);
 }
 

@@ -162,6 +162,8 @@ for (const [internal, pub] of Object.entries(CATEGORY_PUBLIC_SLUG)) {
 }
 
 export const LOCATION_SEO_HEADER = "x-bp-seo-path";
+/** Forwarded by middleware so SSR listings match the selected delivery country. */
+export const STOREFRONT_COUNTRY_HEADER = "x-blossompot-country";
 
 export function normalizePathname(pathname: string): string {
   if (!pathname) return "/";
@@ -242,6 +244,34 @@ export function countryIsoFromPathname(pathname: string, searchCountry?: string 
   const fromQuery = searchCountry?.trim().toUpperCase();
   if (fromQuery && /^[A-Z]{2}$/.test(fromQuery)) return fromQuery;
   return null;
+}
+
+function normalizeIso2(raw?: string | null): string | null {
+  const iso = (raw ?? "").trim().toUpperCase();
+  return /^[A-Z]{2}$/.test(iso) ? iso : null;
+}
+
+/** Path (country page / shop URL) wins, then ?country=, then the delivery cookie. */
+export function resolveStorefrontCountryIso(input: {
+  pathname: string;
+  searchCountry?: string | null;
+  cookieCountry?: string | null;
+}): string | null {
+  return (
+    countryIsoFromPathname(input.pathname, input.searchCountry) ??
+    normalizeIso2(input.cookieCountry)
+  );
+}
+
+export function withCountryQuery(href: string, country: string | null | undefined): string {
+  const iso = normalizeIso2(country ?? null);
+  if (!iso) return href;
+  const qIndex = href.indexOf("?");
+  const path = qIndex >= 0 ? href.slice(0, qIndex) : href;
+  const params = new URLSearchParams(qIndex >= 0 ? href.slice(qIndex + 1) : "");
+  params.set("country", iso);
+  const qs = params.toString();
+  return qs ? `${path}?${qs}` : path;
 }
 
 /** Internal rewrite target. Use public category paths so /categories/* 301s do not strip the SEO URL. */

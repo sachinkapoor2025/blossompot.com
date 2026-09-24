@@ -8,15 +8,20 @@ import {
   type Product,
 } from "@blossompot/shared";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
+import { useStorefrontCountryIso } from "@/lib/use-storefront-country";
 
 export function useLocationFilteredProducts(products: Product[]) {
   const { location, vendorSlugs, ready, checking } = useDeliveryLocation();
-  if (!ready || !location || checking) {
+  const countryIso = useStorefrontCountryIso();
+  if (!countryIso) {
     return { products, filtered: false, emptyBecauseLocation: false };
   }
+  const applyVendorFilter =
+    ready && !checking && Boolean(location) && location?.countryCode === countryIso;
   const allowed = new Set(vendorSlugs);
   const next = products.filter((p) => {
-    if (!productVisibleForDeliveryCountry(p, location.countryCode)) return false;
+    if (!productVisibleForDeliveryCountry(p, countryIso)) return false;
+    if (!applyVendorFilter) return true;
     if (isGboCatalogProduct(p)) return true;
     if (allowed.size === 0) return true;
     return allowed.has(fulfillmentVendorSlug(p));

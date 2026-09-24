@@ -109,7 +109,7 @@ export default async function ProductPage({ params }: Props) {
     );
   }
 
-  const relatedProducts = await loadRelatedProducts(product.categorySlug, product.slug);
+  const relatedProducts = await loadRelatedProducts(product.categorySlug, product.slug, countryIso);
   const faqs = productFaqsForCategory(product.categorySlug);
 
   const categoryLabel = categoryBreadcrumbLabel(product.categorySlug);
