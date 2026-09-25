@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { api } from "@/lib/api";
-import { HomeProductCard } from "@/components/HomeProductCard";
-import { LocationEmptyHint, LocationFilteredProducts } from "@/components/LocationFilteredProducts";
+import { GroupedProductCards } from "@/components/LocationFilteredProducts";
 import { ShopLocationLink } from "@/components/ShopLocationLink";
 import { ProductGrid } from "@/components/ProductGrid";
 import type { ProductSort } from "@/components/ProductSortBar";
@@ -197,19 +196,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                     View All →
                   </ShopLocationLink>
                 </div>
-                <LocationFilteredProducts products={section.products}>
-                  {({ products: visible, emptyBecauseLocation }) =>
-                    emptyBecauseLocation ? (
-                      <LocationEmptyHint />
-                    ) : (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-stretch">
-                        {visible.map((p) => (
-                          <HomeProductCard key={p.slug} product={p} />
-                        ))}
-                      </div>
-                    )
-                  }
-                </LocationFilteredProducts>
+                <GroupedProductCards products={section.products} />
               </section>
             ) : null
           )}
