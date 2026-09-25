@@ -7,6 +7,7 @@ import {
   productVisibleForDeliveryCountry,
   type Product,
 } from "@blossompot/shared";
+import { HomeProductCard } from "@/components/HomeProductCard";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
 import { useStorefrontCountryIso } from "@/lib/use-storefront-country";
 
@@ -45,6 +46,18 @@ export function LocationFilteredProducts({
   }) => ReactNode;
 }) {
   return <>{children(useLocationFilteredProducts(products))}</>;
+}
+
+export function GroupedProductCards({ products }: { products: Product[] }) {
+  const { products: visible, emptyBecauseLocation } = useLocationFilteredProducts(products);
+  if (emptyBecauseLocation) return <LocationEmptyHint />;
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-stretch">
+      {visible.map((p) => (
+        <HomeProductCard key={p.slug} product={p} />
+      ))}
+    </div>
+  );
 }
 
 export function LocationEmptyHint() {
