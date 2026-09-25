@@ -13,6 +13,7 @@ import { HomeSeoSection } from "@/components/HomeSeoSection";
 import { buildHomeCategoryTiles } from "@/lib/home-category-carousel";
 import { JsonLd } from "@/components/JsonLd";
 import { faqs, homeBanners, countriesMenu } from "@/lib/site";
+import { localizeCopyForCountry } from "@/lib/location-seo-urls";
 import { loadProducts } from "@/lib/product-loader";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { faqJsonLd, pageMetadata } from "@/lib/seo";
@@ -196,8 +197,8 @@ export default async function HomePage({
         <div className="space-y-4">
           {faqs.map((f) => (
             <div key={f.q}>
-              <p className="font-semibold text-primary text-sm">{f.q}</p>
-              <p className="text-sm text-slate-600 mt-1">{f.a}</p>
+              <p className="font-semibold text-primary text-sm">{localizeCopyForCountry(f.q, deliveryCountry)}</p>
+              <p className="text-sm text-slate-600 mt-1">{localizeCopyForCountry(f.a, deliveryCountry)}</p>
             </div>
           ))}
         </div>

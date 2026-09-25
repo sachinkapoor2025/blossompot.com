@@ -12,6 +12,7 @@ import { getCategoryPageSeo } from "@/lib/content/category-seo";
 import { getCategoryRichContent } from "@/lib/content/category-rich-content";
 import { categoryHref } from "@/lib/category-urls";
 import {
+  countryDisplayName,
   giftsCatalogLocationHref,
   localizeShopCopy,
   parseLocationShopPath,
@@ -123,10 +124,14 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const seoPath = await requestSeoPath(categoryHref(slug));
   const located = parseLocationShopPath(seoPath);
   const pageSeo = localizeShopCopy(seoPath, getCategoryPageSeo(slug) ?? { title: "", description: "", h1: `${name} — Worldwide Delivery` });
-  const h1 = pageSeo.h1 || `${name} — Worldwide Delivery`;
+  const h1 =
+    pageSeo.h1 ||
+    (located
+      ? `${name} — Delivery to ${countryDisplayName(located.countryIso)}`
+      : `${name} — Delivery to ${countryDisplayName(deliveryCountry)}`);
   const baseDescription =
     category?.description?.trim() ||
-    `Browse our ${name} collection — flowers, cakes, and thoughtful gifts with worldwide delivery from BlossomPot.`;
+    `Browse our ${name} collection — flowers, cakes, and thoughtful gifts with delivery to ${countryDisplayName(deliveryCountry)} from BlossomPot.`;
   const extra = getCategoryContent(slug);
   const rich = getCategoryRichContent(slug);
   const shopHref = located ? giftsCatalogLocationHref(located.countryIso) : "/products";
@@ -202,11 +207,11 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             <ul className="grid sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-2 text-sm text-slate-600">
               <li className="flex gap-2">
                 <span className="text-nav shrink-0">✓</span>
-                Worldwide delivery with clear shipping windows
+                Delivery to {countryDisplayName(deliveryCountry)} with clear shipping windows
               </li>
               <li className="flex gap-2">
                 <span className="text-nav shrink-0">✓</span>
-                Order from the USA or abroad — we deliver to US addresses
+                Gifts chosen for delivery in {countryDisplayName(deliveryCountry)}
               </li>
               <li className="flex gap-2">
                 <span className="text-nav shrink-0">✓</span>

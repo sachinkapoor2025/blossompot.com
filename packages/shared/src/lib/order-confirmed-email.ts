@@ -55,8 +55,8 @@ function isBlockedSupportPhone(raw: string): boolean {
 
 function supportPhone(): string {
   const raw =
-    process.env.SUPPORT_PHONE?.trim() || process.env.NEXT_PUBLIC_SUPPORT_PHONE?.trim() || "";
-  if (!raw || isBlockedSupportPhone(raw)) return "";
+    process.env.SUPPORT_PHONE?.trim() || process.env.NEXT_PUBLIC_SUPPORT_PHONE?.trim() || "+91 92664 67887";
+  if (isBlockedSupportPhone(raw)) return "+91 92664 67887";
   return raw;
 }
 

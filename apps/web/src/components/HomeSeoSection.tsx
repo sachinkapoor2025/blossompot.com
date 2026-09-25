@@ -11,6 +11,9 @@ export function HomeSeoSection({ countryIso = "US" }: { countryIso?: string }) {
   const usedHrefs = new Set<string>();
   const countryName = countryDisplayName(countryIso);
   const usa = countryIso.trim().toUpperCase() === "US";
+  const inlineLinks = usa
+    ? homepageInlineLinks
+    : homepageInlineLinks.filter((link) => link.phrase !== "United States");
 
   return (
     <section className="bg-slate-50 border-y border-slate-200" aria-labelledby="home-seo-heading">
@@ -23,7 +26,7 @@ export function HomeSeoSection({ countryIso = "US" }: { countryIso?: string }) {
               </h2>
               {intro.paragraphs.map((para, i) => (
                 <p key={i} className="mb-4">
-                  {applyInlineLinks(para, homepageInlineLinks, { usedHrefs, currentPath: "/", max: 4 })}
+                  {applyInlineLinks(para, inlineLinks, { usedHrefs, currentPath: "/", max: 4 })}
                 </p>
               ))}
             </header>
@@ -32,7 +35,7 @@ export function HomeSeoSection({ countryIso = "US" }: { countryIso?: string }) {
               <h3 className="text-xl font-semibold text-primary mb-3">{delivery.heading}</h3>
               {delivery.paragraphs.map((para, i) => (
                 <p key={i} className="mb-4">
-                  {applyInlineLinks(para, homepageInlineLinks, { usedHrefs, currentPath: "/", max: 4 })}
+                  {applyInlineLinks(para, inlineLinks, { usedHrefs, currentPath: "/", max: 4 })}
                 </p>
               ))}
               <div className="flex flex-wrap gap-2 mt-2">

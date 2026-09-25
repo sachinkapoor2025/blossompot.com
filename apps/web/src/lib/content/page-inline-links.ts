@@ -313,7 +313,7 @@ export const blogPageInlineLinks: Record<string, readonly { phrase: string; href
     { phrase: "United Kingdom", href: "/flower-delivery-uk" },
     { phrase: "flowers", href: categoryHref("flowers") },
     { phrase: "gift hampers", href: categoryHref("gift-hampers") },
-    { phrase: "New York", href: locationPublicPath("new-york") },
+    { phrase: "London", href: "/locations/europe/united-kingdom/london" },
   ],
   "thanksgiving-gift-ideas": [
     { phrase: "gift hampers", href: categoryHref("gift-hampers") },

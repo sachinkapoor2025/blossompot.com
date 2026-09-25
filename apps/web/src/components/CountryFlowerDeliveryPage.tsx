@@ -11,7 +11,6 @@ import { JsonLd } from "@/components/JsonLd";
 import {
   flowerDeliveryCountryIso,
   getCountryFlowerDelivery,
-  otherCountryFlowerDeliveryLinks,
   type CountryFlowerDeliverySlug,
 } from "@/lib/content/country-flower-delivery";
 import { countryPageInlineLinks } from "@/lib/content/page-inline-links";
@@ -64,7 +63,6 @@ export async function CountryFlowerDeliveryPage({
     href: cityNavHref(city),
   }));
   const productsFirst = country === "usa";
-  const otherCountries = otherCountryFlowerDeliveryLinks(country);
   const inlineLinks = countryPageInlineLinks[country] ?? [];
   const usedHrefs = new Set<string>();
   const crumbs = [
@@ -245,27 +243,13 @@ export async function CountryFlowerDeliveryPage({
         </div>
       </section>
 
-      <section className="mb-10">
-        <h2 className="text-xl font-bold text-primary mb-3">Flower delivery in other countries</h2>
-        <p className="text-slate-700 mb-3 max-w-3xl leading-relaxed">
-          The BlossomPot homepage serves shoppers in the USA, UK, Canada, Australia, and the UAE. Each
-          country page has its own flower delivery notes, occasions, and internal links.
-        </p>
-        <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
-          {otherCountries.slice(0, 4).map((link) => (
-            <li key={link.href}>
-              <Link href={link.href} className="text-nav hover:underline">
-                {link.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
-
       <section>
         <h2 className="text-xl font-bold text-primary mb-3">Related pages</h2>
         <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
-          {page.relatedHubs.slice(0, 4).map((link) => (
+          {page.relatedHubs
+            .filter((link) => !link.href.startsWith("/flower-delivery-") || link.href === page.href)
+            .slice(0, 4)
+            .map((link) => (
             <li key={link.href}>
               <Link href={link.href} className="text-nav hover:underline">
                 {link.label}

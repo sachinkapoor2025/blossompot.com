@@ -1,6 +1,11 @@
+"use client";
+
 import { trustStripItems } from "@/lib/trust";
+import { localizeCopyForCountry } from "@/lib/location-seo-urls";
+import { useStorefrontCountryIso } from "@/lib/use-storefront-country";
 
 export function TrustStrip() {
+  const iso = useStorefrontCountryIso() ?? "US";
   return (
     <div
       className="bg-primary/5 border-y border-primary/10"
@@ -15,7 +20,7 @@ export function TrustStrip() {
                   •
                 </span>
               )}
-              <span className="font-medium">{item}</span>
+              <span className="font-medium">{localizeCopyForCountry(item, iso)}</span>
             </li>
           ))}
         </ul>
