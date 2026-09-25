@@ -1,11 +1,14 @@
+"use client";
+
 import type { CSSProperties, ReactNode } from "react";
 import Link from "next/link";
-import { site, navItems, giftSetsMenu, countriesMenu } from "@/lib/site";
+import { site, navItems, giftSetsMenu, whatsappChatUrl, whatsappLinkLabel } from "@/lib/site";
 import { PaymentMethodIcons } from "@/components/PaymentMethodIcons";
 import { ShopLocationLink } from "@/components/ShopLocationLink";
 import { SiteLogoLink } from "@/components/SiteLogo";
 import { trustFacts } from "@/lib/trust";
-import { footerGeoLinks } from "@/lib/content/geo/locations";
+import { FooterDeliverTo } from "@/components/FooterDeliverTo";
+import { FooterCountryBlurb } from "@/components/FooterCountryBlurb";
 
 const INSTAGRAM_GRADIENT: CSSProperties = {
   background:
@@ -120,14 +123,23 @@ export function Footer() {
           {/* Brand + contact — full width on mobile, one column on desktop */}
           <div className="col-span-2 lg:col-span-3">
             <SiteLogoLink size="desktop" className="mb-5" />
-            <p className="text-slate-600 leading-relaxed mb-4 max-w-xs">
-              Flowers, cakes, and thoughtful gifts delivered across the Worldwide. Premium online gifting for every celebration.
-            </p>
+            <FooterCountryBlurb />
             <div className="space-y-2 text-slate-700">
               <p>
                 <span className="text-slate-500 text-xs uppercase tracking-wide block mb-0.5">Email</span>
                 <a href={`mailto:${site.supportEmail}`} className="font-medium text-primary hover:underline">
                   {site.supportEmail}
+                </a>
+              </p>
+              <p>
+                <span className="text-slate-500 text-xs uppercase tracking-wide block mb-0.5">WhatsApp</span>
+                <a
+                  href={whatsappChatUrl()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-primary hover:underline"
+                >
+                  {whatsappLinkLabel()}
                 </a>
               </p>
             </div>
@@ -206,39 +218,7 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Geo hubs — top states + index */}
-          <div className="col-span-2 lg:col-span-5 min-w-0">
-            <p className="font-semibold text-primary mb-3 sm:mb-4">Deliver to</p>
-            <ul className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2 text-slate-600">
-              {countriesMenu.items.map((item) => (
-                <li key={item.href} className="col-span-1">
-                  <Link href={item.href} className="hover:text-primary hover:underline">
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-              <li className="col-span-2 sm:col-span-3 pt-2">
-                <span className="text-xs uppercase tracking-wide text-slate-500">USA cities &amp; states</span>
-              </li>
-              {footerGeoLinks(12).map((c) => (
-                <li key={c.href}>
-                  <Link href={c.href} className="hover:text-primary hover:underline">
-                    {c.label}
-                  </Link>
-                </li>
-              ))}
-              <li className="col-span-2 sm:col-span-3">
-                <Link href="/locations" className="hover:text-primary hover:underline font-medium">
-                  International locations →
-                </Link>
-              </li>
-              <li className="col-span-2 sm:col-span-3">
-                <Link href="/delivery-locations" className="hover:text-primary hover:underline font-medium">
-                  All USA delivery locations →
-                </Link>
-              </li>
-            </ul>
-          </div>
+          <FooterDeliverTo />
         </div>
 
         {/* Payments row */}

@@ -9,15 +9,22 @@ function isBlockedSupportPhone(digits: string): boolean {
   return BLOCKED_SUPPORT_PHONE_DIGITS.has(compact) || BLOCKED_SUPPORT_PHONE_DIGITS.has(compact.replace(/^1/, ""));
 }
 
+const DEFAULT_SUPPORT_PHONE_DISPLAY = "+91 92664 67887";
+const DEFAULT_SUPPORT_PHONE_DIGITS = "919266467887";
+
 /**
- * Optional support phone. The former default +1 (669) 260-3819 is never shown
- * and is never used in WhatsApp wa.me links.
+ * Customer WhatsApp / support phone. Defaults to +91 92664 67887.
+ * The former +1 (669) 260-3819 number is never shown or used in wa.me links.
  */
-const RAW_SUPPORT_PHONE = process.env.NEXT_PUBLIC_SUPPORT_PHONE?.trim() || "";
+const RAW_SUPPORT_PHONE = process.env.NEXT_PUBLIC_SUPPORT_PHONE?.trim() || DEFAULT_SUPPORT_PHONE_DISPLAY;
 const SUPPORT_PHONE_DIGITS_RAW = RAW_SUPPORT_PHONE.replace(/\D/g, "");
 const SUPPORT_PHONE_BLOCKED = isBlockedSupportPhone(SUPPORT_PHONE_DIGITS_RAW);
-const SUPPORT_PHONE_DISPLAY = SUPPORT_PHONE_BLOCKED ? "" : RAW_SUPPORT_PHONE;
-const SUPPORT_PHONE_DIGITS = SUPPORT_PHONE_BLOCKED ? "" : SUPPORT_PHONE_DIGITS_RAW;
+const SUPPORT_PHONE_DISPLAY = SUPPORT_PHONE_BLOCKED
+  ? DEFAULT_SUPPORT_PHONE_DISPLAY
+  : RAW_SUPPORT_PHONE;
+const SUPPORT_PHONE_DIGITS = SUPPORT_PHONE_BLOCKED
+  ? DEFAULT_SUPPORT_PHONE_DIGITS
+  : SUPPORT_PHONE_DIGITS_RAW || DEFAULT_SUPPORT_PHONE_DIGITS;
 
 if (
   process.env.NODE_ENV === "production" &&
