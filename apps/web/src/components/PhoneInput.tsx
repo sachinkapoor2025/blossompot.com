@@ -21,6 +21,8 @@ interface PhoneInputProps {
   className?: string;
   selectClassName?: string;
   inputClassName?: string;
+  invalid?: boolean;
+  errorId?: string;
 }
 
 function optionLabel(c: (typeof COUNTRIES)[number], compact: boolean): string {
@@ -45,6 +47,8 @@ export function PhoneInput({
   className = "",
   selectClassName = "",
   inputClassName = "",
+  invalid = false,
+  errorId,
 }: PhoneInputProps) {
   const selected = COUNTRIES.find((c) => c.iso === countryIso);
 
@@ -60,7 +64,9 @@ export function PhoneInput({
           title={selected ? `${selected.dial} ${selected.name}` : "Country code"}
           className={`${
             compact ? "w-[4.75rem]" : "w-[min(100%,11rem)]"
-          } shrink-0 border border-slate-300 rounded-lg px-1.5 py-2 text-sm bg-white disabled:opacity-60 ${selectClassName}`}
+          } shrink-0 border border-slate-300 rounded-lg px-1.5 py-2 text-sm bg-white disabled:opacity-60 ${
+            invalid ? "!border-red-500" : ""
+          } ${selectClassName}`}
         >
           <option value="">{compact ? "" : "Country code"}</option>
           {COUNTRIES.map((c) => (
@@ -78,7 +84,11 @@ export function PhoneInput({
           placeholder={placeholder}
           required={required}
           disabled={disabled}
-          className={`flex-1 min-w-0 border border-slate-300 rounded-lg px-3 py-2 disabled:opacity-60 ${inputClassName}`}
+          aria-invalid={invalid || undefined}
+          aria-describedby={errorId}
+          className={`flex-1 min-w-0 border border-slate-300 rounded-lg px-3 py-2 disabled:opacity-60 ${
+            invalid ? "!border-red-500 !ring-1 !ring-red-300" : ""
+          } ${inputClassName}`}
         />
       </div>
     </div>

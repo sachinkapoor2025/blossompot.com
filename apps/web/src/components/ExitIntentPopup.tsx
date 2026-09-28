@@ -17,7 +17,8 @@ import { saveWelcomeCoupon, formatCouponExpiry } from "@/lib/welcome-coupon";
 import { trackSessionHeartbeat } from "@/lib/track";
 import { DEFAULT_COUNTRY_ISO } from "@/lib/country-codes";
 import { ConfettiBurst } from "@/components/ConfettiBurst";
-import { PhoneInput, buildPhoneValue } from "@/components/PhoneInput";
+import { PhoneInput } from "@/components/PhoneInput";
+import { phoneCountryErrorMessage, validatePhoneForCountry } from "@/lib/phone-country";
 import { useOptionalDeliveryLocation } from "@/lib/delivery-location-context";
 
 const STORAGE_KEY = "blossompot_daily_deal_shown_v20";
@@ -41,11 +42,6 @@ const SEGMENT_COLORS = [
 
 function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
-}
-
-function isValidPhone(value: string): boolean {
-  const digits = value.replace(/\D/g, "");
-  return digits.length >= 7 && digits.length <= 15;
 }
 
 function segmentIndexForPercent(percent: number): number {
@@ -80,6 +76,7 @@ export function ExitIntentPopup() {
     "idle" | "spinning" | "celebrating" | "done" | "blocked"
   >("idle");
   const [error, setError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
   const [coupon, setCoupon] = useState<CouponResult | null>(null);
   const [copied, setCopied] = useState(false);
   const [rotation, setRotation] = useState(0);
@@ -141,18 +138,22 @@ export function ExitIntentPopup() {
 
   const spin = (e: React.FormEvent) => {
     e.preventDefault();
-    const fullPhone = buildPhoneValue(countryIso, localNumber);
     const trimmedEmail = email.trim();
     if (phase !== "idle") return;
-    if (!isValidPhone(fullPhone)) {
-      setError("Enter a valid mobile number to spin for today’s discount.");
+    const phoneCheck = validatePhoneForCountry(countryIso, localNumber);
+    if (!phoneCheck.ok) {
+      setError("");
+      setPhoneError(phoneCountryErrorMessage(countryIso));
       return;
     }
+    const fullPhone = phoneCheck.e164;
     if (trimmedEmail && !isValidEmail(trimmedEmail)) {
+      setPhoneError("");
       setError("Enter a valid email, or leave it blank.");
       return;
     }
 
+    setPhoneError("");
     setError("");
     setCoupon(null);
     setPhase("spinning");
@@ -437,15 +438,27 @@ export function ExitIntentPopup() {
                     label=""
                     countryIso={countryIso}
                     localNumber={localNumber}
-                    onCountryChange={setCountryIso}
-                    onLocalNumberChange={setLocalNumber}
-                    required
+                    onCountryChange={(iso) => {
+                      setCountryIso(iso);
+                      setPhoneError("");
+                    }}
+                    onLocalNumberChange={(value) => {
+                      setLocalNumber(value);
+                      setPhoneError("");
+                    }}
                     compact
+                    invalid={Boolean(phoneError)}
+                    errorId={phoneError ? "daily-deal-phone-error" : undefined}
                     disabled={phase === "spinning"}
                     placeholder="Mobile number"
                     selectClassName="border-slate-200 py-2.5 focus:outline-none focus:ring-2 focus:ring-nav"
                     inputClassName="border-slate-200 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-nav"
                   />
+                  {phoneError ? (
+                    <p id="daily-deal-phone-error" role="alert" className="text-red-500 text-xs">
+                      {phoneError}
+                    </p>
+                  ) : null}
                   <input
                     type="email"
                     value={email}
