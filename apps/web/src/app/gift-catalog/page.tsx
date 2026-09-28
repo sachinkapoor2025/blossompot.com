@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { OverseasGiftGrid } from "@/components/OverseasGiftGrid";
-import { loadProducts } from "@/lib/product-loader";
+import { ListingPageSkeleton } from "@/components/route-skeletons";
+import { loadProducts, toListingCardProducts } from "@/lib/product-loader";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { pageMetadata } from "@/lib/seo";
 import { resolveDeliveryCountry, type Product } from "@blossompot/shared";
@@ -15,7 +17,17 @@ export const metadata: Metadata = pageMetadata({
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function GiftCatalogPage({
+export default function GiftCatalogPage(props: {
+  searchParams: Promise<{ country?: string }>;
+}) {
+  return (
+    <Suspense fallback={<ListingPageSkeleton />}>
+      <GiftCatalogContent {...props} />
+    </Suspense>
+  );
+}
+
+async function GiftCatalogContent({
   searchParams,
 }: {
   searchParams: Promise<{ country?: string }>;
@@ -45,7 +57,7 @@ export default async function GiftCatalogPage({
           {catalogError}
         </p>
       ) : (
-        <OverseasGiftGrid products={products} />
+        <OverseasGiftGrid products={toListingCardProducts(products)} />
       )}
     </div>
   );

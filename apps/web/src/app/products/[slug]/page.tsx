@@ -1,16 +1,19 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { ProductPageSkeleton } from "@/components/route-skeletons";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
 import { ProductDetailClient } from "./ProductDetailClient";
 import { breadcrumbJsonLd, faqJsonLd, productJsonLd, productPageMetadata } from "@/lib/seo";
 import { productFaqsForCategory } from "@/lib/content/product-faqs";
 import { resolveImageUrl } from "@/lib/images";
-import { loadProduct, loadRelatedProducts, loadProducts, getStaticProductSlugs } from "@/lib/product-loader";
+import { loadProduct, loadRelatedProducts, loadProducts, getStaticProductSlugs, toListingCardProducts } from "@/lib/product-loader";
 import { api } from "@/lib/api";
 import { categoryHref } from "@/lib/category-urls";
 import { getCategoryPageSeo } from "@/lib/content/category-seo";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
+import { deliveryDestinationName } from "@/lib/location-seo-urls";
 import {
   isProductSearchIndexable,
   isProductStorefrontVisible,
@@ -78,7 +81,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-export default async function ProductPage({ params }: Props) {
+export default function ProductPage(props: Props) {
+  return (
+    <Suspense fallback={<ProductPageSkeleton />}>
+      <ProductPageContent {...props} />
+    </Suspense>
+  );
+}
+
+async function ProductPageContent({ params }: Props) {
   const { slug } = await params;
   const product = await loadProduct(slug);
   if (!product) notFound();
@@ -110,7 +121,7 @@ export default async function ProductPage({ params }: Props) {
   }
 
   const relatedProducts = await loadRelatedProducts(product.categorySlug, product.slug, countryIso);
-  const faqs = productFaqsForCategory(product.categorySlug);
+  const faqs = productFaqsForCategory(product.categorySlug, deliveryDestinationName(countryIso));
 
   const categoryLabel = categoryBreadcrumbLabel(product.categorySlug);
   const crumbs = [
@@ -132,7 +143,11 @@ export default async function ProductPage({ params }: Props) {
       <div className="max-w-6xl mx-auto px-4 pt-6">
         <Breadcrumbs items={crumbs} />
       </div>
-      <ProductDetailClient product={product} relatedProducts={relatedProducts} faqs={faqs} />
+      <ProductDetailClient
+        product={product}
+        relatedProducts={toListingCardProducts(relatedProducts)}
+        deliveryCountryIso={countryIso}
+      />
     </>
   );
 }

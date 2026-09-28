@@ -17,7 +17,7 @@ import { countryPageInlineLinks } from "@/lib/content/page-inline-links";
 import { mergeProductsForCountry } from "@/lib/catalog-fallback";
 import { shuffleForCity } from "@/lib/city-products";
 import { applyInlineLinks } from "@/lib/inline-links";
-import { loadProducts } from "@/lib/product-loader";
+import { loadProducts, toListingCardProducts } from "@/lib/product-loader";
 import { breadcrumbJsonLd, canonical, faqJsonLd, itemListJsonLd } from "@/lib/seo";
 import { site, cityNavHref } from "@/lib/site";
 import { cityMenuForCountry } from "@/lib/city-menu-for-location";
@@ -82,7 +82,7 @@ export async function CountryFlowerDeliveryPage({
             : `A rotating selection from the live ${site.name} catalog — flowers first, then cakes and hampers. Open any product for current price, inventory, and delivery timing.`}
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {featured.map((product) => (
+          {toListingCardProducts(featured).map((product) => (
             <HomeProductCard key={product.slug} product={product} />
           ))}
         </div>

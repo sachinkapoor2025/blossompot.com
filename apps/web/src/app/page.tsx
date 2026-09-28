@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { HomeHero } from "@/components/HomeHero";
@@ -31,10 +32,32 @@ export const metadata: Metadata = pageMetadata({
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function HomePage({
+export default function HomePage({
   searchParams,
 }: {
   searchParams: Promise<{ country?: string }>;
+}) {
+  // Start reviews immediately so they overlap the catalog fetch instead of following it.
+  const reviewsPromise = getGoogleReviews();
+  return (
+    <div>
+      <JsonLd data={[faqJsonLd(faqs)]} />
+      <HomeHero banners={[...homeBanners]} />
+      <HomeBrandTaglines />
+      <Suspense fallback={<HomeBelowHeroFallback />}>
+        <HomeCatalog searchParams={searchParams} reviewsPromise={reviewsPromise} />
+      </Suspense>
+    </div>
+  );
+}
+
+/** Catalog, reviews, and localized copy. Streamed after the hero so LCP is not blocked. */
+async function HomeCatalog({
+  searchParams,
+  reviewsPromise,
+}: {
+  searchParams: Promise<{ country?: string }>;
+  reviewsPromise: ReturnType<typeof getGoogleReviews>;
 }) {
   const params = await searchParams;
   let products: Product[] = [];
@@ -46,7 +69,7 @@ export default async function HomePage({
   try {
     const [liveProducts, categoriesData] = await Promise.all([
       loadProducts({ country: deliveryCountry }),
-      api<{ categories: Category[] }>("/categories", { revalidate: false }),
+      api<{ categories: Category[] }>("/categories", { revalidate: 45 }),
     ]);
     products = liveProducts;
     categories = categoriesData.categories;
@@ -54,7 +77,6 @@ export default async function HomePage({
     catalogError = err instanceof Error ? err.message : "Gift catalog is temporarily unavailable.";
   }
 
-  const googleReviews = await getGoogleReviews();
   const categoryTiles = buildHomeCategoryTiles(products, categories);
   const selectedFlowerSlug = flowerDeliverySlugForIso(deliveryCountry);
   const countryPages = selectedFlowerSlug
@@ -62,12 +84,7 @@ export default async function HomePage({
     : [];
 
   return (
-    <div>
-      <JsonLd data={[faqJsonLd(faqs)]} />
-
-      <HomeHero banners={[...homeBanners]} />
-      <HomeBrandTaglines />
-
+    <>
       <HomeCategoryCarousel tiles={categoryTiles} />
       <TrustStrip />
 
@@ -152,7 +169,9 @@ export default async function HomePage({
 
       <WhyTrustUsSection />
 
-      <CustomerReviews data={googleReviews} />
+      <Suspense fallback={<HomeReviewsFallback />}>
+        <HomeReviews reviewsPromise={reviewsPromise} />
+      </Suspense>
 
       <HomeFlowerGuideCta />
       <HomeSeoSection countryIso={deliveryCountry} />
@@ -206,6 +225,49 @@ export default async function HomePage({
           <p className="text-xs text-slate-400 mt-8">{categories.length} categories available in catalog</p>
         )}
       </section>
-    </div>
+    </>
+  );
+}
+
+async function HomeReviews({
+  reviewsPromise,
+}: {
+  reviewsPromise: ReturnType<typeof getGoogleReviews>;
+}) {
+  const googleReviews = await reviewsPromise;
+  return <CustomerReviews data={googleReviews} />;
+}
+
+function HomeReviewsFallback() {
+  return (
+    <section className="border-y border-[#eadfd8] bg-gradient-to-b from-[#fff8f5] to-white" aria-hidden>
+      <div className="mx-auto max-w-7xl px-4 py-12 md:py-16 animate-pulse">
+        <div className="mx-auto mb-8 h-8 w-56 max-w-full rounded bg-white" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {Array.from({ length: 5 }, (_, i) => (
+            <div key={i} className="h-40 rounded-2xl border border-primary/10 bg-white" />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** Reserves the category row under the hero so the banner does not jump when the catalog streams in. */
+function HomeBelowHeroFallback() {
+  return (
+    <section className="bg-[#f7f1ea] border-y border-[#eadfd8]" aria-hidden>
+      <div className="max-w-7xl mx-auto px-4 py-8 sm:py-10 animate-pulse">
+        <div className="mx-auto mb-5 h-8 w-64 max-w-full rounded bg-white/80" />
+        <div className="flex gap-4 sm:gap-5 overflow-hidden">
+          {Array.from({ length: 8 }, (_, i) => (
+            <div key={i} className="shrink-0 w-[112px] sm:w-[132px]">
+              <div className="aspect-square rounded-2xl bg-white ring-1 ring-[#eadfd8]" />
+              <div className="mx-auto mt-2 h-4 w-16 rounded bg-white/80" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }

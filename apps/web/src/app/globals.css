@@ -25,7 +25,6 @@ body {
     radial-gradient(1200px 520px at 12% -8%, rgba(224, 122, 154, 0.16), transparent 58%),
     radial-gradient(900px 480px at 92% 0%, rgba(47, 143, 107, 0.12), transparent 55%),
     linear-gradient(180deg, #f7fcf8 0%, #f3faf5 42%, #fff8fb 100%);
-  background-attachment: fixed;
   font-family: var(--font-sans), "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
 }
 

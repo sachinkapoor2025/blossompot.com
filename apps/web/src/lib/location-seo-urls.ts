@@ -342,6 +342,20 @@ export function countryDisplayName(countryIso: string): string {
     .join(" ");
 }
 
+/**
+ * Name used in delivery copy. Known storefront countries use the site label
+ * (USA, UK, UAE). Other destinations use the same catalog name as the header.
+ */
+export function deliveryDestinationName(countryIso: string | null | undefined, catalogName?: string | null): string {
+  const iso = (countryIso ?? "").trim().toUpperCase();
+  const resolved = /^[A-Z]{2}$/.test(iso) ? iso : "US";
+  const known = countryDisplayName(resolved);
+  if (known.toUpperCase() !== resolved) return known;
+  const catalog = catalogName?.trim();
+  if (catalog) return catalog;
+  return resolved;
+}
+
 export function localizeCopyForCountry(text: string, countryIso: string): string {
   return rewriteWorldwideCopy(text, countryDisplayName(countryIso));
 }

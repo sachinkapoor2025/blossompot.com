@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { api } from "@/lib/api";
@@ -18,7 +19,8 @@ import {
   parseLocationShopPath,
 } from "@/lib/location-seo-urls";
 import { requestSeoPath } from "@/lib/request-seo-path";
-import { loadProductsByCategory } from "@/lib/product-loader";
+import { ListingPageSkeleton } from "@/components/route-skeletons";
+import { loadProductsByCategory, toListingCardProducts } from "@/lib/product-loader";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { categoryOrder } from "@/lib/site";
 import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, pageMetadata } from "@/lib/seo";
@@ -87,7 +89,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function CategoryPage({ params, searchParams }: Props) {
+export default function CategoryPage(props: Props) {
+  return (
+    <Suspense fallback={<ListingPageSkeleton />}>
+      <CategoryPageContent {...props} />
+    </Suspense>
+  );
+}
+
+async function CategoryPageContent({ params, searchParams }: Props) {
   const { slug } = await params;
   const query = await searchParams;
   const sort = resolveSort(query.sort);
@@ -100,7 +110,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
   try {
     const [catData, categoryProducts] = await Promise.all([
-      api<{ category: Category }>(`/categories/${slug}`, { revalidate: false }),
+      api<{ category: Category }>(`/categories/${slug}`, { revalidate: 45 }),
       loadProductsByCategory(slug, deliveryCountry),
     ]);
     category = catData.category;
@@ -124,11 +134,14 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const seoPath = await requestSeoPath(categoryHref(slug));
   const located = parseLocationShopPath(seoPath);
   const pageSeo = localizeShopCopy(seoPath, getCategoryPageSeo(slug) ?? { title: "", description: "", h1: `${name} — Worldwide Delivery` });
+  const deliveryCountryName = countryDisplayName(located?.countryIso ?? deliveryCountry);
   const h1 =
-    pageSeo.h1 ||
-    (located
-      ? `${name} — Delivery to ${countryDisplayName(located.countryIso)}`
-      : `${name} — Delivery to ${countryDisplayName(deliveryCountry)}`);
+    slug === "flowers"
+      ? `Send flowers to ${deliveryCountryName}`
+      : pageSeo.h1 ||
+        (located
+          ? `${name} — Delivery to ${countryDisplayName(located.countryIso)}`
+          : `${name} — Delivery to ${countryDisplayName(deliveryCountry)}`);
   const baseDescription =
     category?.description?.trim() ||
     `Browse our ${name} collection — flowers, cakes, and thoughtful gifts with delivery to ${countryDisplayName(deliveryCountry)} from BlossomPot.`;
@@ -158,7 +171,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       <h1 className="text-3xl font-bold text-primary mb-8">{h1}</h1>
 
       {products.length > 0 ? (
-        <ProductGrid products={products} sort={sort} />
+        <ProductGrid products={toListingCardProducts(products)} sort={sort} />
       ) : (
         <p className="text-slate-500">
           Products loading soon.{" "}
@@ -169,7 +182,11 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       )}
 
       {rich ? (
-        <CategoryContentSection content={rich} categoryName={seoCategoryName} />
+        <CategoryContentSection
+          content={rich}
+          categoryName={seoCategoryName}
+          deliveryCountryIso={located?.countryIso ?? deliveryCountry}
+        />
       ) : (
         <>
           <section className="mt-12 pt-10 border-t border-slate-200">

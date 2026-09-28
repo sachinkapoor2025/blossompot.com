@@ -14,6 +14,7 @@ import {
   giftsCatalogCountryIso,
   giftsCatalogCountryRewrites,
   countryIsoFromPathname,
+  deliveryDestinationName,
   resolveStorefrontCountryIso,
   withCountryQuery,
 } from "./location-seo-urls";
@@ -86,6 +87,19 @@ describe("location SEO shop URLs", () => {
     assert.equal(giftsCatalogCountryIso("california"), null);
     const usa = giftsCatalogCountryRewrites().find((r) => r.source === "/gifts-to-usa");
     assert.deepEqual(usa, { source: "/gifts-to-usa", destination: "/products?country=US" });
+  });
+
+  it("names the selected delivery destination for help copy", () => {
+    assert.equal(deliveryDestinationName("BH", "Bahrain"), "Bahrain");
+    assert.equal(deliveryDestinationName("BH"), "Bahrain");
+    assert.equal(deliveryDestinationName("AE", "United Arab Emirates"), "UAE");
+    assert.equal(deliveryDestinationName("GB"), "UK");
+    assert.equal(deliveryDestinationName("US", "United States"), "USA");
+    assert.equal(deliveryDestinationName(null), "USA");
+    assert.equal(
+      `confirm ${deliveryDestinationName("AE", "United Arab Emirates")} delivery addresses.`,
+      "confirm UAE delivery addresses."
+    );
   });
 
   it("maps country pages to that country's ISO for city menus", () => {

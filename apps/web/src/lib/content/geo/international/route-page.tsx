@@ -4,7 +4,7 @@ import { InternationalLocationPage } from "@/components/geo/InternationalLocatio
 import { pageMetadata } from "@/lib/seo";
 import { mergeProductsForCountry } from "@/lib/catalog-fallback";
 import { shuffleForCity } from "@/lib/city-products";
-import { loadProducts } from "@/lib/product-loader";
+import { loadProducts, toListingCardProducts } from "@/lib/product-loader";
 import {
   isProductStorefrontVisible,
   productVisibleForDeliveryCountry,
@@ -73,6 +73,7 @@ export async function InternationalMarketPage({
       ),
       loc.slug
     ).slice(0, 20);
+    products = toListingCardProducts(products);
   }
   return <InternationalLocationPage loc={resolveLocation(loc)} products={products} />;
 }

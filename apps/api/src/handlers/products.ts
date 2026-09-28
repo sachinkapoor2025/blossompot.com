@@ -217,15 +217,11 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
     const evals = await evaluateProductsForLocation(items, location);
     const deliverable = new Set(evals.filter((e) => e.deliverable).map((e) => e.slug));
     products = products.filter((p) => deliverable.has(p.slug));
+    // Postal availability is per address — do not CDN-cache it.
     return ok({ products, location, filtered: true });
   }
-  if (location?.countryCode) {
-    return ok({ products, location, filtered: true });
-  }
-
-  // Short CDN TTL only — listing + PDP must not drift for minutes after price edits.
-  if (search) return ok({ products });
-  return okCached({ products }, 10);
+  // Country is a query parameter, so each country is its own cache entry.
+  return okCached({ products, ...(location?.countryCode ? { location, filtered: true } : {}) }, 45);
 }
 
 export async function getProduct(event: APIGatewayProxyEventV2) {
@@ -250,7 +246,7 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
         },
       });
     }
-    return okCached({ product: forStorefront(cached.product) }, 30);
+    return okCached({ product: forStorefront(cached.product) }, 45);
   }
 
   const result = await docClient.send(
@@ -290,7 +286,7 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
       },
     });
   }
-  return okCached({ product: forStorefront(product) }, 10);
+  return okCached({ product: forStorefront(product) }, 45);
 }
 
 export async function createProduct(event: APIGatewayProxyEventV2) {
