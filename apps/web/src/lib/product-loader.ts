@@ -33,7 +33,7 @@ const productMemoryCache = new Map<string, { product: Product; at: number }>();
  * Short enough that a price edit is visible within a minute.
  */
 export const CATALOG_REVALIDATE_SECONDS = 45;
-const CATALOG_FETCH = { revalidate: CATALOG_REVALIDATE_SECONDS as const };
+const CATALOG_FETCH = { revalidate: CATALOG_REVALIDATE_SECONDS };
 
 function rememberProduct(product: Product): Product {
   productMemoryCache.set(product.slug, { product, at: Date.now() });
