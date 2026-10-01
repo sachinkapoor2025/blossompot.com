@@ -257,7 +257,7 @@ export function ShippingAddressForm({
             label="Recipient name"
             value={value.name}
             onChange={(e) => update("name", e.target.value)}
-            placeholder="Brother's full name"
+            placeholder="Recipient's Name"
             required
             autoComplete="name"
           />
