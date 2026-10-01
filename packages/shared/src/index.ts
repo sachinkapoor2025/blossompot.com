@@ -17,6 +17,7 @@ export * from "./schemas/reminder-email";
 export * from "./schemas/pending-payment-unsub";
 export * from "./schemas/blog";
 export * from "./schemas/flower-guide";
+export * from "./schemas/flower-guide-cards";
 export * from "./schemas/shipping";
 export * from "./schemas/vendor-orange-county";
 export * from "./schemas/vendor-gbo";

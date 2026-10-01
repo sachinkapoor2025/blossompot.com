@@ -119,6 +119,14 @@ export const configKeys = {
     pk: `CONFIG#HOMEPAGE_CATALOG#${countryIso.trim().toUpperCase()}`,
     sk: "META" as const,
   }),
+  /**
+   * Selected flower-guide cards for one delivery country.
+   * Separate from the homepage record and from the product catalog scan.
+   */
+  flowerGuideCards: (countryIso: string) => ({
+    pk: `CONFIG#FLOWER_GUIDE_CARDS#${countryIso.trim().toUpperCase()}`,
+    sk: "META" as const,
+  }),
 };
 
 /** Tracks admin S3 uploads → product slug for recovery if DB is reset. */

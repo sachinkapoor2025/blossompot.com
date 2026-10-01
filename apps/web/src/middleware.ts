@@ -3,7 +3,8 @@ import type { NextRequest } from "next/server";
 import { classifyUserAgent } from "@/lib/crawler-policy";
 import {
   DELIVERY_LOCATION_COOKIE,
-  deliveryLocationToken,
+  deliveryCookieUpdate,
+  isDeliveryCookieFlight,
   parseDeliveryLocationToken,
 } from "@/lib/delivery-location";
 import {
@@ -70,18 +71,18 @@ function stampBotHeaders(response: NextResponse, request: NextRequest) {
 }
 
 function applyDeliveryCountryCookie(response: NextResponse, request: NextRequest, country: string) {
-  const existing = parseDeliveryLocationToken(request.cookies.get(DELIVERY_LOCATION_COOKIE)?.value);
-  const postalCode = existing?.countryCode === country ? existing.postalCode : "";
+  const update = deliveryCookieUpdate({
+    resolvedCountry: country,
+    requestCookie: request.cookies.get(DELIVERY_LOCATION_COOKIE)?.value,
+    flight: isDeliveryCookieFlight(request.headers),
+  });
+  if (!update) return;
   response.cookies.set({
     name: DELIVERY_LOCATION_COOKIE,
-    value: deliveryLocationToken({
-      countryCode: country,
-      postalCode,
-      postalDisplay: postalCode || country,
-    }),
+    value: update.value,
     path: "/",
     sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 365,
+    maxAge: update.maxAge,
   });
 }
 

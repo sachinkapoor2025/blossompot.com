@@ -36,6 +36,60 @@ export function deliveryLocationToken(location: StoredDeliveryLocation): string 
   return `${location.countryCode}:${location.postalCode}`;
 }
 
+/** One year. Matches the client cookie and the middleware `maxAge`. */
+export const DELIVERY_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
+
+export type DeliveryCookieUpdate = {
+  value: string;
+  maxAge: number;
+};
+
+/**
+ * App Router client navigations and prefetches are fetch responses. The browser
+ * applies their Set-Cookie when the bytes arrive, which can be after a newer
+ * selection has already written `bp_dl`. Those flights must not set the cookie.
+ * A document load is the navigation the browser is committing, so it still may.
+ *
+ * Next removes `rsc` and the router prefetch headers before user middleware runs.
+ * `Sec-Fetch-*`, `next-url`, and `Accept` are still visible there.
+ */
+export function isDeliveryCookieFlight(headers: { get(name: string): string | null }): boolean {
+  const dest = headers.get("sec-fetch-dest")?.toLowerCase() ?? "";
+  const mode = headers.get("sec-fetch-mode")?.toLowerCase() ?? "";
+  if (dest === "document" || mode === "navigate") return false;
+  if (dest === "empty" || mode === "cors" || mode === "no-cors" || mode === "same-origin") return true;
+  const purpose = `${headers.get("purpose") ?? ""} ${headers.get("sec-purpose") ?? ""}`.toLowerCase();
+  if (purpose.includes("prefetch")) return true;
+  if ((headers.get("accept") ?? "").includes("text/x-component")) return true;
+  if (headers.get("next-url")) return true;
+  if (headers.get("rsc") === "1") return true;
+  if (headers.get("next-router-prefetch") === "1") return true;
+  if (headers.get("next-router-segment-prefetch")) return true;
+  return false;
+}
+
+/**
+ * Cookie to attach to this response, or null when the response must leave `bp_dl` alone.
+ * Document loads keep the existing token shape and lifetime. Flights do not emit one.
+ */
+export function deliveryCookieUpdate(input: {
+  resolvedCountry: string | null;
+  requestCookie: string | null | undefined;
+  flight: boolean;
+}): DeliveryCookieUpdate | null {
+  if (!input.resolvedCountry || input.flight) return null;
+  const existing = parseDeliveryLocationToken(input.requestCookie);
+  const postalCode = existing?.countryCode === input.resolvedCountry ? existing.postalCode : "";
+  return {
+    value: deliveryLocationToken({
+      countryCode: input.resolvedCountry,
+      postalCode,
+      postalDisplay: postalCode || input.resolvedCountry,
+    }),
+    maxAge: DELIVERY_COOKIE_MAX_AGE_SECONDS,
+  };
+}
+
 function readCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
   const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
