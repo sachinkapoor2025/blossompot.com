@@ -25,6 +25,8 @@ import * as loadTest from "./handlers/load-test";
 import * as adminVendorApi from "./handlers/admin-vendor-api";
 import * as adminGboApi from "./handlers/admin-gbo-api";
 import * as gbo from "./handlers/gbo";
+import * as homepageCatalog from "./handlers/homepage-catalog";
+import * as flowerGuideCards from "./handlers/flower-guide-cards";
 import * as expenses from "./handlers/expenses";
 import * as paymentLedger from "./handlers/payment-ledger";
 import * as paymentReconciliation from "./handlers/payment-reconciliation";
@@ -79,6 +81,10 @@ const routes: Route[] = [
   },
   { method: "POST", pattern: /^\/products\/bulk$/, handler: products.bulkUploadProducts },
   { method: "GET", pattern: /^\/categories$/, handler: categories.listCategories },
+  { method: "GET", pattern: /^\/homepage-catalog$/, handler: homepageCatalog.getHomepageCatalogCache },
+  { method: "PUT", pattern: /^\/homepage-catalog$/, handler: homepageCatalog.putHomepageCatalogCache },
+  { method: "GET", pattern: /^\/flower-guide-cards$/, handler: flowerGuideCards.getFlowerGuideCardsCache },
+  { method: "PUT", pattern: /^\/flower-guide-cards$/, handler: flowerGuideCards.putFlowerGuideCardsCache },
   { method: "GET", pattern: /^\/categories\/([^/]+)$/, handler: categories.getCategory, params: ["slug"] },
   { method: "POST", pattern: /^\/categories$/, handler: categories.createCategory },
   { method: "PUT", pattern: /^\/categories\/([^/]+)$/, handler: categories.updateCategory, params: ["slug"] },

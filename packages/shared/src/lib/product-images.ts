@@ -127,10 +127,46 @@ export function resolveProductGalleryWithFallback(
   return categoryFallbackUrl ? [categoryFallbackUrl] : [];
 }
 
-/** True when a product is part of the temporary sample marketplace catalog. */
-export function isSampleCatalogProduct(product: { isSampleProduct?: boolean; tags?: string[] }): boolean {
+function usesDemoStockPhotos(images?: string[] | null): boolean {
+  return (images ?? []).some((url) => {
+    const value = String(url ?? "").toLowerCase();
+    return value.includes("unsplash.com") || value.includes("picsum.photos");
+  });
+}
+
+function isLiveInventorySku(sku?: string | null, tags?: string[]): boolean {
+  if ((tags ?? []).includes("tf-usa")) return true;
+  const value = (sku ?? "").trim();
+  if (!value) return false;
+  const upper = value.toUpperCase();
+  if (upper.startsWith("SMP-") || upper.startsWith("SAMPLE-")) return false;
+  if (upper.startsWith("GBO:")) return true;
+  if (/^TF[A-Z0-9]/i.test(value)) return true;
+  return true;
+}
+
+/** True when a product is part of the temporary sample / Unsplash demo catalog. */
+export function isSampleCatalogProduct(product: {
+  isSampleProduct?: boolean;
+  tags?: string[];
+  vendorSlug?: string | null;
+  fulfilledByName?: string | null;
+  sku?: string | null;
+  slug?: string | null;
+  images?: string[] | null;
+}): boolean {
   if (product.isSampleProduct === true) return true;
-  return (product.tags ?? []).includes("sample-product");
+  if ((product.tags ?? []).includes("sample-product")) return true;
+  const vendor = (product.vendorSlug ?? "").toLowerCase();
+  if (vendor.startsWith("sample-")) return true;
+  if ((product.fulfilledByName ?? "").includes("SAMPLE VENDOR")) return true;
+  const sku = (product.sku ?? "").toUpperCase();
+  if (sku.startsWith("SMP-") || sku.startsWith("SAMPLE-")) return true;
+  const slug = (product.slug ?? "").toLowerCase();
+  if (slug.startsWith("sample-")) return true;
+  if (isLiveInventorySku(product.sku, product.tags)) return false;
+  if (usesDemoStockPhotos(product.images)) return true;
+  return false;
 }
 
 /**
@@ -149,6 +185,11 @@ export function isProductSearchIndexable(product: {
   tags?: string[];
   indexable?: boolean;
   published?: boolean;
+  vendorSlug?: string | null;
+  fulfilledByName?: string | null;
+  sku?: string | null;
+  slug?: string | null;
+  images?: string[] | null;
 }): boolean {
   if (product.published === false) return false;
   if (product.indexable === false) return false;
@@ -161,6 +202,11 @@ export function isProductStorefrontVisible(product: {
   published?: boolean;
   isSampleProduct?: boolean;
   tags?: string[];
+  vendorSlug?: string | null;
+  fulfilledByName?: string | null;
+  sku?: string | null;
+  slug?: string | null;
+  images?: string[] | null;
 }): boolean {
   if (product.published === false) return false;
   if (isSampleCatalogProduct(product)) return false;

@@ -77,7 +77,22 @@ export const productSchema = z.object({
   featured: z.boolean().optional(),
   sameDayAvailable: z.boolean().optional(),
   nextDayAvailable: z.boolean().optional(),
+  /** Flat per-unit shipping from the vendor sheet (not the $6.99/$3.99/free table). */
   deliveryFee: z.number().min(0).optional(),
+  /** Exact sheet shipping text shown on the product page. */
+  shippingNote: z.string().max(500).optional(),
+  /**
+   * Day-wise shipping choices (cakes). Prices are shipping only — never added to product price.
+   */
+  shippingOptions: z
+    .array(
+      z.object({
+        label: z.string().min(1).max(80),
+        price: z.number().min(0),
+      })
+    )
+    .max(12)
+    .optional(),
   /** Optional size/style choices (label + relative price). Flat SKU remains primary. */
   variants: z
     .array(

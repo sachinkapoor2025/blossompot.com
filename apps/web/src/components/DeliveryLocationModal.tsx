@@ -2,10 +2,10 @@
 
 import { Suspense, useEffect, useId, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { deliverToDestination, navigateAfterLocationCommit } from "@/lib/country-switch";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
 import { dismissLocationPrompt } from "@/lib/delivery-location";
 import { useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
-import { normalizePathname, shopPathForLocation } from "@/lib/location-seo-urls";
 
 export function DeliveryLocationModal() {
   return (
@@ -16,7 +16,7 @@ export function DeliveryLocationModal() {
 }
 
 function DeliveryLocationModalInner() {
-  const { location, selectorOpen, selectorCountryPrefill, closeSelector, setLocation } = useDeliveryLocation();
+  const { location, selectorOpen, selectorCountryPrefill, closeSelector, setLocation, checkError } = useDeliveryLocation();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -29,8 +29,8 @@ function DeliveryLocationModalInner() {
   useEffect(() => {
     if (!selectorOpen) return;
     setCountryCode(selectorCountryPrefill || location?.countryCode || "US");
-    setError("");
-  }, [selectorOpen, location, selectorCountryPrefill]);
+    setError(checkError ?? "");
+  }, [selectorOpen, location, selectorCountryPrefill, checkError]);
 
   useEffect(() => {
     if (!selectorOpen) return;
@@ -48,30 +48,26 @@ function DeliveryLocationModalInner() {
     closeSelector();
   };
 
-  const submit = async () => {
+  const submit = () => {
     setError("");
     setBusy(true);
-    try {
-      await setLocation({
-        countryCode,
-        postalCode: "",
-        postalDisplay: countryCode,
-      });
-      closeSelector();
-      const nextPath = shopPathForLocation(pathname, countryCode);
-      const next = new URLSearchParams(searchParams.toString());
-      if (nextPath !== normalizePathname(pathname)) {
-        next.delete("country");
-      } else {
-        next.set("country", countryCode);
-      }
-      const qs = next.toString();
-      router.push(qs ? `${nextPath}?${qs}` : nextPath);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not check this location");
-    } finally {
-      setBusy(false);
-    }
+    navigateAfterLocationCommit({
+      href: deliverToDestination(pathname, countryCode, searchParams.toString()),
+      commit: () =>
+        setLocation({
+          countryCode,
+          postalCode: "",
+          postalDisplay: countryCode,
+        }),
+      navigate: (href) => {
+        closeSelector();
+        router.push(href);
+      },
+      onCheckError: (err) => {
+        setError(err instanceof Error ? err.message : "Could not check this location");
+      },
+    });
+    setBusy(false);
   };
 
   return (

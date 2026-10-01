@@ -2,7 +2,7 @@
 
 import { useState, useEffect, type ReactNode } from "react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import { categoryHref } from "@/lib/category-urls";
 import { categoryLocationHref, parseLocationShopPath } from "@/lib/location-seo-urls";
@@ -12,24 +12,29 @@ import {
   cityNavMenuLabel,
   countriesMenu,
 } from "@/lib/site";
-import { cityMenuForCountry, filterCityMenuLinks } from "@/lib/city-menu-for-location";
+import { cityMenuForCountry, countryIsoFromPathname, filterCityMenuLinks } from "@/lib/city-menu-for-location";
 import { SearchBar } from "@/components/SearchBar";
 import { SiteLogoLink } from "@/components/SiteLogo";
 import { DeliveryLocationChip } from "@/components/DeliveryLocationChip";
 import { DeliveryLocationBanner } from "@/components/DeliveryLocationBanner";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
+import { countryMenuDestination, navigateAfterLocationCommit } from "@/lib/country-switch";
 import { COUNTRY_GUIDE_HREF, useCountrySearch, useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
 
 function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const { openSelector, location } = useDeliveryLocation();
-  const menu = cityMenuForCountry(location?.countryCode);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const menu = cityMenuForCountry(
+    countryIsoFromPathname(pathname, searchParams.get("country")) ?? location?.countryCode
+  );
   const visible = filterCityMenuLinks(menu.links, query);
 
   useEffect(() => {
     setQuery("");
-  }, [location?.countryCode]);
+  }, [menu.heading]);
 
   return (
     <div
@@ -113,9 +118,29 @@ function CountriesMenu({
   onNavigate?: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const { openSelector } = useDeliveryLocation();
+  const { setLocation, location } = useDeliveryLocation();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { countries, loaded } = useGboDeliveryCountries();
   const { query, setQuery, filtered } = useCountrySearch(countries);
+  const selectedCountry =
+    countryIsoFromPathname(pathname, searchParams.get("country")) ?? location?.countryCode;
+
+  const chooseCountry = (countryCode: string, href?: string) => {
+    setOpen(false);
+    onNavigate?.();
+    navigateAfterLocationCommit({
+      href: countryMenuDestination(countryCode, href),
+      commit: () =>
+        setLocation({
+          countryCode,
+          postalCode: "",
+          postalDisplay: countryCode,
+        }),
+      navigate: (url) => router.push(url),
+    });
+  };
 
   return (
     <div
@@ -152,29 +177,17 @@ function CountriesMenu({
             ) : (
               filtered.map((c) => {
                 const guide = COUNTRY_GUIDE_HREF[c.countryCode];
-                if (guide) {
-                  return (
-                    <Link
-                      key={c.countryCode}
-                      href={guide}
-                      className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-nav whitespace-nowrap"
-                      onClick={() => {
-                        setOpen(false);
-                        onNavigate?.();
-                      }}
-                    >
-                      {c.countryName}
-                    </Link>
-                  );
-                }
                 return (
                   <button
                     key={c.countryCode}
                     type="button"
-                    className="block w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-blue-50 hover:text-nav whitespace-nowrap"
+                    className={`block w-full px-4 py-2.5 text-left text-sm whitespace-nowrap ${
+                      c.countryCode === selectedCountry
+                        ? "bg-blue-50 font-semibold text-nav"
+                        : "text-slate-700 hover:bg-blue-50 hover:text-nav"
+                    }`}
                     onClick={() => {
-                      setOpen(false);
-                      openSelector({ countryCode: c.countryCode });
+                      void chooseCountry(c.countryCode, guide);
                     }}
                   >
                     {c.countryName}
@@ -333,21 +346,24 @@ function DesktopCartAction() {
 
 export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const activeCategory = searchParams.get("category");
   const [menuOpen, setMenuOpen] = useState(false);
   const [citiesOpen, setCitiesOpen] = useState(false);
   const [countriesOpen, setCountriesOpen] = useState(false);
   const [cityQuery, setCityQuery] = useState("");
-  const { openSelector, location: deliveryLocation } = useDeliveryLocation();
+  const { openSelector, setLocation, location: deliveryLocation } = useDeliveryLocation();
   const { countries, loaded: countriesLoaded } = useGboDeliveryCountries();
   const countrySearch = useCountrySearch(countries);
-  const cityMenu = cityMenuForCountry(deliveryLocation?.countryCode);
+  const cityCountryIso =
+    countryIsoFromPathname(pathname, searchParams.get("country")) ?? deliveryLocation?.countryCode;
+  const cityMenu = cityMenuForCountry(cityCountryIso);
   const cityVisible = filterCityMenuLinks(cityMenu.links, cityQuery);
 
   useEffect(() => {
     setCityQuery("");
-  }, [deliveryLocation?.countryCode]);
+  }, [cityCountryIso]);
 
   const isActive = (href: string, category?: string) => {
     if (href === "/") return pathname === "/" && !activeCategory;
@@ -363,8 +379,8 @@ export function Header() {
   };
 
   const navHref = (item: (typeof navItems)[number]) => {
-    if ("category" in item && item.category && deliveryLocation?.countryCode) {
-      return categoryLocationHref(item.category, deliveryLocation.countryCode);
+    if ("category" in item && item.category && cityCountryIso) {
+      return categoryLocationHref(item.category, cityCountryIso);
     }
     return item.href;
   };
@@ -602,26 +618,27 @@ export function Header() {
                     ) : (
                       countrySearch.filtered.map((c) => {
                         const guide = COUNTRY_GUIDE_HREF[c.countryCode];
-                        if (guide) {
-                          return (
-                            <Link
-                              key={c.countryCode}
-                              href={guide}
-                              onClick={closeMenu}
-                              className="block rounded-lg px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-nav"
-                            >
-                              {c.countryName}
-                            </Link>
-                          );
-                        }
                         return (
                           <button
                             key={c.countryCode}
                             type="button"
-                            className="block w-full rounded-lg px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-blue-50 hover:text-nav"
+                            className={`block w-full rounded-lg px-4 py-2.5 text-left text-sm ${
+                              c.countryCode === cityCountryIso
+                                ? "bg-blue-50 font-semibold text-nav"
+                                : "text-slate-700 hover:bg-blue-50 hover:text-nav"
+                            }`}
                             onClick={() => {
                               closeMenu();
-                              openSelector({ countryCode: c.countryCode });
+                              navigateAfterLocationCommit({
+                                href: countryMenuDestination(c.countryCode, guide),
+                                commit: () =>
+                                  setLocation({
+                                    countryCode: c.countryCode,
+                                    postalCode: "",
+                                    postalDisplay: c.countryCode,
+                                  }),
+                                navigate: (url) => router.push(url),
+                              });
                             }}
                           >
                             {c.countryName}

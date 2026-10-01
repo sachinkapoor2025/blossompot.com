@@ -5,6 +5,7 @@ import { HomeProductCard } from "@/components/HomeProductCard";
 import { LocationEmptyHint, useLocationFilteredProducts } from "@/components/LocationFilteredProducts";
 import { ProductSortBar, sortProducts, type ProductSort } from "@/components/ProductSortBar";
 import type { Product } from "@blossompot/shared";
+import { dedupeStorefrontProducts } from "@blossompot/shared";
 import { HOME_CATALOG_PAGE_SIZE } from "@/components/OverseasGiftGrid";
 
 /**
@@ -21,7 +22,8 @@ export function ProductGrid({
   /** Server-resolved sort so the grid HTML matches ?sort= without waiting on hydration. */
   sort?: ProductSort;
 }) {
-  const visible = useLocationFilteredProducts(products);
+  const unique = dedupeStorefrontProducts(products);
+  const visible = useLocationFilteredProducts(unique);
   const sorted = sortProducts(visible.products, sort);
   const [shown, setShown] = useState(HOME_CATALOG_PAGE_SIZE);
   const sentinelRef = useRef<HTMLDivElement>(null);

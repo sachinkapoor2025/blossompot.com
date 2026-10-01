@@ -3,10 +3,17 @@ import type { NextRequest } from "next/server";
 import { classifyUserAgent } from "@/lib/crawler-policy";
 import {
   DELIVERY_LOCATION_COOKIE,
-  deliveryLocationToken,
+  deliveryCookieUpdate,
+  isDeliveryCookieFlight,
   parseDeliveryLocationToken,
 } from "@/lib/delivery-location";
-import { LOCATION_SEO_HEADER, locationShopRewritePath, parseLocationShopPath } from "@/lib/location-seo-urls";
+import {
+  LOCATION_SEO_HEADER,
+  STOREFRONT_COUNTRY_HEADER,
+  locationShopRewritePath,
+  parseLocationShopPath,
+  resolveStorefrontCountryIso,
+} from "@/lib/location-seo-urls";
 
 /**
  * Edge 301: apex → www.
@@ -30,19 +37,27 @@ export function middleware(request: NextRequest) {
     url.searchParams.set("country", locationShop.countryIso);
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set(LOCATION_SEO_HEADER, request.nextUrl.pathname.replace(/\/+$/, "") || "/");
+    requestHeaders.set(STOREFRONT_COUNTRY_HEADER, locationShop.countryIso);
     const response = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
     applyDeliveryCountryCookie(response, request, locationShop.countryIso);
     stampBotHeaders(response, request);
     return response;
   }
 
-  const response = NextResponse.next();
-  stampBotHeaders(response, request);
+  const cookieCountry = parseDeliveryLocationToken(
+    request.cookies.get(DELIVERY_LOCATION_COOKIE)?.value
+  )?.countryCode;
+  const country = resolveStorefrontCountryIso({
+    pathname: request.nextUrl.pathname,
+    searchCountry: request.nextUrl.searchParams.get("country"),
+    cookieCountry,
+  });
 
-  const country = request.nextUrl.searchParams.get("country")?.trim().toUpperCase();
-  if (country && /^[A-Z]{2}$/.test(country)) {
-    applyDeliveryCountryCookie(response, request, country);
-  }
+  const requestHeaders = new Headers(request.headers);
+  if (country) requestHeaders.set(STOREFRONT_COUNTRY_HEADER, country);
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  stampBotHeaders(response, request);
+  if (country) applyDeliveryCountryCookie(response, request, country);
 
   return response;
 }
@@ -56,18 +71,18 @@ function stampBotHeaders(response: NextResponse, request: NextRequest) {
 }
 
 function applyDeliveryCountryCookie(response: NextResponse, request: NextRequest, country: string) {
-  const existing = parseDeliveryLocationToken(request.cookies.get(DELIVERY_LOCATION_COOKIE)?.value);
-  const postalCode = existing?.countryCode === country ? existing.postalCode : "";
+  const update = deliveryCookieUpdate({
+    resolvedCountry: country,
+    requestCookie: request.cookies.get(DELIVERY_LOCATION_COOKIE)?.value,
+    flight: isDeliveryCookieFlight(request.headers),
+  });
+  if (!update) return;
   response.cookies.set({
     name: DELIVERY_LOCATION_COOKIE,
-    value: deliveryLocationToken({
-      countryCode: country,
-      postalCode,
-      postalDisplay: postalCode || country,
-    }),
+    value: update.value,
     path: "/",
     sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 365,
+    maxAge: update.maxAge,
   });
 }
 

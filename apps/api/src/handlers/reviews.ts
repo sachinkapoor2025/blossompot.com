@@ -27,7 +27,12 @@ async function recomputeAggregate(productSlug: string): Promise<ProductRatingAgg
       },
     })
   );
-  const published = (result.Items ?? []).filter((r) => r.published !== false) as ProductReview[];
+  const published = (result.Items ?? []).filter(
+    (r) =>
+      r.published !== false &&
+      r.isSampleReview !== true &&
+      !String(r.reviewId ?? "").startsWith("sample-")
+  ) as ProductReview[];
   if (!published.length) {
     await docClient.send(
       new UpdateCommand({
@@ -74,6 +79,7 @@ export async function listProductReviews(event: APIGatewayProxyEventV2) {
 
   const reviews = ((result.Items ?? []) as ProductReview[])
     .filter((r) => r.published !== false)
+    .filter((r) => r.isSampleReview !== true && !String(r.reviewId ?? "").startsWith("sample-"))
     .sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
 
   return ok({ reviews });

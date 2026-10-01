@@ -162,6 +162,8 @@ for (const [internal, pub] of Object.entries(CATEGORY_PUBLIC_SLUG)) {
 }
 
 export const LOCATION_SEO_HEADER = "x-bp-seo-path";
+/** Forwarded by middleware so SSR listings match the selected delivery country. */
+export const STOREFRONT_COUNTRY_HEADER = "x-blossompot-country";
 
 export function normalizePathname(pathname: string): string {
   if (!pathname) return "/";
@@ -211,6 +213,65 @@ export function parseLocationShopPath(pathname: string): ParsedLocationShopPath 
   const internalSlug = STEM_TO_INTERNAL[stem];
   if (!internalSlug) return null;
   return { kind: "category", internalSlug, countryIso, stem };
+}
+
+const FLOWER_DELIVERY_PATH_ISO: Record<string, string> = {
+  "/flower-delivery-usa": "US",
+  "/flower-delivery-uk": "GB",
+  "/flower-delivery-canada": "CA",
+  "/flower-delivery-australia": "AU",
+  "/flower-delivery-uae": "AE",
+};
+
+/** Country of a country landing, location hub, or shop URL. */
+export function countryIsoFromPathname(pathname: string, searchCountry?: string | null): string | null {
+  const path = normalizePathname(pathname);
+  if (FLOWER_DELIVERY_PATH_ISO[path]) return FLOWER_DELIVERY_PATH_ISO[path];
+
+  const shop = parseLocationShopPath(path);
+  if (shop) return shop.countryIso;
+
+  if (path.startsWith("/locations/europe/united-kingdom")) return "GB";
+  if (path.startsWith("/locations/europe/ireland")) return "IE";
+  if (path.startsWith("/locations/europe/germany")) return "DE";
+  if (path.startsWith("/locations/europe/france")) return "FR";
+  if (path.startsWith("/locations/europe/netherlands")) return "NL";
+  if (path.startsWith("/locations/europe/belgium")) return "BE";
+  if (path.startsWith("/locations/canada")) return "CA";
+  if (path.startsWith("/locations/australia")) return "AU";
+  if (path.startsWith("/locations/united-states")) return "US";
+
+  const fromQuery = searchCountry?.trim().toUpperCase();
+  if (fromQuery && /^[A-Z]{2}$/.test(fromQuery)) return fromQuery;
+  return null;
+}
+
+function normalizeIso2(raw?: string | null): string | null {
+  const iso = (raw ?? "").trim().toUpperCase();
+  return /^[A-Z]{2}$/.test(iso) ? iso : null;
+}
+
+/** Path (country page / shop URL) wins, then ?country=, then the delivery cookie. */
+export function resolveStorefrontCountryIso(input: {
+  pathname: string;
+  searchCountry?: string | null;
+  cookieCountry?: string | null;
+}): string | null {
+  return (
+    countryIsoFromPathname(input.pathname, input.searchCountry) ??
+    normalizeIso2(input.cookieCountry)
+  );
+}
+
+export function withCountryQuery(href: string, country: string | null | undefined): string {
+  const iso = normalizeIso2(country ?? null);
+  if (!iso) return href;
+  const qIndex = href.indexOf("?");
+  const path = qIndex >= 0 ? href.slice(0, qIndex) : href;
+  const params = new URLSearchParams(qIndex >= 0 ? href.slice(qIndex + 1) : "");
+  params.set("country", iso);
+  const qs = params.toString();
+  return qs ? `${path}?${qs}` : path;
 }
 
 /** Internal rewrite target. Use public category paths so /categories/* 301s do not strip the SEO URL. */
@@ -279,6 +340,24 @@ export function countryDisplayName(countryIso: string): string {
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+/**
+ * Name used in delivery copy. Known storefront countries use the site label
+ * (USA, UK, UAE). Other destinations use the same catalog name as the header.
+ */
+export function deliveryDestinationName(countryIso: string | null | undefined, catalogName?: string | null): string {
+  const iso = (countryIso ?? "").trim().toUpperCase();
+  const resolved = /^[A-Z]{2}$/.test(iso) ? iso : "US";
+  const known = countryDisplayName(resolved);
+  if (known.toUpperCase() !== resolved) return known;
+  const catalog = catalogName?.trim();
+  if (catalog) return catalog;
+  return resolved;
+}
+
+export function localizeCopyForCountry(text: string, countryIso: string): string {
+  return rewriteWorldwideCopy(text, countryDisplayName(countryIso));
 }
 
 function rewriteWorldwideCopy(value: string, country: string): string {

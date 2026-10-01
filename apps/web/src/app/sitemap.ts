@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { api } from "@/lib/api";
-import { isProductSearchIndexable, type Product } from "@blossompot/shared";
+import { isProductSearchIndexable, dedupeStorefrontProducts, type Product } from "@blossompot/shared";
 import { siteUrl } from "@/lib/env";
 import { categoryHref } from "@/lib/category-urls";
 import {
@@ -8,7 +8,6 @@ import {
   giftsCatalogLocationHref,
   PRIMARY_LOCATION_SITEMAP_ISOS,
 } from "@/lib/location-seo-urls";
-import { getCatalogProducts } from "@/lib/catalog-fallback";
 import { categoryOrder } from "@/lib/site";
 import { listAllBlogPosts } from "@/lib/content/blog-posts";
 import { allCollectionSlugs } from "@/lib/collections";
@@ -20,11 +19,7 @@ import { allGiftGuideSlugs } from "@/lib/content/recipients";
 import { flowerSitemapPaths } from "@/lib/content/flower-guide";
 
 function mergeProducts(apiProducts: Product[]): Product[] {
-  const bySlug = new Map(apiProducts.map((p) => [p.slug, p]));
-  for (const p of getCatalogProducts()) {
-    if (!bySlug.has(p.slug)) bySlug.set(p.slug, p);
-  }
-  return [...bySlug.values()].filter((p) => isProductSearchIndexable(p));
+  return dedupeStorefrontProducts(apiProducts.filter((p) => isProductSearchIndexable(p)));
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

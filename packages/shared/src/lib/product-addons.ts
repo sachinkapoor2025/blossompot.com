@@ -110,6 +110,16 @@ export function cartAddonSignature(
     .join(",");
 }
 
+/** Merge key for cart lines that also differ by cake / sheet shipping choice. */
+export function cartLineOptionsSignature(
+  addons: Array<{ id: string; quantity?: number }> | undefined | null,
+  shippingOptionLabel?: string | null
+): string {
+  const add = cartAddonSignature(addons);
+  const ship = (shippingOptionLabel ?? "").trim().toLowerCase();
+  return ship ? `${add}#ship:${ship}` : add;
+}
+
 export function cartLineUnitTotal(item: {
   price: number;
   addons?: Array<{ price: number; quantity: number }> | null;

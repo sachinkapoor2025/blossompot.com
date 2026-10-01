@@ -1,80 +1,49 @@
 import Link from "next/link";
-import type { Product } from "@blossompot/shared";
+import { Suspense } from "react";
 import { AnswerBlock } from "@/components/AnswerBlock";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { HomeProductCard } from "@/components/HomeProductCard";
+import { CountryFlowerProductSection } from "@/components/CountryFlowerProductSection";
 import { JsonLd } from "@/components/JsonLd";
+import { ListingPageSkeleton } from "@/components/route-skeletons";
 import {
+  flowerDeliveryCountryIso,
   getCountryFlowerDelivery,
-  otherCountryFlowerDeliveryLinks,
   type CountryFlowerDeliverySlug,
 } from "@/lib/content/country-flower-delivery";
 import { countryPageInlineLinks } from "@/lib/content/page-inline-links";
-import { getCatalogProducts, mergeProductsPreferExisting } from "@/lib/catalog-fallback";
-import { shuffleForCity } from "@/lib/city-products";
 import { applyInlineLinks } from "@/lib/inline-links";
-import { loadProducts } from "@/lib/product-loader";
-import { breadcrumbJsonLd, canonical, faqJsonLd, itemListJsonLd } from "@/lib/seo";
-import { site } from "@/lib/site";
+import { breadcrumbJsonLd, canonical, faqJsonLd } from "@/lib/seo";
+import { cityNavHref } from "@/lib/site";
+import { cityMenuForCountry } from "@/lib/city-menu-for-location";
 import { siteUrl } from "@/lib/env";
 
-const FLOWER_CATEGORY_SLUGS = new Set(["flowers", "flower-bouquets"]);
-
-function pickCountryProducts(products: Product[], slug: CountryFlowerDeliverySlug): Product[] {
-  const visible = products.filter((p) => p.published !== false);
-  const flowers = visible.filter((p) => FLOWER_CATEGORY_SLUGS.has(p.categorySlug));
-  if (slug === "usa") {
-    const pool = flowers.length > 0 ? flowers : visible;
-    return shuffleForCity(pool, `flower-delivery-${slug}`).slice(0, 24);
-  }
-  const flowersFirst = [
-    ...flowers,
-    ...visible.filter((p) => !FLOWER_CATEGORY_SLUGS.has(p.categorySlug)),
-  ];
-  return shuffleForCity(flowersFirst, `flower-delivery-${slug}`).slice(0, 10);
+function FlowerGuideProducts({ country }: { country: CountryFlowerDeliverySlug }) {
+  return (
+    <Suspense fallback={<ListingPageSkeleton />}>
+      <CountryFlowerProductSection country={country} />
+    </Suspense>
+  );
 }
 
-export async function CountryFlowerDeliveryPage({
+export function CountryFlowerDeliveryPage({
   country,
 }: {
   country: CountryFlowerDeliverySlug;
 }) {
   const page = getCountryFlowerDelivery(country);
-  let products: Product[] = [];
-  try {
-    products = await loadProducts();
-  } catch {
-    products = [];
-  }
-  products = mergeProductsPreferExisting(products, getCatalogProducts());
-  const featured = pickCountryProducts(products, country);
+  const countryIso = flowerDeliveryCountryIso(country);
+  const cityMenu = cityMenuForCountry(countryIso);
+  const countryCityLinks = cityMenu.links.map((city) => ({
+    label: city.label,
+    href: cityNavHref(city),
+  }));
   const productsFirst = country === "usa";
-  const otherCountries = otherCountryFlowerDeliveryLinks(country);
   const inlineLinks = countryPageInlineLinks[country] ?? [];
   const usedHrefs = new Set<string>();
   const crumbs = [
     { label: "Home", href: "/" },
     { label: page.menuLabel },
   ];
-
-  const productSection =
-    featured.length > 0 ? (
-      <section className="mb-10">
-        <h2 className="text-xl font-bold text-primary mb-3">
-          {productsFirst ? `Flower gifts for ${page.countryName}` : `Featured gifts for ${page.countryName}`}
-        </h2>
-        <p className="text-slate-700 mb-4 max-w-3xl leading-relaxed">
-          {productsFirst
-            ? `Shop flowers available for ${page.countryName} delivery. Open any product for current price, inventory, and delivery timing.`
-            : `A rotating selection from the live ${site.name} catalog — flowers first, then cakes and hampers. Open any product for current price, inventory, and delivery timing.`}
-        </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {featured.map((product) => (
-            <HomeProductCard key={product.slug} product={product} />
-          ))}
-        </div>
-      </section>
-    ) : null;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
@@ -85,10 +54,6 @@ export async function CountryFlowerDeliveryPage({
             { name: page.menuLabel, path: page.href },
           ]),
           faqJsonLd(page.faqs),
-          itemListJsonLd(
-            page.h1,
-            featured.map((p) => ({ name: p.name, path: `/products/${p.slug}` }))
-          ),
           {
             "@context": "https://schema.org",
             "@type": "WebPage",
@@ -124,9 +89,9 @@ export async function CountryFlowerDeliveryPage({
         ]}
       />
       <Breadcrumbs items={crumbs} />
-      {productsFirst ? productSection : null}
+      {productsFirst ? <FlowerGuideProducts country={country} /> : null}
       <h1 className="text-3xl font-bold text-primary mb-3">{page.h1}</h1>
-      {productsFirst ? null : productSection}
+      {productsFirst ? null : <FlowerGuideProducts country={country} />}
 
       <p className="text-slate-600 mb-6 max-w-3xl leading-relaxed">
         {applyInlineLinks(page.intro, inlineLinks, { usedHrefs, currentPath: page.href, max: 4 })}
@@ -183,8 +148,8 @@ export async function CountryFlowerDeliveryPage({
           {applyInlineLinks(page.citiesIntro, inlineLinks, { usedHrefs, currentPath: page.href, max: 4 })}
         </p>
         <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
-          {page.cityLinks.map((link) => (
-            <li key={link.href}>
+          {countryCityLinks.map((link) => (
+            <li key={`${link.href}-${link.label}`}>
               <Link href={link.href} className="text-nav hover:underline">
                 {link.label}
               </Link>
@@ -230,27 +195,13 @@ export async function CountryFlowerDeliveryPage({
         </div>
       </section>
 
-      <section className="mb-10">
-        <h2 className="text-xl font-bold text-primary mb-3">Flower delivery in other countries</h2>
-        <p className="text-slate-700 mb-3 max-w-3xl leading-relaxed">
-          The BlossomPot homepage serves shoppers in the USA, UK, Canada, Australia, and the UAE. Each
-          country page has its own flower delivery notes, occasions, and internal links.
-        </p>
-        <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
-          {otherCountries.slice(0, 4).map((link) => (
-            <li key={link.href}>
-              <Link href={link.href} className="text-nav hover:underline">
-                {link.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
-
       <section>
         <h2 className="text-xl font-bold text-primary mb-3">Related pages</h2>
         <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
-          {page.relatedHubs.slice(0, 4).map((link) => (
+          {page.relatedHubs
+            .filter((link) => !link.href.startsWith("/flower-delivery-") || link.href === page.href)
+            .slice(0, 4)
+            .map((link) => (
             <li key={link.href}>
               <Link href={link.href} className="text-nav hover:underline">
                 {link.label}

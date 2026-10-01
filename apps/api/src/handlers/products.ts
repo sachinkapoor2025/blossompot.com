@@ -5,6 +5,8 @@ import {
   updateProductSchema,
   bulkProductRowSchema,
   productKeys,
+  marketplaceVendorKeys,
+  vendorCoverageKeys,
   DEFAULT_PRODUCT_INVENTORY,
   withCompetitiveStorefrontPricing,
   stripVendorPrivateFields,
@@ -14,16 +16,40 @@ import {
   resolveProductImagesForUpsert,
   isProductStorefrontVisible,
   isSampleCatalogProduct,
+  productInStorefrontCategory,
+  productVisibleForDeliveryCountry,
+  dedupeStorefrontProducts,
   VENDOR_GBO,
   type Product,
 } from "@blossompot/shared";
-import { docClient, PRODUCTS_TABLE, now, slugify } from "../lib/db";
+import { docClient, PRODUCTS_TABLE, CONFIG_TABLE, now, slugify } from "../lib/db";
 import { ok, okCached, created, badRequest, notFound, forbidden } from "../lib/response";
 import { evaluateProductsForLocation, parseLocationQuery } from "./serviceability";
 import { getAuth, requireAdmin } from "../lib/auth";
 import { withResolvedProductImages, resolveProductImageUrl } from "../lib/images";
 import { syncInventoryAlertState } from "../lib/inventory";
 import { ensureProductInDb } from "../lib/ensure-product";
+import { listBundledCatalogProducts, persistMissingBundledCatalogProducts } from "../lib/blossompot-catalog";
+
+function mergeBundledCatalogProducts(items: Product[], category?: string): Product[] {
+  const bySlug = new Map(items.map((product) => [product.slug, product]));
+  const stamp = "2026-09-23T00:00:00.000Z";
+  for (const bundled of listBundledCatalogProducts()) {
+    if (bySlug.has(bundled.slug)) continue;
+    if (category && !productInStorefrontCategory(bundled, category)) continue;
+    bySlug.set(bundled.slug, {
+      ...bundled,
+      currency: bundled.currency ?? "USD",
+      inventory: bundled.inventory ?? DEFAULT_PRODUCT_INVENTORY,
+      tags: bundled.tags ?? [],
+      images: bundled.images ?? [],
+      published: bundled.published !== false,
+      createdAt: stamp,
+      updatedAt: stamp,
+    } as Product);
+  }
+  return [...bySlug.values()];
+}
 
 function forStorefront(product: Product): Product {
   const allowsAddons = productAllowsAddons(product);
@@ -168,6 +194,8 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
     items = await scanAllProducts();
   }
 
+  items = dedupeStorefrontProducts(items);
+
   items = items.filter(
     (p) => p.published !== false && (p.inventory ?? 0) > 0 && isProductStorefrontVisible(p)
   );
@@ -181,17 +209,19 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
   }
 
   const location = parseLocationQuery(event);
+  if (location?.countryCode) {
+    items = items.filter((p) => productVisibleForDeliveryCountry(p, location.countryCode));
+  }
   let products = items.map(forStorefront);
-  if (location) {
+  if (location?.postalCode) {
     const evals = await evaluateProductsForLocation(items, location);
     const deliverable = new Set(evals.filter((e) => e.deliverable).map((e) => e.slug));
     products = products.filter((p) => deliverable.has(p.slug));
+    // Postal availability is per address — do not CDN-cache it.
     return ok({ products, location, filtered: true });
   }
-
-  // Short CDN TTL only — listing + PDP must not drift for minutes after price edits.
-  if (search) return ok({ products });
-  return okCached({ products }, 10);
+  // Country is a query parameter, so each country is its own cache entry.
+  return okCached({ products, ...(location?.countryCode ? { location, filtered: true } : {}) }, 45);
 }
 
 export async function getProduct(event: APIGatewayProxyEventV2) {
@@ -202,7 +232,10 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
   const cached = productGetCache.get(slug);
   if (cached && nowMs - cached.at < PRODUCT_GET_CACHE_TTL_MS) {
     const location = parseLocationQuery(event);
-    if (location) {
+    if (location?.countryCode && !productVisibleForDeliveryCountry(cached.product, location.countryCode)) {
+      return notFound("Product not found");
+    }
+    if (location?.postalCode) {
       const [evalRow] = await evaluateProductsForLocation([cached.product], location);
       return ok({
         product: forStorefront(cached.product),
@@ -213,7 +246,7 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
         },
       });
     }
-    return okCached({ product: forStorefront(cached.product) }, 30);
+    return okCached({ product: forStorefront(cached.product) }, 45);
   }
 
   const result = await docClient.send(
@@ -239,7 +272,10 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
   if (!isProductStorefrontVisible(product)) return notFound("Product not found");
   productGetCache.set(slug, { at: nowMs, product });
   const location = parseLocationQuery(event);
-  if (location) {
+  if (location?.countryCode && !productVisibleForDeliveryCountry(product, location.countryCode)) {
+    return notFound("Product not found");
+  }
+  if (location?.postalCode) {
     const [evalRow] = await evaluateProductsForLocation([product], location);
     return ok({
       product: forStorefront(product),
@@ -250,7 +286,7 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
       },
     });
   }
-  return okCached({ product: forStorefront(product) }, 10);
+  return okCached({ product: forStorefront(product) }, 45);
 }
 
 export async function createProduct(event: APIGatewayProxyEventV2) {
@@ -294,6 +330,13 @@ export async function updateProduct(event: APIGatewayProxyEventV2) {
       Key: { PK: productKeys.pk(slug), SK: productKeys.sk() },
     })
   );
+  if (!existing.Item) {
+    const upserted = await ensureProductInDb(slug);
+    if (upserted) {
+      existing.Item = upserted;
+      invalidateProductListCache((upserted as Product).categorySlug);
+    }
+  }
   if (!existing.Item) return notFound("Product not found");
 
   const previous = existing.Item as Product;
@@ -338,17 +381,17 @@ export async function listAdminProducts(event: APIGatewayProxyEventV2) {
 
   const sampleFilter = (event.queryStringParameters?.sample ?? "all").toLowerCase();
 
-  const result = await docClient.send(
-    new ScanCommand({
-      TableName: PRODUCTS_TABLE,
-      FilterExpression: "begins_with(PK, :prefix) AND SK = :sk",
-      ExpressionAttributeValues: { ":prefix": "PRODUCT#", ":sk": "META" },
-    })
-  );
+  let items = await scanAllProducts();
+  const persisted = await persistMissingBundledCatalogProducts(new Set(items.map((p) => p.slug)));
+  if (persisted.length > 0) {
+    invalidateProductListCache();
+    items = [...persisted.map((row) => row as Product), ...items];
+  }
+  items = mergeBundledCatalogProducts(items);
+  items.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
-  let items = ((result.Items ?? []) as Product[]).sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-  );
+  const sampleCount = items.filter((p) => isSampleCatalogProduct(p)).length;
+  const realCount = items.length - sampleCount;
 
   if (sampleFilter === "true" || sampleFilter === "sample") {
     items = items.filter((p) => isSampleCatalogProduct(p));
@@ -356,23 +399,135 @@ export async function listAdminProducts(event: APIGatewayProxyEventV2) {
     items = items.filter((p) => !isSampleCatalogProduct(p));
   }
 
-  const sampleCount = ((result.Items ?? []) as Product[]).filter((p) =>
-    isSampleCatalogProduct(p)
-  ).length;
-
   return ok({
     products: items.map(withResolvedProductImages),
     meta: {
-      totalScanned: result.Items?.length ?? 0,
+      totalScanned: items.length,
       returned: items.length,
       sampleCount,
-      realCount: (result.Items?.length ?? 0) - sampleCount,
+      realCount,
       sampleFilter,
     },
   });
 }
 
-/** Admin: permanently delete all isSampleProduct rows (+ sample reviews on those slugs). */
+async function scanAllProductTableItems(): Promise<Record<string, unknown>[]> {
+  const items: Record<string, unknown>[] = [];
+  let ExclusiveStartKey: Record<string, unknown> | undefined;
+  do {
+    const result = await docClient.send(
+      new ScanCommand({
+        TableName: PRODUCTS_TABLE,
+        FilterExpression: "begins_with(PK, :prefix)",
+        ExpressionAttributeValues: { ":prefix": "PRODUCT#" },
+        ExclusiveStartKey,
+      })
+    );
+    if (result.Items?.length) items.push(...result.Items);
+    ExclusiveStartKey = result.LastEvaluatedKey as Record<string, unknown> | undefined;
+  } while (ExclusiveStartKey);
+  return items;
+}
+
+function isSampleMarketplaceVendor(item: Record<string, unknown>): boolean {
+  if (item.isSampleVendor === true) return true;
+  const slug = String(item.vendorSlug ?? "").toLowerCase();
+  if (slug.startsWith("sample-")) return true;
+  const vendorId = String(item.vendorId ?? "").toLowerCase();
+  if (vendorId.startsWith("sample-")) return true;
+  const email = String(item.email ?? "").toLowerCase();
+  if (email.endsWith("@sample.blossompot.local")) return true;
+  const name = String(item.businessName ?? "");
+  if (name.includes("SAMPLE VENDOR")) return true;
+  return false;
+}
+
+async function deleteSampleMarketplaceVendors(): Promise<{
+  deletedVendors: number;
+  deletedVendorLookups: number;
+  deletedCoverage: number;
+}> {
+  const items: Record<string, unknown>[] = [];
+  let ExclusiveStartKey: Record<string, unknown> | undefined;
+  do {
+    const result = await docClient.send(
+      new ScanCommand({
+        TableName: CONFIG_TABLE,
+        ExclusiveStartKey,
+      })
+    );
+    if (result.Items?.length) items.push(...result.Items);
+    ExclusiveStartKey = result.LastEvaluatedKey as Record<string, unknown> | undefined;
+  } while (ExclusiveStartKey);
+
+  const vendorMetas = items.filter(
+    (i) => String(i.PK ?? "").startsWith("MVENDOR#") && String(i.SK ?? "") === "META" && isSampleMarketplaceVendor(i)
+  );
+  const vendorIds = new Set(vendorMetas.map((v) => String(v.vendorId ?? "")));
+  const vendorSlugs = new Set(
+    vendorMetas.map((v) => String(v.vendorSlug ?? "")).filter(Boolean)
+  );
+
+  let deletedVendors = 0;
+  let deletedVendorLookups = 0;
+  let deletedCoverage = 0;
+
+  for (const item of items) {
+    const pk = String(item.PK ?? "");
+    const sk = String(item.SK ?? "");
+    const vendorId = String(item.vendorId ?? "");
+    const slugFromPk = pk.startsWith("MVENDORSLUG#") ? pk.slice("MVENDORSLUG#".length) : "";
+    const emailFromPk = pk.startsWith("MVENDOREMAIL#") ? pk.slice("MVENDOREMAIL#".length) : "";
+    const coverageSlug = pk.startsWith("VCOV#") ? pk.slice("VCOV#".length) : "";
+
+    const dropVendorMeta = pk.startsWith("MVENDOR#") && vendorIds.has(pk.slice("MVENDOR#".length));
+    const dropSlug =
+      Boolean(slugFromPk) && (vendorSlugs.has(slugFromPk) || slugFromPk.startsWith("sample-"));
+    const dropEmail =
+      Boolean(emailFromPk) &&
+      (emailFromPk.endsWith("@sample.blossompot.local") || vendorIds.has(vendorId));
+    const dropCoverage = Boolean(coverageSlug) && vendorSlugs.has(coverageSlug);
+
+    if (!dropVendorMeta && !dropSlug && !dropEmail && !dropCoverage) continue;
+
+    await docClient.send(
+      new DeleteCommand({
+        TableName: CONFIG_TABLE,
+        Key: { PK: pk, SK: sk },
+      })
+    );
+    if (dropVendorMeta && sk === "META") deletedVendors++;
+    else if (dropCoverage) deletedCoverage++;
+    else deletedVendorLookups++;
+  }
+
+  // Coverage / slug rows may exist even if vendor META was already removed.
+  for (const slug of vendorSlugs) {
+    await docClient.send(
+      new DeleteCommand({
+        TableName: CONFIG_TABLE,
+        Key: { PK: marketplaceVendorKeys.slugPk(slug), SK: marketplaceVendorKeys.slugSk() },
+      })
+    );
+    const email = `${slug}@sample.blossompot.local`;
+    await docClient.send(
+      new DeleteCommand({
+        TableName: CONFIG_TABLE,
+        Key: { PK: marketplaceVendorKeys.emailPk(email), SK: marketplaceVendorKeys.emailSk() },
+      })
+    );
+    await docClient.send(
+      new DeleteCommand({
+        TableName: CONFIG_TABLE,
+        Key: { PK: vendorCoverageKeys.pk(slug), SK: vendorCoverageKeys.metaSk() },
+      })
+    );
+  }
+
+  return { deletedVendors, deletedVendorLookups, deletedCoverage };
+}
+
+/** Admin: permanently delete all sample-vendor products (+ sample reviews on those slugs). */
 export async function deleteAllSampleProducts(event: APIGatewayProxyEventV2) {
   if (!requireAdmin(event)) return forbidden();
   const body = JSON.parse(event.body ?? "{}") as { confirm?: string };
@@ -380,15 +535,7 @@ export async function deleteAllSampleProducts(event: APIGatewayProxyEventV2) {
     return badRequest('Pass confirm: "REMOVE_ALL_SAMPLE_PRODUCTS" to proceed');
   }
 
-  const result = await docClient.send(
-    new ScanCommand({
-      TableName: PRODUCTS_TABLE,
-      FilterExpression: "begins_with(PK, :prefix)",
-      ExpressionAttributeValues: { ":prefix": "PRODUCT#" },
-    })
-  );
-
-  const items = result.Items ?? [];
+  const items = await scanAllProductTableItems();
   const sampleMetas = items.filter(
     (i) => i.SK === "META" && isSampleCatalogProduct(i as Product)
   ) as Product[];
@@ -416,8 +563,15 @@ export async function deleteAllSampleProducts(event: APIGatewayProxyEventV2) {
     else deletedReviews++;
   }
 
+  const vendors = await deleteSampleMarketplaceVendors();
+
   invalidateProductListCache();
-  return ok({ deletedProducts, deletedReviews, confirm: body.confirm });
+  return ok({
+    deletedProducts,
+    deletedReviews,
+    ...vendors,
+    confirm: body.confirm,
+  });
 }
 
 /** Admin: mark a sample product as real (clears sample flag; keeps images/data). */

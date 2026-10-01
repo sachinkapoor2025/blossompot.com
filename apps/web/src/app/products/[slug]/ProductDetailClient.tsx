@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { api } from "@/lib/api";
 import { AddToCartControl } from "@/components/AddToCartControl";
 import { ProductAddonsPicker } from "@/components/ProductAddonsPicker";
 import { ProductImageGallery } from "@/components/ProductImageGallery";
@@ -18,7 +17,9 @@ import { LeadCaptureInput } from "@/components/LeadCaptureInput";
 import { ExploreMoreSection } from "@/components/ExploreMoreSection";
 import { HomeProductCard } from "@/components/HomeProductCard";
 import { useCart } from "@/lib/cart-context";
-import { productFaqsForCategory, type ProductFaq } from "@/lib/content/product-faqs";
+import { productFaqsForCategory } from "@/lib/content/product-faqs";
+import { useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
+import { deliveryDestinationName } from "@/lib/location-seo-urls";
 import { testimonials } from "@/lib/site";
 import {
   LOW_STOCK_THRESHOLD,
@@ -31,6 +32,7 @@ import {
   isFlashComboSaleActive,
   flashComboSaleEndsAt,
   FLASH_COMBO_SHIPPING_USD,
+  resolveCatalogShippingFee,
 } from "@blossompot/shared";
 import { EstimatedDeliveryNote } from "@/components/EstimatedDeliveryNote";
 import { ProductCareAccordions } from "@/components/ProductCareAccordions";
@@ -106,14 +108,27 @@ function ShareButton({ title, url }: { title: string; url: string }) {
 export function ProductDetailClient({
   product,
   relatedProducts = [],
-  faqs,
+  deliveryCountryIso = "US",
 }: {
   product: Product;
   relatedProducts?: Product[];
-  faqs?: ProductFaq[];
+  /** Server-resolved delivery country, same cookie/header source as the header. */
+  deliveryCountryIso?: string;
 }) {
   const flowerGuide = flowerGuideForProduct(product);
-  const pageFaqs = faqs ?? productFaqsForCategory(product.categorySlug);
+  const delivery = useDeliveryLocation();
+  const { countries } = useGboDeliveryCountries();
+  const selectedIso =
+    delivery.ready && delivery.location?.countryCode
+      ? delivery.location.countryCode
+      : deliveryCountryIso;
+  const catalogName = delivery.ready
+    ? countries.find((country) => country.countryCode === selectedIso)?.countryName
+    : undefined;
+  const pageFaqs = productFaqsForCategory(
+    product.categorySlug,
+    deliveryDestinationName(selectedIso, catalogName)
+  );
   const productNoun = product.categorySlug.includes("cake")
     ? "cake"
     : product.categorySlug.includes("flower") || product.categorySlug.includes("bouquet")
@@ -124,7 +139,6 @@ export function ProductDetailClient({
   const captureLeadNow = useLeadCapture(sessionId);
   const { cart, itemCount } = useCart();
   const { format } = useCurrency();
-  const delivery = useDeliveryLocation();
   const locationSet = Boolean(delivery.location);
   const vendorKey = product.internationalDelivery
     ? VENDOR_GBO
@@ -141,6 +155,10 @@ export function ProductDetailClient({
   const [galleryImages, setGalleryImages] = useState(product.images ?? []);
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [addons, setAddons] = useState<ProductAddonSelection[]>([]);
+  const [shippingOptionLabel, setShippingOptionLabel] = useState(
+    product.shippingOptions?.find((o) => o.label === "2nd Day")?.label ??
+      product.shippingOptions?.[0]?.label
+  );
 
   useEffect(() => {
     setGalleryImages(product.images ?? []);
@@ -155,23 +173,6 @@ export function ProductDetailClient({
     setProductUrl(window.location.href);
   }, [product.slug]);
 
-  /** SSR/ISR can serve stale image lists — always sync gallery from live API on the client. */
-  useEffect(() => {
-    let cancelled = false;
-    void api<{ product: Product }>(`/products/${product.slug}`, { revalidate: false })
-      .then((data) => {
-        if (cancelled) return;
-        const fresh = data.product.images ?? [];
-        if (fresh.length > 0) setGalleryImages(fresh);
-      })
-      .catch(() => {
-        /* keep SSR images */
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [product.slug]);
-
   const price = format(product.price, product.currency);
   const addonsUsdTotal = sumAddonPrices(
     addons.map((s) => {
@@ -184,6 +185,7 @@ export function ProductDetailClient({
       };
     })
   );
+  const catalogShipFee = resolveCatalogShippingFee(product, shippingOptionLabel);
   /** Add-on catalog is USD; show combined display when shopper has extras selected. */
   const displayTotal =
     addonsUsdTotal > 0 && product.currency === "USD"
@@ -300,6 +302,36 @@ export function ProductDetailClient({
             </div>
           ) : null}
 
+          {product.shippingOptions && product.shippingOptions.length > 0 ? (
+            <div className="mb-4">
+              <p className="text-sm font-medium text-slate-800 mb-2">Shipping (day-wise — not added to product price)</p>
+              <div className="flex flex-wrap gap-2">
+                {product.shippingOptions.map((option) => (
+                  <button
+                    key={option.label}
+                    type="button"
+                    onClick={() => setShippingOptionLabel(option.label)}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-medium ${
+                      shippingOptionLabel === option.label
+                        ? "border-primary bg-primary text-white"
+                        : "border-slate-300 bg-white text-slate-700"
+                    }`}
+                  >
+                    {option.label} · {format(option.price, product.currency)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : catalogShipFee != null ? (
+            <p className="mb-4 text-sm text-slate-600">
+              Shipping: {catalogShipFee === 0 ? "Free" : format(catalogShipFee, product.currency)}{" "}
+              (charged separately at checkout)
+            </p>
+          ) : null}
+          {product.shippingNote ? (
+            <p className="mb-4 whitespace-pre-line text-xs text-slate-500">{product.shippingNote}</p>
+          ) : null}
+
           <p className="text-slate-600 text-sm sm:text-base mb-3 leading-relaxed">{summary}</p>
           <ProductIncludesPreview product={product} />
 
@@ -372,8 +404,9 @@ export function ProductDetailClient({
                     }
                     fullWidth
                     variant="detail"
-                    getContact={getContact}
+                    shippingOptionLabel={shippingOptionLabel}
                     addons={addons}
+                    getContact={getContact}
                   />
                 </div>
 
@@ -411,8 +444,9 @@ export function ProductDetailClient({
                     }
                     fullWidth
                     variant="detail"
-                    getContact={getContact}
+                    shippingOptionLabel={shippingOptionLabel}
                     addons={addons}
+                    getContact={getContact}
                   />
                 </div>
                 <WishlistButton product={product} variant="toolbar" />
@@ -602,6 +636,7 @@ export function ProductDetailClient({
       product={product}
       getContact={getContact}
       addons={addons}
+      shippingOptionLabel={shippingOptionLabel}
       disabled={!deliverable}
     />
     </>

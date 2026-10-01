@@ -9,15 +9,22 @@ function isBlockedSupportPhone(digits: string): boolean {
   return BLOCKED_SUPPORT_PHONE_DIGITS.has(compact) || BLOCKED_SUPPORT_PHONE_DIGITS.has(compact.replace(/^1/, ""));
 }
 
+const DEFAULT_SUPPORT_PHONE_DISPLAY = "+91 92664 67887";
+const DEFAULT_SUPPORT_PHONE_DIGITS = "919266467887";
+
 /**
- * Optional support phone. The former default +1 (669) 260-3819 is never shown
- * and is never used in WhatsApp wa.me links.
+ * Customer WhatsApp / support phone. Defaults to +91 92664 67887.
+ * The former +1 (669) 260-3819 number is never shown or used in wa.me links.
  */
-const RAW_SUPPORT_PHONE = process.env.NEXT_PUBLIC_SUPPORT_PHONE?.trim() || "";
+const RAW_SUPPORT_PHONE = process.env.NEXT_PUBLIC_SUPPORT_PHONE?.trim() || DEFAULT_SUPPORT_PHONE_DISPLAY;
 const SUPPORT_PHONE_DIGITS_RAW = RAW_SUPPORT_PHONE.replace(/\D/g, "");
 const SUPPORT_PHONE_BLOCKED = isBlockedSupportPhone(SUPPORT_PHONE_DIGITS_RAW);
-const SUPPORT_PHONE_DISPLAY = SUPPORT_PHONE_BLOCKED ? "" : RAW_SUPPORT_PHONE;
-const SUPPORT_PHONE_DIGITS = SUPPORT_PHONE_BLOCKED ? "" : SUPPORT_PHONE_DIGITS_RAW;
+const SUPPORT_PHONE_DISPLAY = SUPPORT_PHONE_BLOCKED
+  ? DEFAULT_SUPPORT_PHONE_DISPLAY
+  : RAW_SUPPORT_PHONE;
+const SUPPORT_PHONE_DIGITS = SUPPORT_PHONE_BLOCKED
+  ? DEFAULT_SUPPORT_PHONE_DIGITS
+  : SUPPORT_PHONE_DIGITS_RAW || DEFAULT_SUPPORT_PHONE_DIGITS;
 
 if (
   process.env.NODE_ENV === "production" &&
@@ -221,38 +228,48 @@ export function whatsappChatUrl(message = "Hi BlossomPot, I need help with a gif
 export const testimonials = [
   {
     name: "Emily",
+    country: "USA",
+    city: "New York",
     rating: 5,
     timeAgo: "3 days ago",
     image: editorialCdnUrl("testimonial-emily.jpg"),
-    text: "I ordered a rose bouquet for my mom in Texas. It arrived fresh, beautifully wrapped, and she called me in tears — in the best way. BlossomPot made Mother's Day effortless.",
+    text: "I sent an anniversary bouquet to my sister in New York. The roses arrived fresh, beautifully arranged, and she said they looked just like the photos. BlossomPot made the gift feel effortless.",
   },
   {
     name: "Sarah",
+    country: "UK",
+    city: "London",
     rating: 5,
     timeAgo: "1 week ago",
     image: editorialCdnUrl("testimonial-sarah.jpg"),
-    text: "The anniversary hamper and cake combo for my husband in New York was perfect. Fast delivery, elegant packaging, and the quality matched the photos.",
+    text: "I sent a birthday bouquet to my mum in London from abroad. It arrived on the day we chose, looked lovely, and the handwritten card made her morning. Delivery was smooth the whole way.",
   },
   {
     name: "Priya",
+    country: "UAE",
+    city: "Dubai",
     rating: 5,
     timeAgo: "2 weeks ago",
     image: editorialCdnUrl("testimonial-priya.jpg"),
-    text: "Ordered same-day flowers for a friend in California. Checkout was smooth, tracking was clear, and the bouquet looked premium. Will order again for birthdays.",
+    text: "I ordered flowers and a small cake for my wife in Dubai. Everything arrived beautifully presented on her birthday, and the gift looked as elegant as the photos. She was thrilled.",
   },
   {
     name: "Jessica",
+    country: "Canada",
+    city: "Toronto",
     rating: 5,
     timeAgo: "3 weeks ago",
     image: editorialCdnUrl("testimonial-jessica.jpg"),
-    text: "BlossomPot feels like a real gifting marketplace — great selection of cakes, bouquets, and hampers. Support answered my delivery questions quickly.",
+    text: "I sent a bouquet to my friend in Toronto for her new home. The flowers were fresh and elegant, carefully packed, and looked just like the listing. It made the house feel welcoming.",
   },
   {
     name: "Amanda",
+    country: "Australia",
+    city: "Sydney",
     rating: 5,
     timeAgo: "1 month ago",
     image: editorialCdnUrl("testimonial-amanda.jpg"),
-    text: "Sent a birthday cake and mixed bouquet to my sister in Florida. Everything arrived on the date we chose, looked exactly like the listing, and made her day. I'll be back for Valentine's.",
+    text: "I ordered a surprise flower hamper for my sister in Sydney. It arrived beautifully packed on the date we picked, and she loved the mix of blooms. I'll order again for her birthday.",
   },
 ] as const;
 

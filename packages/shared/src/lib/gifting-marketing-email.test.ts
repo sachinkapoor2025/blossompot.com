@@ -10,7 +10,7 @@ describe("gifting marketing email", () => {
   it("includes hero, three categories, worldwide CTA, featured product, and unsubscribe", () => {
     const html = buildGiftingMarketingEmailHtml();
     assert.equal(GIFTING_MARKETING_EMAIL_SUBJECT.length > 20, true);
-    assert.match(html, /Send a Gift They'll Never Forget/);
+    assert.match(html, /Send a Gift They&#39;ll Never Forget/);
     assert.match(html, /Shop Now/);
     assert.match(html, /https:\/\/www\.blossompot\.com\/flowers/);
     assert.match(html, /https:\/\/www\.blossompot\.com\/cakes/);

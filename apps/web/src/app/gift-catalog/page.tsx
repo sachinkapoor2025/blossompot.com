@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { OverseasGiftGrid } from "@/components/OverseasGiftGrid";
-import { loadGboStorefrontProducts } from "@/lib/product-loader";
+import { ListingPageSkeleton } from "@/components/route-skeletons";
+import { loadProducts, toListingCardProducts } from "@/lib/product-loader";
+import { countryDisplayName } from "@/lib/location-seo-urls";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { pageMetadata } from "@/lib/seo";
 import { resolveDeliveryCountry, type Product } from "@blossompot/shared";
@@ -15,7 +18,17 @@ export const metadata: Metadata = pageMetadata({
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function GiftCatalogPage({
+export default function GiftCatalogPage(props: {
+  searchParams: Promise<{ country?: string }>;
+}) {
+  return (
+    <Suspense fallback={<ListingPageSkeleton />}>
+      <GiftCatalogContent {...props} />
+    </Suspense>
+  );
+}
+
+async function GiftCatalogContent({
   searchParams,
 }: {
   searchParams: Promise<{ country?: string }>;
@@ -27,25 +40,25 @@ export default async function GiftCatalogPage({
   const destinationName = resolveDeliveryCountry(deliveryCountry).countryName;
 
   try {
-    products = await loadGboStorefrontProducts(deliveryCountry);
+    products = await loadProducts({ country: deliveryCountry });
   } catch (err) {
     catalogError = err instanceof Error ? err.message : "Gift catalog is temporarily unavailable.";
   }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
-      <h1 className="text-3xl font-bold text-primary mb-2">Gift catalog</h1>
+      <h1 className="text-3xl font-bold text-primary mb-2">{`Gift catalog to ${countryDisplayName(deliveryCountry)}`}</h1>
       <p className="text-sm text-slate-600 mb-8">
         {products.length
-          ? `${products.length} international gifts for ${destinationName}. Scroll for more.`
-          : `International gifts for ${destinationName}.`}
+          ? `${products.length} gifts for ${destinationName}. Scroll for more.`
+          : `Gifts for ${destinationName}.`}
       </p>
       {catalogError ? (
         <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
           {catalogError}
         </p>
       ) : (
-        <OverseasGiftGrid products={products} />
+        <OverseasGiftGrid products={toListingCardProducts(products)} />
       )}
     </div>
   );

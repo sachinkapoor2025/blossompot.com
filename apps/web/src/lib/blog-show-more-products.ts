@@ -1,10 +1,8 @@
 import type { Product } from "@blossompot/shared";
-import {
-  getCatalogProductsByCategory,
-  mergeProductsPreferExisting,
-} from "@/lib/catalog-fallback";
+import { mergeProductsForCountry } from "@/lib/catalog-fallback";
 import { resolveImageUrl } from "@/lib/images";
 import { loadProducts } from "@/lib/product-loader";
+import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 
 /** Categories featured in the blog “Show More” product image grid (2 products each). */
 export const BLOG_SHOW_MORE_CATEGORIES = [
@@ -42,12 +40,11 @@ export async function loadBlogShowMoreProducts(): Promise<BlogShowMoreProduct[]>
     products = [];
   }
 
-  for (const category of BLOG_SHOW_MORE_CATEGORIES) {
-    products = mergeProductsPreferExisting(
-      products,
-      getCatalogProductsByCategory(category.slug)
-    );
-  }
+  const countryIso = await getStorefrontDeliveryCountry();
+  products = mergeProductsForCountry(
+    products,
+    countryIso
+  );
 
   const used = new Set<string>();
   const selected: BlogShowMoreProduct[] = [];

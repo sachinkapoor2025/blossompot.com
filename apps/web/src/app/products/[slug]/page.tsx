@@ -1,16 +1,28 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { ProductPageSkeleton } from "@/components/route-skeletons";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
 import { ProductDetailClient } from "./ProductDetailClient";
 import { breadcrumbJsonLd, faqJsonLd, productJsonLd, productPageMetadata } from "@/lib/seo";
 import { productFaqsForCategory } from "@/lib/content/product-faqs";
 import { resolveImageUrl } from "@/lib/images";
-import { loadProduct, loadRelatedProducts, getStaticProductSlugs } from "@/lib/product-loader";
+import { loadProduct, loadRelatedProducts, loadProducts, getStaticProductSlugs, toListingCardProducts } from "@/lib/product-loader";
 import { api } from "@/lib/api";
 import { categoryHref } from "@/lib/category-urls";
 import { getCategoryPageSeo } from "@/lib/content/category-seo";
-import { isProductSearchIndexable, isProductStorefrontVisible, type Product } from "@blossompot/shared";
+import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
+import { deliveryDestinationName } from "@/lib/location-seo-urls";
+import {
+  isProductSearchIndexable,
+  isProductStorefrontVisible,
+  productVisibleForDeliveryCountry,
+  resolveDeliveryCountry,
+  type Product,
+} from "@blossompot/shared";
+import Link from "next/link";
+import { HomeProductList } from "@/components/HomeProductList";
 
 function categoryBreadcrumbLabel(categorySlug: string): string {
   const seo = getCategoryPageSeo(categorySlug);
@@ -69,14 +81,47 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-export default async function ProductPage({ params }: Props) {
+export default function ProductPage(props: Props) {
+  return (
+    <Suspense fallback={<ProductPageSkeleton />}>
+      <ProductPageContent {...props} />
+    </Suspense>
+  );
+}
+
+async function ProductPageContent({ params }: Props) {
   const { slug } = await params;
   const product = await loadProduct(slug);
   if (!product) notFound();
   if (!isProductStorefrontVisible(product)) notFound();
 
-  const relatedProducts = await loadRelatedProducts(product.categorySlug, product.slug);
-  const faqs = productFaqsForCategory(product.categorySlug);
+  const countryIso = await getStorefrontDeliveryCountry();
+  if (!productVisibleForDeliveryCountry(product, countryIso)) {
+    const countryName = resolveDeliveryCountry(countryIso).countryName;
+    const available = await loadProducts({ country: countryIso });
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-10">
+        <h1 className="text-2xl font-bold text-primary mb-3">This gift is not available for {countryName}</h1>
+        <p className="text-slate-600 mb-6 max-w-2xl">
+          {product.name} is listed for a different delivery country. Browse gifts that can be sent to{" "}
+          {countryName}.
+        </p>
+        <Link href="/gift-catalog" className="btn-nav bg-primary inline-flex mb-10">
+          Shop gifts for {countryName}
+        </Link>
+        {available.length > 0 ? (
+          <HomeProductList
+            products={available}
+            limit={10}
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 list-none p-0 m-0"
+          />
+        ) : null}
+      </div>
+    );
+  }
+
+  const relatedProducts = await loadRelatedProducts(product.categorySlug, product.slug, countryIso);
+  const faqs = productFaqsForCategory(product.categorySlug, deliveryDestinationName(countryIso));
 
   const categoryLabel = categoryBreadcrumbLabel(product.categorySlug);
   const crumbs = [
@@ -98,7 +143,11 @@ export default async function ProductPage({ params }: Props) {
       <div className="max-w-6xl mx-auto px-4 pt-6">
         <Breadcrumbs items={crumbs} />
       </div>
-      <ProductDetailClient product={product} relatedProducts={relatedProducts} faqs={faqs} />
+      <ProductDetailClient
+        product={product}
+        relatedProducts={toListingCardProducts(relatedProducts)}
+        deliveryCountryIso={countryIso}
+      />
     </>
   );
 }

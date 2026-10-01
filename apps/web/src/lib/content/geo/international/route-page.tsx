@@ -2,10 +2,14 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { InternationalLocationPage } from "@/components/geo/InternationalLocationPage";
 import { pageMetadata } from "@/lib/seo";
-import { getCatalogProducts, mergeProductsPreferExisting } from "@/lib/catalog-fallback";
+import { mergeProductsForCountry } from "@/lib/catalog-fallback";
 import { shuffleForCity } from "@/lib/city-products";
-import { loadProducts } from "@/lib/product-loader";
-import type { Product } from "@blossompot/shared";
+import { loadProducts, toListingCardProducts } from "@/lib/product-loader";
+import {
+  isProductStorefrontVisible,
+  productVisibleForDeliveryCountry,
+  type Product,
+} from "@blossompot/shared";
 import {
   generateParamsForMarket,
   isInternationalIndexable,
@@ -55,15 +59,21 @@ export async function InternationalMarketPage({
 }) {
   const loc = resolveInternationalPath(market, segments ?? []);
   if (!loc || !isInternationalIndexable(loc)) notFound();
+  const countryIso = loc.isoCountry?.trim().toUpperCase() ?? "";
   let products: Product[] = [];
-  try {
-    products = await loadProducts();
-  } catch {
-    products = [];
+  if (/^[A-Z]{2}$/.test(countryIso)) {
+    try {
+      products = await loadProducts({ country: countryIso });
+    } catch {
+      products = [];
+    }
+    products = shuffleForCity(
+      mergeProductsForCountry(products, countryIso).filter(
+        (p) => isProductStorefrontVisible(p) && productVisibleForDeliveryCountry(p, countryIso)
+      ),
+      loc.slug
+    ).slice(0, 20);
+    products = toListingCardProducts(products);
   }
-  products = shuffleForCity(
-    mergeProductsPreferExisting(products, getCatalogProducts()),
-    loc.slug
-  ).slice(0, 20);
   return <InternationalLocationPage loc={resolveLocation(loc)} products={products} />;
 }

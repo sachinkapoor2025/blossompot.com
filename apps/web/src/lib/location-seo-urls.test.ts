@@ -5,6 +5,7 @@ import {
   giftsCatalogLocationHref,
   isExistingGiftsToSeoPage,
   isLocationUrlExemptPath,
+  localizeCopyForCountry,
   localizeShopCopy,
   locationShopHeading,
   locationShopRewritePath,
@@ -12,6 +13,10 @@ import {
   shopPathForLocation,
   giftsCatalogCountryIso,
   giftsCatalogCountryRewrites,
+  countryIsoFromPathname,
+  deliveryDestinationName,
+  resolveStorefrontCountryIso,
+  withCountryQuery,
 } from "./location-seo-urls";
 
 describe("location SEO shop URLs", () => {
@@ -73,6 +78,7 @@ describe("location SEO shop URLs", () => {
     assert.match(copy.description, /USA/);
     assert.equal(copy.h1, "Send Flowers Online — Delivery to USA");
     assert.equal(locationShopHeading("/gifts-to-uk", "Shop Flowers, Cakes & Gifts"), "Shop Flowers, Cakes & Gifts to UK");
+    assert.match(localizeCopyForCountry("Shop with worldwide delivery.", "GB"), /UK/);
   });
 
   it("rewrites country catalog gifts-to URLs to /products before city pages", () => {
@@ -81,5 +87,78 @@ describe("location SEO shop URLs", () => {
     assert.equal(giftsCatalogCountryIso("california"), null);
     const usa = giftsCatalogCountryRewrites().find((r) => r.source === "/gifts-to-usa");
     assert.deepEqual(usa, { source: "/gifts-to-usa", destination: "/products?country=US" });
+  });
+
+  it("names the selected delivery destination for help copy", () => {
+    assert.equal(deliveryDestinationName("BH", "Bahrain"), "Bahrain");
+    assert.equal(deliveryDestinationName("BH"), "Bahrain");
+    assert.equal(deliveryDestinationName("AE", "United Arab Emirates"), "UAE");
+    assert.equal(deliveryDestinationName("GB"), "UK");
+    assert.equal(deliveryDestinationName("US", "United States"), "USA");
+    assert.equal(deliveryDestinationName(null), "USA");
+    assert.equal(
+      `confirm ${deliveryDestinationName("AE", "United Arab Emirates")} delivery addresses.`,
+      "confirm UAE delivery addresses."
+    );
+  });
+
+  it("maps country pages to that country's ISO for city menus", () => {
+    assert.equal(countryIsoFromPathname("/flower-delivery-usa"), "US");
+    assert.equal(countryIsoFromPathname("/flower-delivery-uk"), "GB");
+    assert.equal(countryIsoFromPathname("/flower-delivery-canada"), "CA");
+    assert.equal(countryIsoFromPathname("/flower-delivery-uk", "US"), "GB");
+    assert.equal(countryIsoFromPathname("/locations/canada/ontario"), "CA");
+    assert.equal(countryIsoFromPathname("/", "GB"), "GB");
+  });
+
+  it("resolves storefront country from country pages before the cookie", () => {
+    assert.equal(
+      resolveStorefrontCountryIso({
+        pathname: "/flower-delivery-uk",
+        cookieCountry: "US",
+      }),
+      "GB"
+    );
+    assert.equal(
+      resolveStorefrontCountryIso({
+        pathname: "/flower-delivery-usa",
+        cookieCountry: "GB",
+      }),
+      "US"
+    );
+    assert.equal(
+      resolveStorefrontCountryIso({
+        pathname: "/flower-delivery-canada",
+      }),
+      "CA"
+    );
+    assert.equal(
+      resolveStorefrontCountryIso({
+        pathname: "/flower-delivery-uae",
+      }),
+      "AE"
+    );
+    assert.equal(
+      resolveStorefrontCountryIso({
+        pathname: "/flower-delivery-australia",
+      }),
+      "AU"
+    );
+    assert.equal(
+      resolveStorefrontCountryIso({
+        pathname: "/flowers",
+        cookieCountry: "GB",
+      }),
+      "GB"
+    );
+    assert.equal(
+      resolveStorefrontCountryIso({
+        pathname: "/products",
+        searchCountry: "AE",
+        cookieCountry: "US",
+      }),
+      "AE"
+    );
+    assert.equal(withCountryQuery("/products?search=roses", "GB"), "/products?search=roses&country=GB");
   });
 });

@@ -5,7 +5,7 @@
  * Same pattern as orange-county-catalog.ts for hampers.
  */
 import { PutCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
-import { productKeys, categoryKeys, DEFAULT_PRODUCT_INVENTORY } from "@blossompot/shared";
+import { productKeys, categoryKeys, DEFAULT_PRODUCT_INVENTORY, isSampleCatalogProduct } from "@blossompot/shared";
 import { docClient, PRODUCTS_TABLE, now } from "./db";
 import catalogJson from "../data/blossompot-catalog.json";
 
@@ -30,6 +30,9 @@ type CatalogProduct = {
   inventory?: number;
   tags?: string[];
   couponExcluded?: boolean;
+  deliveryFee?: number;
+  shippingNote?: string;
+  shippingOptions?: Array<{ label: string; price: number }>;
   seoTitle?: string;
   seoDescription?: string;
   published?: boolean;
@@ -41,6 +44,11 @@ const bySlug = new Map(products.map((p) => [p.slug, p]));
 
 export function getBundledUsarakhiProduct(slug: string): CatalogProduct | undefined {
   return bySlug.get(slug);
+}
+
+/** Published live bundled SKUs (TF USA). Unsplash demo rows are not persisted or listed. */
+export function listBundledCatalogProducts(): CatalogProduct[] {
+  return [...bySlug.values()].filter((p) => p.published !== false && !isSampleCatalogProduct(p));
 }
 
 /**
@@ -113,6 +121,37 @@ export async function ensureUsarakhiCategoriesInDb(): Promise<number> {
   return created;
 }
 
+function catalogProductToDbItem(bundled: CatalogProduct, ts: string) {
+  const categorySlug = bundled.categorySlug;
+  return {
+    name: bundled.name,
+    slug: bundled.slug,
+    description: bundled.description,
+    price: bundled.price,
+    compareAtPrice: bundled.compareAtPrice,
+    currency: bundled.currency ?? "USD",
+    categorySlug,
+    additionalCategorySlugs: bundled.additionalCategorySlugs,
+    images: bundled.images ?? [],
+    sku: bundled.sku,
+    inventory: bundled.inventory ?? DEFAULT_PRODUCT_INVENTORY,
+    tags: bundled.tags ?? [],
+    ...(bundled.couponExcluded ? { couponExcluded: true } : {}),
+    ...(bundled.deliveryFee != null ? { deliveryFee: bundled.deliveryFee } : {}),
+    ...(bundled.shippingNote ? { shippingNote: bundled.shippingNote } : {}),
+    ...(bundled.shippingOptions?.length ? { shippingOptions: bundled.shippingOptions } : {}),
+    seoTitle: bundled.seoTitle,
+    seoDescription: bundled.seoDescription,
+    published: bundled.published !== false,
+    PK: productKeys.pk(bundled.slug),
+    SK: productKeys.sk(),
+    GSI1PK: productKeys.gsi1pk(categorySlug),
+    GSI1SK: productKeys.gsi1sk(bundled.slug),
+    createdAt: ts,
+    updatedAt: ts,
+  };
+}
+
 /**
  * If the slug exists in the bundled catalog but not in DynamoDB, create it.
  * Does not overwrite existing products (prices/inventory stay admin-controlled).
@@ -132,36 +171,39 @@ export async function ensureUsarakhiCatalogProductInDb(
   );
   if (existing.Item) return existing.Item as Record<string, unknown>;
 
-  const ts = now();
-  const categorySlug = bundled.categorySlug;
-  const item = {
-    name: bundled.name,
-    slug: bundled.slug,
-    description: bundled.description,
-    price: bundled.price,
-    compareAtPrice: bundled.compareAtPrice,
-    currency: bundled.currency ?? "USD",
-    categorySlug,
-    additionalCategorySlugs: bundled.additionalCategorySlugs,
-    images: bundled.images ?? [],
-    sku: bundled.sku,
-    inventory: bundled.inventory ?? DEFAULT_PRODUCT_INVENTORY,
-    tags: bundled.tags ?? [],
-    ...(bundled.couponExcluded ? { couponExcluded: true } : {}),
-    seoTitle: bundled.seoTitle,
-    seoDescription: bundled.seoDescription,
-    published: bundled.published !== false,
-    PK: productKeys.pk(slug),
-    SK: productKeys.sk(),
-    GSI1PK: productKeys.gsi1pk(categorySlug),
-    GSI1SK: productKeys.gsi1sk(slug),
-    createdAt: ts,
-    updatedAt: ts,
-  };
-
+  const item = catalogProductToDbItem(bundled, now());
   await docClient.send(new PutCommand({ TableName: PRODUCTS_TABLE, Item: item }));
   console.log(`upserted blossompot catalog product ${slug}`);
   return item;
+}
+
+/** Create Dynamo rows for bundled catalog SKUs that are not in the table yet. */
+export async function persistMissingBundledCatalogProducts(
+  existingSlugs: Set<string>
+): Promise<Record<string, unknown>[]> {
+  const missing = listBundledCatalogProducts().filter((product) => !existingSlugs.has(product.slug));
+  if (missing.length === 0) return [];
+
+  const ts = now();
+  const written = await Promise.all(
+    missing.map(async (bundled) => {
+      const item = catalogProductToDbItem(bundled, ts);
+      try {
+        await docClient.send(
+          new PutCommand({
+            TableName: PRODUCTS_TABLE,
+            Item: item,
+            ConditionExpression: "attribute_not_exists(PK)",
+          })
+        );
+        console.log(`upserted blossompot catalog product ${bundled.slug}`);
+        return item as Record<string, unknown>;
+      } catch {
+        return null;
+      }
+    })
+  );
+  return written.filter((item): item is Record<string, unknown> => item != null);
 }
 
 

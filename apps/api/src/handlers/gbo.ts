@@ -14,7 +14,7 @@ import {
   gboListCountries,
   gboListGifts,
 } from "../lib/gbo-client";
-import { json, ok, badRequest, unauthorized } from "../lib/response";
+import { json, ok, okCached, badRequest, unauthorized } from "../lib/response";
 
 function query(event: APIGatewayProxyEventV2): Record<string, string> {
   const out: Record<string, string> = {};
@@ -103,11 +103,13 @@ export async function gboGiftsHandler(
   if (!parsed.success) return badRequest(parsed.error.issues[0]?.message ?? "Invalid gift query");
   try {
     const gifts = await gboListGifts(parsed.data, { sandbox: parsed.data.sandbox ?? sandboxFlag(event) });
-    return ok({
+    const body = {
       country: parsed.data.country,
       count: gifts.length,
       gifts,
-    });
+    };
+    if (parsed.data.sandbox || sandboxFlag(event)) return ok(body);
+    return okCached(body, 45);
   } catch (err) {
     return gboFail(err);
   }
