@@ -49,7 +49,11 @@ export async function getHomepageCatalogCache(
   if (!country) return badRequest("country is required");
 
   const item = await readItem(country);
-  if (!item?.cachedAt || !isHomepageCatalogFresh(item.cachedAt)) {
+  const fresh = Boolean(item?.cachedAt && isHomepageCatalogFresh(item.cachedAt));
+  console.info(
+    `homepage-catalog country=${country} found=${Boolean(item)} fresh=${fresh} table=${CONFIG_TABLE}`
+  );
+  if (!item?.cachedAt || !fresh) {
     return notFound("Homepage catalog cache miss");
   }
 

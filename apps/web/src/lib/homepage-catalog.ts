@@ -15,20 +15,6 @@ type MemoryEntry = { at: number; data: HomepageCatalogData };
 const memoryCache = new Map<string, MemoryEntry>();
 const inFlight = new Map<string, Promise<HomepageCatalogData>>();
 
-function readMemory(country: string): HomepageCatalogData | null {
-  const hit = memoryCache.get(country);
-  if (!hit) return null;
-  if (Date.now() - hit.at >= MEMORY_TTL_MS) {
-    memoryCache.delete(country);
-    return null;
-  }
-  return hit.data;
-}
-
-function writeMemory(country: string, data: HomepageCatalogData) {
-  memoryCache.set(country, { at: Date.now(), data });
-}
-
 /**
  * Same inputs the homepage used inline: merged visible catalog length, category length,
  * and `buildHomeCategoryTiles()` (category image, then one product image, then the static tile).
@@ -57,17 +43,27 @@ async function readShared(country: string): Promise<HomepageCatalogData | null> 
   }
 }
 
-async function writeShared(data: HomepageCatalogData): Promise<void> {
+async function writeShared(data: HomepageCatalogData): Promise<boolean> {
   const parsed = homepageCatalogDataSchema.safeParse(data);
-  if (!parsed.success) return;
+  if (!parsed.success) {
+    console.info(
+      `homepage-catalog country=${data.country} source=miss stored=false reason=schema`
+    );
+    return false;
+  }
   try {
     await api(`/homepage-catalog?country=${parsed.data.country}`, {
       method: "PUT",
       body: JSON.stringify(parsed.data),
       revalidate: false,
     });
-  } catch {
-    /* The page still renders. The next instance recomputes if the shared record was not stored. */
+    return true;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "write failed";
+    console.info(
+      `homepage-catalog country=${parsed.data.country} source=miss stored=false reason=${message}`
+    );
+    return false;
   }
 }
 
@@ -79,26 +75,51 @@ async function compute(country: string): Promise<HomepageCatalogData> {
   return deriveHomepageCatalogData(country, products, categoriesData.categories);
 }
 
-async function resolveHomepageCatalog(country: string): Promise<HomepageCatalogData> {
-  const memory = readMemory(country);
-  if (memory) {
-    console.info(`homepage-catalog country=${country} source=memory`);
-    return memory;
-  }
+export type HomepageCatalogSource = "memory" | "shared" | "miss";
 
-  const shared = await readShared(country);
+type HomepageCatalogDeps = {
+  readShared: (country: string) => Promise<HomepageCatalogData | null>;
+  writeShared: (data: HomepageCatalogData) => Promise<boolean>;
+  compute: (country: string) => Promise<HomepageCatalogData>;
+};
+
+/**
+ * Shared record first, so another server instance can reuse what was stored.
+ * Memory is only the fallback when the shared read misses but this instance already built the country.
+ */
+export async function resolveHomepageCatalogData(
+  country: string,
+  deps: HomepageCatalogDeps,
+  memory: Map<string, MemoryEntry> = memoryCache
+): Promise<{ data: HomepageCatalogData; source: HomepageCatalogSource }> {
+  const iso = country.trim().toUpperCase();
+  const shared = await deps.readShared(iso);
   if (shared) {
-    writeMemory(country, shared);
-    console.info(`homepage-catalog country=${country} source=shared`);
-    return shared;
+    memory.set(iso, { at: Date.now(), data: shared });
+    return { data: shared, source: "shared" };
   }
 
-  const computed = await compute(country);
-  writeMemory(country, computed);
-  // Do not hold the homepage HTML for the cache write. A miss already paid for the catalog fetch.
-  void writeShared(computed);
-  console.info(`homepage-catalog country=${country} source=miss`);
-  return computed;
+  const local = memory.get(iso);
+  if (local && Date.now() - local.at < MEMORY_TTL_MS) {
+    return { data: local.data, source: "memory" };
+  }
+  memory.delete(iso);
+
+  const computed = await deps.compute(iso);
+  const stored = await deps.writeShared(computed);
+  memory.set(iso, { at: Date.now(), data: computed });
+  if (stored) {
+    console.info(`homepage-catalog country=${iso} source=miss stored=true`);
+  }
+  return { data: computed, source: "miss" };
+}
+
+async function resolveHomepageCatalog(country: string): Promise<HomepageCatalogData> {
+  const resolved = await resolveHomepageCatalogData(country, { readShared, writeShared, compute });
+  if (resolved.source !== "miss") {
+    console.info(`homepage-catalog country=${country} source=${resolved.source}`);
+  }
+  return resolved.data;
 }
 
 /**

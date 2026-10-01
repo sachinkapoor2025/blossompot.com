@@ -67,6 +67,40 @@ describe("homepage catalog cache handler", () => {
     assert.equal(other.status, 404);
   });
 
+  it("treats a record older than 45 seconds as a miss and stores the rebuild", async () => {
+    const { PutCommand } = await import("@aws-sdk/lib-dynamodb");
+    const { configKeys } = await import("@blossompot/shared");
+    const { CONFIG_TABLE, docClient } = await import("../lib/db");
+    const { getHomepageCatalogCache, putHomepageCatalogCache } = await import("./homepage-catalog");
+
+    const key = configKeys.homepageCatalog("AU");
+    await docClient.send(
+      new PutCommand({
+        TableName: CONFIG_TABLE,
+        Item: {
+          PK: key.pk,
+          SK: key.sk,
+          ...sample("AU", 10),
+          cachedAt: new Date(Date.now() - 46_000).toISOString(),
+        },
+      })
+    );
+
+    const stale = read(await getHomepageCatalogCache(event("GET", "AU")));
+    assert.equal(stale.status, 404);
+
+    const stored = read(await putHomepageCatalogCache(event("PUT", "AU", sample("AU", 20))));
+    assert.equal(stored.status, 200);
+    assert.equal(stored.body.stored, true);
+
+    const fresh = read(await getHomepageCatalogCache(event("GET", "AU")));
+    assert.equal(fresh.status, 200);
+    assert.equal(fresh.body.country, "AU");
+    assert.equal(fresh.body.giftCount, 20);
+    assert.equal(fresh.body.categoryCount, 14);
+    assert.equal(Array.isArray(fresh.body.tiles) ? (fresh.body.tiles as unknown[]).length : 0, 13);
+  });
+
   it("rejects a tile list that does not match the carousel", async () => {
     const { putHomepageCatalogCache } = await import("./homepage-catalog");
     const bad = sample("AE", 10);
