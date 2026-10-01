@@ -18,6 +18,7 @@ import { SiteLogoLink } from "@/components/SiteLogo";
 import { DeliveryLocationChip } from "@/components/DeliveryLocationChip";
 import { DeliveryLocationBanner } from "@/components/DeliveryLocationBanner";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
+import { countryMenuDestination, navigateAfterLocationCommit } from "@/lib/country-switch";
 import { COUNTRY_GUIDE_HREF, useCountrySearch, useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
 
 function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
@@ -126,16 +127,19 @@ function CountriesMenu({
   const selectedCountry =
     countryIsoFromPathname(pathname, searchParams.get("country")) ?? location?.countryCode;
 
-  const chooseCountry = async (countryCode: string, href?: string) => {
+  const chooseCountry = (countryCode: string, href?: string) => {
     setOpen(false);
     onNavigate?.();
-    await setLocation({
-      countryCode,
-      postalCode: "",
-      postalDisplay: countryCode,
+    navigateAfterLocationCommit({
+      href: countryMenuDestination(countryCode, href),
+      commit: () =>
+        setLocation({
+          countryCode,
+          postalCode: "",
+          postalDisplay: countryCode,
+        }),
+      navigate: (url) => router.push(url),
     });
-    const path = href?.split("?")[0] || "/";
-    router.push(`${path}?country=${countryCode}`);
   };
 
   return (
@@ -625,13 +629,15 @@ export function Header() {
                             }`}
                             onClick={() => {
                               closeMenu();
-                              void setLocation({
-                                countryCode: c.countryCode,
-                                postalCode: "",
-                                postalDisplay: c.countryCode,
-                              }).then(() => {
-                                const path = guide?.split("?")[0] || "/";
-                                router.push(`${path}?country=${c.countryCode}`);
+                              navigateAfterLocationCommit({
+                                href: countryMenuDestination(c.countryCode, guide),
+                                commit: () =>
+                                  setLocation({
+                                    countryCode: c.countryCode,
+                                    postalCode: "",
+                                    postalDisplay: c.countryCode,
+                                  }),
+                                navigate: (url) => router.push(url),
                               });
                             }}
                           >
