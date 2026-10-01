@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
-import { api } from "@/lib/api";
 import { HomeHero } from "@/components/HomeHero";
 import { HomeBrandTaglines } from "@/components/HomeBrandTaglines";
 import { CustomerReviews } from "@/components/CustomerReviews";
@@ -15,10 +14,10 @@ import { buildHomeCategoryTiles } from "@/lib/home-category-carousel";
 import { JsonLd } from "@/components/JsonLd";
 import { faqs, homeBanners, countriesMenu } from "@/lib/site";
 import { localizeCopyForCountry } from "@/lib/location-seo-urls";
-import { loadProducts } from "@/lib/product-loader";
+import { getHomepageCatalogData } from "@/lib/homepage-catalog";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { faqJsonLd, pageMetadata } from "@/lib/seo";
-import { resolveDeliveryCountry, type Product, type Category } from "@blossompot/shared";
+import { resolveDeliveryCountry } from "@blossompot/shared";
 import { flowerDeliverySlugForIso } from "@/lib/content/country-flower-delivery";
 
 export const metadata: Metadata = pageMetadata({
@@ -60,24 +59,21 @@ async function HomeCatalog({
   reviewsPromise: ReturnType<typeof getGoogleReviews>;
 }) {
   const params = await searchParams;
-  let products: Product[] = [];
-  let categories: Category[] = [];
+  let giftCount = 0;
+  let categoryCount = 0;
   let catalogError = "";
   const deliveryCountry = await getStorefrontDeliveryCountry(params.country);
   const destinationName = resolveDeliveryCountry(deliveryCountry).countryName;
+  let categoryTiles = buildHomeCategoryTiles([], []);
 
   try {
-    const [liveProducts, categoriesData] = await Promise.all([
-      loadProducts({ country: deliveryCountry }),
-      api<{ categories: Category[] }>("/categories", { revalidate: 45 }),
-    ]);
-    products = liveProducts;
-    categories = categoriesData.categories;
+    const catalog = await getHomepageCatalogData(deliveryCountry);
+    giftCount = catalog.giftCount;
+    categoryCount = catalog.categoryCount;
+    categoryTiles = catalog.tiles;
   } catch (err) {
     catalogError = err instanceof Error ? err.message : "Gift catalog is temporarily unavailable.";
   }
-
-  const categoryTiles = buildHomeCategoryTiles(products, categories);
   const selectedFlowerSlug = flowerDeliverySlugForIso(deliveryCountry);
   const countryPages = selectedFlowerSlug
     ? countriesMenu.items.filter((item) => item.slug === selectedFlowerSlug)
@@ -134,7 +130,7 @@ async function HomeCatalog({
           </p>
         ) : (
           <p className="text-sm text-slate-600 mb-4">
-            {products.length} gifts available for {destinationName}.
+            {giftCount} gifts available for {destinationName}.
           </p>
         )}
         <Link href="/gift-catalog" className="btn-nav bg-primary inline-flex">
@@ -221,8 +217,8 @@ async function HomeCatalog({
             </div>
           ))}
         </div>
-        {categories.length > 0 && (
-          <p className="text-xs text-slate-400 mt-8">{categories.length} categories available in catalog</p>
+        {categoryCount > 0 && (
+          <p className="text-xs text-slate-400 mt-8">{categoryCount} categories available in catalog</p>
         )}
       </section>
     </>

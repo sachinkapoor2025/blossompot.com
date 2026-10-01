@@ -1,6 +1,7 @@
 export * from "./schemas/product";
 export * from "./schemas/review";
 export * from "./schemas/category";
+export * from "./schemas/homepage-catalog";
 export * from "./schemas/cart";
 export * from "./schemas/order";
 export * from "./schemas/lead";

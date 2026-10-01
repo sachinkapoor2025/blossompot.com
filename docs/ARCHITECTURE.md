@@ -117,6 +117,7 @@ When admin (or Orange County vendor tracking) changes order status (accepted, pr
 | DELETE | `/products/{slug}` | Admin: delete |
 | POST | `/products/bulk` | Admin: CSV bulk upload |
 | GET | `/categories` | List categories |
+| GET/PUT | `/homepage-catalog?country=` | Homepage-only derived record (gift count, category count, 13 tiles) in the config table for 45 seconds, keyed by country. Does not replace `/products` or `/gbo/gifts`. |
 | POST | `/categories` | Admin: create |
 | GET | `/cart` | Get cart. Optional `country` + `postalCode` flags lines that are no longer serviceable. |
 | POST | `/cart/items` | Add to cart (optional `addons[]` as catalog ids or `{ id, quantity }` for BlossomPot products). Optional `deliveryCountry` + `deliveryPostal` rejects non-serviceable items. |

@@ -111,6 +111,14 @@ export const configKeys = {
   shipping: { pk: "CONFIG#SHIPPING", sk: "META" as const },
   /** Growth-score weights + feature flags for Product Sales Intelligence. */
   productSalesIntel: { pk: "CONFIG#PRODUCT_SALES_INTEL", sk: "META" as const },
+  /**
+   * Derived homepage catalog for one delivery country.
+   * Lives in the config table so it is shared across API instances and is not part of the product scan.
+   */
+  homepageCatalog: (countryIso: string) => ({
+    pk: `CONFIG#HOMEPAGE_CATALOG#${countryIso.trim().toUpperCase()}`,
+    sk: "META" as const,
+  }),
 };
 
 /** Tracks admin S3 uploads → product slug for recovery if DB is reset. */
