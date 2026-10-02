@@ -52,9 +52,7 @@ function memoryProduct(slug: string): Product | null {
   return hit.product;
 }
 
-/** Live Gift Baskets Overseas catalog for the selected delivery country. */
-export async function loadGboStorefrontProducts(country?: string): Promise<Product[]> {
-  const iso = (country ?? (await getStorefrontDeliveryCountry())).trim().toUpperCase() || "US";
+async function fetchGboStorefrontProducts(iso: string): Promise<Product[]> {
   const data = await api<{ gifts: GboGift[] }>(`/gbo/gifts?country=${iso}`, CATALOG_FETCH);
   return (data.gifts ?? [])
     .filter((gift) => gboGiftNumericId(gift) != null)
@@ -63,6 +61,33 @@ export async function loadGboStorefrontProducts(country?: string): Promise<Produ
       const { vendorCost: _c, ...rest } = mapped;
       return rememberProduct(rest as Product);
     });
+}
+
+/**
+ * Coalesce concurrent loads for the same country into one fetch and one mapping pass.
+ * Cleared when the shared promise settles, so this is not an extra TTL cache.
+ * Country keys stay separate. The 45-second Next fetch cache is unchanged.
+ */
+const gboInFlight = new Map<string, Promise<Product[]>>();
+
+/** Live Gift Baskets Overseas catalog for the selected delivery country. */
+export async function loadGboStorefrontProducts(country?: string): Promise<Product[]> {
+  const iso = (country ?? (await getStorefrontDeliveryCountry())).trim().toUpperCase() || "US";
+  const pending = gboInFlight.get(iso);
+  if (pending) return pending;
+
+  let resolveJob: (products: Product[]) => void = () => undefined;
+  let rejectJob: (err: unknown) => void = () => undefined;
+  const job = new Promise<Product[]>((resolve, reject) => {
+    resolveJob = resolve;
+    rejectJob = reject;
+  });
+  gboInFlight.set(iso, job);
+  fetchGboStorefrontProducts(iso).then(resolveJob, rejectJob);
+  void job.finally(() => {
+    if (gboInFlight.get(iso) === job) gboInFlight.delete(iso);
+  });
+  return job;
 }
 
 function mergeBySlug(primary: Product[], extra: Product[]): Product[] {

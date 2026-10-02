@@ -24,12 +24,18 @@ export function ProductImageRotator({
   staggerKey = "",
   /** First image eager only for above-the-fold cards; listing grids should stay lazy. */
   priority = false,
+  /**
+   * Homepage rows pass true so off-screen cards keep a single lazy frame
+   * until they intersect. Listing grids omit this and keep the current gallery.
+   */
+  loadWhenVisible = false,
 }: {
   images: string[];
   alt: string;
   className?: string;
   staggerKey?: string;
   priority?: boolean;
+  loadWhenVisible?: boolean;
 }) {
   const resolved = useMemo(
     () => [...new Set(images.map(resolveImageUrl).filter(Boolean))].slice(0, MAX_FRAMES),
@@ -38,13 +44,14 @@ export function ProductImageRotator({
   const [urls, setUrls] = useState<string[]>([]);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(!loadWhenVisible);
+  const [seen, setSeen] = useState(!loadWhenVisible);
   const [root, setRoot] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setUrls([]);
     setIndex(0);
-    if (resolved.length === 0) return;
+    if (!seen || resolved.length === 0) return;
 
     let cancelled = false;
     const measured: SizedProductImage[] = [];
@@ -75,12 +82,16 @@ export function ProductImageRotator({
     return () => {
       cancelled = true;
     };
-  }, [resolved]);
+  }, [resolved, seen]);
 
   useEffect(() => {
     if (!root || typeof IntersectionObserver === "undefined") return;
     const io = new IntersectionObserver(
-      ([entry]) => setVisible(Boolean(entry?.isIntersecting)),
+      ([entry]) => {
+        const onScreen = Boolean(entry?.isIntersecting);
+        setVisible(onScreen);
+        if (onScreen) setSeen(true);
+      },
       { rootMargin: "80px", threshold: 0.15 }
     );
     io.observe(root);
@@ -104,7 +115,13 @@ export function ProductImageRotator({
     return () => window.clearInterval(id);
   }, [urls, paused, visible, staggerKey]);
 
-  const frames = urls.length > 0 ? urls : resolved.length > 0 ? resolved : [site.logoSrc];
+  const gallery = urls.length > 0 ? urls : resolved;
+  const frames =
+    loadWhenVisible && !seen
+      ? gallery.slice(0, 1)
+      : gallery.length > 0
+        ? gallery
+        : [site.logoSrc];
 
   if (resolved.length === 0) {
     return (

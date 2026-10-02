@@ -14,9 +14,12 @@ import { useOptionalDeliveryLocation } from "@/lib/delivery-location-context";
 export function HomeProductCard({
   product,
   showFastSellingBadge = false,
+  loadGalleryWhenVisible = false,
 }: {
   product: Product;
   showFastSellingBadge?: boolean;
+  /** Homepage rows defer extra gallery frames until the card is on screen. */
+  loadGalleryWhenVisible?: boolean;
 }) {
   const { format } = useCurrency();
   const delivery = useOptionalDeliveryLocation();
@@ -42,6 +45,7 @@ export function HomeProductCard({
             alt={product.name}
             staggerKey={product.slug}
             className="absolute inset-0 h-full w-full"
+            loadWhenVisible={loadGalleryWhenVisible}
           />
         </Link>
       </div>
