@@ -130,6 +130,11 @@ Parameters:
     Default: "false"
     AllowedValues: ["true", "false"]
     Description: When true, GBO catalog/order calls use /api/v1/sandbox
+  GboStorefrontEnabled:
+    Type: String
+    Default: "false"
+    AllowedValues: ["true", "false"]
+    Description: When false, hide GBO products and block new GBO purchases. Partner API, admin tools, and tracking for orders already placed stay on. Set true to restore the storefront.
   GboPaymentType:
     Type: String
     Default: monthlyBilling
@@ -213,6 +218,7 @@ Globals:
         GBO_API_TOKEN: !Ref GboApiToken
         GBO_INTERNAL_API_KEY: !Ref GboInternalApiKey
         GBO_SANDBOX: !Ref GboSandbox
+        GBO_STOREFRONT_ENABLED: !Ref GboStorefrontEnabled
         GBO_PAYMENT_TYPE: !Ref GboPaymentType
         GBO_AUTH_SCHEME: !Ref GboAuthScheme
         GBO_BASE_URL: !Ref GboBaseUrl

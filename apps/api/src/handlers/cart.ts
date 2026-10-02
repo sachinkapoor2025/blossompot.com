@@ -17,6 +17,8 @@ import {
   isFlashComboSaleActive,
   flashComboUnitPriceUsd,
   productUsesFixedStorefrontPrice,
+  GBO_STOREFRONT_UNAVAILABLE_MESSAGE,
+  isGboHiddenFromStorefront,
   type Cart,
   type CartItem,
 } from "@blossompot/shared";
@@ -140,6 +142,9 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
   if (!parsed.success) {
     return badRequest(parsed.error.issues[0]?.message ?? "Could not add this gift to your cart");
   }
+  if (isGboHiddenFromStorefront({ slug: parsed.data.productSlug })) {
+    return badRequest(GBO_STOREFRONT_UNAVAILABLE_MESSAGE);
+  }
 
   const [productResult, cart] = await Promise.all([
     docClient.send(
@@ -168,6 +173,9 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
     productItem = (await ensureProductInDb(parsed.data.productSlug)) ?? productItem;
   }
   if (!productItem) return badRequest("Product not found");
+  if (isGboHiddenFromStorefront(productItem as { slug?: string; vendorSlug?: string; sku?: string })) {
+    return badRequest(GBO_STOREFRONT_UNAVAILABLE_MESSAGE);
+  }
 
   const product = productItem as {
     slug: string;
@@ -325,6 +333,7 @@ export async function updateCartItem(event: APIGatewayProxyEventV2) {
     cart.items.find((i) => i.lineId === lineId) ??
     cart.items.find((i) => i.productSlug === lineId);
   if (!item) return badRequest("Item not in cart");
+  if (isGboHiddenFromStorefront(item)) return badRequest(GBO_STOREFRONT_UNAVAILABLE_MESSAGE);
 
   const productSlug = item.productSlug;
   let product = (

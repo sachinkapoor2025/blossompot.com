@@ -8,7 +8,13 @@ import {
   gboGiftToProduct,
   gboImageUrl,
   gboPartnerOrderId,
+  isGboFulfillmentLine,
+  isGboHiddenFromStorefront,
+  isGboStorefrontEnabled,
+  isGboStorefrontHold,
+  isPublicGboCatalogPath,
   mapGboGiftStorefrontCategories,
+  orderIncludesGboProduct,
   mapGboStatusToOrderStatus,
   parseGboContentsLines,
   parseGboLineRef,
@@ -151,6 +157,54 @@ describe("gbo helpers", () => {
   it("clips gift card text to 180 chars", () => {
     assert.equal(clipGboGiftCardText("  hi  "), "hi");
     assert.equal(clipGboGiftCardText("x".repeat(200))?.length, 180);
+  });
+
+  it("keeps the GBO storefront off unless explicitly enabled", () => {
+    assert.equal(isGboStorefrontEnabled({}), false);
+    assert.equal(isGboStorefrontEnabled({ GBO_STOREFRONT_ENABLED: "" }), false);
+    assert.equal(isGboStorefrontEnabled({ GBO_STOREFRONT_ENABLED: "false" }), false);
+    assert.equal(isGboStorefrontEnabled({ GBO_STOREFRONT_ENABLED: "no" }), false);
+    assert.equal(isGboStorefrontEnabled({ GBO_STOREFRONT_ENABLED: "true" }), true);
+    assert.equal(isGboStorefrontEnabled({ GBO_STOREFRONT_ENABLED: "TRUE" }), true);
+    assert.equal(isGboStorefrontEnabled({ GBO_STOREFRONT_ENABLED: "1" }), true);
+    assert.equal(isGboStorefrontEnabled({ GBO_STOREFRONT_ENABLED: "yes" }), true);
+  });
+
+  it("hides GBO catalog rows only while the storefront switch is off", () => {
+    const gift = { slug: "gbo-us-3-peak", sku: "gbo:US:3", vendorSlug: "gift-baskets-overseas" };
+    const local = { slug: "blush-bloom", vendorSlug: "blossompot" };
+    const off = { GBO_STOREFRONT_ENABLED: "false" };
+    const on = { GBO_STOREFRONT_ENABLED: "true" };
+    assert.equal(isGboHiddenFromStorefront(gift, off), true);
+    assert.equal(isGboHiddenFromStorefront(local, off), false);
+    assert.equal(isGboHiddenFromStorefront(gift, on), false);
+    assert.equal(isGboFulfillmentLine({ productSlug: "gbo-gb-7-bear", sku: "gbo:GB:7" }), true);
+    assert.equal(
+      orderIncludesGboProduct({ items: [{ productSlug: "blush-bloom" }, { sku: "gbo:US:3" }] }),
+      true
+    );
+    assert.equal(orderIncludesGboProduct({ items: [{ productSlug: "blush-bloom", vendorSlug: "blossompot" }] }), false);
+  });
+
+  it("recognizes public GBO catalog paths and storefront holds", () => {
+    assert.equal(isPublicGboCatalogPath("/gbo/gifts"), true);
+    assert.equal(isPublicGboCatalogPath("/gbo/gifts/10215"), true);
+    assert.equal(isPublicGboCatalogPath("/admin/gbo/gifts"), false);
+    assert.equal(isPublicGboCatalogPath("/gifts"), false);
+    assert.equal(isPublicGboCatalogPath("/gbo/countries"), false);
+    assert.equal(
+      isGboStorefrontHold({
+        gbo: { lastError: "GBO storefront is disabled; this order was not submitted to Gift Baskets Overseas." },
+      }),
+      true
+    );
+    assert.equal(
+      isGboStorefrontHold({
+        gbo: { invoice: "INV1", lastError: "GBO storefront is disabled; this order was not submitted to Gift Baskets Overseas." },
+      }),
+      false
+    );
+    assert.equal(isGboStorefrontHold({ gbo: { invoice: "INV1", placedAt: "2026-10-01T00:00:00.000Z" } }), false);
   });
 
   it("matches GBO gifts in storefront search by name, contents, and tags", () => {

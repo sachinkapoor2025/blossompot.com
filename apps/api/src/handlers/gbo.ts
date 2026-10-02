@@ -3,6 +3,8 @@ import {
   gboCreateOrderSchema,
   gboGiftDetailQuerySchema,
   gboGiftQuerySchema,
+  isGboStorefrontEnabled,
+  isPublicGboCatalogPath,
 } from "@blossompot/shared";
 import {
   GboClientError,
@@ -14,7 +16,11 @@ import {
   gboListCountries,
   gboListGifts,
 } from "../lib/gbo-client";
-import { json, ok, okCached, badRequest, unauthorized } from "../lib/response";
+import { json, ok, okCached, badRequest, notFound, unauthorized } from "../lib/response";
+
+function requestPath(event: APIGatewayProxyEventV2): string {
+  return event.rawPath || event.requestContext?.http?.path || "";
+}
 
 function query(event: APIGatewayProxyEventV2): Record<string, string> {
   const out: Record<string, string> = {};
@@ -101,6 +107,14 @@ export async function gboGiftsHandler(
     sandbox: q.sandbox,
   });
   if (!parsed.success) return badRequest(parsed.error.issues[0]?.message ?? "Invalid gift query");
+  if (!isGboStorefrontEnabled() && isPublicGboCatalogPath(requestPath(event))) {
+    return ok({
+      country: parsed.data.country,
+      count: 0,
+      gifts: [],
+      storefrontEnabled: false,
+    });
+  }
   try {
     const gifts = await gboListGifts(parsed.data, { sandbox: parsed.data.sandbox ?? sandboxFlag(event) });
     const body = {
@@ -125,6 +139,9 @@ export async function gboGiftDetailHandler(
     sandbox: q.sandbox,
   });
   if (!parsed.success) return badRequest(parsed.error.issues[0]?.message ?? "country and productId required");
+  if (!isGboStorefrontEnabled() && isPublicGboCatalogPath(requestPath(event))) {
+    return notFound("Product not found");
+  }
   try {
     const gift = await gboResolveGift(parsed.data.country, parsed.data.productId, {
       sandbox: parsed.data.sandbox ?? sandboxFlag(event),

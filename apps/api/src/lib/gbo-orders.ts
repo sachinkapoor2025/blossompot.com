@@ -9,6 +9,8 @@ import {
   coerceGboString,
   gboPartnerOrderId,
   gboStatusLabel,
+  isGboStorefrontEnabled,
+  isGboStorefrontHold,
   isGboVendor,
   mapGboStatusToOrderStatus,
   orderHasGbo,
@@ -309,6 +311,21 @@ async function queryOrdersByStatus(status: string): Promise<StoredOrder[]> {
   return items;
 }
 
+/**
+ * While the storefront switch is off, skip payment-holds before the batch cap
+ * so they cannot crowd out orders that still need placement or tracking.
+ * When the switch is on, holds stay in the list and can be submitted.
+ */
+export function gboTrackingBatch<T extends Parameters<typeof isGboStorefrontHold>[0]>(
+  orders: T[],
+  limit = BATCH_LIMIT
+): T[] {
+  const eligible = isGboStorefrontEnabled()
+    ? orders
+    : orders.filter((order) => !isGboStorefrontHold(order));
+  return eligible.slice(0, limit);
+}
+
 export async function processGboTrackingSync(): Promise<{
   scanned: number;
   synced: number;
@@ -331,13 +348,14 @@ export async function processGboTrackingSync(): Promise<{
 
   const unique = new Map<string, StoredOrder>();
   for (const o of candidates) unique.set(o.orderId, o);
-  const list = [...unique.values()].slice(0, BATCH_LIMIT);
+  const list = gboTrackingBatch([...unique.values()]);
 
   let synced = 0;
   let updated = 0;
   let errors = 0;
   for (const order of list) {
     if (orderNeedsGboPlacement(order)) {
+      if (!isGboStorefrontEnabled() && isGboStorefrontHold(order)) continue;
       const placed = await placeGboOrderForPaidOrder(order);
       synced += 1;
       if (placed.error) errors += 1;

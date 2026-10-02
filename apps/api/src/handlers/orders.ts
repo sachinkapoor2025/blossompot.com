@@ -34,6 +34,12 @@ import {
   type VendorFulfillment,
   formatPostalDisplay,
   fulfillmentVendorSlug,
+  GBO_STOREFRONT_HOLD_ERROR,
+  GBO_STOREFRONT_UNAVAILABLE_MESSAGE,
+  gboPartnerOrderId,
+  isGboStorefrontEnabled,
+  isGboStorefrontHold,
+  orderIncludesGboProduct,
 } from "@blossompot/shared";
 import { evaluateProductsForLocation } from "./serviceability";
 import { resolveCheckoutUsdInrRate } from "../lib/exchange-rate";
@@ -227,6 +233,9 @@ export async function checkout(event: APIGatewayProxyEventV2) {
   const cart = cartBody.cart;
 
   if (!cart?.items?.length) return badRequest("Cart is empty");
+  if (!isGboStorefrontEnabled() && orderIncludesGboProduct({ items: cart.items })) {
+    return badRequest(GBO_STOREFRONT_UNAVAILABLE_MESSAGE);
+  }
 
   const cartCurrency = cart.items[0]?.currency ?? "USD";
   const checkoutCurrency = parsed.data.checkoutCurrency ?? cartCurrency;
@@ -849,8 +858,27 @@ export async function markOrderPaid(
 
   try {
     const { placeGboOrderForPaidOrder, orderNeedsGboPlacement } = await import("../lib/gbo-orders");
-    const latest = (await fetchOrder(orderId)) ?? updated;
-    if (orderNeedsGboPlacement(latest)) {
+    let latest = (await fetchOrder(orderId)) ?? updated;
+    if (
+      !isGboStorefrontEnabled() &&
+      orderIncludesGboProduct(latest) &&
+      !latest.gbo?.invoice &&
+      !latest.gbo?.placedAt
+    ) {
+      const held = {
+        ...latest,
+        gbo: {
+          partnerOrderId: latest.gbo?.partnerOrderId ?? gboPartnerOrderId(latest),
+          lastError: GBO_STOREFRONT_HOLD_ERROR,
+          lastSyncAt: timestamp,
+        },
+        updatedAt: timestamp,
+      };
+      await docClient.send(new PutCommand({ TableName: ORDERS_TABLE, Item: held }));
+      console.error("GBO place skipped — storefront disabled:", orderId);
+      latest = held;
+    }
+    if (orderNeedsGboPlacement(latest) && !isGboStorefrontHold(latest)) {
       const gboResult = await placeGboOrderForPaidOrder(latest);
       if (gboResult.error) console.error("GBO place after pay failed:", orderId, gboResult.error);
     }

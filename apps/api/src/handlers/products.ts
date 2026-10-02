@@ -19,6 +19,7 @@ import {
   productInStorefrontCategory,
   productVisibleForDeliveryCountry,
   dedupeStorefrontProducts,
+  isGboHiddenFromStorefront,
   VENDOR_GBO,
   type Product,
 } from "@blossompot/shared";
@@ -197,7 +198,11 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
   items = dedupeStorefrontProducts(items);
 
   items = items.filter(
-    (p) => p.published !== false && (p.inventory ?? 0) > 0 && isProductStorefrontVisible(p)
+    (p) =>
+      p.published !== false &&
+      (p.inventory ?? 0) > 0 &&
+      isProductStorefrontVisible(p) &&
+      !isGboHiddenFromStorefront(p)
   );
   if (search) {
     items = items.filter(
@@ -227,10 +232,12 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
 export async function getProduct(event: APIGatewayProxyEventV2) {
   const slug = event.pathParameters?.slug;
   if (!slug) return badRequest("Slug required");
+  if (isGboHiddenFromStorefront({ slug })) return notFound("Product not found");
 
   const nowMs = Date.now();
   const cached = productGetCache.get(slug);
   if (cached && nowMs - cached.at < PRODUCT_GET_CACHE_TTL_MS) {
+    if (isGboHiddenFromStorefront(cached.product)) return notFound("Product not found");
     const location = parseLocationQuery(event);
     if (location?.countryCode && !productVisibleForDeliveryCountry(cached.product, location.countryCode)) {
       return notFound("Product not found");
@@ -268,6 +275,7 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
 
   if (!item) return notFound("Product not found");
   const product = item;
+  if (isGboHiddenFromStorefront(product)) return notFound("Product not found");
   if (product.published === false) return notFound("Product not found");
   if (!isProductStorefrontVisible(product)) return notFound("Product not found");
   productGetCache.set(slug, { at: nowMs, product });

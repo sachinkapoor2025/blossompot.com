@@ -2,6 +2,8 @@ import {
   parseGboSlug,
   gboGiftToProduct,
   gboGiftNumericId,
+  isGboHiddenFromStorefront,
+  isGboStorefrontEnabled,
   productInStorefrontCategory,
   productMatchesSearchQuery,
   productVisibleForDeliveryCountry,
@@ -16,7 +18,11 @@ import { isRakhiRelatedCategorySlug, isRakhiRelatedProduct } from "./rakhi-filte
 import { getStorefrontDeliveryCountry } from "./storefront-country";
 
 function isStorefrontVisible(product: Product): boolean {
-  return !isRakhiRelatedProduct(product) && isProductStorefrontVisible(product);
+  return (
+    !isGboHiddenFromStorefront(product) &&
+    !isRakhiRelatedProduct(product) &&
+    isProductStorefrontVisible(product)
+  );
 }
 
 /**
@@ -72,6 +78,7 @@ const gboInFlight = new Map<string, Promise<Product[]>>();
 
 /** Live Gift Baskets Overseas catalog for the selected delivery country. */
 export async function loadGboStorefrontProducts(country?: string): Promise<Product[]> {
+  if (!isGboStorefrontEnabled()) return [];
   const iso = (country ?? (await getStorefrontDeliveryCountry())).trim().toUpperCase() || "US";
   const pending = gboInFlight.get(iso);
   if (pending) return pending;
@@ -112,19 +119,15 @@ function isProductMissingError(err: unknown): boolean {
  * Bundled catalog JSON is seed data, not a public listing source.
  */
 export async function loadProduct(slug: string): Promise<Product | null> {
+  if (isGboHiddenFromStorefront({ slug })) return null;
   try {
     const data = await api<{ product: Product }>(`/products/${slug}`, CATALOG_FETCH);
     if (!isStorefrontVisible(data.product)) return null;
     return rememberProduct(data.product);
   } catch (err) {
-    const stale = memoryProduct(slug);
-    if (stale) {
-      if (!isStorefrontVisible(stale)) return null;
-      return stale;
-    }
-
     const gboRef = parseGboSlug(slug);
     if (gboRef) {
+      if (isGboHiddenFromStorefront({ slug })) return null;
       try {
         const data = await api<{ gift: GboGift }>(
           `/gbo/gifts/${gboRef.productId}?country=${gboRef.country}`,
@@ -136,11 +139,13 @@ export async function loadProduct(slug: string): Promise<Product | null> {
           return rememberProduct(rest as Product);
         }
       } catch {
-        /* GBO token missing or gift not found */
+        /* GBO token missing, storefront off, or gift not found */
       }
+      if (isProductMissingError(err)) return null;
     }
 
-    if (isProductMissingError(err)) return null;
+    const stale = memoryProduct(slug);
+    if (stale && isStorefrontVisible(stale)) return stale;
     return null;
   }
 }
