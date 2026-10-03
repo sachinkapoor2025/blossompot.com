@@ -198,13 +198,13 @@ export default function FnpImportPage() {
   }
 
   function overridesFromDrafts(): FnpCategoryOverride[] {
-    return Object.values(drafts).flatMap((draft) => {
+    return Object.values(drafts).flatMap((draft): FnpCategoryOverride[] => {
       if (draft.mode === "map" && draft.slug) {
         const catalog = preview?.catalogCategories.find((category) => category.slug === draft.slug);
         return [{ workbook: draft.workbook, slug: draft.slug, name: catalog?.name ?? draft.slug, create: false }];
       }
       if (draft.mode === "create" && draft.name.trim()) {
-        return [{ workbook: draft.workbook, slug: draft.name.trim(), name: draft.name.trim(), create: true as const }];
+        return [{ workbook: draft.workbook, slug: draft.name.trim(), name: draft.name.trim(), create: true }];
       }
       return [];
     });
