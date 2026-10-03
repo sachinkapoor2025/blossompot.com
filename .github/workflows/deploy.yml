@@ -242,6 +242,13 @@ jobs:
               exit 1
               ;;
           esac
+          # A failed changeset leaves a new stack here with no resources. Remove only that empty stack.
+          DEV_STACK_STATUS=$(aws cloudformation describe-stacks --stack-name blossompot-dev --query "Stacks[0].StackStatus" --output text 2>/dev/null || echo "MISSING")
+          if [ "$DEV_STACK_STATUS" = "REVIEW_IN_PROGRESS" ]; then
+            echo "Deleting empty blossompot-dev stack left in REVIEW_IN_PROGRESS."
+            aws cloudformation delete-stack --stack-name blossompot-dev
+            aws cloudformation wait stack-delete-complete --stack-name blossompot-dev
+          fi
           sam build && sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --config-env default --stack-name blossompot-dev \
             --parameter-overrides "$OVERRIDES"
 

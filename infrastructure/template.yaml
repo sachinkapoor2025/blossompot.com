@@ -149,6 +149,9 @@ Parameters:
     Type: String
     Default: "https://www.giftbasketsoverseas.com/api/v1"
 
+Conditions:
+  IsProd: !Equals [!Ref Environment, prod]
+
 Globals:
   Function:
     Runtime: nodejs20.x
@@ -591,8 +594,12 @@ Resources:
           ForwardedValues:
             QueryString: false
 
+  # One SES identity per account. Production already owns blossompot.com.
+  # Dev and staging must not create it again: CloudFormation EarlyValidation
+  # ResourceExistenceCheck fails the changeset when the identity already exists.
   SesDomainIdentity:
     Type: AWS::SES::EmailIdentity
+    Condition: IsProd
     Properties:
       EmailIdentity: blossompot.com
       DkimSigningAttributes:

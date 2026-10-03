@@ -122,4 +122,6 @@ test("workflow and Amplify config isolate dev from production", () => {
   const template = readFileSync(resolve(root, "infrastructure/template.yaml"), "utf8");
   assert.match(template, /TableName: !Sub blossompot-products-\$\{Environment\}/);
   assert.match(template, /StageName: !Ref Environment/);
+  assert.match(template, /IsProd: !Equals \[!Ref Environment, prod\]/);
+  assert.match(template, /SesDomainIdentity:[\s\S]*Condition: IsProd[\s\S]*EmailIdentity: blossompot.com/);
 });
