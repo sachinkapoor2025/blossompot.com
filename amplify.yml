@@ -12,34 +12,142 @@ applications:
         build:
           commands:
             - |
-              STACK_NAME=${STACK_NAME:-blossompot-prod}
+              BRANCH="${AWS_BRANCH:-}"
               ENV_FILE="apps/web/.env.production"
               if [ ! -d "apps/web" ]; then ENV_FILE=".env.production"; fi
-              if command -v aws >/dev/null 2>&1; then
-                output() {
-                  aws cloudformation describe-stacks \
-                    --stack-name "$STACK_NAME" \
-                    --query "Stacks[0].Outputs[?OutputKey=='$1'].OutputValue | [0]" \
-                    --output text 2>/dev/null
-                }
-                USER_POOL_ID=$(output UserPoolId || true)
-                USER_POOL_CLIENT_ID=$(output UserPoolClientId || true)
-                API_URL=$(output ApiUrl || true)
-                CLOUDFRONT_DOMAIN=$(output CloudFrontDomain || true)
-                if [ -n "$USER_POOL_ID" ] && [ "$USER_POOL_ID" != "None" ] && [ -n "$USER_POOL_CLIENT_ID" ] && [ "$USER_POOL_CLIENT_ID" != "None" ]; then
-                  {
-                    echo "NEXT_PUBLIC_COGNITO_USER_POOL_ID=$USER_POOL_ID"
-                    echo "NEXT_PUBLIC_COGNITO_CLIENT_ID=$USER_POOL_CLIENT_ID"
-                    echo "NEXT_PUBLIC_COGNITO_REGION=${AWS_REGION:-us-east-1}"
-                    if [ -n "$API_URL" ] && [ "$API_URL" != "None" ]; then echo "NEXT_PUBLIC_API_URL=$API_URL"; fi
-                    if [ -n "$CLOUDFRONT_DOMAIN" ] && [ "$CLOUDFRONT_DOMAIN" != "None" ]; then echo "NEXT_PUBLIC_CDN_URL=https://$CLOUDFRONT_DOMAIN"; fi
-                    if [ -n "${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-}" ]; then echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"; fi
-                    if [ -n "${NEXT_PUBLIC_RAZORPAY_KEY_ID:-}" ]; then echo "NEXT_PUBLIC_RAZORPAY_KEY_ID=$NEXT_PUBLIC_RAZORPAY_KEY_ID"; fi
-                    if [ -n "${RAZOR_KEY_ID:-}" ]; then echo "NEXT_PUBLIC_RAZORPAY_KEY_ID=$RAZOR_KEY_ID"; fi
-                  } >> "$ENV_FILE"
+              PROD_API_HOST="6y37e2a4j1.execute-api.us-east-1.amazonaws.com"
+              PROD_CDN_HOST="d2d01h4hac5hqs.cloudfront.net"
+
+              output_from() {
+                aws cloudformation describe-stacks \
+                  --region "${AWS_REGION:-us-east-1}" \
+                  --stack-name "$1" \
+                  --query "Stacks[0].Outputs[?OutputKey=='$2'].OutputValue | [0]" \
+                  --output text 2>/dev/null || true
+              }
+
+              if [ "$BRANCH" = "dev" ]; then
+                set -eu
+                STACK_NAME="blossompot-dev"
+                if ! command -v aws >/dev/null 2>&1; then
+                  echo "Refusing to build the dev branch without the AWS CLI. This build will not fall back to blossompot-prod."
+                  exit 1
                 fi
+                USER_POOL_ID=$(output_from "$STACK_NAME" UserPoolId)
+                USER_POOL_CLIENT_ID=$(output_from "$STACK_NAME" UserPoolClientId)
+                API_URL=$(output_from "$STACK_NAME" ApiUrl)
+                CLOUDFRONT_DOMAIN=$(output_from "$STACK_NAME" CloudFrontDomain)
+                PRODUCTS_TABLE=$(output_from "$STACK_NAME" ProductsTableName)
+                API_URL=${API_URL%/}
+                missing=""
+                for pair in \
+                  "UserPoolId:$USER_POOL_ID" \
+                  "UserPoolClientId:$USER_POOL_CLIENT_ID" \
+                  "ApiUrl:$API_URL" \
+                  "CloudFrontDomain:$CLOUDFRONT_DOMAIN" \
+                  "ProductsTableName:$PRODUCTS_TABLE"
+                do
+                  value="${pair#*:}"
+                  if [ -z "$value" ] || [ "$value" = "None" ]; then
+                    missing="$missing ${pair%%:*}"
+                  fi
+                done
+                if [ -n "$missing" ]; then
+                  echo "Dev stack ${STACK_NAME} is missing:${missing}."
+                  echo "Refusing to build the dev site without those outputs. This build will not use the production API."
+                  exit 1
+                fi
+                case "$API_URL" in
+                  https://*.execute-api.*.amazonaws.com/dev) ;;
+                  *)
+                    echo "Dev stack ApiUrl is not an execute-api URL ending in /dev."
+                    echo "Refusing to build the dev site against another API."
+                    exit 1
+                    ;;
+                esac
+                case "$API_URL" in
+                  *"$PROD_API_HOST"*)
+                    echo "Refusing to build the dev site with the production API host."
+                    exit 1
+                    ;;
+                esac
+                if [ "$PRODUCTS_TABLE" != "blossompot-products-dev" ]; then
+                  echo "Dev stack products table is '${PRODUCTS_TABLE}', expected blossompot-products-dev."
+                  exit 1
+                fi
+                if [ "$CLOUDFRONT_DOMAIN" = "$PROD_CDN_HOST" ]; then
+                  echo "Refusing to build the dev site with the production CloudFront distribution."
+                  exit 1
+                fi
+                unset NEXT_PUBLIC_API_URL NEXT_PUBLIC_COGNITO_USER_POOL_ID NEXT_PUBLIC_COGNITO_CLIENT_ID NEXT_PUBLIC_CDN_URL
+                export NEXT_PUBLIC_APP_ENV=dev
+                export NEXT_PUBLIC_API_URL="$API_URL"
+                export NEXT_PUBLIC_COGNITO_USER_POOL_ID="$USER_POOL_ID"
+                export NEXT_PUBLIC_COGNITO_CLIENT_ID="$USER_POOL_CLIENT_ID"
+                export NEXT_PUBLIC_COGNITO_REGION="${AWS_REGION:-us-east-1}"
+                export NEXT_PUBLIC_CDN_URL="https://$CLOUDFRONT_DOMAIN"
+                case "${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-}" in
+                  pk_test_*) ;;
+                  "") unset NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ;;
+                  *)
+                    echo "Ignoring a non-test Stripe publishable key on the dev branch."
+                    unset NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+                    ;;
+                esac
+                razor_key="${NEXT_PUBLIC_RAZORPAY_KEY_ID:-}"
+                if [ -z "$razor_key" ]; then razor_key="${RAZOR_KEY_ID:-}"; fi
+                case "$razor_key" in
+                  rzp_test_*) export NEXT_PUBLIC_RAZORPAY_KEY_ID="$razor_key" ;;
+                  "") unset NEXT_PUBLIC_RAZORPAY_KEY_ID RAZOR_KEY_ID ;;
+                  *)
+                    echo "Ignoring a non-test Razorpay key id on the dev branch."
+                    unset NEXT_PUBLIC_RAZORPAY_KEY_ID RAZOR_KEY_ID
+                    ;;
+                esac
+                case "${NEXT_PUBLIC_SITE_URL:-}" in
+                  ""|https://www.blossompot.com|https://blossompot.com|http://blossompot.com|http://www.blossompot.com)
+                    if [ -n "${AWS_APP_ID:-}" ]; then
+                      export NEXT_PUBLIC_SITE_URL="https://dev.${AWS_APP_ID}.amplifyapp.com"
+                    fi
+                    ;;
+                esac
+                {
+                  echo "NEXT_PUBLIC_APP_ENV=dev"
+                  echo "NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL"
+                  echo "NEXT_PUBLIC_COGNITO_USER_POOL_ID=$NEXT_PUBLIC_COGNITO_USER_POOL_ID"
+                  echo "NEXT_PUBLIC_COGNITO_CLIENT_ID=$NEXT_PUBLIC_COGNITO_CLIENT_ID"
+                  echo "NEXT_PUBLIC_COGNITO_REGION=$NEXT_PUBLIC_COGNITO_REGION"
+                  echo "NEXT_PUBLIC_CDN_URL=$NEXT_PUBLIC_CDN_URL"
+                  if [ -n "${NEXT_PUBLIC_SITE_URL:-}" ]; then echo "NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL"; fi
+                  if [ -n "${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-}" ]; then echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"; fi
+                  if [ -n "${NEXT_PUBLIC_RAZORPAY_KEY_ID:-}" ]; then echo "NEXT_PUBLIC_RAZORPAY_KEY_ID=$NEXT_PUBLIC_RAZORPAY_KEY_ID"; fi
+                } > "$ENV_FILE"
+                npm run build -w @blossompot/web
+              elif [ "$BRANCH" = "main" ]; then
+                STACK_NAME="${STACK_NAME:-blossompot-prod}"
+                if command -v aws >/dev/null 2>&1; then
+                  USER_POOL_ID=$(output_from "$STACK_NAME" UserPoolId)
+                  USER_POOL_CLIENT_ID=$(output_from "$STACK_NAME" UserPoolClientId)
+                  API_URL=$(output_from "$STACK_NAME" ApiUrl)
+                  CLOUDFRONT_DOMAIN=$(output_from "$STACK_NAME" CloudFrontDomain)
+                  if [ -n "$USER_POOL_ID" ] && [ "$USER_POOL_ID" != "None" ] && [ -n "$USER_POOL_CLIENT_ID" ] && [ "$USER_POOL_CLIENT_ID" != "None" ]; then
+                    {
+                      echo "NEXT_PUBLIC_COGNITO_USER_POOL_ID=$USER_POOL_ID"
+                      echo "NEXT_PUBLIC_COGNITO_CLIENT_ID=$USER_POOL_CLIENT_ID"
+                      echo "NEXT_PUBLIC_COGNITO_REGION=${AWS_REGION:-us-east-1}"
+                      if [ -n "$API_URL" ] && [ "$API_URL" != "None" ]; then echo "NEXT_PUBLIC_API_URL=$API_URL"; fi
+                      if [ -n "$CLOUDFRONT_DOMAIN" ] && [ "$CLOUDFRONT_DOMAIN" != "None" ]; then echo "NEXT_PUBLIC_CDN_URL=https://$CLOUDFRONT_DOMAIN"; fi
+                      if [ -n "${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-}" ]; then echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"; fi
+                      if [ -n "${NEXT_PUBLIC_RAZORPAY_KEY_ID:-}" ]; then echo "NEXT_PUBLIC_RAZORPAY_KEY_ID=$NEXT_PUBLIC_RAZORPAY_KEY_ID"; fi
+                      if [ -n "${RAZOR_KEY_ID:-}" ]; then echo "NEXT_PUBLIC_RAZORPAY_KEY_ID=$RAZOR_KEY_ID"; fi
+                    } >> "$ENV_FILE"
+                  fi
+                fi
+                npm run build -w @blossompot/web
+              else
+                echo "Refusing to build Amplify branch '${BRANCH:-unset}'. Expected dev or main. This build will not select blossompot-prod."
+                exit 1
               fi
-            - npm run build -w @blossompot/web
       artifacts:
         baseDirectory: apps/web/.next
         files:
@@ -51,6 +159,7 @@ applications:
     environment:
       variables:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_APP_ENV: ${NEXT_PUBLIC_APP_ENV}
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
         NEXT_PUBLIC_COGNITO_USER_POOL_ID: ${NEXT_PUBLIC_COGNITO_USER_POOL_ID}
         NEXT_PUBLIC_COGNITO_CLIENT_ID: ${NEXT_PUBLIC_COGNITO_CLIENT_ID}

@@ -304,7 +304,7 @@ Every form blur or debounced keystroke can POST to `/leads`:
 3. Log into admin portal locally or staging
 4. Prompt: *"Add wishlist feature"* or *"Improve checkout UX"*
 5. Cursor edits `apps/web` and `apps/api` following conventions
-6. Push branch → PR → GitHub Actions deploys to staging
+6. Push a `feature/**` branch → GitHub Actions builds and tests only. It does not deploy.
 7. Multiple devs: feature branches, shared types in `packages/shared`
 
 Admin credentials for staging are in team 1Password / SSM — developers never share source code in prompts; Cursor has repo access.
@@ -312,8 +312,14 @@ Admin credentials for staging are in team 1Password / SSM — developers never s
 ## AWS Deployment (GitHub Actions)
 
 ```
-push main → build shared → build api → sam deploy → build web → Amplify/OpenNext deploy
+push main  → test + build → sam deploy --config-env prod (blossompot-prod, blossompot-products-prod, API stage /prod) → Amplify branch main
+push dev   → test + build → sam deploy --config-env default (blossompot-dev, blossompot-products-dev, API stage /dev) → Amplify branch dev
+feature/** → test + build only
 ```
+
+Manual `workflow_dispatch` requires `environment=dev` or `environment=prod` and the matching branch (`dev` or `main`). It does not default to production. Dev deploys do not receive production payment, SMTP, WhatsApp, Twilio, USPS, Orange County, or GBO secrets. Optional dev test keys, when configured in GitHub, must use `sk_test_` / `pk_test_` / `rzp_test_` prefixes. The dev products table starts empty; catalog and FNP imports are not part of deploy.
+
+`amplify.yml` selects `blossompot-dev` for `AWS_BRANCH=dev` and `blossompot-prod` for `main`. Any other Amplify branch fails the build. A dev build fails if the dev stack API URL is missing. `NEXT_PUBLIC_APP_ENV=dev` is exported in the same shell as `npm run build` so an Amplify console value cannot keep the production API (`apps/web/src/lib/env.ts`).
 
 ### Estimated Monthly Cost (Low Traffic / Idle)
 
