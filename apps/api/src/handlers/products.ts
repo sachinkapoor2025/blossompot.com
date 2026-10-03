@@ -57,9 +57,10 @@ function forStorefront(product: Product): Product {
   const stripped = stripVendorPrivateFields(
     withCompetitiveStorefrontPricing(withResolvedProductImages(product))
   );
+  const { sourceUrl: _sourceUrl, importBatchId: _importBatchId, ...publicProduct } = stripped;
   const international = product.vendorSlug === VENDOR_GBO || product.internationalDelivery === true;
   return {
-    ...stripped,
+    ...publicProduct,
     allowsAddons,
     ...(international
       ? {

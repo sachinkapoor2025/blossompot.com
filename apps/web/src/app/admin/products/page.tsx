@@ -575,6 +575,9 @@ export default function AdminProductsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Products</h1>
         <div className="flex gap-2">
+          <Link href="/admin/products/import" className="px-4 py-2 rounded-lg text-sm border">
+            FNP import
+          </Link>
           <button
             type="button"
             onClick={() => {
@@ -907,6 +910,11 @@ export default function AdminProductsPage() {
             <h2 className="text-xl font-bold mb-2">Bulk Upload (CSV)</h2>
             <p className="text-sm text-slate-600 mb-3">
               Download the sample template, fill in your products, then paste or upload the CSV below.
+              FNP USA workbook imports belong on the{" "}
+              <Link href="/admin/products/import" className="underline font-medium">
+                FNP import
+              </Link>{" "}
+              page, which previews rows, hosts images, and keeps products unpublished.
             </p>
             <button
               type="button"

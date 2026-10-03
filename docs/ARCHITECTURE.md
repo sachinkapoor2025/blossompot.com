@@ -116,6 +116,11 @@ When admin (or Orange County vendor tracking) changes order status (accepted, pr
 | PUT | `/products/{slug}` | Admin: update |
 | DELETE | `/products/{slug}` | Admin: delete |
 | POST | `/products/bulk` | Admin: CSV bulk upload |
+| POST | `/admin/imports/fnp/preview` | Admin: read-only FNP USA workbook preview. Validates rows, the approved category map, optional unmatched-category mappings, FNP URL duplicates, and existing categories. Writes nothing. UI: `/admin/products/import`. |
+| POST | `/admin/imports/fnp/commit` | Admin: commit at most 20 selected preview rows. Refuses production. Creates missing approved or explicitly mapped categories unpublished, copies each distinct FNP image to S3 once, and inserts unpublished products. Same FNP URL is a no-op. A slug owned by another product is not overwritten. |
+| POST | `/admin/imports/fnp/retry` | Admin: retry up to 20 failed rows from one import batch. |
+| GET | `/admin/imports/fnp` | Admin: recent FNP import batches. |
+| GET | `/admin/imports/fnp/:batchId` | Admin: one FNP import batch and its row results. |
 | GET | `/categories` | List categories |
 | GET/PUT | `/homepage-catalog?country=` | Homepage-only derived record (gift count, category count, 13 tiles) in the config table for 45 seconds, keyed by country. Does not replace `/products` or `/gbo/gifts`. |
 | GET/PUT | `/flower-guide-cards?country=` | Selected flower-guide cards for one country (USA up to 24, other guides up to 10) in the config table for 45 seconds. Does not replace `/products`, `/gbo/gifts`, or product detail. |

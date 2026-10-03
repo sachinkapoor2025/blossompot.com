@@ -72,6 +72,8 @@ export * from "./lib/order-vendors";
 export * from "./lib/postal-countries";
 export * from "./lib/serviceability";
 export * from "./schemas/serviceability";
+export * from "./lib/slug";
+export * from "./lib/fnp-import";
 export * from "./lib/product-addons";
 export * from "./lib/flash-sale";
 export * from "./schemas/gifting";

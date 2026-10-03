@@ -2,6 +2,7 @@ import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda
 import { ok, notFound, corsPreflight, json } from "./lib/response";
 import { allowRequest, clientIp, limitForPath } from "./lib/rate-limit";
 import * as products from "./handlers/products";
+import * as fnpImport from "./handlers/fnp-import";
 import * as categories from "./handlers/categories";
 import * as cart from "./handlers/cart";
 import * as orders from "./handlers/orders";
@@ -80,6 +81,16 @@ const routes: Route[] = [
     params: ["slug"],
   },
   { method: "POST", pattern: /^\/products\/bulk$/, handler: products.bulkUploadProducts },
+  { method: "POST", pattern: /^\/admin\/imports\/fnp\/preview$/, handler: fnpImport.previewFnpImport },
+  { method: "POST", pattern: /^\/admin\/imports\/fnp\/commit$/, handler: fnpImport.commitFnpImport },
+  { method: "POST", pattern: /^\/admin\/imports\/fnp\/retry$/, handler: fnpImport.retryFnpImport },
+  { method: "GET", pattern: /^\/admin\/imports\/fnp$/, handler: fnpImport.listFnpImports },
+  {
+    method: "GET",
+    pattern: /^\/admin\/imports\/fnp\/([^/]+)$/,
+    handler: fnpImport.getFnpImport,
+    params: ["batchId"],
+  },
   { method: "GET", pattern: /^\/categories$/, handler: categories.listCategories },
   { method: "GET", pattern: /^\/homepage-catalog$/, handler: homepageCatalog.getHomepageCatalogCache },
   { method: "PUT", pattern: /^\/homepage-catalog$/, handler: homepageCatalog.putHomepageCatalogCache },

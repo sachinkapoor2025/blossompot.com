@@ -30,6 +30,7 @@
     "import:blossompot": "tsx scripts/import-blossompot.ts",
     "import:blossompot:fetch": "tsx scripts/import-blossompot.ts --fetch-only",
     "import:orange-county": "tsx scripts/import-orange-county.ts",
+    "import:fnp-usa": "tsx --env-file=apps/api/.env scripts/import-fnp-usa.ts",
     "generate:orange-county-catalog": "tsx scripts/generate-orange-county-catalog.ts",
     "seed:inventory": "tsx scripts/seed-inventory.ts",
     "seed:serviceability": "tsx scripts/seed-serviceability.ts",

@@ -11,7 +11,7 @@ let categoryCache: { at: number; items: Category[] } | null = null;
 /** Once per Lambda instance: repair categories missing GSI1 (legacy WooCommerce/seed imports). */
 let categoryIndexRepaired = false;
 
-function invalidateCategoryCache() {
+export function invalidateCategoryCache() {
   categoryCache = null;
 }
 
