@@ -1,5 +1,6 @@
 "use client";
 
+import { SHOPPING_COUNTRY_ISO } from "@blossompot/shared";
 import { useState, useEffect, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -101,7 +102,7 @@ function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
                 openSelector();
               }}
             >
-              Other country — enter postal code
+              United States — enter ZIP code
             </button>
           </div>
         </div>
@@ -379,8 +380,8 @@ export function Header() {
   };
 
   const navHref = (item: (typeof navItems)[number]) => {
-    if ("category" in item && item.category && cityCountryIso) {
-      return categoryLocationHref(item.category, cityCountryIso);
+    if ("category" in item && item.category) {
+      return categoryLocationHref(item.category, SHOPPING_COUNTRY_ISO);
     }
     return item.href;
   };
@@ -586,7 +587,7 @@ export function Header() {
                         openSelector();
                       }}
                     >
-                      Other country — enter postal code
+                      United States — enter ZIP code
                     </button>
                   </div>
                 )}

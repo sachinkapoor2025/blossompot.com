@@ -15,6 +15,7 @@ import { applyDeliveryCheck, type DeliveryCheckState } from "./country-switch";
 import {
   DELIVERY_LOCATION_EVENT,
   readDeliveryLocation,
+  toShoppingDeliveryLocation,
   writeDeliveryLocation,
   type StoredDeliveryLocation,
 } from "./delivery-location";
@@ -110,10 +111,10 @@ export function DeliveryLocationProvider({ children }: { children: ReactNode }) 
 
   const setLocation = useCallback(
     async (next: StoredDeliveryLocation) => {
-      const normalized: StoredDeliveryLocation = {
+      const normalized = toShoppingDeliveryLocation({
         ...next,
         countryCode: next.countryCode.trim().toUpperCase(),
-      };
+      });
       const id = ++selectionRef.current;
       writeDeliveryLocation(normalized);
       setStored(normalized);

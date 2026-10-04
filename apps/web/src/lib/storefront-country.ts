@@ -1,3 +1,4 @@
+import { clampShoppingCountry } from "@blossompot/shared";
 import { cookies, headers } from "next/headers";
 import { DELIVERY_LOCATION_COOKIE, parseDeliveryLocationToken } from "./delivery-location";
 import { STOREFRONT_COUNTRY_HEADER } from "./location-seo-urls";
@@ -17,24 +18,24 @@ function decodeCookieValue(raw: string): string {
   }
 }
 
-/** ISO-2 country from ?country=, middleware header, or the delivery-location cookie. Defaults to US. */
+/** Shopping country from ?country=, middleware header, or the delivery cookie. Always US. */
 export async function getStorefrontDeliveryCountry(
   preferred?: string | string[] | null
 ): Promise<string> {
   const fromQuery = normalizeStorefrontCountry(preferred);
-  if (fromQuery) return fromQuery;
+  if (fromQuery) return clampShoppingCountry(fromQuery);
   try {
     const fromHeader = normalizeStorefrontCountry((await headers()).get(STOREFRONT_COUNTRY_HEADER));
-    if (fromHeader) return fromHeader;
+    if (fromHeader) return clampShoppingCountry(fromHeader);
   } catch {
     /* headers() unavailable outside a request */
   }
   try {
     const raw = (await cookies()).get(DELIVERY_LOCATION_COOKIE)?.value;
     const loc = parseDeliveryLocationToken(raw ? decodeCookieValue(raw) : "");
-    if (loc?.countryCode) return loc.countryCode;
+    if (loc?.countryCode) return clampShoppingCountry(loc.countryCode);
   } catch {
     /* cookies() unavailable outside a request */
   }
-  return "US";
+  return clampShoppingCountry();
 }

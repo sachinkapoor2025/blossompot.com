@@ -1,3 +1,4 @@
+import { clampShoppingCountry, SHOPPING_COUNTRY_ISO } from "@blossompot/shared";
 import { CATEGORY_PUBLIC_SLUG, categoryHref } from "./category-urls";
 
 /** Pretty country slugs for category URLs (`/flowers-to-usa`). ISO-2 lowercase is the fallback. */
@@ -251,25 +252,31 @@ function normalizeIso2(raw?: string | null): string | null {
   return /^[A-Z]{2}$/.test(iso) ? iso : null;
 }
 
-/** Path (country page / shop URL) wins, then ?country=, then the delivery cookie. */
+/**
+ * Shopping country for catalog requests and the delivery cookie.
+ * Page identity still comes from `countryIsoFromPathname`. A UK guide or
+ * `?country=GB` does not change the catalog away from the United States.
+ */
 export function resolveStorefrontCountryIso(input: {
   pathname: string;
   searchCountry?: string | null;
   cookieCountry?: string | null;
 }): string | null {
-  return (
+  const resolved =
     countryIsoFromPathname(input.pathname, input.searchCountry) ??
-    normalizeIso2(input.cookieCountry)
-  );
+    normalizeIso2(input.cookieCountry);
+  if (!resolved) return null;
+  return clampShoppingCountry(resolved);
 }
 
 export function withCountryQuery(href: string, country: string | null | undefined): string {
   const iso = normalizeIso2(country ?? null);
   if (!iso) return href;
+  const shopping = clampShoppingCountry(iso);
   const qIndex = href.indexOf("?");
   const path = qIndex >= 0 ? href.slice(0, qIndex) : href;
   const params = new URLSearchParams(qIndex >= 0 ? href.slice(qIndex + 1) : "");
-  params.set("country", iso);
+  params.set("country", shopping);
   const qs = params.toString();
   return qs ? `${path}?${qs}` : path;
 }
@@ -368,10 +375,14 @@ function rewriteWorldwideCopy(value: string, country: string): string {
     .replace(/worldwide/g, country);
 }
 
+function shoppingCopyName(countryIso: string): string {
+  return countryDisplayName(clampShoppingCountry(countryIso));
+}
+
 export function localizeShopText(path: string, text: string): string {
   const parsed = parseLocationShopPath(path);
   if (!parsed) return text;
-  return rewriteWorldwideCopy(text, countryDisplayName(parsed.countryIso));
+  return rewriteWorldwideCopy(text, shoppingCopyName(parsed.countryIso));
 }
 
 /** Keep location shop pages unique vs generic worldwide copy. Canonical path is unchanged. */
@@ -381,7 +392,7 @@ export function localizeShopCopy(
 ): { title: string; description: string; h1?: string } {
   const parsed = parseLocationShopPath(path);
   if (!parsed) return copy;
-  const country = countryDisplayName(parsed.countryIso);
+  const country = shoppingCopyName(parsed.countryIso);
   return {
     title: rewriteWorldwideCopy(copy.title, country),
     description: rewriteWorldwideCopy(copy.description, country),
@@ -392,7 +403,7 @@ export function localizeShopCopy(
 export function locationShopHeading(path: string, heading: string): string {
   const parsed = parseLocationShopPath(path);
   if (!parsed) return heading;
-  const country = countryDisplayName(parsed.countryIso);
+  const country = shoppingCopyName(parsed.countryIso);
   const rewritten = rewriteWorldwideCopy(heading, country);
   if (rewritten !== heading) return rewritten;
   if (heading.toLowerCase().includes(country.toLowerCase())) return heading;
@@ -461,16 +472,16 @@ export function giftsCatalogCountryIso(locationSlug: string): string | null {
 export function giftsCatalogCountryRewrites(): { source: string; destination: string }[] {
   const seen = new Set<string>();
   const rules: { source: string; destination: string }[] = [];
-  const add = (slug: string, iso: string) => {
+  const add = (slug: string) => {
     const key = slug.trim().toLowerCase();
     if (!key || seen.has(key)) return;
     seen.add(key);
-    rules.push({ source: `/gifts-to-${key}`, destination: `/products?country=${iso}` });
+    rules.push({
+      source: `/gifts-to-${key}`,
+      destination: `/products?country=${SHOPPING_COUNTRY_ISO}`,
+    });
   };
-  for (const [iso, slug] of Object.entries(ISO_TO_SLUG)) add(slug, iso);
-  for (const slug of GIFTS_CATALOG_COUNTRY_SLUGS) {
-    const iso = isoFromCountrySeoSlug(slug);
-    if (iso) add(slug, iso);
-  }
+  for (const slug of Object.values(ISO_TO_SLUG)) add(slug);
+  for (const slug of GIFTS_CATALOG_COUNTRY_SLUGS) add(slug);
   return rules;
 }

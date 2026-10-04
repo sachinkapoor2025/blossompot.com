@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { ShippingAddress } from "@blossompot/shared";
+import { isShoppingCountry, type ShippingAddress } from "@blossompot/shared";
 import { LeadCaptureInput } from "@/components/LeadCaptureInput";
 import { PhoneInput, buildPhoneValue } from "@/components/PhoneInput";
 import { CountryRegionFields } from "@/components/CountryRegionFields";
@@ -58,6 +58,7 @@ export function RecipientAddressFields({
 
   const changeCountry = (iso: string) => {
     const next = iso.trim().toUpperCase();
+    if (!isShoppingCountry(next)) return;
     const regions = regionOptionsForCountry(next);
     const nextState = regions?.some((r) => r.code === value.state) ? value.state : "";
     setPhoneCountry(next);
@@ -65,6 +66,7 @@ export function RecipientAddressFields({
       ...value,
       country: next,
       state: nextState,
+      postalCode: isShoppingCountry(value.country) ? value.postalCode : "",
       phone: buildPhoneValue(next, phoneLocal),
     });
   };
@@ -133,11 +135,14 @@ export function RecipientAddressFields({
         <label className="block text-sm">
           <span className="font-medium text-slate-700">Country</span>
           <select
-            value={value.country}
+            value={isShoppingCountry(value.country) ? value.country : ""}
             onChange={(e) => changeCountry(e.target.value)}
             required
             className="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent bg-white"
           >
+            {!isShoppingCountry(value.country) ? (
+              <option value="">Select the United States</option>
+            ) : null}
             {countries.map((c) => (
               <option key={c.countryCode} value={c.countryCode}>
                 {c.countryName}

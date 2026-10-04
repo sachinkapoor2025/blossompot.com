@@ -27,6 +27,30 @@ export function isGboVendor(slug?: string | null): boolean {
 /** Customer-facing message when a new GBO purchase is blocked. */
 export const GBO_STOREFRONT_UNAVAILABLE_MESSAGE = "This product is temporarily unavailable.";
 
+/** Name the overseas lines already in the cart. Does not remove them. */
+export function gboCartLineUnavailableMessage(
+  items: Array<{
+    name?: string | null;
+    vendorSlug?: string | null;
+    internationalDelivery?: boolean;
+    slug?: string | null;
+    productSlug?: string | null;
+    sku?: string | null;
+  }>
+): string {
+  const names: string[] = [];
+  for (const item of items) {
+    if (!isGboFulfillmentLine(item)) continue;
+    const name = item.name?.trim();
+    if (name && !names.includes(name)) names.push(name);
+  }
+  if (names.length === 0) {
+    return `${GBO_STOREFRONT_UNAVAILABLE_MESSAGE} Remove the overseas gift from your cart to continue.`;
+  }
+  const label = names.join(", ");
+  return `${label} is temporarily unavailable. Remove ${names.length === 1 ? "it" : "them"} from your cart to continue.`;
+}
+
 /**
  * Stored on an in-flight unpaid order after payment, so automatic placement
  * does not submit it while the storefront switch is off. Line items are unchanged.

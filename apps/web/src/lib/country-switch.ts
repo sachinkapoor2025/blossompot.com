@@ -1,4 +1,10 @@
-import { normalizePathname, shopPathForLocation } from "./location-seo-urls";
+import { isShoppingCountry } from "@blossompot/shared";
+import {
+  countryIsoFromPathname,
+  normalizePathname,
+  preserveShopQuery,
+  shopPathForLocation,
+} from "./location-seo-urls";
 
 export type DeliveryCheckState = {
   serviceable: boolean | null;
@@ -103,4 +109,41 @@ export function shouldReconcilePathCountry(input: {
 }): boolean {
   if (input.pendingCountry && input.pathIso !== input.pendingCountry) return false;
   return true;
+}
+
+export type LocationSyncPlan =
+  | { action: "leave"; clearPending: boolean }
+  | { action: "adopt"; countryCode: string; postalCode: string }
+  | { action: "rewrite"; href: string; clearPending: boolean };
+
+/**
+ * A guide or non-US shop URL must not replace the saved US location.
+ * Shopping URLs still sync when the page country is the United States.
+ */
+export function planLocationCategorySync(input: {
+  pathname: string;
+  search?: string;
+  searchCountry?: string | null;
+  savedCountry?: string | null;
+  savedPostal?: string;
+  pendingCountry?: string | null;
+}): LocationSyncPlan {
+  const pathIso = countryIsoFromPathname(input.pathname, input.searchCountry);
+  const pending = input.pendingCountry ?? null;
+  if (pathIso && !isShoppingCountry(pathIso)) return { action: "leave", clearPending: false };
+  const clearPending = Boolean(pathIso && pending && pathIso === pending);
+  if (!shouldReconcilePathCountry({ pathIso, pendingCountry: pending })) {
+    return { action: "leave", clearPending };
+  }
+  if (pathIso && input.savedCountry !== pathIso) {
+    return { action: "adopt", countryCode: pathIso, postalCode: "" };
+  }
+  const search = input.search ?? "";
+  const desired = preserveShopQuery(
+    shopPathForLocation(input.pathname, input.savedCountry ?? pathIso ?? null),
+    search
+  );
+  const current = preserveShopQuery(input.pathname, search);
+  if (desired === current) return { action: "leave", clearPending };
+  return { action: "rewrite", href: desired, clearPending };
 }

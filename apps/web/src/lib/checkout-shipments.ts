@@ -1,16 +1,18 @@
 import {
   addressFingerprint,
   cartLineUnitTotal,
+  isShoppingCountry,
   isValidShippingPhone,
   quoteAddressShipmentShipping,
   shippingVendorKey,
+  USA_ONLY_DELIVERY_MESSAGE,
   type CartItem,
   type CheckoutShipment,
   type FreeShippingQuote,
   type ShippingAddress,
   type DisplayCurrency,
 } from "@blossompot/shared";
-import { emptyShippingAddress } from "@/lib/shipping-address";
+import { emptyShippingAddress } from "./shipping-address";
 
 export type DeliveryUnit = {
   key: string;
@@ -83,6 +85,9 @@ export function validateDeliveryUnits(
     }
     if (!a.line1.trim() || !a.city.trim() || !a.state.trim() || !a.postalCode.trim()) {
       return `Complete the delivery address for ${unit.name}`;
+    }
+    if (!isShoppingCountry(a.country)) {
+      return `${USA_ONLY_DELIVERY_MESSAGE} Enter a US address for ${unit.name}.`;
     }
   }
   void primary;

@@ -8,6 +8,7 @@ import { loadProducts, toListingCardProducts } from "@/lib/product-loader";
 import {
   isProductStorefrontVisible,
   productVisibleForDeliveryCountry,
+  SHOPPING_COUNTRY_ISO,
   type Product,
 } from "@blossompot/shared";
 import {
@@ -68,8 +69,9 @@ export async function InternationalMarketPage({
       products = [];
     }
     products = shuffleForCity(
-      mergeProductsForCountry(products, countryIso).filter(
-        (p) => isProductStorefrontVisible(p) && productVisibleForDeliveryCountry(p, countryIso)
+      mergeProductsForCountry(products, SHOPPING_COUNTRY_ISO).filter(
+        (p) =>
+          isProductStorefrontVisible(p) && productVisibleForDeliveryCountry(p, SHOPPING_COUNTRY_ISO)
       ),
       loc.slug
     ).slice(0, 20);

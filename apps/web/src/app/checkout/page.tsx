@@ -31,6 +31,7 @@ import {
   loadSavedAddresses,
   saveShippingAddress,
 } from "@/lib/shipping-address";
+import { chooseCheckoutAddressPrefill } from "@/lib/checkout-address";
 import {
   buildCheckoutShipmentsFromUnits,
   expandCartToDeliveryUnits,
@@ -51,6 +52,8 @@ import {
   checkoutCurrencyForDisplay,
   isValidPostal,
   getDeliveryCountry,
+  isShoppingCountry,
+  USA_ONLY_DELIVERY_MESSAGE,
   type Order,
   type RateQuote,
   type ShippingAddress,
@@ -305,78 +308,50 @@ function CheckoutPageInner() {
     if (addressPrefilled.current || !sessionId) return;
 
     const prefill = async () => {
+      let accountAddress: ShippingAddress | null = null;
+      let previousOrder: ShippingAddress | null = null;
       if (token) {
         try {
           const account = await fetchAccount(token, sessionId);
           if (account.profile.preferredPaymentMethod) {
             setPaymentMethod(account.profile.preferredPaymentMethod);
           }
-          const defaultAddress =
-            account.addresses.find((a) => a.isDefault) ?? account.addresses[0];
-          if (defaultAddress) {
-            setAddress({
-              name: defaultAddress.name,
-              line1: defaultAddress.line1,
-              line2: defaultAddress.line2,
-              city: defaultAddress.city,
-              state: defaultAddress.state,
-              postalCode: defaultAddress.postalCode,
-              country: defaultAddress.country,
-              phone: defaultAddress.phone ?? "",
-              email: defaultAddress.email || user?.email || "",
-              senderName: defaultAddress.senderName ?? "",
-              senderMessage: defaultAddress.senderMessage?.trim() || DEFAULT_SENDER_MESSAGE,
-            });
-            addressPrefilled.current = true;
-            return;
-          }
+          accountAddress = account.addresses.find((a) => a.isDefault) ?? account.addresses[0] ?? null;
         } catch {
-          // fall through to local storage
+          accountAddress = null;
         }
-      }
-
-      const saved = loadSavedAddresses();
-      if (saved.length > 0) {
-        const latest = saved[0];
-        setAddress({
-          name: latest.name,
-          line1: latest.line1,
-          line2: latest.line2,
-          city: latest.city,
-          state: latest.state,
-          postalCode: latest.postalCode,
-          country: latest.country,
-          phone: latest.phone ?? "",
-          email: latest.email || user?.email || "",
-          senderName: latest.senderName ?? "",
-          senderMessage: latest.senderMessage?.trim() || DEFAULT_SENDER_MESSAGE,
-        });
-        addressPrefilled.current = true;
-        return;
-      }
-
-      if (token) {
         try {
           const data = await api<{ orders: Order[] }>("/orders", { sessionId, token });
-          const latest = data.orders[0];
-          if (latest?.shippingAddress) {
-            const sa = latest.shippingAddress;
-            setAddress({
-              ...sa,
-              phone: sa.phone ?? "",
-              senderName: sa.senderName ?? "",
-              senderMessage: sa.senderMessage?.trim() || DEFAULT_SENDER_MESSAGE,
-            });
-            addressPrefilled.current = true;
-            return;
-          }
+          previousOrder = data.orders[0]?.shippingAddress ?? null;
         } catch {
-          // ignore
+          previousOrder = null;
         }
       }
 
-      if (user?.email) {
-        setAddress((a) => ({ ...a, email: user.email }));
+      const choice = chooseCheckoutAddressPrefill({
+        accountAddress,
+        saved: loadSavedAddresses(),
+        previousOrder,
+      });
+      if (choice.address && isShoppingCountry(choice.address.country)) {
+        const source = choice.address;
+        setAddress({
+          name: source.name ?? "",
+          line1: source.line1 ?? "",
+          line2: source.line2,
+          city: source.city ?? "",
+          state: source.state ?? "",
+          postalCode: source.postalCode ?? "",
+          country: source.country ?? "US",
+          phone: source.phone ?? "",
+          email: source.email || user?.email || "",
+          senderName: source.senderName ?? "",
+          senderMessage: source.senderMessage?.trim() || DEFAULT_SENDER_MESSAGE,
+        });
+        setError("");
+      } else {
+        if (choice.notice) setError(choice.notice);
+        if (user?.email) setAddress((a) => ({ ...a, email: user.email }));
       }
       addressPrefilled.current = true;
     };
@@ -386,12 +361,13 @@ function CheckoutPageInner() {
 
   useEffect(() => {
     if (!delivery.location?.countryCode) return;
+    const postal = delivery.location.postalCode.trim();
     setAddress((current) => {
       if (current.line1) return current;
       return {
         ...current,
-        country: delivery.location!.countryCode,
-        postalCode: current.postalCode || delivery.location!.postalDisplay,
+        country: "US",
+        postalCode: current.postalCode || (isValidPostal("US", postal) ? postal : ""),
       };
     });
   }, [delivery.location]);
@@ -638,6 +614,11 @@ function CheckoutPageInner() {
         senderMessage,
         ...(address.line2?.trim() ? { line2: address.line2.trim() } : { line2: undefined }),
       };
+      if (!isShoppingCountry(payload.country)) {
+        throw new Error(
+          `${USA_ONLY_DELIVERY_MESSAGE} Enter a US street, city, state, and ZIP code.`
+        );
+      }
       if (!isValidPostal(payload.country, payload.postalCode)) {
         const label = getDeliveryCountry(payload.country)?.postalLabel ?? "postal code";
         throw new Error(`Enter a valid ${label} for the selected country.`);

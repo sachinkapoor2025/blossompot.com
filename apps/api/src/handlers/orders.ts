@@ -34,8 +34,10 @@ import {
   type VendorFulfillment,
   formatPostalDisplay,
   fulfillmentVendorSlug,
+  nonUsDeliveryRejection,
+  USA_ONLY_DELIVERY_MESSAGE,
   GBO_STOREFRONT_HOLD_ERROR,
-  GBO_STOREFRONT_UNAVAILABLE_MESSAGE,
+  gboCartLineUnavailableMessage,
   gboPartnerOrderId,
   isGboStorefrontEnabled,
   isGboStorefrontHold,
@@ -234,7 +236,7 @@ export async function checkout(event: APIGatewayProxyEventV2) {
 
   if (!cart?.items?.length) return badRequest("Cart is empty");
   if (!isGboStorefrontEnabled() && orderIncludesGboProduct({ items: cart.items })) {
-    return badRequest(GBO_STOREFRONT_UNAVAILABLE_MESSAGE);
+    return badRequest(gboCartLineUnavailableMessage(cart.items ?? []));
   }
 
   const cartCurrency = cart.items[0]?.currency ?? "USD";
@@ -254,6 +256,15 @@ export async function checkout(event: APIGatewayProxyEventV2) {
   if (stockError) return badRequest(stockError);
 
   const destCountry = (parsed.data.shippingAddress.country ?? "US").trim().toUpperCase();
+  const shipmentCountries = (parsed.data.shipments ?? []).map((shipment) =>
+    (shipment.shippingAddress.country ?? "").trim()
+  );
+  if (
+    nonUsDeliveryRejection(destCountry) ||
+    shipmentCountries.some((country) => nonUsDeliveryRejection(country))
+  ) {
+    return badRequest(USA_ONLY_DELIVERY_MESSAGE);
+  }
   const destPostal = (parsed.data.shippingAddress.postalCode ?? "").trim();
   if (!destPostal) return badRequest("A delivery postal / ZIP code is required");
 

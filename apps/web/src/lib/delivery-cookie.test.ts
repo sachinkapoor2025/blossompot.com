@@ -4,7 +4,9 @@ import {
   DELIVERY_COOKIE_MAX_AGE_SECONDS,
   deliveryCookieUpdate,
   isDeliveryCookieFlight,
+  parseDeliveryLocationToken,
 } from "./delivery-location";
+import { shoppingCountryOptions } from "./gbo-delivery-countries";
 import { resolveStorefrontCountryIso } from "./location-seo-urls";
 
 function headerBag(record: Record<string, string>) {
@@ -16,6 +18,39 @@ const documentHeaders = headerBag({
   accept: "text/html,application/xhtml+xml",
   "sec-fetch-dest": "document",
   "sec-fetch-mode": "navigate",
+});
+
+describe("shopping country options", () => {
+  it("lists only the United States", () => {
+    const options = shoppingCountryOptions();
+    assert.deepEqual(
+      options.map((country) => country.countryCode),
+      ["US"]
+    );
+  });
+});
+
+describe("stored delivery location", () => {
+  it("resolves a GB cookie and a CA value to the US and clears the foreign postal code", () => {
+    assert.deepEqual(parseDeliveryLocationToken("GB:SW1A1AA"), {
+      countryCode: "US",
+      postalCode: "",
+      postalDisplay: "US",
+    });
+    assert.deepEqual(parseDeliveryLocationToken("CA:K1A 0B1"), {
+      countryCode: "US",
+      postalCode: "",
+      postalDisplay: "US",
+    });
+  });
+
+  it("keeps a valid US ZIP", () => {
+    assert.deepEqual(parseDeliveryLocationToken("US:90012"), {
+      countryCode: "US",
+      postalCode: "90012",
+      postalDisplay: "90012",
+    });
+  });
 });
 
 describe("delivery cookie responses", () => {
@@ -76,14 +111,14 @@ describe("delivery cookie responses", () => {
       pathname: "/flower-delivery-uk",
       cookieCountry: null,
     });
-    assert.equal(resolved, "GB");
+    assert.equal(resolved, "US");
     assert.equal(isDeliveryCookieFlight(documentHeaders), false);
     const update = deliveryCookieUpdate({
       resolvedCountry: resolved,
       requestCookie: null,
       flight: false,
     });
-    assert.deepEqual(update, { value: "GB:", maxAge: DELIVERY_COOKIE_MAX_AGE_SECONDS });
+    assert.deepEqual(update, { value: "US:", maxAge: DELIVERY_COOKIE_MAX_AGE_SECONDS });
   });
 
   it("lets the current document response replace an older cookie", () => {
@@ -92,24 +127,30 @@ describe("delivery cookie responses", () => {
       searchCountry: "GB",
       cookieCountry: "CA",
     });
-    assert.equal(resolved, "GB");
+    assert.equal(resolved, "US");
     const update = deliveryCookieUpdate({
       resolvedCountry: resolved,
       requestCookie: "CA:",
       flight: false,
     });
-    assert.equal(update?.value, "GB:");
+    assert.equal(update?.value, "US:");
     assert.equal(update?.maxAge, 60 * 60 * 24 * 365);
   });
 
-  it("keeps the cookie format, postal value, and one-year lifetime", () => {
+  it("keeps a US ZIP and clears a foreign postal code", () => {
     const sameCountry = deliveryCookieUpdate({
+      resolvedCountry: "US",
+      requestCookie: "US:90012",
+      flight: false,
+    });
+    assert.equal(sameCountry?.value, "US:90012");
+    assert.equal(sameCountry?.maxAge, DELIVERY_COOKIE_MAX_AGE_SECONDS);
+    const foreign = deliveryCookieUpdate({
       resolvedCountry: "GB",
       requestCookie: "GB:SW1A1AA",
       flight: false,
     });
-    assert.equal(sameCountry?.value, "GB:SW1A1AA");
-    assert.equal(sameCountry?.maxAge, DELIVERY_COOKIE_MAX_AGE_SECONDS);
+    assert.equal(foreign?.value, "US:");
     assert.equal(
       resolveStorefrontCountryIso({
         pathname: "/flower-delivery-usa",

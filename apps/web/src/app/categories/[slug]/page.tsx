@@ -134,7 +134,7 @@ async function CategoryPageContent({ params, searchParams }: Props) {
   const seoPath = await requestSeoPath(categoryHref(slug));
   const located = parseLocationShopPath(seoPath);
   const pageSeo = localizeShopCopy(seoPath, getCategoryPageSeo(slug) ?? { title: "", description: "", h1: `${name} — Worldwide Delivery` });
-  const deliveryCountryName = countryDisplayName(located?.countryIso ?? deliveryCountry);
+  const deliveryCountryName = countryDisplayName(deliveryCountry);
   const menuHeading: Record<string, string> = {
     flowers: "Send Flowers",
     "flower-bouquets": "Flower Bouquets",
@@ -147,16 +147,13 @@ async function CategoryPageContent({ params, searchParams }: Props) {
   };
   const h1 = menuHeading[slug]
     ? `${menuHeading[slug]} to ${deliveryCountryName}`
-    : pageSeo.h1 ||
-      (located
-        ? `${name} — Delivery to ${countryDisplayName(located.countryIso)}`
-        : `${name} — Delivery to ${countryDisplayName(deliveryCountry)}`);
+    : pageSeo.h1 || `${name} — Delivery to ${countryDisplayName(deliveryCountry)}`;
   const baseDescription =
     category?.description?.trim() ||
     `Browse our ${name} collection — flowers, cakes, and thoughtful gifts with delivery to ${countryDisplayName(deliveryCountry)} from BlossomPot.`;
   const extra = getCategoryContent(slug);
   const rich = getCategoryRichContent(slug);
-  const shopHref = located ? giftsCatalogLocationHref(located.countryIso) : "/products";
+  const shopHref = located ? giftsCatalogLocationHref(deliveryCountry) : "/products";
 
   const crumbs = [
     { label: "Home", href: "/" },
@@ -194,7 +191,7 @@ async function CategoryPageContent({ params, searchParams }: Props) {
         <CategoryContentSection
           content={rich}
           categoryName={seoCategoryName}
-          deliveryCountryIso={located?.countryIso ?? deliveryCountry}
+          deliveryCountryIso={deliveryCountry}
         />
       ) : (
         <>

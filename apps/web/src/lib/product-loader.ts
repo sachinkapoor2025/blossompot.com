@@ -15,6 +15,7 @@ import {
 import { api } from "./api";
 import { toListingCardProducts } from "./listing-card";
 import { isRakhiRelatedCategorySlug, isRakhiRelatedProduct } from "./rakhi-filter";
+import { shoppingCatalogCountry, shoppingCatalogQuery } from "./shopping-catalog";
 import { getStorefrontDeliveryCountry } from "./storefront-country";
 
 function isStorefrontVisible(product: Product): boolean {
@@ -34,8 +35,8 @@ const PRODUCT_MEMORY_TTL_MS = 60 * 60 * 1000; // 1 hour
 const productMemoryCache = new Map<string, { product: Product; at: number }>();
 
 /**
- * Public catalog only. The request URL includes `country`, so US and GB
- * do not share a cache entry. Cart, checkout, and account calls do not use this.
+ * Public catalog only. The request country is always the United States.
+ * Cart, checkout, and account calls do not use this.
  * Short enough that a price edit is visible within a minute.
  */
 export const CATALOG_REVALIDATE_SECONDS = 45;
@@ -79,7 +80,8 @@ const gboInFlight = new Map<string, Promise<Product[]>>();
 /** Live Gift Baskets Overseas catalog for the selected delivery country. */
 export async function loadGboStorefrontProducts(country?: string): Promise<Product[]> {
   if (!isGboStorefrontEnabled()) return [];
-  const iso = (country ?? (await getStorefrontDeliveryCountry())).trim().toUpperCase() || "US";
+  const requested = country ?? (await getStorefrontDeliveryCountry());
+  const iso = shoppingCatalogCountry(requested);
   const pending = gboInFlight.get(iso);
   if (pending) return pending;
 
@@ -164,12 +166,13 @@ export async function loadProducts(params?: {
 }): Promise<Product[]> {
   if (params?.category && isRakhiRelatedCategorySlug(params.category)) return [];
 
-  const country = params?.country ?? (await getStorefrontDeliveryCountry());
-  const query = new URLSearchParams();
-  if (params?.category) query.set("category", params.category);
-  if (params?.search) query.set("search", params.search);
-  query.set("country", country);
-  const qs = `?${query.toString()}`;
+  const requested = params?.country ?? (await getStorefrontDeliveryCountry());
+  const country = shoppingCatalogCountry(requested);
+  const qs = shoppingCatalogQuery({
+    category: params?.category,
+    search: params?.search,
+    country: requested,
+  });
 
   const [dbResult, gboResult] = await Promise.all([
     api<{ products: Product[] }>(`/products${qs}`, CATALOG_FETCH)

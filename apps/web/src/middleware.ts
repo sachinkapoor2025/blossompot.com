@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { clampShoppingCountry } from "@blossompot/shared";
 import { classifyUserAgent } from "@/lib/crawler-policy";
 import {
   DELIVERY_LOCATION_COOKIE,
@@ -32,14 +33,15 @@ export function middleware(request: NextRequest) {
 
   const locationShop = parseLocationShopPath(request.nextUrl.pathname);
   if (locationShop) {
+    const shoppingCountry = clampShoppingCountry(locationShop.countryIso);
     const url = request.nextUrl.clone();
     url.pathname = locationShopRewritePath(locationShop);
-    url.searchParams.set("country", locationShop.countryIso);
+    url.searchParams.set("country", shoppingCountry);
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set(LOCATION_SEO_HEADER, request.nextUrl.pathname.replace(/\/+$/, "") || "/");
-    requestHeaders.set(STOREFRONT_COUNTRY_HEADER, locationShop.countryIso);
+    requestHeaders.set(STOREFRONT_COUNTRY_HEADER, shoppingCountry);
     const response = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
-    applyDeliveryCountryCookie(response, request, locationShop.countryIso);
+    applyDeliveryCountryCookie(response, request, shoppingCountry);
     stampBotHeaders(response, request);
     return response;
   }

@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useId, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { SHOPPING_COUNTRY_ISO } from "@blossompot/shared";
 import { deliverToDestination, navigateAfterLocationCommit } from "@/lib/country-switch";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
 import { dismissLocationPrompt } from "@/lib/delivery-location";
@@ -52,12 +53,12 @@ function DeliveryLocationModalInner() {
     setError("");
     setBusy(true);
     navigateAfterLocationCommit({
-      href: deliverToDestination(pathname, countryCode, searchParams.toString()),
+      href: deliverToDestination(pathname, SHOPPING_COUNTRY_ISO, searchParams.toString()),
       commit: () =>
         setLocation({
-          countryCode,
+          countryCode: SHOPPING_COUNTRY_ISO,
           postalCode: "",
-          postalDisplay: countryCode,
+          postalDisplay: SHOPPING_COUNTRY_ISO,
         }),
       navigate: (href) => {
         closeSelector();

@@ -5,6 +5,7 @@ import {
   clipGboGiftCardText,
   formatGboProductSlug,
   formatGboSku,
+  gboCartLineUnavailableMessage,
   gboGiftToProduct,
   gboImageUrl,
   gboPartnerOrderId,
@@ -184,6 +185,16 @@ describe("gbo helpers", () => {
       true
     );
     assert.equal(orderIncludesGboProduct({ items: [{ productSlug: "blush-bloom", vendorSlug: "blossompot" }] }), false);
+  });
+
+  it("names the overseas cart line without dropping it from the message", () => {
+    const message = gboCartLineUnavailableMessage([
+      { name: "Sunset roses", productSlug: "sunset-roses" },
+      { name: "London hamper", productSlug: "gbo-gb-7-bear", sku: "gbo:GB:7" },
+    ]);
+    assert.match(message, /London hamper/);
+    assert.match(message, /temporarily unavailable/);
+    assert.doesNotMatch(message, /Sunset roses/);
   });
 
   it("recognizes public GBO catalog paths and storefront holds", () => {
