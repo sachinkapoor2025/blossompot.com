@@ -556,6 +556,90 @@ function stackOutput(stack: string, key: string): string {
   return (result.stdout ?? "").trim();
 }
 
+/** Manual read-only check. It must not deploy, import, or pass --write. */
+export function assertReadOnlyDevCatalogWorkflow(workflow: string): void {
+  const header = workflow.split(/^jobs:/m)[0] ?? "";
+  if (!header.includes("workflow_dispatch:")) {
+    throw new Error("Dev catalog verification must be started manually.");
+  }
+  if (/\n\s{2}push:/.test(header) || header.includes("pull_request:") || header.includes("schedule:")) {
+    throw new Error("Dev catalog verification must not run on push, pull request, or a schedule.");
+  }
+  if (header.includes("inputs:")) {
+    throw new Error("Dev catalog verification must not accept inputs.");
+  }
+  const credentialsAt = workflow.indexOf("aws-actions/configure-aws-credentials");
+  const branchAt = workflow.indexOf('"$GITHUB_REF" != "refs/heads/dev"');
+  if (branchAt < 0 || credentialsAt < 0 || branchAt > credentialsAt) {
+    throw new Error("Dev catalog verification must reject other branches before configuring AWS credentials.");
+  }
+  if (!workflow.includes("aws-region: us-east-1")) {
+    throw new Error("Dev catalog verification must use us-east-1.");
+  }
+  if (!workflow.includes("npm ci")) {
+    throw new Error("Dev catalog verification must install dependencies with npm ci.");
+  }
+  const command = workflow
+    .split("\n")
+    .map((line) => line.trim())
+    .find((line) => line.startsWith("run:") && line.includes("persist-dev-bundled-catalogs.ts"));
+  if (command !== "run: npx tsx scripts/persist-dev-bundled-catalogs.ts") {
+    throw new Error("Dev catalog verification must run only the read-only catalog command.");
+  }
+  for (const forbidden of [
+    "--write",
+    "sam ",
+    "amplify",
+    "import:blossompot",
+    "import-fnp",
+    "fix-product-price",
+    "PutItem",
+    "blossompot-prod",
+    "refs/heads/main",
+  ]) {
+    if (workflow.includes(forbidden)) {
+      throw new Error(`Dev catalog verification must not include ${forbidden}.`);
+    }
+  }
+}
+
+/** The default script path reads identity, stack, and table, then returns. */
+export function assertCatalogVerificationIsReadOnly(source: string): void {
+  const verifyStart = source.indexOf("async function verifyDevTarget");
+  const verifyEnd = source.indexOf("async function productFingerprint");
+  const mainStart = source.indexOf("async function main");
+  if (verifyStart < 0 || verifyEnd < verifyStart || mainStart < 0) {
+    throw new Error("Catalog verification script is missing its read-only path.");
+  }
+  const verify = source.slice(verifyStart, verifyEnd);
+  const reads = source.slice(0, source.indexOf("async function writeMissingProducts"));
+  const main = source.slice(mainStart);
+  for (const operation of ["PutCommand", "UpdateCommand", "DeleteCommand", "BatchWrite", "PutItem", "TransactWrite"]) {
+    if (verify.includes(operation) || reads.includes(operation)) {
+      throw new Error(`Catalog verification must not call ${operation}.`);
+    }
+  }
+  for (const read of ["GetCallerIdentityCommand", "Action=DescribeStacks", "DescribeTableCommand"]) {
+    if (!reads.includes(read)) {
+      throw new Error(`Catalog verification must call ${read}.`);
+    }
+  }
+  if (!verify.includes("blossompot-dev") && !source.includes("DEV_CATALOG_STACK")) {
+    throw new Error("Catalog verification must describe blossompot-dev.");
+  }
+  if (verify.includes("stackXml") && verify.includes("console.log")) {
+    const logged = verify.slice(verify.indexOf("console.log"));
+    if (logged.includes("stackXml") || logged.includes("secretAccessKey") || logged.includes("sessionToken")) {
+      throw new Error("Catalog verification must not print stack XML or credentials.");
+    }
+  }
+  const gate = main.indexOf("if (!write)");
+  const writeCall = main.indexOf("await writeMissingProducts()");
+  if (gate < 0 || writeCall < 0 || gate > writeCall || !main.slice(gate, writeCall).includes("return")) {
+    throw new Error("Catalog verification must return before any product write.");
+  }
+}
+
 export function assertWorkflowIsolation(workflow: string): void {
   const prodApi = jobBlock(workflow, "deploy-api-prod");
   const devApi = jobBlock(workflow, "deploy-api-dev");

@@ -20,6 +20,8 @@ import {
   assertDevAmplifyBranch,
   assertProductsTable,
   assertSamTarget,
+  assertCatalogVerificationIsReadOnly,
+  assertReadOnlyDevCatalogWorkflow,
   assertWorkflowIsolation,
   devAmplifyEnvironment,
   devFrontendBuildEnv,
@@ -488,6 +490,23 @@ test("a successful mocked dev stack read writes only the five public build value
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("dev catalog verification workflow is manual and read-only", () => {
+  const workflow = readFileSync(resolve(root, ".github/workflows/verify-dev-catalog.yml"), "utf8");
+  const script = readFileSync(resolve(root, "scripts/persist-dev-bundled-catalogs.ts"), "utf8");
+  const target = readFileSync(resolve(root, "scripts/ci/dev-catalog-persist.ts"), "utf8");
+  assertReadOnlyDevCatalogWorkflow(workflow);
+  assertCatalogVerificationIsReadOnly(script);
+  assert.doesNotMatch(workflow, /echo\s+.*AWS_|console\.log\(/);
+  assert.match(workflow, /secrets\.AWS_ACCESS_KEY_ID/);
+  assert.match(workflow, /secrets\.AWS_SECRET_ACCESS_KEY/);
+  assert.match(workflow, /secrets\.AWS_SESSION_TOKEN/);
+  assert.match(target, /796174527529/);
+  assert.match(target, /blossompot-products-dev/);
+  assert.match(target, /blossompot-dev/);
+  assert.match(target, /us-east-1/);
+  assert.match(script, /arn:aws:dynamodb:\$\{DEV_CATALOG_REGION\}:\$\{DEV_CATALOG_ACCOUNT\}:table\/\$\{DEV_CATALOG_TABLE\}/);
 });
 
 test("workflow and Amplify config isolate dev from production", () => {
