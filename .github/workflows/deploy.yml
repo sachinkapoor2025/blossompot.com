@@ -2,7 +2,7 @@ name: Deploy
 
 # Push targets:
 #   main       → blossompot-prod / blossompot-products-prod / API stage /prod / Amplify branch main
-#   dev        → blossompot-dev  / blossompot-products-dev  / API stage /dev  / Amplify branch dev
+#   dev        → blossompot-dev  / blossompot-products-dev  / API stage /dev  / Amplify app dsjdlmcsa1pdc branch dev
 #   feature/** → test and build only
 # Manual workflow_dispatch requires environment=dev or prod (the dropdown starts on dev).
 # Prod can be selected only from refs/heads/main. Dev can be selected only from refs/heads/dev.
@@ -282,9 +282,13 @@ jobs:
           RAZOR_KEY_ID: ${{ secrets.RAZOR_KEY_ID }}
           GBO_STOREFRONT_ENABLED: ${{ secrets.GBO_STOREFRONT_ENABLED }}
         run: |
-          APP_ID="${AMPLIFY_APP_ID:-d1vlvm5li37k6g}"
-          EXISTING=$(aws amplify get-branch --app-id "$APP_ID" --branch-name main \
-            --query 'branch.environmentVariables' --output json 2>/dev/null || echo '{}')
+          APP_ID=$(npx tsx scripts/ci/deploy-target.ts amplify-app-id)
+          export APP_ID
+          APP_JSON=$(aws amplify get-app --region us-east-1 --app-id "$APP_ID" --output json)
+          export APP_JSON
+          npx tsx scripts/ci/deploy-target.ts assert-amplify-app
+          EXISTING=$(aws amplify get-branch --region us-east-1 --app-id "$APP_ID" --branch-name main \
+            --query 'branch.environmentVariables' --output json)
           export EXISTING
           MERGED=$(python3 -c "import json,os; e=json.loads(os.environ.get('EXISTING') or '{}'); s=(os.environ.get('STRIPE_PK') or '').strip(); r=(os.environ.get('RAZOR_KEY_ID') or '').strip(); g=(os.environ.get('GBO_STOREFRONT_ENABLED') or 'false').strip().lower(); g='true' if g in ('true','1','yes') else 'false'; e.update({k:v for k,v in [('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY',s),('RAZOR_KEY_ID',r),('NEXT_PUBLIC_RAZORPAY_KEY_ID',r)] if v}); e['GBO_STOREFRONT_ENABLED']=g; print(json.dumps(e))")
           export MERGED
@@ -354,6 +358,7 @@ jobs:
           set -euo pipefail
           output() {
             aws cloudformation describe-stacks \
+              --region us-east-1 \
               --stack-name blossompot-dev \
               --query "Stacks[0].Outputs[?OutputKey=='$1'].OutputValue | [0]" \
               --output text
@@ -376,22 +381,12 @@ jobs:
           echo "DEV_USER_POOL_CLIENT_ID=$(output UserPoolClientId)" >> "$GITHUB_ENV"
           echo "DEV_CDN=${CDN}" >> "$GITHUB_ENV"
 
-      - name: Sync dev Amplify branch
+      - name: Publish dev configuration to Amplify app dsjdlmcsa1pdc branch dev
         env:
           AMPLIFY_APP_ID: ${{ secrets.AMPLIFY_APP_ID }}
           STRIPE_PK_TEST: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_TEST }}
           RAZOR_KEY_ID_TEST: ${{ secrets.RAZORPAY_KEY_ID_TEST }}
-        run: |
-          set -euo pipefail
-          APP_ID="${AMPLIFY_APP_ID:-d1vlvm5li37k6g}"
-          EXISTING=$(aws amplify get-branch --app-id "$APP_ID" --branch-name dev \
-            --query 'branch.environmentVariables' --output json 2>/dev/null || echo '{}')
-          export EXISTING APP_ID
-          MERGED=$(npx tsx scripts/ci/deploy-target.ts dev-amplify-env)
-          export MERGED
-          ENV_STRING=$(python3 -c "import json,os; d=json.loads(os.environ.get('MERGED') or '{}'); print(','.join(f'{k}={v}' for k,v in d.items()))")
-          aws amplify update-branch --app-id "$APP_ID" --branch-name dev --environment-variables "$ENV_STRING" >/dev/null
-          echo "Amplify dev branch now points at the dev API. Live payment keys were not copied."
+        run: npx tsx scripts/ci/deploy-target.ts publish-dev-amplify
 
       - run: npm run build -w @blossompot/shared
       - run: npm run build -w @blossompot/web

@@ -4,7 +4,7 @@
  * Does not call AWS and does not read product data.
  */
 import { spawnSync } from "child_process";
-import { readFileSync } from "fs";
+import { readFileSync, writeFileSync } from "fs";
 import { resolve } from "path";
 
 export const PROD_STACK = "blossompot-prod";
@@ -13,6 +13,10 @@ export const PROD_PRODUCTS_TABLE = "blossompot-products-prod";
 export const DEV_PRODUCTS_TABLE = "blossompot-products-dev";
 export const PROD_API_HOST = "6y37e2a4j1.execute-api.us-east-1.amazonaws.com";
 export const PROD_CDN_HOST = "d2d01h4hac5hqs.cloudfront.net";
+export const BLOSSOMPOT_AMPLIFY_APP_ID = "dsjdlmcsa1pdc";
+export const USARAKHI_AMPLIFY_APP_ID = "d1vlvm5li37k6g";
+export const BLOSSOMPOT_REPOSITORY = "https://github.com/sachinkapoor2025/blossompot.com";
+export const DEV_AMPLIFY_BRANCH = "dev";
 
 const DEV_API_URL =
   /^https:\/\/[a-z0-9]+\.execute-api\.[a-z0-9.-]+\.amazonaws\.com\/dev$/;
@@ -199,6 +203,51 @@ export function devParameterOverrides(env: Record<string, string | undefined>): 
   return joined;
 }
 
+const SAFE_ENV_VALUE = /^[A-Za-z0-9_.:/@-]+$/;
+
+export function resolveBlossomPotAmplifyAppId(configured: string | undefined): string {
+  const value = configured?.trim() ?? "";
+  if (!value) {
+    throw new Error("Amplify app id is missing. Refusing to fall back to another app.");
+  }
+  if (value === USARAKHI_AMPLIFY_APP_ID) {
+    throw new Error("Refusing Amplify app d1vlvm5li37k6g. That app is not BlossomPot.");
+  }
+  if (value !== BLOSSOMPOT_AMPLIFY_APP_ID) {
+    throw new Error(
+      `Refusing Amplify app ${value}. This repository only deploys ${BLOSSOMPOT_AMPLIFY_APP_ID}.`
+    );
+  }
+  return value;
+}
+
+/** GitHub secret AMPLIFY_APP_ID must be the BlossomPot app. An empty value is not a fallback. */
+export function resolveDevAmplifyAppId(secretValue: string | undefined): string {
+  return resolveBlossomPotAmplifyAppId(secretValue);
+}
+
+export function assertBlossomPotAmplifyApp(app: { appId?: string; repository?: string }): void {
+  const appId = resolveBlossomPotAmplifyAppId(app.appId);
+  const repository = (app.repository ?? "").trim().replace(/\.git$/, "").replace(/\/$/, "");
+  const accepted = new Set([
+    BLOSSOMPOT_REPOSITORY,
+    "git@github.com:sachinkapoor2025/blossompot.com",
+  ]);
+  if (!accepted.has(repository)) {
+    throw new Error(
+      `Amplify app ${appId} is not connected to ${BLOSSOMPOT_REPOSITORY}. Refusing to update it.`
+    );
+  }
+}
+
+export function assertDevAmplifyBranch(branchName: string | undefined): void {
+  if (branchName !== DEV_AMPLIFY_BRANCH) {
+    throw new Error(
+      `Dev deployment only updates the Amplify dev branch. Refusing branch "${branchName ?? ""}".`
+    );
+  }
+}
+
 export function devAmplifyEnvironment(
   existing: Record<string, string>,
   input: {
@@ -212,6 +261,7 @@ export function devAmplifyEnvironment(
     razorpayKeyIdTest?: string;
   }
 ): Record<string, string> {
+  const appId = resolveBlossomPotAmplifyAppId(input.appId);
   assertApiUrl("dev", input.apiUrl);
   assertProductsTable("dev", input.productsTable);
   const userPoolId = input.userPoolId.trim();
@@ -256,10 +306,221 @@ export function devAmplifyEnvironment(
     site === "http://blossompot.com" ||
     site === "http://www.blossompot.com"
   ) {
-    if (!input.appId.trim()) throw new Error("Amplify app id is required to set the dev site URL.");
-    next.NEXT_PUBLIC_SITE_URL = `https://dev.${input.appId.trim()}.amplifyapp.com`;
+    next.NEXT_PUBLIC_SITE_URL = `https://dev.${appId}.amplifyapp.com`;
   }
   return next;
+}
+
+export function devFrontendBuildEnv(
+  env: Record<string, string | undefined>,
+  amplifyAppId: string | undefined
+): Record<string, string> {
+  const appId = amplifyAppId?.trim() || BLOSSOMPOT_AMPLIFY_APP_ID;
+  resolveBlossomPotAmplifyAppId(appId);
+  const apiUrl = (env.NEXT_PUBLIC_API_URL ?? "").trim().replace(/\/$/, "");
+  if (!apiUrl) {
+    throw new Error(
+      "Dev build is missing NEXT_PUBLIC_API_URL. GitHub Actions must publish the blossompot-dev API URL before this build. Refusing to use the production API."
+    );
+  }
+  assertApiUrl("dev", apiUrl);
+  const pool = (env.NEXT_PUBLIC_COGNITO_USER_POOL_ID ?? "").trim();
+  const client = (env.NEXT_PUBLIC_COGNITO_CLIENT_ID ?? "").trim();
+  if (!pool || pool === "None" || !client || client === "None") {
+    throw new Error("Dev build is missing Cognito environment variables. Refusing to use production Cognito.");
+  }
+  const region = (env.NEXT_PUBLIC_COGNITO_REGION ?? "").trim();
+  if (region !== "us-east-1") {
+    throw new Error("Dev build NEXT_PUBLIC_COGNITO_REGION must be us-east-1.");
+  }
+  const cdn = (env.NEXT_PUBLIC_CDN_URL ?? "").trim().replace(/\/$/, "");
+  if (!cdn.startsWith("https://") || cdn.includes(PROD_CDN_HOST)) {
+    throw new Error("Dev build NEXT_PUBLIC_CDN_URL is missing or uses the production CloudFront distribution.");
+  }
+  if ((env.NEXT_PUBLIC_APP_ENV ?? "").trim() !== "dev") {
+    throw new Error("Dev build NEXT_PUBLIC_APP_ENV must be dev.");
+  }
+  const gbo = (env.GBO_STOREFRONT_ENABLED ?? "").trim().toLowerCase();
+  if (gbo === "true" || gbo === "1" || gbo === "yes") {
+    throw new Error("Dev build refuses GBO_STOREFRONT_ENABLED=true.");
+  }
+  let site = (env.NEXT_PUBLIC_SITE_URL ?? "").trim().replace(/\/$/, "");
+  if (
+    site === "" ||
+    site === "https://www.blossompot.com" ||
+    site === "https://blossompot.com" ||
+    site === "http://blossompot.com" ||
+    site === "http://www.blossompot.com"
+  ) {
+    site = `https://dev.${appId}.amplifyapp.com`;
+  }
+  const out: Record<string, string> = {
+    NEXT_PUBLIC_APP_ENV: "dev",
+    NEXT_PUBLIC_API_URL: apiUrl,
+    NEXT_PUBLIC_COGNITO_USER_POOL_ID: pool,
+    NEXT_PUBLIC_COGNITO_CLIENT_ID: client,
+    NEXT_PUBLIC_COGNITO_REGION: "us-east-1",
+    NEXT_PUBLIC_CDN_URL: cdn,
+    NEXT_PUBLIC_SITE_URL: site,
+    GBO_STOREFRONT_ENABLED: "false",
+  };
+  const stripe = env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim();
+  if (stripe?.startsWith("pk_test_")) out.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = stripe;
+  const razor = (env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? env.RAZOR_KEY_ID)?.trim();
+  if (razor?.startsWith("rzp_test_")) out.NEXT_PUBLIC_RAZORPAY_KEY_ID = razor;
+  for (const [key, value] of Object.entries(out)) {
+    if (!SAFE_ENV_VALUE.test(value)) {
+      throw new Error(`${key} contains characters that cannot be written to the build env file.`);
+    }
+  }
+  return out;
+}
+
+export function writeDevFrontendEnvFile(
+  env: Record<string, string | undefined>,
+  amplifyAppId: string | undefined,
+  envFile: string
+): Record<string, string> {
+  const built = devFrontendBuildEnv(env, amplifyAppId);
+  writeFileSync(
+    envFile,
+    Object.entries(built)
+      .map(([key, value]) => `${key}=${value}`)
+      .join("\n")
+      .concat("\n"),
+    { encoding: "utf8" }
+  );
+  return built;
+}
+
+export type AwsCommandResult = {
+  status: number | null;
+  stdout: string;
+  stderr: string;
+  error?: string;
+};
+
+function requireAws(result: AwsCommandResult, operation: string): string {
+  if (result.error || result.status !== 0) {
+    const detail = [result.error, result.stderr].filter(Boolean).join("\n").trim();
+    throw new Error(`AWS ${operation} failed for the BlossomPot dev Amplify app.\n${detail}`);
+  }
+  return result.stdout;
+}
+
+/**
+ * Reads blossompot-dev outputs already exported by GitHub Actions, verifies the
+ * Amplify app, replaces only the dev branch environment, and starts one release.
+ * update-branch does not start a build, so start-job is required.
+ * Auto-build is turned off so the git webhook does not start a second build
+ * before these environment variables exist.
+ */
+export function publishDevAmplifyConfig(
+  env: Record<string, string | undefined>,
+  run: (args: string[]) => AwsCommandResult
+): { jobId: string; environment: Record<string, string> } {
+  if (env.GITHUB_REF === "refs/heads/main") {
+    throw new Error("Refusing to publish dev Amplify settings from the main branch.");
+  }
+  if ((env.AWS_REGION ?? "us-east-1").trim() !== "us-east-1") {
+    throw new Error("Dev Amplify publish must run in us-east-1.");
+  }
+  const appId = resolveDevAmplifyAppId(env.AMPLIFY_APP_ID);
+  const appStdout = requireAws(
+    run(["amplify", "get-app", "--region", "us-east-1", "--app-id", appId, "--output", "json"]),
+    "amplify get-app"
+  );
+  let app: { app?: { appId?: string; repository?: string } };
+  try {
+    app = JSON.parse(appStdout) as { app?: { appId?: string; repository?: string } };
+  } catch {
+    throw new Error("Amplify get-app returned unreadable output.");
+  }
+  if (app.app?.appId && app.app.appId !== appId) {
+    throw new Error("Amplify get-app returned a different app id.");
+  }
+  assertBlossomPotAmplifyApp({ appId, repository: app.app?.repository });
+
+  const branchStdout = requireAws(
+    run([
+      "amplify",
+      "get-branch",
+      "--region",
+      "us-east-1",
+      "--app-id",
+      appId,
+      "--branch-name",
+      DEV_AMPLIFY_BRANCH,
+      "--output",
+      "json",
+    ]),
+    "amplify get-branch"
+  );
+  let branch: { branch?: { branchName?: string; environmentVariables?: Record<string, string> } };
+  try {
+    branch = JSON.parse(branchStdout) as {
+      branch?: { branchName?: string; environmentVariables?: Record<string, string> };
+    };
+  } catch {
+    throw new Error("Amplify get-branch returned unreadable output.");
+  }
+  assertDevAmplifyBranch(branch.branch?.branchName);
+  const merged = devAmplifyEnvironment(branch.branch?.environmentVariables ?? {}, {
+    apiUrl: env.NEXT_PUBLIC_API_URL ?? "",
+    productsTable: env.DEV_PRODUCTS_TABLE ?? "",
+    userPoolId: env.DEV_USER_POOL_ID ?? "",
+    userPoolClientId: env.DEV_USER_POOL_CLIENT_ID ?? "",
+    cdnDomain: env.DEV_CDN ?? "",
+    appId,
+    stripePublishableKeyTest: env.STRIPE_PK_TEST,
+    razorpayKeyIdTest: env.RAZOR_KEY_ID_TEST,
+  });
+  requireAws(
+    run([
+      "amplify",
+      "update-branch",
+      "--region",
+      "us-east-1",
+      "--cli-input-json",
+      JSON.stringify({
+        appId,
+        branchName: DEV_AMPLIFY_BRANCH,
+        enableAutoBuild: false,
+        environmentVariables: merged,
+      }),
+    ]),
+    "amplify update-branch"
+  );
+  const commitId = env.GITHUB_SHA?.trim() ?? "";
+  if (!/^[0-9a-f]{40}$/i.test(commitId)) {
+    throw new Error("Refusing to start an Amplify dev build without the GitHub commit SHA.");
+  }
+  const jobStdout = requireAws(
+    run([
+      "amplify",
+      "start-job",
+      "--region",
+      "us-east-1",
+      "--cli-input-json",
+      JSON.stringify({
+        appId,
+        branchName: DEV_AMPLIFY_BRANCH,
+        jobType: "RELEASE",
+        commitId,
+        jobReason: "GitHub Actions dev deploy",
+      }),
+    ]),
+    "amplify start-job"
+  );
+  let job: { jobSummary?: { jobId?: string } };
+  try {
+    job = JSON.parse(jobStdout) as { jobSummary?: { jobId?: string } };
+  } catch {
+    throw new Error("Amplify start-job returned unreadable output.");
+  }
+  const jobId = job.jobSummary?.jobId?.trim() ?? "";
+  if (!jobId) throw new Error("Amplify start-job did not return a job id.");
+  return { jobId, environment: merged };
 }
 
 function stackOutput(stack: string, key: string): string {
@@ -272,6 +533,8 @@ function stackOutput(stack: string, key: string): string {
     [
       "cloudformation",
       "describe-stacks",
+      "--region",
+      "us-east-1",
       "--stack-name",
       stack,
       "--query",
@@ -358,8 +621,23 @@ export function assertWorkflowIsolation(workflow: string): void {
   if (!prodWeb.includes('--branch-name main') && !prodWeb.includes("--branch-name main")) {
     throw new Error("deploy-web-prod must update only the main Amplify branch.");
   }
-  if (!devWeb.includes("--branch-name dev")) {
-    throw new Error("deploy-web-dev must update only the dev Amplify branch.");
+  if (!devWeb.includes("publish-dev-amplify")) {
+    throw new Error("deploy-web-dev must publish the dev branch through publish-dev-amplify.");
+  }
+  if (!devWeb.includes(BLOSSOMPOT_AMPLIFY_APP_ID)) {
+    throw new Error("deploy-web-dev must name the BlossomPot Amplify app.");
+  }
+  if (devWeb.includes(USARAKHI_AMPLIFY_APP_ID) || devWeb.includes("AMPLIFY_APP_ID:-")) {
+    throw new Error("deploy-web-dev must not fall back to another Amplify app.");
+  }
+  if (devWeb.includes("--branch-name main") || devWeb.includes("blossompot-prod")) {
+    throw new Error("deploy-web-dev must not update the production branch or stack.");
+  }
+  if (!devWeb.includes("--region us-east-1") || !devWeb.includes("--stack-name blossompot-dev")) {
+    throw new Error("deploy-web-dev must read blossompot-dev in us-east-1.");
+  }
+  if (devWeb.includes("2>/dev/null")) {
+    throw new Error("deploy-web-dev must not hide AWS errors.");
   }
   if (prodWeb.includes("GITHUB_REF_NAME") || devWeb.includes("GITHUB_REF_NAME")) {
     throw new Error("Amplify branch updates must use the selected environment, not the git ref name.");
@@ -379,8 +657,16 @@ export function assertAmplifyIsolation(amplifyYml: string): void {
   if (amplifyYml.includes("STACK_NAME=${STACK_NAME:-blossompot-prod}")) {
     throw new Error("amplify.yml must not default an unknown branch to blossompot-prod.");
   }
-  if (!amplifyYml.includes('STACK_NAME="blossompot-dev"')) {
-    throw new Error("amplify.yml must select blossompot-dev for the dev branch.");
+  const devBranch = amplifyYml.split('if [ "$BRANCH" = "dev" ]')[1]?.split('elif [ "$BRANCH" = "main" ]')[0];
+  if (!devBranch) throw new Error("amplify.yml is missing the dev branch build.");
+  if (devBranch.includes("describe-stacks") || devBranch.includes("dev-stack-outputs.ts") || devBranch.includes("blossompot-prod")) {
+    throw new Error("amplify.yml dev branch must not call CloudFormation or select the production stack.");
+  }
+  if (!devBranch.includes("write-dev-frontend-env")) {
+    throw new Error("amplify.yml dev branch must validate the published dev environment before building.");
+  }
+  if (devBranch.includes("2>/dev/null")) {
+    throw new Error("amplify.yml dev branch must not hide AWS CLI errors.");
   }
   if (!amplifyYml.includes("blossompot-prod")) {
     throw new Error("amplify.yml must still build main from blossompot-prod.");
@@ -461,6 +747,42 @@ function main(): void {
     console.error(`Confirmed deployed stack ${stack}.`);
     return;
   }
+  if (command === "amplify-app-id") {
+    const appId = resolveDevAmplifyAppId(process.env.AMPLIFY_APP_ID);
+    process.stdout.write(appId);
+    return;
+  }
+  if (command === "assert-amplify-app") {
+    const parsed = JSON.parse(process.env.APP_JSON || "{}") as {
+      app?: { appId?: string; repository?: string };
+    };
+    assertBlossomPotAmplifyApp({
+      appId: parsed.app?.appId,
+      repository: parsed.app?.repository,
+    });
+    console.error(`Confirmed Amplify app ${BLOSSOMPOT_AMPLIFY_APP_ID} is connected to ${BLOSSOMPOT_REPOSITORY}.`);
+    return;
+  }
+  if (command === "write-dev-frontend-env") {
+    const envFile = readFlag("--out");
+    if (!envFile) throw new Error("Usage: deploy-target.ts write-dev-frontend-env --out <path>");
+    writeDevFrontendEnvFile(process.env, process.env.AWS_APP_ID, envFile);
+    console.error("Validated the dev frontend environment. Values were not logged.");
+    return;
+  }
+  if (command === "publish-dev-amplify") {
+    const { jobId } = publishDevAmplifyConfig(process.env, (args) => {
+      const result = spawnSync("aws", args, { encoding: "utf8" });
+      return {
+        status: result.status,
+        stdout: result.stdout ?? "",
+        stderr: result.stderr ?? "",
+        error: result.error?.message,
+      };
+    });
+    console.error(`Started Amplify dev release ${jobId} on ${BLOSSOMPOT_AMPLIFY_APP_ID} branch dev.`);
+    return;
+  }
   if (command === "dev-amplify-env") {
     const existing = JSON.parse(process.env.EXISTING || "{}") as Record<string, string>;
     const next = devAmplifyEnvironment(existing, {
@@ -477,7 +799,7 @@ function main(): void {
     return;
   }
   throw new Error(
-    "Usage: deploy-target.ts <assert|assert-url|assert-stack|dev-overrides|dev-amplify-env>"
+    "Usage: deploy-target.ts <assert|assert-url|assert-stack|dev-overrides|dev-amplify-env|amplify-app-id|assert-amplify-app|write-dev-frontend-env|publish-dev-amplify>"
   );
 }
 
