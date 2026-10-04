@@ -221,9 +221,14 @@ export function resolveBlossomPotAmplifyAppId(configured: string | undefined): s
   return value;
 }
 
-/** GitHub secret AMPLIFY_APP_ID must be the BlossomPot app. An empty value is not a fallback. */
+/**
+ * Dev publish uses the verified BlossomPot app when AMPLIFY_APP_ID is unset.
+ * A set value must still be that app. UsaRakhi and any other id are refused.
+ */
 export function resolveDevAmplifyAppId(secretValue: string | undefined): string {
-  return resolveBlossomPotAmplifyAppId(secretValue);
+  const secret = secretValue?.trim() ?? "";
+  if (!secret) return BLOSSOMPOT_AMPLIFY_APP_ID;
+  return resolveBlossomPotAmplifyAppId(secret);
 }
 
 export function assertBlossomPotAmplifyApp(app: { appId?: string; repository?: string }): void {
@@ -748,7 +753,7 @@ function main(): void {
     return;
   }
   if (command === "amplify-app-id") {
-    const appId = resolveDevAmplifyAppId(process.env.AMPLIFY_APP_ID);
+    const appId = resolveBlossomPotAmplifyAppId(process.env.AMPLIFY_APP_ID);
     process.stdout.write(appId);
     return;
   }

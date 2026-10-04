@@ -26,6 +26,7 @@ import {
   devParameterOverrides,
   publishDevAmplifyConfig,
   resolveBlossomPotAmplifyAppId,
+  resolveDevAmplifyAppId,
   writeDevFrontendEnvFile,
   type AwsCommandResult,
 } from "./deploy-target.ts";
@@ -157,6 +158,9 @@ test("Amplify app selection rejects a missing id, UsaRakhi, and the wrong reposi
   assert.throws(() => resolveBlossomPotAmplifyAppId(""), /missing/);
   assert.throws(() => resolveBlossomPotAmplifyAppId(USARAKHI_AMPLIFY_APP_ID), /not BlossomPot/);
   assert.equal(resolveBlossomPotAmplifyAppId(BLOSSOMPOT_AMPLIFY_APP_ID), BLOSSOMPOT_AMPLIFY_APP_ID);
+  assert.equal(resolveDevAmplifyAppId(""), BLOSSOMPOT_AMPLIFY_APP_ID);
+  assert.equal(resolveDevAmplifyAppId(undefined), BLOSSOMPOT_AMPLIFY_APP_ID);
+  assert.throws(() => resolveDevAmplifyAppId(USARAKHI_AMPLIFY_APP_ID), /not BlossomPot/);
   assertBlossomPotAmplifyApp({
     appId: BLOSSOMPOT_AMPLIFY_APP_ID,
     repository: BLOSSOMPOT_REPOSITORY,
@@ -212,6 +216,18 @@ function amplifyResponses(branchName: string, repository = BLOSSOMPOT_REPOSITORY
     return { status: 1, stdout: "", stderr: "unexpected command" };
   };
 }
+
+test("dev Amplify publish uses the BlossomPot app when the secret is unset", () => {
+  const calls: string[][] = [];
+  publishDevAmplifyConfig({ ...devPublishInput, AMPLIFY_APP_ID: "" }, (args) => {
+    calls.push(args);
+    return amplifyResponses("dev")(args);
+  });
+  const getApp = calls.find((args) => args[1] === "get-app");
+  assert.ok(getApp);
+  assert.equal(getApp[getApp.indexOf("--app-id") + 1], BLOSSOMPOT_AMPLIFY_APP_ID);
+  assert.equal(calls.some((args) => args.includes(USARAKHI_AMPLIFY_APP_ID)), false);
+});
 
 test("dev Amplify publish keeps unrelated settings and does not update main", () => {
   const calls: string[][] = [];
