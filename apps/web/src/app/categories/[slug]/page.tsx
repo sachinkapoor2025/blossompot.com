@@ -38,7 +38,7 @@ function resolveSort(raw?: string): ProductSort {
 }
 
 function isKnownCategorySlug(slug: string): boolean {
-  return (categoryOrder as readonly string[]).includes(slug);
+  return (categoryOrder as readonly string[]).includes(slug) || slug === "rakhi-hampers";
 }
 
 /** Match PDP: always use live product prices (no stale ISR listing HTML). */

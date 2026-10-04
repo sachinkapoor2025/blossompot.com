@@ -16,7 +16,7 @@ import { categoryHref } from "@/lib/category-urls";
 import { localizeShopCopy, localizeShopText, locationShopHeading } from "@/lib/location-seo-urls";
 import { homeCategoryOrder, orderCategories } from "@/lib/site";
 import { ListingPageSkeleton } from "@/components/route-skeletons";
-import { isRakhiRelatedCategorySlug, isRakhiRelatedProduct } from "@/lib/rakhi-filter";
+import { isRakhiRelatedProduct, productsNotShownInSections, storefrontSkipsRakhiCategory } from "@/lib/rakhi-filter";
 
 /** Match PDP: no ISR HTML with stale product prices. */
 export const dynamic = "force-dynamic";
@@ -124,7 +124,7 @@ async function ProductsPageContent({ searchParams }: Props) {
       api<{ categories: Category[] }>("/categories", { revalidate: 45 }),
     ]);
     products = liveProducts.filter((p) => !isRakhiRelatedProduct(p));
-    categories = categoriesData.categories.filter((c) => !isRakhiRelatedCategorySlug(c.slug));
+    categories = categoriesData.categories.filter((c) => !storefrontSkipsRakhiCategory(c.slug));
   } catch {
     products = [];
     categories = [];
@@ -148,6 +148,13 @@ async function ProductsPageContent({ searchParams }: Props) {
     name: categoryMap.get(slug)?.name ?? slug.replace(/-/g, " "),
     products: grouped.get(slug) ?? [],
   }));
+  const ungrouped = productsNotShownInSections(
+    products,
+    productsByCategory.flatMap((section) => section.products)
+  );
+  const ungroupedTitle = ungrouped.every((product) => product.categorySlug === "rakhi-hampers")
+    ? "Rakhi Hampers"
+    : "More gifts";
   const showGrouped = !search && !category;
 
   return (
@@ -210,6 +217,12 @@ async function ProductsPageContent({ searchParams }: Props) {
               </section>
             ) : null
           )}
+          {ungrouped.length > 0 ? (
+            <section>
+              <h2 className="text-xl font-bold text-primary mb-4">{ungroupedTitle}</h2>
+              <GroupedProductCards products={toListingCardProducts(ungrouped)} />
+            </section>
+          ) : null}
         </div>
       ) : (
         <ProductGrid products={toListingCardProducts(products)} sort={sort} />

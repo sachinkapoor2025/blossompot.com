@@ -14,7 +14,7 @@ import {
 } from "@blossompot/shared";
 import { api } from "./api";
 import { toListingCardProducts } from "./listing-card";
-import { isRakhiRelatedCategorySlug, isRakhiRelatedProduct } from "./rakhi-filter";
+import { isRakhiRelatedProduct, storefrontSkipsRakhiCategory } from "./rakhi-filter";
 import { shoppingCatalogCountry, shoppingCatalogQuery } from "./shopping-catalog";
 import { getStorefrontDeliveryCountry } from "./storefront-country";
 
@@ -164,7 +164,7 @@ export async function loadProducts(params?: {
   search?: string;
   country?: string;
 }): Promise<Product[]> {
-  if (params?.category && isRakhiRelatedCategorySlug(params.category)) return [];
+  if (params?.category && storefrontSkipsRakhiCategory(params.category)) return [];
 
   const requested = params?.country ?? (await getStorefrontDeliveryCountry());
   const country = shoppingCatalogCountry(requested);

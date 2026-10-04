@@ -10,7 +10,7 @@ import {
 } from "@blossompot/shared";
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
-import { isRakhiRelatedCategorySlug, isRakhiRelatedProduct } from "./rakhi-filter";
+import { isRakhiRelatedProduct, storefrontSkipsRakhiCategory } from "./rakhi-filter";
 import blossompotCatalog from "../../../../scripts/data/blossompot-catalog.json";
 import tfUsaCatalog from "../../../../scripts/data/tf-usa-catalog.json";
 
@@ -80,7 +80,7 @@ function productInCategory(product: Product, categorySlug: string): boolean {
 }
 
 export function getCatalogProductsByCategory(categorySlug: string): Product[] {
-  if (isRakhiRelatedCategorySlug(categorySlug)) return [];
+  if (storefrontSkipsRakhiCategory(categorySlug)) return [];
   const bySlug = new Map<string, Product>();
   for (const product of getCatalogProducts()) {
     if (productInCategory(product, categorySlug)) bySlug.set(product.slug, product);

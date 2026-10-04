@@ -10,6 +10,7 @@ export const HOME_PRODUCT_SECTIONS = [
   { slug: "flower-bouquets", title: "Bouquets" },
   { slug: "cakes", title: "Cakes" },
   { slug: "gift-hampers", title: "Gift Hampers" },
+  { slug: "rakhi-hampers", title: "Rakhi Hampers" },
 ] as const;
 
 const CARD_WIDTH = "w-[10.75rem] sm:w-[13rem] lg:w-[15rem]";
