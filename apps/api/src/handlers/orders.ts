@@ -32,6 +32,7 @@ import {
   type OrderStatusHistoryEntry,
   type CartItem,
   type VendorFulfillment,
+  CATALOG_VENDOR_UNAVAILABLE_MESSAGE,
   formatPostalDisplay,
   fulfillmentVendorSlug,
   nonUsDeliveryRejection,
@@ -44,6 +45,7 @@ import {
   orderIncludesGboProduct,
 } from "@blossompot/shared";
 import { evaluateProductsForLocation } from "./serviceability";
+import { decideNewShopping } from "../lib/catalog-vendor-store";
 import { resolveCheckoutUsdInrRate } from "../lib/exchange-rate";
 import { docClient, ORDERS_TABLE, CUSTOMERS_TABLE, now } from "../lib/db";
 import { ok, created, badRequest, unauthorized, forbidden, notFound } from "../lib/response";
@@ -237,6 +239,17 @@ export async function checkout(event: APIGatewayProxyEventV2) {
   if (!cart?.items?.length) return badRequest("Cart is empty");
   if (!isGboStorefrontEnabled() && orderIncludesGboProduct({ items: cart.items })) {
     return badRequest(gboCartLineUnavailableMessage(cart.items ?? []));
+  }
+  const newShoppingCountry = (parsed.data.shippingAddress.country ?? "US").trim() || "US";
+  for (const item of cart.items as CartItem[]) {
+    const decision = await decideNewShopping(item, newShoppingCountry);
+    if (!decision.available) {
+      return badRequest(
+        decision.reason === "gbo_storefront_disabled"
+          ? gboCartLineUnavailableMessage(cart.items ?? [])
+          : CATALOG_VENDOR_UNAVAILABLE_MESSAGE
+      );
+    }
   }
 
   const cartCurrency = cart.items[0]?.currency ?? "USD";

@@ -1,11 +1,13 @@
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
 import {
+  VENDOR_GBO,
   gboCreateOrderSchema,
   gboGiftDetailQuerySchema,
   gboGiftQuerySchema,
   isGboStorefrontEnabled,
   isPublicGboCatalogPath,
 } from "@blossompot/shared";
+import { loadCatalogVendorRegistry } from "../lib/catalog-vendor-store";
 import {
   GboClientError,
   gboCreateOrder,
@@ -16,7 +18,7 @@ import {
   gboListCountries,
   gboListGifts,
 } from "../lib/gbo-client";
-import { json, ok, okCached, badRequest, notFound, unauthorized } from "../lib/response";
+import { json, ok, badRequest, notFound, unauthorized } from "../lib/response";
 
 function requestPath(event: APIGatewayProxyEventV2): string {
   return event.rawPath || event.requestContext?.http?.path || "";
@@ -46,6 +48,15 @@ function sandboxFlag(event: APIGatewayProxyEventV2): boolean | undefined {
   if (v === "1" || v === "true") return true;
   if (v === "0" || v === "false") return false;
   return undefined;
+}
+
+/** Public GBO shopping needs the catalog vendor and the existing environment flag. */
+async function gboOpenForNewShopping(country: string): Promise<boolean> {
+  if (!isGboStorefrontEnabled()) return false;
+  const registry = await loadCatalogVendorRegistry();
+  const vendor = registry.get(VENDOR_GBO);
+  if (!vendor?.enabled) return false;
+  return vendor.deliveryCountries.includes(country.trim().toUpperCase());
 }
 
 function gboFail(err: unknown): APIGatewayProxyResultV2 {
@@ -107,12 +118,12 @@ export async function gboGiftsHandler(
     sandbox: q.sandbox,
   });
   if (!parsed.success) return badRequest(parsed.error.issues[0]?.message ?? "Invalid gift query");
-  if (!isGboStorefrontEnabled() && isPublicGboCatalogPath(requestPath(event))) {
+  if (isPublicGboCatalogPath(requestPath(event)) && !(await gboOpenForNewShopping(parsed.data.country))) {
     return ok({
       country: parsed.data.country,
       count: 0,
       gifts: [],
-      storefrontEnabled: false,
+      storefrontEnabled: isGboStorefrontEnabled(),
     });
   }
   try {
@@ -123,7 +134,8 @@ export async function gboGiftsHandler(
       gifts,
     };
     if (parsed.data.sandbox || sandboxFlag(event)) return ok(body);
-    return okCached(body, 45);
+    // Vendor enablement can change inside the old 45s window, so do not CDN-cache the public list.
+    return ok(body);
   } catch (err) {
     return gboFail(err);
   }
@@ -139,7 +151,7 @@ export async function gboGiftDetailHandler(
     sandbox: q.sandbox,
   });
   if (!parsed.success) return badRequest(parsed.error.issues[0]?.message ?? "country and productId required");
-  if (!isGboStorefrontEnabled() && isPublicGboCatalogPath(requestPath(event))) {
+  if (isPublicGboCatalogPath(requestPath(event)) && !(await gboOpenForNewShopping(parsed.data.country))) {
     return notFound("Product not found");
   }
   try {

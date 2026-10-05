@@ -211,6 +211,16 @@ export const marketplaceVendorKeys = {
   agreementSk: () => "META" as const,
 };
 
+/**
+ * Built-in catalog vendors (config table).
+ * Separate from marketplace applicants (`MVENDOR#<vendorId>`).
+ */
+export const catalogVendorKeys = {
+  pk: (vendorSlug: string) => `CATALOGVENDOR#${vendorSlug}`,
+  sk: () => "META" as const,
+  pkPrefix: () => "CATALOGVENDOR#" as const,
+};
+
 /** Vendor delivery coverage rules (config table). */
 export const vendorCoverageKeys = {
   pk: (vendorSlug: string) => `VCOV#${vendorSlug}`,

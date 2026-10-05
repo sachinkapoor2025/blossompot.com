@@ -51,6 +51,7 @@ const navItems: NavItem[] = [
     label: "Vendor Management",
     href: "/admin/vendor-management",
     children: [
+      { href: "/admin/vendors", label: "Vendors" },
       { href: "/admin/marketplace-vendors", label: "Marketplace vendors" },
       { href: "/admin/service-areas", label: "Service areas" },
       { href: "/admin/vendor-management?tab=expense", label: "Vendor expense" },

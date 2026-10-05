@@ -241,10 +241,7 @@ export function isProductDeliverableToLocation(
   if (product.published === false || (product.inventory ?? 1) <= 0) {
     return { serviceable: false, reason: "inactive_vendor", vendorSlug };
   }
-  const active =
-    vendorSlug === VENDOR_BLOSSOMPOT ||
-    vendorSlug === VENDOR_GBO ||
-    activeVendorSlugs.has(vendorSlug);
+  const active = activeVendorSlugs.has(vendorSlug);
   return checkVendorServiceability(vendorSlug, areas, location, active);
 }
 

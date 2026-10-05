@@ -33,6 +33,7 @@ import * as paymentLedger from "./handlers/payment-ledger";
 import * as paymentReconciliation from "./handlers/payment-reconciliation";
 import * as vendorManagement from "./handlers/vendor-management";
 import * as marketplaceVendors from "./handlers/marketplace-vendors";
+import * as catalogVendors from "./handlers/catalog-vendors";
 import * as serviceability from "./handlers/serviceability";
 import * as reviews from "./handlers/reviews";
 import * as gifting from "./handlers/gifting";
@@ -179,6 +180,14 @@ const routes: Route[] = [
     pattern: /^\/admin\/vendor-payouts\/([^/]+)$/,
     handler: vendorManagement.deleteVendorPayout,
     params: ["payoutId"],
+  },
+  // Catalog vendor registry (BlossomPot, Orange County, GBO, FNP). Not marketplace applicants.
+  { method: "GET", pattern: /^\/admin\/catalog-vendors$/, handler: catalogVendors.listCatalogVendorsAdmin },
+  {
+    method: "PUT",
+    pattern: /^\/admin\/catalog-vendors\/([^/]+)$/,
+    handler: catalogVendors.updateCatalogVendorAdmin,
+    params: ["vendorSlug"],
   },
   // Marketplace vendor partners (signup, portal, admin review)
   { method: "GET", pattern: /^\/marketplace\/vendor-agreement$/, handler: marketplaceVendors.getVendorAgreement },

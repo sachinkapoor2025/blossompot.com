@@ -163,6 +163,9 @@ export const GBO_PRODUCT_INVENTORY = 500;
 /** Default BlossomPot fulfillment key (catalog lines without product.vendorSlug). */
 export const VENDOR_BLOSSOMPOT = "blossompot" as const;
 
+/** FNP USA workbook imports. Catalog registry only until products are assigned this slug. */
+export const VENDOR_FNP = "fnp" as const;
+
 /** Public category slug (legacy; prefer gift-hampers). */
 export const ORANGE_COUNTY_CATEGORY_SLUG = "rakhi-hampers" as const;
 

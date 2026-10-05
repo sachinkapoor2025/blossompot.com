@@ -17,6 +17,7 @@ import {
   isFlashComboSaleActive,
   flashComboUnitPriceUsd,
   productUsesFixedStorefrontPrice,
+  CATALOG_VENDOR_UNAVAILABLE_MESSAGE,
   GBO_STOREFRONT_UNAVAILABLE_MESSAGE,
   gboCartLineUnavailableMessage,
   isGboHiddenFromStorefront,
@@ -31,6 +32,7 @@ import { cartAvailabilityLocation, evaluateProductsForLocation } from "./service
 import { formatPostalDisplay } from "@blossompot/shared";
 import { resolveProductImageUrl } from "../lib/images";
 import { upsertSessionProfile } from "../lib/customer-profile";
+import { decideNewShopping } from "../lib/catalog-vendor-store";
 import { ensureOrangeCountyProductInDb } from "../lib/orange-county-catalog";
 import { ensureProductInDb } from "../lib/ensure-product";
 
@@ -182,6 +184,17 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
   if (!productItem) return badRequest("Product not found");
   if (isGboHiddenFromStorefront(productItem as { slug?: string; vendorSlug?: string; sku?: string })) {
     return badRequest(GBO_STOREFRONT_UNAVAILABLE_MESSAGE);
+  }
+  const shoppingDecision = await decideNewShopping(
+    productItem as { slug?: string; vendorSlug?: string; sku?: string; internationalDelivery?: boolean },
+    parsed.data.deliveryCountry || "US"
+  );
+  if (!shoppingDecision.available) {
+    return badRequest(
+      shoppingDecision.reason === "gbo_storefront_disabled"
+        ? GBO_STOREFRONT_UNAVAILABLE_MESSAGE
+        : CATALOG_VENDOR_UNAVAILABLE_MESSAGE
+    );
   }
 
   const product = productItem as {

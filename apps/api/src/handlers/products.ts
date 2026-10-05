@@ -20,11 +20,13 @@ import {
   productVisibleForDeliveryCountry,
   dedupeStorefrontProducts,
   isGboHiddenFromStorefront,
+  productAllowedForNewShopping,
   VENDOR_GBO,
   type Product,
 } from "@blossompot/shared";
+import { decideNewShopping, loadCatalogVendorRegistry } from "../lib/catalog-vendor-store";
 import { docClient, PRODUCTS_TABLE, CONFIG_TABLE, now, slugify } from "../lib/db";
-import { ok, okCached, created, badRequest, notFound, forbidden } from "../lib/response";
+import { ok, created, badRequest, notFound, forbidden } from "../lib/response";
 import { evaluateProductsForLocation, parseLocationQuery } from "./serviceability";
 import { getAuth, requireAdmin } from "../lib/auth";
 import { withResolvedProductImages, resolveProductImageUrl } from "../lib/images";
@@ -218,6 +220,9 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
   if (location?.countryCode) {
     items = items.filter((p) => productVisibleForDeliveryCountry(p, location.countryCode));
   }
+  const shoppingCountry = location?.countryCode || "US";
+  const vendorRegistry = await loadCatalogVendorRegistry();
+  items = items.filter((product) => productAllowedForNewShopping(product, shoppingCountry, vendorRegistry).available);
   let products = items.map(forStorefront);
   if (location?.postalCode) {
     const evals = await evaluateProductsForLocation(items, location);
@@ -226,8 +231,8 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
     // Postal availability is per address — do not CDN-cache it.
     return ok({ products, location, filtered: true });
   }
-  // Country is a query parameter, so each country is its own cache entry.
-  return okCached({ products, ...(location?.countryCode ? { location, filtered: true } : {}) }, 45);
+  // Vendor availability can change without a product write, so do not CDN-cache the list.
+  return ok({ products, ...(location?.countryCode ? { location, filtered: true } : {}) });
 }
 
 export async function getProduct(event: APIGatewayProxyEventV2) {
@@ -243,6 +248,9 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
     if (location?.countryCode && !productVisibleForDeliveryCountry(cached.product, location.countryCode)) {
       return notFound("Product not found");
     }
+    if (!(await decideNewShopping(cached.product, location?.countryCode || "US")).available) {
+      return notFound("Product not found");
+    }
     if (location?.postalCode) {
       const [evalRow] = await evaluateProductsForLocation([cached.product], location);
       return ok({
@@ -254,7 +262,7 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
         },
       });
     }
-    return okCached({ product: forStorefront(cached.product) }, 45);
+    return ok({ product: forStorefront(cached.product) });
   }
 
   const result = await docClient.send(
@@ -284,6 +292,9 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
   if (location?.countryCode && !productVisibleForDeliveryCountry(product, location.countryCode)) {
     return notFound("Product not found");
   }
+  if (!(await decideNewShopping(product, location?.countryCode || "US")).available) {
+    return notFound("Product not found");
+  }
   if (location?.postalCode) {
     const [evalRow] = await evaluateProductsForLocation([product], location);
     return ok({
@@ -295,7 +306,7 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
       },
     });
   }
-  return okCached({ product: forStorefront(product) }, 45);
+  return ok({ product: forStorefront(product) });
 }
 
 export async function createProduct(event: APIGatewayProxyEventV2) {

@@ -40,7 +40,6 @@ const productMemoryCache = new Map<string, { product: Product; at: number }>();
  * Short enough that a price edit is visible within a minute.
  */
 export const CATALOG_REVALIDATE_SECONDS = 45;
-const CATALOG_FETCH = { revalidate: CATALOG_REVALIDATE_SECONDS };
 
 function rememberProduct(product: Product): Product {
   productMemoryCache.set(product.slug, { product, at: Date.now() });
@@ -60,7 +59,7 @@ function memoryProduct(slug: string): Product | null {
 }
 
 async function fetchGboStorefrontProducts(iso: string): Promise<Product[]> {
-  const data = await api<{ gifts: GboGift[] }>(`/gbo/gifts?country=${iso}`, CATALOG_FETCH);
+  const data = await api<{ gifts: GboGift[] }>(`/gbo/gifts?country=${iso}`, { revalidate: false });
   return (data.gifts ?? [])
     .filter((gift) => gboGiftNumericId(gift) != null)
     .map((gift) => {
@@ -73,7 +72,7 @@ async function fetchGboStorefrontProducts(iso: string): Promise<Product[]> {
 /**
  * Coalesce concurrent loads for the same country into one fetch and one mapping pass.
  * Cleared when the shared promise settles, so this is not an extra TTL cache.
- * Country keys stay separate. The 45-second Next fetch cache is unchanged.
+ * Country keys stay separate. Product and GBO gift reads are no-store so a vendor toggle is not frozen.
  */
 const gboInFlight = new Map<string, Promise<Product[]>>();
 
@@ -123,7 +122,7 @@ function isProductMissingError(err: unknown): boolean {
 export async function loadProduct(slug: string): Promise<Product | null> {
   if (isGboHiddenFromStorefront({ slug })) return null;
   try {
-    const data = await api<{ product: Product }>(`/products/${slug}`, CATALOG_FETCH);
+    const data = await api<{ product: Product }>(`/products/${slug}`, { revalidate: false });
     if (!isStorefrontVisible(data.product)) return null;
     return rememberProduct(data.product);
   } catch (err) {
@@ -133,7 +132,7 @@ export async function loadProduct(slug: string): Promise<Product | null> {
       try {
         const data = await api<{ gift: GboGift }>(
           `/gbo/gifts/${gboRef.productId}?country=${gboRef.country}`,
-          CATALOG_FETCH
+          { revalidate: false }
         );
         if (data.gift) {
           const mapped = gboGiftToProduct(gboRef.country, data.gift);
@@ -146,6 +145,7 @@ export async function loadProduct(slug: string): Promise<Product | null> {
       if (isProductMissingError(err)) return null;
     }
 
+    if (isProductMissingError(err)) return null;
     const stale = memoryProduct(slug);
     if (stale && isStorefrontVisible(stale)) return stale;
     return null;
@@ -175,7 +175,7 @@ export async function loadProducts(params?: {
   });
 
   const [dbResult, gboResult] = await Promise.all([
-    api<{ products: Product[] }>(`/products${qs}`, CATALOG_FETCH)
+    api<{ products: Product[] }>(`/products${qs}`, { revalidate: false })
       .then((data) => rememberProducts(data.products.filter(isStorefrontVisible)))
       .catch(() => null as Product[] | null),
     loadGboStorefrontProducts(country).catch(() => [] as Product[]),

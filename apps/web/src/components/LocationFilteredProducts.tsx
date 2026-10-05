@@ -3,7 +3,6 @@
 import type { ReactNode } from "react";
 import {
   fulfillmentVendorSlug,
-  isGboCatalogProduct,
   productVisibleForDeliveryCountry,
   type Product,
 } from "@blossompot/shared";
@@ -23,7 +22,6 @@ export function useLocationFilteredProducts(products: Product[]) {
   const next = products.filter((p) => {
     if (!productVisibleForDeliveryCountry(p, countryIso)) return false;
     if (!applyVendorFilter) return true;
-    if (isGboCatalogProduct(p)) return true;
     if (allowed.size === 0) return true;
     return allowed.has(fulfillmentVendorSlug(p));
   });

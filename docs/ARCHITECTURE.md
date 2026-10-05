@@ -164,6 +164,8 @@ When admin (or Orange County vendor tracking) changes order status (accepted, pr
 | GET | `/marketplace/vendors/orders` | Vendor: orders containing this vendorSlug (fulfillment fields only) |
 | POST | `/marketplace/vendors/orders/{orderId}/action` | Vendor: accept/reject/preparing/ready/out_for_delivery/delivered |
 | POST | `/marketplace/vendors/pricing/preview` | Vendor/admin: server-side margin/fee breakdown |
+| GET | `/admin/catalog-vendors` | Admin: catalog vendor registry (BlossomPot, Orange County, GBO, FNP). Missing rows use code defaults. UI: `/admin/vendors`. Does not change storefront visibility. |
+| PUT | `/admin/catalog-vendors/{vendorSlug}` | Admin: set `enabled` and `deliveryCountries` on `CATALOGVENDOR#<slug>`. |
 | GET | `/admin/marketplace/vendors` | Admin: list/filter marketplace vendor applications. UI: `/admin/marketplace-vendors` |
 | GET | `/admin/marketplace/vendors/{vendorId}` | Admin: vendor detail |
 | PATCH | `/admin/marketplace/vendors/{vendorId}/status` | Admin: pending→under_review→approved/active→suspended/rejected (+ optional temp password) |
