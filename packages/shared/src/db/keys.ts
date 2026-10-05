@@ -130,6 +130,11 @@ export const configKeys = {
   payments: { pk: "CONFIG#PAYMENTS", sk: "META" as const },
   blogImages: { pk: "CONFIG#BLOG_IMAGES", sk: "META" as const },
   shipping: { pk: "CONFIG#SHIPPING", sk: "META" as const },
+  /**
+   * Countries BlossomPot currently offers to customers.
+   * Separate from each catalog vendor's `deliveryCountries`.
+   */
+  catalogCountries: { pk: "CONFIG#CATALOG_COUNTRIES", sk: "META" as const },
   /** Growth-score weights + feature flags for Product Sales Intelligence. */
   productSalesIntel: { pk: "CONFIG#PRODUCT_SALES_INTEL", sk: "META" as const },
   /**

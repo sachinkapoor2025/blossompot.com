@@ -1,9 +1,20 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { CATALOG_INTEGRATION_LABELS, type CatalogIntegrationType } from "@blossompot/shared";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
+import {
+  VENDOR_COUNTRY_REQUIRED_MESSAGE,
+  VENDOR_GLOBAL_COUNTRY_NOTE,
+  applyVendorDeliveryCountries,
+  filterCountryChoices,
+  formatDeliveryCountryList,
+  toggleCountryChoice,
+  vendorCountrySaveRequest,
+  type CountryChoice,
+} from "@/lib/admin-country-management";
 
 type CatalogVendorRow = {
   vendorSlug: string;
@@ -32,6 +43,8 @@ export default function AdminCatalogVendorsPage() {
   const [countNote, setCountNote] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [enabled, setEnabled] = useState(true);
+  const [deliveryRows, setDeliveryRows] = useState<CountryChoice[]>([]);
+  const [countryQuery, setCountryQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -52,23 +65,35 @@ export default function AdminCatalogVendorsPage() {
   function openManage(vendor: CatalogVendorRow) {
     setSelected(vendor.vendorSlug);
     setEnabled(vendor.enabled);
+    setDeliveryRows(applyVendorDeliveryCountries(vendor.deliveryCountries));
+    setCountryQuery("");
     setSaved(null);
     setError(null);
   }
 
+  const visibleCountries = filterCountryChoices(deliveryRows, countryQuery);
+  const selectedCodes = deliveryRows.filter((row) => row.selected).map((row) => row.countryCode);
+  const saveRequest = current ? vendorCountrySaveRequest(current.vendorSlug, enabled, deliveryRows) : null;
+  const saveBlocked = saveRequest != null && "error" in saveRequest;
+
   async function save() {
-    if (!token || !current) return;
+    if (!token || !current || !saveRequest || "error" in saveRequest) {
+      setError(saveRequest && "error" in saveRequest ? saveRequest.error : VENDOR_COUNTRY_REQUIRED_MESSAGE);
+      return;
+    }
     setBusy(true);
     setError(null);
     setSaved(null);
     try {
-      await api(`/admin/catalog-vendors/${current.vendorSlug}`, {
-        method: "PUT",
+      const savedVendor = await api<{ vendor: CatalogVendorRow }>(saveRequest.path, {
+        method: saveRequest.method,
         token,
-        body: JSON.stringify({ enabled, deliveryCountries: ["US"] }),
+        body: JSON.stringify(saveRequest.body),
       });
       await load();
-      setSaved("Saved. Customer product lists are unchanged until vendor visibility is turned on.");
+      setEnabled(savedVendor.vendor.enabled);
+      setDeliveryRows(applyVendorDeliveryCountries(savedVendor.vendor.deliveryCountries));
+      setSaved("Saved. This vendor's delivery countries are stored. Customers can still select only the United States.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Save failed");
     } finally {
@@ -124,9 +149,9 @@ export default function AdminCatalogVendorsPage() {
                   ) : null}
                 </td>
                 <td className="px-4 py-3">
-                  {vendor.deliveryCountries.length === 1 && vendor.deliveryCountries[0] === "US"
-                    ? "United States"
-                    : vendor.deliveryCountries.join(", ") || "—"}
+                  {vendor.deliveryCountries.length > 0
+                    ? formatDeliveryCountryList(vendor.deliveryCountries)
+                    : "—"}
                 </td>
                 <td className="px-4 py-3 text-slate-500">{vendor.productCount ?? "—"}</td>
                 <td className="px-4 py-3">
@@ -147,7 +172,7 @@ export default function AdminCatalogVendorsPage() {
       {countNote ? <p className="text-xs text-slate-500">{countNote}</p> : null}
 
       {current ? (
-        <section className="max-w-xl space-y-4 rounded-xl border bg-white p-4">
+        <section className="max-w-2xl space-y-4 rounded-xl border bg-white p-4">
           <h2 className="text-lg font-semibold">{current.vendorName}</h2>
           <dl className="grid grid-cols-2 gap-2 text-sm">
             <dt className="text-slate-500">Integration</dt>
@@ -165,11 +190,51 @@ export default function AdminCatalogVendorsPage() {
             {enabled ? "Enabled" : "Disabled"}
           </label>
 
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked disabled readOnly />
-            United States
-          </label>
-          <p className="text-xs text-slate-500">Additional countries are not available yet.</p>
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold">Delivery Countries</h3>
+            <p className="text-xs text-slate-500">
+              Countries this vendor can deliver to. {VENDOR_GLOBAL_COUNTRY_NOTE}{" "}
+              <Link href="/admin/countries" className="font-medium text-nav underline">
+                Global Target Countries
+              </Link>
+            </p>
+            <p className="text-sm text-slate-600">
+              Selected: {selectedCodes.length > 0 ? formatDeliveryCountryList(selectedCodes) : "none"}
+            </p>
+            <label className="block text-sm">
+              <span className="sr-only">Search delivery countries</span>
+              <input
+                type="search"
+                value={countryQuery}
+                onChange={(event) => setCountryQuery(event.target.value)}
+                placeholder="Search countries"
+                className="w-full rounded-lg border px-3 py-2"
+              />
+            </label>
+            <div className="max-h-64 space-y-2 overflow-y-auto rounded-lg border px-3 py-2">
+              {visibleCountries.map((row) => (
+                <label key={row.countryCode} className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={row.selected}
+                    onChange={(event) => {
+                      setDeliveryRows((currentRows) =>
+                        toggleCountryChoice(currentRows, row.countryCode, event.target.checked)
+                      );
+                      setSaved(null);
+                    }}
+                  />
+                  <span>
+                    {row.countryName}{" "}
+                    <span className="text-slate-500">{row.countryCode}</span>
+                  </span>
+                </label>
+              ))}
+              {visibleCountries.length === 0 ? (
+                <p className="text-sm text-slate-500">No countries match that search.</p>
+              ) : null}
+            </div>
+          </div>
 
           {current.vendorSlug === "gift-baskets-overseas" ? (
             <div className="rounded-lg bg-slate-50 px-3 py-2 text-sm">
@@ -184,10 +249,12 @@ export default function AdminCatalogVendorsPage() {
             </div>
           ) : null}
 
+          {saveBlocked ? <p className="text-sm text-red-600">{saveRequest.error}</p> : null}
+
           <button
             type="button"
             onClick={() => void save()}
-            disabled={busy}
+            disabled={busy || saveBlocked}
             className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
           >
             {busy ? "Saving…" : "Save"}

@@ -59,6 +59,8 @@ the Lambda via env vars (`PRODUCTS_TABLE`, `ORDERS_TABLE`, `CARTS_TABLE`,
 | config | `CONFIG#PAYMENTS` | `META` | Stripe/Razorpay settings |
 | config | `CONFIG#SHIPPING` | `META` | USPS rate-shopping, origin address, festival mode |
 | config | `CONFIG#VENDOR_COMMISSIONS` | `META` | Marketplace commission rules (global / category / vendor) |
+| config | `CONFIG#CATALOG_COUNTRIES` | `META` | Global target countries (`countries[]` of `{ countryCode, enabled }`). Missing row means USA only. Admin UI: `/admin/countries`. Not read by the storefront yet. |
+| config | `CATALOGVENDOR#<slug>` | `META` | Catalog vendor `enabled` and `deliveryCountries`. Separate from global target countries and from `MVENDOR#`. |
 | config | `VCOV#{vendorSlug}` | `SAREA#{areaId}` / `META` | Vendor delivery service areas (ALLOW/DENY by country, state, city, postal, prefix, radius) |
 | config | `MVENDOR#<vendorId>` | `META` | Marketplace partner profile + status; lookups `MVENDOREMAIL#` / `MVENDORSLUG#`; sessions `MVENDORSESSION#`; ledger `MVENDORLEDGER#` |
 
@@ -164,8 +166,13 @@ When admin (or Orange County vendor tracking) changes order status (accepted, pr
 | GET | `/marketplace/vendors/orders` | Vendor: orders containing this vendorSlug (fulfillment fields only) |
 | POST | `/marketplace/vendors/orders/{orderId}/action` | Vendor: accept/reject/preparing/ready/out_for_delivery/delivered |
 | POST | `/marketplace/vendors/pricing/preview` | Vendor/admin: server-side margin/fee breakdown |
-| GET | `/admin/catalog-vendors` | Admin: catalog vendor registry (BlossomPot, Orange County, GBO, FNP). Missing rows use code defaults. UI: `/admin/vendors`. Does not change storefront visibility. |
-| PUT | `/admin/catalog-vendors/{vendorSlug}` | Admin: set `enabled` and `deliveryCountries` on `CATALOGVENDOR#<slug>`. |
+| GET | `/admin/catalog-vendors` | Admin: catalog vendor registry (BlossomPot, Orange County, GBO, FNP). Missing rows use code defaults. UI: `/admin/vendors`. |
+| PUT | `/admin/catalog-vendors/{vendorSlug}` | Admin: set `enabled` and `deliveryCountries` on `CATALOGVENDOR#<slug>`. The vendor form sends the selected ISO-2 codes. It does not force `["US"]` and does not change global target countries. |
+| GET | `/admin/catalog-countries` | Admin: global target countries, including disabled ones. Missing `CONFIG#CATALOG_COUNTRIES` returns USA enabled. UI: `/admin/countries`. Not wired to the storefront. |
+| PUT | `/admin/catalog-countries` | Admin: replace that list. Requires a known ISO-2 code, no duplicates, and at least one enabled country. Does not change vendor rows. |
+| GET | `/catalog-countries` | Public: globally enabled countries only (`countryCode`, `name`). The country selector does not call this yet. |
+
+**Global target countries vs vendor delivery countries.** A global country answers “can a customer select this country?” A catalog vendor’s `deliveryCountries` answers “can this vendor deliver there?” Both must eventually be true before a product is shoppable, together with the existing vendor enablement and product rules. Admin manages the two lists separately: `/admin/countries` for global target countries, and `/admin/vendors` for each vendor’s delivery countries. Saving one list does not change the other. A vendor may list GB while the global list is still USA only; that GB capability stays stored and is not customer-selectable. `clampShoppingCountry()` still forces the storefront to the United States, and the country selector, product lists, cart, and checkout do not read `CONFIG#CATALOG_COUNTRIES` yet.
 | GET | `/admin/marketplace/vendors` | Admin: list/filter marketplace vendor applications. UI: `/admin/marketplace-vendors` |
 | GET | `/admin/marketplace/vendors/{vendorId}` | Admin: vendor detail |
 | PATCH | `/admin/marketplace/vendors/{vendorId}/status` | Admin: pending→under_review→approved/active→suspended/rejected (+ optional temp password) |

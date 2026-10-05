@@ -34,6 +34,7 @@ import * as paymentReconciliation from "./handlers/payment-reconciliation";
 import * as vendorManagement from "./handlers/vendor-management";
 import * as marketplaceVendors from "./handlers/marketplace-vendors";
 import * as catalogVendors from "./handlers/catalog-vendors";
+import * as catalogCountries from "./handlers/catalog-countries";
 import * as serviceability from "./handlers/serviceability";
 import * as reviews from "./handlers/reviews";
 import * as gifting from "./handlers/gifting";
@@ -183,6 +184,9 @@ const routes: Route[] = [
   },
   // Catalog vendor registry (BlossomPot, Orange County, GBO, FNP). Not marketplace applicants.
   { method: "GET", pattern: /^\/admin\/catalog-vendors$/, handler: catalogVendors.listCatalogVendorsAdmin },
+  { method: "GET", pattern: /^\/admin\/catalog-countries$/, handler: catalogCountries.listCatalogCountriesAdmin },
+  { method: "PUT", pattern: /^\/admin\/catalog-countries$/, handler: catalogCountries.updateCatalogCountriesAdmin },
+  { method: "GET", pattern: /^\/catalog-countries$/, handler: catalogCountries.listCatalogCountriesPublic },
   {
     method: "PUT",
     pattern: /^\/admin\/catalog-vendors\/([^/]+)$/,
