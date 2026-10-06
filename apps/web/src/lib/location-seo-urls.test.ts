@@ -123,13 +123,13 @@ describe("location SEO shop URLs", () => {
     assert.equal(countryIsoFromPathname("/", "GB"), "GB");
   });
 
-  it("resolves storefront country from country pages before the cookie", () => {
+  it("keeps shopping in the US when a guide, query, or cookie names another country", () => {
     assert.equal(
       resolveStorefrontCountryIso({
         pathname: "/flower-delivery-uk",
         cookieCountry: "US",
       }),
-      "GB"
+      "US"
     );
     assert.equal(
       resolveStorefrontCountryIso({
@@ -142,26 +142,26 @@ describe("location SEO shop URLs", () => {
       resolveStorefrontCountryIso({
         pathname: "/flower-delivery-canada",
       }),
-      "CA"
+      "US"
     );
     assert.equal(
       resolveStorefrontCountryIso({
         pathname: "/flower-delivery-uae",
       }),
-      "AE"
+      "US"
     );
     assert.equal(
       resolveStorefrontCountryIso({
         pathname: "/flower-delivery-australia",
       }),
-      "AU"
+      "US"
     );
     assert.equal(
       resolveStorefrontCountryIso({
         pathname: "/flowers",
         cookieCountry: "GB",
       }),
-      "GB"
+      "US"
     );
     assert.equal(
       resolveStorefrontCountryIso({
@@ -169,8 +169,9 @@ describe("location SEO shop URLs", () => {
         searchCountry: "AE",
         cookieCountry: "US",
       }),
-      "AE"
+      "US"
     );
-    assert.equal(withCountryQuery("/products?search=roses", "GB"), "/products?search=roses&country=GB");
+    assert.equal(withCountryQuery("/products?search=roses", "GB"), "/products?search=roses&country=US");
+    assert.equal(withCountryQuery("/products?search=roses", "US"), "/products?search=roses&country=US");
   });
 });
