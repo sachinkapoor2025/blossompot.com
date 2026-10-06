@@ -13,7 +13,8 @@ import { slugify } from "../packages/shared/src/lib/slug";
 
 const ROOT = resolve(process.cwd());
 const SOURCE =
-  process.env.FNP_WORKBOOK_SOURCE ?? "C:\\Users\\dell\\Downloads\\FNP_USA_Product_List.xlsx";
+  process.env.FNP_WORKBOOK_SOURCE ??
+  "C:\\Users\\dell\\Downloads\\FNP_USA_Product_List_Categorized.xlsx";
 const OUTPUT_XLSX = resolve(ROOT, "scripts/data/fnp-usa/FNP_USA_Product_List.xlsx");
 const OUTPUT_JSON = resolve(ROOT, "scripts/data/fnp-usa-catalog.json");
 const DOWNLOAD_COPY = "C:\\Users\\dell\\Downloads\\FNP_USA_Product_List_Categorized.xlsx";

@@ -54,6 +54,15 @@ function mergeBundledCatalogProducts(items: Product[], category?: string): Produ
   return [...bySlug.values()];
 }
 
+async function persistAndMergeBundledCatalog(items: Product[], category?: string): Promise<Product[]> {
+  const persisted = await persistMissingBundledCatalogProducts(new Set(items.map((product) => product.slug)));
+  if (persisted.length > 0) {
+    invalidateProductListCache(category);
+    items = [...persisted.map((row) => row as Product), ...items];
+  }
+  return dedupeStorefrontProducts(mergeBundledCatalogProducts(items, category));
+}
+
 function forStorefront(product: Product): Product {
   const allowsAddons = productAllowsAddons(product);
   const stripped = stripVendorPrivateFields(
@@ -198,7 +207,7 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
     items = await scanAllProducts();
   }
 
-  items = dedupeStorefrontProducts(items);
+  items = await persistAndMergeBundledCatalog(items, category);
 
   items = items.filter(
     (p) =>

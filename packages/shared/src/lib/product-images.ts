@@ -136,6 +136,7 @@ function usesDemoStockPhotos(images?: string[] | null): boolean {
 
 function isLiveInventorySku(sku?: string | null, tags?: string[]): boolean {
   if ((tags ?? []).includes("tf-usa")) return true;
+  if ((tags ?? []).includes("fnp-usa-import")) return true;
   const value = (sku ?? "").trim();
   if (!value) return false;
   const upper = value.toUpperCase();
