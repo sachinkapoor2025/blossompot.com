@@ -2,6 +2,7 @@ import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda
 import { ok, notFound, corsPreflight, json } from "./lib/response";
 import { allowRequest, clientIp, limitForPath } from "./lib/rate-limit";
 import * as products from "./handlers/products";
+import * as fnpImport from "./handlers/fnp-import";
 import * as categories from "./handlers/categories";
 import * as cart from "./handlers/cart";
 import * as orders from "./handlers/orders";
@@ -25,11 +26,15 @@ import * as loadTest from "./handlers/load-test";
 import * as adminVendorApi from "./handlers/admin-vendor-api";
 import * as adminGboApi from "./handlers/admin-gbo-api";
 import * as gbo from "./handlers/gbo";
+import * as homepageCatalog from "./handlers/homepage-catalog";
+import * as flowerGuideCards from "./handlers/flower-guide-cards";
 import * as expenses from "./handlers/expenses";
 import * as paymentLedger from "./handlers/payment-ledger";
 import * as paymentReconciliation from "./handlers/payment-reconciliation";
 import * as vendorManagement from "./handlers/vendor-management";
 import * as marketplaceVendors from "./handlers/marketplace-vendors";
+import * as catalogVendors from "./handlers/catalog-vendors";
+import * as catalogCountries from "./handlers/catalog-countries";
 import * as serviceability from "./handlers/serviceability";
 import * as reviews from "./handlers/reviews";
 import * as gifting from "./handlers/gifting";
@@ -78,7 +83,21 @@ const routes: Route[] = [
     params: ["slug"],
   },
   { method: "POST", pattern: /^\/products\/bulk$/, handler: products.bulkUploadProducts },
+  { method: "POST", pattern: /^\/admin\/imports\/fnp\/preview$/, handler: fnpImport.previewFnpImport },
+  { method: "POST", pattern: /^\/admin\/imports\/fnp\/commit$/, handler: fnpImport.commitFnpImport },
+  { method: "POST", pattern: /^\/admin\/imports\/fnp\/retry$/, handler: fnpImport.retryFnpImport },
+  { method: "GET", pattern: /^\/admin\/imports\/fnp$/, handler: fnpImport.listFnpImports },
+  {
+    method: "GET",
+    pattern: /^\/admin\/imports\/fnp\/([^/]+)$/,
+    handler: fnpImport.getFnpImport,
+    params: ["batchId"],
+  },
   { method: "GET", pattern: /^\/categories$/, handler: categories.listCategories },
+  { method: "GET", pattern: /^\/homepage-catalog$/, handler: homepageCatalog.getHomepageCatalogCache },
+  { method: "PUT", pattern: /^\/homepage-catalog$/, handler: homepageCatalog.putHomepageCatalogCache },
+  { method: "GET", pattern: /^\/flower-guide-cards$/, handler: flowerGuideCards.getFlowerGuideCardsCache },
+  { method: "PUT", pattern: /^\/flower-guide-cards$/, handler: flowerGuideCards.putFlowerGuideCardsCache },
   { method: "GET", pattern: /^\/categories\/([^/]+)$/, handler: categories.getCategory, params: ["slug"] },
   { method: "POST", pattern: /^\/categories$/, handler: categories.createCategory },
   { method: "PUT", pattern: /^\/categories\/([^/]+)$/, handler: categories.updateCategory, params: ["slug"] },
@@ -162,6 +181,17 @@ const routes: Route[] = [
     pattern: /^\/admin\/vendor-payouts\/([^/]+)$/,
     handler: vendorManagement.deleteVendorPayout,
     params: ["payoutId"],
+  },
+  // Catalog vendor registry (BlossomPot, Orange County, GBO, FNP). Not marketplace applicants.
+  { method: "GET", pattern: /^\/admin\/catalog-vendors$/, handler: catalogVendors.listCatalogVendorsAdmin },
+  { method: "GET", pattern: /^\/admin\/catalog-countries$/, handler: catalogCountries.listCatalogCountriesAdmin },
+  { method: "PUT", pattern: /^\/admin\/catalog-countries$/, handler: catalogCountries.updateCatalogCountriesAdmin },
+  { method: "GET", pattern: /^\/catalog-countries$/, handler: catalogCountries.listCatalogCountriesPublic },
+  {
+    method: "PUT",
+    pattern: /^\/admin\/catalog-vendors\/([^/]+)$/,
+    handler: catalogVendors.updateCatalogVendorAdmin,
+    params: ["vendorSlug"],
   },
   // Marketplace vendor partners (signup, portal, admin review)
   { method: "GET", pattern: /^\/marketplace\/vendor-agreement$/, handler: marketplaceVendors.getVendorAgreement },

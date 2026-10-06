@@ -32,7 +32,7 @@ export async function getStorefrontDeliveryCountry(
   try {
     const raw = (await cookies()).get(DELIVERY_LOCATION_COOKIE)?.value;
     const loc = parseDeliveryLocationToken(raw ? decodeCookieValue(raw) : "");
-    if (loc?.countryCode) return loc.countryCode;
+    if (loc?.countryCode) return loc.countryCode.toUpperCase();
   } catch {
     /* cookies() unavailable outside a request */
   }

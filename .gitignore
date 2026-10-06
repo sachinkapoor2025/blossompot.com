@@ -32,6 +32,9 @@ Thumbs.db
 npm-debug.log*
 
 apps/api/uploads/
+.dynamodb-local/
+.jdk/
+scripts/reports/
 
 # Large vendor catalogue assets (import locally; do not commit binaries)
 USA Rakhi Images Catalouge  2026i/

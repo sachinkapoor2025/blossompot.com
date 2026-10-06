@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
-import { api } from "@/lib/api";
 import { HomeHero } from "@/components/HomeHero";
 import { HomeBrandTaglines } from "@/components/HomeBrandTaglines";
 import { CustomerReviews } from "@/components/CustomerReviews";
@@ -14,10 +14,15 @@ import { buildHomeCategoryTiles } from "@/lib/home-category-carousel";
 import { JsonLd } from "@/components/JsonLd";
 import { faqs, homeBanners, countriesMenu } from "@/lib/site";
 import { localizeCopyForCountry } from "@/lib/location-seo-urls";
-import { loadProducts } from "@/lib/product-loader";
+import { getHomepageCatalogData } from "@/lib/homepage-catalog";
+import {
+  HOME_PRODUCT_SECTIONS,
+  HomeCategoryProductRow,
+  HomeCategoryProductRowFallback,
+} from "@/components/HomeCategoryProductRow";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { faqJsonLd, pageMetadata } from "@/lib/seo";
-import { resolveDeliveryCountry, type Product, type Category } from "@blossompot/shared";
+import { resolveDeliveryCountry } from "@blossompot/shared";
 import { flowerDeliverySlugForIso } from "@/lib/content/country-flower-delivery";
 
 export const metadata: Metadata = pageMetadata({
@@ -31,44 +36,46 @@ export const metadata: Metadata = pageMetadata({
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function HomePage({
+export default function HomePage({
   searchParams,
 }: {
   searchParams: Promise<{ country?: string }>;
 }) {
+  // Start reviews immediately so they overlap the catalog fetch instead of following it.
+  const reviewsPromise = getGoogleReviews();
+  return (
+    <div>
+      <JsonLd data={[faqJsonLd(faqs)]} />
+      <HomeHero banners={[...homeBanners]} />
+      <HomeBrandTaglines />
+      <Suspense fallback={<HomeBelowHeroFallback />}>
+        <HomeBelowHero searchParams={searchParams} reviewsPromise={reviewsPromise} />
+      </Suspense>
+    </div>
+  );
+}
+
+/** Resolves the delivery country, then streams the carousel and category rows independently. */
+async function HomeBelowHero({
+  searchParams,
+  reviewsPromise,
+}: {
+  searchParams: Promise<{ country?: string }>;
+  reviewsPromise: ReturnType<typeof getGoogleReviews>;
+}) {
   const params = await searchParams;
-  let products: Product[] = [];
-  let categories: Category[] = [];
-  let catalogError = "";
   const deliveryCountry = await getStorefrontDeliveryCountry(params.country);
   const destinationName = resolveDeliveryCountry(deliveryCountry).countryName;
-
-  try {
-    const [liveProducts, categoriesData] = await Promise.all([
-      loadProducts({ country: deliveryCountry }),
-      api<{ categories: Category[] }>("/categories", { revalidate: false }),
-    ]);
-    products = liveProducts;
-    categories = categoriesData.categories;
-  } catch (err) {
-    catalogError = err instanceof Error ? err.message : "Gift catalog is temporarily unavailable.";
-  }
-
-  const googleReviews = await getGoogleReviews();
-  const categoryTiles = buildHomeCategoryTiles(products, categories);
   const selectedFlowerSlug = flowerDeliverySlugForIso(deliveryCountry);
   const countryPages = selectedFlowerSlug
     ? countriesMenu.items.filter((item) => item.slug === selectedFlowerSlug)
     : [];
 
   return (
-    <div>
-      <JsonLd data={[faqJsonLd(faqs)]} />
-
-      <HomeHero banners={[...homeBanners]} />
-      <HomeBrandTaglines />
-
-      <HomeCategoryCarousel tiles={categoryTiles} />
+    <>
+      <Suspense fallback={<HomeBelowHeroFallback />}>
+        <HomeCategoryCarouselBlock country={deliveryCountry} />
+      </Suspense>
       <TrustStrip />
 
       <div className="max-w-7xl mx-auto px-4 pt-6 pb-2 flex flex-wrap justify-center gap-3">
@@ -105,24 +112,23 @@ export default async function HomePage({
       ) : null}
 
       <section className="max-w-7xl mx-auto px-4 py-10">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-primary">Gift catalog</h2>
-          <p className="text-sm text-slate-600 mt-1">
-            Browse flowers, cakes, and hampers for {destinationName} — open the full catalog to shop.
-          </p>
+        <p className="text-sm text-slate-600">
+          Flowers, bouquets, cakes, and hampers for {destinationName}.
+        </p>
+        <div className="mt-8 space-y-10">
+          {HOME_PRODUCT_SECTIONS.map((section) => (
+            <Suspense
+              key={section.slug}
+              fallback={<HomeCategoryProductRowFallback title={section.title} />}
+            >
+              <HomeCategoryProductRow
+                slug={section.slug}
+                title={section.title}
+                country={deliveryCountry}
+              />
+            </Suspense>
+          ))}
         </div>
-        {catalogError ? (
-          <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-            {catalogError}
-          </p>
-        ) : (
-          <p className="text-sm text-slate-600 mb-4">
-            {products.length} gifts available for {destinationName}.
-          </p>
-        )}
-        <Link href="/gift-catalog" className="btn-nav bg-primary inline-flex">
-          Open gift catalog
-        </Link>
       </section>
 
       <section className="max-w-7xl mx-auto px-4 py-12">
@@ -152,7 +158,9 @@ export default async function HomePage({
 
       <WhyTrustUsSection />
 
-      <CustomerReviews data={googleReviews} />
+      <Suspense fallback={<HomeReviewsFallback />}>
+        <HomeReviews reviewsPromise={reviewsPromise} />
+      </Suspense>
 
       <HomeFlowerGuideCta />
       <HomeSeoSection countryIso={deliveryCountry} />
@@ -202,10 +210,76 @@ export default async function HomePage({
             </div>
           ))}
         </div>
-        {categories.length > 0 && (
-          <p className="text-xs text-slate-400 mt-8">{categories.length} categories available in catalog</p>
-        )}
+        <Suspense fallback={null}>
+          <HomeCategoryCount country={deliveryCountry} />
+        </Suspense>
       </section>
-    </div>
+    </>
+  );
+}
+
+async function HomeCategoryCarouselBlock({ country }: { country: string }) {
+  let categoryTiles = buildHomeCategoryTiles([], []);
+  try {
+    const catalog = await getHomepageCatalogData(country);
+    categoryTiles = catalog.tiles;
+  } catch {
+    categoryTiles = buildHomeCategoryTiles([], []);
+  }
+  return <HomeCategoryCarousel tiles={categoryTiles} />;
+}
+
+async function HomeCategoryCount({ country }: { country: string }) {
+  try {
+    const catalog = await getHomepageCatalogData(country);
+    if (catalog.categoryCount <= 0) return null;
+    return (
+      <p className="text-xs text-slate-400 mt-8">{catalog.categoryCount} categories available in catalog</p>
+    );
+  } catch {
+    return null;
+  }
+}
+
+async function HomeReviews({
+  reviewsPromise,
+}: {
+  reviewsPromise: ReturnType<typeof getGoogleReviews>;
+}) {
+  const googleReviews = await reviewsPromise;
+  return <CustomerReviews data={googleReviews} />;
+}
+
+function HomeReviewsFallback() {
+  return (
+    <section className="border-y border-[#eadfd8] bg-gradient-to-b from-[#fff8f5] to-white" aria-hidden>
+      <div className="mx-auto max-w-7xl px-4 py-12 md:py-16 animate-pulse">
+        <div className="mx-auto mb-8 h-8 w-56 max-w-full rounded bg-white" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {Array.from({ length: 5 }, (_, i) => (
+            <div key={i} className="h-40 rounded-2xl border border-primary/10 bg-white" />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** Reserves the category row under the hero so the banner does not jump when the catalog streams in. */
+function HomeBelowHeroFallback() {
+  return (
+    <section className="bg-[#f7f1ea] border-y border-[#eadfd8]" aria-hidden>
+      <div className="max-w-7xl mx-auto px-4 py-8 sm:py-10 animate-pulse">
+        <div className="mx-auto mb-5 h-8 w-64 max-w-full rounded bg-white/80" />
+        <div className="flex gap-4 sm:gap-5 overflow-hidden">
+          {Array.from({ length: 8 }, (_, i) => (
+            <div key={i} className="shrink-0 w-[112px] sm:w-[132px]">
+              <div className="aspect-square rounded-2xl bg-white ring-1 ring-[#eadfd8]" />
+              <div className="mx-auto mt-2 h-4 w-16 rounded bg-white/80" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }

@@ -14,6 +14,7 @@ import {
   giftsCatalogCountryIso,
   giftsCatalogCountryRewrites,
   countryIsoFromPathname,
+  deliveryDestinationName,
   resolveStorefrontCountryIso,
   withCountryQuery,
 } from "./location-seo-urls";
@@ -77,6 +78,15 @@ describe("location SEO shop URLs", () => {
     assert.match(copy.description, /USA/);
     assert.equal(copy.h1, "Send Flowers Online — Delivery to USA");
     assert.equal(locationShopHeading("/gifts-to-uk", "Shop Flowers, Cakes & Gifts"), "Shop Flowers, Cakes & Gifts to UK");
+    assert.equal(locationShopHeading("/flowers-to-uk", "Send Flowers"), "Send Flowers to UK");
+    const ukShop = localizeShopCopy("/flowers-to-uk", {
+      title: "Send Flowers Online Worldwide | BlossomPot",
+      description: "Order fresh flowers for worldwide delivery.",
+      h1: "Send Flowers — Worldwide Delivery",
+    });
+    assert.match(ukShop.title, /UK/);
+    assert.match(ukShop.h1 ?? "", /UK/);
+    assert.equal(countryIsoFromPathname("/flowers-to-uk"), "GB");
     assert.match(localizeCopyForCountry("Shop with worldwide delivery.", "GB"), /UK/);
   });
 
@@ -86,6 +96,22 @@ describe("location SEO shop URLs", () => {
     assert.equal(giftsCatalogCountryIso("california"), null);
     const usa = giftsCatalogCountryRewrites().find((r) => r.source === "/gifts-to-usa");
     assert.deepEqual(usa, { source: "/gifts-to-usa", destination: "/products?country=US" });
+    const uk = giftsCatalogCountryRewrites().find((r) => r.source === "/gifts-to-uk");
+    assert.deepEqual(uk, { source: "/gifts-to-uk", destination: "/products?country=GB" });
+    assert.equal(categoryLocationHref("flowers", "US"), "/flowers-to-usa");
+  });
+
+  it("names the selected delivery destination for help copy", () => {
+    assert.equal(deliveryDestinationName("BH", "Bahrain"), "Bahrain");
+    assert.equal(deliveryDestinationName("BH"), "Bahrain");
+    assert.equal(deliveryDestinationName("AE", "United Arab Emirates"), "UAE");
+    assert.equal(deliveryDestinationName("GB"), "UK");
+    assert.equal(deliveryDestinationName("US", "United States"), "USA");
+    assert.equal(deliveryDestinationName(null), "USA");
+    assert.equal(
+      `confirm ${deliveryDestinationName("AE", "United Arab Emirates")} delivery addresses.`,
+      "confirm UAE delivery addresses."
+    );
   });
 
   it("maps country pages to that country's ISO for city menus", () => {

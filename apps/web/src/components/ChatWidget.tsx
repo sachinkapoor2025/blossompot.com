@@ -321,7 +321,7 @@ export function ChatWidget() {
         onClick={() => (open ? setOpen(false) : handleOpen())}
         aria-label={open ? "Close chat" : "Open BlossomPot chat assistant"}
         aria-expanded={open}
-        className="fixed bottom-[4.75rem] right-5 z-50 flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-white shadow-[0_4px_12px_rgba(24,58,104,0.45)] ring-2 ring-white/20 hover:bg-primary/90 hover:scale-105 active:scale-95 transition-transform"
+        className={`fixed bottom-[4.75rem] right-5 z-50 flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-white shadow-[0_4px_12px_rgba(24,58,104,0.45)] ring-2 ring-white/20 hover:bg-primary/90 hover:scale-105 active:scale-95 transition-transform${open ? " max-md:hidden" : ""}`}
       >
         {open ? (
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

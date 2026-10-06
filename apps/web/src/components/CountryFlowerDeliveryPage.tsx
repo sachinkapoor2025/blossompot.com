@@ -1,62 +1,37 @@
 import Link from "next/link";
-import {
-  isProductStorefrontVisible,
-  productVisibleForDeliveryCountry,
-  type Product,
-} from "@blossompot/shared";
+import { Suspense } from "react";
 import { AnswerBlock } from "@/components/AnswerBlock";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { HomeProductCard } from "@/components/HomeProductCard";
+import { CountryFlowerProductSection } from "@/components/CountryFlowerProductSection";
 import { JsonLd } from "@/components/JsonLd";
+import { ListingPageSkeleton } from "@/components/route-skeletons";
 import {
   flowerDeliveryCountryIso,
   getCountryFlowerDelivery,
   type CountryFlowerDeliverySlug,
 } from "@/lib/content/country-flower-delivery";
 import { countryPageInlineLinks } from "@/lib/content/page-inline-links";
-import { mergeProductsForCountry } from "@/lib/catalog-fallback";
-import { shuffleForCity } from "@/lib/city-products";
 import { applyInlineLinks } from "@/lib/inline-links";
-import { loadProducts } from "@/lib/product-loader";
-import { breadcrumbJsonLd, canonical, faqJsonLd, itemListJsonLd } from "@/lib/seo";
-import { site, cityNavHref } from "@/lib/site";
+import { breadcrumbJsonLd, canonical, faqJsonLd } from "@/lib/seo";
+import { cityNavHref } from "@/lib/site";
 import { cityMenuForCountry } from "@/lib/city-menu-for-location";
 import { siteUrl } from "@/lib/env";
 
-const FLOWER_CATEGORY_SLUGS = new Set(["flowers", "flower-bouquets"]);
-
-function pickCountryProducts(products: Product[], slug: CountryFlowerDeliverySlug): Product[] {
-  const countryIso = flowerDeliveryCountryIso(slug);
-  const visible = products.filter(
-    (p) => isProductStorefrontVisible(p) && productVisibleForDeliveryCountry(p, countryIso)
+function FlowerGuideProducts({ country }: { country: CountryFlowerDeliverySlug }) {
+  return (
+    <Suspense fallback={<ListingPageSkeleton />}>
+      <CountryFlowerProductSection country={country} />
+    </Suspense>
   );
-  const flowers = visible.filter((p) => FLOWER_CATEGORY_SLUGS.has(p.categorySlug));
-  if (slug === "usa") {
-    const pool = flowers.length > 0 ? flowers : visible;
-    return shuffleForCity(pool, `flower-delivery-${slug}`).slice(0, 24);
-  }
-  const flowersFirst = [
-    ...flowers,
-    ...visible.filter((p) => !FLOWER_CATEGORY_SLUGS.has(p.categorySlug)),
-  ];
-  return shuffleForCity(flowersFirst, `flower-delivery-${slug}`).slice(0, 10);
 }
 
-export async function CountryFlowerDeliveryPage({
+export function CountryFlowerDeliveryPage({
   country,
 }: {
   country: CountryFlowerDeliverySlug;
 }) {
   const page = getCountryFlowerDelivery(country);
   const countryIso = flowerDeliveryCountryIso(country);
-  let products: Product[] = [];
-  try {
-    products = await loadProducts({ country: countryIso });
-  } catch {
-    products = [];
-  }
-  products = mergeProductsForCountry(products, countryIso);
-  const featured = pickCountryProducts(products, country);
   const cityMenu = cityMenuForCountry(countryIso);
   const countryCityLinks = cityMenu.links.map((city) => ({
     label: city.label,
@@ -70,25 +45,6 @@ export async function CountryFlowerDeliveryPage({
     { label: page.menuLabel },
   ];
 
-  const productSection =
-    featured.length > 0 ? (
-      <section className="mb-10">
-        <h2 className="text-xl font-bold text-primary mb-3">
-          {productsFirst ? `Flower gifts for ${page.countryName}` : `Featured gifts for ${page.countryName}`}
-        </h2>
-        <p className="text-slate-700 mb-4 max-w-3xl leading-relaxed">
-          {productsFirst
-            ? `Shop flowers available for ${page.countryName} delivery. Open any product for current price, inventory, and delivery timing.`
-            : `A rotating selection from the live ${site.name} catalog — flowers first, then cakes and hampers. Open any product for current price, inventory, and delivery timing.`}
-        </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {featured.map((product) => (
-            <HomeProductCard key={product.slug} product={product} />
-          ))}
-        </div>
-      </section>
-    ) : null;
-
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
       <JsonLd
@@ -98,10 +54,6 @@ export async function CountryFlowerDeliveryPage({
             { name: page.menuLabel, path: page.href },
           ]),
           faqJsonLd(page.faqs),
-          itemListJsonLd(
-            page.h1,
-            featured.map((p) => ({ name: p.name, path: `/products/${p.slug}` }))
-          ),
           {
             "@context": "https://schema.org",
             "@type": "WebPage",
@@ -137,9 +89,9 @@ export async function CountryFlowerDeliveryPage({
         ]}
       />
       <Breadcrumbs items={crumbs} />
-      {productsFirst ? productSection : null}
+      {productsFirst ? <FlowerGuideProducts country={country} /> : null}
       <h1 className="text-3xl font-bold text-primary mb-3">{page.h1}</h1>
-      {productsFirst ? null : productSection}
+      {productsFirst ? null : <FlowerGuideProducts country={country} />}
 
       <p className="text-slate-600 mb-6 max-w-3xl leading-relaxed">
         {applyInlineLinks(page.intro, inlineLinks, { usedHrefs, currentPath: page.href, max: 4 })}

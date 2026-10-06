@@ -1,5 +1,6 @@
 version = 0.1
 
+# Dev stack used by the dev branch (--config-env default). Do not point this section at blossompot-prod.
 [default.deploy.parameters]
 stack_name = "blossompot-dev"
 resolve_s3 = true

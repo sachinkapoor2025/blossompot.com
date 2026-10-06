@@ -2,6 +2,8 @@ import {
   parseGboSlug,
   gboGiftToProduct,
   gboGiftNumericId,
+  isGboHiddenFromStorefront,
+  isGboStorefrontEnabled,
   productInStorefrontCategory,
   productMatchesSearchQuery,
   productVisibleForDeliveryCountry,
@@ -11,11 +13,16 @@ import {
   type Product,
 } from "@blossompot/shared";
 import { api } from "./api";
-import { isRakhiRelatedCategorySlug, isRakhiRelatedProduct } from "./rakhi-filter";
+import { toListingCardProducts } from "./listing-card";
+import { isRakhiRelatedProduct, storefrontSkipsRakhiCategory } from "./rakhi-filter";
 import { getStorefrontDeliveryCountry } from "./storefront-country";
 
 function isStorefrontVisible(product: Product): boolean {
-  return !isRakhiRelatedProduct(product) && isProductStorefrontVisible(product);
+  return (
+    !isGboHiddenFromStorefront(product) &&
+    !isRakhiRelatedProduct(product) &&
+    isProductStorefrontVisible(product)
+  );
 }
 
 /**
@@ -26,8 +33,11 @@ function isStorefrontVisible(product: Product): boolean {
 const PRODUCT_MEMORY_TTL_MS = 60 * 60 * 1000; // 1 hour
 const productMemoryCache = new Map<string, { product: Product; at: number }>();
 
-/** Same cache policy for listing + PDP — never serve a stale Next Data Cache price. */
-const FRESH_PRODUCT_FETCH = { revalidate: false as const };
+/**
+ * Public catalog only. Cart, checkout, and account calls do not use this.
+ * Short enough that a price edit is visible within a minute.
+ */
+export const CATALOG_REVALIDATE_SECONDS = 45;
 
 function rememberProduct(product: Product): Product {
   productMemoryCache.set(product.slug, { product, at: Date.now() });
@@ -46,10 +56,12 @@ function memoryProduct(slug: string): Product | null {
   return hit.product;
 }
 
-/** Live Gift Baskets Overseas catalog for the selected delivery country. */
-export async function loadGboStorefrontProducts(country?: string): Promise<Product[]> {
-  const iso = (country ?? (await getStorefrontDeliveryCountry())).trim().toUpperCase() || "US";
-  const data = await api<{ gifts: GboGift[] }>(`/gbo/gifts?country=${iso}`, FRESH_PRODUCT_FETCH);
+function catalogCountry(country?: string | null): string {
+  return (country ?? "").trim().toUpperCase() || "US";
+}
+
+async function fetchGboStorefrontProducts(iso: string): Promise<Product[]> {
+  const data = await api<{ gifts: GboGift[] }>(`/gbo/gifts?country=${iso}`, { revalidate: false });
   return (data.gifts ?? [])
     .filter((gift) => gboGiftNumericId(gift) != null)
     .map((gift) => {
@@ -57,6 +69,35 @@ export async function loadGboStorefrontProducts(country?: string): Promise<Produ
       const { vendorCost: _c, ...rest } = mapped;
       return rememberProduct(rest as Product);
     });
+}
+
+/**
+ * Coalesce concurrent loads for the same country into one fetch and one mapping pass.
+ * Cleared when the shared promise settles, so this is not an extra TTL cache.
+ * Country keys stay separate. Product and GBO gift reads are no-store so a vendor toggle is not frozen.
+ */
+const gboInFlight = new Map<string, Promise<Product[]>>();
+
+/** Live Gift Baskets Overseas catalog for the selected delivery country. */
+export async function loadGboStorefrontProducts(country?: string): Promise<Product[]> {
+  if (!isGboStorefrontEnabled()) return [];
+  const requested = country ?? (await getStorefrontDeliveryCountry());
+  const iso = catalogCountry(requested);
+  const pending = gboInFlight.get(iso);
+  if (pending) return pending;
+
+  let resolveJob: (products: Product[]) => void = () => undefined;
+  let rejectJob: (err: unknown) => void = () => undefined;
+  const job = new Promise<Product[]>((resolve, reject) => {
+    resolveJob = resolve;
+    rejectJob = reject;
+  });
+  gboInFlight.set(iso, job);
+  fetchGboStorefrontProducts(iso).then(resolveJob, rejectJob);
+  void job.finally(() => {
+    if (gboInFlight.get(iso) === job) gboInFlight.delete(iso);
+  });
+  return job;
 }
 
 function mergeBySlug(primary: Product[], extra: Product[]): Product[] {
@@ -81,23 +122,19 @@ function isProductMissingError(err: unknown): boolean {
  * Bundled catalog JSON is seed data, not a public listing source.
  */
 export async function loadProduct(slug: string): Promise<Product | null> {
+  if (isGboHiddenFromStorefront({ slug })) return null;
   try {
-    const data = await api<{ product: Product }>(`/products/${slug}`, FRESH_PRODUCT_FETCH);
+    const data = await api<{ product: Product }>(`/products/${slug}`, { revalidate: false });
     if (!isStorefrontVisible(data.product)) return null;
     return rememberProduct(data.product);
   } catch (err) {
-    const stale = memoryProduct(slug);
-    if (stale) {
-      if (!isStorefrontVisible(stale)) return null;
-      return stale;
-    }
-
     const gboRef = parseGboSlug(slug);
     if (gboRef) {
+      if (isGboHiddenFromStorefront({ slug })) return null;
       try {
         const data = await api<{ gift: GboGift }>(
           `/gbo/gifts/${gboRef.productId}?country=${gboRef.country}`,
-          FRESH_PRODUCT_FETCH
+          { revalidate: false }
         );
         if (data.gift) {
           const mapped = gboGiftToProduct(gboRef.country, data.gift);
@@ -105,11 +142,14 @@ export async function loadProduct(slug: string): Promise<Product | null> {
           return rememberProduct(rest as Product);
         }
       } catch {
-        /* GBO token missing or gift not found */
+        /* GBO token missing, storefront off, or gift not found */
       }
+      if (isProductMissingError(err)) return null;
     }
 
     if (isProductMissingError(err)) return null;
+    const stale = memoryProduct(slug);
+    if (stale && isStorefrontVisible(stale)) return stale;
     return null;
   }
 }
@@ -120,49 +160,54 @@ function filterLiveForCountry(live: Product[], country: string): Product[] {
   );
 }
 
+function catalogQuery(params?: { category?: string; search?: string; country?: string | null }): string {
+  const query = new URLSearchParams();
+  if (params?.category) query.set("category", params.category);
+  if (params?.search) query.set("search", params.search);
+  query.set("country", catalogCountry(params?.country));
+  return `?${query.toString()}`;
+}
+
 /** Shared list loader — same API + cache policy as `loadProduct` (PDP). */
 export async function loadProducts(params?: {
   category?: string;
   search?: string;
   country?: string;
 }): Promise<Product[]> {
-  if (params?.category && isRakhiRelatedCategorySlug(params.category)) return [];
-
-  const country = params?.country ?? (await getStorefrontDeliveryCountry());
-  const query = new URLSearchParams();
-  if (params?.category) query.set("category", params.category);
-  if (params?.search) query.set("search", params.search);
-  query.set("country", country);
-  const qs = `?${query.toString()}`;
-
-  try {
-    const data = await api<{ products: Product[] }>(`/products${qs}`, FRESH_PRODUCT_FETCH);
-    const db = rememberProducts(data.products.filter(isStorefrontVisible));
-    const gbo = await loadGboStorefrontProducts(country).catch(() => [] as Product[]);
-    let extra = gbo;
-    if (params?.category) {
-      extra = gbo.filter((product) => productInStorefrontCategory(product, params.category as string));
-    }
-    if (params?.search) {
-      extra = extra.filter((product) => productMatchesSearchQuery(product, params.search as string));
-    }
-    return filterLiveForCountry(mergeBySlug(db, extra), country);
-  } catch {
-    try {
-      const gbo = await loadGboStorefrontProducts(country);
-      let extra = gbo;
-      if (params?.category) {
-        extra = gbo.filter((product) => productInStorefrontCategory(product, params.category as string));
-      }
-      if (params?.search) {
-        extra = extra.filter((product) => productMatchesSearchQuery(product, params.search as string));
-      }
-      return filterLiveForCountry(extra, country);
-    } catch {
-      return [];
-    }
+  if (params?.category && storefrontSkipsRakhiCategory(params.category)) {
+    return [];
   }
+
+  const requested = params?.country ?? (await getStorefrontDeliveryCountry());
+  const country = catalogCountry(requested);
+  const qs = catalogQuery({
+    category: params?.category,
+    search: params?.search,
+    country: requested,
+  });
+
+  const [dbResult, gboResult] = await Promise.all([
+    api<{ products: Product[] }>(`/products${qs}`, { revalidate: false })
+      .then((data) => rememberProducts(data.products.filter(isStorefrontVisible)))
+      .catch(() => null as Product[] | null),
+    loadGboStorefrontProducts(country).catch(() => [] as Product[]),
+  ]);
+
+  let extra = gboResult;
+  if (params?.category) {
+    extra = gboResult.filter((product) => productInStorefrontCategory(product, params.category as string));
+  }
+  if (params?.search) {
+    extra = extra.filter((product) => productMatchesSearchQuery(product, params.search as string));
+  }
+
+  if (dbResult) {
+    return filterLiveForCountry(mergeBySlug(dbResult, extra), country);
+  }
+  return filterLiveForCountry(extra, country);
 }
+
+export { toListingCardProducts };
 
 /**
  * Category grids: live API first, then only add missing hamper/catalog SKUs.

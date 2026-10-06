@@ -1,10 +1,12 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { VENDOR_BLOSSOMPOT, VENDOR_GBO } from "../constants";
+import { VENDOR_BLOSSOMPOT, VENDOR_GBO, VENDOR_ORANGE_COUNTY } from "../constants";
 import {
   checkVendorServiceability,
   defaultBlossompotAreas,
+  defaultOrangeCountyAreas,
   getServiceableVendors,
+  isProductDeliverableToLocation,
   type VendorServiceArea,
 } from "./serviceability";
 import { isValidPostal, normalizePostal } from "./postal-countries";
@@ -124,6 +126,31 @@ describe("serviceability engine", () => {
     const r = checkVendorServiceability(VENDOR_GBO, [], { countryCode: "GB", postalCode: "SW1A 1AA" });
     assert.equal(r.serviceable, true);
     assert.equal(r.matchedRule?.countryCode, "GB");
+  });
+
+  it("keeps Orange County ZIP prefixes and drops the vendor when it is not active", () => {
+    const areas = defaultOrangeCountyAreas();
+    const product = { slug: "oc-hamper", vendorSlug: VENDOR_ORANGE_COUNTY, published: true, inventory: 5 };
+    const active = new Set([VENDOR_BLOSSOMPOT, VENDOR_ORANGE_COUNTY, VENDOR_GBO]);
+    const irvine = isProductDeliverableToLocation(product, areas, { countryCode: "US", postalCode: "92612" }, active);
+    assert.equal(irvine.serviceable, true);
+    assert.equal(irvine.matchedRule?.postalPrefix, "926");
+    const manhattan = isProductDeliverableToLocation(
+      product,
+      areas,
+      { countryCode: "US", postalCode: "10001" },
+      active
+    );
+    assert.equal(manhattan.serviceable, false);
+    assert.equal(manhattan.reason, "no_matching_service_area");
+    const disabled = isProductDeliverableToLocation(
+      product,
+      areas,
+      { countryCode: "US", postalCode: "92612" },
+      new Set([VENDOR_BLOSSOMPOT])
+    );
+    assert.equal(disabled.serviceable, false);
+    assert.equal(disabled.reason, "inactive_vendor");
   });
 
   it("treats Gift Baskets Overseas as country-wide without a postal code", () => {

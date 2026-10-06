@@ -1,7 +1,9 @@
 import {
-  enabledDeliveryCountries,
+  SHOPPING_COUNTRY_ISO,
+  clampShoppingCountry,
   formatPostalDisplay,
   getDeliveryCountry,
+  isShoppingCountry,
   isValidPostal,
 } from "@blossompot/shared";
 
@@ -15,6 +17,23 @@ export type StoredDeliveryLocation = {
   postalDisplay: string;
 };
 
+/** Stored shopper location. A non-US country becomes US and its postal code is dropped. */
+export function toShoppingDeliveryLocation(location: StoredDeliveryLocation): StoredDeliveryLocation {
+  if (!isShoppingCountry(location.countryCode)) {
+    return {
+      countryCode: SHOPPING_COUNTRY_ISO,
+      postalCode: "",
+      postalDisplay: SHOPPING_COUNTRY_ISO,
+    };
+  }
+  const postalCode = location.postalCode.trim();
+  return {
+    countryCode: SHOPPING_COUNTRY_ISO,
+    postalCode,
+    postalDisplay: postalCode ? formatPostalDisplay(SHOPPING_COUNTRY_ISO, postalCode) : SHOPPING_COUNTRY_ISO,
+  };
+}
+
 export function parseDeliveryLocationToken(raw: string | null | undefined): StoredDeliveryLocation | null {
   if (!raw) return null;
   const [countryCode, ...rest] = raw.split(":");
@@ -22,18 +41,80 @@ export function parseDeliveryLocationToken(raw: string | null | undefined): Stor
   if (!countryCode) return null;
   const iso = countryCode.trim().toUpperCase();
   if (!/^[A-Z]{2}$/.test(iso)) return null;
+  if (!isShoppingCountry(iso)) {
+    return toShoppingDeliveryLocation({
+      countryCode: iso,
+      postalCode,
+      postalDisplay: iso,
+    });
+  }
   const country = getDeliveryCountry(iso);
   if (country && !country.enabled) return null;
   if (postalCode && !isValidPostal(iso, postalCode)) return null;
-  return {
+  return toShoppingDeliveryLocation({
     countryCode: iso,
     postalCode,
     postalDisplay: postalCode ? formatPostalDisplay(iso, postalCode) : iso,
-  };
+  });
 }
 
 export function deliveryLocationToken(location: StoredDeliveryLocation): string {
   return `${location.countryCode}:${location.postalCode}`;
+}
+
+/** One year. Matches the client cookie and the middleware `maxAge`. */
+export const DELIVERY_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
+
+export type DeliveryCookieUpdate = {
+  value: string;
+  maxAge: number;
+};
+
+/**
+ * App Router client navigations and prefetches are fetch responses. The browser
+ * applies their Set-Cookie when the bytes arrive, which can be after a newer
+ * selection has already written `bp_dl`. Those flights must not set the cookie.
+ * A document load is the navigation the browser is committing, so it still may.
+ *
+ * Next removes `rsc` and the router prefetch headers before user middleware runs.
+ * `Sec-Fetch-*`, `next-url`, and `Accept` are still visible there.
+ */
+export function isDeliveryCookieFlight(headers: { get(name: string): string | null }): boolean {
+  const dest = headers.get("sec-fetch-dest")?.toLowerCase() ?? "";
+  const mode = headers.get("sec-fetch-mode")?.toLowerCase() ?? "";
+  if (dest === "document" || mode === "navigate") return false;
+  if (dest === "empty" || mode === "cors" || mode === "no-cors" || mode === "same-origin") return true;
+  const purpose = `${headers.get("purpose") ?? ""} ${headers.get("sec-purpose") ?? ""}`.toLowerCase();
+  if (purpose.includes("prefetch")) return true;
+  if ((headers.get("accept") ?? "").includes("text/x-component")) return true;
+  if (headers.get("next-url")) return true;
+  if (headers.get("rsc") === "1") return true;
+  if (headers.get("next-router-prefetch") === "1") return true;
+  if (headers.get("next-router-segment-prefetch")) return true;
+  return false;
+}
+
+/**
+ * Cookie to attach to this response, or null when the response must leave `bp_dl` alone.
+ * Document loads keep the existing token shape and lifetime. Flights do not emit one.
+ */
+export function deliveryCookieUpdate(input: {
+  resolvedCountry: string | null;
+  requestCookie: string | null | undefined;
+  flight: boolean;
+}): DeliveryCookieUpdate | null {
+  if (!input.resolvedCountry || input.flight) return null;
+  const country = clampShoppingCountry(input.resolvedCountry);
+  const existing = parseDeliveryLocationToken(input.requestCookie);
+  const postalCode = existing?.countryCode === country ? existing.postalCode : "";
+  return {
+    value: deliveryLocationToken({
+      countryCode: country,
+      postalCode,
+      postalDisplay: postalCode || country,
+    }),
+    maxAge: DELIVERY_COOKIE_MAX_AGE_SECONDS,
+  };
 }
 
 function readCookie(name: string): string | null {
@@ -48,19 +129,39 @@ function writeCookie(name: string, value: string, days = 365) {
   document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
 }
 
-export function readDeliveryLocation(): StoredDeliveryLocation | null {
-  if (typeof window === "undefined") return null;
-  const fromCookie = parseDeliveryLocationToken(readCookie(DELIVERY_LOCATION_COOKIE));
-  if (fromCookie) return fromCookie;
+function storedToken(raw: string | null): string | null {
+  if (!raw) return null;
   try {
-    return parseDeliveryLocationToken(window.localStorage.getItem(DELIVERY_LOCATION_COOKIE));
+    return decodeURIComponent(raw);
   } catch {
-    return null;
+    return raw;
   }
 }
 
+export function readDeliveryLocation(): StoredDeliveryLocation | null {
+  if (typeof window === "undefined") return null;
+  const cookieRaw = readCookie(DELIVERY_LOCATION_COOKIE);
+  let localRaw: string | null = null;
+  try {
+    localRaw = window.localStorage.getItem(DELIVERY_LOCATION_COOKIE);
+  } catch {
+    localRaw = null;
+  }
+  const parsed =
+    parseDeliveryLocationToken(cookieRaw) ?? parseDeliveryLocationToken(localRaw);
+  if (!parsed) return null;
+  const expected = deliveryLocationToken(parsed);
+  const cookieToken = storedToken(cookieRaw);
+  const localToken = storedToken(localRaw);
+  if (cookieToken !== expected || localToken !== expected) {
+    writeDeliveryLocation(parsed);
+  }
+  return parsed;
+}
+
 export function writeDeliveryLocation(location: StoredDeliveryLocation) {
-  const token = deliveryLocationToken(location);
+  const normalized = toShoppingDeliveryLocation(location);
+  const token = deliveryLocationToken(normalized);
   writeCookie(DELIVERY_LOCATION_COOKIE, token);
   try {
     window.localStorage.setItem(DELIVERY_LOCATION_COOKIE, token);
@@ -105,7 +206,8 @@ export function locationQueryString(location: StoredDeliveryLocation | null): st
 }
 
 export function deliveryCountryOptions() {
-  return enabledDeliveryCountries();
+  const unitedStates = getDeliveryCountry(SHOPPING_COUNTRY_ISO);
+  return unitedStates ? [unitedStates] : [];
 }
 
 export function postalLabelFor(countryCode: string): string {

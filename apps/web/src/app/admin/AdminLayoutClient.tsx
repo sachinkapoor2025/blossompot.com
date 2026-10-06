@@ -51,6 +51,8 @@ const navItems: NavItem[] = [
     label: "Vendor Management",
     href: "/admin/vendor-management",
     children: [
+      { href: "/admin/vendors", label: "Vendors" },
+      { href: "/admin/countries", label: "Countries" },
       { href: "/admin/marketplace-vendors", label: "Marketplace vendors" },
       { href: "/admin/service-areas", label: "Service areas" },
       { href: "/admin/vendor-management?tab=expense", label: "Vendor expense" },
@@ -154,7 +156,10 @@ function NavButtons({
       if (item.type !== "group") continue;
       if (variant === "mobile") {
         open[item.id] = true;
-      } else if (pathActive(pathname, item.href)) {
+      } else if (
+        pathActive(pathname, item.href) ||
+        (item.id === "vendor" && pathname.startsWith("/admin/countries"))
+      ) {
         open[item.id] = true;
       }
     }
@@ -175,6 +180,13 @@ function NavButtons({
           item.type === "group" &&
           item.id === "analytics" &&
           pathname.startsWith("/admin/product-sales")
+        ) {
+          next[item.id] = true;
+        }
+        if (
+          item.type === "group" &&
+          item.id === "vendor" &&
+          pathname.startsWith("/admin/countries")
         ) {
           next[item.id] = true;
         }
@@ -219,7 +231,8 @@ function NavButtons({
 
         const groupActive =
           pathActive(pathname, item.href) ||
-          (item.id === "analytics" && pathname.startsWith("/admin/product-sales"));
+          (item.id === "analytics" && pathname.startsWith("/admin/product-sales")) ||
+          (item.id === "vendor" && pathname.startsWith("/admin/countries"));
         const children =
           item.id === "vendor" && !showSuper
             ? item.children.filter((c) => !c.href.includes("tab=expense"))

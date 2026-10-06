@@ -19,11 +19,14 @@ import {
   productInStorefrontCategory,
   productVisibleForDeliveryCountry,
   dedupeStorefrontProducts,
+  isGboHiddenFromStorefront,
+  productAllowedForNewShopping,
   VENDOR_GBO,
   type Product,
 } from "@blossompot/shared";
+import { decideNewShopping, loadCatalogVendorRegistry } from "../lib/catalog-vendor-store";
 import { docClient, PRODUCTS_TABLE, CONFIG_TABLE, now, slugify } from "../lib/db";
-import { ok, okCached, created, badRequest, notFound, forbidden } from "../lib/response";
+import { ok, created, badRequest, notFound, forbidden } from "../lib/response";
 import { evaluateProductsForLocation, parseLocationQuery } from "./serviceability";
 import { getAuth, requireAdmin } from "../lib/auth";
 import { withResolvedProductImages, resolveProductImageUrl } from "../lib/images";
@@ -56,9 +59,10 @@ function forStorefront(product: Product): Product {
   const stripped = stripVendorPrivateFields(
     withCompetitiveStorefrontPricing(withResolvedProductImages(product))
   );
+  const { sourceUrl: _sourceUrl, importBatchId: _importBatchId, ...publicProduct } = stripped;
   const international = product.vendorSlug === VENDOR_GBO || product.internationalDelivery === true;
   return {
-    ...stripped,
+    ...publicProduct,
     allowsAddons,
     ...(international
       ? {
@@ -197,7 +201,11 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
   items = dedupeStorefrontProducts(items);
 
   items = items.filter(
-    (p) => p.published !== false && (p.inventory ?? 0) > 0 && isProductStorefrontVisible(p)
+    (p) =>
+      p.published !== false &&
+      (p.inventory ?? 0) > 0 &&
+      isProductStorefrontVisible(p) &&
+      !isGboHiddenFromStorefront(p)
   );
   if (search) {
     items = items.filter(
@@ -212,31 +220,35 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
   if (location?.countryCode) {
     items = items.filter((p) => productVisibleForDeliveryCountry(p, location.countryCode));
   }
+  const shoppingCountry = location?.countryCode || "US";
+  const vendorRegistry = await loadCatalogVendorRegistry();
+  items = items.filter((product) => productAllowedForNewShopping(product, shoppingCountry, vendorRegistry).available);
   let products = items.map(forStorefront);
   if (location?.postalCode) {
     const evals = await evaluateProductsForLocation(items, location);
     const deliverable = new Set(evals.filter((e) => e.deliverable).map((e) => e.slug));
     products = products.filter((p) => deliverable.has(p.slug));
+    // Postal availability is per address — do not CDN-cache it.
     return ok({ products, location, filtered: true });
   }
-  if (location?.countryCode) {
-    return ok({ products, location, filtered: true });
-  }
-
-  // Short CDN TTL only — listing + PDP must not drift for minutes after price edits.
-  if (search) return ok({ products });
-  return okCached({ products }, 10);
+  // Vendor availability can change without a product write, so do not CDN-cache the list.
+  return ok({ products, ...(location?.countryCode ? { location, filtered: true } : {}) });
 }
 
 export async function getProduct(event: APIGatewayProxyEventV2) {
   const slug = event.pathParameters?.slug;
   if (!slug) return badRequest("Slug required");
+  if (isGboHiddenFromStorefront({ slug })) return notFound("Product not found");
 
   const nowMs = Date.now();
   const cached = productGetCache.get(slug);
   if (cached && nowMs - cached.at < PRODUCT_GET_CACHE_TTL_MS) {
+    if (isGboHiddenFromStorefront(cached.product)) return notFound("Product not found");
     const location = parseLocationQuery(event);
     if (location?.countryCode && !productVisibleForDeliveryCountry(cached.product, location.countryCode)) {
+      return notFound("Product not found");
+    }
+    if (!(await decideNewShopping(cached.product, location?.countryCode || "US")).available) {
       return notFound("Product not found");
     }
     if (location?.postalCode) {
@@ -250,7 +262,7 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
         },
       });
     }
-    return okCached({ product: forStorefront(cached.product) }, 30);
+    return ok({ product: forStorefront(cached.product) });
   }
 
   const result = await docClient.send(
@@ -272,11 +284,15 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
 
   if (!item) return notFound("Product not found");
   const product = item;
+  if (isGboHiddenFromStorefront(product)) return notFound("Product not found");
   if (product.published === false) return notFound("Product not found");
   if (!isProductStorefrontVisible(product)) return notFound("Product not found");
   productGetCache.set(slug, { at: nowMs, product });
   const location = parseLocationQuery(event);
   if (location?.countryCode && !productVisibleForDeliveryCountry(product, location.countryCode)) {
+    return notFound("Product not found");
+  }
+  if (!(await decideNewShopping(product, location?.countryCode || "US")).available) {
     return notFound("Product not found");
   }
   if (location?.postalCode) {
@@ -290,7 +306,7 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
       },
     });
   }
-  return okCached({ product: forStorefront(product) }, 10);
+  return ok({ product: forStorefront(product) });
 }
 
 export async function createProduct(event: APIGatewayProxyEventV2) {

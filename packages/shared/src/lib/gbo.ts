@@ -24,6 +24,108 @@ export function isGboVendor(slug?: string | null): boolean {
   return (slug ?? "").trim() === VENDOR_GBO;
 }
 
+/** Customer-facing message when a new GBO purchase is blocked. */
+export const GBO_STOREFRONT_UNAVAILABLE_MESSAGE = "This product is temporarily unavailable.";
+
+/** Name the overseas lines already in the cart. Does not remove them. */
+export function gboCartLineUnavailableMessage(
+  items: Array<{
+    name?: string | null;
+    vendorSlug?: string | null;
+    internationalDelivery?: boolean;
+    slug?: string | null;
+    productSlug?: string | null;
+    sku?: string | null;
+  }>
+): string {
+  const names: string[] = [];
+  for (const item of items) {
+    if (!isGboFulfillmentLine(item)) continue;
+    const name = item.name?.trim();
+    if (name && !names.includes(name)) names.push(name);
+  }
+  if (names.length === 0) {
+    return `${GBO_STOREFRONT_UNAVAILABLE_MESSAGE} Remove the overseas gift from your cart to continue.`;
+  }
+  const label = names.join(", ");
+  return `${label} is temporarily unavailable. Remove ${names.length === 1 ? "it" : "them"} from your cart to continue.`;
+}
+
+/**
+ * Stored on an in-flight unpaid order after payment, so automatic placement
+ * does not submit it while the storefront switch is off. Line items are unchanged.
+ */
+export const GBO_STOREFRONT_HOLD_ERROR =
+  "GBO storefront is disabled; this order was not submitted to Gift Baskets Overseas.";
+
+/**
+ * Storefront catalog and new purchases.
+ * Default is off: only `true`, `1`, or `yes` enable Gift Baskets Overseas on the storefront.
+ * Admin catalog tools, the partner API client, and tracking for orders already sent stay available.
+ */
+export function isGboStorefrontEnabled(
+  env: Record<string, string | undefined> = process.env
+): boolean {
+  const value = (env.GBO_STOREFRONT_ENABLED ?? "").trim().toLowerCase();
+  return value === "true" || value === "1" || value === "yes";
+}
+
+export function isGboHiddenFromStorefront(
+  product: {
+    vendorSlug?: string | null;
+    internationalDelivery?: boolean;
+    slug?: string | null;
+    sku?: string | null;
+    productSlug?: string | null;
+  },
+  env: Record<string, string | undefined> = process.env
+): boolean {
+  return !isGboStorefrontEnabled(env) && isGboFulfillmentLine(product);
+}
+
+/** Cart line, order line, or catalog row fulfilled by Gift Baskets Overseas. */
+export function isGboFulfillmentLine(line: {
+  vendorSlug?: string | null;
+  internationalDelivery?: boolean;
+  slug?: string | null;
+  productSlug?: string | null;
+  sku?: string | null;
+}): boolean {
+  return isGboCatalogProduct({
+    vendorSlug: line.vendorSlug,
+    internationalDelivery: line.internationalDelivery,
+    sku: line.sku,
+    slug: line.slug ?? line.productSlug,
+  });
+}
+
+export function orderIncludesGboProduct(order: {
+  vendorSlugs?: string[] | null;
+  items?: Array<{
+    vendorSlug?: string | null;
+    internationalDelivery?: boolean;
+    slug?: string | null;
+    productSlug?: string | null;
+    sku?: string | null;
+  }> | null;
+}): boolean {
+  if (order.vendorSlugs?.some((slug) => isGboVendor(slug))) return true;
+  return (order.items ?? []).some((item) => isGboFulfillmentLine(item));
+}
+
+/** Public storefront catalog routes. Admin `/admin/gbo/*` and the keyed wrapper `/gifts` are not included. */
+export function isPublicGboCatalogPath(path: string): boolean {
+  const bare = path.split("?")[0]?.replace(/\/+$/, "") || "/";
+  return bare === "/gbo/gifts" || /^\/gbo\/gifts\/[^/]+$/.test(bare);
+}
+
+export function isGboStorefrontHold(order: {
+  gbo?: { lastError?: string | null; invoice?: string | null; placedAt?: string | null } | null;
+}): boolean {
+  const err = order.gbo?.lastError ?? "";
+  return err.startsWith("GBO storefront is disabled") && !order.gbo?.invoice && !order.gbo?.placedAt;
+}
+
 export function formatGboSku(country: string, productId: number): string {
   return `gbo:${country.trim().toUpperCase()}:${productId}`;
 }

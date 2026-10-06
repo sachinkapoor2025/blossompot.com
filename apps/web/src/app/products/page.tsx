@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { api } from "@/lib/api";
 import { GroupedProductCards } from "@/components/LocationFilteredProducts";
 import { ShopLocationLink } from "@/components/ShopLocationLink";
@@ -8,13 +9,14 @@ import { SearchTracker } from "@/components/SearchTracker";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { pageMetadata } from "@/lib/seo";
 import { requestSeoPath } from "@/lib/request-seo-path";
-import { loadProducts } from "@/lib/product-loader";
+import { loadProducts, toListingCardProducts } from "@/lib/product-loader";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { groupStorefrontProductsOnce, type Product, type Category } from "@blossompot/shared";
 import { categoryHref } from "@/lib/category-urls";
 import { localizeShopCopy, localizeShopText, locationShopHeading } from "@/lib/location-seo-urls";
 import { homeCategoryOrder, orderCategories } from "@/lib/site";
-import { isRakhiRelatedCategorySlug, isRakhiRelatedProduct } from "@/lib/rakhi-filter";
+import { ListingPageSkeleton } from "@/components/route-skeletons";
+import { isRakhiRelatedProduct, productsNotShownInSections, storefrontSkipsRakhiCategory } from "@/lib/rakhi-filter";
 
 /** Match PDP: no ISR HTML with stale product prices. */
 export const dynamic = "force-dynamic";
@@ -98,7 +100,15 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   });
 }
 
-export default async function ProductsPage({ searchParams }: Props) {
+export default function ProductsPage(props: Props) {
+  return (
+    <Suspense fallback={<ListingPageSkeleton width="6xl" />}>
+      <ProductsPageContent {...props} />
+    </Suspense>
+  );
+}
+
+async function ProductsPageContent({ searchParams }: Props) {
   const params = await searchParams;
   const search = params.search;
   const category = params.category;
@@ -111,10 +121,10 @@ export default async function ProductsPage({ searchParams }: Props) {
   try {
     const [liveProducts, categoriesData] = await Promise.all([
       loadProducts({ search, category, country: deliveryCountry }),
-      api<{ categories: Category[] }>("/categories", { revalidate: false }),
+      api<{ categories: Category[] }>("/categories", { revalidate: 45 }),
     ]);
     products = liveProducts.filter((p) => !isRakhiRelatedProduct(p));
-    categories = categoriesData.categories.filter((c) => !isRakhiRelatedCategorySlug(c.slug));
+    categories = categoriesData.categories.filter((c) => !storefrontSkipsRakhiCategory(c.slug));
   } catch {
     products = [];
     categories = [];
@@ -138,6 +148,13 @@ export default async function ProductsPage({ searchParams }: Props) {
     name: categoryMap.get(slug)?.name ?? slug.replace(/-/g, " "),
     products: grouped.get(slug) ?? [],
   }));
+  const ungrouped = productsNotShownInSections(
+    products,
+    productsByCategory.flatMap((section) => section.products)
+  );
+  const ungroupedTitle = ungrouped.every((product) => product.categorySlug === "rakhi-hampers")
+    ? "Rakhi Hampers"
+    : "More gifts";
   const showGrouped = !search && !category;
 
   return (
@@ -196,13 +213,19 @@ export default async function ProductsPage({ searchParams }: Props) {
                     View All →
                   </ShopLocationLink>
                 </div>
-                <GroupedProductCards products={section.products} />
+                <GroupedProductCards products={toListingCardProducts(section.products)} />
               </section>
             ) : null
           )}
+          {ungrouped.length > 0 ? (
+            <section>
+              <h2 className="text-xl font-bold text-primary mb-4">{ungroupedTitle}</h2>
+              <GroupedProductCards products={toListingCardProducts(ungrouped)} />
+            </section>
+          ) : null}
         </div>
       ) : (
-        <ProductGrid products={products} sort={sort} />
+        <ProductGrid products={toListingCardProducts(products)} sort={sort} />
       )}
     </div>
   );

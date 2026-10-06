@@ -4,7 +4,7 @@ import { InternationalLocationPage } from "@/components/geo/InternationalLocatio
 import { pageMetadata } from "@/lib/seo";
 import { mergeProductsForCountry } from "@/lib/catalog-fallback";
 import { shuffleForCity } from "@/lib/city-products";
-import { loadProducts } from "@/lib/product-loader";
+import { loadProducts, toListingCardProducts } from "@/lib/product-loader";
 import {
   isProductStorefrontVisible,
   productVisibleForDeliveryCountry,
@@ -67,12 +67,14 @@ export async function InternationalMarketPage({
     } catch {
       products = [];
     }
-    products = shuffleForCity(
-      mergeProductsForCountry(products, countryIso).filter(
-        (p) => isProductStorefrontVisible(p) && productVisibleForDeliveryCountry(p, countryIso)
-      ),
-      loc.slug
-    ).slice(0, 20);
+    products = toListingCardProducts(
+      shuffleForCity(
+        mergeProductsForCountry(products, countryIso).filter(
+          (p) => isProductStorefrontVisible(p) && productVisibleForDeliveryCountry(p, countryIso)
+        ),
+        loc.slug
+      ).slice(0, 20)
+    );
   }
   return <InternationalLocationPage loc={resolveLocation(loc)} products={products} />;
 }

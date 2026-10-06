@@ -17,16 +17,22 @@ import {
   isFlashComboSaleActive,
   flashComboUnitPriceUsd,
   productUsesFixedStorefrontPrice,
+  CATALOG_VENDOR_UNAVAILABLE_MESSAGE,
+  GBO_STOREFRONT_UNAVAILABLE_MESSAGE,
+  gboCartLineUnavailableMessage,
+  isGboHiddenFromStorefront,
+  nonUsDeliveryRejection,
   type Cart,
   type CartItem,
 } from "@blossompot/shared";
 import { docClient, CARTS_TABLE, PRODUCTS_TABLE, now, ttlInDays } from "../lib/db";
 import { ok, badRequest, unauthorized } from "../lib/response";
 import { getUserOrSessionKey, getSessionId } from "../lib/auth";
-import { evaluateProductsForLocation } from "./serviceability";
+import { cartAvailabilityLocation, evaluateProductsForLocation } from "./serviceability";
 import { formatPostalDisplay } from "@blossompot/shared";
 import { resolveProductImageUrl } from "../lib/images";
 import { upsertSessionProfile } from "../lib/customer-profile";
+import { decideNewShopping } from "../lib/catalog-vendor-store";
 import { ensureOrangeCountyProductInDb } from "../lib/orange-county-catalog";
 import { ensureProductInDb } from "../lib/ensure-product";
 
@@ -101,10 +107,11 @@ export async function getCartHandler(event: APIGatewayProxyEventV2) {
   }
   const country = event.queryStringParameters?.country ?? event.queryStringParameters?.countryCode;
   const postal = event.queryStringParameters?.postalCode ?? event.queryStringParameters?.zip;
-  if (country && items.length) {
+  const shoppingLocation = cartAvailabilityLocation(country, postal);
+  if (shoppingLocation && items.length) {
     const evals = await evaluateProductsForLocation(
       items.map((i) => ({ slug: i.productSlug, vendorSlug: i.vendorSlug })),
-      { countryCode: country, postalCode: postal ?? "" }
+      { countryCode: shoppingLocation.countryCode, postalCode: shoppingLocation.postalCode }
     );
     const bySlug = new Map(evals.map((e) => [e.slug, e]));
     const flagged = items.map((item) => {
@@ -114,7 +121,9 @@ export async function getCartHandler(event: APIGatewayProxyEventV2) {
             ...item,
             unavailableForLocation: true,
             unavailableReason: `No longer available for delivery to ${
-              postal ? formatPostalDisplay(country, postal) : country
+              shoppingLocation.postalCode
+                ? formatPostalDisplay(shoppingLocation.countryCode, shoppingLocation.postalCode)
+                : shoppingLocation.countryCode
             }.`,
           }
         : item;
@@ -139,6 +148,11 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
   });
   if (!parsed.success) {
     return badRequest(parsed.error.issues[0]?.message ?? "Could not add this gift to your cart");
+  }
+  const deliveryRejection = nonUsDeliveryRejection(parsed.data.deliveryCountry);
+  if (deliveryRejection) return badRequest(deliveryRejection);
+  if (isGboHiddenFromStorefront({ slug: parsed.data.productSlug })) {
+    return badRequest(GBO_STOREFRONT_UNAVAILABLE_MESSAGE);
   }
 
   const [productResult, cart] = await Promise.all([
@@ -168,6 +182,20 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
     productItem = (await ensureProductInDb(parsed.data.productSlug)) ?? productItem;
   }
   if (!productItem) return badRequest("Product not found");
+  if (isGboHiddenFromStorefront(productItem as { slug?: string; vendorSlug?: string; sku?: string })) {
+    return badRequest(GBO_STOREFRONT_UNAVAILABLE_MESSAGE);
+  }
+  const shoppingDecision = await decideNewShopping(
+    productItem as { slug?: string; vendorSlug?: string; sku?: string; internationalDelivery?: boolean },
+    parsed.data.deliveryCountry || "US"
+  );
+  if (!shoppingDecision.available) {
+    return badRequest(
+      shoppingDecision.reason === "gbo_storefront_disabled"
+        ? GBO_STOREFRONT_UNAVAILABLE_MESSAGE
+        : CATALOG_VENDOR_UNAVAILABLE_MESSAGE
+    );
+  }
 
   const product = productItem as {
     slug: string;
@@ -325,6 +353,7 @@ export async function updateCartItem(event: APIGatewayProxyEventV2) {
     cart.items.find((i) => i.lineId === lineId) ??
     cart.items.find((i) => i.productSlug === lineId);
   if (!item) return badRequest("Item not in cart");
+  if (isGboHiddenFromStorefront(item)) return badRequest(gboCartLineUnavailableMessage([item]));
 
   const productSlug = item.productSlug;
   let product = (

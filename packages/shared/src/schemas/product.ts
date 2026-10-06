@@ -70,6 +70,13 @@ export const productSchema = z.object({
    * Sample products are also gated by SAMPLE_PRODUCT_INDEXABLE (default off).
    */
   indexable: z.boolean().optional(),
+  /**
+   * FNP catalog URL. Idempotency key for the USA workbook import.
+   * Storefront responses omit this field.
+   */
+  sourceUrl: z.string().url().max(500).optional(),
+  /** Batch that created this imported product. Storefront responses omit this field. */
+  importBatchId: z.string().min(1).max(80).optional(),
   shortDescription: z.string().max(320).optional(),
   subcategory: z.string().max(80).optional(),
   occasion: z.string().max(80).optional(),

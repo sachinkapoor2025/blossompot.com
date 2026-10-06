@@ -446,6 +446,58 @@ export const DELIVERY_COUNTRIES: DeliveryCountryConfig[] = [
 
 const byCode = new Map(DELIVERY_COUNTRIES.map((c) => [c.countryCode, c]));
 
+/**
+ * Shopping catalog, delivery cookie, and checkout.
+ * The full `DELIVERY_COUNTRIES` list stays available for admin coverage and postal rules.
+ */
+export const SHOPPING_COUNTRY_ISO = "US" as const;
+
+export const USA_ONLY_DELIVERY_MESSAGE = "Delivery is available in the United States only.";
+
+export function isShoppingCountry(raw?: string | null): boolean {
+  return (raw ?? "").trim().toUpperCase() === SHOPPING_COUNTRY_ISO;
+}
+
+/** A US value stays US. Every other country value resolves to US. */
+export function clampShoppingCountry(raw?: string | null): typeof SHOPPING_COUNTRY_ISO {
+  if (isShoppingCountry(raw)) return SHOPPING_COUNTRY_ISO;
+  return SHOPPING_COUNTRY_ISO;
+}
+
+/**
+ * Reject a delivery country that is present and not the United States.
+ * An empty value is left alone so optional cart fields still mean "no location sent".
+ */
+export function nonUsDeliveryRejection(country?: string | null): string | null {
+  const value = (country ?? "").trim();
+  if (!value) return null;
+  if (isShoppingCountry(value)) return null;
+  return USA_ONLY_DELIVERY_MESSAGE;
+}
+
+export type ShoppingCatalogLocation = {
+  countryCode: typeof SHOPPING_COUNTRY_ISO;
+  postalCode: string;
+};
+
+/**
+ * Catalog country filter. Non-US requests become US and drop the foreign postal code.
+ * An invalid US ZIP returns null so the caller does not apply a broken postal filter.
+ */
+export function shoppingCatalogLocation(
+  countryCode: string,
+  postalCode: string
+): ShoppingCatalogLocation | null {
+  const iso = countryCode.trim().toUpperCase();
+  if (!/^[A-Z]{2}$/.test(iso)) return null;
+  if (!isShoppingCountry(iso)) {
+    return { countryCode: SHOPPING_COUNTRY_ISO, postalCode: "" };
+  }
+  const postal = postalCode.trim();
+  if (postal && !isValidPostal(SHOPPING_COUNTRY_ISO, postal)) return null;
+  return { countryCode: SHOPPING_COUNTRY_ISO, postalCode: postal };
+}
+
 /** Lenient postal check for GBO countries not in the curated DELIVERY_COUNTRIES list. */
 export const GBO_WORLDWIDE_POSTAL_RE = /^[A-Z0-9][A-Z0-9 \-]{2,15}$/i;
 

@@ -12,34 +12,50 @@ applications:
         build:
           commands:
             - |
-              STACK_NAME=${STACK_NAME:-blossompot-prod}
+              BRANCH="${AWS_BRANCH:-}"
               ENV_FILE="apps/web/.env.production"
               if [ ! -d "apps/web" ]; then ENV_FILE=".env.production"; fi
-              if command -v aws >/dev/null 2>&1; then
-                output() {
-                  aws cloudformation describe-stacks \
-                    --stack-name "$STACK_NAME" \
-                    --query "Stacks[0].Outputs[?OutputKey=='$1'].OutputValue | [0]" \
-                    --output text 2>/dev/null
-                }
-                USER_POOL_ID=$(output UserPoolId || true)
-                USER_POOL_CLIENT_ID=$(output UserPoolClientId || true)
-                API_URL=$(output ApiUrl || true)
-                CLOUDFRONT_DOMAIN=$(output CloudFrontDomain || true)
-                if [ -n "$USER_POOL_ID" ] && [ "$USER_POOL_ID" != "None" ] && [ -n "$USER_POOL_CLIENT_ID" ] && [ "$USER_POOL_CLIENT_ID" != "None" ]; then
-                  {
-                    echo "NEXT_PUBLIC_COGNITO_USER_POOL_ID=$USER_POOL_ID"
-                    echo "NEXT_PUBLIC_COGNITO_CLIENT_ID=$USER_POOL_CLIENT_ID"
-                    echo "NEXT_PUBLIC_COGNITO_REGION=${AWS_REGION:-us-east-1}"
-                    if [ -n "$API_URL" ] && [ "$API_URL" != "None" ]; then echo "NEXT_PUBLIC_API_URL=$API_URL"; fi
-                    if [ -n "$CLOUDFRONT_DOMAIN" ] && [ "$CLOUDFRONT_DOMAIN" != "None" ]; then echo "NEXT_PUBLIC_CDN_URL=https://$CLOUDFRONT_DOMAIN"; fi
-                    if [ -n "${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-}" ]; then echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"; fi
-                    if [ -n "${NEXT_PUBLIC_RAZORPAY_KEY_ID:-}" ]; then echo "NEXT_PUBLIC_RAZORPAY_KEY_ID=$NEXT_PUBLIC_RAZORPAY_KEY_ID"; fi
-                    if [ -n "${RAZOR_KEY_ID:-}" ]; then echo "NEXT_PUBLIC_RAZORPAY_KEY_ID=$RAZOR_KEY_ID"; fi
-                  } >> "$ENV_FILE"
+              PROD_API_HOST="6y37e2a4j1.execute-api.us-east-1.amazonaws.com"
+              PROD_CDN_HOST="d2d01h4hac5hqs.cloudfront.net"
+
+              output_from() {
+                aws cloudformation describe-stacks \
+                  --region "${AWS_REGION:-us-east-1}" \
+                  --stack-name "$1" \
+                  --query "Stacks[0].Outputs[?OutputKey=='$2'].OutputValue | [0]" \
+                  --output text 2>/dev/null || true
+              }
+
+              if [ "$BRANCH" = "dev" ]; then
+                set -eu
+                # Values are published by GitHub Actions onto this branch. This build does not call CloudFormation.
+                npx tsx scripts/ci/deploy-target.ts write-dev-frontend-env --out "$ENV_FILE"
+                npm run build -w @blossompot/web
+              elif [ "$BRANCH" = "main" ]; then
+                STACK_NAME="${STACK_NAME:-blossompot-prod}"
+                if command -v aws >/dev/null 2>&1; then
+                  USER_POOL_ID=$(output_from "$STACK_NAME" UserPoolId)
+                  USER_POOL_CLIENT_ID=$(output_from "$STACK_NAME" UserPoolClientId)
+                  API_URL=$(output_from "$STACK_NAME" ApiUrl)
+                  CLOUDFRONT_DOMAIN=$(output_from "$STACK_NAME" CloudFrontDomain)
+                  if [ -n "$USER_POOL_ID" ] && [ "$USER_POOL_ID" != "None" ] && [ -n "$USER_POOL_CLIENT_ID" ] && [ "$USER_POOL_CLIENT_ID" != "None" ]; then
+                    {
+                      echo "NEXT_PUBLIC_COGNITO_USER_POOL_ID=$USER_POOL_ID"
+                      echo "NEXT_PUBLIC_COGNITO_CLIENT_ID=$USER_POOL_CLIENT_ID"
+                      echo "NEXT_PUBLIC_COGNITO_REGION=${AWS_REGION:-us-east-1}"
+                      if [ -n "$API_URL" ] && [ "$API_URL" != "None" ]; then echo "NEXT_PUBLIC_API_URL=$API_URL"; fi
+                      if [ -n "$CLOUDFRONT_DOMAIN" ] && [ "$CLOUDFRONT_DOMAIN" != "None" ]; then echo "NEXT_PUBLIC_CDN_URL=https://$CLOUDFRONT_DOMAIN"; fi
+                      if [ -n "${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-}" ]; then echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"; fi
+                      if [ -n "${NEXT_PUBLIC_RAZORPAY_KEY_ID:-}" ]; then echo "NEXT_PUBLIC_RAZORPAY_KEY_ID=$NEXT_PUBLIC_RAZORPAY_KEY_ID"; fi
+                      if [ -n "${RAZOR_KEY_ID:-}" ]; then echo "NEXT_PUBLIC_RAZORPAY_KEY_ID=$RAZOR_KEY_ID"; fi
+                    } >> "$ENV_FILE"
+                  fi
                 fi
+                npm run build -w @blossompot/web
+              else
+                echo "Refusing to build Amplify branch '${BRANCH:-unset}'. Expected dev or main. This build will not select blossompot-prod."
+                exit 1
               fi
-            - npm run build -w @blossompot/web
       artifacts:
         baseDirectory: apps/web/.next
         files:
@@ -51,6 +67,7 @@ applications:
     environment:
       variables:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_APP_ENV: ${NEXT_PUBLIC_APP_ENV}
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
         NEXT_PUBLIC_COGNITO_USER_POOL_ID: ${NEXT_PUBLIC_COGNITO_USER_POOL_ID}
         NEXT_PUBLIC_COGNITO_CLIENT_ID: ${NEXT_PUBLIC_COGNITO_CLIENT_ID}

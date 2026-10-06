@@ -1,6 +1,6 @@
 "use client";
 
-import type { ShippingAddress } from "@blossompot/shared";
+import { isShoppingCountry, type ShippingAddress } from "@blossompot/shared";
 import { LeadCaptureInput } from "@/components/LeadCaptureInput";
 import { CountryRegionFields } from "@/components/CountryRegionFields";
 import { regionOptionsForCountry } from "@/lib/checkout-regions";
@@ -19,6 +19,7 @@ export function AddressFormFields({
   };
   const changeCountry = (iso: string) => {
     const next = iso.trim().toUpperCase();
+    if (!isShoppingCountry(next)) return;
     const regions = regionOptionsForCountry(next);
     const nextState = regions?.some((r) => r.code === value.state) ? value.state : "";
     onChange({ ...value, country: next, state: nextState });
@@ -72,11 +73,16 @@ export function AddressFormFields({
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Country</label>
           <select
-            value={value.country}
+            value={isShoppingCountry(value.country) ? value.country : ""}
             onChange={(e) => changeCountry(e.target.value)}
             required
             className="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent bg-white"
           >
+            {!isShoppingCountry(value.country) ? (
+              <option value="" disabled>
+                Select the United States
+              </option>
+            ) : null}
             {countries.map((c) => (
               <option key={c.countryCode} value={c.countryCode}>
                 {c.countryName}

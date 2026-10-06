@@ -1,35 +1,21 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
-  enabledDeliveryCountries,
-  mergeGboDeliveryCountries,
+  SHOPPING_COUNTRY_ISO,
+  getDeliveryCountry,
   type DeliveryCountryConfig,
-  type GboCountry,
 } from "@blossompot/shared";
-import { api } from "@/lib/api";
+
+/** Shopping selectors list the United States only. Partner countries are not merged in. */
+export function shoppingCountryOptions(): DeliveryCountryConfig[] {
+  const unitedStates = getDeliveryCountry(SHOPPING_COUNTRY_ISO);
+  return unitedStates ? [unitedStates] : [];
+}
 
 export function useGboDeliveryCountries() {
-  const [countries, setCountries] = useState<DeliveryCountryConfig[]>(() => enabledDeliveryCountries());
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    void api<{ countries: GboCountry[] }>("/gbo/countries", { revalidate: 300 })
-      .then((data) => {
-        if (cancelled) return;
-        setCountries(mergeGboDeliveryCountries(data.countries ?? []));
-        setLoaded(true);
-      })
-      .catch(() => {
-        if (!cancelled) setLoaded(true);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return { countries, loaded };
+  const countries = useMemo(() => shoppingCountryOptions(), []);
+  return { countries, loaded: true };
 }
 
 export function filterDeliveryCountries(countries: DeliveryCountryConfig[], query: string) {

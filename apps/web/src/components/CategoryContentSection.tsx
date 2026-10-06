@@ -5,12 +5,16 @@ import { categoryPageInlineLinks } from "@/lib/content/page-inline-links";
 import { applyInlineLinks } from "@/lib/inline-links";
 import { whatsappChatUrl } from "@/lib/site";
 
+import { CategoryDeliveryHelpNote } from "@/components/CategoryDeliveryHelpNote";
+
 interface Props {
   content: CategoryRichContent;
   categoryName: string;
+  /** ISO-2 already resolved for this request (URL, then delivery cookie). */
+  deliveryCountryIso: string;
 }
 
-export function CategoryContentSection({ content, categoryName }: Props) {
+export function CategoryContentSection({ content, categoryName, deliveryCountryIso }: Props) {
   const inlineLinks = categoryPageInlineLinks[content.slug] ?? [];
   const usedHrefs = new Set<string>();
 
@@ -96,9 +100,7 @@ export function CategoryContentSection({ content, categoryName }: Props) {
         <aside className="lg:sticky lg:top-24">
           <section className="bg-nav text-white rounded-xl p-6">
             <h3 className="text-lg font-semibold mb-2">Need help choosing {categoryName}?</h3>
-            <p className="text-sm text-white/90 mb-4">
-              Our team helps you pick the perfect {categoryName.toLowerCase()} and confirm US delivery addresses.
-            </p>
+            <CategoryDeliveryHelpNote categoryName={categoryName} fallbackCountryIso={deliveryCountryIso} />
             <div className="flex flex-wrap gap-3 text-sm">
               <Link
                 href="/contact"

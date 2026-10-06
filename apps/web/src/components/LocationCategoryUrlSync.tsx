@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { shouldReconcilePathCountry } from "@/lib/country-switch";
 import { useOptionalDeliveryLocation } from "@/lib/delivery-location-context";
 import { preserveShopQuery, shopPathForLocation, countryIsoFromPathname } from "@/lib/location-seo-urls";
 
@@ -23,12 +24,21 @@ function LocationCategoryUrlSyncInner() {
   useEffect(() => {
     if (!delivery?.ready) return;
     const pathIso = countryIsoFromPathname(pathname, searchParams.get("country"));
+    const pending = delivery.pendingCountry ?? null;
+    if (!shouldReconcilePathCountry({ pathIso, pendingCountry: pending })) {
+      return;
+    }
+    if (pathIso && pending && pathIso === pending) {
+      delivery.clearPendingIfSettled(pending);
+    }
     if (pathIso && delivery.location?.countryCode !== pathIso) {
-      void delivery.setLocation({
-        countryCode: pathIso,
-        postalCode: "",
-        postalDisplay: pathIso,
-      });
+      void delivery
+        .setLocation({
+          countryCode: pathIso,
+          postalCode: "",
+          postalDisplay: pathIso,
+        })
+        .catch(() => undefined);
       return;
     }
     const search = searchParams.toString();
@@ -42,7 +52,9 @@ function LocationCategoryUrlSyncInner() {
   }, [
     delivery?.ready,
     delivery?.location?.countryCode,
+    delivery?.pendingCountry,
     delivery?.setLocation,
+    delivery?.clearPendingIfSettled,
     pathname,
     router,
     searchParams,

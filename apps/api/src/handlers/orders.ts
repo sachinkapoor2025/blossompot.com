@@ -32,10 +32,20 @@ import {
   type OrderStatusHistoryEntry,
   type CartItem,
   type VendorFulfillment,
+  CATALOG_VENDOR_UNAVAILABLE_MESSAGE,
   formatPostalDisplay,
   fulfillmentVendorSlug,
+  nonUsDeliveryRejection,
+  USA_ONLY_DELIVERY_MESSAGE,
+  GBO_STOREFRONT_HOLD_ERROR,
+  gboCartLineUnavailableMessage,
+  gboPartnerOrderId,
+  isGboStorefrontEnabled,
+  isGboStorefrontHold,
+  orderIncludesGboProduct,
 } from "@blossompot/shared";
 import { evaluateProductsForLocation } from "./serviceability";
+import { decideNewShopping } from "../lib/catalog-vendor-store";
 import { resolveCheckoutUsdInrRate } from "../lib/exchange-rate";
 import { docClient, ORDERS_TABLE, CUSTOMERS_TABLE, now } from "../lib/db";
 import { ok, created, badRequest, unauthorized, forbidden, notFound } from "../lib/response";
@@ -227,6 +237,20 @@ export async function checkout(event: APIGatewayProxyEventV2) {
   const cart = cartBody.cart;
 
   if (!cart?.items?.length) return badRequest("Cart is empty");
+  if (!isGboStorefrontEnabled() && orderIncludesGboProduct({ items: cart.items })) {
+    return badRequest(gboCartLineUnavailableMessage(cart.items ?? []));
+  }
+  const newShoppingCountry = (parsed.data.shippingAddress.country ?? "US").trim() || "US";
+  for (const item of cart.items as CartItem[]) {
+    const decision = await decideNewShopping(item, newShoppingCountry);
+    if (!decision.available) {
+      return badRequest(
+        decision.reason === "gbo_storefront_disabled"
+          ? gboCartLineUnavailableMessage(cart.items ?? [])
+          : CATALOG_VENDOR_UNAVAILABLE_MESSAGE
+      );
+    }
+  }
 
   const cartCurrency = cart.items[0]?.currency ?? "USD";
   const checkoutCurrency = parsed.data.checkoutCurrency ?? cartCurrency;
@@ -245,6 +269,15 @@ export async function checkout(event: APIGatewayProxyEventV2) {
   if (stockError) return badRequest(stockError);
 
   const destCountry = (parsed.data.shippingAddress.country ?? "US").trim().toUpperCase();
+  const shipmentCountries = (parsed.data.shipments ?? []).map((shipment) =>
+    (shipment.shippingAddress.country ?? "").trim()
+  );
+  if (
+    nonUsDeliveryRejection(destCountry) ||
+    shipmentCountries.some((country) => nonUsDeliveryRejection(country))
+  ) {
+    return badRequest(USA_ONLY_DELIVERY_MESSAGE);
+  }
   const destPostal = (parsed.data.shippingAddress.postalCode ?? "").trim();
   if (!destPostal) return badRequest("A delivery postal / ZIP code is required");
 
@@ -849,8 +882,27 @@ export async function markOrderPaid(
 
   try {
     const { placeGboOrderForPaidOrder, orderNeedsGboPlacement } = await import("../lib/gbo-orders");
-    const latest = (await fetchOrder(orderId)) ?? updated;
-    if (orderNeedsGboPlacement(latest)) {
+    let latest = (await fetchOrder(orderId)) ?? updated;
+    if (
+      !isGboStorefrontEnabled() &&
+      orderIncludesGboProduct(latest) &&
+      !latest.gbo?.invoice &&
+      !latest.gbo?.placedAt
+    ) {
+      const held = {
+        ...latest,
+        gbo: {
+          partnerOrderId: latest.gbo?.partnerOrderId ?? gboPartnerOrderId(latest),
+          lastError: GBO_STOREFRONT_HOLD_ERROR,
+          lastSyncAt: timestamp,
+        },
+        updatedAt: timestamp,
+      };
+      await docClient.send(new PutCommand({ TableName: ORDERS_TABLE, Item: held }));
+      console.error("GBO place skipped — storefront disabled:", orderId);
+      latest = held;
+    }
+    if (orderNeedsGboPlacement(latest) && !isGboStorefrontHold(latest)) {
       const gboResult = await placeGboOrderForPaidOrder(latest);
       if (gboResult.error) console.error("GBO place after pay failed:", orderId, gboResult.error);
     }
