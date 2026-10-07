@@ -10,10 +10,63 @@ export const catalogCountryKeys = configKeys.catalogCountries;
 
 /**
  * Used when `CONFIG#CATALOG_COUNTRIES` is missing or unreadable.
- * USA-only matches today's storefront. This config is not applied to shopping yet.
+ * USA-only matches the storefront until an admin enables more countries.
  */
 export function defaultCatalogCountries(): CatalogCountrySetting[] {
   return [{ countryCode: "US", enabled: true }];
+}
+
+export const NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE =
+  "Delivery is not available right now. No countries are enabled for shopping.";
+
+export const SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE = "Delivery is not available in that country.";
+
+/**
+ * Customer country for shopping.
+ * A globally enabled code is kept. Otherwise USA when it is enabled, otherwise the first enabled country.
+ * Returns null only when nothing is enabled.
+ */
+export function resolveEnabledShoppingCountry(
+  raw: string | null | undefined,
+  countries: readonly { countryCode: string; enabled: boolean }[]
+): string | null {
+  const enabled = enabledCatalogCountries(countries as CatalogCountrySetting[]).map((country) => country.countryCode);
+  if (enabled.length === 0) return null;
+  const code = (raw ?? "").trim().toUpperCase();
+  if (code && enabled.includes(code)) return code;
+  if (enabled.includes("US")) return "US";
+  return enabled[0] ?? null;
+}
+
+/** Reject a country that was sent and is not globally enabled. An empty value is left alone. */
+export function shoppingCountryRejection(
+  country: string | null | undefined,
+  enabledCodes: readonly string[]
+): string | null {
+  const value = (country ?? "").trim();
+  if (!value) return null;
+  const code = value.toUpperCase();
+  if (enabledCodes.includes(code)) return null;
+  return SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE;
+}
+
+/**
+ * Apply the resolved shopping country to a requested location.
+ * A fallback country drops the postal code that belonged to the rejected country.
+ */
+export function applyEnabledShoppingCountry<T extends { countryCode: string; postalCode: string }>(
+  requested: T | null,
+  countries: readonly { countryCode: string; enabled: boolean }[]
+): T | null {
+  const countryCode = resolveEnabledShoppingCountry(requested?.countryCode, countries);
+  if (!countryCode) return null;
+  if (!requested || requested.countryCode !== countryCode) {
+    const next = { ...(requested ?? ({} as T)), countryCode, postalCode: "" };
+    if ("stateCode" in next) (next as { stateCode?: string }).stateCode = undefined;
+    if ("city" in next) (next as { city?: string }).city = undefined;
+    return next;
+  }
+  return { ...requested, countryCode };
 }
 
 export function catalogCountryName(countryCode: string): string | null {

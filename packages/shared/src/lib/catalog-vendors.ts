@@ -258,3 +258,23 @@ export function productAllowedForNewShopping(
   }
   return { available: true, vendorSlug };
 }
+
+/**
+ * Outside the United States, a vendor that delivers to the selected country stays shoppable
+ * when no service area is stored for that country. US ZIP and prefix rules are unchanged.
+ */
+export function vendorCoversShoppingCountryWithoutArea(
+  vendor: { vendorSlug: string; enabled: boolean; deliveryCountries: readonly string[]; trashedAt?: string } | null | undefined,
+  countryCode: string,
+  areaReason: string | undefined,
+  env: Record<string, string | undefined> = process.env
+): boolean {
+  if (areaReason !== "no_matching_service_area" || !vendor) return false;
+  const iso = countryCode.trim().toUpperCase();
+  if (!iso || iso === "US") return false;
+  if (!vendor.deliveryCountries.includes(iso)) return false;
+  return catalogVendorShoppingStatus(
+    { vendorSlug: vendor.vendorSlug, enabled: vendor.enabled, trashedAt: vendor.trashedAt },
+    env
+  ).shoppingAvailable;
+}

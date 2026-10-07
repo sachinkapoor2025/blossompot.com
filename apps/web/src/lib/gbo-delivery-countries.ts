@@ -1,21 +1,68 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   SHOPPING_COUNTRY_ISO,
   getDeliveryCountry,
   type DeliveryCountryConfig,
 } from "@blossompot/shared";
 
-/** Shopping selectors list the United States only. Partner countries are not merged in. */
+/** Sync fallback before the global country list loads. Partner countries are not merged in. */
 export function shoppingCountryOptions(): DeliveryCountryConfig[] {
   const unitedStates = getDeliveryCountry(SHOPPING_COUNTRY_ISO);
   return unitedStates ? [unitedStates] : [];
 }
 
+/** Customer selector options: only countries present in the global enabled list. */
+export function shoppingCountriesFromGlobal(
+  rows: readonly { countryCode?: string | null }[]
+): DeliveryCountryConfig[] {
+  const seen = new Set<string>();
+  const countries: DeliveryCountryConfig[] = [];
+  for (const row of rows) {
+    const country = getDeliveryCountry(row.countryCode ?? "");
+    if (!country || seen.has(country.countryCode)) continue;
+    seen.add(country.countryCode);
+    countries.push(country);
+  }
+  return countries;
+}
+
+export function isListedShoppingCountry(
+  countryCode: string | null | undefined,
+  countries: readonly { countryCode: string }[]
+): boolean {
+  const code = (countryCode ?? "").trim().toUpperCase();
+  return countries.some((country) => country.countryCode === code);
+}
+
 export function useGboDeliveryCountries() {
-  const countries = useMemo(() => shoppingCountryOptions(), []);
-  return { countries, loaded: true };
+  const [countries, setCountries] = useState<DeliveryCountryConfig[]>(() => shoppingCountryOptions());
+  const [loaded, setLoaded] = useState(false);
+  const [fromConfig, setFromConfig] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    void import("./api")
+      .then(({ api }) =>
+        api<{ countries?: { countryCode?: string }[] }>("/catalog-countries", { revalidate: false })
+      )
+      .then((data) => {
+        if (cancelled) return;
+        setCountries(shoppingCountriesFromGlobal(data.countries ?? []));
+        setFromConfig(true);
+        setLoaded(true);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setLoaded(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return useMemo(() => ({ countries, loaded, fromConfig }), [countries, loaded, fromConfig]);
 }
 
 export function filterDeliveryCountries(countries: DeliveryCountryConfig[], query: string) {

@@ -1,8 +1,9 @@
-import { clampShoppingCountry } from "@blossompot/shared";
+import { getDeliveryCountry, SHOPPING_COUNTRY_ISO } from "@blossompot/shared";
 
-/** Country sent to the catalog and Gift Baskets Overseas list. Always the United States. */
+/** Country sent to the catalog. A known code is kept; the API checks the global enabled list. */
 export function shoppingCatalogCountry(country?: string | null): string {
-  return clampShoppingCountry(country);
+  const iso = (country ?? "").trim().toUpperCase();
+  return getDeliveryCountry(iso)?.countryCode ?? SHOPPING_COUNTRY_ISO;
 }
 
 /** Query string used by `loadProducts`. A non-US country becomes `country=US`. */

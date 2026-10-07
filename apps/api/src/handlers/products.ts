@@ -20,6 +20,7 @@ import {
   productVisibleForDeliveryCountry,
   dedupeStorefrontProducts,
   isGboHiddenFromStorefront,
+  NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE,
   productAllowedForNewShopping,
   VENDOR_GBO,
   type Product,
@@ -27,7 +28,7 @@ import {
 import { decideNewShopping, loadCatalogVendorRegistry } from "../lib/catalog-vendor-store";
 import { docClient, PRODUCTS_TABLE, CONFIG_TABLE, now, slugify } from "../lib/db";
 import { ok, created, badRequest, notFound, forbidden } from "../lib/response";
-import { evaluateProductsForLocation, parseLocationQuery } from "./serviceability";
+import { evaluateProductsForLocation, parseLocationQuery, resolveShoppingLocation } from "./serviceability";
 import { getAuth, requireAdmin } from "../lib/auth";
 import { withResolvedProductImages, resolveProductImageUrl } from "../lib/images";
 import { syncInventoryAlertState } from "../lib/inventory";
@@ -234,11 +235,12 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
     );
   }
 
-  const location = parseLocationQuery(event);
-  if (location?.countryCode) {
-    items = items.filter((p) => productVisibleForDeliveryCountry(p, location.countryCode));
+  const location = await resolveShoppingLocation(parseLocationQuery(event));
+  if (!location) {
+    return ok({ products: [], countryUnavailable: true, message: NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE });
   }
-  const shoppingCountry = location?.countryCode || "US";
+  items = items.filter((p) => productVisibleForDeliveryCountry(p, location.countryCode));
+  const shoppingCountry = location.countryCode;
   const vendorRegistry = await loadCatalogVendorRegistry();
   items = items.filter((product) => productAllowedForNewShopping(product, shoppingCountry, vendorRegistry).available);
   let products = items.map(forStorefront);
@@ -262,14 +264,22 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
   const cached = productGetCache.get(slug);
   if (cached && nowMs - cached.at < PRODUCT_GET_CACHE_TTL_MS) {
     if (isGboHiddenFromStorefront(cached.product)) return notFound("Product not found");
-    const location = parseLocationQuery(event);
-    if (location?.countryCode && !productVisibleForDeliveryCountry(cached.product, location.countryCode)) {
-      return notFound("Product not found");
+    const location = await resolveShoppingLocation(parseLocationQuery(event));
+    if (!location) return notFound(NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE);
+    const visible = productVisibleForDeliveryCountry(cached.product, location.countryCode);
+    const shopping = await decideNewShopping(cached.product, location.countryCode);
+    if (!shopping.available && shopping.reason !== "country_not_allowed") return notFound("Product not found");
+    if (!visible || !shopping.available) {
+      return ok({
+        product: forStorefront(cached.product),
+        availability: {
+          deliverable: false,
+          reason: shopping.reason ?? "country_not_allowed",
+          location,
+        },
+      });
     }
-    if (!(await decideNewShopping(cached.product, location?.countryCode || "US")).available) {
-      return notFound("Product not found");
-    }
-    if (location?.postalCode) {
+    if (location.postalCode) {
       const [evalRow] = await evaluateProductsForLocation([cached.product], location);
       return ok({
         product: forStorefront(cached.product),
@@ -306,14 +316,22 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
   if (product.published === false) return notFound("Product not found");
   if (!isProductStorefrontVisible(product)) return notFound("Product not found");
   productGetCache.set(slug, { at: nowMs, product });
-  const location = parseLocationQuery(event);
-  if (location?.countryCode && !productVisibleForDeliveryCountry(product, location.countryCode)) {
-    return notFound("Product not found");
+  const location = await resolveShoppingLocation(parseLocationQuery(event));
+  if (!location) return notFound(NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE);
+  const visible = productVisibleForDeliveryCountry(product, location.countryCode);
+  const shopping = await decideNewShopping(product, location.countryCode);
+  if (!shopping.available && shopping.reason !== "country_not_allowed") return notFound("Product not found");
+  if (!visible || !shopping.available) {
+    return ok({
+      product: forStorefront(product),
+      availability: {
+        deliverable: false,
+        reason: shopping.reason ?? "country_not_allowed",
+        location,
+      },
+    });
   }
-  if (!(await decideNewShopping(product, location?.countryCode || "US")).available) {
-    return notFound("Product not found");
-  }
-  if (location?.postalCode) {
+  if (location.postalCode) {
     const [evalRow] = await evaluateProductsForLocation([product], location);
     return ok({
       product: forStorefront(product),

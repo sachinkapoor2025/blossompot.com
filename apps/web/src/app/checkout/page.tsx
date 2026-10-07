@@ -52,13 +52,13 @@ import {
   checkoutCurrencyForDisplay,
   isValidPostal,
   getDeliveryCountry,
-  isShoppingCountry,
-  USA_ONLY_DELIVERY_MESSAGE,
+  SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE,
   type Order,
   type RateQuote,
   type ShippingAddress,
 } from "@blossompot/shared";
 import { resolveImageUrl } from "@/lib/images";
+import { isListedShoppingCountry, useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
 
 declare global {
   interface Window {
@@ -83,6 +83,8 @@ function CheckoutPageInner() {
   const retryOrderId = searchParams.get("orderId");
   const { cart, loading: cartLoading, refresh } = useCart();
   const delivery = useDeliveryLocation();
+  const { countries, loaded: countriesLoaded } = useGboDeliveryCountries();
+  const enabledCountryCodes = countries.map((country) => country.countryCode);
   const locationBlocked = (cart?.items ?? []).some((item) => item.unavailableForLocation);
   const { user, token } = useAuth();
   const { format, displayCurrency, convert, usdInrRate } = useCurrency();
@@ -305,8 +307,8 @@ function CheckoutPageInner() {
   }, [cart, convert]);
 
   useEffect(() => {
-    if (addressPrefilled.current || !sessionId) return;
-
+    if (addressPrefilled.current || !sessionId || !countriesLoaded) return;
+    addressPrefilled.current = true;
     const prefill = async () => {
       let accountAddress: ShippingAddress | null = null;
       let previousOrder: ShippingAddress | null = null;
@@ -332,8 +334,9 @@ function CheckoutPageInner() {
         accountAddress,
         saved: loadSavedAddresses(),
         previousOrder,
+        enabledCountryCodes,
       });
-      if (choice.address && isShoppingCountry(choice.address.country)) {
+      if (choice.address && isListedShoppingCountry(choice.address.country, countries)) {
         const source = choice.address;
         setAddress({
           name: source.name ?? "",
@@ -353,24 +356,25 @@ function CheckoutPageInner() {
         if (choice.notice) setError(choice.notice);
         if (user?.email) setAddress((a) => ({ ...a, email: user.email }));
       }
-      addressPrefilled.current = true;
     };
 
     void prefill();
-  }, [user, token, sessionId]);
+  }, [user, token, sessionId, countriesLoaded, countries, enabledCountryCodes]);
 
   useEffect(() => {
-    if (!delivery.location?.countryCode) return;
+    if (!delivery.location?.countryCode || !countriesLoaded) return;
+    const iso = delivery.location.countryCode.trim().toUpperCase();
+    if (!isListedShoppingCountry(iso, countries)) return;
     const postal = delivery.location.postalCode.trim();
     setAddress((current) => {
       if (current.line1) return current;
       return {
         ...current,
-        country: "US",
-        postalCode: current.postalCode || (isValidPostal("US", postal) ? postal : ""),
+        country: iso,
+        postalCode: current.postalCode || (isValidPostal(iso, postal) ? postal : ""),
       };
     });
-  }, [delivery.location]);
+  }, [delivery.location, countries, countriesLoaded]);
 
   const captureField = (field: string, value: string) => {
     const a = addressRef.current;
@@ -614,17 +618,15 @@ function CheckoutPageInner() {
         senderMessage,
         ...(address.line2?.trim() ? { line2: address.line2.trim() } : { line2: undefined }),
       };
-      if (!isShoppingCountry(payload.country)) {
-        throw new Error(
-          `${USA_ONLY_DELIVERY_MESSAGE} Enter a US street, city, state, and ZIP code.`
-        );
+      if (!isListedShoppingCountry(payload.country, countries)) {
+        throw new Error(SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE);
       }
       if (!isValidPostal(payload.country, payload.postalCode)) {
         const label = getDeliveryCountry(payload.country)?.postalLabel ?? "postal code";
         throw new Error(`Enter a valid ${label} for the selected country.`);
       }
 
-      const unitsError = validateDeliveryUnits(deliveryUnits, payload);
+      const unitsError = validateDeliveryUnits(deliveryUnits, payload, enabledCountryCodes);
       if (unitsError) throw new Error(unitsError);
 
       const shipments = buildCheckoutShipmentsFromUnits(deliveryUnits, payload);

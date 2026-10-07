@@ -146,6 +146,52 @@ function catalogListingExtras(params?: {
   return extras;
 }
 
+export async function loadProductForCountry(
+  slug: string,
+  country: string
+): Promise<{ product: Product; deliverable: boolean; reason?: string } | null> {
+  if (!country || isGboHiddenFromStorefront({ slug })) return null;
+  try {
+    const data = await api<{
+      product: Product;
+      availability?: { deliverable?: boolean; reason?: string };
+    }>(`/products/${slug}?country=${encodeURIComponent(country)}`, { revalidate: false });
+    if (!isStorefrontVisible(data.product)) return null;
+    return {
+      product: rememberProduct(data.product),
+      deliverable: data.availability?.deliverable !== false,
+      reason: data.availability?.reason,
+    };
+  } catch (err) {
+    const gboRef = parseGboSlug(slug);
+    if (gboRef && !isProductMissingError(err)) {
+      try {
+        const data = await api<{ gift: GboGift }>(
+          `/gbo/gifts/${gboRef.productId}?country=${gboRef.country}`,
+          { revalidate: false }
+        );
+        if (data.gift) {
+          const mapped = gboGiftToProduct(gboRef.country, data.gift);
+          const { vendorCost: _c, ...rest } = mapped;
+          const product = rememberProduct(rest as Product);
+          return {
+            product,
+            deliverable: productVisibleForDeliveryCountry(product, country),
+          };
+        }
+      } catch {
+        /* GBO token missing, storefront off, or gift not found */
+      }
+    }
+    if (isProductMissingError(err)) return null;
+    const stale = memoryProduct(slug);
+    if (stale && isStorefrontVisible(stale)) {
+      return { product: stale, deliverable: productVisibleForDeliveryCountry(stale, country) };
+    }
+    return null;
+  }
+}
+
 /**
  * Live API (Dynamo / GBO) first. Fill missing published bundled catalog SKUs
  * (FNP USA / TF USA) so listings work before Dynamo import completes.
@@ -209,6 +255,7 @@ export async function loadProducts(params?: {
   }
 
   const requested = params?.country ?? (await getStorefrontDeliveryCountry());
+  if (!requested) return [];
   const country = catalogCountry(requested);
   const qs = catalogQuery({
     category: params?.category,

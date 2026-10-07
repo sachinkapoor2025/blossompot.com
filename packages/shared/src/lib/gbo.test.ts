@@ -105,7 +105,7 @@ describe("gbo helpers", () => {
     );
     assert.equal(
       productVisibleForDeliveryCountry({ slug: "red-roses-dozen", sku: "BP-ROSES" }, "AM"),
-      false
+      true
     );
     assert.equal(
       productVisibleForDeliveryCountry({ slug: "red-roses-dozen", sku: "BP-ROSES" }, "US"),

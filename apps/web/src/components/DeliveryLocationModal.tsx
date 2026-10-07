@@ -2,8 +2,9 @@
 
 import { Suspense, useEffect, useId, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { SHOPPING_COUNTRY_ISO } from "@blossompot/shared";
+import { SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE } from "@blossompot/shared";
 import { deliverToDestination, navigateAfterLocationCommit } from "@/lib/country-switch";
+import { isListedShoppingCountry } from "@/lib/gbo-delivery-countries";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
 import { dismissLocationPrompt } from "@/lib/delivery-location";
 import { useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
@@ -51,14 +52,21 @@ function DeliveryLocationModalInner() {
 
   const submit = () => {
     setError("");
+    const selected = countryCode.trim().toUpperCase();
+    if (!isListedShoppingCountry(selected, countries)) {
+      setError(countries.length === 0
+        ? "Delivery is not available right now. No countries are enabled for shopping."
+        : SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE);
+      return;
+    }
     setBusy(true);
     navigateAfterLocationCommit({
-      href: deliverToDestination(pathname, SHOPPING_COUNTRY_ISO, searchParams.toString()),
+      href: deliverToDestination(pathname, selected, searchParams.toString()),
       commit: () =>
         setLocation({
-          countryCode: SHOPPING_COUNTRY_ISO,
+          countryCode: selected,
           postalCode: "",
-          postalDisplay: SHOPPING_COUNTRY_ISO,
+          postalDisplay: selected,
         }),
       navigate: (href) => {
         closeSelector();

@@ -1,4 +1,4 @@
-import { isShoppingCountry } from "@blossompot/shared";
+import { SHOPPING_COUNTRY_ISO } from "@blossompot/shared";
 import {
   countryIsoFromPathname,
   normalizePathname,
@@ -117,8 +117,8 @@ export type LocationSyncPlan =
   | { action: "rewrite"; href: string; clearPending: boolean };
 
 /**
- * A guide or non-US shop URL must not replace the saved US location.
- * Shopping URLs still sync when the page country is the United States.
+ * A page country is adopted only when it is globally enabled.
+ * With no list, only the USA is adoptable, so a guide URL does not clear a saved US location.
  */
 export function planLocationCategorySync(input: {
   pathname: string;
@@ -127,10 +127,14 @@ export function planLocationCategorySync(input: {
   savedCountry?: string | null;
   savedPostal?: string;
   pendingCountry?: string | null;
+  enabledCountryCodes?: readonly string[];
 }): LocationSyncPlan {
   const pathIso = countryIsoFromPathname(input.pathname, input.searchCountry);
   const pending = input.pendingCountry ?? null;
-  if (pathIso && !isShoppingCountry(pathIso)) return { action: "leave", clearPending: false };
+  const enabled = new Set(
+    (input.enabledCountryCodes ?? [SHOPPING_COUNTRY_ISO]).map((code) => code.trim().toUpperCase())
+  );
+  if (pathIso && !enabled.has(pathIso)) return { action: "leave", clearPending: false };
   const clearPending = Boolean(pathIso && pending && pathIso === pending);
   if (!shouldReconcilePathCountry({ pathIso, pendingCountry: pending })) {
     return { action: "leave", clearPending };

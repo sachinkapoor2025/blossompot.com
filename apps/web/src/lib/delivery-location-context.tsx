@@ -12,6 +12,7 @@ import {
 } from "react";
 import { api } from "./api";
 import { applyDeliveryCheck, type DeliveryCheckState } from "./country-switch";
+import { useGboDeliveryCountries } from "./gbo-delivery-countries";
 import {
   DELIVERY_LOCATION_EVENT,
   readDeliveryLocation,
@@ -60,6 +61,7 @@ export function DeliveryLocationProvider({ children }: { children: ReactNode }) 
   const [pendingCountry, setPendingCountry] = useState<string | null>(null);
   const [selectorOpen, setSelectorOpen] = useState(false);
   const [selectorCountryPrefill, setSelectorCountryPrefill] = useState<string | null>(null);
+  const { countries, loaded: countriesLoaded, fromConfig } = useGboDeliveryCountries();
   const selectionRef = useRef(0);
   const checkLocationRef = useRef<(location: StoredDeliveryLocation, requestId: number) => Promise<CheckResponse>>(
     async () => ({ serviceable: false })
@@ -131,6 +133,15 @@ export function DeliveryLocationProvider({ children }: { children: ReactNode }) 
   const clearPendingIfSettled = useCallback((pathIso: string | null) => {
     setPendingCountry((current) => (current && pathIso === current ? null : current));
   }, []);
+
+  useEffect(() => {
+    if (!countriesLoaded || !fromConfig || !location) return;
+    const code = location.countryCode.trim().toUpperCase();
+    if (countries.some((country) => country.countryCode === code)) return;
+    const fallback = countries.find((country) => country.countryCode === "US")?.countryCode ?? countries[0]?.countryCode;
+    if (!fallback || fallback === code) return;
+    void setLocation({ countryCode: fallback, postalCode: "", postalDisplay: fallback });
+  }, [countries, countriesLoaded, fromConfig, location, setLocation]);
 
   useEffect(() => {
     const existing = readDeliveryLocation();

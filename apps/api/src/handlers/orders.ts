@@ -35,8 +35,8 @@ import {
   CATALOG_VENDOR_UNAVAILABLE_MESSAGE,
   formatPostalDisplay,
   fulfillmentVendorSlug,
-  nonUsDeliveryRejection,
-  USA_ONLY_DELIVERY_MESSAGE,
+  shoppingCountryRejection,
+  SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE,
   GBO_STOREFRONT_HOLD_ERROR,
   gboCartLineUnavailableMessage,
   gboPartnerOrderId,
@@ -45,6 +45,7 @@ import {
   orderIncludesGboProduct,
 } from "@blossompot/shared";
 import { evaluateProductsForLocation } from "./serviceability";
+import { loadCatalogCountries } from "../lib/catalog-country-store";
 import { decideNewShopping } from "../lib/catalog-vendor-store";
 import { resolveCheckoutUsdInrRate } from "../lib/exchange-rate";
 import { docClient, ORDERS_TABLE, CUSTOMERS_TABLE, now } from "../lib/db";
@@ -247,7 +248,9 @@ export async function checkout(event: APIGatewayProxyEventV2) {
       return badRequest(
         decision.reason === "gbo_storefront_disabled"
           ? gboCartLineUnavailableMessage(cart.items ?? [])
-          : CATALOG_VENDOR_UNAVAILABLE_MESSAGE
+          : decision.reason === "country_not_allowed"
+            ? `Some items in your cart cannot be delivered to ${newShoppingCountry}. Remove them before checkout.`
+            : CATALOG_VENDOR_UNAVAILABLE_MESSAGE
       );
     }
   }
@@ -272,11 +275,15 @@ export async function checkout(event: APIGatewayProxyEventV2) {
   const shipmentCountries = (parsed.data.shipments ?? []).map((shipment) =>
     (shipment.shippingAddress.country ?? "").trim()
   );
+  const storedCountries = await loadCatalogCountries();
+  const enabledCountryCodes = storedCountries.countries
+    .filter((country) => country.enabled)
+    .map((country) => country.countryCode);
   if (
-    nonUsDeliveryRejection(destCountry) ||
-    shipmentCountries.some((country) => nonUsDeliveryRejection(country))
+    shoppingCountryRejection(destCountry, enabledCountryCodes) ||
+    shipmentCountries.some((country) => shoppingCountryRejection(country, enabledCountryCodes))
   ) {
-    return badRequest(USA_ONLY_DELIVERY_MESSAGE);
+    return badRequest(SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE);
   }
   const destPostal = (parsed.data.shippingAddress.postalCode ?? "").trim();
   if (!destPostal) return badRequest("A delivery postal / ZIP code is required");

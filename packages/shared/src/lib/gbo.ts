@@ -403,8 +403,7 @@ export function isGboCatalogProduct(product: {
 }
 
 /**
- * Destination catalog for a product. Local BlossomPot SKUs are US-only;
- * GBO SKUs are tagged `gbo:{CC}:{id}`.
+ * GBO SKU destination (`gbo:{CC}:{id}`). Local products do not carry a country.
  */
 export function catalogProductCountry(product: {
   vendorSlug?: string | null;
@@ -415,10 +414,13 @@ export function catalogProductCountry(product: {
   const ref = parseGboSku(product.sku) ?? parseGboSlug(product.slug);
   if (ref) return ref.country;
   if (isGboCatalogProduct(product)) return null;
-  return "US";
+  return null;
 }
 
-/** Keep the selected country's GBO catalog; hide US-only SKUs abroad. */
+/**
+ * GBO SKUs must match the destination country. Untagged GBO rows stay hidden.
+ * Every other product is decided by the vendor's delivery countries, not a product field.
+ */
 export function productVisibleForDeliveryCountry(
   product: {
     vendorSlug?: string | null;
@@ -430,11 +432,10 @@ export function productVisibleForDeliveryCountry(
 ): boolean {
   const iso = country.trim().toUpperCase();
   if (!/^[A-Z]{2}$/.test(iso)) return true;
-  const dest = catalogProductCountry(product);
-  if (dest) return dest === iso;
-  // Untagged international rows are not a country's catalog.
+  const ref = parseGboSku(product.sku) ?? parseGboSlug(product.slug);
+  if (ref) return ref.country === iso;
   if (isGboCatalogProduct(product)) return false;
-  return iso === "US";
+  return true;
 }
 
 /**

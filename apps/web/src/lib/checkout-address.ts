@@ -1,14 +1,29 @@
-import { isShoppingCountry, USA_ONLY_DELIVERY_MESSAGE, type ShippingAddress } from "@blossompot/shared";
+import {
+  SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE,
+  USA_ONLY_DELIVERY_MESSAGE,
+  type ShippingAddress,
+} from "@blossompot/shared";
 
 export type CheckoutAddressCandidate = Partial<ShippingAddress> & { country?: string | null };
 
 const FOREIGN_SAVED_ADDRESS_NOTICE = `${USA_ONLY_DELIVERY_MESSAGE} Your saved address is outside the United States. Enter a US delivery address.`;
 
-/** Blocks a new or edited account address that is still outside the United States. */
-export function nonUsAccountSaveMessage(country?: string | null): string | null {
+function enabledSet(enabledCountryCodes?: readonly string[]): Set<string> {
+  return new Set((enabledCountryCodes ?? ["US"]).map((code) => code.trim().toUpperCase()));
+}
+
+/** Blocks an address outside the globally enabled shopping countries. Defaults to the USA. */
+export function nonUsAccountSaveMessage(
+  country?: string | null,
+  enabledCountryCodes?: readonly string[]
+): string | null {
+  const enabled = enabledSet(enabledCountryCodes);
   const iso = (country || "US").trim().toUpperCase();
-  if (isShoppingCountry(iso)) return null;
-  return `${USA_ONLY_DELIVERY_MESSAGE} Enter a US street, city, state, and ZIP code.`;
+  if (enabled.has(iso)) return null;
+  if (enabled.size === 1 && enabled.has("US")) {
+    return `${USA_ONLY_DELIVERY_MESSAGE} Enter a US street, city, state, and ZIP code.`;
+  }
+  return SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE;
 }
 
 /**
@@ -19,12 +34,24 @@ export function chooseCheckoutAddressPrefill(input: {
   accountAddress?: CheckoutAddressCandidate | null;
   saved?: CheckoutAddressCandidate[] | null;
   previousOrder?: CheckoutAddressCandidate | null;
+  enabledCountryCodes?: readonly string[];
 }): { address: CheckoutAddressCandidate | null; notice: string | null } {
+  const enabled = enabledSet(input.enabledCountryCodes);
   const candidates = [input.accountAddress, ...(input.saved ?? []), input.previousOrder];
-  const usable = candidates.find((address) => address && isShoppingCountry(address.country));
+  const usable = candidates.find((address) => address && enabled.has((address.country || "").trim().toUpperCase()));
   if (usable) return { address: usable, notice: null };
-  const sawForeign = candidates.some(
-    (address) => Boolean(address?.country) && !isShoppingCountry(address?.country)
-  );
-  return { address: null, notice: sawForeign ? FOREIGN_SAVED_ADDRESS_NOTICE : null };
+  const sawForeign = candidates.some((address) => {
+    const code = address?.country?.trim().toUpperCase();
+    if (!code) return false;
+    return !enabled.has(code);
+  });
+  const usaOnly = enabled.size === 1 && enabled.has("US");
+  return {
+    address: null,
+    notice: sawForeign
+      ? usaOnly
+        ? FOREIGN_SAVED_ADDRESS_NOTICE
+        : SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE
+      : null,
+  };
 }

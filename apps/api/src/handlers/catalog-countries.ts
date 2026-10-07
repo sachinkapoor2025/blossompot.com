@@ -33,7 +33,7 @@ export async function listCatalogCountriesAdmin(event: APIGatewayProxyEventV2) {
   });
 }
 
-/** Storefront list of globally enabled countries. Not wired to the country selector. */
+/** Storefront list of globally enabled countries. The country selector uses this list. */
 export async function listCatalogCountriesPublic() {
   const stored = await loadCatalogCountries();
   return ok({

@@ -213,14 +213,13 @@ describe("catalog countries API", { concurrency: false }, () => {
     assert.equal((scan.Items ?? []).length, 0);
   });
 
-  it("does not connect global countries to product shopping", () => {
+  it("connects global countries to product, cart, and checkout validation", () => {
     const products = readFileSync(path.join(__dirname, "products.ts"), "utf8");
     const cart = readFileSync(path.join(__dirname, "cart.ts"), "utf8");
     const orders = readFileSync(path.join(__dirname, "orders.ts"), "utf8");
-    for (const source of [products, cart, orders]) {
-      assert.equal(source.includes("loadCatalogCountries"), false);
-      assert.equal(source.includes("isCatalogCountryEnabled"), false);
-    }
+    assert.equal(products.includes("resolveShoppingLocation"), true);
+    assert.equal(cart.includes("loadCatalogCountries"), true);
+    assert.equal(orders.includes("loadCatalogCountries"), true);
     const postal = readFileSync(
       path.join(__dirname, "../../../../packages/shared/src/lib/postal-countries.ts"),
       "utf8"

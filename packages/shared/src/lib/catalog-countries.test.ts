@@ -3,13 +3,25 @@ import { describe, it } from "node:test";
 import { configKeys } from "../db/keys";
 import { clampShoppingCountry, isShoppingCountry } from "./postal-countries";
 import {
+  applyEnabledShoppingCountry,
   catalogCountryKeys,
   defaultCatalogCountries,
   enabledCatalogCountries,
   isCatalogCountryEnabled,
   normalizeCatalogCountries,
   readStoredCatalogCountries,
+  resolveEnabledShoppingCountry,
+  shoppingCountryRejection,
+  SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE,
 } from "./catalog-countries";
+import { VENDOR_BLOSSOMPOT, VENDOR_FNP, VENDOR_GBO, VENDOR_ORANGE_COUNTY } from "../constants";
+import {
+  defaultCatalogVendor,
+  productAllowedForNewShopping,
+  vendorCoversShoppingCountryWithoutArea,
+} from "./catalog-vendors";
+import { productVisibleForDeliveryCountry } from "./gbo";
+import { defaultOrangeCountyAreas } from "./serviceability";
 
 describe("catalog country defaults", () => {
   it("uses USA only when the config item is missing", () => {
@@ -89,5 +101,129 @@ describe("catalog country validation", () => {
     assert.equal(clampShoppingCountry("CA"), "US");
     assert.equal(isShoppingCountry("US"), true);
     assert.equal(isShoppingCountry("GB"), false);
+  });
+});
+
+describe("customer country resolution", () => {
+  const usaOnly = defaultCatalogCountries();
+  const usaAndUk = [
+    { countryCode: "US", enabled: true },
+    { countryCode: "GB", enabled: true },
+    { countryCode: "CA", enabled: false },
+  ];
+
+  it("keeps USA when it is the only enabled country", () => {
+    assert.equal(resolveEnabledShoppingCountry("GB", usaOnly), "US");
+    assert.equal(resolveEnabledShoppingCountry("CA", usaOnly), "US");
+    assert.equal(resolveEnabledShoppingCountry(undefined, usaOnly), "US");
+    assert.deepEqual(
+      applyEnabledShoppingCountry({ countryCode: "GB", postalCode: "SW1A 1AA" }, usaOnly),
+      { countryCode: "US", postalCode: "" }
+    );
+  });
+
+  it("accepts USA and the UK and rejects a disabled or unknown country", () => {
+    assert.equal(resolveEnabledShoppingCountry("GB", usaAndUk), "GB");
+    assert.equal(resolveEnabledShoppingCountry("US", usaAndUk), "US");
+    assert.equal(resolveEnabledShoppingCountry("CA", usaAndUk), "US");
+    assert.equal(resolveEnabledShoppingCountry("ZZ", usaAndUk), "US");
+    assert.equal(shoppingCountryRejection("CA", ["US", "GB"]), SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE);
+    assert.equal(shoppingCountryRejection("GB", ["US", "GB"]), null);
+    assert.equal(shoppingCountryRejection("", ["US", "GB"]), null);
+  });
+
+  it("falls back to the first enabled country when USA is off", () => {
+    const ukOnly = [
+      { countryCode: "US", enabled: false },
+      { countryCode: "GB", enabled: true },
+    ];
+    assert.equal(resolveEnabledShoppingCountry("US", ukOnly), "GB");
+    assert.equal(resolveEnabledShoppingCountry("CA", ukOnly), "GB");
+  });
+
+  it("fails safely when no country is enabled", () => {
+    assert.equal(
+      resolveEnabledShoppingCountry("US", [
+        { countryCode: "US", enabled: false },
+        { countryCode: "GB", enabled: false },
+      ]),
+      null
+    );
+    assert.equal(applyEnabledShoppingCountry({ countryCode: "US", postalCode: "90012" }, []), null);
+  });
+
+  it("filters one vendor at a time for the selected country", () => {
+    const vendors = [VENDOR_BLOSSOMPOT, VENDOR_FNP, VENDOR_ORANGE_COUNTY, VENDOR_GBO].map((slug) => {
+      const vendor = defaultCatalogVendor(slug);
+      if (slug === VENDOR_BLOSSOMPOT || slug === VENDOR_GBO) {
+        return { ...vendor, deliveryCountries: ["US", "GB"] };
+      }
+      return vendor;
+    });
+    const fnp = { slug: "fnp-cake", vendorSlug: VENDOR_FNP };
+    const blossompot = { slug: "owned-rose", vendorSlug: VENDOR_BLOSSOMPOT };
+    const orange = { slug: "oc-hamper", vendorSlug: VENDOR_ORANGE_COUNTY };
+    const gbo = { slug: "gbo-gb-1", vendorSlug: VENDOR_GBO, sku: "gbo:GB:1" };
+    const country = resolveEnabledShoppingCountry("GB", usaAndUk);
+    assert.equal(country, "GB");
+    assert.equal(productAllowedForNewShopping(fnp, country, vendors).available, false);
+    assert.equal(productAllowedForNewShopping(orange, country, vendors).available, false);
+    assert.equal(productAllowedForNewShopping(blossompot, country, vendors).available, true);
+    assert.equal(productVisibleForDeliveryCountry(blossompot, "GB"), true);
+    assert.equal(productVisibleForDeliveryCountry(fnp, "GB"), true);
+    assert.equal(
+      productAllowedForNewShopping(gbo, country, vendors, { GBO_STOREFRONT_ENABLED: "false" }).reason,
+      "gbo_storefront_disabled"
+    );
+    assert.equal(productVisibleForDeliveryCountry({ sku: "gbo:US:1", vendorSlug: VENDOR_GBO }, "GB"), false);
+    assert.equal(productVisibleForDeliveryCountry(gbo, "GB"), true);
+
+    const fnpOff = vendors.map((vendor) =>
+      vendor.vendorSlug === VENDOR_FNP ? { ...vendor, enabled: false } : vendor
+    );
+    assert.equal(productAllowedForNewShopping(fnp, "US", fnpOff).available, false);
+    assert.equal(productAllowedForNewShopping(blossompot, "US", fnpOff).available, true);
+    assert.equal(
+      productAllowedForNewShopping(gbo, "US", fnpOff, { GBO_STOREFRONT_ENABLED: "true" }).available,
+      true
+    );
+  });
+
+  it("does not erase vendor delivery countries when a global country is disabled", () => {
+    const vendor = { ...defaultCatalogVendor(VENDOR_BLOSSOMPOT), deliveryCountries: ["US", "GB"] };
+    const disabledUk = [
+      { countryCode: "US", enabled: true },
+      { countryCode: "GB", enabled: false },
+    ];
+    assert.equal(resolveEnabledShoppingCountry("GB", disabledUk), "US");
+    assert.deepEqual(vendor.deliveryCountries, ["US", "GB"]);
+    const reenabled = [
+      { countryCode: "US", enabled: true },
+      { countryCode: "GB", enabled: true },
+    ];
+    assert.equal(resolveEnabledShoppingCountry("GB", reenabled), "GB");
+    assert.equal(productAllowedForNewShopping({ slug: "owned-rose" }, "GB", [vendor]).available, true);
+  });
+
+  it("keeps Orange County ZIP prefixes and does not use them outside the US", () => {
+    const prefixes = defaultOrangeCountyAreas().map((area) => area.postalPrefix);
+    assert.deepEqual(prefixes, ["926", "927", "928", "906", "907"]);
+    const vendor = defaultCatalogVendor(VENDOR_ORANGE_COUNTY);
+    assert.equal(
+      vendorCoversShoppingCountryWithoutArea(vendor, "US", "no_matching_service_area"),
+      false
+    );
+    assert.equal(
+      vendorCoversShoppingCountryWithoutArea(
+        { ...vendor, deliveryCountries: ["US", "GB"] },
+        "GB",
+        "no_matching_service_area"
+      ),
+      true
+    );
+    assert.equal(
+      vendorCoversShoppingCountryWithoutArea(vendor, "GB", "denied"),
+      false
+    );
   });
 });

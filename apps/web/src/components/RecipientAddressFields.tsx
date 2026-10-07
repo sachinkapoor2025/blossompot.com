@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { isShoppingCountry, type ShippingAddress } from "@blossompot/shared";
+import { type ShippingAddress } from "@blossompot/shared";
+import { isListedShoppingCountry } from "@/lib/gbo-delivery-countries";
 import { LeadCaptureInput } from "@/components/LeadCaptureInput";
 import { PhoneInput, buildPhoneValue } from "@/components/PhoneInput";
 import { CountryRegionFields } from "@/components/CountryRegionFields";
@@ -58,7 +59,7 @@ export function RecipientAddressFields({
 
   const changeCountry = (iso: string) => {
     const next = iso.trim().toUpperCase();
-    if (!isShoppingCountry(next)) return;
+    if (!isListedShoppingCountry(next, countries)) return;
     const regions = regionOptionsForCountry(next);
     const nextState = regions?.some((r) => r.code === value.state) ? value.state : "";
     setPhoneCountry(next);
@@ -66,7 +67,7 @@ export function RecipientAddressFields({
       ...value,
       country: next,
       state: nextState,
-      postalCode: isShoppingCountry(value.country) ? value.postalCode : "",
+      postalCode: isListedShoppingCountry(value.country, countries) ? value.postalCode : "",
       phone: buildPhoneValue(next, phoneLocal),
     });
   };
@@ -135,13 +136,13 @@ export function RecipientAddressFields({
         <label className="block text-sm">
           <span className="font-medium text-slate-700">Country</span>
           <select
-            value={isShoppingCountry(value.country) ? value.country : ""}
+            value={isListedShoppingCountry(value.country, countries) ? value.country : ""}
             onChange={(e) => changeCountry(e.target.value)}
             required
             className="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent bg-white"
           >
-            {!isShoppingCountry(value.country) ? (
-              <option value="">Select the United States</option>
+            {!isListedShoppingCountry(value.country, countries) ? (
+              <option value="">Select a delivery country</option>
             ) : null}
             {countries.map((c) => (
               <option key={c.countryCode} value={c.countryCode}>

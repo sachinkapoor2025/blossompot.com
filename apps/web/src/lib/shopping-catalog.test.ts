@@ -16,18 +16,18 @@ function product(slug: string): Product {
 }
 
 describe("shopping catalog country", () => {
-  it("loads a GB request as the United States catalog", () => {
-    assert.equal(shoppingCatalogCountry("GB"), "US");
+  it("forwards a known country and lets the API apply the global list", () => {
+    assert.equal(shoppingCatalogCountry("GB"), "GB");
     const query = shoppingCatalogQuery({ country: "GB", search: "roses" });
-    assert.match(query, /country=US/);
-    assert.equal(query.includes("country=GB"), false);
-    const visible = [product("sunset-roses"), product("gbo-gb-9-hamper")].filter((item) =>
-      productVisibleForDeliveryCountry(item, shoppingCatalogCountry("GB"))
-    );
+    assert.match(query, /country=GB/);
+    assert.equal(shoppingCatalogCountry("ZZ"), SHOPPING_COUNTRY_ISO);
+    const visible = [
+      product("sunset-roses"),
+      { ...product("gbo-us-9-hamper"), sku: "gbo:US:9", vendorSlug: "gift-baskets-overseas" },
+    ].filter((item) => productVisibleForDeliveryCountry(item, shoppingCatalogCountry("GB")));
     assert.deepEqual(
       visible.map((item) => item.slug),
       ["sunset-roses"]
     );
-    assert.equal(shoppingCatalogCountry("CA"), SHOPPING_COUNTRY_ISO);
   });
 });

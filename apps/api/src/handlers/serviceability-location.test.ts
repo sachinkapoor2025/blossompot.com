@@ -17,26 +17,31 @@ describe("catalog location query", () => {
     });
   });
 
-  it("does not let a non-US country or its postal code hide the US catalog", () => {
+  it("keeps a requested delivery country for the enabled-country resolver", () => {
     assert.deepEqual(
       parseLocationQuery(event({ country: "GB", postalCode: "SW1A 1AA", city: "London" })),
       {
-        countryCode: "US",
-        postalCode: "",
+        countryCode: "GB",
+        postalCode: "SW1A 1AA",
         stateCode: undefined,
-        city: undefined,
+        city: "London",
       }
     );
     assert.deepEqual(parseLocationQuery(event({ country: "CA", zip: "K1A 0B1" })), {
-      countryCode: "US",
-      postalCode: "",
+      countryCode: "CA",
+      postalCode: "K1A 0B1",
       stateCode: undefined,
       city: undefined,
     });
   });
 
-  it("ignores an invalid US ZIP instead of filtering the catalog with it", () => {
-    assert.equal(parseLocationQuery(event({ country: "US", postalCode: "AB1" })), null);
+  it("drops an invalid US ZIP instead of filtering the catalog with it", () => {
+    assert.deepEqual(parseLocationQuery(event({ country: "US", postalCode: "AB1" })), {
+      countryCode: "US",
+      postalCode: "",
+      stateCode: undefined,
+      city: undefined,
+    });
   });
 
   it("clamps a Canada cart query to the United States", () => {
@@ -50,7 +55,7 @@ describe("catalog location query", () => {
     });
   });
 
-  it("checks public serviceability as the United States", () => {
+  it("checks public serviceability as the United States when no other country is enabled", () => {
     assert.deepEqual(publicShoppingServiceability({ countryCode: "CA", postalCode: "K1A 0B1" }), {
       countryCode: "US",
       postalCode: "",
@@ -60,5 +65,32 @@ describe("catalog location query", () => {
       postalCode: "90012",
     });
     assert.equal("error" in publicShoppingServiceability({ countryCode: "US", postalCode: "AB1" }), true);
+  });
+
+  it("keeps an enabled UK check and still rejects Canada when Canada is disabled", () => {
+    assert.deepEqual(
+      publicShoppingServiceability({
+        countryCode: "GB",
+        postalCode: "SW1A 1AA",
+        enabledCountryCodes: ["US", "GB"],
+      }),
+      { countryCode: "GB", postalCode: "SW1A 1AA" }
+    );
+    assert.deepEqual(
+      publicShoppingServiceability({
+        countryCode: "CA",
+        postalCode: "K1A 0B1",
+        enabledCountryCodes: ["US", "GB"],
+      }),
+      { countryCode: "US", postalCode: "" }
+    );
+    assert.equal(
+      "error" in
+        publicShoppingServiceability({
+          countryCode: "US",
+          enabledCountryCodes: [],
+        }),
+      true
+    );
   });
 });

@@ -21,7 +21,8 @@ import {
   GBO_STOREFRONT_UNAVAILABLE_MESSAGE,
   gboCartLineUnavailableMessage,
   isGboHiddenFromStorefront,
-  nonUsDeliveryRejection,
+  productAllowedForNewShopping,
+  shoppingCountryRejection,
   type Cart,
   type CartItem,
 } from "@blossompot/shared";
@@ -32,7 +33,8 @@ import { cartAvailabilityLocation, evaluateProductsForLocation } from "./service
 import { formatPostalDisplay } from "@blossompot/shared";
 import { resolveProductImageUrl } from "../lib/images";
 import { upsertSessionProfile } from "../lib/customer-profile";
-import { decideNewShopping } from "../lib/catalog-vendor-store";
+import { loadCatalogCountries } from "../lib/catalog-country-store";
+import { decideNewShopping, loadCatalogVendorRegistry } from "../lib/catalog-vendor-store";
 import { ensureOrangeCountyProductInDb } from "../lib/orange-county-catalog";
 import { ensureProductInDb } from "../lib/ensure-product";
 
@@ -107,26 +109,40 @@ export async function getCartHandler(event: APIGatewayProxyEventV2) {
   }
   const country = event.queryStringParameters?.country ?? event.queryStringParameters?.countryCode;
   const postal = event.queryStringParameters?.postalCode ?? event.queryStringParameters?.zip;
-  const shoppingLocation = cartAvailabilityLocation(country, postal);
+  const storedCountries = await loadCatalogCountries();
+  const enabledCountryCodes = storedCountries.countries
+    .filter((row) => row.enabled)
+    .map((row) => row.countryCode);
+  const shoppingLocation = cartAvailabilityLocation(country, postal, enabledCountryCodes);
   if (shoppingLocation && items.length) {
-    const evals = await evaluateProductsForLocation(
-      items.map((i) => ({ slug: i.productSlug, vendorSlug: i.vendorSlug })),
-      { countryCode: shoppingLocation.countryCode, postalCode: shoppingLocation.postalCode }
-    );
+    const [evals, registry] = await Promise.all([
+      evaluateProductsForLocation(
+        items.map((i) => ({ slug: i.productSlug, vendorSlug: i.vendorSlug, sku: i.sku })),
+        { countryCode: shoppingLocation.countryCode, postalCode: shoppingLocation.postalCode }
+      ),
+      loadCatalogVendorRegistry(),
+    ]);
     const bySlug = new Map(evals.map((e) => [e.slug, e]));
+    const where = shoppingLocation.postalCode
+      ? formatPostalDisplay(shoppingLocation.countryCode, shoppingLocation.postalCode)
+      : shoppingLocation.countryCode;
     const flagged = items.map((item) => {
+      const decision = productAllowedForNewShopping(item, shoppingLocation.countryCode, registry);
       const ev = bySlug.get(item.productSlug);
-      return ev && !ev.deliverable
-        ? {
-            ...item,
-            unavailableForLocation: true,
-            unavailableReason: `No longer available for delivery to ${
-              shoppingLocation.postalCode
-                ? formatPostalDisplay(shoppingLocation.countryCode, shoppingLocation.postalCode)
-                : shoppingLocation.countryCode
-            }.`,
-          }
-        : item;
+      const areaBlocked = Boolean(ev && !ev.deliverable);
+      if (decision.available && !areaBlocked) return item;
+      const unavailableReason = !decision.available
+        ? decision.reason === "gbo_storefront_disabled"
+          ? GBO_STOREFRONT_UNAVAILABLE_MESSAGE
+          : decision.reason === "country_not_allowed"
+            ? `This item cannot be delivered to ${where}.`
+            : CATALOG_VENDOR_UNAVAILABLE_MESSAGE
+        : `No longer available for delivery to ${where}.`;
+      return {
+        ...item,
+        unavailableForLocation: true,
+        unavailableReason,
+      };
     });
     return ok({
       cart: { items: flagged, updatedAt: raw.updatedAt ?? now() },
@@ -149,8 +165,15 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
   if (!parsed.success) {
     return badRequest(parsed.error.issues[0]?.message ?? "Could not add this gift to your cart");
   }
-  const deliveryRejection = nonUsDeliveryRejection(parsed.data.deliveryCountry);
+  const storedCountries = await loadCatalogCountries();
+  const enabledCountryCodes = storedCountries.countries
+    .filter((row) => row.enabled)
+    .map((row) => row.countryCode);
+  const deliveryRejection = shoppingCountryRejection(parsed.data.deliveryCountry, enabledCountryCodes);
   if (deliveryRejection) return badRequest(deliveryRejection);
+  if (enabledCountryCodes.length === 0) {
+    return badRequest("Delivery is not available right now. No countries are enabled for shopping.");
+  }
   if (isGboHiddenFromStorefront({ slug: parsed.data.productSlug })) {
     return badRequest(GBO_STOREFRONT_UNAVAILABLE_MESSAGE);
   }

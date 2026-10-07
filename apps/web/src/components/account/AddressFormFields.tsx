@@ -1,6 +1,7 @@
 "use client";
 
-import { isShoppingCountry, type ShippingAddress } from "@blossompot/shared";
+import { type ShippingAddress } from "@blossompot/shared";
+import { isListedShoppingCountry } from "@/lib/gbo-delivery-countries";
 import { LeadCaptureInput } from "@/components/LeadCaptureInput";
 import { CountryRegionFields } from "@/components/CountryRegionFields";
 import { regionOptionsForCountry } from "@/lib/checkout-regions";
@@ -19,7 +20,7 @@ export function AddressFormFields({
   };
   const changeCountry = (iso: string) => {
     const next = iso.trim().toUpperCase();
-    if (!isShoppingCountry(next)) return;
+    if (!isListedShoppingCountry(next, countries)) return;
     const regions = regionOptionsForCountry(next);
     const nextState = regions?.some((r) => r.code === value.state) ? value.state : "";
     onChange({ ...value, country: next, state: nextState });
@@ -73,14 +74,14 @@ export function AddressFormFields({
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Country</label>
           <select
-            value={isShoppingCountry(value.country) ? value.country : ""}
+            value={isListedShoppingCountry(value.country, countries) ? value.country : ""}
             onChange={(e) => changeCountry(e.target.value)}
             required
             className="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent bg-white"
           >
-            {!isShoppingCountry(value.country) ? (
+            {!isListedShoppingCountry(value.country, countries) ? (
               <option value="" disabled>
-                Select the United States
+                Select a delivery country
               </option>
             ) : null}
             {countries.map((c) => (

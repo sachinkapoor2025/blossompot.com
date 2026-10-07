@@ -8,7 +8,7 @@ import { ProductDetailClient } from "./ProductDetailClient";
 import { breadcrumbJsonLd, faqJsonLd, productJsonLd, productPageMetadata } from "@/lib/seo";
 import { productFaqsForCategory } from "@/lib/content/product-faqs";
 import { resolveImageUrl } from "@/lib/images";
-import { loadProduct, loadRelatedProducts, loadProducts, getStaticProductSlugs, toListingCardProducts } from "@/lib/product-loader";
+import { loadProductForCountry, loadRelatedProducts, loadProducts, getStaticProductSlugs, toListingCardProducts } from "@/lib/product-loader";
 import { api } from "@/lib/api";
 import { categoryHref } from "@/lib/category-urls";
 import { getCategoryPageSeo } from "@/lib/content/category-seo";
@@ -64,7 +64,9 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const p = await loadProduct(slug);
+  const country = await getStorefrontDeliveryCountry();
+  const loaded = await loadProductForCountry(slug, country);
+  const p = loaded?.deliverable ? loaded.product : null;
   if (!p) return { title: "Product", robots: { index: false, follow: false } };
   if (!isProductSearchIndexable(p)) {
     return { title: p.name, robots: { index: false, follow: false } };
@@ -91,12 +93,21 @@ export default function ProductPage(props: Props) {
 
 async function ProductPageContent({ params }: Props) {
   const { slug } = await params;
-  const product = await loadProduct(slug);
-  if (!product) notFound();
+  const countryIso = await getStorefrontDeliveryCountry();
+  if (!countryIso) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-10">
+        <h1 className="text-2xl font-bold text-primary mb-3">Delivery is not available right now</h1>
+        <p className="text-slate-600 max-w-2xl">No countries are enabled for shopping.</p>
+      </div>
+    );
+  }
+  const loaded = await loadProductForCountry(slug, countryIso);
+  if (!loaded) notFound();
+  const product = loaded.product;
   if (!isProductStorefrontVisible(product)) notFound();
 
-  const countryIso = await getStorefrontDeliveryCountry();
-  if (!productVisibleForDeliveryCountry(product, countryIso)) {
+  if (!loaded.deliverable || !productVisibleForDeliveryCountry(product, countryIso)) {
     const countryName = resolveDeliveryCountry(countryIso).countryName;
     const available = await loadProducts({ country: countryIso });
     return (

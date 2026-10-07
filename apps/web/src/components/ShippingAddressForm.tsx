@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { currencyForCountryCode, isShoppingCountry, USA_ONLY_DELIVERY_MESSAGE, type ShippingAddress } from "@blossompot/shared";
+import { currencyForCountryCode, SHOPPING_COUNTRY_ISO, SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE, type ShippingAddress } from "@blossompot/shared";
+import { isListedShoppingCountry } from "@/lib/gbo-delivery-countries";
 import { LeadCaptureInput } from "@/components/LeadCaptureInput";
 import { PhoneInput, buildPhoneValue } from "@/components/PhoneInput";
 import { CountryRegionFields } from "@/components/CountryRegionFields";
@@ -99,7 +100,7 @@ export function ShippingAddressForm({
 
   const changeCountry = (iso: string) => {
     const next = iso.trim().toUpperCase();
-    if (!isShoppingCountry(next)) return;
+    if (!isListedShoppingCountry(next, countries)) return;
     const regions = regionOptionsForCountry(next);
     const nextState = regions?.some((r) => r.code === value.state) ? value.state : "";
     const nextPhone = buildPhoneValue(next, phoneLocal);
@@ -109,18 +110,16 @@ export function ShippingAddressForm({
       ...value,
       country: next,
       state: nextState,
-      postalCode: isShoppingCountry(value.country) ? value.postalCode : "",
+      postalCode: isListedShoppingCountry(value.country, countries) ? value.postalCode : "",
       phone: nextPhone,
     });
-    setDisplayCurrency(currencyForCountryCode(next));
+    if (next === SHOPPING_COUNTRY_ISO) setDisplayCurrency(currencyForCountryCode(next));
   };
 
   const useSaved = (address: SavedShippingAddress) => {
-    if (!isShoppingCountry(address.country)) {
+    if (!isListedShoppingCountry(address.country, countries)) {
       setSelectedId(null);
-      setAddressNotice(
-        `${USA_ONLY_DELIVERY_MESSAGE} This saved address is outside the United States. Enter a US street, city, state, and ZIP code.`
-      );
+      setAddressNotice(SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE);
       return;
     }
     setAddressNotice("");
@@ -335,15 +334,15 @@ export function ShippingAddressForm({
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Country</label>
               <select
-                value={isShoppingCountry(value.country) ? value.country : ""}
+                value={isListedShoppingCountry(value.country, countries) ? value.country : ""}
                 onChange={(e) => changeCountry(e.target.value)}
                 required
                 autoComplete="country"
                 aria-label="Country"
                 className="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-accent"
               >
-                {!isShoppingCountry(value.country) ? (
-                  <option value="">Select the United States</option>
+                {!isListedShoppingCountry(value.country, countries) ? (
+                  <option value="">Select a delivery country</option>
                 ) : null}
                 {countries.map((c) => (
                   <option key={c.countryCode} value={c.countryCode}>
@@ -351,10 +350,9 @@ export function ShippingAddressForm({
                   </option>
                 ))}
               </select>
-              {addressNotice || !isShoppingCountry(value.country) ? (
+              {addressNotice || !isListedShoppingCountry(value.country, countries) ? (
                 <p className="mt-1 text-sm text-red-600">
-                  {addressNotice ||
-                    `${USA_ONLY_DELIVERY_MESSAGE} Choose United States and enter a US street, city, state, and ZIP code.`}
+                  {addressNotice || SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE}
                 </p>
               ) : null}
             </div>

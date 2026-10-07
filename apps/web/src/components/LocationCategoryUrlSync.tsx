@@ -2,9 +2,9 @@
 
 import { Suspense, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { shouldReconcilePathCountry } from "@/lib/country-switch";
+import { planLocationCategorySync } from "@/lib/country-switch";
 import { useOptionalDeliveryLocation } from "@/lib/delivery-location-context";
-import { preserveShopQuery, shopPathForLocation, countryIsoFromPathname } from "@/lib/location-seo-urls";
+import { useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
 
 /** Keeps category/shop URLs in sync with the selected delivery country. */
 export function LocationCategoryUrlSync() {
@@ -20,41 +20,43 @@ function LocationCategoryUrlSyncInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const delivery = useOptionalDeliveryLocation();
+  const { countries, loaded, fromConfig } = useGboDeliveryCountries();
 
   useEffect(() => {
-    if (!delivery?.ready) return;
-    const pathIso = countryIsoFromPathname(pathname, searchParams.get("country"));
-    const pending = delivery.pendingCountry ?? null;
-    if (!shouldReconcilePathCountry({ pathIso, pendingCountry: pending })) {
-      return;
-    }
-    if (pathIso && pending && pathIso === pending) {
-      delivery.clearPendingIfSettled(pending);
-    }
-    if (pathIso && delivery.location?.countryCode !== pathIso) {
+    if (!delivery || !delivery.ready || !loaded) return;
+    const plan = planLocationCategorySync({
+      pathname,
+      search: searchParams.toString(),
+      searchCountry: searchParams.get("country"),
+      savedCountry: delivery.location?.countryCode,
+      savedPostal: delivery.location?.postalCode,
+      pendingCountry: delivery.pendingCountry,
+      enabledCountryCodes: fromConfig ? countries.map((country) => country.countryCode) : ["US"],
+    });
+    if (plan.action === "adopt") {
       void delivery
         .setLocation({
-          countryCode: pathIso,
-          postalCode: "",
-          postalDisplay: pathIso,
+          countryCode: plan.countryCode,
+          postalCode: plan.postalCode,
+          postalDisplay: plan.postalCode || plan.countryCode,
         })
         .catch(() => undefined);
       return;
     }
-    const search = searchParams.toString();
-    const desired = preserveShopQuery(
-      shopPathForLocation(pathname, delivery.location?.countryCode ?? pathIso ?? null),
-      search
-    );
-    const current = preserveShopQuery(pathname, search);
-    if (desired === current) return;
-    router.replace(desired);
+    if (plan.clearPending && delivery.pendingCountry) {
+      delivery.clearPendingIfSettled(delivery.pendingCountry);
+    }
+    if (plan.action === "rewrite") router.replace(plan.href);
   }, [
+    countries,
     delivery?.ready,
     delivery?.location?.countryCode,
+    delivery?.location?.postalCode,
     delivery?.pendingCountry,
     delivery?.setLocation,
     delivery?.clearPendingIfSettled,
+    fromConfig,
+    loaded,
     pathname,
     router,
     searchParams,

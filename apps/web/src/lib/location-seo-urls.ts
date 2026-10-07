@@ -1,4 +1,4 @@
-import { clampShoppingCountry, SHOPPING_COUNTRY_ISO } from "@blossompot/shared";
+import { getDeliveryCountry, SHOPPING_COUNTRY_ISO } from "@blossompot/shared";
 import { CATEGORY_PUBLIC_SLUG, categoryHref } from "./category-urls";
 
 /** Pretty country slugs for category URLs (`/flowers-to-usa`). ISO-2 lowercase is the fallback. */
@@ -252,7 +252,7 @@ function normalizeIso2(raw?: string | null): string | null {
   return /^[A-Z]{2}$/.test(iso) ? iso : null;
 }
 
-/** Path (country page / shop URL) wins, then ?country=, then the delivery cookie. Shopping stays US. */
+/** Path (country page / shop URL) wins, then ?country=, then the delivery cookie. Unknown codes fall back to the USA. */
 export function resolveStorefrontCountryIso(input: {
   pathname: string;
   searchCountry?: string | null;
@@ -262,13 +262,13 @@ export function resolveStorefrontCountryIso(input: {
     countryIsoFromPathname(input.pathname, input.searchCountry) ??
     normalizeIso2(input.cookieCountry);
   if (!resolved) return null;
-  return clampShoppingCountry(resolved);
+  return getDeliveryCountry(resolved)?.countryCode ?? SHOPPING_COUNTRY_ISO;
 }
 
 export function withCountryQuery(href: string, country: string | null | undefined): string {
   const iso = normalizeIso2(country ?? null);
   if (!iso) return href;
-  const shopping = clampShoppingCountry(iso);
+  const shopping = getDeliveryCountry(iso)?.countryCode ?? SHOPPING_COUNTRY_ISO;
   const qIndex = href.indexOf("?");
   const path = qIndex >= 0 ? href.slice(0, qIndex) : href;
   const params = new URLSearchParams(qIndex >= 0 ? href.slice(qIndex + 1) : "");

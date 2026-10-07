@@ -1,9 +1,7 @@
 import {
   SHOPPING_COUNTRY_ISO,
-  clampShoppingCountry,
   formatPostalDisplay,
   getDeliveryCountry,
-  isShoppingCountry,
   isValidPostal,
 } from "@blossompot/shared";
 
@@ -17,9 +15,11 @@ export type StoredDeliveryLocation = {
   postalDisplay: string;
 };
 
-/** Stored shopper location. A non-US country becomes US and its postal code is dropped. */
+/** Stored shopper location. Unknown codes fall back to the USA. A known country keeps a valid postal code. */
 export function toShoppingDeliveryLocation(location: StoredDeliveryLocation): StoredDeliveryLocation {
-  if (!isShoppingCountry(location.countryCode)) {
+  const iso = location.countryCode.trim().toUpperCase();
+  const country = getDeliveryCountry(iso);
+  if (!country) {
     return {
       countryCode: SHOPPING_COUNTRY_ISO,
       postalCode: "",
@@ -27,10 +27,11 @@ export function toShoppingDeliveryLocation(location: StoredDeliveryLocation): St
     };
   }
   const postalCode = location.postalCode.trim();
+  const postalOk = !postalCode || isValidPostal(iso, postalCode);
   return {
-    countryCode: SHOPPING_COUNTRY_ISO,
-    postalCode,
-    postalDisplay: postalCode ? formatPostalDisplay(SHOPPING_COUNTRY_ISO, postalCode) : SHOPPING_COUNTRY_ISO,
+    countryCode: iso,
+    postalCode: postalOk ? postalCode : "",
+    postalDisplay: postalOk && postalCode ? formatPostalDisplay(iso, postalCode) : iso,
   };
 }
 
@@ -41,20 +42,10 @@ export function parseDeliveryLocationToken(raw: string | null | undefined): Stor
   if (!countryCode) return null;
   const iso = countryCode.trim().toUpperCase();
   if (!/^[A-Z]{2}$/.test(iso)) return null;
-  if (!isShoppingCountry(iso)) {
-    return toShoppingDeliveryLocation({
-      countryCode: iso,
-      postalCode,
-      postalDisplay: iso,
-    });
-  }
-  const country = getDeliveryCountry(iso);
-  if (country && !country.enabled) return null;
-  if (postalCode && !isValidPostal(iso, postalCode)) return null;
   return toShoppingDeliveryLocation({
     countryCode: iso,
     postalCode,
-    postalDisplay: postalCode ? formatPostalDisplay(iso, postalCode) : iso,
+    postalDisplay: iso,
   });
 }
 
@@ -104,7 +95,8 @@ export function deliveryCookieUpdate(input: {
   flight: boolean;
 }): DeliveryCookieUpdate | null {
   if (!input.resolvedCountry || input.flight) return null;
-  const country = clampShoppingCountry(input.resolvedCountry);
+  const requested = input.resolvedCountry.trim().toUpperCase();
+  const country = getDeliveryCountry(requested)?.countryCode ?? SHOPPING_COUNTRY_ISO;
   const existing = parseDeliveryLocationToken(input.requestCookie);
   const postalCode = existing?.countryCode === country ? existing.postalCode : "";
   return {

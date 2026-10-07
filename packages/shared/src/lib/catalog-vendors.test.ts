@@ -117,10 +117,10 @@ describe("phase 3 leaves existing catalog behavior in place", () => {
     assert.equal(fnpImportWriteBlocked({ environment: "prod" }).blocked, true);
   });
 
-  it("keeps USA shopping visibility rules", () => {
+  it("keeps the USA clamp helper and lets vendor delivery decide local products", () => {
     assert.equal(clampShoppingCountry("GB"), "US");
     assert.equal(productVisibleForDeliveryCountry({ slug: "rakhi-hamper" }, "US"), true);
-    assert.equal(productVisibleForDeliveryCountry({ slug: "rakhi-hamper" }, "GB"), false);
+    assert.equal(productVisibleForDeliveryCountry({ slug: "rakhi-hamper" }, "GB"), true);
   });
 });
 
