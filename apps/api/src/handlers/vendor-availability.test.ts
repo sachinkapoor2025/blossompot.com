@@ -297,7 +297,7 @@ describe("catalog vendor availability for new shopping", { concurrency: false },
     await setVendor("orange-county", true);
     await setVendor("blossompot", true);
     const abroad = resultOf(await listProducts(shopperEvent({ queryStringParameters: { country: "GB" } })));
-    assert.equal(slugsOf(abroad.body).includes("phase4-owned"), true);
+    assert.equal(slugsOf(abroad.body).includes("phase4-owned"), false);
 
     const irvine = resultOf(
       await listProducts(
