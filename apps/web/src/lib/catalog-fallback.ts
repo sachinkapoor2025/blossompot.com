@@ -5,7 +5,9 @@ import {
   productAllowsAddons,
   productAllowedForNewShopping,
   productVisibleForDeliveryCountry,
+  productInStorefrontCategory,
   resolveProductImageUrls,
+  coalesceProductImages,
   stripVendorPrivateFields,
   withCompetitiveStorefrontPricing,
   dedupeStorefrontProducts,
@@ -77,16 +79,11 @@ export function getCatalogProduct(slug: string): Product | undefined {
   return getCatalogProducts().find((p) => p.slug === slug);
 }
 
-function productInCategory(product: Product, categorySlug: string): boolean {
-  if (product.categorySlug === categorySlug) return true;
-  return product.additionalCategorySlugs?.includes(categorySlug) ?? false;
-}
-
 export function getCatalogProductsByCategory(categorySlug: string): Product[] {
   if (storefrontSkipsRakhiCategory(categorySlug)) return [];
   const bySlug = new Map<string, Product>();
   for (const product of getCatalogProducts()) {
-    if (productInCategory(product, categorySlug)) bySlug.set(product.slug, product);
+    if (productInStorefrontCategory(product, categorySlug)) bySlug.set(product.slug, product);
   }
   return dedupeStorefrontProducts([...bySlug.values()]);
 }
@@ -99,10 +96,15 @@ export function mergeProductsPreferExisting(
   existing: Product[],
   additions: Product[]
 ): Product[] {
+  const catalogBySlug = new Map(additions.map((product) => [product.slug, product]));
   const bySlug = new Map(
     existing
       .filter((p) => !isRakhiRelatedProduct(p) && !isSampleCatalogProduct(p))
-      .map((product) => [product.slug, product])
+      .map((product) => {
+        const catalog = catalogBySlug.get(product.slug);
+        const images = coalesceProductImages(product.images, catalog?.images);
+        return [product.slug, images === product.images ? product : { ...product, images }] as const;
+      })
   );
   for (const product of additions) {
     if (isRakhiRelatedProduct(product)) continue;

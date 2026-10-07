@@ -15,6 +15,7 @@ import {
   isGboStorefrontHold,
   isPublicGboCatalogPath,
   mapGboGiftStorefrontCategories,
+  productInStorefrontCategory,
   orderIncludesGboProduct,
   mapGboStatusToOrderStatus,
   parseGboContentsLines,
@@ -121,6 +122,23 @@ describe("gbo helpers", () => {
     assert.equal(
       productVisibleForDeliveryCountry({ internationalDelivery: true, slug: "overseas-gift" }, "GB"),
       false
+    );
+  });
+
+  it("keeps generic flower SKUs off Birthday and Valentine listings", () => {
+    assert.equal(
+      productInStorefrontCategory(
+        { categorySlug: "flower-bouquets", additionalCategorySlugs: ["birthday-gifts"] },
+        "birthday-gifts"
+      ),
+      false
+    );
+    assert.equal(
+      productInStorefrontCategory(
+        { categorySlug: "birthday-gifts", additionalCategorySlugs: ["flowers"] },
+        "birthday-gifts"
+      ),
+      true
     );
   });
 

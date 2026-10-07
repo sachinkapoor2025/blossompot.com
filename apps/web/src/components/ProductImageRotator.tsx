@@ -119,9 +119,7 @@ export function ProductImageRotator({
   const frames =
     loadWhenVisible && !seen
       ? gallery.slice(0, 1)
-      : gallery.length > 0
-        ? gallery
-        : [site.logoSrc];
+      : gallery;
 
   if (resolved.length === 0) {
     return (
@@ -154,8 +152,13 @@ export function ProductImageRotator({
           width={1200}
           height={1200}
           onError={(event) => {
-            event.currentTarget.src = site.logoSrc;
-            event.currentTarget.classList.add("object-contain", "bg-white", "p-6");
+            const img = event.currentTarget;
+            const next = frames[i + 1];
+            if (next && img.src !== next) {
+              img.src = next;
+              return;
+            }
+            img.remove();
           }}
         />
       ))}

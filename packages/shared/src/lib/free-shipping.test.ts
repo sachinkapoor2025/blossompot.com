@@ -184,13 +184,21 @@ describe("quoteAddressShipmentShipping", () => {
   });
 
   it("uses sheet shipping for catalog lines and does not add $40 or the $6.99 table", () => {
+    const belowThreshold = quoteAddressShipmentShipping({
+      items: [{ price: 10, quantity: 1, shippingFee: 5, productSlug: "small-tf-sku" }],
+      currency: "USD",
+      usdInrRate: 96,
+    });
+    assert.equal(belowThreshold.totalCharge, 5);
+
     const flower = quoteAddressShipmentShipping({
       items: [{ price: 89.99, quantity: 1, shippingFee: 5, productSlug: "sweet-moments-bouquet" }],
       currency: "USD",
       usdInrRate: 96,
     });
-    assert.equal(flower.totalCharge, 5);
+    assert.equal(flower.totalCharge, 0);
     assert.equal(flower.perVendor[0]?.policy, "catalog");
+    assert.equal(flower.perVendor[0]?.qualifiesForFreeShipping, true);
 
     const cake = quoteAddressShipmentShipping({
       items: [
@@ -204,7 +212,7 @@ describe("quoteAddressShipmentShipping", () => {
       currency: "USD",
       usdInrRate: 96,
     });
-    assert.equal(cake.totalCharge, 15.99);
+    assert.equal(cake.totalCharge, 0);
 
     const freeHamper = quoteAddressShipmentShipping({
       items: [{ price: 107.49, quantity: 1, shippingFee: 0, productSlug: "happy-candy-box" }],
@@ -221,6 +229,6 @@ describe("quoteAddressShipmentShipping", () => {
       currency: "USD",
       usdInrRate: 96,
     });
-    assert.equal(mixedCart.totalCharge, 5 + BELOW_THRESHOLD_SHIPPING_USD);
+    assert.equal(mixedCart.totalCharge, BELOW_THRESHOLD_SHIPPING_USD);
   });
 });

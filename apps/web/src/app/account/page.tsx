@@ -8,6 +8,8 @@ import {
   isUnconfirmedError,
   formatAuthError,
 } from "@/lib/cognito";
+import { isValidPublicEmail } from "@blossompot/shared";
+import { clearFailedLogins, loginLockMessage, recordFailedLogin } from "@/lib/login-throttle";
 import { AccountDashboard } from "@/components/account/AccountDashboard";
 
 type AuthMode = "login" | "register" | "confirm" | "forgot" | "reset";
@@ -93,7 +95,24 @@ function AccountLoginForm() {
       }
 
       if (mode === "login") {
-        await finishLogin();
+        const locked = loginLockMessage();
+        if (locked) {
+          setError(locked);
+          return;
+        }
+        try {
+          await finishLogin();
+          clearFailedLogins();
+        } catch (err) {
+          const lock = recordFailedLogin();
+          if (lock) throw new Error(lock);
+          throw err;
+        }
+        return;
+      }
+
+      if (mode === "register" && !isValidPublicEmail(email)) {
+        setError("Enter a valid email with a domain and TLD (for example name@gmail.com).");
         return;
       }
 

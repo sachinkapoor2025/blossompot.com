@@ -4,12 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { api } from "@/lib/api";
 import { getOrCreateSessionId } from "@/lib/session";
+import { isValidPublicEmail } from "@blossompot/shared";
 
 const DISMISS_KEY = "blossompot_stay_updated_dismissed";
 const SUBSCRIBED_KEY = "blossompot_stay_updated_subscribed";
 
 function isValidEmail(value: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+  return isValidPublicEmail(value);
 }
 
 /**

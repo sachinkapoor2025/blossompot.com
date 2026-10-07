@@ -67,7 +67,7 @@ export const giftSetsMenu = {
     { label: "Flower Bouquets", href: categoryHref("flower-bouquets"), category: "flower-bouquets" },
     { label: "Cakes", href: categoryHref("cakes"), category: "cakes" },
     { label: "Gift Hampers", href: categoryHref("gift-hampers"), category: "gift-hampers" },
-    { label: "Overseas Gifts", href: "/gift-catalog" },
+    { label: "Gift Catalog", href: "/gift-catalog" },
   ],
 } as const;
 
@@ -82,7 +82,7 @@ export const navItems = [
   { label: "Anniversary", href: categoryHref("anniversary-gifts"), category: "anniversary-gifts" },
   { label: "Valentine's", href: categoryHref("valentines-day-gifts"), category: "valentines-day-gifts" },
   { label: "Hampers", href: categoryHref("gift-hampers"), category: "gift-hampers" },
-  { label: "Overseas", href: "/gift-catalog" },
+  { label: "Gift Catalog", href: "/gift-catalog" },
   { label: "Same-Day", href: categoryHref("same-day-gifts"), category: "same-day-gifts" },
   { label: "Remember", href: "/remember" },
 ] as const;
@@ -216,13 +216,9 @@ export function whatsappLinkLabel(fallback = "Chat on WhatsApp"): string {
 }
 
 export function whatsappChatUrl(message = "Hi BlossomPot, I need help with a gift order."): string {
-  const groupUrl = site.whatsappGroupInviteUrl?.trim();
-  if (groupUrl) return groupUrl;
-  const digits = site.whatsapp.replace(/\D/g, "");
-  if (digits) {
-    return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
-  }
-  return `https://wa.me/?text=${encodeURIComponent(message)}`;
+  const digits = (site.whatsapp.replace(/\D/g, "") || DEFAULT_SUPPORT_PHONE_DIGITS).replace(/^0+/, "");
+  const text = message.trim() || "Hi BlossomPot, I need help with a gift order.";
+  return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`;
 }
 
 export const testimonials = [
@@ -280,7 +276,7 @@ export const faqs = [
   },
   {
     q: "Do you offer same-day delivery?",
-    a: "Same-day gift options are available in select US cities when you order before the local cut-off. Look for the Same-Day collection or filter on product pages.",
+    a: "Same-day gift options appear in select cities when you order before the local cut-off. Look for the Same-Day collection or the delivery estimate on the product page for the recipient country.",
   },
   {
     q: "Can I add a gift message?",

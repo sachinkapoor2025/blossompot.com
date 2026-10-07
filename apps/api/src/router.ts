@@ -490,6 +490,7 @@ const routes: Route[] = [
   { method: "POST", pattern: /^\/events$/, handler: events.recordEvent },
   { method: "GET", pattern: /^\/config\/payments$/, handler: config.getPaymentConfig },
   { method: "GET", pattern: /^\/config\/usd-inr-rate$/, handler: config.getUsdInrRate },
+  { method: "GET", pattern: /^\/config\/usd-rates$/, handler: config.getUsdRates },
   { method: "PUT", pattern: /^\/config\/payments$/, handler: config.updatePaymentConfig },
   { method: "GET", pattern: /^\/blog-images$/, handler: config.getBlogImages },
   { method: "PUT", pattern: /^\/admin\/blog-images$/, handler: config.updateBlogImages },

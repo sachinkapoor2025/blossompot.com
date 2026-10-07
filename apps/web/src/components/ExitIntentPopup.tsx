@@ -9,6 +9,7 @@ import {
   DAILY_DEAL_WHEEL_LABELS,
   WELCOME_COUPON_HOURS,
   pickDailyDealDiscount,
+  isValidPublicEmail,
 } from "@blossompot/shared";
 import { site } from "@/lib/site";
 import { getOrCreateSessionId } from "@/lib/session";
@@ -41,7 +42,7 @@ const SEGMENT_COLORS = [
 ];
 
 function isValidEmail(value: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+  return isValidPublicEmail(value);
 }
 
 function segmentIndexForPercent(percent: number): number {

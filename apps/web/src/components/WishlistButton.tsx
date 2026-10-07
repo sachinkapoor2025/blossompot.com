@@ -1,7 +1,10 @@
 "use client";
 
 import type { Product } from "@blossompot/shared";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
 import { useWishlist } from "@/lib/wishlist-context";
+import { wishlistEntryHref } from "@/lib/wishlist-href";
 
 export function WishlistButton({
   product,
@@ -13,6 +16,8 @@ export function WishlistButton({
   variant?: "overlay" | "toolbar";
 }) {
   const { isWishlisted, toggle } = useWishlist();
+  const { user, loading } = useAuth();
+  const router = useRouter();
   const active = isWishlisted(product.slug);
 
   const overlayClass =
@@ -26,6 +31,11 @@ export function WishlistButton({
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (loading) return;
+        if (!user) {
+          router.push(wishlistEntryHref(false));
+          return;
+        }
         toggle(product);
       }}
       aria-label={active ? "Remove from wishlist" : "Add to wishlist"}

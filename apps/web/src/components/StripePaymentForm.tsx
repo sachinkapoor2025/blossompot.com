@@ -67,7 +67,18 @@ export function StripePaymentForm({ clientSecret, returnUrl, amountLabel, onErro
     <div className="border border-slate-200 rounded-lg p-4 bg-slate-50 space-y-4">
       <p className="text-sm font-semibold text-slate-800">Complete card payment</p>
       <Elements stripe={stripePromise} options={{ clientSecret }}>
-        <PaymentElement options={{ layout: "tabs" }} />
+        <PaymentElement
+          options={{
+            layout: "tabs",
+            fields: {
+              billingDetails: {
+                name: "auto",
+                email: "auto",
+                address: "always",
+              },
+            },
+          }}
+        />
         <div className="pt-4">
           <StripePayButton returnUrl={returnUrl} amountLabel={amountLabel} onError={onError} />
         </div>

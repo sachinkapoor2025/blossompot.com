@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { categoryHref } from "@/lib/category-urls";
 import { loadProductsByCategory, toListingCardProducts } from "@/lib/product-loader";
+import { getCatalogProductsByCategory } from "@/lib/catalog-fallback";
+import { productVisibleForDeliveryCountry } from "@blossompot/shared";
 import { HomeCategoryProductScroller } from "@/components/HomeCategoryProductScroller";
 
 export const HOME_PRODUCT_ROW_LIMIT = 8;
@@ -51,6 +53,11 @@ export async function HomeCategoryProductRow({
     products = await loadProductsByCategory(slug, country);
   } catch (err) {
     error = err instanceof Error ? err.message : "This category is temporarily unavailable.";
+  }
+  if (products.length === 0 && !error) {
+    products = getCatalogProductsByCategory(slug).filter((product) =>
+      productVisibleForDeliveryCountry(product, country)
+    );
   }
 
   const cards = toListingCardProducts(products.slice(0, HOME_PRODUCT_ROW_LIMIT));

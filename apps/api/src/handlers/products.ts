@@ -19,6 +19,7 @@ import {
   productInStorefrontCategory,
   productVisibleForDeliveryCountry,
   dedupeStorefrontProducts,
+  coalesceProductImages,
   isGboHiddenFromStorefront,
   NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE,
   productAllowedForNewShopping,
@@ -36,7 +37,22 @@ import { ensureProductInDb } from "../lib/ensure-product";
 import { listBundledCatalogProducts, persistMissingBundledCatalogProducts } from "../lib/blossompot-catalog";
 
 function mergeBundledCatalogProducts(items: Product[], category?: string): Product[] {
-  const bySlug = new Map(items.map((product) => [product.slug, product]));
+  const bundledBySlug = new Map(listBundledCatalogProducts().map((row) => [row.slug, row]));
+  const bySlug = new Map(
+    items.map((product) => {
+      const bundled = bundledBySlug.get(product.slug);
+      const images = coalesceProductImages(product.images, bundled?.images);
+      const tfUsa = (product.tags ?? bundled?.tags ?? []).includes("tf-usa");
+      const next: Product = {
+        ...product,
+        images,
+        ...(tfUsa && bundled?.price != null ? { price: bundled.price } : {}),
+        ...(tfUsa && bundled && "deliveryFee" in bundled ? { deliveryFee: bundled.deliveryFee } : {}),
+        ...(tfUsa ? { couponExcluded: false } : {}),
+      };
+      return [product.slug, next] as const;
+    })
+  );
   const stamp = "2026-09-23T00:00:00.000Z";
   for (const bundled of listBundledCatalogProducts()) {
     if (bySlug.has(bundled.slug)) continue;

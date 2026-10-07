@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { chatRequestSchema, type ChatMessage } from "@blossompot/shared";
 import { buildChatSystemPrompt } from "@/lib/chat/prompt";
-import { fallbackChatReply } from "@/lib/chat/fallback";
+import { fallbackChatReply, isOnTopicGiftQuestion, productRecommendations } from "@/lib/chat/fallback";
 
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 
@@ -69,12 +69,20 @@ export async function POST(req: Request) {
     const { messages, page } = parsed.data;
     const recent = messages.slice(-10);
     const userText = lastUserMessage(recent);
+    const history = isOnTopicGiftQuestion(userText)
+      ? recent
+      : [{ role: "user" as const, content: userText }];
 
     let reply: string;
 
     if (getApiKey()) {
       const systemPrompt = buildChatSystemPrompt(page);
-      reply = await callOpenAI(systemPrompt, recent);
+      reply = await callOpenAI(systemPrompt, history);
+      const wantsProducts = /flower|bouquet|rose|cake|hamper|gift|product|recommend|suggest/i.test(userText);
+      if (wantsProducts && !/\/products\//.test(reply)) {
+        const recs = productRecommendations(userText);
+        if (recs) reply = `${reply.trim()}\n\n${recs}`;
+      }
     } else {
       reply = fallbackChatReply(userText);
     }

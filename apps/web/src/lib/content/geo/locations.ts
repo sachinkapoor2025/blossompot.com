@@ -48,8 +48,8 @@ function normalize(raw: RawLocation): GeoLocation {
   }
   const deliveryWindow =
     raw.type === "state"
-      ? `Same-day options before ${raw.cutoffTimeLocal} local in select ZIPs; otherwise standard USA shipping typically 5–7 business days`
-      : `Same-day before ${raw.cutoffTimeLocal} local in select ${raw.name} ZIPs; otherwise standard USA shipping typically 5–7 business days`;
+      ? `Same-day options before ${raw.cutoffTimeLocal} local in select ZIPs; otherwise standard worldwide shipping, typically 5–7 business days`
+      : `Same-day before ${raw.cutoffTimeLocal} local in select ${raw.name} ZIPs; otherwise standard worldwide shipping, typically 5–7 business days`;
   return {
     type: raw.type,
     slug: raw.slug,
@@ -107,6 +107,26 @@ function topCitySlugs(limit: number): Set<string> {
 
 const TOP_200_CITIES = topCitySlugs(200);
 
+/** Header Cities menu (states through New Jersey, then featured metros). Must stay crawlable. */
+const FEATURED_US_NAV_SLUGS = new Set([
+  "california",
+  "new-york",
+  "texas",
+  "florida",
+  "new-jersey",
+  "los-angeles",
+  "san-francisco",
+  "chicago",
+  "houston",
+  "dallas",
+  "austin",
+  "atlanta",
+  "seattle",
+  "miami",
+  "boston",
+  "denver",
+]);
+
 export function getGeoPublishWave(): GeoPublishWave {
   const raw = (process.env.GEO_PUBLISH_WAVE || "states").toLowerCase();
   if (raw === "all" || raw === "cities-200" || raw === "states") return raw;
@@ -114,6 +134,9 @@ export function getGeoPublishWave(): GeoPublishWave {
 }
 
 export function isGeoPublished(geo: GeoLocation, wave: GeoPublishWave = getGeoPublishWave()): boolean {
+  if (!(geo.stateAbbr || "").trim()) return false;
+  // Header Cities links after New Jersey must resolve even if long-tail hygiene is unfinished.
+  if (FEATURED_US_NAV_SLUGS.has(geo.slug)) return true;
   if (!assertGeoLocationComplete(geo)) return false;
   if (wave === "all") return true;
   if (wave === "states") return geo.type === "state";

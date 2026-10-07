@@ -140,7 +140,7 @@ export function organizationJsonLd() {
         contactType: "customer service",
         email: site.supportEmail,
         ...(site.phone ? { telephone: site.phone } : {}),
-        url: site.whatsapp ? `https://wa.me/${site.whatsapp}` : whatsappChatUrl(),
+        url: whatsappChatUrl(),
         availableLanguage: ["en"],
         areaServed: "US",
       },

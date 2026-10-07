@@ -10,10 +10,11 @@ import { WhyTrustUsSection } from "@/components/WhyTrustUsSection";
 import { HomeFlowerGuideCta } from "@/components/flower-guide/HomeFlowerGuideCta";
 import { HomeCategoryCarousel } from "@/components/HomeCategoryCarousel";
 import { HomeSeoSection } from "@/components/HomeSeoSection";
+import { FaqAccordion } from "@/components/FaqAccordion";
 import { buildHomeCategoryTiles } from "@/lib/home-category-carousel";
 import { JsonLd } from "@/components/JsonLd";
-import { faqs, homeBanners, countriesMenu } from "@/lib/site";
-import { localizeCopyForCountry } from "@/lib/location-seo-urls";
+import { homeBanners, countriesMenu } from "@/lib/site";
+import { faqsForCountry } from "@/lib/faqs-for-country";
 import { getHomepageCatalogData } from "@/lib/homepage-catalog";
 import {
   HOME_PRODUCT_SECTIONS,
@@ -45,7 +46,6 @@ export default function HomePage({
   const reviewsPromise = getGoogleReviews();
   return (
     <div>
-      <JsonLd data={[faqJsonLd(faqs)]} />
       <HomeHero banners={[...homeBanners]} />
       <HomeBrandTaglines />
       <Suspense fallback={<HomeBelowHeroFallback />}>
@@ -73,6 +73,7 @@ async function HomeBelowHero({
 
   return (
     <>
+      <JsonLd data={[faqJsonLd(faqsForCountry(deliveryCountry))]} />
       <Suspense fallback={<HomeBelowHeroFallback />}>
         <HomeCategoryCarouselBlock country={deliveryCountry} />
       </Suspense>
@@ -202,14 +203,7 @@ async function HomeBelowHero({
 
       <section className="max-w-3xl mx-auto px-4 pb-16">
         <h2 className="text-xl font-bold text-primary mb-4">Frequently asked questions</h2>
-        <div className="space-y-4">
-          {faqs.map((f) => (
-            <div key={f.q}>
-              <p className="font-semibold text-primary text-sm">{localizeCopyForCountry(f.q, deliveryCountry)}</p>
-              <p className="text-sm text-slate-600 mt-1">{localizeCopyForCountry(f.a, deliveryCountry)}</p>
-            </div>
-          ))}
-        </div>
+        <FaqAccordion items={faqsForCountry(deliveryCountry)} />
         <Suspense fallback={null}>
           <HomeCategoryCount country={deliveryCountry} />
         </Suspense>

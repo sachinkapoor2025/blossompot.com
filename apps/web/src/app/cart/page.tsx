@@ -113,7 +113,7 @@ function AddonList({ item, format }: { item: CartItem; format: (n: number, c: Di
 
 export default function CartPage() {
   const { cart, loading } = useCart();
-  const { format, convert, displayCurrency, usdInrRate } = useCurrency();
+  const { format, formatDisplay, convert, displayCurrency, usdInrRate } = useCurrency();
   const delivery = useDeliveryLocation();
 
   if (loading) return <div className="p-10 text-center text-slate-600">Loading cart...</div>;
@@ -259,7 +259,7 @@ export default function CartPage() {
             <div className="space-y-3 text-sm border-b border-slate-200 pb-4 mb-5">
               <div className="flex items-center justify-between gap-4">
                 <span className="text-slate-700">Subtotal ({itemCount} {itemCount === 1 ? "item" : "items"})</span>
-                <span className="font-medium text-slate-900">{format(total, currency)}</span>
+                <span className="font-medium text-slate-900">{formatDisplay(total)}</span>
               </div>
               <div className="flex items-center justify-between gap-4">
                 <span className="text-slate-700">Shipping fee</span>
@@ -270,20 +270,20 @@ export default function CartPage() {
                       : "font-bold text-accent"
                   }
                 >
-                  {shippingCharge > 0 ? format(shippingCharge, currency) : "FREE"}
+                  {shippingCharge > 0 ? formatDisplay(shippingCharge) : "FREE"}
                 </span>
               </div>
               {showMixedVendorShippingException ? (
                 <p className="text-xs text-amber-900 bg-amber-50 border border-amber-100 rounded-md px-3 py-2">
                   Your items ship from different sellers, so shipping is checked separately for each
-                  — not on the cart total. International partner gifts are a flat $19. Other sellers:
-                  under $8 is $6.99, $8–$13.99 is $3.99, and above $13.99 is free. Current shipping
-                  fee: {format(shippingCharge, currency)}.
+                  — not on the cart total. International partner gifts use a flat partner shipping
+                  fee. Other sellers use the free-shipping tiers shown below. Current shipping fee:{" "}
+                  {formatDisplay(shippingCharge)}.
                 </p>
               ) : (
                 <FreeShippingNotice
                   quote={shippingQuote}
-                  formatMoney={format}
+                  formatMoney={formatDisplay}
                   currency={currency}
                 />
               )}
@@ -295,7 +295,7 @@ export default function CartPage() {
               )}
               <div className="flex items-center justify-between gap-4 pt-2 border-t border-slate-100">
                 <span className="font-bold text-slate-900">Estimated total</span>
-                <span className="font-bold text-accent text-base">{format(estimatedTotal, currency)}</span>
+                <span className="font-bold text-accent text-base">{formatDisplay(estimatedTotal)}</span>
               </div>
             </div>
 

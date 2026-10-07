@@ -6,6 +6,8 @@ import { resolveImageUrl } from "@/lib/images";
 
 const WISHLIST_KEY = "hr_ecom_wishlist";
 
+export { WISHLIST_PATH, wishlistEntryHref } from "./wishlist-href";
+
 export type WishlistItem = {
   slug: string;
   name: string;

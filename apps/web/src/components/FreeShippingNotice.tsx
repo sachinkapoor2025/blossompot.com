@@ -9,7 +9,7 @@ import type { DisplayCurrency } from "@/lib/currency-context";
 
 type Props = {
   quote: FreeShippingQuote;
-  formatMoney: (amount: number, currency: DisplayCurrency) => string;
+  formatMoney: (amount: number, currency?: DisplayCurrency) => string;
   currency: DisplayCurrency;
   className?: string;
 };
@@ -32,7 +32,8 @@ export function FreeShippingNotice({ quote, formatMoney, currency, className = "
       >
         <p className="font-semibold">Shipping: {formatMoney(quote.charge, currency)}</p>
         <p className="mt-0.5 leading-snug text-slate-600">
-          Flat $19 shipping for these gifts only. Other sellers keep the usual free-shipping tiers.
+          Flat {formatMoney(quote.charge, currency)} shipping for these gifts only. Other sellers keep
+          the usual free-shipping tiers.
         </p>
       </div>
     );

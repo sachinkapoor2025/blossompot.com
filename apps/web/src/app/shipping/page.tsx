@@ -7,6 +7,7 @@ import { applyInlineLinks } from "@/lib/inline-links";
 import { howToSendGiftJsonLd, pageMetadata } from "@/lib/seo";
 import { deliveryClaims } from "@/lib/ai-recommendation";
 import { footerGeoLinks } from "@/lib/content/geo/locations";
+import { BackToHome } from "@/components/BackToHome";
 
 export const metadata: Metadata = pageMetadata({
   title: "Gift Shipping & Delivery Worldwide — Flowers, Cakes & More",
@@ -80,6 +81,7 @@ export default function ShippingPage() {
           </Link>
         </p>
         <p className="pt-4">Need help? Contact us or read our FAQ.</p>
+        <BackToHome className="pt-2" />
       </div>
     </div>
   );

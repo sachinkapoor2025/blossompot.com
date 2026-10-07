@@ -211,6 +211,16 @@ export function mapGboGiftStorefrontCategories(gift: {
   return { categorySlug, additionalCategorySlugs };
 }
 
+const OCCASION_CATEGORY_SLUGS = new Set([
+  "birthday-gifts",
+  "valentines-day-gifts",
+  "anniversary-gifts",
+  "mothers-day-gifts",
+  "wedding-gifts",
+]);
+
+const GENERIC_FLORAL_PRIMARY = new Set(["flowers", "flower-bouquets"]);
+
 export function productInStorefrontCategory(
   product: { categorySlug?: string | null; additionalCategorySlugs?: string[] | null },
   categorySlug: string
@@ -218,7 +228,11 @@ export function productInStorefrontCategory(
   const slug = categorySlug.trim();
   if (!slug) return false;
   if (product.categorySlug === slug) return true;
-  return product.additionalCategorySlugs?.includes(slug) ?? false;
+  if (!product.additionalCategorySlugs?.includes(slug)) return false;
+  if (OCCASION_CATEGORY_SLUGS.has(slug) && GENERIC_FLORAL_PRIMARY.has(product.categorySlug ?? "")) {
+    return false;
+  }
+  return true;
 }
 
 export function gboImageUrl(image?: string | null): string | undefined {

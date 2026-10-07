@@ -20,7 +20,6 @@ import { useCart } from "@/lib/cart-context";
 import { productFaqsForCategory } from "@/lib/content/product-faqs";
 import { useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
 import { deliveryDestinationName } from "@/lib/location-seo-urls";
-import { testimonials } from "@/lib/site";
 import {
   LOW_STOCK_THRESHOLD,
   isFastSelling,
@@ -325,10 +324,10 @@ export function ProductDetailClient({
           ) : catalogShipFee != null ? (
             <p className="mb-4 text-sm text-slate-600">
               Shipping: {catalogShipFee === 0 ? "Free" : format(catalogShipFee, product.currency)}{" "}
-              (charged separately at checkout)
+              in the selected currency (charged separately at checkout)
             </p>
           ) : null}
-          {product.shippingNote ? (
+          {product.shippingNote && catalogShipFee == null ? (
             <p className="mb-4 whitespace-pre-line text-xs text-slate-500">{product.shippingNote}</p>
           ) : null}
 
@@ -365,7 +364,9 @@ export function ProductDetailClient({
           </div>
 
           {isGboProduct ? (
-            <p className="mb-5 text-xs text-slate-600">$19 shipping · Partner fulfillment</p>
+            <p className="mb-5 text-xs text-slate-600">
+              {format(19, "USD")} shipping · Partner fulfillment
+            </p>
           ) : (
             <TrustBadges variant="compact" className="mb-5" />
           )}
@@ -482,7 +483,7 @@ export function ProductDetailClient({
                 : "border-transparent text-slate-500 hover:text-primary"
             }`}
           >
-            Reviews ({testimonials.length})
+            Reviews{product.ratingAggregate?.reviewCount ? ` (${product.ratingAggregate.reviewCount})` : ""}
           </button>
           <button
             type="button"
@@ -587,7 +588,7 @@ export function ProductDetailClient({
 
           </div>
         ) : tab === "reviews" ? (
-          <ProductReviewsPreview />
+          <ProductReviewsPreview productSlug={product.slug} aggregate={product.ratingAggregate} />
         ) : (
           <dl className="space-y-5 max-w-2xl">
             {pageFaqs.map((f) => (

@@ -12,8 +12,6 @@ import {
 import {
   DEFAULT_USD_INR_RATE,
   DEFAULT_USD_RATES,
-  fetchLiveUsdInrRate,
-  fetchLiveUsdRates,
   convertCurrency,
   currencyForCountryCode,
   displayCurrencyLocale,
@@ -41,6 +39,8 @@ interface CurrencyContextValue {
   rateSource: string;
   convert: (amount: number, from: DisplayCurrency | string) => number;
   format: (amount: number, from: DisplayCurrency | string) => string;
+  /** Format an amount that is already in the shopper's display currency (no second conversion). */
+  formatDisplay: (amount: number) => string;
 }
 
 const CurrencyContext = createContext<CurrencyContextValue | null>(null);
@@ -65,6 +65,20 @@ async function fetchUsdInrRate(): Promise<{ rate: number; source: string }> {
   if (sessionCached) return { rate: sessionCached, source: "session-cache" };
 
   try {
+    const res = await fetch("/api/fx-rates", { cache: "no-store" });
+    if (res.ok) {
+      const data = (await res.json()) as { rate?: number; source?: string };
+      if (data.rate && data.rate > 0) {
+        const rate = Math.round(data.rate * 10_000) / 10_000;
+        storeCachedRate(rate);
+        return { rate, source: data.source ?? "fx-proxy" };
+      }
+    }
+  } catch {
+    /* fall through */
+  }
+
+  try {
     const res = await fetch(`${getApiUrl()}/config/usd-inr-rate`, { cache: "force-cache" });
     if (!res.ok) throw new Error("api rate failed");
     const data = (await res.json()) as { rate?: number; source?: string };
@@ -72,17 +86,6 @@ async function fetchUsdInrRate(): Promise<{ rate: number; source: string }> {
     const rate = Math.round(data.rate * 10_000) / 10_000;
     storeCachedRate(rate);
     return { rate, source: data.source ?? "api" };
-  } catch {
-    /* fall through */
-  }
-
-  try {
-    const live = await fetchLiveUsdInrRate();
-    if (live) {
-      const rate = Math.round(live.rate * 10_000) / 10_000;
-      storeCachedRate(rate);
-      return { rate, source: live.source };
-    }
   } catch {
     /* fall through */
   }
@@ -113,11 +116,14 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         const parsed = JSON.parse(cachedFx) as Partial<Record<DisplayCurrency, number>>;
         setUsdRates({ ...DEFAULT_USD_RATES, ...parsed, INR: rate, USD: 1 });
       }
-      const live = await fetchLiveUsdRates();
-      if (live?.rates) {
-        const next = { ...DEFAULT_USD_RATES, ...live.rates, INR: rate, USD: 1 };
-        setUsdRates(next);
-        sessionStorage.setItem(RATES_CACHE_KEY, JSON.stringify(next));
+      const res = await fetch("/api/fx-rates", { cache: "no-store" });
+      if (res.ok) {
+        const live = (await res.json()) as { rates?: Partial<Record<DisplayCurrency, number>> };
+        if (live?.rates) {
+          const next = { ...DEFAULT_USD_RATES, ...live.rates, INR: rate, USD: 1 };
+          setUsdRates(next);
+          sessionStorage.setItem(RATES_CACHE_KEY, JSON.stringify(next));
+        }
       }
     } catch {
       setUsdRates((prev) => ({ ...DEFAULT_USD_RATES, ...prev, INR: rate, USD: 1 }));
@@ -182,21 +188,33 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     [displayCurrency, usdInrRate, usdRates]
   );
 
-  const format = useCallback(
-    (amount: number, from: DisplayCurrency | string) => {
-      const value = convert(amount, from);
-      return new Intl.NumberFormat(displayCurrencyLocale(displayCurrency), {
+  const formatDisplay = useCallback(
+    (amount: number) =>
+      new Intl.NumberFormat(displayCurrencyLocale(displayCurrency), {
         style: "currency",
         currency: displayCurrency,
         maximumFractionDigits: displayCurrency === "INR" ? 0 : 2,
-      }).format(value);
-    },
-    [convert, displayCurrency]
+      }).format(amount),
+    [displayCurrency]
+  );
+
+  const format = useCallback(
+    (amount: number, from: DisplayCurrency | string) => formatDisplay(convert(amount, from)),
+    [convert, formatDisplay]
   );
 
   const value = useMemo(
-    () => ({ displayCurrency, setDisplayCurrency, usdInrRate, rateLoading, rateSource, convert, format }),
-    [displayCurrency, setDisplayCurrency, usdInrRate, rateLoading, rateSource, convert, format]
+    () => ({
+      displayCurrency,
+      setDisplayCurrency,
+      usdInrRate,
+      rateLoading,
+      rateSource,
+      convert,
+      format,
+      formatDisplay,
+    }),
+    [displayCurrency, setDisplayCurrency, usdInrRate, rateLoading, rateSource, convert, format, formatDisplay]
   );
 
   return <CurrencyContext.Provider value={value}>{children}</CurrencyContext.Provider>;

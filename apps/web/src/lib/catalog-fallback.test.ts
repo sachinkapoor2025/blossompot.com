@@ -43,6 +43,13 @@ describe("bundled catalog fallback", () => {
     assert.ok(merged.some((product) => product.slug === "florist-choice-bouquet"));
   });
 
+  it("lists gift-hampers SKUs for the Gift Hampers page", () => {
+    const hampers = getCatalogProductsByCategory("gift-hampers");
+    assert.ok(hampers.length > 0);
+    assert.ok(hampers.some((product) => product.slug === "festive-flavors-collection"));
+    assert.ok(hampers.every((product) => (product.images ?? []).length > 0 && product.price > 0));
+  });
+
   it("connects FNP products to existing storefront categories", () => {
     const bouquets = getCatalogProductsByCategory("flower-bouquets");
     assert.ok(bouquets.some((product) => (product.tags ?? []).includes("fnp-usa-import")));

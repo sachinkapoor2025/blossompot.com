@@ -39,12 +39,12 @@ export function HomeProductCard({
           {fastSelling && <FastSellingBadge className="!text-[10px] sm:!text-xs" />}
         </div>
         <WishlistButton product={product} className="!top-2 !right-2 z-20" />
-        <Link href={`/products/${product.slug}`} className="absolute inset-0 block">
+        <Link href={`/products/${product.slug}`} className="absolute inset-0 z-[1] block" prefetch={false}>
           <ProductImageRotator
             images={product.images ?? []}
             alt={product.name}
             staggerKey={product.slug}
-            className="absolute inset-0 h-full w-full"
+            className="pointer-events-none absolute inset-0 h-full w-full"
             loadWhenVisible={loadGalleryWhenVisible}
           />
         </Link>

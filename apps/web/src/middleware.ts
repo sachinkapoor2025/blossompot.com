@@ -89,6 +89,6 @@ function applyDeliveryCountryCookie(response: NextResponse, request: NextRequest
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml|SVG|PNG|JPG|JPEG|GIF|WEBP|ICO)$).*)",
   ],
 };

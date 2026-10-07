@@ -79,6 +79,7 @@ export * from "./schemas/serviceability";
 export * from "./lib/slug";
 export * from "./lib/fnp-import";
 export * from "./lib/product-addons";
+export * from "./lib/cart-merge";
 export * from "./lib/flash-sale";
 export * from "./schemas/gifting";
 export * from "./lib/gifting-occasions";

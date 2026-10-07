@@ -146,12 +146,12 @@ async function ProductsPageContent({ searchParams }: Props) {
   const productsByCategory = homeCategoryOrder.map((slug) => ({
     slug,
     name: categoryMap.get(slug)?.name ?? slug.replace(/-/g, " "),
-    products: grouped.get(slug) ?? [],
+    products: (grouped.get(slug) ?? []).slice(0, 8),
   }));
   const ungrouped = productsNotShownInSections(
     products,
-    productsByCategory.flatMap((section) => section.products)
-  );
+    homeCategoryOrder.flatMap((slug) => grouped.get(slug) ?? [])
+  ).slice(0, 8);
   const ungroupedTitle = ungrouped.every((product) => product.categorySlug === "rakhi-hampers")
     ? "Rakhi Hampers"
     : "More gifts";

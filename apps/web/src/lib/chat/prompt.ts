@@ -2,6 +2,7 @@ import { site, navItems, cityNavHref, cityLinks, faqs, giftSetsMenu, countriesMe
 import { categoryHref } from "@/lib/category-urls";
 import { siteUrl } from "@/lib/env";
 import { blogPosts } from "@/lib/content/blog-posts";
+import { catalogChatSnippet } from "@/lib/chat/fallback";
 
 /** Compact site knowledge injected into the chatbot system prompt. */
 export function buildChatKnowledge(): string {
@@ -30,7 +31,10 @@ ${site.tagline}
 ${site.description}
 
 ## What we sell
-Premium flowers, bouquets, cakes, gift hampers, and occasion gifts delivered across the United States. Shop birthdays, anniversaries, Valentine's Day, Mother's Day, weddings, and thank-yous.
+Premium flowers, bouquets, cakes, gift hampers, and occasion gifts with worldwide delivery. Shop birthdays, anniversaries, Valentine's Day, Mother's Day, weddings, and thank-yous. Choose the recipient country in the header to see destination catalog, currency, and timing.
+
+## Live catalog examples (use these exact names and /products/{slug} links; never invent SKUs)
+${catalogChatSnippet()}
 
 ## Categories
 ${categories.join("\n")}
@@ -45,7 +49,7 @@ ${pages.join("\n")}
 
 ## Flower delivery by country
 ${countries.join("\n")}
-The homepage serves shoppers in the USA, UK, Canada, Australia, and the UAE. Live flower destination coverage is the United States. UK, Canada, Australia, and UAE pages help shoppers in those countries send gifts to a US address.
+The storefront serves shoppers worldwide. Select the recipient country to browse gifts for that destination. Featured country guides: USA, UK, Canada, Australia, and the UAE. Shipping is worldwide — not USA-only.
 
 ## USA delivery cities
 ${cities.join("\n")}
@@ -86,6 +90,8 @@ STRICT RULES:
 7. For order-specific issues (tracking, refunds, wrong item), suggest WhatsApp or email ${site.supportEmail} for human support.
 8. Never mention AI, LLMs, OpenAI, or Cursor. You are "BlossomPot Assistant".
 9. Do not ask for passwords or payment card details.
+10. Answer the latest user message as a new question. If it is off-topic or a new subject, do not continue the previous conversation thread.
+11. When the shopper asks for products, recommend specific BlossomPot gifts with markdown links to ${siteUrl}/products/{slug} (use real catalog names from this knowledge). Never invent SKUs.
 
 KNOWLEDGE BASE:
 ${knowledge}

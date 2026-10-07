@@ -106,7 +106,7 @@ export function HomeCategoryProductScroller({
         tabIndex={0}
         aria-label={`${title} products`}
         onKeyDown={onKeyDown}
-        className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth overscroll-x-contain pb-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary [scrollbar-width:thin]"
+        className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth overscroll-x-contain touch-pan-x pb-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary [scrollbar-width:thin] [-webkit-overflow-scrolling:touch]"
       >
         {visible.products.map((product) => (
           <li key={product.slug} className={`snap-start shrink-0 self-stretch ${CARD_WIDTH}`}>

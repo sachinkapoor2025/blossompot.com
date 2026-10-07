@@ -9,10 +9,15 @@ import {
 import { docClient, CONFIG_TABLE, now } from "../lib/db";
 import { ok, badRequest, forbidden } from "../lib/response";
 import { getAuth } from "../lib/auth";
-import { getLiveUsdInrRate } from "../lib/exchange-rate";
+import { getLiveUsdInrRate, getLiveUsdRates } from "../lib/exchange-rate";
 
 export async function getUsdInrRate(_event: APIGatewayProxyEventV2) {
   const quote = await getLiveUsdInrRate();
+  return ok(quote);
+}
+
+export async function getUsdRates(_event: APIGatewayProxyEventV2) {
+  const quote = await getLiveUsdRates();
   return ok(quote);
 }
 

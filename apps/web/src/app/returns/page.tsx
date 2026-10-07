@@ -26,7 +26,7 @@ const returnFaqs = [
 export const metadata: Metadata = pageMetadata({
   title: "Returns & Satisfaction Guarantee",
   description:
-    "BlossomPot 48-hour satisfaction guarantee: free replacement or full refund for damaged, wilted, or incorrect flowers, cakes, and hampers delivered in the USA.",
+    "BlossomPot 48-hour satisfaction guarantee: free replacement or full refund for damaged, wilted, or incorrect flowers, cakes, and hampers with worldwide delivery.",
   path: "/returns",
 });
 
@@ -118,8 +118,9 @@ export default function ReturnsPage() {
 
         <h2 className="text-xl font-bold text-primary">Delivery Issues &amp; Delays</h2>
         <p>
-          Most orders arrive within the estimated 5–7 business day window (same-day delivery is available in
-          select cities). If your gift hasn&apos;t arrived within that time:
+          Most orders follow the delivery window shown at checkout (often 5–7 business days after dispatch;
+          same-day is available in select cities when the local cut-off allows). If your gift hasn&apos;t
+          arrived within that time:
         </p>
         <ul className="list-disc pl-5 space-y-2">
           <li>

@@ -36,7 +36,7 @@ export function PaymentMethodPicker({
   checkoutCurrency?: "USD" | "INR";
 }) {
   const allOptions: { id: PaymentMethod; label: string; icon: ReactNode }[] = [
-    { id: "razorpay", label: "Pay with Razorpay", icon: <RazorpayIcon /> },
+    { id: "razorpay", label: "Pay with UPI / Razorpay", icon: <RazorpayIcon /> },
     { id: "stripe", label: "Pay with Stripe", icon: <StripeIcon /> },
   ];
 

@@ -30,8 +30,8 @@ export function resolveProductImageUrl(url: string | undefined | null, cdnBase?:
 
   const cdn = getProductCdnBase(cdnBase);
 
-  // TF USA photos ship with the Next app under public/uploads/tf-usa — they are not on CloudFront.
-  // Keep (or restore) a same-origin path so listings/PDP/admin all load the files Amplify deploys.
+  // TF USA photos ship with the Next app under public/uploads/tf-usa. Keep a same-origin
+  // path so Amplify-hosted files load; callers may also rewrite to the CDN when needed.
   const tfUsa = trimmed.match(/\/uploads\/tf-usa\/(.+)$/i);
   if (tfUsa) return `/uploads/tf-usa/${tfUsa[1]}`;
   if (/^uploads\/tf-usa\//i.test(trimmed)) return `/${trimmed.replace(/^\/+/, "")}`;

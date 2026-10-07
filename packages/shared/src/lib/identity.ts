@@ -15,11 +15,30 @@ export function normalizeName(name?: string | null): string | undefined {
   return trimmed || undefined;
 }
 
+/**
+ * Public email for registration / newsletter / checkout.
+ * Requires a domain with a real TLD (rejects `111@cc` and similar).
+ */
+export function isValidPublicEmail(email?: string | null): boolean {
+  const trimmed = String(email ?? "").trim();
+  if (!trimmed || trimmed.length > 254) return false;
+  if (/\s/.test(trimmed)) return false;
+  const at = trimmed.lastIndexOf("@");
+  if (at < 1 || at === trimmed.length - 1) return false;
+  const local = trimmed.slice(0, at);
+  const domain = trimmed.slice(at + 1);
+  if (!local || local.length > 64) return false;
+  if (local.startsWith(".") || local.endsWith(".") || local.includes("..")) return false;
+  if (!/^[A-Za-z0-9._%+-]+$/.test(local)) return false;
+  if (!/^[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(domain)) return false;
+  if (domain.startsWith("-") || domain.endsWith("-") || domain.includes("..")) return false;
+  return true;
+}
+
 /** Lowercase + trim email; returns undefined if not a plausible email. */
 export function normalizeEmail(email?: string | null): string | undefined {
   const trimmed = email?.trim().toLowerCase();
-  if (!trimmed || !trimmed.includes("@")) return undefined;
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return undefined;
+  if (!trimmed || !isValidPublicEmail(trimmed)) return undefined;
   return trimmed;
 }
 

@@ -190,7 +190,7 @@ export function ChatWidget() {
           <div className="flex items-center justify-between gap-2 bg-primary px-4 py-3 border-b border-white/10">
             <div className="min-w-0">
               <p className="font-semibold text-white text-sm">BlossomPot Assistant</p>
-              <p className="text-xs text-white/60 truncate">Gift delivery help · USA shipping</p>
+              <p className="text-xs text-white/60 truncate">Gift delivery help · Worldwide shipping</p>
             </div>
             <div className="flex items-center gap-1 shrink-0">
               <button

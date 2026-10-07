@@ -21,10 +21,11 @@ import {
 import { requestSeoPath } from "@/lib/request-seo-path";
 import { ListingPageSkeleton } from "@/components/route-skeletons";
 import { loadProductsByCategory, toListingCardProducts } from "@/lib/product-loader";
+import { getCatalogProductsByCategory } from "@/lib/catalog-fallback";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { categoryOrder } from "@/lib/site";
 import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, pageMetadata } from "@/lib/seo";
-import { type Product, type Category } from "@blossompot/shared";
+import { type Product, type Category, productVisibleForDeliveryCountry } from "@blossompot/shared";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -118,6 +119,11 @@ async function CategoryPageContent({ params, searchParams }: Props) {
   } catch {
     products = await loadProductsByCategory(slug, deliveryCountry);
   }
+  if (products.length === 0) {
+    products = getCatalogProductsByCategory(slug).filter((product) =>
+      productVisibleForDeliveryCountry(product, deliveryCountry)
+    );
+  }
 
   const name = category?.name ?? slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   const headingName: Record<string, string> = {
@@ -180,7 +186,7 @@ async function CategoryPageContent({ params, searchParams }: Props) {
         <ProductGrid products={toListingCardProducts(products)} sort={sort} />
       ) : (
         <p className="text-slate-500">
-          Products loading soon.{" "}
+          No gifts in this collection for {deliveryCountryName} yet.{" "}
           <Link href={shopHref} className="text-nav hover:underline">
             Browse all gifts
           </Link>

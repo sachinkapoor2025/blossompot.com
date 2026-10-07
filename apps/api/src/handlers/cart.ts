@@ -23,12 +23,13 @@ import {
   isGboHiddenFromStorefront,
   productAllowedForNewShopping,
   shoppingCountryRejection,
+  mergeCartItems,
   type Cart,
   type CartItem,
 } from "@blossompot/shared";
 import { docClient, CARTS_TABLE, PRODUCTS_TABLE, now, ttlInDays } from "../lib/db";
 import { ok, badRequest, unauthorized } from "../lib/response";
-import { getUserOrSessionKey, getSessionId } from "../lib/auth";
+import { getAuth, getUserOrSessionKey, getSessionId } from "../lib/auth";
 import { cartAvailabilityLocation, evaluateProductsForLocation } from "./serviceability";
 import { formatPostalDisplay } from "@blossompot/shared";
 import { resolveProductImageUrl } from "../lib/images";
@@ -94,18 +95,43 @@ async function saveCart(
   cart.updatedAt = timestamp;
 }
 
-export async function getCartHandler(event: APIGatewayProxyEventV2) {
+async function loadCartForRequest(event: APIGatewayProxyEventV2): Promise<{
+  userKey: string;
+  cart: Cart & { createdAt?: string };
+}> {
+  const auth = getAuth(event);
+  const sessionId = getSessionId(event);
+  if (auth && sessionId && auth.userId !== sessionId) {
+    const [accountCart, guestCart] = await Promise.all([getCart(auth.userId), getCart(sessionId)]);
+    if ((guestCart.items ?? []).length > 0) {
+      const items = mergeCartItems(accountCart.items ?? [], guestCart.items ?? []);
+      const merged = { ...accountCart, items };
+      await saveCart(auth.userId, merged, sessionId);
+      await saveCart(sessionId, { items: [], updatedAt: now(), createdAt: guestCart.createdAt }, sessionId);
+      return { userKey: auth.userId, cart: merged };
+    }
+    return { userKey: auth.userId, cart: accountCart };
+  }
   const userKey = getUserOrSessionKey(event);
-  if (!userKey) return unauthorized("Session or auth required");
+  if (!userKey) throw new Error("UNAUTH");
+  return { userKey, cart: await getCart(userKey) };
+}
 
-  const raw = await getCart(userKey);
+export async function getCartHandler(event: APIGatewayProxyEventV2) {
+  let loaded: { userKey: string; cart: Cart & { createdAt?: string } };
+  try {
+    loaded = await loadCartForRequest(event);
+  } catch {
+    return unauthorized("Session or auth required");
+  }
+  const raw = loaded.cart;
   const items = (raw.items ?? []).map((item) => ({
     ...item,
     image: item.image ? resolveProductImageUrl(item.image) : item.image,
   }));
   // Persist backfilled lineIds so subsequent updates work.
   if ((raw.items ?? []).some((i) => !i.lineId)) {
-    await saveCart(userKey, { ...raw, items }, getSessionId(event));
+    await saveCart(loaded.userKey, { ...raw, items }, getSessionId(event));
   }
   const country = event.queryStringParameters?.country ?? event.queryStringParameters?.countryCode;
   const postal = event.queryStringParameters?.postalCode ?? event.queryStringParameters?.zip;
@@ -153,8 +179,15 @@ export async function getCartHandler(event: APIGatewayProxyEventV2) {
 }
 
 export async function addToCart(event: APIGatewayProxyEventV2) {
-  const userKey = getUserOrSessionKey(event);
-  if (!userKey) return unauthorized("Session or auth required");
+  let userKey: string;
+  let cart: Cart & { createdAt?: string };
+  try {
+    const loaded = await loadCartForRequest(event);
+    userKey = loaded.userKey;
+    cart = loaded.cart;
+  } catch {
+    return unauthorized("Session or auth required");
+  }
 
   const body = JSON.parse(event.body ?? "{}");
   const parsed = addToCartSchema.safeParse({
@@ -178,15 +211,12 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
     return badRequest(GBO_STOREFRONT_UNAVAILABLE_MESSAGE);
   }
 
-  const [productResult, cart] = await Promise.all([
-    docClient.send(
-      new GetCommand({
-        TableName: PRODUCTS_TABLE,
-        Key: { PK: productKeys.pk(parsed.data.productSlug), SK: productKeys.sk() },
-      })
-    ),
-    getCart(userKey),
-  ]);
+  const productResult = await docClient.send(
+    new GetCommand({
+      TableName: PRODUCTS_TABLE,
+      Key: { PK: productKeys.pk(parsed.data.productSlug), SK: productKeys.sk() },
+    })
+  );
 
   // Storefront may show catalog fallback before DynamoDB import — upsert on first add.
   let productItem = productResult.Item as Record<string, unknown> | undefined;
@@ -290,7 +320,8 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
       ? product.price
       : applyCompetitivePriceReduction(product.price, product.currency);
   const couponExcluded =
-    Boolean(product.couponExcluded) || isFlashComboProduct(product.slug);
+    isFlashComboProduct(product.slug) ||
+    (Boolean(product.couponExcluded) && !(product.tags ?? []).includes("tf-usa"));
 
   const existingIdx = cart.items.findIndex(
     (i) =>
