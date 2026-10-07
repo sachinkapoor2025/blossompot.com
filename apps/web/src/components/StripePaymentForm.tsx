@@ -74,7 +74,7 @@ export function StripePaymentForm({ clientSecret, returnUrl, amountLabel, onErro
               billingDetails: {
                 name: "auto",
                 email: "auto",
-                address: "always",
+                address: "auto",
               },
             },
           }}
