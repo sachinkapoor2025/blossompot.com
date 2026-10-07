@@ -1,13 +1,15 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { storefrontCurrenciesForDelivery } from "@blossompot/shared";
+import { displayCurrenciesForCountry } from "@blossompot/shared";
 import { useCurrency, type DisplayCurrency } from "@/lib/currency-context";
+import { useStorefrontCountryIso } from "@/lib/use-storefront-country";
 
 export function CurrencySwitcher() {
   const pathname = usePathname();
+  const countryIso = useStorefrontCountryIso();
   const { displayCurrency, setDisplayCurrency } = useCurrency();
-  const options = storefrontCurrenciesForDelivery();
+  const options = displayCurrenciesForCountry(countryIso || "US");
 
   if (pathname.startsWith("/admin") || pathname.startsWith("/ses-email")) return null;
 
@@ -19,7 +21,7 @@ export function CurrencySwitcher() {
     return null;
   }
 
-  const value = options.includes(displayCurrency) ? displayCurrency : "USD";
+  const value = options.includes(displayCurrency) ? displayCurrency : options[0];
 
   return (
     <div

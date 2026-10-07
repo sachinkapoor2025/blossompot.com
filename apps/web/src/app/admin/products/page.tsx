@@ -563,7 +563,14 @@ export default function AdminProductsPage() {
           {submitLabel}
         </button>
         {editing && (
-          <button type="button" onClick={resetForm} className="border px-4 py-2 rounded-lg text-sm">
+          <button
+            type="button"
+            onClick={() => {
+              resetForm();
+              setTab("list");
+            }}
+            className="border px-4 py-2 rounded-lg text-sm"
+          >
             Cancel
           </button>
         )}
@@ -575,31 +582,9 @@ export default function AdminProductsPage() {
     <div className="max-w-6xl mx-auto px-4 py-10 space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Products</h1>
-        <div className="flex gap-2">
-          <Link href="/admin/products/new" className="px-4 py-2 rounded-lg text-sm border">
-            Add Product
-          </Link>
-          <button
-            type="button"
-            onClick={() => {
-              resetForm();
-              setTab("list");
-            }}
-            className={`px-4 py-2 rounded-lg text-sm ${tab === "list" ? "bg-nav text-white" : "border"}`}
-          >
-            All products
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              resetForm();
-              setTab("create");
-            }}
-            className={`px-4 py-2 rounded-lg text-sm ${tab === "create" ? "bg-nav text-white" : "border"}`}
-          >
-            {editing ? "Edit product" : "Add product"}
-          </button>
-        </div>
+        <Link href="/admin/products/new" className="px-4 py-2 rounded-lg text-sm border">
+          Add Product
+        </Link>
       </div>
 
       {missingDimsCount > 0 && (

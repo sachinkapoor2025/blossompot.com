@@ -11,7 +11,7 @@ import { pageMetadata } from "@/lib/seo";
 import { requestSeoPath } from "@/lib/request-seo-path";
 import { loadProducts, toListingCardProducts } from "@/lib/product-loader";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
-import { groupStorefrontProductsOnce, type Product, type Category } from "@blossompot/shared";
+import { groupStorefrontProductsOnce, noProductsForDeliveryCountryMessage, type Product, type Category } from "@blossompot/shared";
 import { categoryHref } from "@/lib/category-urls";
 import { localizeShopCopy, localizeShopText, locationShopHeading } from "@/lib/location-seo-urls";
 import { homeCategoryOrder, orderCategories } from "@/lib/site";
@@ -201,7 +201,11 @@ async function ProductsPageContent({ searchParams }: Props) {
       )}
 
       {products.length === 0 ? (
-        <p className="text-slate-600">No products found. Try another category or search term.</p>
+        <p className="text-slate-600">
+          {!search && deliveryCountry
+            ? noProductsForDeliveryCountryMessage(deliveryCountry)
+            : "No products found. Try another category or search term."}
+        </p>
       ) : showGrouped ? (
         <div className="space-y-10">
           {productsByCategory.map((section) =>

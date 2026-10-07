@@ -10,6 +10,7 @@ import {
   isCatalogCountryEnabled,
   normalizeCatalogCountries,
   readStoredCatalogCountries,
+  noProductsForDeliveryCountryMessage,
   resolveEnabledShoppingCountry,
   shoppingCountryRejection,
   SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE,
@@ -21,7 +22,7 @@ import {
   vendorCoversShoppingCountryWithoutArea,
 } from "./catalog-vendors";
 import { productVisibleForDeliveryCountry } from "./gbo";
-import { defaultOrangeCountyAreas } from "./serviceability";
+import { defaultOrangeCountyAreas, productKeptForServiceableVendors } from "./serviceability";
 
 describe("catalog country defaults", () => {
   it("uses USA only when the config item is missing", () => {
@@ -225,5 +226,33 @@ describe("customer country resolution", () => {
       vendorCoversShoppingCountryWithoutArea(vendor, "GB", "denied"),
       false
     );
+  });
+
+  it("shows nothing for Serbia until a vendor delivers there", () => {
+    const enabled = [
+      { countryCode: "US", enabled: true },
+      { countryCode: "RS", enabled: true },
+    ];
+    assert.equal(resolveEnabledShoppingCountry("RS", enabled), "RS");
+    const defaults = [VENDOR_BLOSSOMPOT, VENDOR_FNP, VENDOR_ORANGE_COUNTY, VENDOR_GBO].map((slug) =>
+      defaultCatalogVendor(slug)
+    );
+    const fnp = { slug: "fnp-cake", vendorSlug: VENDOR_FNP };
+    const owned = { slug: "owned-rose", vendorSlug: VENDOR_BLOSSOMPOT };
+    const orange = { slug: "oc-hamper", vendorSlug: VENDOR_ORANGE_COUNTY };
+    assert.equal(productAllowedForNewShopping(fnp, "RS", defaults).available, false);
+    assert.equal(productAllowedForNewShopping(owned, "RS", defaults).available, false);
+    assert.equal(productAllowedForNewShopping(orange, "RS", defaults).available, false);
+    assert.equal(productAllowedForNewShopping(fnp, "RS", defaults).reason, "country_not_allowed");
+    const serbiaVendor = defaults.map((vendor) =>
+      vendor.vendorSlug === VENDOR_BLOSSOMPOT ? { ...vendor, deliveryCountries: ["US", "RS"] } : vendor
+    );
+    assert.equal(productAllowedForNewShopping(owned, "RS", serbiaVendor).available, true);
+    assert.equal(productAllowedForNewShopping(fnp, "RS", serbiaVendor).available, false);
+    assert.equal(productKeptForServiceableVendors(owned, [], true, "RS"), false);
+    assert.equal(productKeptForServiceableVendors(owned, [VENDOR_BLOSSOMPOT], true, "RS"), true);
+    assert.equal(productKeptForServiceableVendors(fnp, [VENDOR_BLOSSOMPOT], true, "RS"), false);
+    assert.equal(productKeptForServiceableVendors(owned, [], true, "US"), true);
+    assert.equal(noProductsForDeliveryCountryMessage("RS"), "No products are currently available for delivery to Serbia.");
   });
 });

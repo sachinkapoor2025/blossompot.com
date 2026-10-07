@@ -55,4 +55,13 @@ describe("bundled catalog fallback", () => {
     assert.ok(merged.length >= 771);
     assert.ok(merged.some((product) => product.slug === "perfectly-pastel-premium"));
   });
+
+  it("does not inject US-only bundled products for Serbia", () => {
+    const merged = mergeProductsForCountry([], "RS");
+    assert.equal(merged.length, 0);
+    assert.equal(
+      merged.some((product) => product.slug === "perfectly-pastel-premium"),
+      false
+    );
+  });
 });

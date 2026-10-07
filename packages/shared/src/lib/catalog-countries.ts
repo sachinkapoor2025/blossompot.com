@@ -21,6 +21,13 @@ export const NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE =
 
 export const SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE = "Delivery is not available in that country.";
 
+/** Listing empty state when no enabled vendor delivers to the selected country. */
+export function noProductsForDeliveryCountryMessage(countryCode: string): string {
+  const iso = countryCode.trim().toUpperCase();
+  const name = getDeliveryCountry(iso)?.countryName || iso || "this country";
+  return `No products are currently available for delivery to ${name}.`;
+}
+
 /**
  * Customer country for shopping.
  * A globally enabled code is kept. Otherwise USA when it is enabled, otherwise the first enabled country.

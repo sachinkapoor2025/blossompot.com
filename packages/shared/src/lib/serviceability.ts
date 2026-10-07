@@ -245,6 +245,32 @@ export function isProductDeliverableToLocation(
   return checkVendorServiceability(vendorSlug, areas, location, active);
 }
 
+/**
+ * Location list filter. A product is kept or dropped from its own vendor only.
+ * An empty vendor list does not wipe the catalog. Gift Baskets Overseas is not exempt.
+ */
+export function productKeptForServiceableVendors(
+  product: {
+    vendorSlug?: string | null;
+    internationalDelivery?: boolean;
+    slug?: string | null;
+    sku?: string | null;
+  },
+  vendorSlugs: readonly string[],
+  applyVendorFilter: boolean,
+  countryCode?: string
+): boolean {
+  if (!applyVendorFilter) return true;
+  if (vendorSlugs.length === 0) {
+    const iso = countryCode?.trim().toUpperCase();
+    // A finished non-US check with no covering vendor means nothing can be shown.
+    // An empty US list still keeps the catalog, matching the existing location filter.
+    if (iso && iso !== "US") return false;
+    return true;
+  }
+  return vendorSlugs.includes(fulfillmentVendorSlug(product));
+}
+
 /** Built-in nationwide US coverage for BlossomPot catalog SKUs (no marketplace vendor). */
 export function defaultBlossompotAreas(): VendorServiceArea[] {
   return [

@@ -1,6 +1,9 @@
 import {
+  CATALOG_VENDOR_SLUGS,
+  defaultCatalogVendor,
   isSampleCatalogProduct,
   productAllowsAddons,
+  productAllowedForNewShopping,
   productVisibleForDeliveryCountry,
   resolveProductImageUrls,
   stripVendorPrivateFields,
@@ -108,8 +111,24 @@ export function mergeProductsPreferExisting(
   }
   return dedupeStorefrontProducts([...bySlug.values()]);
 }
+const DEFAULT_BUNDLED_VENDORS = CATALOG_VENDOR_SLUGS.map((slug) => defaultCatalogVendor(slug));
+
+/**
+ * Bundled JSON is not a second catalog. It may fill a missing SKU only when that
+ * product's built-in vendor delivers to the country. Live admin delivery countries
+ * stay on the product API, which already filtered its own rows.
+ */
+function bundledProductAllowedForCountry(product: Product, country: string): boolean {
+  if (!productVisibleForDeliveryCountry(product, country)) return false;
+  const decision = productAllowedForNewShopping(product, country, DEFAULT_BUNDLED_VENDORS);
+  if (decision.available) return true;
+  if (decision.reason !== "gbo_storefront_disabled") return false;
+  const record = DEFAULT_BUNDLED_VENDORS.find((vendor) => vendor.vendorSlug === decision.vendorSlug);
+  return Boolean(record?.deliveryCountries.includes(country.trim().toUpperCase()));
+}
+
 export function getCatalogProductsForCountry(country: string): Product[] {
-  return getCatalogProducts().filter((product) => productVisibleForDeliveryCountry(product, country));
+  return getCatalogProducts().filter((product) => bundledProductAllowedForCountry(product, country));
 }
 
 /** API/GBO prices win for shared slugs; fill in published bundled catalog SKUs that Dynamo never imported. */

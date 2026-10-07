@@ -16,6 +16,7 @@ import { api } from "./api";
 import {
   getCatalogProduct,
   getCatalogProducts,
+  getCatalogProductsForCountry,
   mergeProductsPreferExisting,
 } from "./catalog-fallback";
 import { toListingCardProducts } from "./listing-card";
@@ -133,15 +134,14 @@ function catalogListingExtras(params?: {
   search?: string;
   country?: string;
 }): Product[] {
-  let extras = getCatalogProducts().filter(isStorefrontVisible);
+  let extras = (
+    params?.country ? getCatalogProductsForCountry(params.country) : getCatalogProducts()
+  ).filter(isStorefrontVisible);
   if (params?.category) {
     extras = extras.filter((product) => productInStorefrontCategory(product, params.category as string));
   }
   if (params?.search) {
     extras = extras.filter((product) => productMatchesSearchQuery(product, params.search as string));
-  }
-  if (params?.country) {
-    extras = extras.filter((product) => productVisibleForDeliveryCountry(product, params.country as string));
   }
   return extras;
 }
