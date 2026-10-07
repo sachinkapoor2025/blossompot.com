@@ -176,10 +176,10 @@ describe("storefront regression", () => {
   it("keeps shopping in the United States and Orange County ZIP prefixes", () => {
     assert.equal(clampShoppingCountry("GB"), "US");
     assert.equal(clampShoppingCountry("CA"), SHOPPING_COUNTRY_ISO);
-    assert.deepEqual(
-      shoppingCountryOptions().map((country) => country.countryCode),
-      ["US"]
-    );
+    const selector = shoppingCountryOptions().map((country) => country.countryCode);
+    for (const code of ["US", "GB", "CA", "AU", "AE"]) {
+      assert.equal(selector.includes(code), true, code);
+    }
     assert.deepEqual(
       defaultOrangeCountyAreas().map((area) => area.postalPrefix),
       ["926", "927", "928", "906", "907"]

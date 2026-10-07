@@ -1,5 +1,5 @@
 import { configKeys } from "../db/keys";
-import { getDeliveryCountry } from "./postal-countries";
+import { enabledDeliveryCountries, getDeliveryCountry } from "./postal-countries";
 import {
   catalogCountriesConfigSchema,
   type CatalogCountriesConfig,
@@ -14,6 +14,34 @@ export const catalogCountryKeys = configKeys.catalogCountries;
  */
 export function defaultCatalogCountries(): CatalogCountrySetting[] {
   return [{ countryCode: "US", enabled: true }];
+}
+
+/**
+ * Customer Countries / Cities menus and shopping gates.
+ * Always includes the full curated delivery catalog (`DELIVERY_COUNTRIES`)
+ * so a truncated admin save cannot hide previously published markets.
+ */
+export function catalogCountriesForStorefront(
+  stored: readonly CatalogCountrySetting[] = []
+): CatalogCountrySetting[] {
+  const rows: CatalogCountrySetting[] = enabledDeliveryCountries().map((country) => ({
+    countryCode: country.countryCode,
+    enabled: true,
+  }));
+  const seen = new Set(rows.map((row) => row.countryCode));
+  for (const row of stored) {
+    const code = row.countryCode.trim().toUpperCase();
+    if (!row.enabled || seen.has(code) || !getDeliveryCountry(code)) continue;
+    seen.add(code);
+    rows.push({ countryCode: code, enabled: true });
+  }
+  return rows;
+}
+
+export function storefrontShoppingCountryCodes(
+  stored: readonly CatalogCountrySetting[] = []
+): string[] {
+  return catalogCountriesForStorefront(stored).map((row) => row.countryCode);
 }
 
 export const NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE =

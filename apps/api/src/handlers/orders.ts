@@ -36,6 +36,7 @@ import {
   formatPostalDisplay,
   fulfillmentVendorSlug,
   shoppingCountryRejection,
+  storefrontShoppingCountryCodes,
   SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE,
   GBO_STOREFRONT_HOLD_ERROR,
   gboCartLineUnavailableMessage,
@@ -276,9 +277,7 @@ export async function checkout(event: APIGatewayProxyEventV2) {
     (shipment.shippingAddress.country ?? "").trim()
   );
   const storedCountries = await loadCatalogCountries();
-  const enabledCountryCodes = storedCountries.countries
-    .filter((country) => country.enabled)
-    .map((country) => country.countryCode);
+  const enabledCountryCodes = storefrontShoppingCountryCodes(storedCountries.countries);
   if (
     shoppingCountryRejection(destCountry, enabledCountryCodes) ||
     shipmentCountries.some((country) => shoppingCountryRejection(country, enabledCountryCodes))

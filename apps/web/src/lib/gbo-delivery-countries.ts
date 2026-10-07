@@ -2,25 +2,29 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
-  SHOPPING_COUNTRY_ISO,
+  catalogCountriesForStorefront,
+  enabledDeliveryCountries,
   getDeliveryCountry,
   type DeliveryCountryConfig,
 } from "@blossompot/shared";
 
-/** Sync fallback before the global country list loads. Partner countries are not merged in. */
+/** Full curated delivery catalog — the previous Countries / Cities source list. */
 export function shoppingCountryOptions(): DeliveryCountryConfig[] {
-  const unitedStates = getDeliveryCountry(SHOPPING_COUNTRY_ISO);
-  return unitedStates ? [unitedStates] : [];
+  return enabledDeliveryCountries();
 }
 
-/** Customer selector options: only countries present in the global enabled list. */
+/** Customer selector: full catalog, plus any extra known countries from the API. */
 export function shoppingCountriesFromGlobal(
   rows: readonly { countryCode?: string | null }[]
 ): DeliveryCountryConfig[] {
-  const seen = new Set<string>();
+  const stored = rows.flatMap((row) => {
+    const countryCode = (row.countryCode ?? "").trim().toUpperCase();
+    return countryCode ? [{ countryCode, enabled: true }] : [];
+  });
   const countries: DeliveryCountryConfig[] = [];
-  for (const row of rows) {
-    const country = getDeliveryCountry(row.countryCode ?? "");
+  const seen = new Set<string>();
+  for (const row of catalogCountriesForStorefront(stored)) {
+    const country = getDeliveryCountry(row.countryCode);
     if (!country || seen.has(country.countryCode)) continue;
     seen.add(country.countryCode);
     countries.push(country);

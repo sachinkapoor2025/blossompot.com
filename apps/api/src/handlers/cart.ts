@@ -23,6 +23,7 @@ import {
   isGboHiddenFromStorefront,
   productAllowedForNewShopping,
   shoppingCountryRejection,
+  storefrontShoppingCountryCodes,
   mergeCartItems,
   type Cart,
   type CartItem,
@@ -136,9 +137,7 @@ export async function getCartHandler(event: APIGatewayProxyEventV2) {
   const country = event.queryStringParameters?.country ?? event.queryStringParameters?.countryCode;
   const postal = event.queryStringParameters?.postalCode ?? event.queryStringParameters?.zip;
   const storedCountries = await loadCatalogCountries();
-  const enabledCountryCodes = storedCountries.countries
-    .filter((row) => row.enabled)
-    .map((row) => row.countryCode);
+  const enabledCountryCodes = storefrontShoppingCountryCodes(storedCountries.countries);
   const shoppingLocation = cartAvailabilityLocation(country, postal, enabledCountryCodes);
   if (shoppingLocation && items.length) {
     const [evals, registry] = await Promise.all([
@@ -199,9 +198,7 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
     return badRequest(parsed.error.issues[0]?.message ?? "Could not add this gift to your cart");
   }
   const storedCountries = await loadCatalogCountries();
-  const enabledCountryCodes = storedCountries.countries
-    .filter((row) => row.enabled)
-    .map((row) => row.countryCode);
+  const enabledCountryCodes = storefrontShoppingCountryCodes(storedCountries.countries);
   const deliveryRejection = shoppingCountryRejection(parsed.data.deliveryCountry, enabledCountryCodes);
   if (deliveryRejection) return badRequest(deliveryRejection);
   if (enabledCountryCodes.length === 0) {

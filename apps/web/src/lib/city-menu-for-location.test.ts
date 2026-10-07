@@ -23,5 +23,18 @@ describe("US city nav list", () => {
       gb.links.some((link) => link.slug === "los-angeles"),
       false
     );
+    assert.ok(gb.links.some((link) => link.slug === "london" || link.slug === "united-kingdom"));
+    const au = cityMenuForCountry("AU");
+    assert.ok(au.links.some((link) => /south-wales|victoria|queensland|sydney|melbourne/i.test(link.slug)));
+    assert.equal(
+      au.links.some((link) => link.slug === "los-angeles"),
+      false
+    );
+    const ca = cityMenuForCountry("CA");
+    assert.ok(ca.links.some((link) => /ontario|toronto|british-columbia|vancouver/i.test(link.slug)));
+    assert.equal(
+      ca.links.some((link) => link.slug === "los-angeles"),
+      false
+    );
   });
 });

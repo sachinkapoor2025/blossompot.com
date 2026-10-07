@@ -21,24 +21,22 @@ const documentHeaders = headerBag({
 });
 
 describe("shopping country options", () => {
-  it("lists only the United States before the global list loads", () => {
+  it("lists the full curated delivery catalog before the API loads", () => {
     const options = shoppingCountryOptions();
-    assert.deepEqual(
-      options.map((country) => country.countryCode),
-      ["US"]
-    );
+    const codes = options.map((country) => country.countryCode);
+    for (const code of ["US", "GB", "CA", "AU", "AE"]) {
+      assert.equal(codes.includes(code), true, code);
+    }
+    assert.ok(codes.length >= 20);
   });
 
-  it("shows only globally enabled countries and drops Canada when it is absent", () => {
-    const options = shoppingCountriesFromGlobal([
-      { countryCode: "US" },
-      { countryCode: "GB" },
-      { countryCode: "ZZ" },
-    ]);
-    assert.deepEqual(
-      options.map((country) => country.countryCode),
-      ["US", "GB"]
-    );
+  it("keeps the full catalog when the API only returns Australia", () => {
+    const options = shoppingCountriesFromGlobal([{ countryCode: "AU" }, { countryCode: "ZZ" }]);
+    const codes = options.map((country) => country.countryCode);
+    for (const code of ["US", "GB", "CA", "AU", "AE"]) {
+      assert.equal(codes.includes(code), true, code);
+    }
+    assert.equal(codes.includes("ZZ"), false);
   });
 });
 

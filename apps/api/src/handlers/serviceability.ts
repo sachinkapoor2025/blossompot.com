@@ -1,6 +1,8 @@
 import type { APIGatewayProxyEventV2 } from "aws-lambda";
 import {
   applyEnabledShoppingCountry,
+  catalogCountriesForStorefront,
+  storefrontShoppingCountryCodes,
   checkServiceabilitySchema,
   checkVendorServiceability,
   describeMatch,
@@ -90,9 +92,7 @@ export async function checkServiceability(event: APIGatewayProxyEventV2) {
   if (!parsed.success) return badRequest(parsed.error.message);
 
   const storedCountries = await loadCatalogCountries();
-  const enabledCountryCodes = storedCountries.countries
-    .filter((country) => country.enabled)
-    .map((country) => country.countryCode);
+  const enabledCountryCodes = storefrontShoppingCountryCodes(storedCountries.countries);
   const shopping = publicShoppingServiceability({
     countryCode: parsed.data.countryCode,
     postalCode: parsed.data.postalCode,
@@ -365,5 +365,5 @@ export async function resolveShoppingLocation(
   requested: { countryCode: string; postalCode: string; stateCode?: string; city?: string } | null
 ) {
   const stored = await loadCatalogCountries();
-  return applyEnabledShoppingCountry(requested, stored.countries);
+  return applyEnabledShoppingCountry(requested, catalogCountriesForStorefront(stored.countries));
 }

@@ -1,9 +1,9 @@
 import { PutCommand } from "@aws-sdk/lib-dynamodb";
 import type { APIGatewayProxyEventV2 } from "aws-lambda";
 import {
+  catalogCountriesForStorefront,
   catalogCountryKeys,
   catalogCountryName,
-  enabledCatalogCountries,
   normalizeCatalogCountries,
   updateCatalogCountriesSchema,
   type CatalogCountrySetting,
@@ -37,7 +37,9 @@ export async function listCatalogCountriesAdmin(event: APIGatewayProxyEventV2) {
 export async function listCatalogCountriesPublic() {
   const stored = await loadCatalogCountries();
   return ok({
-    countries: enabledCatalogCountries(stored.countries).map((country) => withName(country, false)),
+    countries: catalogCountriesForStorefront(stored.countries).map((country) =>
+      withName(country, false)
+    ),
   });
 }
 

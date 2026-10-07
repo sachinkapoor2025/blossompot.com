@@ -138,6 +138,7 @@ export function DeliveryLocationProvider({ children }: { children: ReactNode }) 
     if (!countriesLoaded || !fromConfig || !location) return;
     const code = location.countryCode.trim().toUpperCase();
     if (countries.some((country) => country.countryCode === code)) return;
+    if (countries.length <= 1) return;
     const fallback = countries.find((country) => country.countryCode === "US")?.countryCode ?? countries[0]?.countryCode;
     if (!fallback || fallback === code) return;
     void setLocation({ countryCode: fallback, postalCode: "", postalDisplay: fallback });

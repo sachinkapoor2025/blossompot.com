@@ -20,7 +20,7 @@ function LocationCategoryUrlSyncInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const delivery = useOptionalDeliveryLocation();
-  const { countries, loaded, fromConfig } = useGboDeliveryCountries();
+  const { countries, loaded } = useGboDeliveryCountries();
 
   useEffect(() => {
     if (!delivery || !delivery.ready || !loaded) return;
@@ -31,7 +31,7 @@ function LocationCategoryUrlSyncInner() {
       savedCountry: delivery.location?.countryCode,
       savedPostal: delivery.location?.postalCode,
       pendingCountry: delivery.pendingCountry,
-      enabledCountryCodes: fromConfig ? countries.map((country) => country.countryCode) : ["US"],
+      enabledCountryCodes: countries.map((country) => country.countryCode),
     });
     if (plan.action === "adopt") {
       void delivery
@@ -55,7 +55,6 @@ function LocationCategoryUrlSyncInner() {
     delivery?.pendingCountry,
     delivery?.setLocation,
     delivery?.clearPendingIfSettled,
-    fromConfig,
     loaded,
     pathname,
     router,

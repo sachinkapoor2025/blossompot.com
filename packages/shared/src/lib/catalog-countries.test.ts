@@ -13,6 +13,8 @@ import {
   noProductsForDeliveryCountryMessage,
   resolveEnabledShoppingCountry,
   shoppingCountryRejection,
+  catalogCountriesForStorefront,
+  storefrontShoppingCountryCodes,
   SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE,
 } from "./catalog-countries";
 import { VENDOR_BLOSSOMPOT, VENDOR_FNP, VENDOR_GBO, VENDOR_ORANGE_COUNTY } from "../constants";
@@ -25,6 +27,16 @@ import { productVisibleForDeliveryCountry } from "./gbo";
 import { defaultOrangeCountyAreas, productKeptForServiceableVendors } from "./serviceability";
 
 describe("catalog country defaults", () => {
+  it("restores the full delivery catalog for storefront menus even when admin saved Australia only", () => {
+    const rows = catalogCountriesForStorefront([{ countryCode: "AU", enabled: true }]);
+    const codes = storefrontShoppingCountryCodes([{ countryCode: "AU", enabled: true }]);
+    for (const code of ["US", "GB", "CA", "AU", "AE", "DE", "FR", "IE"]) {
+      assert.equal(rows.some((row) => row.countryCode === code && row.enabled), true, code);
+      assert.equal(codes.includes(code), true, code);
+    }
+    assert.ok(codes.length >= 20);
+  });
+
   it("uses USA only when the config item is missing", () => {
     const resolved = readStoredCatalogCountries(null);
     assert.equal(resolved.source, "default");
