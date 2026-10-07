@@ -13,6 +13,11 @@ import {
   type Product,
 } from "@blossompot/shared";
 import { api } from "./api";
+import {
+  getCatalogProduct,
+  getCatalogProducts,
+  mergeProductsPreferExisting,
+} from "./catalog-fallback";
 import { toListingCardProducts } from "./listing-card";
 import { isRakhiRelatedProduct, storefrontSkipsRakhiCategory } from "./rakhi-filter";
 import { getStorefrontDeliveryCountry } from "./storefront-country";
@@ -117,9 +122,33 @@ function isProductMissingError(err: unknown): boolean {
   return /not found/i.test(message) || /\(404\)/.test(message);
 }
 
+function bundledCatalogProduct(slug: string): Product | null {
+  const bundled = getCatalogProduct(slug);
+  if (!bundled || !isStorefrontVisible(bundled)) return null;
+  return rememberProduct(bundled);
+}
+
+function catalogListingExtras(params?: {
+  category?: string;
+  search?: string;
+  country?: string;
+}): Product[] {
+  let extras = getCatalogProducts().filter(isStorefrontVisible);
+  if (params?.category) {
+    extras = extras.filter((product) => productInStorefrontCategory(product, params.category as string));
+  }
+  if (params?.search) {
+    extras = extras.filter((product) => productMatchesSearchQuery(product, params.search as string));
+  }
+  if (params?.country) {
+    extras = extras.filter((product) => productVisibleForDeliveryCountry(product, params.country as string));
+  }
+  return extras;
+}
+
 /**
- * Authoritative storefront product: live API (Dynamo / GBO) only.
- * Bundled catalog JSON is seed data, not a public listing source.
+ * Live API (Dynamo / GBO) first. Fill missing published bundled catalog SKUs
+ * (FNP USA / TF USA) so listings work before Dynamo import completes.
  */
 export async function loadProduct(slug: string): Promise<Product | null> {
   if (isGboHiddenFromStorefront({ slug })) return null;
@@ -144,9 +173,10 @@ export async function loadProduct(slug: string): Promise<Product | null> {
       } catch {
         /* GBO token missing, storefront off, or gift not found */
       }
-      if (isProductMissingError(err)) return null;
     }
 
+    const bundled = bundledCatalogProduct(slug);
+    if (bundled) return bundled;
     if (isProductMissingError(err)) return null;
     const stale = memoryProduct(slug);
     if (stale && isStorefrontVisible(stale)) return stale;
@@ -201,16 +231,17 @@ export async function loadProducts(params?: {
     extra = extra.filter((product) => productMatchesSearchQuery(product, params.search as string));
   }
 
-  if (dbResult) {
-    return filterLiveForCountry(mergeBySlug(dbResult, extra), country);
-  }
-  return filterLiveForCountry(extra, country);
+  const live = dbResult ? mergeBySlug(dbResult, extra) : extra;
+  return filterLiveForCountry(
+    mergeProductsPreferExisting(live, catalogListingExtras({ ...params, country })),
+    country
+  );
 }
 
 export { toListingCardProducts };
 
 /**
- * Category grids: live API first, then only add missing hamper/catalog SKUs.
+ * Category grids: live API first, then fill missing hamper/catalog SKUs.
  * Never overwrite an API product with bundled catalog prices.
  */
 export async function loadProductsByCategory(categorySlug: string, country?: string): Promise<Product[]> {
@@ -218,7 +249,10 @@ export async function loadProductsByCategory(categorySlug: string, country?: str
   try {
     products = await loadProducts({ category: categorySlug, country });
   } catch {
-    products = [];
+    products = mergeProductsPreferExisting(
+      [],
+      catalogListingExtras({ category: categorySlug, country: catalogCountry(country) })
+    );
   }
   return dedupeStorefrontProducts(products.filter(isStorefrontVisible));
 }

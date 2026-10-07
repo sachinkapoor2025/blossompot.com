@@ -177,11 +177,20 @@ export async function ensureUsarakhiCatalogProductInDb(
   return item;
 }
 
+export function bundledCatalogProductsMissingFrom(existingSlugs: Set<string>): CatalogProduct[] {
+  return listBundledCatalogProducts().filter((product) => !existingSlugs.has(product.slug));
+}
+
 /** Create Dynamo rows for bundled catalog SKUs that are not in the table yet. */
 export async function persistMissingBundledCatalogProducts(
-  existingSlugs: Set<string>
+  existingSlugs: Set<string>,
+  limit = Number.POSITIVE_INFINITY
 ): Promise<Record<string, unknown>[]> {
-  const missing = listBundledCatalogProducts().filter((product) => !existingSlugs.has(product.slug));
+  const cap = Number.isFinite(limit) ? Math.max(0, Math.floor(limit)) : Number.POSITIVE_INFINITY;
+  const missing = bundledCatalogProductsMissingFrom(existingSlugs).slice(
+    0,
+    Number.isFinite(cap) ? cap : undefined
+  );
   if (missing.length === 0) return [];
 
   const ts = now();

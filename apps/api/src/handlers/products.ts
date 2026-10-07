@@ -54,13 +54,22 @@ function mergeBundledCatalogProducts(items: Product[], category?: string): Produ
   return [...bySlug.values()];
 }
 
+const BUNDLED_CATALOG_PERSIST_BATCH = 25;
+
 async function persistAndMergeBundledCatalog(items: Product[], category?: string): Promise<Product[]> {
-  const persisted = await persistMissingBundledCatalogProducts(new Set(items.map((product) => product.slug)));
-  if (persisted.length > 0) {
-    invalidateProductListCache(category);
-    items = [...persisted.map((row) => row as Product), ...items];
+  const merged = dedupeStorefrontProducts(mergeBundledCatalogProducts(items, category));
+  try {
+    const persisted = await persistMissingBundledCatalogProducts(
+      new Set(items.map((product) => product.slug)),
+      BUNDLED_CATALOG_PERSIST_BATCH
+    );
+    if (persisted.length > 0) {
+      invalidateProductListCache(category);
+    }
+  } catch (err) {
+    console.error("persistMissingBundledCatalogProducts failed", err);
   }
-  return dedupeStorefrontProducts(mergeBundledCatalogProducts(items, category));
+  return merged;
 }
 
 function forStorefront(product: Product): Product {
@@ -411,12 +420,19 @@ export async function listAdminProducts(event: APIGatewayProxyEventV2) {
   const sampleFilter = (event.queryStringParameters?.sample ?? "all").toLowerCase();
 
   let items = await scanAllProducts();
-  const persisted = await persistMissingBundledCatalogProducts(new Set(items.map((p) => p.slug)));
-  if (persisted.length > 0) {
-    invalidateProductListCache();
-    items = [...persisted.map((row) => row as Product), ...items];
-  }
+  const dynamoSlugs = new Set(items.map((p) => p.slug));
   items = mergeBundledCatalogProducts(items);
+  try {
+    const persisted = await persistMissingBundledCatalogProducts(
+      dynamoSlugs,
+      BUNDLED_CATALOG_PERSIST_BATCH
+    );
+    if (persisted.length > 0) {
+      invalidateProductListCache();
+    }
+  } catch (err) {
+    console.error("persistMissingBundledCatalogProducts failed", err);
+  }
   items.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
   const sampleCount = items.filter((p) => isSampleCatalogProduct(p)).length;

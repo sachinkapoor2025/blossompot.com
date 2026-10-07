@@ -112,14 +112,15 @@ export function getCatalogProductsForCountry(country: string): Product[] {
   return getCatalogProducts().filter((product) => productVisibleForDeliveryCountry(product, country));
 }
 
-/** Keep API (and live GBO) results for this country — never inject bundled JSON SKUs. */
+/** API/GBO prices win for shared slugs; fill in published bundled catalog SKUs that Dynamo never imported. */
 export function mergeProductsForCountry(existing: Product[], country: string): Product[] {
-  return dedupeStorefrontProducts(
+  return mergeProductsPreferExisting(
     existing.filter(
       (product) =>
         !isRakhiRelatedProduct(product) &&
         !isSampleCatalogProduct(product) &&
         productVisibleForDeliveryCountry(product, country)
-    )
+    ),
+    getCatalogProductsForCountry(country)
   );
 }
