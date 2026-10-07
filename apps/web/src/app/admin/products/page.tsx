@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useApiClient, useAuth } from "@/lib/auth-context";
 import type { Product } from "@blossompot/shared";
 import {
   DEFAULT_PRODUCT_INVENTORY,
+  fulfillmentVendorSlug,
   LOW_STOCK_THRESHOLD,
   getUnitsSold,
   isFastSelling,
@@ -17,6 +19,7 @@ import { TableControls } from "@/components/admin/TableControls";
 export default function AdminProductsPage() {
   const apiClient = useApiClient();
   const { token } = useAuth();
+  const vendorFilter = useSearchParams().get("vendor") ?? "";
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<{ slug: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,14 +84,12 @@ export default function AdminProductsPage() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return products;
-    return products.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.slug.includes(q) ||
-        p.sku?.toLowerCase().includes(q)
-    );
-  }, [products, search]);
+    return products.filter((p) => {
+      if (vendorFilter && fulfillmentVendorSlug(p) !== vendorFilter) return false;
+      if (!q) return true;
+      return p.name.toLowerCase().includes(q) || p.slug.includes(q) || p.sku?.toLowerCase().includes(q);
+    });
+  }, [products, search, vendorFilter]);
 
   const { items: pageItems, totalPages, total } = paginate(filtered, page, pageSize);
 
@@ -575,8 +576,8 @@ export default function AdminProductsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Products</h1>
         <div className="flex gap-2">
-          <Link href="/admin/products/import" className="px-4 py-2 rounded-lg text-sm border">
-            FNP import
+          <Link href="/admin/products/new" className="px-4 py-2 rounded-lg text-sm border">
+            Add Product
           </Link>
           <button
             type="button"
@@ -910,11 +911,7 @@ export default function AdminProductsPage() {
             <h2 className="text-xl font-bold mb-2">Bulk Upload (CSV)</h2>
             <p className="text-sm text-slate-600 mb-3">
               Download the sample template, fill in your products, then paste or upload the CSV below.
-              FNP USA workbook imports belong on the{" "}
-              <Link href="/admin/products/import" className="underline font-medium">
-                FNP import
-              </Link>{" "}
-              page, which previews rows, hosts images, and keeps products unpublished.
+              New catalog products are added from Add Product so the selected vendor owns the vendor slug.
             </p>
             <button
               type="button"

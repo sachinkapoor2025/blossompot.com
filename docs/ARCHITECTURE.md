@@ -166,8 +166,13 @@ When admin (or Orange County vendor tracking) changes order status (accepted, pr
 | GET | `/marketplace/vendors/orders` | Vendor: orders containing this vendorSlug (fulfillment fields only) |
 | POST | `/marketplace/vendors/orders/{orderId}/action` | Vendor: accept/reject/preparing/ready/out_for_delivery/delivered |
 | POST | `/marketplace/vendors/pricing/preview` | Vendor/admin: server-side margin/fee breakdown |
-| GET | `/admin/catalog-vendors` | Admin: catalog vendor registry (BlossomPot, Orange County, GBO, FNP). Missing rows use code defaults. UI: `/admin/vendors`. |
-| PUT | `/admin/catalog-vendors/{vendorSlug}` | Admin: set `enabled` and `deliveryCountries` on `CATALOGVENDOR#<slug>`. The vendor form sends the selected ISO-2 codes. It does not force `["US"]` and does not change global target countries. |
+| GET | `/admin/catalog-vendors` | Admin: catalog vendor registry, including vendors added later. Built-in rows fall back to code defaults. Product counts are derived from `PRODUCT#` rows. UI: `/admin/vendors`. |
+| POST | `/admin/catalog-vendors` | Admin: create a catalog vendor. Slug must be unique. Storage is DynamoDB. Does not create products. |
+| GET | `/admin/catalog-vendors/{vendorSlug}` | Admin: one catalog vendor, including derived product count. UI: `/admin/vendors/{vendorSlug}`. |
+| PUT | `/admin/catalog-vendors/{vendorSlug}` | Admin: update name, status, delivery countries, method, source, and default inventory. Does not change the slug or existing product inventory. |
+| POST | `/admin/catalog-vendors/{vendorSlug}/trash` | Admin: move a vendor to Trash after the vendor name is confirmed. Products and orders stay. New shopping treats the vendor as disabled. |
+| POST | `/admin/catalog-vendors/{vendorSlug}/restore` | Admin: restore a trashed vendor as disabled. |
+| DELETE | `/admin/catalog-vendors/{vendorSlug}` | Admin: permanently delete a trashed custom vendor record only when it has no products. Built-in vendors and product rows are not deleted. No automatic 30-day purge. |
 | GET | `/admin/catalog-countries` | Admin: global target countries, including disabled ones. Missing `CONFIG#CATALOG_COUNTRIES` returns USA enabled. UI: `/admin/countries`. Not wired to the storefront. |
 | PUT | `/admin/catalog-countries` | Admin: replace that list. Requires a known ISO-2 code, no duplicates, and at least one enabled country. Does not change vendor rows. |
 | GET | `/catalog-countries` | Public: globally enabled countries only (`countryCode`, `name`). The country selector does not call this yet. |

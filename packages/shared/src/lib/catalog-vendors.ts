@@ -3,7 +3,9 @@ import { catalogVendorKeys, marketplaceVendorKeys } from "../db/keys";
 import { isGboStorefrontEnabled } from "./gbo";
 import { fulfillmentVendorSlug } from "./serviceability";
 import {
+  CATALOG_STORAGE_LABEL,
   CATALOG_VENDOR_SLUGS,
+  CATALOG_VENDOR_TRASH_DAYS,
   catalogVendorSchema,
   type CatalogIntegrationType,
   type CatalogVendor,
@@ -16,6 +18,30 @@ export const CATALOG_INTEGRATION_LABELS: Record<CatalogIntegrationType, string> 
   "partner-api": "Partner API",
   excel: "Excel",
 };
+
+/** Admin method column. Stored values stay the existing integration types. */
+export const CATALOG_METHOD_LABELS: Record<CatalogIntegrationType, string> = {
+  owned: "Manual",
+  "partner-api": "API",
+  excel: "Excel",
+  "local-catalog": "JSON/Bundle",
+};
+
+export { CATALOG_STORAGE_LABEL };
+
+export function catalogMethodLabel(integrationType: CatalogIntegrationType): string {
+  return CATALOG_METHOD_LABELS[integrationType];
+}
+
+export function catalogVendorTrashExpiry(from = new Date()): string {
+  const expiry = new Date(from.getTime());
+  expiry.setUTCDate(expiry.getUTCDate() + CATALOG_VENDOR_TRASH_DAYS);
+  return expiry.toISOString();
+}
+
+export function catalogVendorConfirmName(vendorName: string, typed: string): boolean {
+  return vendorName.trim() === typed.trim();
+}
 
 const DEFAULTS: Record<
   CatalogVendorSlug,
@@ -82,28 +108,39 @@ export function normalizeDeliveryCountries(
   return { countries };
 }
 
-export function readStoredCatalogVendor(
-  slug: CatalogVendorSlug,
+export function parseStoredCatalogVendor(
+  slug: string,
   item: Record<string, unknown> | null | undefined
-): { vendor: CatalogVendor; source: "config" | "default" } {
-  if (!item) return { vendor: defaultCatalogVendor(slug), source: "default" };
+): CatalogVendor | null {
+  if (!item) return null;
   const parsed = catalogVendorSchema.safeParse({
     vendorSlug: item.vendorSlug,
     vendorName: item.vendorName,
     enabled: item.enabled,
     integrationType: item.integrationType,
     deliveryCountries: item.deliveryCountries,
+    sourceName: item.sourceName,
+    defaultInventory: item.defaultInventory,
+    trashedAt: item.trashedAt,
+    trashExpiresAt: item.trashExpiresAt,
     updatedAt: item.updatedAt ?? "",
     updatedBy: item.updatedBy,
   });
-  if (!parsed.success || parsed.data.vendorSlug !== slug) {
-    return { vendor: defaultCatalogVendor(slug), source: "default" };
-  }
-  return { vendor: parsed.data, source: "config" };
+  if (!parsed.success || parsed.data.vendorSlug !== slug) return null;
+  return parsed.data;
+}
+
+export function readStoredCatalogVendor(
+  slug: CatalogVendorSlug,
+  item: Record<string, unknown> | null | undefined
+): { vendor: CatalogVendor; source: "config" | "default" } {
+  const parsed = parseStoredCatalogVendor(slug, item);
+  if (!parsed) return { vendor: defaultCatalogVendor(slug), source: "default" };
+  return { vendor: parsed, source: "config" };
 }
 
 export type CatalogVendorShoppingStatus = {
-  /** Catalog `enabled` combined with the GBO environment flag. Not applied to product queries in this phase. */
+  /** Catalog `enabled` combined with the GBO environment flag. */
   shoppingAvailable: boolean;
   /** Null for vendors other than Gift Baskets Overseas. */
   storefrontEnvEnabled: boolean | null;
@@ -115,9 +152,16 @@ export type CatalogVendorShoppingStatus = {
  * Other catalog vendors follow the catalog flag only.
  */
 export function catalogVendorShoppingStatus(
-  vendor: Pick<CatalogVendor, "vendorSlug" | "enabled">,
+  vendor: Pick<CatalogVendor, "vendorSlug" | "enabled" | "trashedAt">,
   env: Record<string, string | undefined> = process.env
 ): CatalogVendorShoppingStatus {
+  if (vendor.trashedAt) {
+    return {
+      shoppingAvailable: false,
+      storefrontEnvEnabled: vendor.vendorSlug === VENDOR_GBO ? isGboStorefrontEnabled(env) : null,
+      storefrontBlockReason: "In trash",
+    };
+  }
   if (vendor.vendorSlug !== VENDOR_GBO) {
     return {
       shoppingAvailable: vendor.enabled,
@@ -154,6 +198,7 @@ export type ShoppingVendorRecord = {
   vendorSlug: string;
   enabled: boolean;
   deliveryCountries: readonly string[];
+  trashedAt?: string;
 };
 
 function asVendorMap(
@@ -186,19 +231,21 @@ export function productAllowedForNewShopping(
     ...product,
     slug: product.slug ?? product.productSlug,
   });
-  if (!isCatalogVendorSlug(vendorSlug)) return { available: true, vendorSlug };
-
-  const record = asVendorMap(vendors).get(vendorSlug) ?? defaultCatalogVendor(vendorSlug);
+  const registry = asVendorMap(vendors);
+  const stored = registry.get(vendorSlug);
+  if (!isCatalogVendorSlug(vendorSlug) && !stored) return { available: true, vendorSlug };
+  const record = stored ?? defaultCatalogVendor(vendorSlug as CatalogVendorSlug);
   const status = catalogVendorShoppingStatus(
-    { vendorSlug, enabled: record.enabled },
+    { vendorSlug, enabled: record.enabled, trashedAt: record.trashedAt },
     env
   );
   if (!status.shoppingAvailable) {
     return {
       available: false,
       vendorSlug,
-      reason:
-        vendorSlug === VENDOR_GBO && status.storefrontEnvEnabled === false
+      reason: record.trashedAt
+        ? "vendor_disabled"
+        : vendorSlug === VENDOR_GBO && status.storefrontEnvEnabled === false
           ? "gbo_storefront_disabled"
           : "vendor_disabled",
     };

@@ -184,13 +184,38 @@ const routes: Route[] = [
   },
   // Catalog vendor registry (BlossomPot, Orange County, GBO, FNP). Not marketplace applicants.
   { method: "GET", pattern: /^\/admin\/catalog-vendors$/, handler: catalogVendors.listCatalogVendorsAdmin },
+  { method: "POST", pattern: /^\/admin\/catalog-vendors$/, handler: catalogVendors.createCatalogVendorAdmin },
   { method: "GET", pattern: /^\/admin\/catalog-countries$/, handler: catalogCountries.listCatalogCountriesAdmin },
   { method: "PUT", pattern: /^\/admin\/catalog-countries$/, handler: catalogCountries.updateCatalogCountriesAdmin },
   { method: "GET", pattern: /^\/catalog-countries$/, handler: catalogCountries.listCatalogCountriesPublic },
   {
+    method: "GET",
+    pattern: /^\/admin\/catalog-vendors\/([^/]+)\/?$/,
+    handler: catalogVendors.getCatalogVendorAdmin,
+    params: ["vendorSlug"],
+  },
+  {
     method: "PUT",
     pattern: /^\/admin\/catalog-vendors\/([^/]+)$/,
     handler: catalogVendors.updateCatalogVendorAdmin,
+    params: ["vendorSlug"],
+  },
+  {
+    method: "POST",
+    pattern: /^\/admin\/catalog-vendors\/([^/]+)\/trash$/,
+    handler: catalogVendors.trashCatalogVendorAdmin,
+    params: ["vendorSlug"],
+  },
+  {
+    method: "POST",
+    pattern: /^\/admin\/catalog-vendors\/([^/]+)\/restore$/,
+    handler: catalogVendors.restoreCatalogVendorAdmin,
+    params: ["vendorSlug"],
+  },
+  {
+    method: "DELETE",
+    pattern: /^\/admin\/catalog-vendors\/([^/]+)$/,
+    handler: catalogVendors.deleteCatalogVendorAdmin,
     params: ["vendorSlug"],
   },
   // Marketplace vendor partners (signup, portal, admin review)

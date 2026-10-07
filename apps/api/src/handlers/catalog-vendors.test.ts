@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { before, describe, it } from "node:test";
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
+import { GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 
 process.env.USE_MEMORY_DB = "true";
 process.env.ENVIRONMENT = "local";
@@ -11,11 +12,24 @@ type Handler = (event: APIGatewayProxyEventV2) => Promise<APIGatewayProxyResultV
 
 let listCatalogVendorsAdmin: Handler;
 let updateCatalogVendorAdmin: Handler;
+let createCatalogVendorAdmin: Handler;
+let trashCatalogVendorAdmin: Handler;
+let restoreCatalogVendorAdmin: Handler;
+let deleteCatalogVendorAdmin: Handler;
+let docClient: { send: (command: unknown) => Promise<{ Item?: Record<string, unknown> }> };
+let productsTable: string;
 
 before(async () => {
   const mod = await import("./catalog-vendors");
   listCatalogVendorsAdmin = mod.listCatalogVendorsAdmin;
   updateCatalogVendorAdmin = mod.updateCatalogVendorAdmin;
+  createCatalogVendorAdmin = mod.createCatalogVendorAdmin;
+  trashCatalogVendorAdmin = mod.trashCatalogVendorAdmin;
+  restoreCatalogVendorAdmin = mod.restoreCatalogVendorAdmin;
+  deleteCatalogVendorAdmin = mod.deleteCatalogVendorAdmin;
+  const db = await import("../lib/db");
+  docClient = db.docClient as typeof docClient;
+  productsTable = db.PRODUCTS_TABLE;
 });
 
 function resultOf(result: APIGatewayProxyResultV2): { statusCode: number; body: Record<string, unknown> } {
@@ -62,8 +76,9 @@ describe("admin catalog vendor API", { concurrency: false }, () => {
     );
     assert.equal(vendors.every((vendor) => vendor.source === "default" && vendor.enabled === true), true);
     assert.equal(vendors.every((vendor) => Array.isArray(vendor.deliveryCountries) && vendor.deliveryCountries[0] === "US"), true);
-    assert.equal(listed.body.productCountAvailable, false);
-    assert.equal(vendors.every((vendor) => vendor.productCount === null), true);
+    assert.equal(listed.body.productCountAvailable, true);
+    assert.equal(vendors.every((vendor) => typeof vendor.productCount === "number"), true);
+    assert.equal(vendors.every((vendor) => vendor.storage === "DynamoDB"), true);
   });
 
   it("rejects an unknown vendor slug", async () => {
@@ -128,5 +143,112 @@ describe("admin catalog vendor API", { concurrency: false }, () => {
     assert.equal(vendor.shoppingAvailable, false);
     assert.equal(vendor.storefrontEnvEnabled, false);
     assert.equal(vendor.storefrontBlockReason, "Blocked by environment");
+  });
+
+  it("creates a unique vendor, counts its product, and leaves that product in place when the vendor is trashed", async () => {
+    const created = resultOf(
+      await createCatalogVendorAdmin(
+        event({
+          body: {
+            vendorName: "Phase Two Flowers",
+            vendorSlug: "phase2-flowers",
+            integrationType: "owned",
+            deliveryCountries: ["US"],
+            enabled: true,
+            sourceName: "Studio",
+            defaultInventory: 12,
+          },
+        })
+      )
+    );
+    assert.equal(created.statusCode, 201);
+    const duplicate = resultOf(
+      await createCatalogVendorAdmin(
+        event({
+          body: {
+            vendorName: "Again",
+            vendorSlug: "phase2-flowers",
+            integrationType: "owned",
+            deliveryCountries: ["US"],
+            enabled: true,
+          },
+        })
+      )
+    );
+    assert.equal(duplicate.statusCode, 409);
+    const builtin = resultOf(
+      await createCatalogVendorAdmin(
+        event({
+          body: {
+            vendorName: "FNP copy",
+            vendorSlug: "fnp",
+            integrationType: "excel",
+            deliveryCountries: ["US"],
+            enabled: true,
+          },
+        })
+      )
+    );
+    assert.equal(builtin.statusCode, 409);
+
+    await docClient.send(
+      new PutCommand({
+        TableName: productsTable,
+        Item: {
+          PK: "PRODUCT#phase2-rose",
+          SK: "META",
+          slug: "phase2-rose",
+          vendorSlug: "phase2-flowers",
+          name: "Phase Two Rose",
+          inventory: 4,
+        },
+      })
+    );
+    const listed = resultOf(await listCatalogVendorsAdmin(event({})));
+    const vendors = listed.body.vendors as Array<Record<string, unknown>>;
+    const row = vendors.find((vendor) => vendor.vendorSlug === "phase2-flowers");
+    assert.equal(row?.productCount, 1);
+    assert.equal(row?.method, "Manual");
+    assert.equal(row?.storage, "DynamoDB");
+
+    const wrongName = resultOf(
+      await trashCatalogVendorAdmin(event({ vendorSlug: "phase2-flowers", body: { confirmName: "Nope" } }))
+    );
+    assert.equal(wrongName.statusCode, 400);
+    const trashed = resultOf(
+      await trashCatalogVendorAdmin(
+        event({ vendorSlug: "phase2-flowers", body: { confirmName: "Phase Two Flowers" } })
+      )
+    );
+    assert.equal(trashed.statusCode, 200);
+    const trashedVendor = trashed.body.vendor as Record<string, unknown>;
+    assert.equal(trashedVendor.enabled, false);
+    assert.equal(typeof trashedVendor.trashedAt, "string");
+    const product = await docClient.send(
+      new GetCommand({
+        TableName: productsTable,
+        Key: { PK: "PRODUCT#phase2-rose", SK: "META" },
+      })
+    );
+    assert.equal(product.Item?.inventory, 4);
+    assert.equal(product.Item?.vendorSlug, "phase2-flowers");
+
+    const restored = resultOf(await restoreCatalogVendorAdmin(event({ vendorSlug: "phase2-flowers" })));
+    assert.equal(restored.statusCode, 200);
+    const restoredVendor = restored.body.vendor as Record<string, unknown>;
+    assert.equal(restoredVendor.enabled, false);
+    assert.equal(restoredVendor.trashedAt, undefined);
+
+    const builtinDelete = resultOf(await deleteCatalogVendorAdmin(event({ vendorSlug: "fnp" })));
+    assert.equal(builtinDelete.statusCode, 400);
+    const stillThere = resultOf(
+      await trashCatalogVendorAdmin(
+        event({ vendorSlug: "phase2-flowers", body: { confirmName: "Phase Two Flowers" } })
+      )
+    );
+    assert.equal(stillThere.statusCode, 200);
+    const blockedDelete = resultOf(await deleteCatalogVendorAdmin(event({ vendorSlug: "phase2-flowers" })));
+    assert.equal(blockedDelete.statusCode, 400);
+    assert.equal(product.Item?.slug, "phase2-rose");
   });
 });
