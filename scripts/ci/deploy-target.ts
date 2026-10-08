@@ -158,9 +158,21 @@ function optionalTestValue(
   return value;
 }
 
+/** Live Gift Baskets Overseas host. DEV does not point this at another host. */
+export const DEV_GBO_UPSTREAM_BASE_URL = "https://www.giftbasketsoverseas.com/api/v1";
+
 /**
- * Dev overrides never read production secret names (STRIPE_SECRET_KEY, SMTP_PASSWORD, …).
+ * DEV partner token. This is not the production `GBO_API_TOKEN` secret.
+ * An empty value keeps the dev storefront flag off.
+ */
+export function devGboApiToken(env: Record<string, string | undefined>): string {
+  return (env.GBO_DEV_API_TOKEN ?? "").trim();
+}
+
+/**
+ * Dev overrides never read production secret names (STRIPE_SECRET_KEY, SMTP_PASSWORD, GBO_API_TOKEN, …).
  * Empty values are explicit so CloudFormation does not keep a previous live value.
+ * GBO uses the live partner API. The storefront flag is on only when `GBO_DEV_API_TOKEN` is set.
  */
 export function devParameterOverrides(env: Record<string, string | undefined>): string {
   const stripeKey = optionalTestValue(env, "STRIPE_SECRET_KEY_TEST", "sk_test_");
@@ -189,11 +201,15 @@ export function devParameterOverrides(env: Record<string, string | undefined>): 
   if (razorpayKey) values.set("RazorpayKeyId", razorpayKey);
   if (razorpaySecret) values.set("RazorpayKeySecret", razorpaySecret);
   if (razorpayWebhook) values.set("RazorpayWebhookSecret", razorpayWebhook);
+  const gboToken = devGboApiToken(env);
+  if (gboToken) values.set("GboApiToken", gboToken);
+  else console.error("GBO_DEV_API_TOKEN is empty — dev GBO storefront stays disabled.");
 
   const parts = [
     assignment("Environment", "dev"),
-    assignment("GboStorefrontEnabled", "false"),
-    assignment("GboSandbox", "true"),
+    assignment("GboStorefrontEnabled", gboToken ? "true" : "false"),
+    assignment("GboSandbox", "false"),
+    assignment("GboBaseUrl", DEV_GBO_UPSTREAM_BASE_URL),
     ...DEV_CLEARED_PARAMETERS.map((key) => assignment(key, values.get(key) ?? "")),
   ];
   const joined = parts.join(" ");
@@ -264,6 +280,7 @@ export function devAmplifyEnvironment(
     appId: string;
     stripePublishableKeyTest?: string;
     razorpayKeyIdTest?: string;
+    gboStorefrontEnabled?: boolean;
   }
 ): Record<string, string> {
   const appId = resolveBlossomPotAmplifyAppId(input.appId);
@@ -302,7 +319,7 @@ export function devAmplifyEnvironment(
   next.NEXT_PUBLIC_COGNITO_CLIENT_ID = userPoolClientId;
   next.NEXT_PUBLIC_COGNITO_REGION = "us-east-1";
   next.NEXT_PUBLIC_CDN_URL = `https://${cdnDomain}`;
-  next.GBO_STOREFRONT_ENABLED = "false";
+  next.GBO_STOREFRONT_ENABLED = input.gboStorefrontEnabled ? "true" : "false";
   const site = (next.NEXT_PUBLIC_SITE_URL ?? "").trim().replace(/\/$/, "");
   if (
     site === "" ||
@@ -346,9 +363,7 @@ export function devFrontendBuildEnv(
     throw new Error("Dev build NEXT_PUBLIC_APP_ENV must be dev.");
   }
   const gbo = (env.GBO_STOREFRONT_ENABLED ?? "").trim().toLowerCase();
-  if (gbo === "true" || gbo === "1" || gbo === "yes") {
-    throw new Error("Dev build refuses GBO_STOREFRONT_ENABLED=true.");
-  }
+  const gboStorefront = gbo === "true" || gbo === "1" || gbo === "yes" ? "true" : "false";
   let site = (env.NEXT_PUBLIC_SITE_URL ?? "").trim().replace(/\/$/, "");
   if (
     site === "" ||
@@ -367,7 +382,7 @@ export function devFrontendBuildEnv(
     NEXT_PUBLIC_COGNITO_REGION: "us-east-1",
     NEXT_PUBLIC_CDN_URL: cdn,
     NEXT_PUBLIC_SITE_URL: site,
-    GBO_STOREFRONT_ENABLED: "false",
+    GBO_STOREFRONT_ENABLED: gboStorefront,
   };
   const stripe = env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim();
   if (stripe?.startsWith("pk_test_")) out.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = stripe;
@@ -479,6 +494,7 @@ export function publishDevAmplifyConfig(
     appId,
     stripePublishableKeyTest: env.STRIPE_PK_TEST,
     razorpayKeyIdTest: env.RAZOR_KEY_ID_TEST,
+    gboStorefrontEnabled: devGboApiToken(env).length > 0,
   });
   requireAws(
     run([
@@ -883,6 +899,7 @@ function main(): void {
       appId: process.env.APP_ID ?? "",
       stripePublishableKeyTest: process.env.STRIPE_PK_TEST,
       razorpayKeyIdTest: process.env.RAZOR_KEY_ID_TEST,
+      gboStorefrontEnabled: devGboApiToken(process.env).length > 0,
     });
     process.stdout.write(JSON.stringify(next));
     return;

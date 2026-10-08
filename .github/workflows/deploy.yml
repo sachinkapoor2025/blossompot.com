@@ -220,6 +220,7 @@ jobs:
           RAZORPAY_KEY_ID_TEST: ${{ secrets.RAZORPAY_KEY_ID_TEST }}
           RAZORPAY_KEY_SECRET_TEST: ${{ secrets.RAZORPAY_KEY_SECRET_TEST }}
           RAZORPAY_WEBHOOK_SECRET_TEST: ${{ secrets.RAZORPAY_WEBHOOK_SECRET_TEST }}
+          GBO_DEV_API_TOKEN: ${{ secrets.GBO_DEV_API_TOKEN }}
         run: npx tsx scripts/ci/deploy-target.ts dev-overrides > "$RUNNER_TEMP/dev-parameter-overrides.txt"
 
       - uses: aws-actions/configure-aws-credentials@v6
@@ -386,6 +387,7 @@ jobs:
           AMPLIFY_APP_ID: ${{ secrets.AMPLIFY_APP_ID }}
           STRIPE_PK_TEST: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_TEST }}
           RAZOR_KEY_ID_TEST: ${{ secrets.RAZORPAY_KEY_ID_TEST }}
+          GBO_DEV_API_TOKEN: ${{ secrets.GBO_DEV_API_TOKEN }}
         run: npx tsx scripts/ci/deploy-target.ts publish-dev-amplify
 
       - run: npm run build -w @blossompot/shared

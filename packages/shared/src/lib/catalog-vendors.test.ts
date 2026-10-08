@@ -180,6 +180,27 @@ describe("new shopping vendor gate", () => {
     assert.equal(closed.reason, "vendor_disabled");
   });
 
+  it("hides GBO when the vendor is disabled, the country is not delivered, or the SKU country differs", () => {
+    const env = { GBO_STOREFRONT_ENABLED: "true" };
+    const product = { slug: "gbo-us-9", sku: "gbo:US:9", vendorSlug: VENDOR_GBO };
+    const disabled = vendors.map((vendor) =>
+      vendor.vendorSlug === VENDOR_GBO ? { ...vendor, enabled: false } : vendor
+    );
+    const vendorOff = productAllowedForNewShopping(product, "US", disabled, env);
+    assert.equal(vendorOff.available, false);
+    assert.equal(vendorOff.reason, "vendor_disabled");
+
+    const elsewhere = vendors.map((vendor) =>
+      vendor.vendorSlug === VENDOR_GBO ? { ...vendor, deliveryCountries: ["GB"] } : vendor
+    );
+    const wrongCountry = productAllowedForNewShopping(product, "US", elsewhere, env);
+    assert.equal(wrongCountry.available, false);
+    assert.equal(wrongCountry.reason, "country_not_allowed");
+
+    assert.equal(productVisibleForDeliveryCountry(product, "GB"), false);
+    assert.equal(productVisibleForDeliveryCountry(product, "US"), true);
+  });
+
   it("does not open a USA catalog vendor for a non-US country", () => {
     const decision = productAllowedForNewShopping({ slug: "rose", vendorSlug: "blossompot" }, "GB", vendors);
     assert.equal(decision.available, false);

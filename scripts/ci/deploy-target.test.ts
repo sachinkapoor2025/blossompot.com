@@ -5,6 +5,7 @@ import { join, resolve } from "path";
 import { test } from "node:test";
 import {
   DEV_CLEARED_PARAMETERS,
+  DEV_GBO_UPSTREAM_BASE_URL,
   DEV_PRODUCTS_TABLE,
   DEV_STACK,
   PROD_API_HOST,
@@ -76,10 +77,49 @@ test("dev overrides clear live payment, email, and partner credentials", () => {
   assert.doesNotMatch(overrides, /Environment=prod/);
   assert.doesNotMatch(overrides, /sk_live_|prod-smtp-secret|prod-gbo-token/);
   assert.match(overrides, /GboStorefrontEnabled=false/);
-  assert.match(overrides, /GboSandbox=true/);
+  assert.match(overrides, /GboSandbox=false/);
+  assert.match(overrides, new RegExp(`GboBaseUrl=${DEV_GBO_UPSTREAM_BASE_URL.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
+  assert.doesNotMatch(overrides, /GboSandbox=true/);
   for (const key of DEV_CLEARED_PARAMETERS) {
     assert.match(overrides, new RegExp(`(^|\\s)${key}=(\\s|$)`));
   }
+});
+
+test("dev real GBO mode uses the live API only when the dev token is present", () => {
+  const absent = devParameterOverrides({
+    GBO_API_TOKEN: "prod-gbo-token",
+  });
+  assert.match(absent, /GboSandbox=false/);
+  assert.match(absent, /GboStorefrontEnabled=false/);
+  assert.match(absent, /(^|\s)GboApiToken=(\s|$)/);
+  assert.doesNotMatch(absent, /prod-gbo-token|GboSandbox=true/);
+
+  const present = devParameterOverrides({
+    GBO_API_TOKEN: "prod-gbo-token",
+    GBO_DEV_API_TOKEN: "dev-gbo-fixture",
+  });
+  assert.match(present, /GboApiToken=dev-gbo-fixture/);
+  assert.match(present, /GboStorefrontEnabled=true/);
+  assert.match(present, /GboSandbox=false/);
+  assert.match(present, new RegExp(`GboBaseUrl=${DEV_GBO_UPSTREAM_BASE_URL.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
+  assert.doesNotMatch(present, /prod-gbo-token|GboSandbox=true|\/sandbox/);
+
+  const workflow = readFileSync(resolve(root, ".github/workflows/deploy.yml"), "utf8");
+  const prodApi = workflow.split("\n  deploy-api-dev:")[0] ?? "";
+  const devApi = workflow.split("\n  deploy-api-dev:")[1]?.split("\n  deploy-web-prod:")[0] ?? "";
+  const prodWeb = workflow.split("\n  deploy-web-prod:")[1]?.split("\n  deploy-web-dev:")[0] ?? "";
+  const devWeb = workflow.split("\n  deploy-web-dev:")[1] ?? "";
+  assert.match(prodApi, /secrets\.GBO_API_TOKEN/);
+  assert.match(prodApi, /GboSandbox=\$\{GBO_SANDBOX\}/);
+  assert.match(prodApi, /secrets\.GBO_STOREFRONT_ENABLED/);
+  assert.doesNotMatch(prodApi, /GBO_DEV_API_TOKEN/);
+  assert.doesNotMatch(prodWeb, /GBO_DEV_API_TOKEN/);
+  assert.match(devApi, /secrets\.GBO_DEV_API_TOKEN/);
+  assert.match(devWeb, /secrets\.GBO_DEV_API_TOKEN/);
+  assert.doesNotMatch(devApi, /secrets\.GBO_API_TOKEN/);
+  assert.doesNotMatch(devWeb, /secrets\.GBO_API_TOKEN/);
+  const shared = readFileSync(resolve(root, "packages/shared/src/schemas/vendor-gbo.ts"), "utf8");
+  assert.match(shared, new RegExp(DEV_GBO_UPSTREAM_BASE_URL.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 });
 
 test("dev overrides accept Stripe and Razorpay test keys only", () => {
@@ -260,6 +300,31 @@ test("dev Amplify publish keeps unrelated settings and does not update main", ()
   assert.doesNotMatch(JSON.stringify(calls), /pk_live_should_not_remain|ASIA|secret_access|sk_live/i);
 });
 
+test("dev Amplify enables the GBO storefront only when the dev token is present", () => {
+  const calls: string[][] = [];
+  const withoutToken = publishDevAmplifyConfig(
+    { ...devPublishInput, GBO_API_TOKEN: "prod-gbo-token" },
+    (args) => {
+      calls.push(args);
+      return amplifyResponses("dev")(args);
+    }
+  );
+  assert.equal(withoutToken.environment.GBO_STOREFRONT_ENABLED, "false");
+  assert.equal(JSON.stringify(withoutToken.environment).includes("prod-gbo-token"), false);
+
+  const withToken = publishDevAmplifyConfig(
+    { ...devPublishInput, GBO_API_TOKEN: "prod-gbo-token", GBO_DEV_API_TOKEN: "dev-gbo-fixture" },
+    (args) => {
+      calls.push(args);
+      return amplifyResponses("dev")(args);
+    }
+  );
+  assert.equal(withToken.environment.GBO_STOREFRONT_ENABLED, "true");
+  const serialized = JSON.stringify(calls);
+  assert.equal(serialized.includes("dev-gbo-fixture"), false);
+  assert.equal(serialized.includes("prod-gbo-token"), false);
+});
+
 test("dev Amplify publish stops before an update when the app or branch is wrong", () => {
   const wrongRepo: string[][] = [];
   assert.throws(() =>
@@ -323,6 +388,11 @@ test("the dev frontend build rejects missing and production configuration withou
     const built = writeDevFrontendEnvFile(valid, BLOSSOMPOT_AMPLIFY_APP_ID, envFile);
     assert.equal(built.NEXT_PUBLIC_SITE_URL, `https://dev.${BLOSSOMPOT_AMPLIFY_APP_ID}.amplifyapp.com`);
     assert.equal(built.GBO_STOREFRONT_ENABLED, "false");
+    const enabled = devFrontendBuildEnv(
+      { ...valid, GBO_STOREFRONT_ENABLED: "true" },
+      BLOSSOMPOT_AMPLIFY_APP_ID
+    );
+    assert.equal(enabled.GBO_STOREFRONT_ENABLED, "true");
     assert.equal(built.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, undefined);
     assert.doesNotMatch(readFileSync(envFile, "utf8"), /pk_live|ASIA|secret/i);
   } finally {
