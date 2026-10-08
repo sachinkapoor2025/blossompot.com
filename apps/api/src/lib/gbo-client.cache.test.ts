@@ -5,7 +5,7 @@ import {
   gboGiftsCacheKey,
   gboListGifts,
   gboSandboxEnabled,
-} from "./gbo-client.ts";
+} from "./gbo-client";
 
 const previousSandbox = process.env.GBO_SANDBOX;
 const previousToken = process.env.GBO_API_TOKEN;
@@ -52,10 +52,10 @@ test("sandbox and live gift cache keys stay distinct", async () => {
   }) as typeof fetch;
 
   process.env.GBO_SANDBOX = "true";
-  assert.equal(gboSandboxEnabled({ token: "test-token" }), true);
+  assert.equal(gboSandboxEnabled(), true);
   const sandboxGifts = await gboListGifts({ country: "US" }, { token: "test-token" });
   process.env.GBO_SANDBOX = "false";
-  assert.equal(gboSandboxEnabled({ token: "test-token" }), false);
+  assert.equal(gboSandboxEnabled(), false);
   const liveGifts = await gboListGifts({ country: "US" }, { token: "test-token" });
 
   assert.equal(sandboxGifts[0]?.name, "Sandbox basket");
