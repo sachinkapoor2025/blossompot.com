@@ -19,7 +19,6 @@ const serviceLinks = [
   { label: "Bouquets", href: categoryHref("flower-bouquets") },
   { label: "Cakes", href: categoryHref("cakes") },
   { label: "Gift hampers", href: categoryHref("gift-hampers") },
-  { label: "Same-day gifts", href: categoryHref("same-day-gifts") },
   { label: "Shipping", href: "/shipping" },
   { label: "FAQ", href: "/faq" },
   { label: "Contact", href: "/contact" },

@@ -1,4 +1,4 @@
-import { VENDOR_BLOSSOMPOT, VENDOR_ORANGE_COUNTY, VENDOR_GBO } from "../constants";
+import { VENDOR_BLOSSOMPOT, VENDOR_ORANGE_COUNTY, VENDOR_GBO, VENDOR_FNP } from "../constants";
 import { isGboVendor, parseGboSku, parseGboSlug } from "./gbo";
 import { normalizePostal, normalizePrefix } from "./postal-countries";
 
@@ -271,19 +271,43 @@ export function productKeptForServiceableVendors(
   return vendorSlugs.includes(fulfillmentVendorSlug(product));
 }
 
+function nationwideUsArea(vendorSlug: string, areaId: string): VendorServiceArea {
+  return {
+    areaId,
+    vendorSlug,
+    countryCode: "US",
+    scope: "COUNTRY",
+    ruleType: "ALLOW",
+    isActive: true,
+    priority: 0,
+  };
+}
+
+/** True when the vendor has ZIP/city/state/radius rules for this country (not country-wide). */
+export function vendorHasLocationScopedAreas(
+  areas: readonly VendorServiceArea[],
+  vendorSlug: string,
+  countryCode: string
+): boolean {
+  const iso = countryCode.trim().toUpperCase();
+  if (!iso) return false;
+  return areas.some(
+    (area) =>
+      area.vendorSlug === vendorSlug &&
+      area.isActive !== false &&
+      area.countryCode.toUpperCase() === iso &&
+      area.scope !== "COUNTRY"
+  );
+}
+
 /** Built-in nationwide US coverage for BlossomPot catalog SKUs (no marketplace vendor). */
 export function defaultBlossompotAreas(): VendorServiceArea[] {
-  return [
-    {
-      areaId: "default-bp-us",
-      vendorSlug: VENDOR_BLOSSOMPOT,
-      countryCode: "US",
-      scope: "COUNTRY",
-      ruleType: "ALLOW",
-      isActive: true,
-      priority: 0,
-    },
-  ];
+  return [nationwideUsArea(VENDOR_BLOSSOMPOT, "default-bp-us")];
+}
+
+/** Built-in nationwide US coverage for FNP catalog SKUs until admin stores areas. */
+export function defaultFnpAreas(): VendorServiceArea[] {
+  return [nationwideUsArea(VENDOR_FNP, "default-fnp-us")];
 }
 
 /** Orange County local prefixes — used until admin overrides exist. */

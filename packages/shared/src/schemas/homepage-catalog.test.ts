@@ -23,8 +23,8 @@ function sampleCatalog(overrides?: Partial<{ giftCount: number; image: string; s
 describe("homepage catalog schema", () => {
   it("accepts the 13-tile homepage record", () => {
     const parsed = homepageCatalogDataSchema.parse(sampleCatalog());
-    assert.equal(parsed.tiles.length, 13);
-    assert.equal(parsed.tiles[9].href, "/same-day-delivery");
+    assert.equal(parsed.tiles.length, HOMEPAGE_TILE_IDENTITY.length);
+    assert.equal(parsed.tiles[9].href, "/plants");
     assert.equal(parsed.giftCount, 400);
   });
 

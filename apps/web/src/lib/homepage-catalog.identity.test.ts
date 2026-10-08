@@ -44,7 +44,7 @@ describe("homepage catalog derivation", () => {
     );
     const parsedDerived = homepageCatalogDataSchema.safeParse(derived);
     assert.equal(parsedDerived.success, true);
-    assert.equal(derived.tiles.length, 13);
+    assert.equal(derived.tiles.length, HOMEPAGE_TILE_IDENTITY.length);
   });
 
   it("reuses the shared country record and does not rebuild it", async () => {
@@ -72,7 +72,7 @@ describe("homepage catalog derivation", () => {
     assert.equal(second.source, "shared");
     assert.equal(builds, 1);
     assert.equal(second.data.giftCount, 259);
-    assert.equal(second.data.tiles.length, 13);
+    assert.equal(second.data.tiles.length, HOMEPAGE_TILE_IDENTITY.length);
   });
 
   it("keeps US and GB records separate", async () => {

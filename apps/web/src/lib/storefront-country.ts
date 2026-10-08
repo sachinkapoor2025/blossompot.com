@@ -74,3 +74,13 @@ export async function getStorefrontDeliveryCountry(
     ) ?? ""
   );
 }
+
+/** Postal/ZIP from the delivery-location cookie, when the shopper has entered one. */
+export async function getStorefrontDeliveryPostal(): Promise<string> {
+  try {
+    const cookie = (await cookies()).get(DELIVERY_LOCATION_COOKIE)?.value;
+    return parseDeliveryLocationToken(cookie ? decodeCookieValue(cookie) : "")?.postalCode?.trim() ?? "";
+  } catch {
+    return "";
+  }
+}

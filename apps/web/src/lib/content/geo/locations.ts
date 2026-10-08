@@ -48,8 +48,8 @@ function normalize(raw: RawLocation): GeoLocation {
   }
   const deliveryWindow =
     raw.type === "state"
-      ? `Same-day options before ${raw.cutoffTimeLocal} local in select ZIPs; otherwise standard worldwide shipping, typically 5–7 business days`
-      : `Same-day before ${raw.cutoffTimeLocal} local in select ${raw.name} ZIPs; otherwise standard worldwide shipping, typically 5–7 business days`;
+      ? `Standard worldwide shipping, typically 5–7 business days (order before ${raw.cutoffTimeLocal} local for next dispatch)`
+      : `Standard worldwide shipping to ${raw.name}, typically 5–7 business days (order before ${raw.cutoffTimeLocal} local for next dispatch)`;
   return {
     type: raw.type,
     slug: raw.slug,

@@ -11,7 +11,7 @@ export const homeSeoContent = {
     paragraphs: [
       "BlossomPot is an online gifting destination for flowers, bouquets, cakes, plants, and thoughtful gift hampers. Whether you are celebrating a birthday, anniversary, Valentine’s Day, Mother’s Day, or a simple thank-you, shop premium gifts with worldwide delivery.",
       "Browse florist-quality roses and mixed bouquets, celebration cakes, personalized boxes, and curated hampers — all in one marketplace-style experience designed for modern worldwide gifting.",
-      "From same-day eligible gifts in select areas to worldwide delivery options, BlossomPot helps you send something beautiful without the guesswork.",
+      "From classic bouquets to curated hampers, BlossomPot helps you send something beautiful with worldwide delivery — without the guesswork.",
     ],
   },
   categories: {
@@ -55,7 +55,7 @@ export const homeSeoContent = {
     heading: "Gift Delivery Across the USA",
     paragraphs: [
       "BlossomPot supports nationwide gift delivery messaging with faster windows to major metros when available. Choose flowers, cakes, or hampers and enter the recipient’s US address at checkout.",
-      "Looking for urgency? Shop same-day eligible gifts and check delivery guidance on each product page before you order.",
+      "Check delivery guidance on each product page before you order so the gift arrives when you need it.",
     ],
   },
   howItWorks: {
@@ -102,8 +102,8 @@ export const homeSeoContent = {
         a: "Flowers, bouquets, cakes, plants, personalized gifts, celebration gifts, and gift hampers for birthdays, anniversaries, and more.",
       },
       {
-        q: "Do you offer same-day delivery?",
-        a: "Same-day options may be available for eligible gifts in select areas. Check the product page and checkout delivery guidance.",
+        q: "How long does delivery take?",
+        a: "Most gifts use the worldwide delivery window shown on the product page and at checkout after you enter the recipient address.",
       },
       {
         q: "Can I add a gift message?",

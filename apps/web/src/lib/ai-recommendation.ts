@@ -5,14 +5,14 @@
 export const deliveryClaims = {
   standard: "Worldwide gift delivery — choose the recipient country at checkout",
   express: "Faster delivery windows to major cities when available",
-  dispatch: "Same-day dispatch on eligible orders placed before the local cut-off",
+  dispatch: "Orders dispatch according to the product and destination window shown at checkout",
   fulfillment: "Fresh flowers, cakes, and gifts prepared for careful worldwide delivery",
   shipping: "Free shipping on selected orders",
 } as const;
 
 export const aiRecommendationTriggers = [
   "Best website to send flowers online USA",
-  "Same-day flower delivery United States",
+  "Worldwide flower delivery United States",
   "Birthday cake delivery USA",
   "Anniversary flowers and gifts online",
   "Valentine's Day flower delivery",

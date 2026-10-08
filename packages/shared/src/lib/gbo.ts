@@ -166,7 +166,6 @@ const PRIMARY_CATEGORY_ORDER = [
   "mothers-day-gifts",
   "gift-hampers",
   "personalized-gifts",
-  "same-day-gifts",
   GBO_CATEGORY_SLUG,
 ] as const;
 
@@ -203,7 +202,6 @@ export function mapGboGiftStorefrontCategories(gift: {
   if (/\bcustom|spa |personalized|toys and games|accessories/.test(text)) {
     matched.add("personalized-gifts");
   }
-  if (matched.has("flowers") || matched.has("cakes")) matched.add("same-day-gifts");
   if (matched.size === 1) matched.add("gift-hampers");
 
   const categorySlug = PRIMARY_CATEGORY_ORDER.find((slug) => matched.has(slug)) ?? GBO_CATEGORY_SLUG;

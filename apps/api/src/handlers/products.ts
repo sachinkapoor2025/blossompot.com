@@ -39,6 +39,14 @@ import { syncInventoryAlertState } from "../lib/inventory";
 import { ensureProductInDb } from "../lib/ensure-product";
 import { listBundledCatalogProducts, persistMissingBundledCatalogProducts } from "../lib/blossompot-catalog";
 
+function decodeProductPathSlug(raw: string): string {
+  try {
+    return decodeURIComponent(raw).trim();
+  } catch {
+    return raw.trim();
+  }
+}
+
 function mergeBundledCatalogProducts(items: Product[], category?: string): Product[] {
   const bundledBySlug = new Map(listBundledCatalogProducts().map((row) => [row.slug, row]));
   const bySlug = new Map(
@@ -264,11 +272,9 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
   items = items.filter((product) => productAllowedForNewShopping(product, shoppingCountry, vendorRegistry).available);
   const vendorRecords = sortVendorsForDisplay([...vendorRegistry.values()]);
   items = orderProductsByVendor(items, vendorRecords);
-  if (location?.postalCode) {
-    const evals = await evaluateProductsForLocation(items, location);
-    const deliverable = new Set(evals.filter((e) => e.deliverable).map((e) => e.slug));
-    items = items.filter((p) => deliverable.has(p.slug));
-  }
+  const evals = await evaluateProductsForLocation(items, location);
+  const deliverable = new Set(evals.filter((e) => e.deliverable).map((e) => e.slug));
+  items = items.filter((p) => deliverable.has(p.slug));
   const products = items.map(forStorefront);
   const listing =
     event.headers?.["x-blossompot-listing-groups"] === "1" ||
@@ -282,16 +288,11 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
           })),
         }
       : {};
-  if (location?.postalCode) {
-    // Postal availability is per address — do not CDN-cache it.
-    return ok({ products, location, filtered: true, ...listing });
-  }
-  // Vendor availability can change without a product write, so do not CDN-cache the list.
-  return ok({ products, ...listing, ...(location?.countryCode ? { location, filtered: true } : {}) });
+  return ok({ products, location, filtered: true, ...listing });
 }
 
 export async function getProduct(event: APIGatewayProxyEventV2) {
-  const slug = event.pathParameters?.slug;
+  const slug = decodeProductPathSlug(event.pathParameters?.slug ?? "");
   if (!slug) return badRequest("Slug required");
   if (isGboHiddenFromStorefront({ slug })) return notFound("Product not found");
 
@@ -303,7 +304,6 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
     if (!location) return notFound(NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE);
     const visible = productVisibleForDeliveryCountry(cached.product, location.countryCode);
     const shopping = await decideNewShopping(cached.product, location.countryCode);
-    if (!shopping.available && shopping.reason !== "country_not_allowed") return notFound("Product not found");
     if (!visible || !shopping.available) {
       return ok({
         product: forStorefront(cached.product),
@@ -314,18 +314,15 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
         },
       });
     }
-    if (location.postalCode) {
-      const [evalRow] = await evaluateProductsForLocation([cached.product], location);
-      return ok({
-        product: forStorefront(cached.product),
-        availability: {
-          deliverable: Boolean(evalRow?.deliverable),
-          reason: evalRow?.reason,
-          location,
-        },
-      });
-    }
-    return ok({ product: forStorefront(cached.product) });
+    const [evalRow] = await evaluateProductsForLocation([cached.product], location);
+    return ok({
+      product: forStorefront(cached.product),
+      availability: {
+        deliverable: Boolean(evalRow?.deliverable),
+        reason: evalRow?.reason,
+        location,
+      },
+    });
   }
 
   const result = await docClient.send(
@@ -355,7 +352,6 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
   if (!location) return notFound(NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE);
   const visible = productVisibleForDeliveryCountry(product, location.countryCode);
   const shopping = await decideNewShopping(product, location.countryCode);
-  if (!shopping.available && shopping.reason !== "country_not_allowed") return notFound("Product not found");
   if (!visible || !shopping.available) {
     return ok({
       product: forStorefront(product),
@@ -366,18 +362,15 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
       },
     });
   }
-  if (location.postalCode) {
-    const [evalRow] = await evaluateProductsForLocation([product], location);
-    return ok({
-      product: forStorefront(product),
-      availability: {
-        deliverable: Boolean(evalRow?.deliverable),
-        reason: evalRow?.reason,
-        location,
-      },
-    });
-  }
-  return ok({ product: forStorefront(product) });
+  const [evalRow] = await evaluateProductsForLocation([product], location);
+  return ok({
+    product: forStorefront(product),
+    availability: {
+      deliverable: Boolean(evalRow?.deliverable),
+      reason: evalRow?.reason,
+      location,
+    },
+  });
 }
 
 export async function createProduct(event: APIGatewayProxyEventV2) {

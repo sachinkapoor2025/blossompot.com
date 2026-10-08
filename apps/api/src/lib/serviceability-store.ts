@@ -3,9 +3,11 @@ import { v4 as uuidv4 } from "uuid";
 import {
   VENDOR_BLOSSOMPOT,
   VENDOR_ORANGE_COUNTY,
+  VENDOR_FNP,
   CATALOG_VENDOR_SLUGS,
   catalogVendorShoppingStatus,
   defaultBlossompotAreas,
+  defaultFnpAreas,
   defaultOrangeCountyAreas,
   marketplaceVendorKeys,
   vendorCoverageKeys,
@@ -122,6 +124,9 @@ export async function loadCoverageBundle(): Promise<{
   const areas = [...stored];
   if (catalogActive.includes(VENDOR_BLOSSOMPOT) && !storedByVendor.has(VENDOR_BLOSSOMPOT)) {
     areas.push(...defaultBlossompotAreas());
+  }
+  if (catalogActive.includes(VENDOR_FNP) && !storedByVendor.has(VENDOR_FNP)) {
+    areas.push(...defaultFnpAreas());
   }
   if (catalogActive.includes(VENDOR_ORANGE_COUNTY) && !storedByVendor.has(VENDOR_ORANGE_COUNTY)) {
     areas.push(...defaultOrangeCountyAreas());

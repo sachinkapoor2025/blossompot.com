@@ -98,18 +98,6 @@ export const COLLECTIONS: CollectionDefinition[] = [
     filter: (products) => limitVendorOrderedByUpdated(products.filter((p) => usdPrice(p) <= 100), 36),
   },
   {
-    slug: "same-day-gifts",
-    title: "Same-Day Gift Ideas Worldwide | BlossomPot",
-    h1: "Same-Day Eligible Gifts",
-    description: "Gifts that may qualify for same-day delivery in select ZIP codes.",
-    intro: "Browse options that can support same-day windows where coverage allows.",
-    filter: (products) =>
-      limitVendorOrdered(
-        products.filter((p) => inCategory(p, "same-day-gifts") || matchesAnyKeyword(p, ["same day", "same-day"])),
-        36
-      ),
-  },
-  {
     slug: "cakes",
     title: "Celebration Cakes Worldwide | BlossomPot",
     h1: "Celebration Cakes",

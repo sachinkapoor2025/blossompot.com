@@ -28,7 +28,6 @@ const categoryLinks = [
   { label: "Cakes", href: categoryHref("cakes") },
   { label: "Hampers", href: categoryHref("gift-hampers") },
   { label: "Birthday", href: categoryHref("birthday-gifts") },
-  { label: "Same-Day", href: categoryHref("same-day-gifts") },
 ];
 
 function VisualHeading({

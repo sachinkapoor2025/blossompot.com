@@ -56,7 +56,7 @@ describe("product delivery FAQ follows the selected country", () => {
     assert.match(faq.a, /USA window/);
     const payment = productFaqsForCategory("flowers").find((item) => item.q.includes("payment"));
     assert.match(payment?.a ?? "", /Stripe \(USD\) and Razorpay \(INR\)/);
-    assert.match(faq.a, /Same-day options are available in select cities/);
+    assert.match(faq.a, /product page and checkout/);
   });
 
   it("uses the project USA display name for the United States", () => {

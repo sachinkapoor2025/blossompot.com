@@ -115,13 +115,21 @@ async function setVendor(vendorSlug: string, enabled: boolean) {
 describe("catalog vendor availability for new shopping", { concurrency: false }, () => {
   it("lists an enabled vendor product and hides it when that vendor is disabled", async () => {
     await setVendor("orange-county", true);
-    const open = resultOf(await listProducts(shopperEvent({ queryStringParameters: { country: "US" } })));
+    const nationwide = resultOf(await listProducts(shopperEvent({ queryStringParameters: { country: "US" } })));
+    assert.equal(nationwide.statusCode, 200);
+    assert.equal(slugsOf(nationwide.body).includes("phase4-oc"), false);
+    assert.equal(slugsOf(nationwide.body).includes("phase4-owned"), true);
+    const open = resultOf(
+      await listProducts(shopperEvent({ queryStringParameters: { country: "US", postalCode: "92612" } }))
+    );
     assert.equal(open.statusCode, 200);
     assert.equal(slugsOf(open.body).includes("phase4-oc"), true);
     assert.equal(slugsOf(open.body).includes("phase4-owned"), true);
 
     await setVendor("orange-county", false);
-    const closed = resultOf(await listProducts(shopperEvent({ queryStringParameters: { country: "US" } })));
+    const closed = resultOf(
+      await listProducts(shopperEvent({ queryStringParameters: { country: "US", postalCode: "92612" } }))
+    );
     assert.equal(slugsOf(closed.body).includes("phase4-oc"), false);
     assert.equal(slugsOf(closed.body).includes("phase4-owned"), true);
     await setVendor("orange-county", true);
@@ -134,7 +142,8 @@ describe("catalog vendor availability for new shopping", { concurrency: false },
 
     await setVendor("fnp", false);
     const hidden = resultOf(await getProduct(shopperEvent({ pathParameters: { slug: "phase4-fnp" } })));
-    assert.equal(hidden.statusCode, 404);
+    assert.equal(hidden.statusCode, 200);
+    assert.equal((hidden.body as { availability?: { deliverable?: boolean } }).availability?.deliverable, false);
 
     await setVendor("fnp", true);
     const restored = resultOf(await getProduct(shopperEvent({ pathParameters: { slug: "phase4-fnp" } })));

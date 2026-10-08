@@ -68,12 +68,6 @@ const TILES: { slug: string; label: string; fallback: string; alt: string }[] = 
     alt: "Curated gift hamper",
   },
   {
-    slug: "same-day-gifts",
-    label: "Same-Day",
-    fallback: editorialCdnUrl("tile-same-day.jpg"),
-    alt: "Same-day flower delivery",
-  },
-  {
     slug: "plants",
     label: "Plants",
     fallback: editorialCdnUrl("tile-plants.jpg"),

@@ -149,7 +149,7 @@ describe("gbo helpers", () => {
     });
     assert.equal(mapped.categorySlug, "flowers");
     assert.ok(mapped.additionalCategorySlugs.includes("birthday-gifts"));
-    assert.ok(mapped.additionalCategorySlugs.includes("same-day-gifts"));
+    assert.equal(mapped.additionalCategorySlugs.includes("same-day-gifts"), false);
   });
 
   it("namespaces partner order ids", () => {

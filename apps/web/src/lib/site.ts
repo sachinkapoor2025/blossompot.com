@@ -43,7 +43,7 @@ export const site = {
   foundingDate: "2024",
   tagline: "Flowers ♥ Cakes ♥ Gifts — Delivering Smiles",
   description:
-    "BlossomPot.com — premium online gifting for flowers, bouquets, cakes, and curated gifts with worldwide delivery. Same-day options in select cities, elegant designs for birthdays, anniversaries, Valentine's Day, Mother's Day, and more.",
+    "BlossomPot.com — premium online gifting for flowers, bouquets, cakes, and curated gifts with worldwide delivery. Elegant designs for birthdays, anniversaries, Valentine's Day, Mother's Day, and more.",
   supportEmail: "support@blossompot.com",
   phone: SUPPORT_PHONE_DISPLAY,
   whatsapp: SUPPORT_PHONE_DIGITS,
@@ -83,7 +83,6 @@ export const navItems = [
   { label: "Valentine's", href: categoryHref("valentines-day-gifts"), category: "valentines-day-gifts" },
   { label: "Hampers", href: categoryHref("gift-hampers"), category: "gift-hampers" },
   { label: "Gift Catalog", href: "/gift-catalog" },
-  { label: "Same-Day", href: categoryHref("same-day-gifts"), category: "same-day-gifts" },
   { label: "Remember", href: "/remember" },
 ] as const;
 
@@ -168,7 +167,7 @@ export const homeBanners = [
   },
   {
     src: "/banners/home-banner-flowers.jpg",
-    alt: "Fresh flowers from blossompot.com — roses, mixed bouquets, and same-day delivery",
+    alt: "Fresh flowers from blossompot.com — roses, mixed bouquets, and worldwide delivery",
     href: "/flowers",
     layout: "full" as const,
     imageFit: "contain" as const,
@@ -177,7 +176,7 @@ export const homeBanners = [
     titleAccent: "fresh flowers",
     description: "Roses, mixed bouquets, sunflowers and more for every occasion.",
     cta: "Shop Flowers",
-    pill: "Premium quality · Same-day delivery · Freshness guaranteed",
+    pill: "Premium quality · Worldwide delivery · Freshness guaranteed",
   },
 ] as const;
 
@@ -189,7 +188,6 @@ export const homeCategoryOrder = [
   "anniversary-gifts",
   "gift-hampers",
   "personalized-gifts",
-  "same-day-gifts",
 ] as const;
 
 export const setSizeCategoryOrder = [] as const;
@@ -275,8 +273,8 @@ export const faqs = [
     a: "Flowers, bouquets, cakes, gift hampers, personalized gifts, plants, and occasion collections for birthdays, anniversaries, Valentine's Day, Mother's Day, weddings, and more — with worldwide delivery.",
   },
   {
-    q: "Do you offer same-day delivery?",
-    a: "Same-day gift options appear in select cities when you order before the local cut-off. Look for the Same-Day collection or the delivery estimate on the product page for the recipient country.",
+    q: "How long does delivery take?",
+    a: "Delivery windows depend on the product and the recipient address. Estimated timing is shown on the product page and at checkout after you choose the delivery country.",
   },
   {
     q: "Can I add a gift message?",

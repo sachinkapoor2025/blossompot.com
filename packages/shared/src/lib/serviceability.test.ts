@@ -1,9 +1,10 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { VENDOR_BLOSSOMPOT, VENDOR_GBO, VENDOR_ORANGE_COUNTY } from "../constants";
+import { VENDOR_BLOSSOMPOT, VENDOR_FNP, VENDOR_GBO, VENDOR_ORANGE_COUNTY } from "../constants";
 import {
   checkVendorServiceability,
   defaultBlossompotAreas,
+  defaultFnpAreas,
   defaultOrangeCountyAreas,
   getServiceableVendors,
   isProductDeliverableToLocation,
@@ -90,6 +91,14 @@ describe("serviceability engine", () => {
       "vendor-c",
     ]);
     assert.deepEqual(matches.map((m) => m.vendorSlug).sort(), ["vendor-a", "vendor-b"]);
+  });
+
+  it("FNP default country US covers any US ZIP", () => {
+    const r = checkVendorServiceability(VENDOR_FNP, defaultFnpAreas(), {
+      countryCode: "US",
+      postalCode: "10001",
+    });
+    assert.equal(r.serviceable, true);
   });
 
   it("BlossomPot default country US covers any US ZIP", () => {

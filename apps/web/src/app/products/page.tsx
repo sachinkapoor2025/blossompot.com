@@ -57,10 +57,6 @@ const CATEGORY_SEO: Record<string, { title: string; description: string }> = {
     title: "Anniversary Gifts Worldwide | BlossomPot",
     description: "Anniversary roses, bouquets, and romantic gifts for worldwide delivery.",
   },
-  "same-day-gifts": {
-    title: "Same-Day Gifts | Select Cities | BlossomPot",
-    description: "Same-day eligible gifts in select ZIP codes — confirm cut-off at checkout.",
-  },
 };
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
@@ -91,7 +87,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   const shopSeo = localizeShopCopy(seoPath, {
     title: "Shop Flowers, Cakes & Gifts — Worldwide Delivery | BlossomPot",
     description:
-      "Browse flowers, bouquets, cakes, and curated gift hampers. Birthday, anniversary, Valentine’s, and same-day options with clear worldwide delivery guidance.",
+      "Browse flowers, bouquets, cakes, and curated gift hampers. Birthday, anniversary, and Valentine’s gifts with clear worldwide delivery guidance.",
   });
   return pageMetadata({
     title: shopSeo.title,

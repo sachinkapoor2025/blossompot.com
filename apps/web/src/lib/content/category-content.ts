@@ -93,11 +93,6 @@ export const categoryContent: Record<string, CategoryContent> = {
       "Living plant gifts that last beyond the celebration — perfect for new homes, desks, and thoughtful thank-yous.",
     ],
   },
-  "same-day-gifts": {
-    extraParagraphs: [
-      "When timing matters, browse same-day eligible gifts and confirm delivery guidance on the product page before checkout.",
-    ],
-  },
   "celebration-gifts": {
     extraParagraphs: [
       "Celebration gifts for promotions, housewarmings, congratulations, and every reason to send something special.",

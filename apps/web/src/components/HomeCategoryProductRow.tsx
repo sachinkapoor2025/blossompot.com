@@ -2,8 +2,9 @@ import Link from "next/link";
 import { categoryHref } from "@/lib/category-urls";
 import { loadProductsByCategory, toListingCardProducts } from "@/lib/product-loader";
 import { getCatalogProductsByCategory } from "@/lib/catalog-fallback";
-import { productVisibleForDeliveryCountry } from "@blossompot/shared";
+import { productVisibleForDeliveryCountry, type Product } from "@blossompot/shared";
 import { HomeCategoryProductScroller } from "@/components/HomeCategoryProductScroller";
+import { isRakhiRelatedProduct } from "@/lib/rakhi-filter";
 
 export const HOME_PRODUCT_ROW_LIMIT = 8;
 
@@ -12,10 +13,19 @@ export const HOME_PRODUCT_SECTIONS = [
   { slug: "flower-bouquets", title: "Bouquets" },
   { slug: "cakes", title: "Cakes" },
   { slug: "gift-hampers", title: "Gift Hampers" },
-  { slug: "rakhi-hampers", title: "Rakhi Hampers" },
 ] as const;
 
 const CARD_WIDTH = "w-[10.75rem] sm:w-[13rem] lg:w-[15rem]";
+
+function productsForHomeSection(slug: string, products: Product[]): Product[] {
+  const withoutRakhi = products.filter(
+    (product) => product.categorySlug !== "rakhi-hampers" && !isRakhiRelatedProduct(product)
+  );
+  if (slug === "gift-hampers") {
+    return withoutRakhi.filter((product) => product.categorySlug === "gift-hampers");
+  }
+  return withoutRakhi;
+}
 
 export function HomeCategoryProductRowFallback({ title }: { title: string }) {
   return (
@@ -59,6 +69,7 @@ export async function HomeCategoryProductRow({
       productVisibleForDeliveryCountry(product, country)
     );
   }
+  products = productsForHomeSection(slug, products);
 
   const cards = toListingCardProducts(products.slice(0, HOME_PRODUCT_ROW_LIMIT));
 

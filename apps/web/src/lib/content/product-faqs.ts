@@ -23,7 +23,7 @@ export function deliveryWindowFaq(destinationName: string): ProductFaq {
   const place = DELIVERY_FAQ_ARTICLE.has(destination) ? `the ${destination}` : destination;
   return {
     q: `How long does delivery take in ${place}?`,
-    a: `Most gifts ship with an estimated 5–7 business day ${destination} window after dispatch. Same-day options are available in select cities when you order before the local cut-off — see the product page delivery estimate for your order.`,
+    a: `Most gifts ship with an estimated 5–7 business day ${destination} window after dispatch. See the product page and checkout for the delivery estimate on your order.`,
   };
 }
 

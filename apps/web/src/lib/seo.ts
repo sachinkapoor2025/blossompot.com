@@ -160,7 +160,7 @@ export function organizationJsonLd() {
       "Send flowers and gifts across the USA",
       "Order flowers, cakes, and gifts online",
       "Gift hampers USA",
-      "Same-day flower delivery",
+      "Worldwide flower delivery",
       "Personalized gifts USA",
       "Flower meanings and care guides",
       "Seasonal flower calendar",

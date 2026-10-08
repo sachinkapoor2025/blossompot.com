@@ -55,11 +55,6 @@ export const HOME_CATEGORY_PRODUCTS: Record<HomeCategorySlug, HomeProductRef[]> 
     { name: "Personalized Gift Box", slug: "personalized-gift-box" },
     { name: "Anniversary Gift Box", slug: "anniversary-gift-box" },
   ],
-  "same-day-gifts": [
-    { name: "Same-Day Cheer Bouquet", slug: "same-day-cheer-bouquet" },
-    { name: "Same-Day Chocolate Cake", slug: "same-day-chocolate-cake" },
-    { name: "Classic Red Rose Bouquet", slug: "classic-red-rose-bouquet" },
-  ],
 };
 
 function normalizeProductLabel(value: string): string {

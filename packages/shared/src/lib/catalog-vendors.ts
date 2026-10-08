@@ -261,18 +261,22 @@ export function productAllowedForNewShopping(
 }
 
 /**
- * Outside the United States, a vendor that delivers to the selected country stays shoppable
- * when no service area is stored for that country. US ZIP and prefix rules are unchanged.
+ * A vendor that delivers to the selected country stays shoppable when no service
+ * area is stored for that country. ZIP/prefix/city rules stay in force: pass
+ * `hasLocationScopedAreas: true` so those vendors still require a matching area.
  */
 export function vendorCoversShoppingCountryWithoutArea(
   vendor: { vendorSlug: string; enabled: boolean; deliveryCountries: readonly string[]; trashedAt?: string } | null | undefined,
   countryCode: string,
   areaReason: string | undefined,
-  env: Record<string, string | undefined> = process.env
+  env: Record<string, string | undefined> = process.env,
+  hasLocationScopedAreas?: boolean
 ): boolean {
   if (areaReason !== "no_matching_service_area" || !vendor) return false;
   const iso = countryCode.trim().toUpperCase();
-  if (!iso || iso === "US") return false;
+  if (!iso) return false;
+  if (hasLocationScopedAreas) return false;
+  if (iso === "US" && hasLocationScopedAreas !== false) return false;
   if (!vendor.deliveryCountries.includes(iso)) return false;
   return catalogVendorShoppingStatus(
     { vendorSlug: vendor.vendorSlug, enabled: vendor.enabled, trashedAt: vendor.trashedAt },

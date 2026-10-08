@@ -3,18 +3,19 @@ import { describe, it } from "node:test";
 import { faqsForCountry } from "./faqs-for-country";
 
 describe("faqsForCountry", () => {
-  it("does not keep USA-only same-day copy for other countries", () => {
+  it("localizes delivery timing copy for other countries", () => {
     const uk = faqsForCountry("GB");
-    const sameDay = uk.find((item) => item.q === "Do you offer same-day delivery?");
-    assert.ok(sameDay);
-    assert.match(sameDay.a, /UK/);
-    assert.doesNotMatch(sameDay.a, /select US cities/);
+    const timing = uk.find((item) => item.q === "How long does delivery take?");
+    assert.ok(timing);
+    assert.match(timing.a, /UK/);
+    assert.doesNotMatch(timing.a, /same-day/i);
   });
 
-  it("keeps US same-day cities language for the USA", () => {
+  it("uses US recipient-address timing copy for the USA", () => {
     const us = faqsForCountry("US");
-    const sameDay = us.find((item) => item.q === "Do you offer same-day delivery?");
-    assert.ok(sameDay);
-    assert.match(sameDay.a, /US cities/);
+    const timing = us.find((item) => item.q === "How long does delivery take?");
+    assert.ok(timing);
+    assert.match(timing.a, /US recipient address/);
+    assert.doesNotMatch(timing.a, /same-day/i);
   });
 });

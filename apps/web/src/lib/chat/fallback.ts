@@ -26,7 +26,7 @@ function categoriesReply(): string {
 }
 
 function deliveryReply(): string {
-  return `We deliver gifts **worldwide**. Choose the recipient country in the header or at checkout — timing, catalog, and currency follow that destination. Same-day options appear in select cities when you order before the local cut-off.\n\nMore details: [Shipping & Delivery](${siteUrl}/shipping)`;
+  return `We deliver gifts **worldwide**. Choose the recipient country in the header or at checkout — timing, catalog, and currency follow that destination. Estimated delivery windows are shown on the product page and at checkout.\n\nMore details: [Shipping & Delivery](${siteUrl}/shipping)`;
 }
 
 function occasionReply(): string {

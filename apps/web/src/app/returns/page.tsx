@@ -118,9 +118,8 @@ export default function ReturnsPage() {
 
         <h2 className="text-xl font-bold text-primary">Delivery Issues &amp; Delays</h2>
         <p>
-          Most orders follow the delivery window shown at checkout (often 5–7 business days after dispatch;
-          same-day is available in select cities when the local cut-off allows). If your gift hasn&apos;t
-          arrived within that time:
+          Most orders follow the delivery window shown at checkout (often 5–7 business days after dispatch).
+          If your gift hasn&apos;t arrived within that time:
         </p>
         <ul className="list-disc pl-5 space-y-2">
           <li>
@@ -150,8 +149,8 @@ export default function ReturnsPage() {
           </li>
         </ul>
         <p>
-          For same-day and date-specific deliveries, we monitor at-risk orders proactively so we can step in
-          before the occasion is missed.
+          For date-specific deliveries, we monitor at-risk orders proactively so we can step in before the
+          occasion is missed.
         </p>
 
         <h2 className="text-xl font-bold text-primary">Cancellations &amp; Order Changes</h2>
@@ -161,9 +160,9 @@ export default function ReturnsPage() {
           florist or baker begins preparation.
         </p>
         <p>
-          <strong>After dispatch:</strong> Once an order has shipped or a cake/bouquet has been prepared for
-          same-day delivery, cancellation usually isn&apos;t possible. Contact us right away and we&apos;ll do
-          everything we can, but we can&apos;t guarantee a stop once preparation has started.
+          <strong>After dispatch:</strong> Once an order has shipped or a cake/bouquet has been prepared,
+          cancellation usually isn&apos;t possible. Contact us right away and we&apos;ll do everything we can,
+          but we can&apos;t guarantee a stop once preparation has started.
         </p>
 
         <h2 className="text-xl font-bold text-primary">Refund Timelines</h2>

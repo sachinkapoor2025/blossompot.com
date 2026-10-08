@@ -43,48 +43,16 @@ export function estimatedDeliveryShort(from = new Date()): string {
   return `${formatDeliveryDate(start)} – ${formatDeliveryDate(end)}`;
 }
 
-const SAME_DAY_CATEGORY_SLUGS = new Set([
-  "same-day-gifts",
-  "flowers",
-  "flower-bouquets",
-  "cakes",
-  "celebration-gifts",
-]);
-
 /**
  * Unified delivery promise for banners, PDP, category, geo, and checkout.
- * Same-day is only claimed when the product/category supports it AND a zip is in a same-day market
- * (zip lookup is optional — without zip we never claim same-day).
+ * Storefront copy uses the standard worldwide window — not same-day claims.
  */
 export function getDeliveryPromise(
-  product?: { categorySlug?: string; tags?: string[] } | null,
-  zip?: string | null,
+  _product?: { categorySlug?: string; tags?: string[] } | null,
+  _zip?: string | null,
   from = new Date()
 ): DeliveryPromise {
   const estimatedWindow = estimatedDeliveryRange(from);
-  const category = product?.categorySlug ?? "";
-  const tags = product?.tags ?? [];
-  const categoryAllowsSameDay =
-    SAME_DAY_CATEGORY_SLUGS.has(category) ||
-    tags.some((t) => /same-?day/i.test(t));
-
-  // Conservative: only mark same-day eligible when a ZIP is provided AND category allows it.
-  // City-level cutoffs live in geo config; without ZIP we advertise standard USA window.
-  const sameDayEligible = Boolean(zip && categoryAllowsSameDay && /^\d{5}/.test(zip.trim()));
-
-  if (sameDayEligible) {
-    return {
-      sameDayEligible: true,
-      cutoffLocal: "14:00",
-      estimatedWindow: { start: from, end: from },
-      copy: {
-        short: "Same-day delivery available for this ZIP",
-        label: "Same-day delivery (order before local cut-off)",
-        banner: "Same-day gifting in select cities when you order before the local cut-off",
-      },
-    };
-  }
-
   return {
     sameDayEligible: false,
     cutoffLocal: null,
@@ -92,7 +60,7 @@ export function getDeliveryPromise(
     copy: {
       short: `Est. ${estimatedDeliveryShort(from)}`,
       label: estimatedDeliveryLabel(from),
-      banner: "Worldwide delivery · timing depends on destination · same-day in select cities",
+      banner: "Worldwide delivery · timing depends on destination",
     },
   };
 }

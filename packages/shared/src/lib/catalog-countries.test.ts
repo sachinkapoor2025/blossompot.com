@@ -346,6 +346,20 @@ describe("customer country resolution", () => {
     );
     assert.equal(
       vendorCoversShoppingCountryWithoutArea(
+        defaultCatalogVendor(VENDOR_FNP),
+        "US",
+        "no_matching_service_area",
+        process.env,
+        false
+      ),
+      true
+    );
+    assert.equal(
+      vendorCoversShoppingCountryWithoutArea(vendor, "US", "no_matching_service_area", process.env, true),
+      false
+    );
+    assert.equal(
+      vendorCoversShoppingCountryWithoutArea(
         { ...vendor, deliveryCountries: ["US", "GB"] },
         "GB",
         "no_matching_service_area"

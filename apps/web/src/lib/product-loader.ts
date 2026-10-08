@@ -26,7 +26,7 @@ import {
 } from "./catalog-fallback";
 import { toListingCardProducts } from "./listing-card";
 import { isRakhiRelatedProduct, storefrontSkipsRakhiCategory } from "./rakhi-filter";
-import { getStorefrontDeliveryCountry } from "./storefront-country";
+import { getStorefrontDeliveryCountry, getStorefrontDeliveryPostal } from "./storefront-country";
 
 function isStorefrontVisible(product: Product): boolean {
   return (
@@ -120,8 +120,23 @@ function isProductMissingError(err: unknown): boolean {
   return /not found/i.test(message) || /\(404\)/.test(message);
 }
 
+function decodeProductSlug(slug: string): string {
+  try {
+    return decodeURIComponent(slug).trim();
+  } catch {
+    return slug.trim();
+  }
+}
+
 function bundledCatalogProduct(slug: string): Product | null {
   const bundled = getCatalogProduct(slug);
+  if (!bundled || !isStorefrontVisible(bundled)) return null;
+  return rememberProduct(bundled);
+}
+
+function bundledProductForCountry(slug: string, country: string): Product | null {
+  const iso = catalogCountry(country);
+  const bundled = getCatalogProductsForCountry(iso).find((product) => product.slug === slug);
   if (!bundled || !isStorefrontVisible(bundled)) return null;
   return rememberProduct(bundled);
 }
@@ -147,12 +162,41 @@ export async function loadProductForCountry(
   slug: string,
   country: string
 ): Promise<{ product: Product; deliverable: boolean; reason?: string } | null> {
-  if (!country || isGboHiddenFromStorefront({ slug })) return null;
+  const decoded = decodeProductSlug(slug);
+  if (!country || isGboHiddenFromStorefront({ slug: decoded })) return null;
+
+  const fromGbo = async (): Promise<{ product: Product; deliverable: boolean } | null> => {
+    const gboRef = parseGboSlug(decoded);
+    if (!gboRef) return null;
+    try {
+      const data = await api<{ gift: GboGift }>(
+        `/gbo/gifts/${gboRef.productId}?country=${gboRef.country}`,
+        { revalidate: false }
+      );
+      if (!data.gift) return null;
+      const mapped = gboGiftToProduct(gboRef.country, data.gift);
+      const { vendorCost: _c, ...rest } = mapped;
+      const product = rememberProduct(rest as Product);
+      if (!isStorefrontVisible(product)) return null;
+      return {
+        product,
+        deliverable: productVisibleForDeliveryCountry(product, country),
+      };
+    } catch {
+      return null;
+    }
+  };
+
   try {
+    const postal = await getStorefrontDeliveryPostal();
+    const locationQuery = new URLSearchParams({ country });
+    if (postal) locationQuery.set("postalCode", postal);
     const data = await api<{
       product: Product;
       availability?: { deliverable?: boolean; reason?: string };
-    }>(`/products/${slug}?country=${encodeURIComponent(country)}`, { revalidate: false });
+    }>(`/products/${encodeURIComponent(decoded)}?${locationQuery.toString()}`, {
+      revalidate: false,
+    });
     if (!isStorefrontVisible(data.product)) return null;
     return {
       product: rememberProduct(data.product),
@@ -160,28 +204,17 @@ export async function loadProductForCountry(
       reason: data.availability?.reason,
     };
   } catch (err) {
-    const gboRef = parseGboSlug(slug);
-    if (gboRef && !isProductMissingError(err)) {
-      try {
-        const data = await api<{ gift: GboGift }>(
-          `/gbo/gifts/${gboRef.productId}?country=${gboRef.country}`,
-          { revalidate: false }
-        );
-        if (data.gift) {
-          const mapped = gboGiftToProduct(gboRef.country, data.gift);
-          const { vendorCost: _c, ...rest } = mapped;
-          const product = rememberProduct(rest as Product);
-          return {
-            product,
-            deliverable: productVisibleForDeliveryCountry(product, country),
-          };
-        }
-      } catch {
-        /* GBO token missing, storefront off, or gift not found */
-      }
+    const gbo = await fromGbo();
+    if (gbo) return gbo;
+    const bundled = bundledProductForCountry(decoded, country) ?? bundledCatalogProduct(decoded);
+    if (bundled) {
+      return {
+        product: bundled,
+        deliverable: productVisibleForDeliveryCountry(bundled, country),
+      };
     }
     if (isProductMissingError(err)) return null;
-    const stale = memoryProduct(slug);
+    const stale = memoryProduct(decoded);
     if (stale && isStorefrontVisible(stale)) {
       return { product: stale, deliverable: productVisibleForDeliveryCountry(stale, country) };
     }
@@ -194,15 +227,18 @@ export async function loadProductForCountry(
  * (FNP USA / TF USA) so listings work before Dynamo import completes.
  */
 export async function loadProduct(slug: string): Promise<Product | null> {
-  if (isGboHiddenFromStorefront({ slug })) return null;
+  const decoded = decodeProductSlug(slug);
+  if (isGboHiddenFromStorefront({ slug: decoded })) return null;
   try {
-    const data = await api<{ product: Product }>(`/products/${slug}`, { revalidate: false });
+    const data = await api<{ product: Product }>(`/products/${encodeURIComponent(decoded)}`, {
+      revalidate: false,
+    });
     if (!isStorefrontVisible(data.product)) return null;
     return rememberProduct(data.product);
   } catch (err) {
-    const gboRef = parseGboSlug(slug);
+    const gboRef = parseGboSlug(decoded);
     if (gboRef) {
-      if (isGboHiddenFromStorefront({ slug })) return null;
+      if (isGboHiddenFromStorefront({ slug: decoded })) return null;
       try {
         const data = await api<{ gift: GboGift }>(
           `/gbo/gifts/${gboRef.productId}?country=${gboRef.country}`,
@@ -218,10 +254,10 @@ export async function loadProduct(slug: string): Promise<Product | null> {
       }
     }
 
-    const bundled = bundledCatalogProduct(slug);
+    const bundled = bundledCatalogProduct(decoded);
     if (bundled) return bundled;
     if (isProductMissingError(err)) return null;
-    const stale = memoryProduct(slug);
+    const stale = memoryProduct(decoded);
     if (stale && isStorefrontVisible(stale)) return stale;
     return null;
   }
@@ -233,11 +269,18 @@ function filterLiveForCountry(live: Product[], country: string): Product[] {
   );
 }
 
-function catalogQuery(params?: { category?: string; search?: string; country?: string | null }): string {
+function catalogQuery(params?: {
+  category?: string;
+  search?: string;
+  country?: string | null;
+  postalCode?: string | null;
+}): string {
   const query = new URLSearchParams();
   if (params?.category) query.set("category", params.category);
   if (params?.search) query.set("search", params.search);
   query.set("country", catalogCountry(params?.country));
+  const postal = params?.postalCode?.trim();
+  if (postal) query.set("postalCode", postal);
   return `?${query.toString()}`;
 }
 
@@ -254,10 +297,12 @@ export async function loadProducts(params?: {
   const requested = params?.country ?? (await getStorefrontDeliveryCountry());
   if (!requested) return [];
   const country = catalogCountry(requested);
+  const postalCode = await getStorefrontDeliveryPostal();
   const qs = catalogQuery({
     category: params?.category,
     search: params?.search,
     country: requested,
+    postalCode,
   });
 
   const [dbResult, gboResult] = await Promise.all([

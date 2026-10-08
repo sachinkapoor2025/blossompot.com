@@ -15,6 +15,7 @@ import {
   resolveEnabledShoppingCountry,
   SHOPPING_COUNTRY_ISO,
   vendorCoversShoppingCountryWithoutArea,
+  vendorHasLocationScopedAreas,
   vendorServiceAreaImportRowSchema,
   vendorServiceAreaInputSchema,
   type ServiceabilityMatch,
@@ -115,27 +116,35 @@ export async function checkServiceability(event: APIGatewayProxyEventV2) {
   };
   const checked = activeVendorSlugs.map((slug) => checkVendorServiceability(slug, areas, location, true));
   let vendors = checked.filter((match) => match.serviceable);
-  if (shopping.countryCode !== "US") {
-    const registry = await loadCatalogVendorRegistry();
-    const covered: ServiceabilityMatch[] = [];
-    for (const match of checked) {
-      if (match.serviceable) continue;
-      const vendor = registry.get(match.vendorSlug);
-      if (!vendorCoversShoppingCountryWithoutArea(vendor, shopping.countryCode, match.reason)) continue;
-      covered.push({
-        serviceable: true,
-        reason: "matched",
-        vendorSlug: match.vendorSlug,
-        matchedRule: {
-          areaId: "vendor-delivery-country",
-          scope: "COUNTRY",
-          ruleType: "ALLOW",
-          countryCode: shopping.countryCode,
-        },
-      });
+  const registry = await loadCatalogVendorRegistry();
+  const covered: ServiceabilityMatch[] = [];
+  for (const match of checked) {
+    if (match.serviceable) continue;
+    const vendor = registry.get(match.vendorSlug);
+    if (
+      !vendorCoversShoppingCountryWithoutArea(
+        vendor,
+        shopping.countryCode,
+        match.reason,
+        process.env,
+        vendorHasLocationScopedAreas(areas, match.vendorSlug, shopping.countryCode)
+      )
+    ) {
+      continue;
     }
-    vendors = [...vendors, ...covered];
+    covered.push({
+      serviceable: true,
+      reason: "matched",
+      vendorSlug: match.vendorSlug,
+      matchedRule: {
+        areaId: "vendor-delivery-country",
+        scope: "COUNTRY",
+        ruleType: "ALLOW",
+        countryCode: shopping.countryCode,
+      },
+    });
   }
+  vendors = [...vendors, ...covered];
   const serviceable = vendors.length > 0;
   const where = postal
     ? formatPostalDisplay(shopping.countryCode, postal)
@@ -323,7 +332,15 @@ export async function evaluateProductsForLocation(
     let reason = match.reason;
     let matchedRule = match.matchedRule;
     const vendor = registry.get(match.vendorSlug);
-    if (vendorCoversShoppingCountryWithoutArea(vendor, location.countryCode, match.reason)) {
+    if (
+      vendorCoversShoppingCountryWithoutArea(
+        vendor,
+        location.countryCode,
+        match.reason,
+        process.env,
+        vendorHasLocationScopedAreas(areas, match.vendorSlug, location.countryCode)
+      )
+    ) {
       deliverable = true;
       reason = "matched";
       matchedRule = {

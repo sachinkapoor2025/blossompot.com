@@ -48,6 +48,12 @@ const nextConfig: NextConfig = {
       { source: "/sitemap.rss", destination: "/sitemap.xml", statusCode: 301 },
       { source: "/logo.svg", destination: "/logo.png", statusCode: 301 },
       { source: "/logo.svg/", destination: "/logo.png", statusCode: 301 },
+      { source: "/same-day-delivery", destination: "/products", statusCode: 301 },
+      { source: "/same-day-delivery/", destination: "/products", statusCode: 301 },
+      { source: "/same-day-gifts", destination: "/products", statusCode: 301 },
+      { source: "/same-day-gifts/", destination: "/products", statusCode: 301 },
+      { source: "/collections/same-day-gifts", destination: "/products", statusCode: 301 },
+      { source: "/collections/same-day-gifts/", destination: "/products", statusCode: 301 },
     ];
   },
   async rewrites() {

@@ -13,7 +13,7 @@ const STORAGE_KEY = "blossompot_chat_messages";
 const QUICK_PROMPTS = [
   "What gifts do you sell?",
   "How long is worldwide delivery?",
-  "Do you offer same-day options?",
+  "How does shipping work?",
   "Can I add a gift message?",
 ] as const;
 

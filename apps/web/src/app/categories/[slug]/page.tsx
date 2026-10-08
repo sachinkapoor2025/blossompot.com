@@ -133,7 +133,6 @@ async function CategoryPageContent({ params, searchParams }: Props) {
     "gift-hampers": "Gift Hampers",
     "birthday-gifts": "Birthday Gifts",
     "anniversary-gifts": "Anniversary Gifts",
-    "same-day-gifts": "Same-Day Gifts",
     "valentines-day-gifts": "Valentine's Day Gifts",
   };
   const seoCategoryName = headingName[slug] ?? name;
@@ -149,7 +148,6 @@ async function CategoryPageContent({ params, searchParams }: Props) {
     "anniversary-gifts": "Anniversary Gifts",
     "valentines-day-gifts": "Valentine's Day Gifts",
     "gift-hampers": "Gift Hampers",
-    "same-day-gifts": "Same-Day Gifts",
   };
   const h1 = menuHeading[slug]
     ? `${menuHeading[slug]} to ${deliveryCountryName}`

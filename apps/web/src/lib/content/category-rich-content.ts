@@ -28,15 +28,14 @@ const relatedAll = [
   { slug: "gift-hampers", label: "Gift Hampers", text: "Curated boxes with treats and extras." },
   { slug: "birthday-gifts", label: "Birthday Gifts", text: "Flowers, cakes, and combos for birthdays." },
   { slug: "anniversary-gifts", label: "Anniversary Gifts", text: "Romantic roses, cakes, and gift sets." },
-  { slug: "same-day-gifts", label: "Same-Day Gifts", text: "Faster options in select US cities." },
 ].map((c) => ({ ...c, href: categoryHref(c.slug) }));
 
 function relatedExcept(slug: string) {
   const preferredBySlug: Record<string, string[]> = {
     flowers: ["flower-bouquets", "anniversary-gifts", "birthday-gifts", "gift-hampers"],
     "flower-bouquets": ["flowers", "anniversary-gifts", "valentines-day-gifts", "cakes"],
-    cakes: ["birthday-gifts", "gift-hampers", "same-day-gifts", "flowers"],
-    "birthday-gifts": ["cakes", "flowers", "gift-hampers", "same-day-gifts"],
+    cakes: ["birthday-gifts", "gift-hampers", "flowers", "flower-bouquets"],
+    "birthday-gifts": ["cakes", "flowers", "gift-hampers", "flower-bouquets"],
     "anniversary-gifts": ["flowers", "flower-bouquets", "cakes", "gift-hampers"],
     "valentines-day-gifts": ["flower-bouquets", "flowers", "anniversary-gifts", "gift-hampers"],
     "mothers-day-gifts": ["flowers", "plants", "flower-bouquets", "gift-hampers"],
@@ -44,7 +43,6 @@ function relatedExcept(slug: string) {
     "personalized-gifts": ["gift-hampers", "birthday-gifts", "flowers", "anniversary-gifts"],
     "gift-hampers": ["birthday-gifts", "cakes", "flowers", "corporate-gifting"],
     plants: ["mothers-day-gifts", "flowers", "celebration-gifts", "gift-hampers"],
-    "same-day-gifts": ["flowers", "cakes", "birthday-gifts", "delivery-locations"],
     "celebration-gifts": ["gift-hampers", "birthday-gifts", "flowers", "cakes"],
   };
 
@@ -230,23 +228,6 @@ export const categoryRichContent: Record<string, CategoryRichContent> = {
     "When a Hamper Wins",
     [
       "Hampers are ideal when you want variety in one box — great for thank-yous, housewarmings, and corporate-friendly celebrations.",
-    ]
-  ),
-  "same-day-gifts": giftCategory(
-    "same-day-gifts",
-    "Same-Day Gifts in Select US Cities",
-    [
-      "Need something today? Same-day gift options are available in select US cities when you order before the local cut-off.",
-    ],
-    "Same-Day Tips",
-    [
-      "Order before the local cut-off shown at checkout",
-      "Confirm the recipient address carefully",
-      "Add a gift message for a more personal touch",
-    ],
-    "Last-Minute, Still Thoughtful",
-    [
-      "Same-day does not have to feel rushed. Choose a clean bouquet or classic cake and let careful packaging carry the moment.",
     ]
   ),
 };
