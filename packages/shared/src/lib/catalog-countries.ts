@@ -1,5 +1,5 @@
 import { configKeys } from "../db/keys";
-import { enabledDeliveryCountries, getDeliveryCountry } from "./postal-countries";
+import { getDeliveryCountry } from "./postal-countries";
 import {
   catalogCountriesConfigSchema,
   type CatalogCountriesConfig,
@@ -17,21 +17,20 @@ export function defaultCatalogCountries(): CatalogCountrySetting[] {
 }
 
 /**
- * Customer Countries / Cities menus and shopping gates.
- * Always includes the full curated delivery catalog (`DELIVERY_COUNTRIES`)
- * so a truncated admin save cannot hide previously published markets.
+ * Globally enabled countries for the customer selector and shopping gates.
+ * `CONFIG#CATALOG_COUNTRIES` is the source of truth. Static delivery-country
+ * rows supply name and currency only; they do not turn a country on.
+ * A missing or unreadable config is USA-only via `defaultCatalogCountries()`.
+ * An enabled code is kept even when it has no static metadata.
  */
 export function catalogCountriesForStorefront(
   stored: readonly CatalogCountrySetting[] = []
 ): CatalogCountrySetting[] {
-  const rows: CatalogCountrySetting[] = enabledDeliveryCountries().map((country) => ({
-    countryCode: country.countryCode,
-    enabled: true,
-  }));
-  const seen = new Set(rows.map((row) => row.countryCode));
+  const rows: CatalogCountrySetting[] = [];
+  const seen = new Set<string>();
   for (const row of stored) {
     const code = row.countryCode.trim().toUpperCase();
-    if (!row.enabled || seen.has(code) || !getDeliveryCountry(code)) continue;
+    if (!row.enabled || seen.has(code) || !/^[A-Z]{2}$/.test(code)) continue;
     seen.add(code);
     rows.push({ countryCode: code, enabled: true });
   }

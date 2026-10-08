@@ -12,7 +12,7 @@ import {
 } from "react";
 import { api } from "./api";
 import { applyDeliveryCheck, type DeliveryCheckState } from "./country-switch";
-import { useGboDeliveryCountries } from "./gbo-delivery-countries";
+import { disabledCountryFallback, useGboDeliveryCountries } from "./gbo-delivery-countries";
 import {
   DELIVERY_LOCATION_EVENT,
   readDeliveryLocation,
@@ -136,11 +136,8 @@ export function DeliveryLocationProvider({ children }: { children: ReactNode }) 
 
   useEffect(() => {
     if (!countriesLoaded || !fromConfig || !location) return;
-    const code = location.countryCode.trim().toUpperCase();
-    if (countries.some((country) => country.countryCode === code)) return;
-    if (countries.length <= 1) return;
-    const fallback = countries.find((country) => country.countryCode === "US")?.countryCode ?? countries[0]?.countryCode;
-    if (!fallback || fallback === code) return;
+    const fallback = disabledCountryFallback(location.countryCode, countries);
+    if (!fallback) return;
     void setLocation({ countryCode: fallback, postalCode: "", postalDisplay: fallback });
   }, [countries, countriesLoaded, fromConfig, location, setLocation]);
 

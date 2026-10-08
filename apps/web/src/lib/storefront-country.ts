@@ -1,8 +1,4 @@
-import {
-  enabledDeliveryCountries,
-  resolveEnabledShoppingCountry,
-  SHOPPING_COUNTRY_ISO,
-} from "@blossompot/shared";
+import { resolveEnabledShoppingCountry, SHOPPING_COUNTRY_ISO } from "@blossompot/shared";
 import { cookies, headers } from "next/headers";
 import { api } from "./api";
 import { DELIVERY_LOCATION_COOKIE, parseDeliveryLocationToken } from "./delivery-location";
@@ -39,13 +35,11 @@ export async function loadEnabledShoppingCountryCodes(): Promise<string[] | null
     const data = await api<{ countries?: { countryCode?: string }[] }>("/catalog-countries", {
       revalidate: 30,
     });
-    const fromApi = (data.countries ?? [])
+    const codes = (data.countries ?? [])
       .map((country) => (country.countryCode ?? "").trim().toUpperCase())
       .filter((code) => /^[A-Z]{2}$/.test(code));
-    const catalog = enabledDeliveryCountries().map((country) => country.countryCode);
-    const codes = [...new Set([...catalog, ...fromApi])];
-    enabledCache = { at: now, codes };
-    return codes;
+    enabledCache = { at: now, codes: [...new Set(codes)] };
+    return enabledCache.codes;
   } catch {
     return enabledCache?.codes ?? [SHOPPING_COUNTRY_ISO];
   }

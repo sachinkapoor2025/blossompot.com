@@ -296,6 +296,20 @@ describe("catalog vendor availability for new shopping", { concurrency: false },
   it("keeps USA shopping and Orange County ZIP limits", async () => {
     await setVendor("orange-county", true);
     await setVendor("blossompot", true);
+    const { updateCatalogCountriesAdmin } = await import("./catalog-countries");
+    const enabled = resultOf(
+      await updateCatalogCountriesAdmin({
+        headers: { authorization: "Bearer dev:admin@blossompot.test:admin" },
+        body: JSON.stringify({
+          countries: [
+            { countryCode: "US", enabled: true },
+            { countryCode: "GB", enabled: true },
+          ],
+        }),
+        requestContext: { http: { method: "PUT" } },
+      } as unknown as APIGatewayProxyEventV2)
+    );
+    assert.equal(enabled.statusCode, 200);
     const abroad = resultOf(await listProducts(shopperEvent({ queryStringParameters: { country: "GB" } })));
     assert.equal(slugsOf(abroad.body).includes("phase4-owned"), false);
 

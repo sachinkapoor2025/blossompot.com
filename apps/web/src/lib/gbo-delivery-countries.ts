@@ -3,23 +3,29 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   catalogCountriesForStorefront,
-  enabledDeliveryCountries,
   getDeliveryCountry,
+  SHOPPING_COUNTRY_ISO,
   type DeliveryCountryConfig,
 } from "@blossompot/shared";
 
-/** Full curated delivery catalog — the previous Countries / Cities source list. */
+/** Sync fallback before the global country list loads. USA only. */
 export function shoppingCountryOptions(): DeliveryCountryConfig[] {
-  return enabledDeliveryCountries();
+  const unitedStates = getDeliveryCountry(SHOPPING_COUNTRY_ISO);
+  return unitedStates ? [unitedStates] : [];
 }
 
-/** Customer selector: full catalog, plus any extra known countries from the API. */
+/**
+ * Customer selector: only globally enabled countries.
+ * A public row without `enabled` is already an enabled country.
+ * An explicit `enabled: false` stays off. Static catalog metadata supplies the name.
+ */
 export function shoppingCountriesFromGlobal(
-  rows: readonly { countryCode?: string | null }[]
+  rows: readonly { countryCode?: string | null; enabled?: boolean }[]
 ): DeliveryCountryConfig[] {
   const stored = rows.flatMap((row) => {
     const countryCode = (row.countryCode ?? "").trim().toUpperCase();
-    return countryCode ? [{ countryCode, enabled: true }] : [];
+    if (!countryCode) return [];
+    return [{ countryCode, enabled: row.enabled !== false }];
   });
   const countries: DeliveryCountryConfig[] = [];
   const seen = new Set<string>();
@@ -30,6 +36,25 @@ export function shoppingCountriesFromGlobal(
     countries.push(country);
   }
   return countries;
+}
+
+/**
+ * Country to write into `bp_dl` when the saved country is no longer globally enabled.
+ * USA when it is enabled, otherwise the first enabled country. Null when no rewrite is needed.
+ */
+export function disabledCountryFallback(
+  savedCode: string | null | undefined,
+  countries: readonly { countryCode: string }[]
+): string | null {
+  const code = (savedCode ?? "").trim().toUpperCase();
+  if (!code) return null;
+  if (countries.some((country) => country.countryCode === code)) return null;
+  const fallback =
+    countries.find((country) => country.countryCode === "US")?.countryCode ??
+    countries[0]?.countryCode ??
+    null;
+  if (!fallback || fallback === code) return null;
+  return fallback;
 }
 
 export function isListedShoppingCountry(

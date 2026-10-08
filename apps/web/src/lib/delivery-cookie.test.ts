@@ -6,7 +6,9 @@ import {
   isDeliveryCookieFlight,
   parseDeliveryLocationToken,
 } from "./delivery-location";
-import { shoppingCountriesFromGlobal, shoppingCountryOptions } from "./gbo-delivery-countries";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { disabledCountryFallback, shoppingCountriesFromGlobal, shoppingCountryOptions } from "./gbo-delivery-countries";
 import { resolveStorefrontCountryIso } from "./location-seo-urls";
 
 function headerBag(record: Record<string, string>) {
@@ -21,22 +23,61 @@ const documentHeaders = headerBag({
 });
 
 describe("shopping country options", () => {
-  it("lists the full curated delivery catalog before the API loads", () => {
-    const options = shoppingCountryOptions();
-    const codes = options.map((country) => country.countryCode);
-    for (const code of ["US", "GB", "CA", "AU", "AE"]) {
-      assert.equal(codes.includes(code), true, code);
-    }
-    assert.ok(codes.length >= 20);
+  it("falls back to the United States before the global list loads", () => {
+    assert.deepEqual(
+      shoppingCountryOptions().map((country) => country.countryCode),
+      ["US"]
+    );
   });
 
-  it("keeps the full catalog when the API only returns Australia", () => {
-    const options = shoppingCountriesFromGlobal([{ countryCode: "AU" }, { countryCode: "ZZ" }]);
-    const codes = options.map((country) => country.countryCode);
-    for (const code of ["US", "GB", "CA", "AU", "AE"]) {
-      assert.equal(codes.includes(code), true, code);
-    }
-    assert.equal(codes.includes("ZZ"), false);
+  it("shows only the globally enabled countries", () => {
+    assert.deepEqual(
+      shoppingCountriesFromGlobal([
+        { countryCode: "US", enabled: true },
+        { countryCode: "GB", enabled: false },
+        { countryCode: "RS", enabled: false },
+      ]).map((country) => country.countryCode),
+      ["US"]
+    );
+    assert.deepEqual(
+      shoppingCountriesFromGlobal([
+        { countryCode: "US", enabled: true },
+        { countryCode: "GB", enabled: true },
+        { countryCode: "RS", enabled: false },
+      ]).map((country) => country.countryCode),
+      ["US", "GB"]
+    );
+    assert.deepEqual(
+      shoppingCountriesFromGlobal([
+        { countryCode: "US", enabled: false },
+        { countryCode: "GB", enabled: true },
+      ]).map((country) => country.countryCode),
+      ["GB"]
+    );
+    assert.deepEqual(
+      shoppingCountriesFromGlobal([{ countryCode: "AU" }, { countryCode: "ZZ" }]).map(
+        (country) => country.countryCode
+      ),
+      ["AU"]
+    );
+  });
+
+  it("replaces a disabled saved country with the United States when the United States is enabled", () => {
+    assert.equal(disabledCountryFallback("RS", [{ countryCode: "US" }]), "US");
+    assert.equal(disabledCountryFallback("GB", [{ countryCode: "US" }, { countryCode: "GB" }]), null);
+    assert.equal(disabledCountryFallback("US", [{ countryCode: "GB" }]), "GB");
+  });
+
+  it("does not write the delivery cookie when the display currency changes", () => {
+    const source = readFileSync(path.join(__dirname, "currency-context.tsx"), "utf8");
+    assert.match(source, /const STORAGE_KEY = "hr_ecom_currency"/);
+    const start = source.indexOf("const setDisplayCurrency");
+    const end = source.indexOf("const convert", start);
+    const fn = source.slice(start, end);
+    assert.equal(fn.includes("bp_dl"), false);
+    assert.equal(fn.includes("writeDeliveryLocation"), false);
+    assert.equal(fn.includes("STORAGE_KEY"), true);
+    assert.equal(fn.includes("MANUAL_KEY"), true);
   });
 });
 

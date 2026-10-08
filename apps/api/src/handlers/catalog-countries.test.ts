@@ -70,10 +70,7 @@ describe("catalog countries API", { concurrency: false }, () => {
 
     const pub = resultOf(await listCatalogCountriesPublic(event({ token: null })));
     assert.equal(pub.statusCode, 200);
-    const publicCodes = codes(pub.body).map((country) => country.countryCode);
-    for (const code of ["US", "GB", "CA", "AU", "AE"]) {
-      assert.equal(publicCodes.includes(code), true, code);
-    }
+    assert.deepEqual(codes(pub.body).map((country) => country.countryCode), ["US"]);
   });
 
   it("returns disabled countries to admin and only enabled countries publicly", async () => {
@@ -102,10 +99,8 @@ describe("catalog countries API", { concurrency: false }, () => {
 
     const pub = resultOf(await listCatalogCountriesPublic(event({ token: null })));
     const publicCodes = codes(pub.body).map((country) => country.countryCode);
-    assert.equal(publicCodes.includes("US"), true);
-    assert.equal(publicCodes.includes("GB"), true);
-    assert.equal(publicCodes.includes("CA"), true);
-    assert.equal(publicCodes.includes("AU"), true);
+    assert.deepEqual(publicCodes, ["US"]);
+    assert.equal(publicCodes.includes("GB"), false);
   });
 
   it("rejects unknown, malformed, duplicate, and empty-enabled lists", async () => {
@@ -164,8 +159,8 @@ describe("catalog countries API", { concurrency: false }, () => {
 
     const cached = resultOf(await listCatalogCountriesPublic(event({ token: null })));
     const cachedCodes = codes(cached.body).map((country) => country.countryCode);
-    assert.equal(cachedCodes.includes("US"), true);
-    assert.equal(cachedCodes.includes("CA"), true);
+    assert.deepEqual(cachedCodes, ["US"]);
+    assert.equal(cachedCodes.includes("CA"), false);
 
     await docClient.send(
       new PutCommand({
@@ -204,9 +199,8 @@ describe("catalog countries API", { concurrency: false }, () => {
     assert.equal(replaced.statusCode, 200);
     const fresh = resultOf(await listCatalogCountriesPublic(event({ token: null })));
     const freshCodes = codes(fresh.body).map((country) => country.countryCode);
-    assert.equal(freshCodes.includes("US"), true);
-    assert.equal(freshCodes.includes("GB"), true);
-    assert.equal(freshCodes.includes("CA"), true);
+    assert.deepEqual(freshCodes, ["US", "GB"]);
+    assert.equal(freshCodes.includes("CA"), false);
   });
 
   it("does not write catalog vendor rows or change vendor defaults", async () => {

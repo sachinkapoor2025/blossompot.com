@@ -17,6 +17,8 @@ import {
   storefrontShoppingCountryCodes,
   SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE,
 } from "./catalog-countries";
+import { displayCurrenciesForCountry } from "./currency-display";
+import { isGboStorefrontEnabled } from "./gbo";
 import { VENDOR_BLOSSOMPOT, VENDOR_FNP, VENDOR_GBO, VENDOR_ORANGE_COUNTY } from "../constants";
 import {
   defaultCatalogVendor,
@@ -26,16 +28,132 @@ import {
 import { productVisibleForDeliveryCountry } from "./gbo";
 import { defaultOrangeCountyAreas, productKeptForServiceableVendors } from "./serviceability";
 
-describe("catalog country defaults", () => {
-  it("restores the full delivery catalog for storefront menus even when admin saved Australia only", () => {
-    const rows = catalogCountriesForStorefront([{ countryCode: "AU", enabled: true }]);
-    const codes = storefrontShoppingCountryCodes([{ countryCode: "AU", enabled: true }]);
-    for (const code of ["US", "GB", "CA", "AU", "AE", "DE", "FR", "IE"]) {
-      assert.equal(rows.some((row) => row.countryCode === code && row.enabled), true, code);
-      assert.equal(codes.includes(code), true, code);
-    }
-    assert.ok(codes.length >= 20);
+describe("global country config", () => {
+  it("offers only USA when the UK and Serbia are disabled", () => {
+    const stored = [
+      { countryCode: "US", enabled: true },
+      { countryCode: "GB", enabled: false },
+      { countryCode: "RS", enabled: false },
+    ];
+    assert.deepEqual(storefrontShoppingCountryCodes(stored), ["US"]);
+    assert.equal(shoppingCountryRejection("GB", storefrontShoppingCountryCodes(stored)), SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE);
+    assert.equal(shoppingCountryRejection("RS", storefrontShoppingCountryCodes(stored)), SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE);
+    assert.equal(resolveEnabledShoppingCountry("GB", stored), "US");
+    assert.equal(resolveEnabledShoppingCountry("RS", stored), "US");
   });
+
+  it("offers USA and the UK when Serbia is disabled", () => {
+    const stored = [
+      { countryCode: "US", enabled: true },
+      { countryCode: "GB", enabled: true },
+      { countryCode: "RS", enabled: false },
+    ];
+    assert.deepEqual(storefrontShoppingCountryCodes(stored), ["US", "GB"]);
+    assert.equal(storefrontShoppingCountryCodes(stored).includes("RS"), false);
+    assert.equal(resolveEnabledShoppingCountry("GB", stored), "GB");
+    assert.equal(resolveEnabledShoppingCountry("RS", stored), "US");
+  });
+
+  it("does not treat USA as enabled when only the UK is enabled", () => {
+    const stored = [
+      { countryCode: "US", enabled: false },
+      { countryCode: "GB", enabled: true },
+    ];
+    assert.deepEqual(storefrontShoppingCountryCodes(stored), ["GB"]);
+    assert.equal(resolveEnabledShoppingCountry("US", stored), "GB");
+    assert.equal(resolveEnabledShoppingCountry("GB", stored), "GB");
+  });
+
+  it("falls back to USA only when the config is missing or unreadable", () => {
+    const missing = readStoredCatalogCountries(null);
+    const unreadable = readStoredCatalogCountries({ countries: "nope" });
+    assert.equal(missing.source, "default");
+    assert.equal(unreadable.source, "default");
+    assert.deepEqual(storefrontShoppingCountryCodes(missing.countries), ["US"]);
+    assert.deepEqual(storefrontShoppingCountryCodes(unreadable.countries), ["US"]);
+  });
+
+  it("keeps an enabled config country that has no static catalog metadata", () => {
+    const stored = [
+      { countryCode: "US", enabled: true },
+      { countryCode: "ZZ", enabled: true },
+      { countryCode: "GB", enabled: false },
+    ];
+    assert.deepEqual(catalogCountriesForStorefront(stored), [
+      { countryCode: "US", enabled: true },
+      { countryCode: "ZZ", enabled: true },
+    ]);
+  });
+
+  it("hides a USA-only vendor in a globally enabled UK", () => {
+    const stored = [
+      { countryCode: "US", enabled: true },
+      { countryCode: "GB", enabled: true },
+    ];
+    assert.equal(resolveEnabledShoppingCountry("GB", stored), "GB");
+    const vendor = defaultCatalogVendor(VENDOR_BLOSSOMPOT);
+    assert.deepEqual(vendor.deliveryCountries, ["US"]);
+    assert.equal(
+      productAllowedForNewShopping({ slug: "owned-rose", vendorSlug: VENDOR_BLOSSOMPOT }, "GB", [vendor]).available,
+      false
+    );
+  });
+
+  it("keeps a vendor that delivers to the UK when the UK is globally enabled", () => {
+    const vendor = { ...defaultCatalogVendor(VENDOR_BLOSSOMPOT), deliveryCountries: ["US", "GB"] };
+    assert.equal(
+      productAllowedForNewShopping({ slug: "owned-rose", vendorSlug: VENDOR_BLOSSOMPOT }, "GB", [vendor]).available,
+      true
+    );
+  });
+
+  it("rewrites a disabled saved country to USA when USA is enabled", () => {
+    const stored = [
+      { countryCode: "US", enabled: true },
+      { countryCode: "RS", enabled: false },
+    ];
+    assert.deepEqual(
+      applyEnabledShoppingCountry({ countryCode: "RS", postalCode: "11000" }, stored),
+      { countryCode: "US", postalCode: "" }
+    );
+    assert.equal(storefrontShoppingCountryCodes(stored).includes("RS"), false);
+  });
+
+  it("keeps display currency independent of the delivery country", () => {
+    assert.deepEqual(displayCurrenciesForCountry("US"), ["USD", "INR"]);
+    assert.deepEqual(displayCurrenciesForCountry("GB"), ["GBP", "INR"]);
+    assert.deepEqual(displayCurrenciesForCountry("RS"), ["RSD", "INR"]);
+    assert.deepEqual(displayCurrenciesForCountry("IN"), ["INR"]);
+    const uk = resolveEnabledShoppingCountry("GB", [
+      { countryCode: "US", enabled: true },
+      { countryCode: "GB", enabled: true },
+    ]);
+    assert.equal(uk, "GB");
+    assert.deepEqual(displayCurrenciesForCountry("US"), ["USD", "INR"]);
+  });
+
+  it("keeps Orange County on US ZIP prefixes", () => {
+    assert.deepEqual(
+      defaultOrangeCountyAreas().map((area) => area.postalPrefix),
+      ["926", "927", "928", "906", "907"]
+    );
+    const vendor = defaultCatalogVendor(VENDOR_ORANGE_COUNTY);
+    assert.deepEqual(vendor.deliveryCountries, ["US"]);
+  });
+
+  it("keeps GBO blocked unless the storefront environment flag is on", () => {
+    assert.equal(isGboStorefrontEnabled({}), false);
+    assert.equal(isGboStorefrontEnabled({ GBO_STOREFRONT_ENABLED: "false" }), false);
+    const vendor = defaultCatalogVendor(VENDOR_GBO);
+    const product = { slug: "gbo-us-1", vendorSlug: VENDOR_GBO, sku: "gbo:US:1" };
+    assert.equal(
+      productAllowedForNewShopping(product, "US", [vendor], { GBO_STOREFRONT_ENABLED: "false" }).available,
+      false
+    );
+  });
+});
+
+describe("catalog country defaults", () => {
 
   it("uses USA only when the config item is missing", () => {
     const resolved = readStoredCatalogCountries(null);
