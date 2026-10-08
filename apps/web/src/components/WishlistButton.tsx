@@ -21,7 +21,7 @@ export function WishlistButton({
   const active = isWishlisted(product.slug);
 
   const overlayClass =
-    "absolute top-2 right-2 z-20 p-1 transition-transform hover:scale-110 active:scale-95";
+    "absolute top-2 right-2 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.2)] ring-1 ring-slate-200 transition-transform hover:scale-110 active:scale-95";
   const toolbarClass =
     "flex h-12 w-12 shrink-0 items-center justify-center rounded border-2 border-nav bg-white text-nav hover:bg-blue-50 transition active:scale-95";
 
@@ -43,7 +43,15 @@ export function WishlistButton({
       className={`${variant === "toolbar" ? toolbarClass : overlayClass} ${className}`}
     >
       <svg
-        className={`w-5 h-5 ${variant === "overlay" ? `w-6 h-6 drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)] ${active ? "text-accent" : "text-white"}` : active ? "text-accent fill-current" : "fill-none stroke-current stroke-2"}`}
+        className={`h-5 w-5 ${
+          variant === "overlay"
+            ? active
+              ? "text-accent"
+              : "text-slate-800"
+            : active
+              ? "text-accent fill-current"
+              : "fill-none stroke-current stroke-2"
+        }`}
         viewBox="0 0 24 24"
         fill={variant === "toolbar" && !active ? "none" : "currentColor"}
         aria-hidden

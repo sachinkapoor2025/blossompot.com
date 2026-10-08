@@ -29,8 +29,7 @@ export const PRODUCT_ADDONS: readonly ProductAddonDef[] = [
     priceUsd: 4,
     group: "cake-extras",
     detail: "Birthday candle set",
-    image:
-      "https://images.unsplash.com/photo-1619052327458-c26071e93052?auto=format&w=240&h=240&fit=crop&q=80",
+    image: "/addons/cake-candle.jpg",
   },
   {
     id: "name-printing",
@@ -38,8 +37,7 @@ export const PRODUCT_ADDONS: readonly ProductAddonDef[] = [
     priceUsd: 8,
     group: "personalization",
     detail: "Print a name on the cake",
-    image:
-      "https://static-assets-prod.fnp.com/images/pr/usa/m/v20260527144813/personalized-happy-birthday-cake.jpg",
+    image: "/addons/name-printing.webp",
   },
   {
     id: "greeting-card",
@@ -47,8 +45,7 @@ export const PRODUCT_ADDONS: readonly ProductAddonDef[] = [
     priceUsd: 5,
     group: "personalization",
     detail: "Handwritten-style card",
-    image:
-      "https://static-assets-prod.fnp.com/images/pr/usa/m/v20260921170911/haldiram-milkcake-with-greeting-card.jpg",
+    image: "/addons/greeting-card.webp",
   },
   {
     id: "message-plaque",
@@ -56,8 +53,7 @@ export const PRODUCT_ADDONS: readonly ProductAddonDef[] = [
     priceUsd: 6,
     group: "personalization",
     detail: "Short message on a cake plaque",
-    image:
-      "https://static-assets-prod.fnp.com/images/pr/usa/m/v20260928162709/charming-birthday-plaque-n-chocolates.jpg",
+    image: "/addons/message-plaque.webp",
   },
 ] as const;
 

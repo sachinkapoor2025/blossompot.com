@@ -22,7 +22,7 @@ describe("product-addons", () => {
     assert.equal(getProductAddon("greeting-card")?.priceUsd, 5);
     assert.equal(getProductAddon("message-plaque")?.priceUsd, 6);
     for (const addon of PRODUCT_ADDONS) {
-      assert.match(productAddonImageUrl(addon.image) ?? "", /^https:\/\//);
+      assert.match(productAddonImageUrl(addon.image) ?? "", /^\/addons\//);
     }
     assert.equal(productAddonImageUrl(""), null);
     assert.equal(productAddonImageUrl("   "), null);

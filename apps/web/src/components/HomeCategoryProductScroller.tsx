@@ -95,7 +95,7 @@ export function HomeCategoryProductScroller({
         <button
           type="button"
           onClick={() => scrollByDir(1)}
-          className="absolute right-0 top-[38%] z-10 flex h-10 w-10 translate-x-1 items-center justify-center rounded-full border border-[#eadfd8] bg-white text-primary shadow-md hover:bg-petal sm:translate-x-3"
+          className="absolute right-1 top-[62%] z-10 flex h-9 w-9 translate-x-0 items-center justify-center rounded-full border border-[#eadfd8] bg-white text-primary shadow-md hover:bg-petal sm:right-0 sm:top-[38%] sm:h-10 sm:w-10 sm:translate-x-3"
           aria-label={`Scroll ${title} forward`}
         >
           <ArrowIcon dir="next" />
