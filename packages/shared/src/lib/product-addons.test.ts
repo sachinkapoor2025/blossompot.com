@@ -5,6 +5,7 @@ import {
   cartAddonSignature,
   cartLineUnitTotal,
   getProductAddon,
+  productAddonImageUrl,
   productAllowsAddons,
   resolveProductAddons,
   resolveProductAddonsFromIds,
@@ -20,6 +21,12 @@ describe("product-addons", () => {
     assert.equal(getProductAddon("name-printing")?.priceUsd, 8);
     assert.equal(getProductAddon("greeting-card")?.priceUsd, 5);
     assert.equal(getProductAddon("message-plaque")?.priceUsd, 6);
+    for (const addon of PRODUCT_ADDONS) {
+      assert.match(productAddonImageUrl(addon.image) ?? "", /^https:\/\//);
+    }
+    assert.equal(productAddonImageUrl(""), null);
+    assert.equal(productAddonImageUrl("   "), null);
+    assert.equal(productAddonImageUrl(undefined), null);
   });
 
   it("allows addons only for non–Orange County products", () => {
