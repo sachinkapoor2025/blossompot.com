@@ -40,6 +40,8 @@ export const catalogVendorSchema = z.object({
   defaultInventory: z.number().int().min(0).max(100000).optional(),
   trashedAt: z.string().min(1).optional(),
   trashExpiresAt: z.string().min(1).optional(),
+  /** Storefront vendor priority. Omitted vendors stay valid and sort after numbered vendors. */
+  displayOrder: z.number().int().positive().max(1000).optional(),
   updatedAt: z.string(),
   updatedBy: z.string().trim().max(160).optional(),
 });
@@ -65,6 +67,8 @@ export const createCatalogVendorSchema = z.object({
   enabled: z.boolean(),
   sourceName: z.string().trim().max(160).optional(),
   defaultInventory: z.number().int().min(0).max(100000).optional(),
+  /** 1-based slot. When omitted, the new vendor is placed at max + 1. */
+  displayPosition: z.number().int().positive().max(1000).optional(),
 });
 
 export type CreateCatalogVendorInput = z.infer<typeof createCatalogVendorSchema>;
@@ -72,3 +76,9 @@ export type CreateCatalogVendorInput = z.infer<typeof createCatalogVendorSchema>
 export const trashCatalogVendorSchema = z.object({
   confirmName: z.string().trim().min(1).max(120),
 });
+
+export const reorderCatalogVendorsSchema = z.object({
+  vendorSlugs: z.array(catalogVendorSlugSchema).min(1).max(100),
+});
+
+export type ReorderCatalogVendorsInput = z.infer<typeof reorderCatalogVendorsSchema>;

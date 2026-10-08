@@ -41,6 +41,10 @@ describe("catalog vendor defaults", () => {
     assert.equal(defaultCatalogVendor("fnp").integrationType, "excel");
     assert.equal(defaultCatalogVendor("fnp").enabled, true);
     assert.deepEqual(defaultCatalogVendor("fnp").deliveryCountries, ["US"]);
+    assert.equal(defaultCatalogVendor("blossompot").displayOrder, 1);
+    assert.equal(defaultCatalogVendor("orange-county").displayOrder, 2);
+    assert.equal(defaultCatalogVendor("gift-baskets-overseas").displayOrder, 3);
+    assert.equal(defaultCatalogVendor("fnp").displayOrder, 4);
   });
 
   it("keeps catalog vendor keys separate from marketplace vendors", () => {

@@ -1,4 +1,4 @@
-import type { Product } from "@blossompot/shared";
+import { orderProductsByVendor, sortStorefrontProducts, type Product } from "@blossompot/shared";
 
 export type CollectionDefinition = {
   slug: string;
@@ -22,8 +22,12 @@ function usdPrice(product: Product): number {
   return product.price;
 }
 
-function byUpdatedDesc(a: Product, b: Product): number {
-  return (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "");
+function limitVendorOrdered(products: Product[], limit: number): Product[] {
+  return sortStorefrontProducts(products, "featured").slice(0, limit);
+}
+
+function limitVendorOrderedByUpdated(products: Product[], limit: number): Product[] {
+  return orderProductsByVendor(products, [], (a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "")).slice(0, limit);
 }
 
 function matchesAnyKeyword(product: Product, keywords: string[]): boolean {
@@ -40,7 +44,10 @@ export const COLLECTIONS: CollectionDefinition[] = [
     description: "Shop classic red rose arrangements for worldwide delivery — birthdays, anniversaries, and romantic surprises.",
     intro: "Choose elegant red rose bouquets with clear worldwide shipping guidance on every product.",
     filter: (products) =>
-      products.filter((p) => matchesAnyKeyword(p, ["red rose", "roses"]) || inCategory(p, "flowers")).slice(0, 36),
+      limitVendorOrdered(
+        products.filter((p) => matchesAnyKeyword(p, ["red rose", "roses"]) || inCategory(p, "flowers")),
+        36
+      ),
   },
   {
     slug: "birthday-flowers",
@@ -49,9 +56,10 @@ export const COLLECTIONS: CollectionDefinition[] = [
     description: "Bright birthday flower arrangements and gift combos with worldwide delivery.",
     intro: "Celebrate with colorful blooms and celebration-ready gifts shipped worldwide.",
     filter: (products) =>
-      products
-        .filter((p) => inCategory(p, "birthday-gifts") || matchesAnyKeyword(p, ["birthday"]))
-        .slice(0, 36),
+      limitVendorOrdered(
+        products.filter((p) => inCategory(p, "birthday-gifts") || matchesAnyKeyword(p, ["birthday"])),
+        36
+      ),
   },
   {
     slug: "anniversary-roses",
@@ -60,9 +68,10 @@ export const COLLECTIONS: CollectionDefinition[] = [
     description: "Romantic anniversary flowers, roses, and gift sets for worldwide delivery.",
     intro: "Mark milestones with roses, mixed bouquets, and dessert pairings.",
     filter: (products) =>
-      products
-        .filter((p) => inCategory(p, "anniversary-gifts") || matchesAnyKeyword(p, ["anniversary", "rose"]))
-        .slice(0, 36),
+      limitVendorOrdered(
+        products.filter((p) => inCategory(p, "anniversary-gifts") || matchesAnyKeyword(p, ["anniversary", "rose"])),
+        36
+      ),
   },
   {
     slug: "gift-hampers",
@@ -70,7 +79,7 @@ export const COLLECTIONS: CollectionDefinition[] = [
     h1: "Curated Gift Hampers",
     description: "Curated gift hampers and celebration boxes with worldwide delivery.",
     intro: "Thoughtful hampers for thank-yous, birthdays, and corporate gestures.",
-    filter: (products) => products.filter((p) => inCategory(p, "gift-hampers")).slice(0, 36),
+    filter: (products) => limitVendorOrdered(products.filter((p) => inCategory(p, "gift-hampers")), 36),
   },
   {
     slug: "under-50",
@@ -78,8 +87,7 @@ export const COLLECTIONS: CollectionDefinition[] = [
     h1: "Gifts Under $50",
     description: "Flowers, cakes, and gifts under $50 with worldwide delivery options.",
     intro: "Budget-friendly picks that still feel polished and ready to gift.",
-    filter: (products) =>
-      products.filter((p) => usdPrice(p) <= 50).sort(byUpdatedDesc).slice(0, 36),
+    filter: (products) => limitVendorOrderedByUpdated(products.filter((p) => usdPrice(p) <= 50), 36),
   },
   {
     slug: "under-100",
@@ -87,8 +95,7 @@ export const COLLECTIONS: CollectionDefinition[] = [
     h1: "Gifts Under $100",
     description: "Premium flowers, cakes, and gift sets under $100 for worldwide delivery.",
     intro: "A wider selection for celebrations when you want more presence without overspending.",
-    filter: (products) =>
-      products.filter((p) => usdPrice(p) <= 100).sort(byUpdatedDesc).slice(0, 36),
+    filter: (products) => limitVendorOrderedByUpdated(products.filter((p) => usdPrice(p) <= 100), 36),
   },
   {
     slug: "same-day-gifts",
@@ -97,7 +104,10 @@ export const COLLECTIONS: CollectionDefinition[] = [
     description: "Gifts that may qualify for same-day delivery in select ZIP codes.",
     intro: "Browse options that can support same-day windows where coverage allows.",
     filter: (products) =>
-      products.filter((p) => inCategory(p, "same-day-gifts") || matchesAnyKeyword(p, ["same day", "same-day"])).slice(0, 36),
+      limitVendorOrdered(
+        products.filter((p) => inCategory(p, "same-day-gifts") || matchesAnyKeyword(p, ["same day", "same-day"])),
+        36
+      ),
   },
   {
     slug: "cakes",
@@ -105,7 +115,7 @@ export const COLLECTIONS: CollectionDefinition[] = [
     h1: "Celebration Cakes",
     description: "Birthday and celebration cakes with worldwide delivery guidance.",
     intro: "Pair cakes with flowers or send dessert on its own for birthdays and thank-yous.",
-    filter: (products) => products.filter((p) => inCategory(p, "cakes")).slice(0, 36),
+    filter: (products) => limitVendorOrdered(products.filter((p) => inCategory(p, "cakes")), 36),
   },
 ];
 

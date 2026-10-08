@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
+import { moveVendorToPosition, sortVendorsForDisplay } from "@blossompot/shared";
 import { formatDeliveryCountryList } from "@/lib/admin-country-management";
 import { VENDOR_STATUS_HELP } from "@/lib/admin-vendor-management";
 
@@ -22,6 +23,7 @@ type CatalogVendorRow = {
   method: string;
   shoppingAvailable: boolean;
   storefrontBlockReason: string | null;
+  displayOrder?: number;
 };
 
 type ListResponse = { vendors: CatalogVendorRow[] };
@@ -44,8 +46,33 @@ export default function AdminCatalogVendorsPage() {
     load().catch((err) => setError(err instanceof Error ? err.message : "Failed to load vendors"));
   }, [load]);
 
-  const active = vendors.filter((vendor) => !vendor.trashedAt);
-  const trashed = vendors.filter((vendor) => vendor.trashedAt);
+  const ordered = sortVendorsForDisplay(vendors);
+  const active = ordered.filter((vendor) => !vendor.trashedAt);
+  const trashed = ordered.filter((vendor) => vendor.trashedAt);
+
+  async function moveVendor(vendorSlug: string, position: number) {
+    if (!token) return;
+    const next = moveVendorToPosition(
+      ordered.map((vendor) => vendor.vendorSlug),
+      vendorSlug,
+      position
+    );
+    if (!next) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await api("/admin/catalog-vendors/reorder", {
+        method: "POST",
+        token,
+        body: JSON.stringify({ vendorSlugs: next }),
+      });
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not save the vendor sequence");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function trashVendor() {
     if (!token || !pendingDelete) return;
@@ -101,7 +128,9 @@ export default function AdminCatalogVendorsPage() {
         <h1 className="text-2xl font-bold text-primary">Vendor Management</h1>
         <p className="mt-1 text-sm text-slate-600">
           Catalog vendors for BlossomPot, Orange County, Gift Baskets Overseas, FNP, and vendors you add.
-          Marketplace applications stay on Marketplace vendors.
+          Marketplace applications stay on Marketplace vendors. Display order is the sequence shoppers see:
+          vendor 1's products come first, then vendor 2, and so on. Disabling a vendor hides its products and keeps
+          its number.
         </p>
       </div>
       <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">{VENDOR_STATUS_HELP}</p>
@@ -111,6 +140,7 @@ export default function AdminCatalogVendorsPage() {
         <table className="min-w-full text-left text-sm">
           <thead className="border-b bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
             <tr>
+              <th className="px-4 py-3">Order</th>
               <th className="px-4 py-3">Vendor</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Delivery Countries</th>
@@ -123,8 +153,28 @@ export default function AdminCatalogVendorsPage() {
             </tr>
           </thead>
           <tbody>
-            {active.map((vendor) => (
+            {active.map((vendor) => {
+              const position = ordered.findIndex((row) => row.vendorSlug === vendor.vendorSlug) + 1;
+              return (
               <tr key={vendor.vendorSlug} className="border-b last:border-b-0">
+                <td className="px-4 py-3">
+                  <label className="sr-only" htmlFor={`vendor-order-${vendor.vendorSlug}`}>
+                    Display order for {vendor.vendorName}
+                  </label>
+                  <select
+                    id={`vendor-order-${vendor.vendorSlug}`}
+                    value={position}
+                    disabled={busy}
+                    onChange={(event) => void moveVendor(vendor.vendorSlug, Number(event.target.value))}
+                    className="rounded-lg border px-2 py-1"
+                  >
+                    {ordered.map((row, index) => (
+                      <option key={row.vendorSlug} value={index + 1}>
+                        {index + 1}
+                      </option>
+                    ))}
+                  </select>
+                </td>
                 <td className="px-4 py-3">
                   <p className="font-medium">{vendor.vendorName}</p>
                   <p className="text-xs text-slate-500">{vendor.vendorSlug}</p>
@@ -161,7 +211,8 @@ export default function AdminCatalogVendorsPage() {
                   </button>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

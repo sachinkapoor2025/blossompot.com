@@ -29,6 +29,7 @@ export * from "./schemas/vendor-payments";
 export * from "./schemas/marketplace-vendor";
 export * from "./schemas/catalog-vendor";
 export * from "./lib/catalog-vendors";
+export * from "./lib/vendor-display-order";
 export * from "./schemas/catalog-country";
 export * from "./lib/catalog-countries";
 export * from "./lib/vendor-commission";

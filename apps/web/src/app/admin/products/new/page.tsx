@@ -43,6 +43,7 @@ const NEW_VENDOR = "__new__";
 export default function AddProductPage() {
   const { token } = useAuth();
   const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [vendorCount, setVendorCount] = useState(0);
   const [vendorSlug, setVendorSlug] = useState("");
   const [creatingVendor, setCreatingVendor] = useState(false);
   const [method, setMethod] = useState<AddProductMethod>("manual");
@@ -68,6 +69,7 @@ export default function AddProductPage() {
     enabled: true,
     sourceName: "",
     defaultInventory: "200",
+    displayPosition: "",
   });
   const [deliveryRows, setDeliveryRows] = useState<CountryChoice[]>([]);
 
@@ -75,6 +77,7 @@ export default function AddProductPage() {
     if (!token) return;
     const data = await api<{ vendors: Vendor[] }>("/admin/catalog-vendors", { token });
     const active = data.vendors.filter((vendor) => !vendor.trashedAt);
+    setVendorCount(data.vendors.length);
     setVendors(active);
     setDeliveryRows(applyVendorDeliveryCountries(["US"]));
     setVendorSlug((current) => current || active[0]?.vendorSlug || "");
@@ -120,6 +123,7 @@ export default function AddProductPage() {
           enabled: draft.enabled,
           sourceName: draft.sourceName || undefined,
           defaultInventory: draft.defaultInventory.trim() === "" ? undefined : Number(draft.defaultInventory),
+          ...(draft.displayPosition ? { displayPosition: Number(draft.displayPosition) } : {}),
         }),
       });
       await load();
@@ -290,6 +294,21 @@ export default function AddProductPage() {
                 ))}
               </div>
             </div>
+            <label className="block text-sm">
+              Display order
+              <select
+                value={draft.displayPosition}
+                onChange={(event) => setDraft({ ...draft, displayPosition: event.target.value })}
+                className="mt-1 w-full rounded-lg border px-3 py-2"
+              >
+                <option value="">At the end</option>
+                {Array.from({ length: vendorCount + 1 }, (_, index) => (
+                  <option key={index + 1} value={String(index + 1)}>
+                    {index + 1}
+                  </option>
+                ))}
+              </select>
+            </label>
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" checked={draft.enabled} onChange={(event) => setDraft({ ...draft, enabled: event.target.checked })} />
               Status: {draft.enabled ? "Enabled" : "Disabled"}

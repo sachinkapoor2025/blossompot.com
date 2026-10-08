@@ -45,12 +45,12 @@ export function catalogVendorConfirmName(vendorName: string, typed: string): boo
 
 const DEFAULTS: Record<
   CatalogVendorSlug,
-  { vendorName: string; integrationType: CatalogIntegrationType }
+  { vendorName: string; integrationType: CatalogIntegrationType; displayOrder: number }
 > = {
-  blossompot: { vendorName: "BlossomPot", integrationType: "owned" },
-  "orange-county": { vendorName: "Orange County", integrationType: "local-catalog" },
-  "gift-baskets-overseas": { vendorName: "Gift Baskets Overseas", integrationType: "partner-api" },
-  fnp: { vendorName: "FNP", integrationType: "excel" },
+  blossompot: { vendorName: "BlossomPot", integrationType: "owned", displayOrder: 1 },
+  "orange-county": { vendorName: "Orange County", integrationType: "local-catalog", displayOrder: 2 },
+  "gift-baskets-overseas": { vendorName: "Gift Baskets Overseas", integrationType: "partner-api", displayOrder: 3 },
+  fnp: { vendorName: "FNP", integrationType: "excel", displayOrder: 4 },
 };
 
 export function isCatalogVendorSlug(slug: string): slug is CatalogVendorSlug {
@@ -69,6 +69,7 @@ export function defaultCatalogVendor(slug: CatalogVendorSlug): CatalogVendor {
     enabled: true,
     integrationType: meta.integrationType,
     deliveryCountries: ["US"],
+    displayOrder: meta.displayOrder,
     updatedAt: "",
   };
 }

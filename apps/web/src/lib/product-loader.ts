@@ -7,10 +7,15 @@ import {
   productInStorefrontCategory,
   productMatchesSearchQuery,
   productVisibleForDeliveryCountry,
+  annotateStorefrontListing,
+  arrangeStorefrontProducts,
+  filterAlignedListingGroups,
   dedupeStorefrontProducts,
   isProductStorefrontVisible,
   type GboGift,
+  type ListingVendorGroup,
   type Product,
+  type VendorDisplaySource,
 } from "@blossompot/shared";
 import { api } from "./api";
 import {
@@ -104,14 +109,6 @@ export async function loadGboStorefrontProducts(country?: string): Promise<Produ
     if (gboInFlight.get(iso) === job) gboInFlight.delete(iso);
   });
   return job;
-}
-
-function mergeBySlug(primary: Product[], extra: Product[]): Product[] {
-  const bySlug = new Map(primary.map((product) => [product.slug, product]));
-  for (const product of extra) {
-    if (!bySlug.has(product.slug)) bySlug.set(product.slug, product);
-  }
-  return [...bySlug.values()];
 }
 
 function forDeliveryCountry(products: Product[], country: string): Product[] {
@@ -264,9 +261,19 @@ export async function loadProducts(params?: {
   });
 
   const [dbResult, gboResult] = await Promise.all([
-    api<{ products: Product[] }>(`/products${qs}`, { revalidate: false })
-      .then((data) => rememberProducts(data.products.filter(isStorefrontVisible)))
-      .catch(() => null as Product[] | null),
+    api<{ products: Product[]; listingGroups?: ListingVendorGroup[]; listingVendors?: VendorDisplaySource[] }>(
+      `/products${qs}`,
+      { revalidate: false, headers: { "x-blossompot-listing-groups": "1" } }
+    )
+      .then((data) => {
+        const aligned = filterAlignedListingGroups(data.products, data.listingGroups, isStorefrontVisible);
+        return {
+          products: rememberProducts(aligned.products),
+          listingGroups: aligned.groups,
+          listingVendors: data.listingVendors ?? [],
+        };
+      })
+      .catch(() => null),
     loadGboStorefrontProducts(country).catch(() => [] as Product[]),
   ]);
 
@@ -278,11 +285,16 @@ export async function loadProducts(params?: {
     extra = extra.filter((product) => productMatchesSearchQuery(product, params.search as string));
   }
 
-  const live = dbResult ? mergeBySlug(dbResult, extra) : extra;
-  return filterLiveForCountry(
-    mergeProductsPreferExisting(live, catalogListingExtras({ ...params, country })),
-    country
-  );
+  const apiProducts = dbResult?.products ?? [];
+  const seen = new Set(apiProducts.map((product) => product.slug));
+  const extras = [...extra, ...catalogListingExtras({ ...params, country })].filter((product) => {
+    if (seen.has(product.slug)) return false;
+    seen.add(product.slug);
+    return true;
+  });
+  const vendors = dbResult?.listingVendors ?? [];
+  const arranged = arrangeStorefrontProducts(apiProducts, dbResult?.listingGroups, extras, vendors);
+  return annotateStorefrontListing(filterLiveForCountry(arranged, country), vendors);
 }
 
 export { toListingCardProducts };

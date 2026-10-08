@@ -1,13 +1,9 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { sortStorefrontProducts, type StorefrontProductSort } from "@blossompot/shared";
 
-export type ProductSort =
-  | "featured"
-  | "price-asc"
-  | "price-desc"
-  | "name-asc"
-  | "name-desc";
+export type ProductSort = StorefrontProductSort;
 
 const OPTIONS: { value: ProductSort; label: string }[] = [
   { value: "featured", label: "Featured" },
@@ -56,17 +52,5 @@ export function sortProducts<T extends { name: string; price: number }>(
   products: T[],
   sort: ProductSort
 ): T[] {
-  const list = [...products];
-  switch (sort) {
-    case "price-asc":
-      return list.sort((a, b) => a.price - b.price);
-    case "price-desc":
-      return list.sort((a, b) => b.price - a.price);
-    case "name-asc":
-      return list.sort((a, b) => a.name.localeCompare(b.name));
-    case "name-desc":
-      return list.sort((a, b) => b.name.localeCompare(a.name));
-    default:
-      return list;
-  }
+  return sortStorefrontProducts(products, sort);
 }

@@ -16,6 +16,7 @@ let createCatalogVendorAdmin: Handler;
 let trashCatalogVendorAdmin: Handler;
 let restoreCatalogVendorAdmin: Handler;
 let deleteCatalogVendorAdmin: Handler;
+let reorderCatalogVendorsAdmin: Handler;
 let docClient: { send: (command: unknown) => Promise<{ Item?: Record<string, unknown> }> };
 let productsTable: string;
 
@@ -27,6 +28,7 @@ before(async () => {
   trashCatalogVendorAdmin = mod.trashCatalogVendorAdmin;
   restoreCatalogVendorAdmin = mod.restoreCatalogVendorAdmin;
   deleteCatalogVendorAdmin = mod.deleteCatalogVendorAdmin;
+  reorderCatalogVendorsAdmin = mod.reorderCatalogVendorsAdmin;
   const db = await import("../lib/db");
   docClient = db.docClient as typeof docClient;
   productsTable = db.PRODUCTS_TABLE;
@@ -73,6 +75,10 @@ describe("admin catalog vendor API", { concurrency: false }, () => {
     assert.deepEqual(
       vendors.map((vendor) => vendor.vendorSlug),
       ["blossompot", "orange-county", "gift-baskets-overseas", "fnp"]
+    );
+    assert.deepEqual(
+      vendors.map((vendor) => vendor.displayOrder),
+      [1, 2, 3, 4]
     );
     assert.equal(vendors.every((vendor) => vendor.source === "default" && vendor.enabled === true), true);
     assert.equal(vendors.every((vendor) => Array.isArray(vendor.deliveryCountries) && vendor.deliveryCountries[0] === "US"), true);
@@ -250,5 +256,87 @@ describe("admin catalog vendor API", { concurrency: false }, () => {
     const blockedDelete = resultOf(await deleteCatalogVendorAdmin(event({ vendorSlug: "phase2-flowers" })));
     assert.equal(blockedDelete.statusCode, 400);
     assert.equal(product.Item?.slug, "phase2-rose");
+  });
+
+  it("saves a complete vendor sequence and keeps that order when a vendor is disabled", async () => {
+    const listed = resultOf(await listCatalogVendorsAdmin(event({})));
+    const slugs = (listed.body.vendors as Array<{ vendorSlug: string }>).map((vendor) => vendor.vendorSlug);
+    const from = slugs.indexOf("gift-baskets-overseas");
+    const moved = [...slugs];
+    const [gbo] = moved.splice(from, 1);
+    moved.unshift(gbo!);
+    const saved = resultOf(await reorderCatalogVendorsAdmin(event({ body: { vendorSlugs: moved } })));
+    assert.equal(saved.statusCode, 200);
+    const ordered = (saved.body.vendors as Array<{ vendorSlug: string; displayOrder: number }>).map(
+      (vendor) => `${vendor.vendorSlug}:${vendor.displayOrder}`
+    );
+    assert.deepEqual(
+      ordered,
+      moved.map((slug, index) => `${slug}:${index + 1}`)
+    );
+
+    const duplicate = resultOf(
+      await reorderCatalogVendorsAdmin(event({ body: { vendorSlugs: [moved[0], moved[0]] } }))
+    );
+    assert.equal(duplicate.statusCode, 400);
+
+    const disabled = resultOf(
+      await updateCatalogVendorAdmin(
+        event({
+          vendorSlug: "gift-baskets-overseas",
+          body: { enabled: false, deliveryCountries: ["US"] },
+        })
+      )
+    );
+    assert.equal(disabled.statusCode, 200);
+    assert.equal((disabled.body.vendor as { displayOrder?: number }).displayOrder, 1);
+    const enabled = resultOf(
+      await updateCatalogVendorAdmin(
+        event({
+          vendorSlug: "gift-baskets-overseas",
+          body: { enabled: true, deliveryCountries: ["US"] },
+        })
+      )
+    );
+    assert.equal((enabled.body.vendor as { displayOrder?: number }).displayOrder, 1);
+  });
+
+  it("places a new vendor at max + 1 unless a position is chosen", async () => {
+    const appended = resultOf(
+      await createCatalogVendorAdmin(
+        event({
+          body: {
+            vendorName: "Sequence Flowers",
+            vendorSlug: "sequence-flowers",
+            integrationType: "owned",
+            deliveryCountries: ["US"],
+            enabled: true,
+          },
+        })
+      )
+    );
+    assert.equal(appended.statusCode, 201);
+    const appendedOrder = (appended.body.vendor as { displayOrder?: number }).displayOrder ?? 0;
+    assert.equal(appendedOrder > 1, true);
+
+    const inserted = resultOf(
+      await createCatalogVendorAdmin(
+        event({
+          body: {
+            vendorName: "Front Flowers",
+            vendorSlug: "front-flowers",
+            integrationType: "owned",
+            deliveryCountries: ["US"],
+            enabled: true,
+            displayPosition: 1,
+          },
+        })
+      )
+    );
+    assert.equal(inserted.statusCode, 201);
+    assert.equal((inserted.body.vendor as { displayOrder?: number }).displayOrder, 1);
+    const listed = resultOf(await listCatalogVendorsAdmin(event({})));
+    const orders = (listed.body.vendors as Array<{ displayOrder?: number }>).map((vendor) => vendor.displayOrder);
+    assert.deepEqual(orders, orders.map((_, index) => index + 1));
   });
 });

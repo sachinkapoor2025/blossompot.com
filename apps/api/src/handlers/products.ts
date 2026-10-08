@@ -23,6 +23,9 @@ import {
   isGboHiddenFromStorefront,
   NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE,
   productAllowedForNewShopping,
+  listingGroupsForProducts,
+  orderProductsByVendor,
+  sortVendorsForDisplay,
   VENDOR_GBO,
   type Product,
 } from "@blossompot/shared";
@@ -259,16 +262,32 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
   const shoppingCountry = location.countryCode;
   const vendorRegistry = await loadCatalogVendorRegistry();
   items = items.filter((product) => productAllowedForNewShopping(product, shoppingCountry, vendorRegistry).available);
-  let products = items.map(forStorefront);
+  const vendorRecords = sortVendorsForDisplay([...vendorRegistry.values()]);
+  items = orderProductsByVendor(items, vendorRecords);
   if (location?.postalCode) {
     const evals = await evaluateProductsForLocation(items, location);
     const deliverable = new Set(evals.filter((e) => e.deliverable).map((e) => e.slug));
-    products = products.filter((p) => deliverable.has(p.slug));
+    items = items.filter((p) => deliverable.has(p.slug));
+  }
+  const products = items.map(forStorefront);
+  const listing =
+    event.headers?.["x-blossompot-listing-groups"] === "1" ||
+    event.headers?.["X-Blossompot-Listing-Groups"] === "1"
+      ? {
+          listingGroups: listingGroupsForProducts(items, vendorRecords),
+          listingVendors: vendorRecords.map((vendor) => ({
+            vendorSlug: vendor.vendorSlug,
+            vendorName: vendor.vendorName,
+            ...(vendor.displayOrder != null ? { displayOrder: vendor.displayOrder } : {}),
+          })),
+        }
+      : {};
+  if (location?.postalCode) {
     // Postal availability is per address — do not CDN-cache it.
-    return ok({ products, location, filtered: true });
+    return ok({ products, location, filtered: true, ...listing });
   }
   // Vendor availability can change without a product write, so do not CDN-cache the list.
-  return ok({ products, ...(location?.countryCode ? { location, filtered: true } : {}) });
+  return ok({ products, ...listing, ...(location?.countryCode ? { location, filtered: true } : {}) });
 }
 
 export async function getProduct(event: APIGatewayProxyEventV2) {

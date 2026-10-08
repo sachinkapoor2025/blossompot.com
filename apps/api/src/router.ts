@@ -185,6 +185,7 @@ const routes: Route[] = [
   // Catalog vendor registry (BlossomPot, Orange County, GBO, FNP). Not marketplace applicants.
   { method: "GET", pattern: /^\/admin\/catalog-vendors$/, handler: catalogVendors.listCatalogVendorsAdmin },
   { method: "POST", pattern: /^\/admin\/catalog-vendors$/, handler: catalogVendors.createCatalogVendorAdmin },
+  { method: "POST", pattern: /^\/admin\/catalog-vendors\/reorder$/, handler: catalogVendors.reorderCatalogVendorsAdmin },
   { method: "GET", pattern: /^\/admin\/catalog-countries$/, handler: catalogCountries.listCatalogCountriesAdmin },
   { method: "PUT", pattern: /^\/admin\/catalog-countries$/, handler: catalogCountries.updateCatalogCountriesAdmin },
   { method: "GET", pattern: /^\/catalog-countries$/, handler: catalogCountries.listCatalogCountriesPublic },

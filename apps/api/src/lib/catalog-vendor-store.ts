@@ -3,6 +3,7 @@ import {
   CATALOG_VENDOR_SLUGS,
   catalogVendorKeys,
   productAllowedForNewShopping,
+  applyStoredDisplayOrder,
   parseStoredCatalogVendor,
   readStoredCatalogVendor,
   type CatalogVendor,
@@ -31,7 +32,8 @@ export async function loadCatalogVendorRegistry(): Promise<Map<string, CatalogVe
           Key: { PK: catalogVendorKeys.pk(slug), SK: catalogVendorKeys.sk() },
         })
       );
-      return [slug, readStoredCatalogVendor(slug, result.Item as Record<string, unknown> | undefined).vendor] as const;
+      const item = result.Item as Record<string, unknown> | undefined;
+      return [slug, applyStoredDisplayOrder(readStoredCatalogVendor(slug, item).vendor, item?.displayOrder)] as const;
     })
   );
   const vendors = new Map<string, CatalogVendor>(items);
@@ -50,7 +52,7 @@ export async function loadCatalogVendorRegistry(): Promise<Map<string, CatalogVe
     if (!slug || (CATALOG_VENDOR_SLUGS as readonly string[]).includes(slug)) continue;
     const parsed = parseStoredCatalogVendor(slug, item as Record<string, unknown>);
     if (!parsed) continue;
-    vendors.set(slug, parsed);
+    vendors.set(slug, applyStoredDisplayOrder(parsed, item.displayOrder));
   }
   cache = { at: nowMs, vendors };
   return vendors;
