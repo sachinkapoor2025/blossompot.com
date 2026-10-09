@@ -47,7 +47,7 @@ import {
 } from "@blossompot/shared";
 import { evaluateProductsForLocation } from "./serviceability";
 import { loadCatalogCountries } from "../lib/catalog-country-store";
-import { decideNewShopping } from "../lib/catalog-vendor-store";
+import { decideNewShopping, withStoredShoppingIdentity } from "../lib/catalog-vendor-store";
 import { resolveCheckoutUsdInrRate } from "../lib/exchange-rate";
 import { docClient, ORDERS_TABLE, CUSTOMERS_TABLE, now } from "../lib/db";
 import { ok, created, badRequest, unauthorized, forbidden, notFound } from "../lib/response";
@@ -244,7 +244,8 @@ export async function checkout(event: APIGatewayProxyEventV2) {
   }
   const newShoppingCountry = (parsed.data.shippingAddress.country ?? "US").trim() || "US";
   for (const item of cart.items as CartItem[]) {
-    const decision = await decideNewShopping(item, newShoppingCountry);
+    const identity = await withStoredShoppingIdentity(item);
+    const decision = await decideNewShopping(identity, newShoppingCountry);
     if (!decision.available) {
       return badRequest(
         decision.reason === "gbo_storefront_disabled"

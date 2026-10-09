@@ -1,9 +1,19 @@
+import { VENDOR_FNP } from "../constants";
 import { productSchema, type Product } from "../schemas/product";
 import { slugify } from "./slug";
 
 export const FNP_IMPORT_COMMIT_BATCH_SIZE = 20;
 export const FNP_IMPORT_PREVIEW_MAX_ROWS = 1000;
 export const FNP_IMPORT_TAG = "fnp-usa-import";
+
+/** Imported FNP rows often have the import tag and no vendor slug. The shopping helper still needs that vendor. */
+export function productForShoppingDecision<T extends { vendorSlug?: string | null; tags?: readonly string[] | null }>(
+  product: T
+): T {
+  if (product.vendorSlug?.trim()) return product;
+  if ((product.tags ?? []).includes(FNP_IMPORT_TAG)) return { ...product, vendorSlug: VENDOR_FNP };
+  return product;
+}
 export const FNP_IMAGE_HOST = "static-assets-prod.fnp.com";
 
 const CAKE_NAME_OVERRIDES = new Set(

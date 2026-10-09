@@ -7,7 +7,7 @@ import {
   isGboStorefrontEnabled,
   isPublicGboCatalogPath,
 } from "@blossompot/shared";
-import { loadCatalogVendorRegistry } from "../lib/catalog-vendor-store";
+import { decideNewShopping } from "../lib/catalog-vendor-store";
 import {
   GboClientError,
   gboCreateOrder,
@@ -50,13 +50,13 @@ function sandboxFlag(event: APIGatewayProxyEventV2): boolean | undefined {
   return undefined;
 }
 
-/** Public GBO shopping needs the catalog vendor and the existing environment flag. */
+/** Public GBO shopping uses the same new-shopping decision as the rest of the storefront. */
 async function gboOpenForNewShopping(country: string): Promise<boolean> {
-  if (!isGboStorefrontEnabled()) return false;
-  const registry = await loadCatalogVendorRegistry();
-  const vendor = registry.get(VENDOR_GBO);
-  if (!vendor?.enabled) return false;
-  return vendor.deliveryCountries.includes(country.trim().toUpperCase());
+  const decision = await decideNewShopping(
+    { vendorSlug: VENDOR_GBO, internationalDelivery: true },
+    country
+  );
+  return decision.available;
 }
 
 function gboFail(err: unknown): APIGatewayProxyResultV2 {

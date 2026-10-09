@@ -1,6 +1,8 @@
 import {
   CATALOG_VENDOR_SLUGS,
   defaultCatalogVendor,
+  fulfillmentVendorSlug,
+  productForShoppingDecision,
   isSampleCatalogProduct,
   productAllowsAddons,
   productAllowedForNewShopping,
@@ -12,6 +14,7 @@ import {
   withCompetitiveStorefrontPricing,
   dedupeStorefrontProducts,
   type Product,
+  type ShoppingVendorRecord,
 } from "@blossompot/shared";
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
@@ -24,6 +27,17 @@ interface CatalogFile {
 }
 
 let cached: Product[] | null = null;
+const bundledVendorBySlug = new Map<string, string>();
+let rememberedShoppingVendors: readonly ShoppingVendorRecord[] | null = null;
+
+/** Last live shopping registry. Fallback rows use the same disabled-vendor decision as the products API. */
+export function rememberStorefrontShoppingVendors(vendors: readonly ShoppingVendorRecord[] | null): void {
+  rememberedShoppingVendors = vendors;
+}
+
+export function hasRememberedStorefrontVendors(): boolean {
+  return Boolean(rememberedShoppingVendors?.length);
+}
 
 function resolveDataPath(filename: string): string | null {
   const candidates = [
@@ -53,6 +67,8 @@ function ingestCatalogProducts(
     if (options.fillMissingOnly && bySlug.has(product.slug)) continue;
     if (isRakhiRelatedProduct(product)) continue;
     if (isSampleCatalogProduct(product)) continue;
+    const vendorSlug = product.vendorSlug?.trim();
+    if (vendorSlug) bundledVendorBySlug.set(product.slug, vendorSlug);
     const allowsAddons = productAllowsAddons(product);
     const publicProduct = stripVendorPrivateFields(product) as Product;
     publicProduct.allowsAddons = allowsAddons;
@@ -65,14 +81,14 @@ function ingestCatalogProducts(
 
 /** Read bundled catalog JSON — real BlossomPot SKUs only (never the sample marketplace dump). */
 export function getCatalogProducts(): Product[] {
-  if (cached) return cached;
+  if (cached) return withoutRememberedDisabledVendors(cached);
   const bySlug = new Map<string, Product>();
   ingestCatalogProducts(bySlug, (blossompotCatalog as { products?: unknown }).products);
   ingestCatalogProducts(bySlug, (tfUsaCatalog as { products?: unknown }).products, { fillMissingOnly: true });
   ingestCatalogProducts(bySlug, loadCatalogFile("blossompot-catalog.json"));
   ingestCatalogProducts(bySlug, loadCatalogFile("tf-usa-catalog.json"), { fillMissingOnly: true });
   cached = dedupeStorefrontProducts([...bySlug.values()]);
-  return cached;
+  return withoutRememberedDisabledVendors(cached);
 }
 
 export function getCatalogProduct(slug: string): Product | undefined {
@@ -114,6 +130,38 @@ export function mergeProductsPreferExisting(
   return dedupeStorefrontProducts([...bySlug.values()]);
 }
 const DEFAULT_BUNDLED_VENDORS = CATALOG_VENDOR_SLUGS.map((slug) => defaultCatalogVendor(slug));
+
+/** Vendor slug for the shopping helper. Public cards stay free of stored vendor identity. */
+export function bundledShoppingVendorSlug(product: {
+  slug?: string | null;
+  vendorSlug?: string | null;
+  sku?: string | null;
+  internationalDelivery?: boolean;
+  tags?: string[] | null;
+}): string {
+  const explicit = product.vendorSlug?.trim() || (product.slug ? bundledVendorBySlug.get(product.slug) : undefined);
+  return fulfillmentVendorSlug(productForShoppingDecision({ ...product, vendorSlug: explicit }));
+}
+
+/** Disabled and GBO-off vendors are absent. Country and ZIP rules stay on the shopping helper. */
+export function bundledHiddenForDisabledVendor(
+  product: Product,
+  country: string,
+  vendors: readonly ShoppingVendorRecord[]
+): boolean {
+  const decision = productAllowedForNewShopping(
+    { ...product, vendorSlug: bundledShoppingVendorSlug(product) },
+    country,
+    vendors
+  );
+  return decision.reason === "vendor_disabled" || decision.reason === "gbo_storefront_disabled";
+}
+
+function withoutRememberedDisabledVendors(products: Product[], country = "US"): Product[] {
+  const vendors = rememberedShoppingVendors;
+  if (!vendors?.length) return products;
+  return products.filter((product) => !bundledHiddenForDisabledVendor(product, country, vendors));
+}
 
 /**
  * Bundled JSON is not a second catalog. It may fill a missing SKU only when that

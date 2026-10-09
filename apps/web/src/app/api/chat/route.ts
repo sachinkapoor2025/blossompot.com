@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { chatRequestSchema, type ChatMessage } from "@blossompot/shared";
 import { buildChatSystemPrompt } from "@/lib/chat/prompt";
 import { fallbackChatReply, isOnTopicGiftQuestion, productRecommendations } from "@/lib/chat/fallback";
+import { loadProducts } from "@/lib/product-loader";
 
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 
@@ -74,6 +75,7 @@ export async function POST(req: Request) {
       : [{ role: "user" as const, content: userText }];
 
     let reply: string;
+    await loadProducts().catch(() => undefined);
 
     if (getApiKey()) {
       const systemPrompt = buildChatSystemPrompt(page);

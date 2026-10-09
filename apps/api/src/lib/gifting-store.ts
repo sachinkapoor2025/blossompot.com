@@ -25,7 +25,7 @@ import {
   type UpcomingOccasionView,
 } from "@blossompot/shared";
 import type { Product } from "@blossompot/shared";
-import { isGboHiddenFromStorefront, isProductStorefrontVisible, productAllowedForNewShopping } from "@blossompot/shared";
+import { isGboHiddenFromStorefront, isProductStorefrontVisible, productAllowedForNewShopping, productForShoppingDecision } from "@blossompot/shared";
 import { loadCatalogVendorRegistry } from "./catalog-vendor-store";
 import { CONFIG_TABLE, CUSTOMERS_TABLE, PRODUCTS_TABLE, now } from "./db";
 import { docClient } from "./db";
@@ -706,7 +706,7 @@ export async function loadCatalogProducts(): Promise<Product[]> {
       isProductStorefrontVisible(p) &&
       !isGboHiddenFromStorefront(p) &&
       (p.inventory ?? 1) > 0 &&
-      productAllowedForNewShopping(p, "US", vendors).available
+      productAllowedForNewShopping(productForShoppingDecision(p), "US", vendors).available
   );
 }
 

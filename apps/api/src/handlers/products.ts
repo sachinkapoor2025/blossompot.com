@@ -23,6 +23,8 @@ import {
   isGboHiddenFromStorefront,
   NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE,
   productAllowedForNewShopping,
+  productForShoppingDecision,
+  catalogVendorShoppingStatus,
   listingGroupsForProducts,
   orderProductsByVendor,
   sortVendorsForDisplay,
@@ -37,7 +39,8 @@ import { getAuth, requireAdmin } from "../lib/auth";
 import { withResolvedProductImages, resolveProductImageUrl } from "../lib/images";
 import { syncInventoryAlertState } from "../lib/inventory";
 import { ensureProductInDb } from "../lib/ensure-product";
-import { listBundledCatalogProducts, persistMissingBundledCatalogProducts } from "../lib/blossompot-catalog";
+import { getBundledUsarakhiProduct, listBundledCatalogProducts, persistMissingBundledCatalogProducts } from "../lib/blossompot-catalog";
+import { getBundledOrangeCountyProduct } from "../lib/orange-county-catalog";
 
 function decodeProductPathSlug(raw: string): string {
   try {
@@ -87,8 +90,17 @@ const BUNDLED_CATALOG_PERSIST_BATCH = 25;
 async function persistAndMergeBundledCatalog(items: Product[], category?: string): Promise<Product[]> {
   const merged = dedupeStorefrontProducts(mergeBundledCatalogProducts(items, category));
   try {
+    const alreadyStored = new Set(items.map((product) => product.slug));
+    const registry = await loadCatalogVendorRegistry();
+    for (const bundled of listBundledCatalogProducts()) {
+      if (alreadyStored.has(bundled.slug)) continue;
+      const decision = productAllowedForNewShopping(productForShoppingDecision(bundled), "US", registry);
+      if (decision.reason === "vendor_disabled" || decision.reason === "gbo_storefront_disabled") {
+        alreadyStored.add(bundled.slug);
+      }
+    }
     const persisted = await persistMissingBundledCatalogProducts(
-      new Set(items.map((product) => product.slug)),
+      alreadyStored,
       BUNDLED_CATALOG_PERSIST_BATCH
     );
     if (persisted.length > 0) {
@@ -98,6 +110,10 @@ async function persistAndMergeBundledCatalog(items: Product[], category?: string
     console.error("persistMissingBundledCatalogProducts failed", err);
   }
   return merged;
+}
+
+function vendorHiddenFromStorefront(decision: { available: boolean; reason?: string }): boolean {
+  return !decision.available && (decision.reason === "vendor_disabled" || decision.reason === "gbo_storefront_disabled");
 }
 
 function forStorefront(product: Product): Product {
@@ -269,7 +285,9 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
   items = items.filter((p) => productVisibleForDeliveryCountry(p, location.countryCode));
   const shoppingCountry = location.countryCode;
   const vendorRegistry = await loadCatalogVendorRegistry();
-  items = items.filter((product) => productAllowedForNewShopping(product, shoppingCountry, vendorRegistry).available);
+  items = items.filter(
+    (product) => productAllowedForNewShopping(productForShoppingDecision(product), shoppingCountry, vendorRegistry).available
+  );
   const vendorRecords = sortVendorsForDisplay([...vendorRegistry.values()]);
   items = orderProductsByVendor(items, vendorRecords);
   const evals = await evaluateProductsForLocation(items, location);
@@ -285,6 +303,7 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
             vendorSlug: vendor.vendorSlug,
             vendorName: vendor.vendorName,
             ...(vendor.displayOrder != null ? { displayOrder: vendor.displayOrder } : {}),
+            shoppingAvailable: catalogVendorShoppingStatus(vendor).shoppingAvailable,
           })),
         }
       : {};
@@ -304,6 +323,7 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
     if (!location) return notFound(NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE);
     const visible = productVisibleForDeliveryCountry(cached.product, location.countryCode);
     const shopping = await decideNewShopping(cached.product, location.countryCode);
+    if (vendorHiddenFromStorefront(shopping)) return notFound("Product not found");
     if (!visible || !shopping.available) {
       return ok({
         product: forStorefront(cached.product),
@@ -334,6 +354,13 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
 
   let item = result.Item as (Product & { published?: boolean }) | undefined;
   if (!item) {
+    const preview = getBundledUsarakhiProduct(slug) ?? getBundledOrangeCountyProduct(slug);
+    if (preview) {
+      const previewLocation = await resolveShoppingLocation(parseLocationQuery(event));
+      if (!previewLocation) return notFound(NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE);
+      const previewShopping = await decideNewShopping(preview, previewLocation.countryCode);
+      if (vendorHiddenFromStorefront(previewShopping)) return notFound("Product not found");
+    }
     // Storefront may list bundled catalog SKUs before DynamoDB import — upsert on first view.
     const upserted = await ensureProductInDb(slug);
     if (upserted) {
@@ -352,6 +379,7 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
   if (!location) return notFound(NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE);
   const visible = productVisibleForDeliveryCountry(product, location.countryCode);
   const shopping = await decideNewShopping(product, location.countryCode);
+  if (vendorHiddenFromStorefront(shopping)) return notFound("Product not found");
   if (!visible || !shopping.available) {
     return ok({
       product: forStorefront(product),

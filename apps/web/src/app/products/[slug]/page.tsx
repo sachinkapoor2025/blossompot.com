@@ -12,6 +12,10 @@ import { loadProductForCountry, loadRelatedProducts, loadProducts, getStaticProd
 import { api } from "@/lib/api";
 import { categoryHref } from "@/lib/category-urls";
 import { getCategoryPageSeo } from "@/lib/content/category-seo";
+import {
+  productAvailabilityNotice,
+  UNAVAILABLE_PAGE_ALLOWS_PURCHASE,
+} from "@/lib/product-availability-copy";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { deliveryDestinationName } from "@/lib/location-seo-urls";
 import {
@@ -109,14 +113,17 @@ async function ProductPageContent({ params }: Props) {
 
   if (!loaded.deliverable || !productVisibleForDeliveryCountry(product, countryIso)) {
     const countryName = resolveDeliveryCountry(countryIso).countryName;
+    const notice = productAvailabilityNotice({
+      productName: product.name,
+      countryName,
+      reason: loaded.reason,
+      visibleForCountry: productVisibleForDeliveryCountry(product, countryIso),
+    });
     const available = await loadProducts({ country: countryIso });
     return (
       <div className="max-w-6xl mx-auto px-4 py-10">
-        <h1 className="text-2xl font-bold text-primary mb-3">This gift is not available for {countryName}</h1>
-        <p className="text-slate-600 mb-6 max-w-2xl">
-          {product.name} is listed for a different delivery country. Browse gifts that can be sent to{" "}
-          {countryName}.
-        </p>
+        <h1 className="text-2xl font-bold text-primary mb-3">{notice.heading}</h1>
+        <p className="text-slate-600 mb-6 max-w-2xl">{notice.body}</p>
         <Link href="/gift-catalog" className="btn-nav bg-primary inline-flex mb-10">
           Shop gifts for {countryName}
         </Link>
@@ -124,6 +131,7 @@ async function ProductPageContent({ params }: Props) {
           <HomeProductList
             products={available}
             limit={10}
+            showPurchaseControls={UNAVAILABLE_PAGE_ALLOWS_PURCHASE}
             className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 list-none p-0 m-0"
           />
         ) : null}

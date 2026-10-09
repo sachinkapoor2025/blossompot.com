@@ -36,8 +36,9 @@ import { formatPostalDisplay } from "@blossompot/shared";
 import { resolveProductImageUrl } from "../lib/images";
 import { upsertSessionProfile } from "../lib/customer-profile";
 import { loadCatalogCountries } from "../lib/catalog-country-store";
-import { decideNewShopping, loadCatalogVendorRegistry } from "../lib/catalog-vendor-store";
-import { ensureOrangeCountyProductInDb } from "../lib/orange-county-catalog";
+import { decideNewShopping, loadCatalogVendorRegistry, withStoredShoppingIdentity } from "../lib/catalog-vendor-store";
+import { getBundledUsarakhiProduct } from "../lib/blossompot-catalog";
+import { ensureOrangeCountyProductInDb, getBundledOrangeCountyProduct } from "../lib/orange-county-catalog";
 import { ensureProductInDb } from "../lib/ensure-product";
 
 /** Stale carts auto-expire after this many days (TTL). */
@@ -151,8 +152,9 @@ export async function getCartHandler(event: APIGatewayProxyEventV2) {
     const where = shoppingLocation.postalCode
       ? formatPostalDisplay(shoppingLocation.countryCode, shoppingLocation.postalCode)
       : shoppingLocation.countryCode;
-    const flagged = items.map((item) => {
-      const decision = productAllowedForNewShopping(item, shoppingLocation.countryCode, registry);
+    const flagged = await Promise.all(items.map(async (item) => {
+      const identity = await withStoredShoppingIdentity(item);
+      const decision = productAllowedForNewShopping(identity, shoppingLocation.countryCode, registry);
       const ev = bySlug.get(item.productSlug);
       const areaBlocked = Boolean(ev && !ev.deliverable);
       if (decision.available && !areaBlocked) return item;
@@ -168,7 +170,7 @@ export async function getCartHandler(event: APIGatewayProxyEventV2) {
         unavailableForLocation: true,
         unavailableReason,
       };
-    });
+    }));
     return ok({
       cart: { items: flagged, updatedAt: raw.updatedAt ?? now() },
       locationRevalidated: true,
@@ -218,6 +220,17 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
   // Storefront may show catalog fallback before DynamoDB import — upsert on first add.
   let productItem = productResult.Item as Record<string, unknown> | undefined;
   if (!productItem) {
+    const preview = getBundledUsarakhiProduct(parsed.data.productSlug) ?? getBundledOrangeCountyProduct(parsed.data.productSlug);
+    if (preview) {
+      const previewShopping = await decideNewShopping(preview, parsed.data.deliveryCountry || "US");
+      if (!previewShopping.available && (previewShopping.reason === "vendor_disabled" || previewShopping.reason === "gbo_storefront_disabled")) {
+        return badRequest(
+          previewShopping.reason === "gbo_storefront_disabled"
+            ? GBO_STOREFRONT_UNAVAILABLE_MESSAGE
+            : CATALOG_VENDOR_UNAVAILABLE_MESSAGE
+        );
+      }
+    }
     productItem = (await ensureProductInDb(parsed.data.productSlug)) ?? undefined;
   } else if (
     productItem.vendorSlug === "orange-county" ||
@@ -417,6 +430,17 @@ export async function updateCartItem(event: APIGatewayProxyEventV2) {
   ).Item as { inventory: number; vendorSlug?: string; categorySlug?: string } | undefined;
 
   if (!product) {
+    const preview = getBundledUsarakhiProduct(productSlug) ?? getBundledOrangeCountyProduct(productSlug);
+    if (preview) {
+      const previewShopping = await decideNewShopping(preview, "US");
+      if (!previewShopping.available && (previewShopping.reason === "vendor_disabled" || previewShopping.reason === "gbo_storefront_disabled")) {
+        return badRequest(
+          previewShopping.reason === "gbo_storefront_disabled"
+            ? GBO_STOREFRONT_UNAVAILABLE_MESSAGE
+            : CATALOG_VENDOR_UNAVAILABLE_MESSAGE
+        );
+      }
+    }
     product =
       ((await ensureProductInDb(productSlug)) as {
         inventory: number;
@@ -432,6 +456,14 @@ export async function updateCartItem(event: APIGatewayProxyEventV2) {
       } | null) ?? product;
   }
   if (!product) return badRequest("Product not found");
+  const shopping = await decideNewShopping(await withStoredShoppingIdentity({ ...item, ...product, productSlug }), "US");
+  if (!shopping.available && (shopping.reason === "vendor_disabled" || shopping.reason === "gbo_storefront_disabled")) {
+    return badRequest(
+      shopping.reason === "gbo_storefront_disabled"
+        ? GBO_STOREFRONT_UNAVAILABLE_MESSAGE
+        : CATALOG_VENDOR_UNAVAILABLE_MESSAGE
+    );
+  }
   if (quantity > product.inventory) return badRequest("Insufficient inventory");
 
   item.quantity = quantity;

@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import type { Product } from "@blossompot/shared";
+import { CATALOG_VENDOR_SLUGS, defaultCatalogVendor, type Product, type ShoppingVendorRecord } from "@blossompot/shared";
 import {
+  bundledHiddenForDisabledVendor,
+  bundledShoppingVendorSlug,
+  rememberStorefrontShoppingVendors,
   getCatalogProduct,
   getCatalogProducts,
   getCatalogProductsByCategory,
@@ -71,4 +74,60 @@ describe("bundled catalog fallback", () => {
       false
     );
   });
+
+  it("hides bundled FNP products when that vendor is disabled and keeps them when it is enabled", () => {
+    const pastel = getCatalogProduct("perfectly-pastel-premium");
+    assert.ok(pastel);
+    assert.equal(bundledShoppingVendorSlug(pastel), "fnp");
+    const vendors = defaultVendors();
+    assert.equal(bundledHiddenForDisabledVendor(pastel, "US", vendors), false);
+    const disabled = vendors.map((vendor) =>
+      vendor.vendorSlug === "fnp" ? { ...vendor, enabled: false } : vendor
+    );
+    assert.equal(bundledHiddenForDisabledVendor(pastel, "US", disabled), true);
+    rememberStorefrontShoppingVendors(disabled);
+    assert.equal(
+      mergeProductsForCountry([], "US").some((product) => product.slug === "perfectly-pastel-premium"),
+      false
+    );
+    assert.equal(
+      getCatalogProductsByCategory("cakes").some((product) => product.slug === "perfectly-pastel-premium") ||
+        getCatalogProducts().some((product) => product.slug === "perfectly-pastel-premium"),
+      false
+    );
+    rememberStorefrontShoppingVendors(null);
+    assert.equal(
+      mergeProductsForCountry([], "US").some((product) => product.slug === "perfectly-pastel-premium"),
+      true
+    );
+  });
+
+  it("hides a disabled Orange County product and leaves an enabled one to the ZIP rules", () => {
+    const product = {
+      slug: "oc-hamper",
+      name: "Orange County hamper",
+      description: "Hamper",
+      price: 40,
+      currency: "USD",
+      categorySlug: "gift-hampers",
+      images: [],
+      sku: "OC-1",
+      inventory: 3,
+      tags: [],
+      vendorSlug: "orange-county",
+      published: true,
+      createdAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+    } as Product;
+    const vendors = defaultVendors();
+    assert.equal(bundledHiddenForDisabledVendor(product, "US", vendors), false);
+    const disabled = vendors.map((vendor) =>
+      vendor.vendorSlug === "orange-county" ? { ...vendor, enabled: false } : vendor
+    );
+    assert.equal(bundledHiddenForDisabledVendor(product, "US", disabled), true);
+  });
 });
+
+function defaultVendors(): ShoppingVendorRecord[] {
+  return CATALOG_VENDOR_SLUGS.map((slug) => defaultCatalogVendor(slug));
+}

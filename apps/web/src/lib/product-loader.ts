@@ -12,20 +12,24 @@ import {
   filterAlignedListingGroups,
   dedupeStorefrontProducts,
   isProductStorefrontVisible,
+  defaultCatalogVendor,
+  isCatalogVendorSlug,
   type GboGift,
   type ListingVendorGroup,
   type Product,
+  type ShoppingVendorRecord,
   type VendorDisplaySource,
 } from "@blossompot/shared";
 import { api } from "./api";
 import {
-  getCatalogProduct,
+  bundledHiddenForDisabledVendor,
   getCatalogProducts,
   getCatalogProductsForCountry,
-  mergeProductsPreferExisting,
+  rememberStorefrontShoppingVendors,
 } from "./catalog-fallback";
 import { toListingCardProducts } from "./listing-card";
 import { isRakhiRelatedProduct, storefrontSkipsRakhiCategory } from "./rakhi-filter";
+import { availabilityAllowsPurchase } from "./product-availability-copy";
 import { getStorefrontDeliveryCountry, getStorefrontDeliveryPostal } from "./storefront-country";
 
 function isStorefrontVisible(product: Product): boolean {
@@ -41,7 +45,6 @@ function isStorefrontVisible(product: Product): boolean {
  * Catalog JSON has historically diverged from DynamoDB (e.g. Om at $1.50 vs live $14.72)
  * and ISR + year-long stale-while-revalidate kept those wrong prices in HTML/OG tags.
  */
-const PRODUCT_MEMORY_TTL_MS = 60 * 60 * 1000; // 1 hour
 const productMemoryCache = new Map<string, { product: Product; at: number }>();
 
 /**
@@ -58,13 +61,6 @@ function rememberProduct(product: Product): Product {
 function rememberProducts(products: Product[]): Product[] {
   for (const product of products) rememberProduct(product);
   return products;
-}
-
-function memoryProduct(slug: string): Product | null {
-  const hit = productMemoryCache.get(slug);
-  if (!hit) return null;
-  if (Date.now() - hit.at > PRODUCT_MEMORY_TTL_MS) return null;
-  return hit.product;
 }
 
 function catalogCountry(country?: string | null): string {
@@ -128,19 +124,6 @@ function decodeProductSlug(slug: string): string {
   }
 }
 
-function bundledCatalogProduct(slug: string): Product | null {
-  const bundled = getCatalogProduct(slug);
-  if (!bundled || !isStorefrontVisible(bundled)) return null;
-  return rememberProduct(bundled);
-}
-
-function bundledProductForCountry(slug: string, country: string): Product | null {
-  const iso = catalogCountry(country);
-  const bundled = getCatalogProductsForCountry(iso).find((product) => product.slug === slug);
-  if (!bundled || !isStorefrontVisible(bundled)) return null;
-  return rememberProduct(bundled);
-}
-
 function catalogListingExtras(params?: {
   category?: string;
   search?: string;
@@ -178,10 +161,7 @@ export async function loadProductForCountry(
       const { vendorCost: _c, ...rest } = mapped;
       const product = rememberProduct(rest as Product);
       if (!isStorefrontVisible(product)) return null;
-      return {
-        product,
-        deliverable: productVisibleForDeliveryCountry(product, country),
-      };
+      return unverifiedProduct(product);
     } catch {
       return null;
     }
@@ -198,28 +178,45 @@ export async function loadProductForCountry(
       revalidate: false,
     });
     if (!isStorefrontVisible(data.product)) return null;
+    if (vendorHiddenFromStorefront(data.availability?.reason)) return null;
     return {
       product: rememberProduct(data.product),
-      deliverable: data.availability?.deliverable !== false,
+      deliverable: availabilityAllowsPurchase(data.availability),
       reason: data.availability?.reason,
     };
   } catch (err) {
-    const gbo = await fromGbo();
-    if (gbo) return gbo;
-    const bundled = bundledProductForCountry(decoded, country) ?? bundledCatalogProduct(decoded);
-    if (bundled) {
-      return {
-        product: bundled,
-        deliverable: productVisibleForDeliveryCountry(bundled, country),
-      };
-    }
-    if (isProductMissingError(err)) return null;
-    const stale = memoryProduct(decoded);
-    if (stale && isStorefrontVisible(stale)) {
-      return { product: stale, deliverable: productVisibleForDeliveryCountry(stale, country) };
-    }
-    return null;
+    if (!isProductMissingError(err)) return null;
+    return fromGbo();
   }
+}
+
+function vendorHiddenFromStorefront(reason?: string | null): boolean {
+  return reason === "vendor_disabled" || reason === "gbo_storefront_disabled";
+}
+
+function shoppingRecords(vendors: readonly VendorDisplaySource[]): ShoppingVendorRecord[] {
+  return vendors.map((vendor) => ({
+    vendorSlug: vendor.vendorSlug,
+    enabled: vendor.shoppingAvailable !== false,
+    deliveryCountries: isCatalogVendorSlug(vendor.vendorSlug)
+      ? defaultCatalogVendor(vendor.vendorSlug).deliveryCountries
+      : ["US"],
+  }));
+}
+
+function withoutDisabledVendors(
+  products: Product[],
+  country: string,
+  vendors: readonly VendorDisplaySource[]
+): Product[] {
+  if (!vendors.length) return [];
+  const records = shoppingRecords(vendors);
+  return products.filter((product) => !bundledHiddenForDisabledVendor(product, country, records));
+}
+
+/** Product info may still render. Purchasing stays blocked until a location check succeeds. */
+function unverifiedProduct(product: Product): { product: Product; deliverable: false } {
+  return { product, deliverable: false };
 }
 
 /**
@@ -235,7 +232,7 @@ export async function loadProduct(slug: string): Promise<Product | null> {
     });
     if (!isStorefrontVisible(data.product)) return null;
     return rememberProduct(data.product);
-  } catch (err) {
+  } catch {
     const gboRef = parseGboSlug(decoded);
     if (gboRef) {
       if (isGboHiddenFromStorefront({ slug: decoded })) return null;
@@ -254,11 +251,6 @@ export async function loadProduct(slug: string): Promise<Product | null> {
       }
     }
 
-    const bundled = bundledCatalogProduct(decoded);
-    if (bundled) return bundled;
-    if (isProductMissingError(err)) return null;
-    const stale = memoryProduct(decoded);
-    if (stale && isStorefrontVisible(stale)) return stale;
     return null;
   }
 }
@@ -332,7 +324,13 @@ export async function loadProducts(params?: {
 
   const apiProducts = dbResult?.products ?? [];
   const seen = new Set(apiProducts.map((product) => product.slug));
-  const extras = [...extra, ...catalogListingExtras({ ...params, country })].filter((product) => {
+  const listingVendors = dbResult?.listingVendors ?? [];
+  if (listingVendors.length) rememberStorefrontShoppingVendors(shoppingRecords(listingVendors));
+  const bundledExtras = dbResult
+    ? withoutDisabledVendors(catalogListingExtras({ ...params, country }), country, listingVendors)
+    : [];
+  const visibleGbo = dbResult ? withoutDisabledVendors(extra, country, listingVendors) : extra;
+  const extras = [...visibleGbo, ...bundledExtras].filter((product) => {
     if (seen.has(product.slug)) return false;
     seen.add(product.slug);
     return true;
@@ -353,10 +351,7 @@ export async function loadProductsByCategory(categorySlug: string, country?: str
   try {
     products = await loadProducts({ category: categorySlug, country });
   } catch {
-    products = mergeProductsPreferExisting(
-      [],
-      catalogListingExtras({ category: categorySlug, country: catalogCountry(country) })
-    );
+    products = [];
   }
   return dedupeStorefrontProducts(products.filter(isStorefrontVisible));
 }

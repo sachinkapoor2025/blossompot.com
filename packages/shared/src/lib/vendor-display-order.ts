@@ -5,6 +5,8 @@ export type VendorDisplaySource = {
   vendorSlug: string;
   vendorName: string;
   displayOrder?: number;
+  /** From `catalogVendorShoppingStatus`. Omitted vendors stay on the existing shopping helper. */
+  shoppingAvailable?: boolean;
 };
 
 export type VendorSortableProduct = {

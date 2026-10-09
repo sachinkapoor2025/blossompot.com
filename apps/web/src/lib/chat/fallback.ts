@@ -1,7 +1,7 @@
 import { site, navItems, faqs, giftSetsMenu, whatsappLinkLabel } from "@/lib/site";
 import { categoryHref } from "@/lib/category-urls";
 import { siteUrl } from "@/lib/env";
-import { getCatalogProducts } from "@/lib/catalog-fallback";
+import { getCatalogProducts, hasRememberedStorefrontVendors } from "@/lib/catalog-fallback";
 
 const OFF_TOPIC_REPLY = `I'm here specifically to help with BlossomPot — flowers, cakes, and gifts for worldwide delivery, our products, shipping, and orders. Is there something about gift delivery I can help with?
 
@@ -42,6 +42,7 @@ function paymentReply(): string {
 }
 
 export function catalogChatSnippet(limit = 40): string {
+  if (!hasRememberedStorefrontVendors()) return "";
   const products = getCatalogProducts();
   const picked: typeof products = [];
   const perCategory = new Map<string, number>();
@@ -66,7 +67,7 @@ export function productRecommendations(query: string): string | null {
     .toLowerCase()
     .split(/\W+/)
     .filter((word) => word.length > 3 && !/^(with|from|that|this|have|want|need|looking|some|your)$/.test(word));
-  if (terms.length === 0) return null;
+  if (terms.length === 0 || !hasRememberedStorefrontVendors()) return null;
   const scored = getCatalogProducts()
     .map((product) => {
       const hay = `${product.name} ${product.categorySlug} ${(product.tags ?? []).join(" ")}`.toLowerCase();

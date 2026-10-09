@@ -15,11 +15,14 @@ export function HomeProductCard({
   product,
   showFastSellingBadge = false,
   loadGalleryWhenVisible = false,
+  showPurchaseControls = true,
 }: {
   product: Product;
   showFastSellingBadge?: boolean;
   /** Homepage rows defer extra gallery frames until the card is on screen. */
   loadGalleryWhenVisible?: boolean;
+  /** When false, the card links to the product page and does not offer add-to-cart. */
+  showPurchaseControls?: boolean;
 }) {
   const { format } = useCurrency();
   const delivery = useOptionalDeliveryLocation();
@@ -67,12 +70,14 @@ export function HomeProductCard({
           </div>
         </div>
       </Link>
-      <div className="mt-auto px-3 pb-3">
-        {!delivery?.location ? (
-          <p className="text-[11px] text-slate-500 mb-1">Check delivery</p>
-        ) : null}
-        <AddToCartControl productSlug={product.slug} disabled={product.inventory <= 0} />
-      </div>
+      {showPurchaseControls ? (
+        <div className="mt-auto px-3 pb-3">
+          {!delivery?.location ? (
+            <p className="text-[11px] text-slate-500 mb-1">Check delivery</p>
+          ) : null}
+          <AddToCartControl productSlug={product.slug} disabled={product.inventory <= 0} />
+        </div>
+      ) : null}
     </div>
   );
 }

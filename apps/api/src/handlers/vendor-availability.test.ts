@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { before, describe, it } from "node:test";
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
-import { PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
+import { DeleteCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 
 process.env.USE_MEMORY_DB = "true";
 process.env.ENVIRONMENT = "local";
@@ -55,13 +55,15 @@ before(async () => {
     catalogProduct("phase4-owned"),
     catalogProduct("phase4-oc", "orange-county"),
     catalogProduct("phase4-fnp", "fnp"),
+    catalogProduct("phase4-fnp-tag", undefined, ["fnp-usa-import"]),
+    catalogProduct("phase4-other-tag", undefined, ["birthday"]),
     catalogProduct("phase4-gbo", "gift-baskets-overseas"),
   ]) {
     await docClient.send(new PutCommand({ TableName: process.env.PRODUCTS_TABLE, Item: product }));
   }
 });
 
-function catalogProduct(slug: string, vendorSlug?: string) {
+function catalogProduct(slug: string, vendorSlug?: string, tags?: string[]) {
   return {
     PK: productKeys.pk(slug),
     SK: productKeys.sk(),
@@ -76,6 +78,7 @@ function catalogProduct(slug: string, vendorSlug?: string) {
     images: ["https://cdn.example.com/phase4.jpg"],
     inventory: 8,
     published: true,
+    ...(tags ? { tags } : {}),
     ...(vendorSlug ? { vendorSlug } : {}),
     ...(vendorSlug === "gift-baskets-overseas" ? { internationalDelivery: true, sku: "gbo:US:101" } : {}),
   };
@@ -142,8 +145,7 @@ describe("catalog vendor availability for new shopping", { concurrency: false },
 
     await setVendor("fnp", false);
     const hidden = resultOf(await getProduct(shopperEvent({ pathParameters: { slug: "phase4-fnp" } })));
-    assert.equal(hidden.statusCode, 200);
-    assert.equal((hidden.body as { availability?: { deliverable?: boolean } }).availability?.deliverable, false);
+    assert.equal(hidden.statusCode, 404);
 
     await setVendor("fnp", true);
     const restored = resultOf(await getProduct(shopperEvent({ pathParameters: { slug: "phase4-fnp" } })));
@@ -298,8 +300,127 @@ describe("catalog vendor availability for new shopping", { concurrency: false },
     await setVendor("fnp", false);
     const fnpOff = resultOf(await listProducts(shopperEvent({ queryStringParameters: { country: "US" } })));
     assert.equal(slugsOf(fnpOff.body).includes("phase4-owned"), true);
+    assert.equal(slugsOf(fnpOff.body).includes("phase4-other-tag"), true);
     assert.equal(slugsOf(fnpOff.body).includes("phase4-fnp"), false);
+    assert.equal(slugsOf(fnpOff.body).includes("phase4-fnp-tag"), false);
+    const hiddenTag = resultOf(await getProduct(shopperEvent({ pathParameters: { slug: "phase4-fnp-tag" } })));
+    assert.equal(hiddenTag.statusCode, 404);
+    const beforeBundled = await docClient.send(
+      new ScanCommand({
+        TableName: process.env.PRODUCTS_TABLE,
+        FilterExpression: "slug = :slug",
+        ExpressionAttributeValues: { ":slug": "perfectly-pastel-premium" },
+      })
+    );
+    const bundledHidden = resultOf(
+      await getProduct(shopperEvent({ pathParameters: { slug: "perfectly-pastel-premium" } }))
+    );
+    assert.equal(bundledHidden.statusCode, 404);
+    assert.equal(slugsOf(fnpOff.body).includes("perfectly-pastel-premium"), false);
+    const afterBundled = await docClient.send(
+      new ScanCommand({
+        TableName: process.env.PRODUCTS_TABLE,
+        FilterExpression: "slug = :slug",
+        ExpressionAttributeValues: { ":slug": "perfectly-pastel-premium" },
+      })
+    );
+    assert.equal((afterBundled.Items ?? []).length, (beforeBundled.Items ?? []).length);
+    const added = resultOf(
+      await addToCart(
+        shopperEvent({
+          body: JSON.stringify({ productSlug: "phase4-fnp-tag", quantity: 1 }),
+          requestContext: { http: { method: "POST", path: "/cart/items" } },
+        })
+      )
+    );
+    assert.equal(added.statusCode, 400);
+    const beforeOrders = await docClient.send(
+      new ScanCommand({
+        TableName: process.env.ORDERS_TABLE,
+        FilterExpression: "begins_with(PK, :prefix) AND SK = :sk",
+        ExpressionAttributeValues: { ":prefix": "ORDER#", ":sk": "META" },
+      })
+    );
     await setVendor("fnp", true);
+    const taggedAdd = resultOf(
+      await addToCart(
+        shopperEvent({
+          body: JSON.stringify({ productSlug: "phase4-fnp-tag", quantity: 1 }),
+          requestContext: { http: { method: "POST", path: "/cart/items" } },
+        })
+      )
+    );
+    assert.equal(taggedAdd.statusCode, 200);
+    await setVendor("fnp", false);
+    const kept = resultOf(await getCartHandler(shopperEvent({ queryStringParameters: { country: "US" } })));
+    const keptItems = (kept.body.cart as { items: Array<{ productSlug: string; vendorSlug?: string }> }).items;
+    const taggedLine = keptItems.find((item) => item.productSlug === "phase4-fnp-tag");
+    assert.ok(taggedLine);
+    assert.equal(taggedLine.vendorSlug, undefined);
+    const rejectedOrder = resultOf(
+      await checkout(
+        shopperEvent({
+          body: JSON.stringify({
+            paymentMethod: "stripe",
+            shippingAddress: {
+              name: "A Recipient",
+              line1: "1 Main",
+              city: "Irvine",
+              state: "CA",
+              postalCode: "92612",
+              country: "US",
+              phone: "+1 408 555 0100",
+              email: "shopper@blossompot.test",
+              senderName: "A Sender",
+              senderMessage: "Thinking of you today",
+            },
+          }),
+          requestContext: { http: { method: "POST", path: "/checkout" } },
+        })
+      )
+    );
+    assert.equal(rejectedOrder.statusCode, 400);
+    const afterOrders = await docClient.send(
+      new ScanCommand({
+        TableName: process.env.ORDERS_TABLE,
+        FilterExpression: "begins_with(PK, :prefix) AND SK = :sk",
+        ExpressionAttributeValues: { ":prefix": "ORDER#", ":sk": "META" },
+      })
+    );
+    assert.equal((afterOrders.Items ?? []).length, (beforeOrders.Items ?? []).length);
+    const stillThere = resultOf(await getCartHandler(shopperEvent()));
+    assert.equal(
+      ((stillThere.body.cart as { items: Array<{ productSlug: string }> }).items ?? []).some(
+        (item) => item.productSlug === "phase4-fnp-tag"
+      ),
+      true
+    );
+    await docClient.send(
+      new DeleteCommand({
+        TableName: process.env.PRODUCTS_TABLE,
+        Key: { PK: productKeys.pk("perfectly-pastel-premium"), SK: productKeys.sk() },
+      })
+    );
+    const bundledAdd = resultOf(
+      await addToCart(
+        shopperEvent({
+          body: JSON.stringify({ productSlug: "perfectly-pastel-premium", quantity: 1 }),
+          requestContext: { http: { method: "POST", path: "/cart/items" } },
+        })
+      )
+    );
+    assert.equal(bundledAdd.statusCode, 400);
+    const bundledRow = await docClient.send(
+      new ScanCommand({
+        TableName: process.env.PRODUCTS_TABLE,
+        FilterExpression: "slug = :slug",
+        ExpressionAttributeValues: { ":slug": "perfectly-pastel-premium" },
+      })
+    );
+    assert.equal((bundledRow.Items ?? []).length, 0);
+    await setVendor("fnp", true);
+    const restored = resultOf(await listProducts(shopperEvent({ queryStringParameters: { country: "US" } })));
+    assert.equal(slugsOf(restored.body).includes("phase4-fnp-tag"), true);
   });
 
   it("keeps USA shopping and Orange County ZIP limits", async () => {
