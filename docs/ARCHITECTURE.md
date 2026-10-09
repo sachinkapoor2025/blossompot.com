@@ -59,6 +59,8 @@ the Lambda via env vars (`PRODUCTS_TABLE`, `ORDERS_TABLE`, `CARTS_TABLE`,
 | config | `CONFIG#PAYMENTS` | `META` | Stripe/Razorpay settings |
 | config | `CONFIG#SHIPPING` | `META` | USPS rate-shopping, origin address, festival mode |
 | config | `CONFIG#VENDOR_COMMISSIONS` | `META` | Marketplace commission rules (global / category / vendor) |
+| config | `CONFIG#CATALOG_COUNTRIES` | `META` | Global target countries (`countries[]` of `{ countryCode, enabled }`). Missing row means USA only. Admin UI: `/admin/countries`. Not read by the storefront yet. |
+| config | `CATALOGVENDOR#<slug>` | `META` | Catalog vendor `enabled` and `deliveryCountries`. Separate from global target countries and from `MVENDOR#`. |
 | config | `VCOV#{vendorSlug}` | `SAREA#{areaId}` / `META` | Vendor delivery service areas (ALLOW/DENY by country, state, city, postal, prefix, radius) |
 | config | `MVENDOR#<vendorId>` | `META` | Marketplace partner profile + status; lookups `MVENDOREMAIL#` / `MVENDORSLUG#`; sessions `MVENDORSESSION#`; ledger `MVENDORLEDGER#` |
 
@@ -116,6 +118,11 @@ When admin (or Orange County vendor tracking) changes order status (accepted, pr
 | PUT | `/products/{slug}` | Admin: update |
 | DELETE | `/products/{slug}` | Admin: delete |
 | POST | `/products/bulk` | Admin: CSV bulk upload |
+| POST | `/admin/imports/fnp/preview` | Admin: read-only FNP USA workbook preview. Validates rows, the approved category map, optional unmatched-category mappings, FNP URL duplicates, and existing categories. Writes nothing. UI: `/admin/products/import`. |
+| POST | `/admin/imports/fnp/commit` | Admin: commit at most 20 selected preview rows. Refuses production. Creates missing approved or explicitly mapped categories unpublished, copies each distinct FNP image to S3 once, and inserts unpublished products. Same FNP URL is a no-op. A slug owned by another product is not overwritten. |
+| POST | `/admin/imports/fnp/retry` | Admin: retry up to 20 failed rows from one import batch. |
+| GET | `/admin/imports/fnp` | Admin: recent FNP import batches. |
+| GET | `/admin/imports/fnp/:batchId` | Admin: one FNP import batch and its row results. |
 | GET | `/categories` | List categories |
 | GET/PUT | `/homepage-catalog?country=` | Homepage-only derived record (gift count, category count, 13 tiles) in the config table for 45 seconds, keyed by country. Does not replace `/products` or `/gbo/gifts`. |
 | GET/PUT | `/flower-guide-cards?country=` | Selected flower-guide cards for one country (USA up to 24, other guides up to 10) in the config table for 45 seconds. Does not replace `/products`, `/gbo/gifts`, or product detail. |
@@ -159,6 +166,18 @@ When admin (or Orange County vendor tracking) changes order status (accepted, pr
 | GET | `/marketplace/vendors/orders` | Vendor: orders containing this vendorSlug (fulfillment fields only) |
 | POST | `/marketplace/vendors/orders/{orderId}/action` | Vendor: accept/reject/preparing/ready/out_for_delivery/delivered |
 | POST | `/marketplace/vendors/pricing/preview` | Vendor/admin: server-side margin/fee breakdown |
+| GET | `/admin/catalog-vendors` | Admin: catalog vendor registry, including vendors added later. Built-in rows fall back to code defaults. Product counts are derived from `PRODUCT#` rows. UI: `/admin/vendors`. |
+| POST | `/admin/catalog-vendors` | Admin: create a catalog vendor. Slug must be unique. Storage is DynamoDB. Does not create products. |
+| GET | `/admin/catalog-vendors/{vendorSlug}` | Admin: one catalog vendor, including derived product count. UI: `/admin/vendors/{vendorSlug}`. |
+| PUT | `/admin/catalog-vendors/{vendorSlug}` | Admin: update name, status, delivery countries, method, source, and default inventory. Does not change the slug or existing product inventory. |
+| POST | `/admin/catalog-vendors/{vendorSlug}/trash` | Admin: move a vendor to Trash after the vendor name is confirmed. Products and orders stay. New shopping treats the vendor as disabled. |
+| POST | `/admin/catalog-vendors/{vendorSlug}/restore` | Admin: restore a trashed vendor as disabled. |
+| DELETE | `/admin/catalog-vendors/{vendorSlug}` | Admin: permanently delete a trashed custom vendor record only when it has no products. Built-in vendors and product rows are not deleted. No automatic 30-day purge. |
+| GET | `/admin/catalog-countries` | Admin: global target countries, including disabled ones. Missing `CONFIG#CATALOG_COUNTRIES` returns USA enabled. UI: `/admin/countries`. Not wired to the storefront. |
+| PUT | `/admin/catalog-countries` | Admin: replace that list. Requires a known ISO-2 code, no duplicates, and at least one enabled country. Does not change vendor rows. |
+| GET | `/catalog-countries` | Public: globally enabled countries only (`countryCode`, `name`). The country selector does not call this yet. |
+
+**Global target countries vs vendor delivery countries.** A global country answers “can a customer select this country?” A catalog vendor’s `deliveryCountries` answers “can this vendor deliver there?” Both must eventually be true before a product is shoppable, together with the existing vendor enablement and product rules. Admin manages the two lists separately: `/admin/countries` for global target countries, and `/admin/vendors` for each vendor’s delivery countries. Saving one list does not change the other. A vendor may list GB while the global list is still USA only; that GB capability stays stored and is not customer-selectable. `clampShoppingCountry()` still forces the storefront to the United States, and the country selector, product lists, cart, and checkout do not read `CONFIG#CATALOG_COUNTRIES` yet.
 | GET | `/admin/marketplace/vendors` | Admin: list/filter marketplace vendor applications. UI: `/admin/marketplace-vendors` |
 | GET | `/admin/marketplace/vendors/{vendorId}` | Admin: vendor detail |
 | PATCH | `/admin/marketplace/vendors/{vendorId}/status` | Admin: pending→under_review→approved/active→suspended/rejected (+ optional temp password) |
@@ -299,7 +318,7 @@ Every form blur or debounced keystroke can POST to `/leads`:
 3. Log into admin portal locally or staging
 4. Prompt: *"Add wishlist feature"* or *"Improve checkout UX"*
 5. Cursor edits `apps/web` and `apps/api` following conventions
-6. Push branch → PR → GitHub Actions deploys to staging
+6. Push a `feature/**` branch → GitHub Actions builds and tests only. It does not deploy.
 7. Multiple devs: feature branches, shared types in `packages/shared`
 
 Admin credentials for staging are in team 1Password / SSM — developers never share source code in prompts; Cursor has repo access.
@@ -307,8 +326,14 @@ Admin credentials for staging are in team 1Password / SSM — developers never s
 ## AWS Deployment (GitHub Actions)
 
 ```
-push main → build shared → build api → sam deploy → build web → Amplify/OpenNext deploy
+push main  → test + build → sam deploy --config-env prod (blossompot-prod, blossompot-products-prod, API stage /prod) → Amplify branch main
+push dev   → test + build → sam deploy --config-env default (blossompot-dev, blossompot-products-dev, API stage /dev) → Amplify branch dev
+feature/** → test + build only
 ```
+
+Manual `workflow_dispatch` requires `environment=dev` or `environment=prod` and the matching branch (`dev` or `main`). It does not default to production. Dev deploys do not receive production payment, SMTP, WhatsApp, Twilio, USPS, Orange County, or GBO secrets. Optional dev test keys, when configured in GitHub, must use `sk_test_` / `pk_test_` / `rzp_test_` prefixes. The dev products table starts empty; catalog and FNP imports are not part of deploy.
+
+`amplify.yml` selects `blossompot-dev` for `AWS_BRANCH=dev` and `blossompot-prod` for `main`. Any other Amplify branch fails the build. A dev build fails if the dev stack API URL is missing. `NEXT_PUBLIC_APP_ENV=dev` is exported in the same shell as `npm run build` so an Amplify console value cannot keep the production API (`apps/web/src/lib/env.ts`).
 
 ### Estimated Monthly Cost (Low Traffic / Idle)
 

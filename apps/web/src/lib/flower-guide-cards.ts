@@ -1,5 +1,6 @@
 import {
   flowerGuideCardsSchema,
+  SHOPPING_COUNTRY_ISO,
   type FlowerGuideCardsData,
   type FlowerGuideCard,
   type Product,
@@ -113,7 +114,7 @@ async function selectCards(slug: CountryFlowerDeliverySlug): Promise<FlowerGuide
   } catch {
     products = [];
   }
-  const picked = pickCountryProducts(mergeProductsForCountry(products, country), slug);
+  const picked = pickCountryProducts(mergeProductsForCountry(products, SHOPPING_COUNTRY_ISO), slug);
   const cards = picked.map(toFlowerGuideCard);
   if (picked.length === 0 || cards.some((card) => card == null)) {
     return { data: null, products: picked };

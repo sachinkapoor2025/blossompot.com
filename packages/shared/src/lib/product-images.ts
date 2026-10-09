@@ -1,3 +1,32 @@
+const PLACEHOLDER_IMAGE_RE =
+  /(?:^|\/)(?:logo(?:-og)?|icon-\d+|placeholder|blossompot-logo)(?:\.(?:png|jpe?g|webp|svg))?$/i;
+
+/** True when a gallery URL is the site logo or a generic placeholder, not a product photo. */
+export function isPlaceholderProductImage(url: string | undefined | null): boolean {
+  const value = String(url ?? "").trim();
+  if (!value) return true;
+  const path = value.split("?")[0]?.split("#")[0] ?? value;
+  return PLACEHOLDER_IMAGE_RE.test(path) || path.includes("/editorial/blossompot-logo");
+}
+
+export function productGalleryNeedsCatalogPhotos(images?: string[] | null): boolean {
+  const urls = (images ?? []).map((u) => u.trim()).filter(Boolean);
+  if (urls.length === 0) return true;
+  return urls.every((url) => isPlaceholderProductImage(url));
+}
+
+/** Prefer real catalog photos when Dynamo/API only has the logo or an empty gallery. */
+export function coalesceProductImages(
+  primary?: string[] | null,
+  catalog?: string[] | null
+): string[] {
+  const catalogUrls = (catalog ?? []).map((u) => u.trim()).filter(Boolean);
+  if (productGalleryNeedsCatalogPhotos(primary) && catalogUrls.length > 0) {
+    return catalogUrls;
+  }
+  return (primary ?? []).map((u) => u.trim()).filter(Boolean);
+}
+
 /** Normalize image URLs for deduplication (path-only, case-insensitive). */
 export function normalizeProductImageKey(url: string): string {
   const trimmed = url.trim();
@@ -136,6 +165,7 @@ function usesDemoStockPhotos(images?: string[] | null): boolean {
 
 function isLiveInventorySku(sku?: string | null, tags?: string[]): boolean {
   if ((tags ?? []).includes("tf-usa")) return true;
+  if ((tags ?? []).includes("fnp-usa-import")) return true;
   const value = (sku ?? "").trim();
   if (!value) return false;
   const upper = value.toUpperCase();

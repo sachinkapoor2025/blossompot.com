@@ -21,10 +21,11 @@ import {
 import { requestSeoPath } from "@/lib/request-seo-path";
 import { ListingPageSkeleton } from "@/components/route-skeletons";
 import { loadProductsByCategory, toListingCardProducts } from "@/lib/product-loader";
+import { getCatalogProductsByCategory } from "@/lib/catalog-fallback";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { categoryOrder } from "@/lib/site";
 import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, pageMetadata } from "@/lib/seo";
-import { type Product, type Category } from "@blossompot/shared";
+import { type Product, type Category, productVisibleForDeliveryCountry } from "@blossompot/shared";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -38,7 +39,7 @@ function resolveSort(raw?: string): ProductSort {
 }
 
 function isKnownCategorySlug(slug: string): boolean {
-  return (categoryOrder as readonly string[]).includes(slug);
+  return (categoryOrder as readonly string[]).includes(slug) || slug === "rakhi-hampers";
 }
 
 /** Match PDP: always use live product prices (no stale ISR listing HTML). */
@@ -118,6 +119,11 @@ async function CategoryPageContent({ params, searchParams }: Props) {
   } catch {
     products = await loadProductsByCategory(slug, deliveryCountry);
   }
+  if (products.length === 0) {
+    products = getCatalogProductsByCategory(slug).filter((product) =>
+      productVisibleForDeliveryCountry(product, deliveryCountry)
+    );
+  }
 
   const name = category?.name ?? slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   const headingName: Record<string, string> = {
@@ -127,7 +133,6 @@ async function CategoryPageContent({ params, searchParams }: Props) {
     "gift-hampers": "Gift Hampers",
     "birthday-gifts": "Birthday Gifts",
     "anniversary-gifts": "Anniversary Gifts",
-    "same-day-gifts": "Same-Day Gifts",
     "valentines-day-gifts": "Valentine's Day Gifts",
   };
   const seoCategoryName = headingName[slug] ?? name;
@@ -143,20 +148,16 @@ async function CategoryPageContent({ params, searchParams }: Props) {
     "anniversary-gifts": "Anniversary Gifts",
     "valentines-day-gifts": "Valentine's Day Gifts",
     "gift-hampers": "Gift Hampers",
-    "same-day-gifts": "Same-Day Gifts",
   };
   const h1 = menuHeading[slug]
     ? `${menuHeading[slug]} to ${deliveryCountryName}`
-    : pageSeo.h1 ||
-      (located
-        ? `${name} — Delivery to ${countryDisplayName(located.countryIso)}`
-        : `${name} — Delivery to ${countryDisplayName(deliveryCountry)}`);
+    : pageSeo.h1 || `${name} — Delivery to ${deliveryCountryName}`;
   const baseDescription =
     category?.description?.trim() ||
     `Browse our ${name} collection — flowers, cakes, and thoughtful gifts with delivery to ${countryDisplayName(deliveryCountry)} from BlossomPot.`;
   const extra = getCategoryContent(slug);
   const rich = getCategoryRichContent(slug);
-  const shopHref = located ? giftsCatalogLocationHref(located.countryIso) : "/products";
+  const shopHref = located ? giftsCatalogLocationHref(deliveryCountry) : "/products";
 
   const crumbs = [
     { label: "Home", href: "/" },
@@ -183,7 +184,7 @@ async function CategoryPageContent({ params, searchParams }: Props) {
         <ProductGrid products={toListingCardProducts(products)} sort={sort} />
       ) : (
         <p className="text-slate-500">
-          Products loading soon.{" "}
+          No gifts in this collection for {deliveryCountryName} yet.{" "}
           <Link href={shopHref} className="text-nav hover:underline">
             Browse all gifts
           </Link>
@@ -194,7 +195,7 @@ async function CategoryPageContent({ params, searchParams }: Props) {
         <CategoryContentSection
           content={rich}
           categoryName={seoCategoryName}
-          deliveryCountryIso={located?.countryIso ?? deliveryCountry}
+          deliveryCountryIso={deliveryCountry}
         />
       ) : (
         <>

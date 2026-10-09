@@ -42,7 +42,16 @@ const navItems: NavItem[] = [
       { href: "/admin/boost-sales?tab=leads", label: "Leads" },
     ],
   },
-  { type: "link", href: "/admin/products", label: "Products" },
+  {
+    type: "group",
+    id: "products",
+    label: "Products",
+    href: "/admin/products",
+    children: [
+      { href: "/admin/products", label: "All Products" },
+      { href: "/admin/products/new", label: "Add Product" },
+    ],
+  },
   { type: "link", href: "/admin/categories", label: "Categories" },
   { type: "link", href: "/admin/shipping", label: "Shipping" },
   {
@@ -51,6 +60,8 @@ const navItems: NavItem[] = [
     label: "Vendor Management",
     href: "/admin/vendor-management",
     children: [
+      { href: "/admin/vendors", label: "Vendors" },
+      { href: "/admin/countries", label: "Countries" },
       { href: "/admin/marketplace-vendors", label: "Marketplace vendors" },
       { href: "/admin/service-areas", label: "Service areas" },
       { href: "/admin/vendor-management?tab=expense", label: "Vendor expense" },
@@ -154,7 +165,11 @@ function NavButtons({
       if (item.type !== "group") continue;
       if (variant === "mobile") {
         open[item.id] = true;
-      } else if (pathActive(pathname, item.href)) {
+      } else if (
+        pathActive(pathname, item.href) ||
+        (item.id === "vendor" &&
+          (pathname.startsWith("/admin/countries") || pathname.startsWith("/admin/vendors")))
+      ) {
         open[item.id] = true;
       }
     }
@@ -175,6 +190,13 @@ function NavButtons({
           item.type === "group" &&
           item.id === "analytics" &&
           pathname.startsWith("/admin/product-sales")
+        ) {
+          next[item.id] = true;
+        }
+        if (
+          item.type === "group" &&
+          item.id === "vendor" &&
+          (pathname.startsWith("/admin/countries") || pathname.startsWith("/admin/vendors"))
         ) {
           next[item.id] = true;
         }
@@ -219,7 +241,9 @@ function NavButtons({
 
         const groupActive =
           pathActive(pathname, item.href) ||
-          (item.id === "analytics" && pathname.startsWith("/admin/product-sales"));
+          (item.id === "analytics" && pathname.startsWith("/admin/product-sales")) ||
+          (item.id === "vendor" &&
+            (pathname.startsWith("/admin/countries") || pathname.startsWith("/admin/vendors")));
         const children =
           item.id === "vendor" && !showSuper
             ? item.children.filter((c) => !c.href.includes("tab=expense"))

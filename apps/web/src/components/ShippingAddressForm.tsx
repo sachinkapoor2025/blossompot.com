@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { currencyForCountryCode, type ShippingAddress } from "@blossompot/shared";
+import { currencyForCountryCode, SHOPPING_COUNTRY_ISO, SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE, type ShippingAddress } from "@blossompot/shared";
+import { isListedShoppingCountry } from "@/lib/gbo-delivery-countries";
 import { LeadCaptureInput } from "@/components/LeadCaptureInput";
 import { PhoneInput, buildPhoneValue } from "@/components/PhoneInput";
 import { CountryRegionFields } from "@/components/CountryRegionFields";
@@ -55,6 +56,7 @@ export function ShippingAddressForm({
   const [phoneCountry, setPhoneCountry] = useState("");
   const [phoneLocal, setPhoneLocal] = useState("");
   const { countries } = useGboDeliveryCountries();
+  const [addressNotice, setAddressNotice] = useState("");
   const { setDisplayCurrency } = useCurrency();
 
   useEffect(() => {
@@ -98,15 +100,29 @@ export function ShippingAddressForm({
 
   const changeCountry = (iso: string) => {
     const next = iso.trim().toUpperCase();
+    if (!isListedShoppingCountry(next, countries)) return;
     const regions = regionOptionsForCountry(next);
     const nextState = regions?.some((r) => r.code === value.state) ? value.state : "";
     const nextPhone = buildPhoneValue(next, phoneLocal);
     setPhoneCountry(next);
-    onChange({ ...value, country: next, state: nextState, phone: nextPhone });
-    setDisplayCurrency(currencyForCountryCode(next));
+    setAddressNotice("");
+    onChange({
+      ...value,
+      country: next,
+      state: nextState,
+      postalCode: isListedShoppingCountry(value.country, countries) ? value.postalCode : "",
+      phone: nextPhone,
+    });
+    if (next === SHOPPING_COUNTRY_ISO) setDisplayCurrency(currencyForCountryCode(next));
   };
 
   const useSaved = (address: SavedShippingAddress) => {
+    if (!isListedShoppingCountry(address.country, countries)) {
+      setSelectedId(null);
+      setAddressNotice(SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE);
+      return;
+    }
+    setAddressNotice("");
     setSelectedId(address.id);
     onChange({
       name: address.name,
@@ -126,9 +142,9 @@ export function ShippingAddressForm({
 
   const startNewAddress = () => {
     setSelectedId(null);
+    setAddressNotice("");
     onChange({
       ...emptyShippingAddress(),
-      country: value.country,
       email: value.email,
       phone: value.phone,
       senderName: value.senderName,
@@ -157,7 +173,7 @@ export function ShippingAddressForm({
       <div>
         <h2 className="text-lg font-bold text-slate-900">Shipping Address</h2>
         <p className="text-sm text-slate-600 mt-1">
-          Enter the recipient’s delivery address. We deliver gifts worldwide — timing depends on the destination country.
+          Enter the recipient’s delivery address in the United States.
         </p>
       </div>
 
@@ -318,22 +334,27 @@ export function ShippingAddressForm({
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Country</label>
               <select
-                value={value.country}
+                value={isListedShoppingCountry(value.country, countries) ? value.country : ""}
                 onChange={(e) => changeCountry(e.target.value)}
                 required
                 autoComplete="country"
                 aria-label="Country"
                 className="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-accent"
               >
+                {!isListedShoppingCountry(value.country, countries) ? (
+                  <option value="">Select a delivery country</option>
+                ) : null}
                 {countries.map((c) => (
                   <option key={c.countryCode} value={c.countryCode}>
                     {c.countryName}
                   </option>
                 ))}
-                {value.country && !countries.some((c) => c.countryCode === value.country) ? (
-                  <option value={value.country}>{value.country}</option>
-                ) : null}
               </select>
+              {addressNotice || !isListedShoppingCountry(value.country, countries) ? (
+                <p className="mt-1 text-sm text-red-600">
+                  {addressNotice || SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE}
+                </p>
+              ) : null}
             </div>
           </div>
           <CountryRegionFields

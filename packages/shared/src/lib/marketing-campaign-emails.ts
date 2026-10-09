@@ -174,14 +174,14 @@ export const ANNIVERSARY_EMAIL_CONFIG = {
   offerHeadline: "Celebrate Your Love Story",
   offerSubhead: "Flowers, cakes & gifts made for anniversaries",
   offerBody:
-    "Mark another year together with florist-quality roses, elegant cakes, and curated hampers. Nationwide USA delivery, with same-day options in select cities when you order before the local cut-off.",
+    "Mark another year together with florist-quality roses, elegant cakes, and curated hampers. Nationwide USA delivery with estimated windows shown at checkout.",
   ctaText: "Shop Anniversary Gifts",
   ctaHref: `${SITE}/anniversary-gifts`,
   benefitsHeading: "Why Couples Choose BlossomPot",
   benefits: [
     { icon: "🌹", title: "Romantic florals", description: "Roses, mixed bouquets, and premium arrangements." },
     { icon: "🎂", title: "Celebration cakes", description: "Pair blooms with a cake they will remember." },
-    { icon: "🚚", title: "USA delivery", description: "Reliable nationwide shipping, same-day in select cities." },
+    { icon: "🚚", title: "USA delivery", description: "Reliable nationwide shipping with estimated windows at checkout." },
     { icon: "💌", title: "Personal gift note", description: "Add a message at checkout — we handle the rest." },
   ] satisfies CampaignBenefit[],
   categoriesHeading: "Gifts They Will Treasure",
@@ -238,7 +238,7 @@ export const BIRTHDAY_EMAIL_CONFIG = {
   name: "Birthday Gifts",
   subject: "Make their birthday bloom — cakes, flowers & gifts from BlossomPot",
   preheader:
-    "Birthday cakes, bright bouquets, and gift hampers delivered across the USA. Same-day options in select cities.",
+    "Birthday cakes, bright bouquets, and gift hampers delivered across the USA.",
   logoUrl: LOGO,
   logoHref: SITE,
   heroImageUrl: `${SITE}/banners/home-banner-birthday.jpg`,
@@ -255,7 +255,7 @@ export const BIRTHDAY_EMAIL_CONFIG = {
   benefits: [
     { icon: "🎂", title: "Celebration cakes", description: "Chocolate, floral, and designer birthday cakes." },
     { icon: "🌸", title: "Fresh flowers", description: "Bright bouquets that arrive looking their best." },
-    { icon: "🚚", title: "On-time delivery", description: "Nationwide USA shipping plus same-day in select cities." },
+    { icon: "🚚", title: "On-time delivery", description: "Nationwide USA shipping with estimated windows at checkout." },
     { icon: "🎁", title: "Hampers & extras", description: "Complete the surprise with a curated gift box." },
   ] satisfies CampaignBenefit[],
   categoriesHeading: "Everything for the Birthday",

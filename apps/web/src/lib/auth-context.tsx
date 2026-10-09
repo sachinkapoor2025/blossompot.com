@@ -13,6 +13,7 @@ import {
   type RegisterResult,
   type ForgotPasswordDelivery,
   loadStoredAuth,
+  restoreSession,
   login as cognitoLogin,
   logout as cognitoLogout,
   register as cognitoRegister,
@@ -45,8 +46,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setUser(loadStoredAuth());
-    setLoading(false);
+    let cancelled = false;
+    void restoreSession()
+      .then((next) => {
+        if (!cancelled) setUser(next ?? loadStoredAuth());
+      })
+      .catch(() => {
+        if (!cancelled) {
+          cognitoLogout();
+          setUser(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    const onFocus = () => {
+      void restoreSession().then((next) => {
+        if (!cancelled) setUser(next);
+      });
+    };
+    window.addEventListener("focus", onFocus);
+    const timer = window.setInterval(onFocus, 60_000);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("focus", onFocus);
+      window.clearInterval(timer);
+    };
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {

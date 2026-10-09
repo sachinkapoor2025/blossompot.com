@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { testimonials } from "@/lib/site";
 import type { GoogleReviewsPayload } from "@/lib/google-reviews";
 import { CountryReviewSources } from "@/components/CountryReviewSources";
 
@@ -12,22 +11,13 @@ type ReviewItem = {
 };
 
 function reviewsFromData(data?: GoogleReviewsPayload): ReviewItem[] {
-  if (data?.reviews.length) {
-    return data.reviews.map((review) => ({
-      id: review.id,
-      name: review.authorName,
-      rating: review.rating,
-      text: review.text,
-      dateLabel: review.dateLabel,
-    }));
-  }
-
-  return testimonials.map((review, index) => ({
-    id: `site-${index}-${review.name}`,
-    name: review.name,
+  if (data?.source !== "google" || !data.reviews.length) return [];
+  return data.reviews.map((review) => ({
+    id: review.id,
+    name: review.authorName,
     rating: review.rating,
     text: review.text,
-    dateLabel: review.timeAgo,
+    dateLabel: review.dateLabel,
   }));
 }
 
@@ -55,9 +45,32 @@ type CustomerReviewsProps = {
 
 export function CustomerReviews({ data }: CustomerReviewsProps) {
   const reviews = reviewsFromData(data);
-  if (reviews.length === 0) return null;
-
   const isGoogle = data?.source === "google";
+  if (reviews.length === 0) {
+    return (
+      <section className="border-y border-[#eadfd8] bg-gradient-to-b from-[#fff8f5] to-white" aria-labelledby="customer-reviews-heading">
+        <div className="mx-auto max-w-7xl px-4 py-12 md:py-16">
+          <div className="mx-auto mb-8 max-w-2xl text-center">
+            <h2 id="customer-reviews-heading" className="text-2xl font-bold text-primary md:text-3xl">
+              Customer reviews
+            </h2>
+            <p className="mt-3 text-sm text-slate-600">
+              Genuine Google and product reviews appear here when they are available. We do not show
+              placeholder quotes.
+            </p>
+          </div>
+          <p className="text-center">
+            <Link href="/reviews" className="text-sm font-semibold text-nav hover:underline">
+              Read reviews or share yours →
+            </Link>
+          </p>
+          <div className="mx-auto mt-8 max-w-3xl">
+            <CountryReviewSources compact />
+          </div>
+        </div>
+      </section>
+    );
+  }
   const average =
     reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
 

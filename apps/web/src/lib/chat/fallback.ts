@@ -1,6 +1,7 @@
 import { site, navItems, faqs, giftSetsMenu, whatsappLinkLabel } from "@/lib/site";
 import { categoryHref } from "@/lib/category-urls";
 import { siteUrl } from "@/lib/env";
+import { getCatalogProducts, hasRememberedStorefrontVendors } from "@/lib/catalog-fallback";
 
 const OFF_TOPIC_REPLY = `I'm here specifically to help with BlossomPot — flowers, cakes, and gifts for worldwide delivery, our products, shipping, and orders. Is there something about gift delivery I can help with?
 
@@ -8,6 +9,10 @@ Browse our catalog: [All Products](${siteUrl}/products) · ${whatsappLinkLabel()
 
 const SITE_KEYWORDS =
   /\b(gift|flower|bouquet|cake|hamper|birthday|anniversary|valentine|mother|wedding|usa|us\b|shipping|deliver|order|payment|stripe|razorpay|product|categor|chocolate|same.?day|california|texas|new york|florida|india|checkout|cart|price|track|support|blossompot)\b/i;
+
+export function isOnTopicGiftQuestion(query: string): boolean {
+  return SITE_KEYWORDS.test(query.trim());
+}
 
 function categoriesReply(): string {
   const links = [
@@ -21,7 +26,7 @@ function categoriesReply(): string {
 }
 
 function deliveryReply(): string {
-  return `We deliver gifts worldwide. Timing depends on the recipient country. Same-day options appear in select cities when you order before the local cut-off.\n\nMore details: [Shipping & Delivery](${siteUrl}/shipping)`;
+  return `We deliver gifts **worldwide**. Choose the recipient country in the header or at checkout — timing, catalog, and currency follow that destination. Estimated delivery windows are shown on the product page and at checkout.\n\nMore details: [Shipping & Delivery](${siteUrl}/shipping)`;
 }
 
 function occasionReply(): string {
@@ -34,6 +39,49 @@ function orderFromAbroadReply(): string {
 
 function paymentReply(): string {
   return `We accept secure online checkout via:\n- Stripe (USD)\n- Razorpay (INR)\n\nPrices are shown in USD or INR at checkout. We never store card details.\n\nQuestions about a specific order? Message us on WhatsApp or email ${site.supportEmail}.`;
+}
+
+export function catalogChatSnippet(limit = 40): string {
+  if (!hasRememberedStorefrontVendors()) return "";
+  const products = getCatalogProducts();
+  const picked: typeof products = [];
+  const perCategory = new Map<string, number>();
+  for (const product of products) {
+    const slug = product.categorySlug || "gifts";
+    const n = perCategory.get(slug) ?? 0;
+    if (n >= 5) continue;
+    perCategory.set(slug, n + 1);
+    picked.push(product);
+    if (picked.length >= limit) break;
+  }
+  return picked
+    .map(
+      (product) =>
+        `- [${product.name}](${siteUrl}/products/${product.slug}) — ${product.currency} ${product.price.toFixed(2)} (${product.categorySlug})`
+    )
+    .join("\n");
+}
+
+export function productRecommendations(query: string): string | null {
+  const terms = query
+    .toLowerCase()
+    .split(/\W+/)
+    .filter((word) => word.length > 3 && !/^(with|from|that|this|have|want|need|looking|some|your)$/.test(word));
+  if (terms.length === 0 || !hasRememberedStorefrontVendors()) return null;
+  const scored = getCatalogProducts()
+    .map((product) => {
+      const hay = `${product.name} ${product.categorySlug} ${(product.tags ?? []).join(" ")}`.toLowerCase();
+      const hits = terms.filter((term) => hay.includes(term)).length;
+      return { product, hits };
+    })
+    .filter((row) => row.hits > 0)
+    .sort((a, b) => b.hits - a.hits || a.product.price - b.product.price)
+    .slice(0, 5);
+  if (scored.length === 0) return null;
+  const lines = scored.map(
+    ({ product }) => `- [${product.name}](${siteUrl}/products/${product.slug}) — ${product.currency} ${product.price.toFixed(2)}`
+  );
+  return `Here are BlossomPot gifts that match your question:\n\n${lines.join("\n")}\n\nOpen a product to see photos, price, and delivery options.`;
 }
 
 function greetingReply(): string {
@@ -56,11 +104,16 @@ export function fallbackChatReply(userMessage: string): string {
 
   if (!q) return greetingReply();
 
-  if (!SITE_KEYWORDS.test(q)) {
+  if (!isOnTopicGiftQuestion(q)) {
     return OFF_TOPIC_REPLY;
   }
 
-  if (/type|sell|categor|collection|what.*gift|which gift|offer|product|flower|cake|bouquet|hamper/.test(q)) {
+  const recommended = productRecommendations(userMessage);
+  if (recommended && /flower|bouquet|rose|bloom|plant|cake|chocolate|hamper|gift|product/.test(q)) {
+    return recommended;
+  }
+
+  if (/type|sell|categor|collection|what.*gift|which gift|offer/.test(q)) {
     return categoriesReply();
   }
 
@@ -89,12 +142,20 @@ export function fallbackChatReply(userMessage: string): string {
   }
 
   if (/cake|chocolate|dessert/.test(q)) {
-    return `Our [Cakes](${siteUrl}${categoryHref("cakes")}) collection covers chocolate, red velvet, designer birthday cakes, and more — with worldwide delivery and gift-message options.\n\n[Shop cakes](${siteUrl}${categoryHref("cakes")})`;
+    return (
+      productRecommendations(userMessage) ??
+      `Our [Cakes](${siteUrl}${categoryHref("cakes")}) collection covers chocolate, red velvet, designer birthday cakes, and more — with worldwide delivery and gift-message options.\n\n[Shop cakes](${siteUrl}${categoryHref("cakes")})`
+    );
   }
 
-  if (/flower|bouquet|rose|bloom/.test(q)) {
-    return `Browse [Flowers](${siteUrl}${categoryHref("flowers")}) and [Flower Bouquets](${siteUrl}${categoryHref("flower-bouquets")}) for birthdays, anniversaries, and everyday surprises — delivered worldwide.\n\n[Shop flowers](${siteUrl}${categoryHref("flowers")})`;
+  if (/flower|bouquet|rose|bloom|plant|hamper/.test(q)) {
+    return (
+      productRecommendations(userMessage) ??
+      `Browse [Flowers](${siteUrl}${categoryHref("flowers")}) and [Flower Bouquets](${siteUrl}${categoryHref("flower-bouquets")}) for birthdays, anniversaries, and everyday surprises — delivered worldwide.\n\n[Shop flowers](${siteUrl}${categoryHref("flowers")})`
+    );
   }
+
+  if (recommended) return recommended;
 
   const faqAnswer = findFaqMatch(q);
   if (faqAnswer) return faqAnswer;

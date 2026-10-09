@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { applyInlineLinks } from "@/lib/inline-links";
 import { ShopLocationLink } from "@/components/ShopLocationLink";
+import { FaqAccordion } from "@/components/FaqAccordion";
 import { homepageInlineLinks } from "@/lib/content/page-inline-links";
 import { whatsappChatUrl } from "@/lib/site";
 import { homeSeoContentForCountry } from "@/lib/content/home-seo";
@@ -138,14 +139,7 @@ export function HomeSeoSection({ countryIso = "US" }: { countryIso?: string }) {
               View all FAQs →
             </Link>
           </div>
-          <div className="grid md:grid-cols-2 gap-6">
-            {faqs.items.map((faq) => (
-              <div key={faq.q} className="bg-white border border-slate-100 rounded-xl p-5">
-                <h4 className="font-semibold text-primary text-sm mb-2">{faq.q}</h4>
-                <p className="text-sm text-slate-600 leading-relaxed">{faq.a}</p>
-              </div>
-            ))}
-          </div>
+          <FaqAccordion items={faqs.items} />
         </section>
       </div>
     </section>

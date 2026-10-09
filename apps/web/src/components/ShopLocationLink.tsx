@@ -18,14 +18,14 @@ export function ShopLocationLink({
   className?: string;
   children: ReactNode;
 }) {
-  const country = useStorefrontCountryIso();
+  const country = useStorefrontCountryIso() ?? "US";
   let dest = href;
-  if (country && category) dest = categoryLocationHref(category, country);
-  else if (country && catalog) dest = giftsCatalogLocationHref(country);
-  else if (country) dest = shopPathForLocation(href, country);
+  if (category) dest = categoryLocationHref(category, country);
+  else if (catalog) dest = giftsCatalogLocationHref(country);
+  else dest = shopPathForLocation(href, country);
 
   return (
-    <Link href={dest} className={className}>
+    <Link href={dest} prefetch className={className}>
       {children}
     </Link>
   );

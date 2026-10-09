@@ -78,6 +78,15 @@ describe("location SEO shop URLs", () => {
     assert.match(copy.description, /USA/);
     assert.equal(copy.h1, "Send Flowers Online — Delivery to USA");
     assert.equal(locationShopHeading("/gifts-to-uk", "Shop Flowers, Cakes & Gifts"), "Shop Flowers, Cakes & Gifts to UK");
+    assert.equal(locationShopHeading("/flowers-to-uk", "Send Flowers"), "Send Flowers to UK");
+    const ukShop = localizeShopCopy("/flowers-to-uk", {
+      title: "Send Flowers Online Worldwide | BlossomPot",
+      description: "Order fresh flowers for worldwide delivery.",
+      h1: "Send Flowers — Worldwide Delivery",
+    });
+    assert.match(ukShop.title, /UK/);
+    assert.match(ukShop.h1 ?? "", /UK/);
+    assert.equal(countryIsoFromPathname("/flowers-to-uk"), "GB");
     assert.match(localizeCopyForCountry("Shop with worldwide delivery.", "GB"), /UK/);
   });
 
@@ -87,6 +96,9 @@ describe("location SEO shop URLs", () => {
     assert.equal(giftsCatalogCountryIso("california"), null);
     const usa = giftsCatalogCountryRewrites().find((r) => r.source === "/gifts-to-usa");
     assert.deepEqual(usa, { source: "/gifts-to-usa", destination: "/products?country=US" });
+    const uk = giftsCatalogCountryRewrites().find((r) => r.source === "/gifts-to-uk");
+    assert.deepEqual(uk, { source: "/gifts-to-uk", destination: "/products?country=GB" });
+    assert.equal(categoryLocationHref("flowers", "US"), "/flowers-to-usa");
   });
 
   it("names the selected delivery destination for help copy", () => {
@@ -111,7 +123,7 @@ describe("location SEO shop URLs", () => {
     assert.equal(countryIsoFromPathname("/", "GB"), "GB");
   });
 
-  it("resolves storefront country from country pages before the cookie", () => {
+  it("keeps a known page or cookie country and falls unknown codes back to the US", () => {
     assert.equal(
       resolveStorefrontCountryIso({
         pathname: "/flower-delivery-uk",
@@ -159,6 +171,14 @@ describe("location SEO shop URLs", () => {
       }),
       "AE"
     );
+    assert.equal(
+      resolveStorefrontCountryIso({
+        pathname: "/products",
+        searchCountry: "ZZ",
+      }),
+      "US"
+    );
     assert.equal(withCountryQuery("/products?search=roses", "GB"), "/products?search=roses&country=GB");
+    assert.equal(withCountryQuery("/products?search=roses", "US"), "/products?search=roses&country=US");
   });
 });

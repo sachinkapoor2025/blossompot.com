@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import type { Product } from "@blossompot/shared";
+import { useAuth } from "@/lib/auth-context";
 import { useWishlist } from "@/lib/wishlist-context";
+import { wishlistEntryHref } from "@/lib/wishlist-href";
 import { AddToCartControl } from "@/components/AddToCartControl";
 import { HomeProductCard } from "@/components/HomeProductCard";
 import { useCurrency, type DisplayCurrency } from "@/lib/currency-context";
@@ -15,9 +17,43 @@ type Props = {
 export function WishlistPageClient({ recommendedProducts }: Props) {
   const { items, remove } = useWishlist();
   const { format } = useCurrency();
+  const { user, loading } = useAuth();
 
   const wishlistSlugs = new Set(items.map((item) => item.slug));
   const suggestions = recommendedProducts.filter((p) => !wishlistSlugs.has(p.slug)).slice(0, 5);
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-16">
+        <p className="text-center text-slate-500">Loading wish list…</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-16">
+        <div className="max-w-md mx-auto text-center rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+          <h1 className="text-3xl font-bold text-primary mb-3">Wish Lists</h1>
+          <p className="text-slate-600 mb-6">
+            Sign in to save gifts to your wish list and view them on this device later.
+          </p>
+          <Link
+            href={wishlistEntryHref(false)}
+            className="inline-flex items-center justify-center rounded-lg bg-nav px-5 py-2.5 text-sm font-semibold text-white hover:bg-nav/90"
+          >
+            Log in to continue
+          </Link>
+          <p className="mt-4 text-sm text-slate-500">
+            New here?{" "}
+            <Link href="/account?redirect=%2Fwishlist" className="font-semibold text-nav hover:underline">
+              Create an account
+            </Link>
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (

@@ -4,13 +4,14 @@ import {
   isValidShippingPhone,
   quoteAddressShipmentShipping,
   shippingVendorKey,
+  USA_ONLY_DELIVERY_MESSAGE,
   type CartItem,
   type CheckoutShipment,
   type FreeShippingQuote,
   type ShippingAddress,
   type DisplayCurrency,
 } from "@blossompot/shared";
-import { emptyShippingAddress } from "@/lib/shipping-address";
+import { emptyShippingAddress } from "./shipping-address";
 
 export type DeliveryUnit = {
   key: string;
@@ -71,7 +72,8 @@ function withSender(
 
 export function validateDeliveryUnits(
   units: DeliveryUnit[],
-  primary: ShippingAddress
+  primary: ShippingAddress,
+  enabledCountryCodes?: readonly string[]
 ): string | null {
   for (const unit of units) {
     if (unit.useSameAddress) continue;
@@ -83,6 +85,13 @@ export function validateDeliveryUnits(
     }
     if (!a.line1.trim() || !a.city.trim() || !a.state.trim() || !a.postalCode.trim()) {
       return `Complete the delivery address for ${unit.name}`;
+    }
+    const enabled = new Set((enabledCountryCodes ?? ["US"]).map((code) => code.trim().toUpperCase()));
+    if (!enabled.has((a.country || "").trim().toUpperCase())) {
+      if (enabled.size === 1 && enabled.has("US")) {
+        return `${USA_ONLY_DELIVERY_MESSAGE} Enter a US address for ${unit.name}.`;
+      }
+      return `Delivery is not available in that country. Enter an enabled country for ${unit.name}.`;
     }
   }
   void primary;

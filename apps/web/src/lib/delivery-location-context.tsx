@@ -12,9 +12,11 @@ import {
 } from "react";
 import { api } from "./api";
 import { applyDeliveryCheck, type DeliveryCheckState } from "./country-switch";
+import { disabledCountryFallback, useGboDeliveryCountries } from "./gbo-delivery-countries";
 import {
   DELIVERY_LOCATION_EVENT,
   readDeliveryLocation,
+  toShoppingDeliveryLocation,
   writeDeliveryLocation,
   type StoredDeliveryLocation,
 } from "./delivery-location";
@@ -59,6 +61,7 @@ export function DeliveryLocationProvider({ children }: { children: ReactNode }) 
   const [pendingCountry, setPendingCountry] = useState<string | null>(null);
   const [selectorOpen, setSelectorOpen] = useState(false);
   const [selectorCountryPrefill, setSelectorCountryPrefill] = useState<string | null>(null);
+  const { countries, loaded: countriesLoaded, fromConfig } = useGboDeliveryCountries();
   const selectionRef = useRef(0);
   const checkLocationRef = useRef<(location: StoredDeliveryLocation, requestId: number) => Promise<CheckResponse>>(
     async () => ({ serviceable: false })
@@ -110,10 +113,10 @@ export function DeliveryLocationProvider({ children }: { children: ReactNode }) 
 
   const setLocation = useCallback(
     async (next: StoredDeliveryLocation) => {
-      const normalized: StoredDeliveryLocation = {
+      const normalized = toShoppingDeliveryLocation({
         ...next,
         countryCode: next.countryCode.trim().toUpperCase(),
-      };
+      });
       const id = ++selectionRef.current;
       writeDeliveryLocation(normalized);
       setStored(normalized);
@@ -130,6 +133,13 @@ export function DeliveryLocationProvider({ children }: { children: ReactNode }) 
   const clearPendingIfSettled = useCallback((pathIso: string | null) => {
     setPendingCountry((current) => (current && pathIso === current ? null : current));
   }, []);
+
+  useEffect(() => {
+    if (!countriesLoaded || !fromConfig || !location) return;
+    const fallback = disabledCountryFallback(location.countryCode, countries);
+    if (!fallback) return;
+    void setLocation({ countryCode: fallback, postalCode: "", postalDisplay: fallback });
+  }, [countries, countriesLoaded, fromConfig, location, setLocation]);
 
   useEffect(() => {
     const existing = readDeliveryLocation();

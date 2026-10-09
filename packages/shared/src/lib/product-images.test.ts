@@ -7,6 +7,8 @@ import {
   mergeProductImages,
   resolveProductImagesForUpsert,
   selectDisplayableProductImages,
+  isPlaceholderProductImage,
+  coalesceProductImages,
 } from "./product-images";
 import { resolveProductImageUrl, getProductCdnBase } from "./image-url";
 
@@ -33,6 +35,21 @@ describe("selectDisplayableProductImages", () => {
     const urls = selectDisplayableProductImages([{ url: "/only.jpg", width: 300, height: 300 }]);
     assert.deepEqual(urls, ["/only.jpg"]);
     assert.ok(300 >= PRODUCT_IMAGE_MIN_EDGE_PX);
+  });
+});
+
+describe("placeholder product images", () => {
+  it("treats the BlossomPot logo as a placeholder, not a product photo", () => {
+    assert.equal(isPlaceholderProductImage("/logo.png"), true);
+    assert.equal(isPlaceholderProductImage("/icon-512.png"), true);
+    assert.equal(isPlaceholderProductImage("/uploads/tf-usa/TFFF2602/TFFF2602.png"), false);
+  });
+
+  it("replaces an empty or logo gallery with catalog photos", () => {
+    assert.deepEqual(
+      coalesceProductImages(["/logo.png"], ["/uploads/tf-usa/TFFF2602/TFFF2602.png"]),
+      ["/uploads/tf-usa/TFFF2602/TFFF2602.png"]
+    );
   });
 });
 

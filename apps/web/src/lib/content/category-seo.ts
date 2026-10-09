@@ -63,12 +63,6 @@ export const categoryPageSeo: Record<
       "Personalized gifts with custom messages for birthdays, anniversaries, and thank-yous — delivered worldwide.",
     h1: "Personalized Gifts — Worldwide Delivery",
   },
-  "same-day-gifts": {
-    title: "Same-Day Gift Delivery | Flowers, Cakes & More | BlossomPot",
-    description:
-      "Send flowers, cakes and gifts with same-day delivery in select locations. Order before the local cut-off time for fast, thoughtful celebrations.",
-    h1: "Same-Day Gifts — Select Cities",
-  },
   plants: {
     title: "Plants Delivery Worldwide | Green Gifts | BlossomPot",
     description:

@@ -20,6 +20,27 @@ export const categoryKeys = {
     `${String(Math.max(0, sortOrder || 0)).padStart(6, "0")}#${slug}`,
 };
 
+/** FNP USA import history in the products table. One META item plus one item per row. */
+export const importBatchKeys = {
+  pk: (batchId: string) => `IMPORTBATCH#${batchId}`,
+  sk: () => "META" as const,
+  rowSk: (row: number) => `ROW#${String(Math.max(0, row)).padStart(6, "0")}`,
+  gsi1pk: () => "ENTITY#FNP_IMPORT" as const,
+  gsi1sk: (createdAt: string, batchId: string) => `${createdAt}#${batchId}`,
+};
+
+/** Idempotency pointer for one FNP product URL. */
+export const importSourceKeys = {
+  pk: (sourceKey: string) => `IMPORTSRC#${sourceKey}`,
+  sk: () => "META" as const,
+};
+
+/** Hosted copy of one source image URL, so a repeated URL is not uploaded again. */
+export const importImageKeys = {
+  pk: (digest: string) => `IMPORTIMG#${digest}`,
+  sk: () => "META" as const,
+};
+
 /** Product reviews live in the products table under PRODUCT#slug / REVIEW#id. */
 export const reviewKeys = {
   pk: (productSlug: string) => `PRODUCT#${productSlug}`,
@@ -109,6 +130,11 @@ export const configKeys = {
   payments: { pk: "CONFIG#PAYMENTS", sk: "META" as const },
   blogImages: { pk: "CONFIG#BLOG_IMAGES", sk: "META" as const },
   shipping: { pk: "CONFIG#SHIPPING", sk: "META" as const },
+  /**
+   * Countries BlossomPot currently offers to customers.
+   * Separate from each catalog vendor's `deliveryCountries`.
+   */
+  catalogCountries: { pk: "CONFIG#CATALOG_COUNTRIES", sk: "META" as const },
   /** Growth-score weights + feature flags for Product Sales Intelligence. */
   productSalesIntel: { pk: "CONFIG#PRODUCT_SALES_INTEL", sk: "META" as const },
   /**
@@ -188,6 +214,16 @@ export const marketplaceVendorKeys = {
   commissionsSk: () => "META" as const,
   agreementPk: () => "CONFIG#VENDOR_AGREEMENT" as const,
   agreementSk: () => "META" as const,
+};
+
+/**
+ * Built-in catalog vendors (config table).
+ * Separate from marketplace applicants (`MVENDOR#<vendorId>`).
+ */
+export const catalogVendorKeys = {
+  pk: (vendorSlug: string) => `CATALOGVENDOR#${vendorSlug}`,
+  sk: () => "META" as const,
+  pkPrefix: () => "CATALOGVENDOR#" as const,
 };
 
 /** Vendor delivery coverage rules (config table). */

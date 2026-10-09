@@ -8,10 +8,14 @@ import { ProductDetailClient } from "./ProductDetailClient";
 import { breadcrumbJsonLd, faqJsonLd, productJsonLd, productPageMetadata } from "@/lib/seo";
 import { productFaqsForCategory } from "@/lib/content/product-faqs";
 import { resolveImageUrl } from "@/lib/images";
-import { loadProduct, loadRelatedProducts, loadProducts, getStaticProductSlugs, toListingCardProducts } from "@/lib/product-loader";
+import { loadProductForCountry, loadRelatedProducts, loadProducts, getStaticProductSlugs, toListingCardProducts } from "@/lib/product-loader";
 import { api } from "@/lib/api";
 import { categoryHref } from "@/lib/category-urls";
 import { getCategoryPageSeo } from "@/lib/content/category-seo";
+import {
+  productAvailabilityNotice,
+  UNAVAILABLE_PAGE_ALLOWS_PURCHASE,
+} from "@/lib/product-availability-copy";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { deliveryDestinationName } from "@/lib/location-seo-urls";
 import {
@@ -64,7 +68,9 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const p = await loadProduct(slug);
+  const country = await getStorefrontDeliveryCountry();
+  const loaded = await loadProductForCountry(slug, country);
+  const p = loaded?.deliverable ? loaded.product : null;
   if (!p) return { title: "Product", robots: { index: false, follow: false } };
   if (!isProductSearchIndexable(p)) {
     return { title: p.name, robots: { index: false, follow: false } };
@@ -91,21 +97,33 @@ export default function ProductPage(props: Props) {
 
 async function ProductPageContent({ params }: Props) {
   const { slug } = await params;
-  const product = await loadProduct(slug);
-  if (!product) notFound();
+  const countryIso = await getStorefrontDeliveryCountry();
+  if (!countryIso) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-10">
+        <h1 className="text-2xl font-bold text-primary mb-3">Delivery is not available right now</h1>
+        <p className="text-slate-600 max-w-2xl">No countries are enabled for shopping.</p>
+      </div>
+    );
+  }
+  const loaded = await loadProductForCountry(slug, countryIso);
+  if (!loaded) notFound();
+  const product = loaded.product;
   if (!isProductStorefrontVisible(product)) notFound();
 
-  const countryIso = await getStorefrontDeliveryCountry();
-  if (!productVisibleForDeliveryCountry(product, countryIso)) {
+  if (!loaded.deliverable || !productVisibleForDeliveryCountry(product, countryIso)) {
     const countryName = resolveDeliveryCountry(countryIso).countryName;
+    const notice = productAvailabilityNotice({
+      productName: product.name,
+      countryName,
+      reason: loaded.reason,
+      visibleForCountry: productVisibleForDeliveryCountry(product, countryIso),
+    });
     const available = await loadProducts({ country: countryIso });
     return (
       <div className="max-w-6xl mx-auto px-4 py-10">
-        <h1 className="text-2xl font-bold text-primary mb-3">This gift is not available for {countryName}</h1>
-        <p className="text-slate-600 mb-6 max-w-2xl">
-          {product.name} is listed for a different delivery country. Browse gifts that can be sent to{" "}
-          {countryName}.
-        </p>
+        <h1 className="text-2xl font-bold text-primary mb-3">{notice.heading}</h1>
+        <p className="text-slate-600 mb-6 max-w-2xl">{notice.body}</p>
         <Link href="/gift-catalog" className="btn-nav bg-primary inline-flex mb-10">
           Shop gifts for {countryName}
         </Link>
@@ -113,6 +131,7 @@ async function ProductPageContent({ params }: Props) {
           <HomeProductList
             products={available}
             limit={10}
+            showPurchaseControls={UNAVAILABLE_PAGE_ALLOWS_PURCHASE}
             className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 list-none p-0 m-0"
           />
         ) : null}

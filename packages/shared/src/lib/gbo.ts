@@ -24,6 +24,108 @@ export function isGboVendor(slug?: string | null): boolean {
   return (slug ?? "").trim() === VENDOR_GBO;
 }
 
+/** Customer-facing message when a new GBO purchase is blocked. */
+export const GBO_STOREFRONT_UNAVAILABLE_MESSAGE = "This product is temporarily unavailable.";
+
+/** Name the overseas lines already in the cart. Does not remove them. */
+export function gboCartLineUnavailableMessage(
+  items: Array<{
+    name?: string | null;
+    vendorSlug?: string | null;
+    internationalDelivery?: boolean;
+    slug?: string | null;
+    productSlug?: string | null;
+    sku?: string | null;
+  }>
+): string {
+  const names: string[] = [];
+  for (const item of items) {
+    if (!isGboFulfillmentLine(item)) continue;
+    const name = item.name?.trim();
+    if (name && !names.includes(name)) names.push(name);
+  }
+  if (names.length === 0) {
+    return `${GBO_STOREFRONT_UNAVAILABLE_MESSAGE} Remove the overseas gift from your cart to continue.`;
+  }
+  const label = names.join(", ");
+  return `${label} is temporarily unavailable. Remove ${names.length === 1 ? "it" : "them"} from your cart to continue.`;
+}
+
+/**
+ * Stored on an in-flight unpaid order after payment, so automatic placement
+ * does not submit it while the storefront switch is off. Line items are unchanged.
+ */
+export const GBO_STOREFRONT_HOLD_ERROR =
+  "GBO storefront is disabled; this order was not submitted to Gift Baskets Overseas.";
+
+/**
+ * Storefront catalog and new purchases.
+ * Default is off: only `true`, `1`, or `yes` enable Gift Baskets Overseas on the storefront.
+ * Admin catalog tools, the partner API client, and tracking for orders already sent stay available.
+ */
+export function isGboStorefrontEnabled(
+  env: Record<string, string | undefined> = process.env
+): boolean {
+  const value = (env.GBO_STOREFRONT_ENABLED ?? "").trim().toLowerCase();
+  return value === "true" || value === "1" || value === "yes";
+}
+
+export function isGboHiddenFromStorefront(
+  product: {
+    vendorSlug?: string | null;
+    internationalDelivery?: boolean;
+    slug?: string | null;
+    sku?: string | null;
+    productSlug?: string | null;
+  },
+  env: Record<string, string | undefined> = process.env
+): boolean {
+  return !isGboStorefrontEnabled(env) && isGboFulfillmentLine(product);
+}
+
+/** Cart line, order line, or catalog row fulfilled by Gift Baskets Overseas. */
+export function isGboFulfillmentLine(line: {
+  vendorSlug?: string | null;
+  internationalDelivery?: boolean;
+  slug?: string | null;
+  productSlug?: string | null;
+  sku?: string | null;
+}): boolean {
+  return isGboCatalogProduct({
+    vendorSlug: line.vendorSlug,
+    internationalDelivery: line.internationalDelivery,
+    sku: line.sku,
+    slug: line.slug ?? line.productSlug,
+  });
+}
+
+export function orderIncludesGboProduct(order: {
+  vendorSlugs?: string[] | null;
+  items?: Array<{
+    vendorSlug?: string | null;
+    internationalDelivery?: boolean;
+    slug?: string | null;
+    productSlug?: string | null;
+    sku?: string | null;
+  }> | null;
+}): boolean {
+  if (order.vendorSlugs?.some((slug) => isGboVendor(slug))) return true;
+  return (order.items ?? []).some((item) => isGboFulfillmentLine(item));
+}
+
+/** Public storefront catalog routes. Admin `/admin/gbo/*` and the keyed wrapper `/gifts` are not included. */
+export function isPublicGboCatalogPath(path: string): boolean {
+  const bare = path.split("?")[0]?.replace(/\/+$/, "") || "/";
+  return bare === "/gbo/gifts" || /^\/gbo\/gifts\/[^/]+$/.test(bare);
+}
+
+export function isGboStorefrontHold(order: {
+  gbo?: { lastError?: string | null; invoice?: string | null; placedAt?: string | null } | null;
+}): boolean {
+  const err = order.gbo?.lastError ?? "";
+  return err.startsWith("GBO storefront is disabled") && !order.gbo?.invoice && !order.gbo?.placedAt;
+}
+
 export function formatGboSku(country: string, productId: number): string {
   return `gbo:${country.trim().toUpperCase()}:${productId}`;
 }
@@ -64,7 +166,6 @@ const PRIMARY_CATEGORY_ORDER = [
   "mothers-day-gifts",
   "gift-hampers",
   "personalized-gifts",
-  "same-day-gifts",
   GBO_CATEGORY_SLUG,
 ] as const;
 
@@ -101,13 +202,22 @@ export function mapGboGiftStorefrontCategories(gift: {
   if (/\bcustom|spa |personalized|toys and games|accessories/.test(text)) {
     matched.add("personalized-gifts");
   }
-  if (matched.has("flowers") || matched.has("cakes")) matched.add("same-day-gifts");
   if (matched.size === 1) matched.add("gift-hampers");
 
   const categorySlug = PRIMARY_CATEGORY_ORDER.find((slug) => matched.has(slug)) ?? GBO_CATEGORY_SLUG;
   const additionalCategorySlugs = [...matched].filter((slug) => slug !== categorySlug).sort();
   return { categorySlug, additionalCategorySlugs };
 }
+
+const OCCASION_CATEGORY_SLUGS = new Set([
+  "birthday-gifts",
+  "valentines-day-gifts",
+  "anniversary-gifts",
+  "mothers-day-gifts",
+  "wedding-gifts",
+]);
+
+const GENERIC_FLORAL_PRIMARY = new Set(["flowers", "flower-bouquets"]);
 
 export function productInStorefrontCategory(
   product: { categorySlug?: string | null; additionalCategorySlugs?: string[] | null },
@@ -116,7 +226,11 @@ export function productInStorefrontCategory(
   const slug = categorySlug.trim();
   if (!slug) return false;
   if (product.categorySlug === slug) return true;
-  return product.additionalCategorySlugs?.includes(slug) ?? false;
+  if (!product.additionalCategorySlugs?.includes(slug)) return false;
+  if (OCCASION_CATEGORY_SLUGS.has(slug) && GENERIC_FLORAL_PRIMARY.has(product.categorySlug ?? "")) {
+    return false;
+  }
+  return true;
 }
 
 export function gboImageUrl(image?: string | null): string | undefined {
@@ -301,8 +415,7 @@ export function isGboCatalogProduct(product: {
 }
 
 /**
- * Destination catalog for a product. Local BlossomPot SKUs are US-only;
- * GBO SKUs are tagged `gbo:{CC}:{id}`.
+ * GBO SKU destination (`gbo:{CC}:{id}`). Local products do not carry a country.
  */
 export function catalogProductCountry(product: {
   vendorSlug?: string | null;
@@ -313,10 +426,13 @@ export function catalogProductCountry(product: {
   const ref = parseGboSku(product.sku) ?? parseGboSlug(product.slug);
   if (ref) return ref.country;
   if (isGboCatalogProduct(product)) return null;
-  return "US";
+  return null;
 }
 
-/** Keep the selected country's GBO catalog; hide US-only SKUs abroad. */
+/**
+ * GBO SKUs must match the destination country. Untagged GBO rows stay hidden.
+ * Every other product is decided by the vendor's delivery countries, not a product field.
+ */
 export function productVisibleForDeliveryCountry(
   product: {
     vendorSlug?: string | null;
@@ -328,11 +444,10 @@ export function productVisibleForDeliveryCountry(
 ): boolean {
   const iso = country.trim().toUpperCase();
   if (!/^[A-Z]{2}$/.test(iso)) return true;
-  const dest = catalogProductCountry(product);
-  if (dest) return dest === iso;
-  // Untagged international rows are not a country's catalog.
+  const ref = parseGboSku(product.sku) ?? parseGboSlug(product.slug);
+  if (ref) return ref.country === iso;
   if (isGboCatalogProduct(product)) return false;
-  return iso === "US";
+  return true;
 }
 
 /**

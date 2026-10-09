@@ -109,7 +109,7 @@ export function HomeCategoryCarousel({ tiles }: { tiles: HomeCategoryTile[] }) {
 
           <ul
             ref={scrollerRef}
-            className="flex gap-4 sm:gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2 px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            className="flex gap-4 sm:gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory touch-pan-x pb-2 px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [-webkit-overflow-scrolling:touch]"
           >
             {tiles.map((tile) => (
               <li key={tile.slug} className="snap-start shrink-0 w-[112px] sm:w-[132px]">

@@ -1,8 +1,10 @@
 import {
   DEFAULT_USD_INR_RATE,
   fetchLiveUsdInrRate,
+  fetchLiveUsdRates,
   resolveUsdInrRate,
   type ExchangeRateQuote,
+  type UsdRateTable,
 } from "@blossompot/shared";
 
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour — do not hit FX providers per request
@@ -47,3 +49,23 @@ export async function resolveCheckoutUsdInrRate(clientRate?: number): Promise<nu
 }
 
 export { DEFAULT_USD_INR_RATE };
+
+let tableCache: { rates: UsdRateTable; source: string; asOf: string; expiresAt: number } | null = null;
+
+/** Multi-currency USD table for storefront display (server-side; avoids browser CORS). */
+export async function getLiveUsdRates(): Promise<{ rates: UsdRateTable; source: string; asOf: string }> {
+  const now = Date.now();
+  if (tableCache && now < tableCache.expiresAt) {
+    return { rates: tableCache.rates, source: tableCache.source, asOf: tableCache.asOf };
+  }
+  const inr = await getLiveUsdInrRate();
+  const live = await fetchLiveUsdRates();
+  const rates: UsdRateTable = { USD: 1, INR: inr.rate, ...(live?.rates ?? {}) };
+  const quote = {
+    rates,
+    source: live?.source ?? inr.source,
+    asOf: live?.asOf ?? inr.asOf,
+  };
+  tableCache = { ...quote, expiresAt: now + CACHE_TTL_MS };
+  return quote;
+}

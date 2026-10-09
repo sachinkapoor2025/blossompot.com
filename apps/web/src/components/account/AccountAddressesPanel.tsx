@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { AccountAddress } from "@blossompot/shared";
+import { nonUsAccountSaveMessage } from "@/lib/checkout-address";
 import { AddressFormFields } from "./AddressFormFields";
 import { LeadCaptureInput } from "@/components/LeadCaptureInput";
 import { emptyShippingAddress, formatAddressLine } from "@/lib/shipping-address";
@@ -92,9 +93,17 @@ export function AccountAddressesPanel({
     setError("");
     setMessage("");
 
+    const country = (form.country || "US").trim().toUpperCase();
+    const countryError = nonUsAccountSaveMessage(country);
+    if (countryError) {
+      setLoading(false);
+      setError(countryError);
+      return;
+    }
+
     const payload = {
       ...form,
-      country: form.country || "US",
+      country,
       label: label || form.name,
       isDefault,
       ...(form.phone?.trim() ? { phone: form.phone.trim() } : {}),

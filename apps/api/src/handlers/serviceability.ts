@@ -1,18 +1,28 @@
 import type { APIGatewayProxyEventV2 } from "aws-lambda";
 import {
+  applyEnabledShoppingCountry,
+  catalogCountriesForStorefront,
+  storefrontShoppingCountryCodes,
   checkServiceabilitySchema,
   checkVendorServiceability,
   describeMatch,
   formatPostalDisplay,
-  fulfillmentVendorSlug,
-  getServiceableVendors,
+  getDeliveryCountry,
   isProductDeliverableToLocation,
   isValidPostal,
+  NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE,
   resolveDeliveryCountry,
+  resolveEnabledShoppingCountry,
+  SHOPPING_COUNTRY_ISO,
+  vendorCoversShoppingCountryWithoutArea,
+  vendorHasLocationScopedAreas,
   vendorServiceAreaImportRowSchema,
   vendorServiceAreaInputSchema,
+  type ServiceabilityMatch,
 } from "@blossompot/shared";
 import { requireAdmin } from "../lib/auth";
+import { loadCatalogCountries } from "../lib/catalog-country-store";
+import { loadCatalogVendorRegistry } from "../lib/catalog-vendor-store";
 import { badRequest, forbidden, json, notFound, ok } from "../lib/response";
 import {
   coverageSummary,
@@ -34,30 +44,116 @@ function locationFromEvent(event: APIGatewayProxyEventV2) {
   };
 }
 
+/**
+ * Public delivery check.
+ * Without an enabled-country list this stays USA-only, matching a missing global config.
+ * Callers that loaded `CONFIG#CATALOG_COUNTRIES` pass that list and keep an enabled country.
+ */
+export function publicShoppingServiceability(input: {
+  countryCode: string;
+  postalCode?: string | null;
+  enabledCountryCodes?: readonly string[];
+}): { countryCode: string; postalCode: string } | { error: string } {
+  const requested = input.countryCode.trim().toUpperCase();
+  const postal = (input.postalCode ?? "").trim();
+  const enabled = (input.enabledCountryCodes ?? [SHOPPING_COUNTRY_ISO]).map((countryCode) => ({
+    countryCode,
+    enabled: true,
+  }));
+  const resolved = resolveEnabledShoppingCountry(requested, enabled);
+  if (!resolved) return { error: NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE };
+  const postalForCheck = resolved === requested ? postal : "";
+  if (postalForCheck && !isValidPostal(resolved, postalForCheck)) {
+    const label = resolveDeliveryCountry(resolved).postalLabel;
+    return { error: `Enter a valid ${label.toLowerCase()}` };
+  }
+  return { countryCode: resolved, postalCode: postalForCheck };
+}
+
+/** Cart availability flag. A disabled country falls back through the enabled list and drops its postal code. */
+export function cartAvailabilityLocation(
+  country?: string | null,
+  postal?: string | null,
+  enabledCountryCodes?: readonly string[]
+) {
+  const requested = (country ?? "").trim();
+  if (!requested) return null;
+  const shopping = publicShoppingServiceability({
+    countryCode: requested,
+    postalCode: postal,
+    enabledCountryCodes,
+  });
+  if ("error" in shopping) return null;
+  return shopping;
+}
+
 export async function checkServiceability(event: APIGatewayProxyEventV2) {
   const raw = event.requestContext.http.method === "GET" ? locationFromEvent(event) : JSON.parse(event.body ?? "{}");
   const parsed = checkServiceabilitySchema.safeParse(raw);
   if (!parsed.success) return badRequest(parsed.error.message);
 
-  const country = resolveDeliveryCountry(parsed.data.countryCode);
-  if (!country.enabled) return badRequest("Unsupported country");
-  const postal = (parsed.data.postalCode ?? "").trim();
-  if (postal && !isValidPostal(parsed.data.countryCode, postal)) {
-    return badRequest(`Enter a valid ${country.postalLabel.toLowerCase()}`);
-  }
+  const storedCountries = await loadCatalogCountries();
+  const enabledCountryCodes = storefrontShoppingCountryCodes(storedCountries.countries);
+  const shopping = publicShoppingServiceability({
+    countryCode: parsed.data.countryCode,
+    postalCode: parsed.data.postalCode,
+    enabledCountryCodes,
+  });
+  if ("error" in shopping) return badRequest(shopping.error);
+
+  const country = resolveDeliveryCountry(shopping.countryCode);
+  if (!getDeliveryCountry(shopping.countryCode)) return badRequest("Unsupported country");
+  const postal = shopping.postalCode;
+  const sameCountry = parsed.data.countryCode.trim().toUpperCase() === shopping.countryCode;
 
   const { areas, activeVendorSlugs } = await loadCoverageBundle();
-  const location = { ...parsed.data, postalCode: postal };
-  const vendors = getServiceableVendors(areas, location, activeVendorSlugs);
+  const location = {
+    ...parsed.data,
+    countryCode: shopping.countryCode,
+    postalCode: postal,
+    stateCode: sameCountry ? parsed.data.stateCode : undefined,
+    city: sameCountry ? parsed.data.city : undefined,
+  };
+  const checked = activeVendorSlugs.map((slug) => checkVendorServiceability(slug, areas, location, true));
+  let vendors = checked.filter((match) => match.serviceable);
+  const registry = await loadCatalogVendorRegistry();
+  const covered: ServiceabilityMatch[] = [];
+  for (const match of checked) {
+    if (match.serviceable) continue;
+    const vendor = registry.get(match.vendorSlug);
+    if (
+      !vendorCoversShoppingCountryWithoutArea(
+        vendor,
+        shopping.countryCode,
+        match.reason,
+        process.env,
+        vendorHasLocationScopedAreas(areas, match.vendorSlug, shopping.countryCode)
+      )
+    ) {
+      continue;
+    }
+    covered.push({
+      serviceable: true,
+      reason: "matched",
+      vendorSlug: match.vendorSlug,
+      matchedRule: {
+        areaId: "vendor-delivery-country",
+        scope: "COUNTRY",
+        ruleType: "ALLOW",
+        countryCode: shopping.countryCode,
+      },
+    });
+  }
+  vendors = [...vendors, ...covered];
   const serviceable = vendors.length > 0;
   const where = postal
-    ? formatPostalDisplay(parsed.data.countryCode, postal)
+    ? formatPostalDisplay(shopping.countryCode, postal)
     : country.countryName;
 
   console.log(
     JSON.stringify({
       type: "SERVICEABILITY_CHECK",
-      country: parsed.data.countryCode,
+      country: shopping.countryCode,
       postal_code: postal.replace(/\s+/g, ""),
       result: serviceable,
       vendor_count: vendors.length,
@@ -69,8 +165,8 @@ export async function checkServiceability(event: APIGatewayProxyEventV2) {
     serviceable,
     location: {
       country: country.countryName,
-      countryCode: parsed.data.countryCode,
-      postalCode: postal ? formatPostalDisplay(parsed.data.countryCode, postal) : "",
+      countryCode: shopping.countryCode,
+      postalCode: postal ? formatPostalDisplay(shopping.countryCode, postal) : "",
       postalLabel: country.postalLabel,
     },
     vendors: vendors.map((v) => ({
@@ -224,28 +320,76 @@ export async function adminCoverageSummary(event: APIGatewayProxyEventV2) {
 }
 
 export async function evaluateProductsForLocation(
-  products: Array<{ slug: string; vendorSlug?: string; published?: boolean; inventory?: number }>,
+  products: Array<{
+    slug: string;
+    vendorSlug?: string | null;
+    published?: boolean;
+    inventory?: number;
+    sku?: string | null;
+    internationalDelivery?: boolean | null;
+    productSlug?: string | null;
+    tags?: readonly string[] | null;
+  }>,
   location: { countryCode: string; postalCode: string; stateCode?: string; city?: string }
 ) {
   const { areas, activeVendorSlugs } = await loadCoverageBundle();
+  const registry = await loadCatalogVendorRegistry();
   const active = new Set(activeVendorSlugs);
   return products.map((p) => {
     const match = isProductDeliverableToLocation(p, areas, location, active);
+    let deliverable = match.serviceable;
+    let reason = match.reason;
+    let matchedRule = match.matchedRule;
+    const vendor = registry.get(match.vendorSlug);
+    if (
+      vendorCoversShoppingCountryWithoutArea(
+        vendor,
+        location.countryCode,
+        match.reason,
+        process.env,
+        vendorHasLocationScopedAreas(areas, match.vendorSlug, location.countryCode)
+      )
+    ) {
+      deliverable = true;
+      reason = "matched";
+      matchedRule = {
+        areaId: "vendor-delivery-country",
+        scope: "COUNTRY",
+        ruleType: "ALLOW",
+        countryCode: location.countryCode.trim().toUpperCase(),
+      };
+    }
     return {
       slug: p.slug,
-      vendorSlug: fulfillmentVendorSlug(p),
-      deliverable: match.serviceable,
-      reason: match.reason,
-      matchedRule: match.matchedRule,
+      vendorSlug: match.vendorSlug,
+      deliverable,
+      reason,
+      matchedRule,
     };
   });
 }
 
+/** Requested catalog location. Does not apply the global enabled-country list. */
 export function parseLocationQuery(event: APIGatewayProxyEventV2) {
   const q = event.queryStringParameters ?? {};
-  const countryCode = (q.country ?? q.countryCode ?? "").trim().toUpperCase();
-  const postalCode = (q.postalCode ?? q.zip ?? "").trim();
-  if (!countryCode) return null;
-  if (postalCode && !isValidPostal(countryCode, postalCode)) return null;
-  return { countryCode, postalCode, stateCode: q.state ?? q.stateCode, city: q.city };
+  const requestedCountry = (q.country ?? q.countryCode ?? "").trim().toUpperCase();
+  const requestedPostal = (q.postalCode ?? q.zip ?? "").trim();
+  if (!requestedCountry || !/^[A-Z]{2}$/.test(requestedCountry)) return null;
+  const known = Boolean(getDeliveryCountry(requestedCountry));
+  const postalCode =
+    requestedPostal && known && isValidPostal(requestedCountry, requestedPostal) ? requestedPostal : "";
+  return {
+    countryCode: requestedCountry,
+    postalCode,
+    stateCode: q.state ?? q.stateCode,
+    city: q.city,
+  };
+}
+
+/** Requested location after the global enabled-country list. Null when nothing is enabled. */
+export async function resolveShoppingLocation(
+  requested: { countryCode: string; postalCode: string; stateCode?: string; city?: string } | null
+) {
+  const stored = await loadCatalogCountries();
+  return applyEnabledShoppingCountry(requested, catalogCountriesForStorefront(stored.countries));
 }

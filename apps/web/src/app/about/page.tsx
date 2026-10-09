@@ -6,11 +6,12 @@ import { marketingPageInlineLinks } from "@/lib/content/page-inline-links";
 import { applyInlineLinks } from "@/lib/inline-links";
 import { site, categoryOrder, whatsappChatUrl } from "@/lib/site";
 import { aboutPageJsonLd, pageMetadata } from "@/lib/seo";
+import { BackToHome } from "@/components/BackToHome";
 
 export const metadata: Metadata = pageMetadata({
-  title: "About BlossomPot — Flowers, Cakes & Gifts | USA Delivery",
+  title: "About BlossomPot — Flowers, Cakes & Gifts | Worldwide Delivery",
   description:
-    "At BlossomPot, we believe a thoughtful gift can transform an ordinary moment into something special. Send flowers, bouquets, cakes, gift hampers and personalized gifts across the United States.",
+    "At BlossomPot, we believe a thoughtful gift can transform an ordinary moment into something special. Send flowers, bouquets, cakes, gift hampers and personalized gifts with worldwide delivery.",
   path: "/about",
 });
 
@@ -32,7 +33,7 @@ export default function AboutPage() {
         </p>
         <p>
           {applyInlineLinks(
-            `${site.name} is a leading online gifting destination serving customers throughout the United States. Whether it's a birthday, anniversary, Valentine's Day, Mother's Day, a wedding, a new beginning or just to say thank you, we have a selection of gifts for all occasions and relationships.`,
+            `${site.name} is a leading online gifting destination with worldwide delivery. Whether it's a birthday, anniversary, Valentine's Day, Mother's Day, a wedding, a new beginning or just to say thank you, we have a selection of gifts for all occasions and relationships.`,
             inlineLinks,
             { usedHrefs, currentPath: "/about", max: 4 }
           )}
@@ -73,11 +74,11 @@ export default function AboutPage() {
           gifting occasions.
         </p>
 
-        <h2 className="text-xl font-bold text-primary pt-4">Serving Customers Across the USA</h2>
+        <h2 className="text-xl font-bold text-primary pt-4">Worldwide Delivery</h2>
         <p>
-          {site.name} is committed to providing customers throughout the USA with the convenience of
-          gifting. We partner with fulfilment partners and delivery networks to help ensure that orders
-          arrive safely and within the expected delivery window.
+          {site.name} delivers flowers, cakes, and gifts worldwide. Choose the recipient country in the
+          header or at checkout. We partner with fulfilment partners and delivery networks to help
+          ensure that orders arrive safely and within the expected delivery window.
         </p>
         <p>
           Availability and delivery times may vary according to product, destination, time of order and
@@ -99,8 +100,8 @@ export default function AboutPage() {
 
         <h2 className="text-xl font-bold text-primary pt-4">A Focus on a Better Gifting Experience</h2>
         <p>
-          {site.name} is operated by <strong>Divit Global Ventures (DGV)</strong> with a US-focused
-          fulfillment and customer support operation.
+          {site.name} is operated by <strong>Divit Global Ventures (DGV)</strong>, with fulfillment
+          partners and customer support for worldwide gift delivery.
         </p>
         <p>
           We combine online convenience with a personal approach to gifting. From selecting products to
@@ -131,8 +132,7 @@ export default function AboutPage() {
         </p>
         <p>
           {site.name} helps you turn that thought into something they can receive and remember, whether
-          it&apos;s sending flowers to someone across the country or choosing a gift for a special
-          occasion.
+          it&apos;s sending flowers across town or choosing a gift for someone in another country.
         </p>
         <p className="font-semibold text-primary">{site.name} — Thoughtful gifts for meaningful moments.</p>
 
@@ -154,7 +154,8 @@ export default function AboutPage() {
           Media inquiries: <Link href="/press" className="text-nav hover:underline">Press kit</Link>.
         </p>
       </div>
-      <div className="mt-10 flex flex-wrap gap-3">
+      <BackToHome className="mt-10" />
+      <div className="mt-6 flex flex-wrap gap-3">
         {categoryOrder.map((slug) => (
           <Link
             key={slug}

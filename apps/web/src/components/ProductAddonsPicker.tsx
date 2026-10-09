@@ -1,9 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import {
   MAX_PRODUCT_ADDON_QUANTITY,
   PRODUCT_ADDONS,
-  cdnUploadUrl,
+  productAddonImageUrl,
   sumAddonPrices,
   type ProductAddonDef,
   type ProductAddonSelection,
@@ -15,6 +16,22 @@ const PERSONALIZATION = PRODUCT_ADDONS.filter((a) => a.group === "personalizatio
 
 function qtyMap(selected: ProductAddonSelection[]): Map<string, number> {
   return new Map(selected.map((s) => [s.id, s.quantity]));
+}
+
+function AddonThumb({ src, alt }: { src: string; alt: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return null;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={alt}
+      width={56}
+      height={56}
+      className="h-14 w-14 shrink-0 rounded-md object-cover bg-white ring-1 ring-slate-200"
+      onError={() => setFailed(true)}
+    />
+  );
 }
 
 function AddonGroup({
@@ -40,6 +57,7 @@ function AddonGroup({
           const qty = quantities.get(addon.id) ?? 0;
           const checked = qty > 0;
           const linePrice = addon.priceUsd * Math.max(qty, 1);
+          const imageUrl = productAddonImageUrl(addon.image);
           return (
             <li key={addon.id}>
               <div
@@ -56,13 +74,7 @@ function AddonGroup({
                     checked={checked}
                     onChange={() => onToggle(addon.id)}
                   />
-                  <img
-                    src={cdnUploadUrl(addon.image)}
-                    alt={addon.name}
-                    width={56}
-                    height={56}
-                    className="h-14 w-14 shrink-0 rounded-md object-cover bg-white ring-1 ring-slate-200"
-                  />
+                  {imageUrl ? <AddonThumb src={imageUrl} alt="" /> : null}
                   <span className="flex-1 min-w-0">
                     <span className="block text-sm font-semibold text-slate-900">{addon.name}</span>
                     <span className="block text-xs text-slate-500 mt-0.5">{addon.detail}</span>

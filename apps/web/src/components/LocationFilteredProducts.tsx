@@ -2,8 +2,8 @@
 
 import type { ReactNode } from "react";
 import {
-  fulfillmentVendorSlug,
-  isGboCatalogProduct,
+  noProductsForDeliveryCountryMessage,
+  productKeptForServiceableVendors,
   productVisibleForDeliveryCountry,
   type Product,
 } from "@blossompot/shared";
@@ -19,13 +19,9 @@ export function useLocationFilteredProducts(products: Product[]) {
   }
   const applyVendorFilter =
     ready && !checking && Boolean(location) && location?.countryCode === countryIso;
-  const allowed = new Set(vendorSlugs);
   const next = products.filter((p) => {
     if (!productVisibleForDeliveryCountry(p, countryIso)) return false;
-    if (!applyVendorFilter) return true;
-    if (isGboCatalogProduct(p)) return true;
-    if (allowed.size === 0) return true;
-    return allowed.has(fulfillmentVendorSlug(p));
+    return productKeptForServiceableVendors(p, vendorSlugs, applyVendorFilter, countryIso);
   });
   return {
     products: next,
@@ -66,8 +62,9 @@ export function LocationEmptyHint() {
   return (
     <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
       <p>
-        {message ??
-          `No products are available for delivery to ${location.postalDisplay} yet.`}
+        {location.postalCode
+          ? (message ?? `No products are available for delivery to ${location.postalDisplay} yet.`)
+          : noProductsForDeliveryCountryMessage(location.countryCode)}
       </p>
       <button type="button" onClick={() => openSelector()} className="mt-2 font-semibold text-nav underline">
         Change location

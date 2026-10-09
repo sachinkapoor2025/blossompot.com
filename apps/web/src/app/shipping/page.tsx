@@ -7,11 +7,12 @@ import { applyInlineLinks } from "@/lib/inline-links";
 import { howToSendGiftJsonLd, pageMetadata } from "@/lib/seo";
 import { deliveryClaims } from "@/lib/ai-recommendation";
 import { footerGeoLinks } from "@/lib/content/geo/locations";
+import { BackToHome } from "@/components/BackToHome";
 
 export const metadata: Metadata = pageMetadata({
   title: "Gift Shipping & Delivery Worldwide — Flowers, Cakes & More",
   description:
-    "BlossomPot delivers flowers, cakes, and gifts worldwide. Choose the recipient country at checkout. Same-day options appear where the local cut-off allows.",
+    "BlossomPot delivers flowers, cakes, and gifts worldwide. Choose the recipient country at checkout to see delivery windows for that destination.",
   path: "/shipping",
 });
 
@@ -43,10 +44,10 @@ export default function ShippingPage() {
             <strong>Shipping:</strong> {deliveryClaims.shipping}
           </li>
         </ul>
-        <h2 className="text-xl font-bold text-primary">Same-day & occasion timing</h2>
+        <h2 className="text-xl font-bold text-primary">Occasion timing</h2>
         <p>
           {applyInlineLinks(
-            "Same-day gift options appear only where coverage and the local cut-off support them. Each delivery location page shows timezone-aware timing. For birthdays, anniversaries, and holiday peaks, order a little early.",
+            "Each delivery location page shows timezone-aware timing. For birthdays, anniversaries, and holiday peaks, order a little early so the gift arrives when you need it.",
             inlineLinks,
             { usedHrefs, currentPath: "/shipping", max: 4 }
           )}
@@ -80,6 +81,7 @@ export default function ShippingPage() {
           </Link>
         </p>
         <p className="pt-4">Need help? Contact us or read our FAQ.</p>
+        <BackToHome className="pt-2" />
       </div>
     </div>
   );

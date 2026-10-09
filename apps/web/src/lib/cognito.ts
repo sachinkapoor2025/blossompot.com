@@ -6,6 +6,7 @@ import {
   AuthenticationDetails,
   CognitoUserAttribute,
 } from "amazon-cognito-identity-js";
+import { isAuthTokenExpired } from "./jwt-expiry";
 
 const poolId = process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID;
 const clientId = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID;
@@ -40,13 +41,82 @@ export function loadStoredAuth(): AuthUser | null {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as AuthUser;
-    return {
+    const user: AuthUser = {
       ...parsed,
       isEmailMarketer: Boolean(parsed.isEmailMarketer ?? parsed.isSuperAdmin),
     };
+    if (!user.token || isAuthTokenExpired(user.token)) {
+      storeAuth(null);
+      return null;
+    }
+    return user;
   } catch {
     return null;
   }
+}
+
+function authUserFromSession(email: string, session: { getIdToken: () => { getJwtToken: () => string; decodePayload: () => Record<string, unknown> } }): AuthUser {
+  const token = session.getIdToken().getJwtToken();
+  const payload = session.getIdToken().decodePayload();
+  const groups: string[] = (payload["cognito:groups"] as string[] | undefined) ?? [];
+  const isSuperAdmin = groups.includes("super-admin");
+  return {
+    email,
+    name: payload.name as string | undefined,
+    token,
+    isSuperAdmin,
+    isAdmin: groups.includes("admin") || isSuperAdmin,
+    isEmailMarketer: groups.includes("email") || isSuperAdmin,
+  };
+}
+
+/** Refresh Cognito ID tokens when the stored JWT is expired or about to expire. */
+export function restoreSession(): Promise<AuthUser | null> {
+  const stored = (() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw) as AuthUser;
+    } catch {
+      return null;
+    }
+  })();
+
+  if (!userPool) {
+    if (stored?.token?.startsWith("dev:")) return Promise.resolve(loadStoredAuth());
+    if (stored && isAuthTokenExpired(stored.token)) {
+      storeAuth(null);
+      return Promise.resolve(null);
+    }
+    return Promise.resolve(loadStoredAuth());
+  }
+
+  const current = userPool.getCurrentUser();
+  if (!current) {
+    if (stored && isAuthTokenExpired(stored.token)) storeAuth(null);
+    return Promise.resolve(loadStoredAuth());
+  }
+
+  return new Promise((resolve) => {
+    current.getSession((err: Error | null, session: { isValid: () => boolean; getIdToken: () => { getJwtToken: () => string; decodePayload: () => Record<string, unknown> } } | null) => {
+      if (err || !session?.isValid()) {
+        if (stored?.token && !isAuthTokenExpired(stored.token)) {
+          resolve({
+            ...stored,
+            isEmailMarketer: Boolean(stored.isEmailMarketer ?? stored.isSuperAdmin),
+          });
+          return;
+        }
+        storeAuth(null);
+        resolve(null);
+        return;
+      }
+      const email = stored?.email || current.getUsername();
+      const authUser = authUserFromSession(email, session);
+      storeAuth(authUser);
+      resolve(authUser);
+    });
+  });
 }
 
 export function storeAuth(user: AuthUser | null) {
@@ -88,18 +158,7 @@ export function login(email: string, password: string): Promise<AuthUser> {
 
     user.authenticateUser(details, {
       onSuccess: (session) => {
-        const token = session.getIdToken().getJwtToken();
-        const payload = session.getIdToken().decodePayload();
-        const groups: string[] = payload["cognito:groups"] ?? [];
-        const isSuperAdmin = groups.includes("super-admin");
-        const authUser: AuthUser = {
-          email,
-          name: payload.name as string | undefined,
-          token,
-          isSuperAdmin,
-          isAdmin: groups.includes("admin") || isSuperAdmin,
-          isEmailMarketer: groups.includes("email") || isSuperAdmin,
-        };
+        const authUser = authUserFromSession(email, session);
         storeAuth(authUser);
         resolve(authUser);
       },

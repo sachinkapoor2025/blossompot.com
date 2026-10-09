@@ -101,30 +101,38 @@ export async function ensureOrangeCountyProductInDb(slug: string): Promise<Recor
 
   if (existing.Item) {
     const inv = Number(existing.Item.inventory ?? 0);
-    if (inv < ORANGE_COUNTY_PRODUCT_INVENTORY || existing.Item.vendorSlug !== VENDOR_ORANGE_COUNTY) {
-      await docClient.send(
-        new UpdateCommand({
-          TableName: PRODUCTS_TABLE,
-          Key: key,
-          UpdateExpression:
-            "SET inventory = :inv, vendorSlug = :vs, updatedAt = :u, published = :pub",
-          ExpressionAttributeValues: {
-            ":inv": ORANGE_COUNTY_PRODUCT_INVENTORY,
-            ":vs": VENDOR_ORANGE_COUNTY,
-            ":u": ts,
-            ":pub": true,
-          },
-        })
-      );
-      return {
-        ...existing.Item,
-        inventory: ORANGE_COUNTY_PRODUCT_INVENTORY,
-        vendorSlug: VENDOR_ORANGE_COUNTY,
-        published: true,
-        updatedAt: ts,
-      };
-    }
-    return existing.Item as Record<string, unknown>;
+    const images = bundled.images ?? [];
+    await docClient.send(
+      new UpdateCommand({
+        TableName: PRODUCTS_TABLE,
+        Key: key,
+        UpdateExpression:
+          "SET inventory = :inv, vendorSlug = :vs, updatedAt = :u, published = :pub, images = :images, description = :description, seoTitle = :seoTitle, seoDescription = :seoDescription, tags = :tags",
+        ExpressionAttributeValues: {
+          ":inv": Math.max(inv, ORANGE_COUNTY_PRODUCT_INVENTORY),
+          ":vs": VENDOR_ORANGE_COUNTY,
+          ":u": ts,
+          ":pub": true,
+          ":images": images,
+          ":description": bundled.description,
+          ":seoTitle": bundled.seoTitle,
+          ":seoDescription": bundled.seoDescription,
+          ":tags": bundled.tags ?? ["rakhi-hamper", "gift-hamper", "raksha-bandhan"],
+        },
+      })
+    );
+    return {
+      ...existing.Item,
+      inventory: Math.max(inv, ORANGE_COUNTY_PRODUCT_INVENTORY),
+      vendorSlug: VENDOR_ORANGE_COUNTY,
+      published: true,
+      updatedAt: ts,
+      images,
+      description: bundled.description,
+      seoTitle: bundled.seoTitle,
+      seoDescription: bundled.seoDescription,
+      tags: bundled.tags ?? ["rakhi-hamper", "gift-hamper", "raksha-bandhan"],
+    };
   }
 
   const categorySlug = bundled.categorySlug || ORANGE_COUNTY_CATEGORY_SLUG;

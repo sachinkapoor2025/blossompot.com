@@ -17,6 +17,13 @@ export function isRakhiRelatedText(...parts: Array<string | null | undefined>): 
   );
 }
 
+const ORANGE_COUNTY_VENDOR = "orange-county";
+const ORANGE_COUNTY_CATEGORY = "rakhi-hampers";
+
+export function isOrangeCountyCatalogProduct(product: { vendorSlug?: string | null }): boolean {
+  return (product.vendorSlug ?? "").trim() === ORANGE_COUNTY_VENDOR;
+}
+
 export function isRakhiRelatedProduct(product: {
   name?: string;
   slug?: string;
@@ -25,7 +32,11 @@ export function isRakhiRelatedProduct(product: {
   tags?: string[];
   additionalCategorySlugs?: string[];
   seoTitle?: string;
+  vendorSlug?: string | null;
 }): boolean {
+  if (isOrangeCountyCatalogProduct(product)) return false;
+  // Public product responses omit vendorSlug. rakhi-hampers is the Orange County catalog.
+  if ((product.categorySlug ?? "").trim() === ORANGE_COUNTY_CATEGORY) return false;
   return isRakhiRelatedText(
     product.name,
     product.slug,
@@ -39,4 +50,19 @@ export function isRakhiRelatedProduct(product: {
 
 export function isRakhiRelatedCategorySlug(slug: string | null | undefined): boolean {
   return isRakhiRelatedText(slug);
+}
+
+/** Rakhi category pages stay hidden, except the Orange County hamper catalog. */
+export function storefrontSkipsRakhiCategory(category: string | null | undefined): boolean {
+  if ((category ?? "").trim() === ORANGE_COUNTY_CATEGORY) return false;
+  return isRakhiRelatedCategorySlug(category);
+}
+
+/** Products whose category is outside the homepage sections still need a place on the shop page. */
+export function productsNotShownInSections<T extends { slug: string }>(
+  products: readonly T[],
+  shown: readonly T[]
+): T[] {
+  const slugs = new Set(shown.map((product) => product.slug));
+  return products.filter((product) => !slugs.has(product.slug));
 }

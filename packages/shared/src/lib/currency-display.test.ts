@@ -4,6 +4,7 @@ import {
   checkoutCurrencyForDisplay,
   convertCurrency,
   currencyForCountryCode,
+  displayCurrenciesForCountry,
 } from "./currency-display";
 
 describe("currencyForCountryCode", () => {
@@ -14,6 +15,19 @@ describe("currencyForCountryCode", () => {
     assert.equal(currencyForCountryCode("AU"), "AUD");
     assert.equal(currencyForCountryCode("AE"), "AED");
     assert.equal(currencyForCountryCode("IN"), "INR");
+    assert.equal(currencyForCountryCode("RS"), "RSD");
+  });
+});
+
+describe("displayCurrenciesForCountry", () => {
+  it("offers the delivery-country currency plus INR", () => {
+    assert.deepEqual(displayCurrenciesForCountry("US"), ["USD", "INR"]);
+    assert.deepEqual(displayCurrenciesForCountry("GB"), ["GBP", "INR"]);
+    assert.deepEqual(displayCurrenciesForCountry("RS"), ["RSD", "INR"]);
+    assert.deepEqual(displayCurrenciesForCountry("AE"), ["AED", "INR"]);
+    assert.deepEqual(displayCurrenciesForCountry("IN"), ["INR"]);
+    assert.equal(displayCurrenciesForCountry("RS").includes("EUR"), false);
+    assert.equal(displayCurrenciesForCountry("US").length, 2);
   });
 });
 

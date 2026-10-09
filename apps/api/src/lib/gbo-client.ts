@@ -47,6 +47,15 @@ function envSandbox(): boolean {
   return v === "1" || v === "true" || v === "yes";
 }
 
+/** Explicit config wins. A missing flag follows `GBO_SANDBOX`, which is off unless set. */
+export function gboSandboxEnabled(config?: Pick<GboClientConfig, "sandbox">): boolean {
+  return config?.sandbox ?? envSandbox();
+}
+
+export function gboGiftsCacheKey(countryQuery: string, sandbox: boolean): string {
+  return `${countryQuery}|${sandbox ? "sandbox" : "live"}`;
+}
+
 function envAuthScheme(): string {
   return (process.env.GBO_AUTH_SCHEME ?? "bearer").trim().toLowerCase();
 }
@@ -91,7 +100,7 @@ async function gboFetch(
     );
   }
   const base = opts?.config?.baseUrl?.replace(/\/$/, "") || envBaseUrl();
-  const sandbox = opts?.sandbox ?? opts?.config?.sandbox ?? envSandbox();
+  const sandbox = opts?.sandbox ?? gboSandboxEnabled(opts?.config);
   const scheme = opts?.config?.authScheme || envAuthScheme();
   const prefix = sandboxPrefix(sandbox);
   const url = `${base}${prefix}${pathWithQuery}`;
@@ -183,6 +192,10 @@ export async function gboListCategories(
 const GIFTS_CACHE_MS = 120_000;
 const giftsCache = new Map<string, { at: number; gifts: GboGift[] }>();
 
+export function clearGboGiftsCache(): void {
+  giftsCache.clear();
+}
+
 export async function gboListGifts(
   input: { country: string; priceMin?: number; priceMax?: number; category?: string },
   config?: GboClientConfig
@@ -192,11 +205,12 @@ export async function gboListGifts(
   if (input.priceMin != null) q.set("price_min", String(input.priceMin));
   if (input.priceMax != null) q.set("price_max", String(input.priceMax));
   if (input.category) q.set("category", input.category);
-  const cacheKey = `${iso}|${q.toString()}|${config?.sandbox ? "s" : "p"}`;
+  const sandbox = gboSandboxEnabled(config);
+  const cacheKey = gboGiftsCacheKey(`${iso}|${q.toString()}`, sandbox);
   const hit = giftsCache.get(cacheKey);
   if (hit && Date.now() - hit.at < GIFTS_CACHE_MS) return hit.gifts;
 
-  const data = await gboFetch(`/gifts/get?${q.toString()}`, { sandbox: config?.sandbox, config });
+  const data = await gboFetch(`/gifts/get?${q.toString()}`, { sandbox, config });
   const gifts = asArray(data)
     .map((row) => gboGiftSchema.safeParse(row))
     .filter((r) => r.success)

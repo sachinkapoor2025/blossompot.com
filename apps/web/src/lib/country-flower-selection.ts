@@ -1,18 +1,21 @@
 import {
   isProductStorefrontVisible,
   productVisibleForDeliveryCountry,
+  SHOPPING_COUNTRY_ISO,
   type Product,
 } from "@blossompot/shared";
-import { shuffleForCity } from "@/lib/city-products";
-import { flowerDeliveryCountryIso, type CountryFlowerDeliverySlug } from "@/lib/content/country-flower-delivery";
+import { shuffleForCity } from "./city-products";
+import type { CountryFlowerDeliverySlug } from "./content/country-flower-delivery";
 
 const FLOWER_CATEGORY_SLUGS = new Set(["flowers", "flower-bouquets"]);
 
-/** Same selection the guide used before the product section streamed on its own. */
+/**
+ * Guide rails shop the United States. The slug still chooses the card count
+ * and shuffle seed. Guide titles keep their own country.
+ */
 export function pickCountryProducts(products: Product[], slug: CountryFlowerDeliverySlug): Product[] {
-  const countryIso = flowerDeliveryCountryIso(slug);
   const visible = products.filter(
-    (p) => isProductStorefrontVisible(p) && productVisibleForDeliveryCountry(p, countryIso)
+    (p) => isProductStorefrontVisible(p) && productVisibleForDeliveryCountry(p, SHOPPING_COUNTRY_ISO)
   );
   const flowers = visible.filter((p) => FLOWER_CATEGORY_SLUGS.has(p.categorySlug));
   if (slug === "usa") {

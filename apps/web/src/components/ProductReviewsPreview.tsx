@@ -1,5 +1,9 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { testimonials } from "@/lib/site";
+import type { ProductRatingAggregate, ProductReview } from "@blossompot/shared";
+import { api } from "@/lib/api";
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -19,31 +23,76 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-/** Site-wide customer reviews preview for product pages (social proof). */
-export function ProductReviewsPreview() {
-  const avg = testimonials.reduce((s, t) => s + t.rating, 0) / testimonials.length;
-  const preview = testimonials.slice(0, 2);
+/** Product reviews from the catalog API only — never reused marketing quotes. */
+export function ProductReviewsPreview({
+  productSlug,
+  aggregate,
+}: {
+  productSlug: string;
+  aggregate?: ProductRatingAggregate | null;
+}) {
+  const [reviews, setReviews] = useState<ProductReview[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void api<{ reviews?: ProductReview[] }>(`/products/${encodeURIComponent(productSlug)}/reviews`, {
+      revalidate: false,
+    })
+      .then((data) => {
+        if (!cancelled) setReviews(data.reviews ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) setReviews([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [productSlug]);
+
+  if (reviews === null) {
+    return <p className="text-sm text-slate-500">Loading reviews…</p>;
+  }
+
+  if (reviews.length === 0) {
+    return (
+      <div className="space-y-3">
+        <p className="text-sm text-slate-600">No customer reviews for this product yet.</p>
+        <p className="text-xs text-slate-500">
+          After delivery you can{" "}
+          <Link href="/reviews" className="text-nav font-semibold hover:underline">
+            share a review
+          </Link>
+          . We do not show placeholder quotes on product pages.
+        </p>
+      </div>
+    );
+  }
+
+  const avg =
+    aggregate?.ratingValue ??
+    reviews.reduce((sum, review) => sum + Number(review.rating || 0), 0) / reviews.length;
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         <StarRating rating={Math.round(avg)} />
         <span className="text-sm font-semibold text-slate-800">{avg.toFixed(1)} / 5</span>
-        <span className="text-xs text-slate-500">from {testimonials.length} customer stories</span>
+        <span className="text-xs text-slate-500">
+          from {aggregate?.reviewCount ?? reviews.length} verified reviews
+        </span>
       </div>
       <ul className="space-y-3">
-        {preview.map((t) => (
-          <li key={t.name} className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-3">
+        {reviews.slice(0, 8).map((review) => (
+          <li key={review.reviewId} className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-3">
             <div className="flex items-center gap-2 mb-1">
-              <span className="font-semibold text-sm text-slate-800">{t.name}</span>
-              <StarRating rating={t.rating} />
+              <span className="font-semibold text-sm text-slate-800">{review.authorName}</span>
+              <StarRating rating={review.rating} />
             </div>
-            <p className="text-sm text-slate-600 leading-relaxed line-clamp-3">{t.text}</p>
+            <p className="text-sm text-slate-600 leading-relaxed">{review.body}</p>
           </li>
         ))}
       </ul>
       <p className="text-xs text-slate-500">
-        Real experiences from BlossomPot customers.{" "}
         <Link href="/reviews" className="text-nav font-semibold hover:underline">
           Write a review after delivery →
         </Link>

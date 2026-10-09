@@ -32,14 +32,15 @@ export function middleware(request: NextRequest) {
 
   const locationShop = parseLocationShopPath(request.nextUrl.pathname);
   if (locationShop) {
+    const countryIso = locationShop.countryIso;
     const url = request.nextUrl.clone();
     url.pathname = locationShopRewritePath(locationShop);
-    url.searchParams.set("country", locationShop.countryIso);
+    url.searchParams.set("country", countryIso);
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set(LOCATION_SEO_HEADER, request.nextUrl.pathname.replace(/\/+$/, "") || "/");
-    requestHeaders.set(STOREFRONT_COUNTRY_HEADER, locationShop.countryIso);
+    requestHeaders.set(STOREFRONT_COUNTRY_HEADER, countryIso);
     const response = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
-    applyDeliveryCountryCookie(response, request, locationShop.countryIso);
+    applyDeliveryCountryCookie(response, request, countryIso);
     stampBotHeaders(response, request);
     return response;
   }
@@ -88,6 +89,6 @@ function applyDeliveryCountryCookie(response: NextResponse, request: NextRequest
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml|SVG|PNG|JPG|JPEG|GIF|WEBP|ICO)$).*)",
   ],
 };

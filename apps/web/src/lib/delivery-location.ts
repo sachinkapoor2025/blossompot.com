@@ -1,5 +1,5 @@
 import {
-  enabledDeliveryCountries,
+  SHOPPING_COUNTRY_ISO,
   formatPostalDisplay,
   getDeliveryCountry,
   isValidPostal,
@@ -15,6 +15,26 @@ export type StoredDeliveryLocation = {
   postalDisplay: string;
 };
 
+/** Stored shopper location. Unknown codes fall back to the USA. A known country keeps a valid postal code. */
+export function toShoppingDeliveryLocation(location: StoredDeliveryLocation): StoredDeliveryLocation {
+  const iso = location.countryCode.trim().toUpperCase();
+  const country = getDeliveryCountry(iso);
+  if (!country) {
+    return {
+      countryCode: SHOPPING_COUNTRY_ISO,
+      postalCode: "",
+      postalDisplay: SHOPPING_COUNTRY_ISO,
+    };
+  }
+  const postalCode = location.postalCode.trim();
+  const postalOk = !postalCode || isValidPostal(iso, postalCode);
+  return {
+    countryCode: iso,
+    postalCode: postalOk ? postalCode : "",
+    postalDisplay: postalOk && postalCode ? formatPostalDisplay(iso, postalCode) : iso,
+  };
+}
+
 export function parseDeliveryLocationToken(raw: string | null | undefined): StoredDeliveryLocation | null {
   if (!raw) return null;
   const [countryCode, ...rest] = raw.split(":");
@@ -22,14 +42,11 @@ export function parseDeliveryLocationToken(raw: string | null | undefined): Stor
   if (!countryCode) return null;
   const iso = countryCode.trim().toUpperCase();
   if (!/^[A-Z]{2}$/.test(iso)) return null;
-  const country = getDeliveryCountry(iso);
-  if (country && !country.enabled) return null;
-  if (postalCode && !isValidPostal(iso, postalCode)) return null;
-  return {
+  return toShoppingDeliveryLocation({
     countryCode: iso,
     postalCode,
-    postalDisplay: postalCode ? formatPostalDisplay(iso, postalCode) : iso,
-  };
+    postalDisplay: iso,
+  });
 }
 
 export function deliveryLocationToken(location: StoredDeliveryLocation): string {
@@ -78,13 +95,15 @@ export function deliveryCookieUpdate(input: {
   flight: boolean;
 }): DeliveryCookieUpdate | null {
   if (!input.resolvedCountry || input.flight) return null;
+  const requested = input.resolvedCountry.trim().toUpperCase();
+  const country = getDeliveryCountry(requested)?.countryCode ?? SHOPPING_COUNTRY_ISO;
   const existing = parseDeliveryLocationToken(input.requestCookie);
-  const postalCode = existing?.countryCode === input.resolvedCountry ? existing.postalCode : "";
+  const postalCode = existing?.countryCode === country ? existing.postalCode : "";
   return {
     value: deliveryLocationToken({
-      countryCode: input.resolvedCountry,
+      countryCode: country,
       postalCode,
-      postalDisplay: postalCode || input.resolvedCountry,
+      postalDisplay: postalCode || country,
     }),
     maxAge: DELIVERY_COOKIE_MAX_AGE_SECONDS,
   };
@@ -102,19 +121,39 @@ function writeCookie(name: string, value: string, days = 365) {
   document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
 }
 
-export function readDeliveryLocation(): StoredDeliveryLocation | null {
-  if (typeof window === "undefined") return null;
-  const fromCookie = parseDeliveryLocationToken(readCookie(DELIVERY_LOCATION_COOKIE));
-  if (fromCookie) return fromCookie;
+function storedToken(raw: string | null): string | null {
+  if (!raw) return null;
   try {
-    return parseDeliveryLocationToken(window.localStorage.getItem(DELIVERY_LOCATION_COOKIE));
+    return decodeURIComponent(raw);
   } catch {
-    return null;
+    return raw;
   }
 }
 
+export function readDeliveryLocation(): StoredDeliveryLocation | null {
+  if (typeof window === "undefined") return null;
+  const cookieRaw = readCookie(DELIVERY_LOCATION_COOKIE);
+  let localRaw: string | null = null;
+  try {
+    localRaw = window.localStorage.getItem(DELIVERY_LOCATION_COOKIE);
+  } catch {
+    localRaw = null;
+  }
+  const parsed =
+    parseDeliveryLocationToken(cookieRaw) ?? parseDeliveryLocationToken(localRaw);
+  if (!parsed) return null;
+  const expected = deliveryLocationToken(parsed);
+  const cookieToken = storedToken(cookieRaw);
+  const localToken = storedToken(localRaw);
+  if (cookieToken !== expected || localToken !== expected) {
+    writeDeliveryLocation(parsed);
+  }
+  return parsed;
+}
+
 export function writeDeliveryLocation(location: StoredDeliveryLocation) {
-  const token = deliveryLocationToken(location);
+  const normalized = toShoppingDeliveryLocation(location);
+  const token = deliveryLocationToken(normalized);
   writeCookie(DELIVERY_LOCATION_COOKIE, token);
   try {
     window.localStorage.setItem(DELIVERY_LOCATION_COOKIE, token);
@@ -159,7 +198,8 @@ export function locationQueryString(location: StoredDeliveryLocation | null): st
 }
 
 export function deliveryCountryOptions() {
-  return enabledDeliveryCountries();
+  const unitedStates = getDeliveryCountry(SHOPPING_COUNTRY_ISO);
+  return unitedStates ? [unitedStates] : [];
 }
 
 export function postalLabelFor(countryCode: string): string {

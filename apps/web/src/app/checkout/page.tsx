@@ -14,6 +14,7 @@ import { getAttributionSnapshotForCheckout } from "@/lib/attribution-store";
 import Script from "next/script";
 import { PaymentMethodPicker, type PaymentMethod } from "@/components/PaymentMethodPicker";
 import { ShippingAddressForm } from "@/components/ShippingAddressForm";
+import { BillingAddressSection } from "@/components/BillingAddressSection";
 import { SecureCheckoutBadge } from "@/components/SecureCheckoutBadge";
 import { CheckoutLegalNotice } from "@/components/CheckoutLegalNotice";
 import { TrustBadges } from "@/components/TrustBadges";
@@ -31,6 +32,7 @@ import {
   loadSavedAddresses,
   saveShippingAddress,
 } from "@/lib/shipping-address";
+import { chooseCheckoutAddressPrefill } from "@/lib/checkout-address";
 import {
   buildCheckoutShipmentsFromUnits,
   expandCartToDeliveryUnits,
@@ -42,6 +44,7 @@ import { fetchAccount, createAccountAddress } from "@/lib/account";
 import {
   ORDER_STATUS,
   isValidShippingPhone,
+  isValidPublicEmail,
   DEFAULT_SENDER_MESSAGE,
   quoteFreeShippingThreshold,
   shippingVendorKey,
@@ -51,11 +54,13 @@ import {
   checkoutCurrencyForDisplay,
   isValidPostal,
   getDeliveryCountry,
+  SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE,
   type Order,
   type RateQuote,
   type ShippingAddress,
 } from "@blossompot/shared";
 import { resolveImageUrl } from "@/lib/images";
+import { isListedShoppingCountry, useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
 
 declare global {
   interface Window {
@@ -80,9 +85,11 @@ function CheckoutPageInner() {
   const retryOrderId = searchParams.get("orderId");
   const { cart, loading: cartLoading, refresh } = useCart();
   const delivery = useDeliveryLocation();
+  const { countries, loaded: countriesLoaded } = useGboDeliveryCountries();
+  const enabledCountryCodes = countries.map((country) => country.countryCode);
   const locationBlocked = (cart?.items ?? []).some((item) => item.unavailableForLocation);
   const { user, token } = useAuth();
-  const { format, displayCurrency, convert, usdInrRate } = useCurrency();
+  const { format, formatDisplay, displayCurrency, convert, usdInrRate } = useCurrency();
   const payCurrency = checkoutCurrencyForDisplay(displayCurrency);
   const sessionId = useSessionId();
   const captureLeadDebounced = useDebouncedLeadCapture(sessionId);
@@ -255,6 +262,12 @@ function CheckoutPageInner() {
   useEffect(() => {
     const stored = loadWelcomeCoupon();
     if (stored?.code) setSavedCouponCode(stored.code);
+    try {
+      const pending = sessionStorage.getItem("blossompot_checkout_coupon");
+      if (pending) setSavedCouponCode(pending);
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   useEffect(() => {
@@ -302,99 +315,74 @@ function CheckoutPageInner() {
   }, [cart, convert]);
 
   useEffect(() => {
-    if (addressPrefilled.current || !sessionId) return;
-
+    if (addressPrefilled.current || !sessionId || !countriesLoaded) return;
+    addressPrefilled.current = true;
     const prefill = async () => {
+      let accountAddress: ShippingAddress | null = null;
+      let previousOrder: ShippingAddress | null = null;
       if (token) {
         try {
           const account = await fetchAccount(token, sessionId);
           if (account.profile.preferredPaymentMethod) {
             setPaymentMethod(account.profile.preferredPaymentMethod);
           }
-          const defaultAddress =
-            account.addresses.find((a) => a.isDefault) ?? account.addresses[0];
-          if (defaultAddress) {
-            setAddress({
-              name: defaultAddress.name,
-              line1: defaultAddress.line1,
-              line2: defaultAddress.line2,
-              city: defaultAddress.city,
-              state: defaultAddress.state,
-              postalCode: defaultAddress.postalCode,
-              country: defaultAddress.country,
-              phone: defaultAddress.phone ?? "",
-              email: defaultAddress.email || user?.email || "",
-              senderName: defaultAddress.senderName ?? "",
-              senderMessage: defaultAddress.senderMessage?.trim() || DEFAULT_SENDER_MESSAGE,
-            });
-            addressPrefilled.current = true;
-            return;
-          }
+          accountAddress = account.addresses.find((a) => a.isDefault) ?? account.addresses[0] ?? null;
         } catch {
-          // fall through to local storage
+          accountAddress = null;
         }
-      }
-
-      const saved = loadSavedAddresses();
-      if (saved.length > 0) {
-        const latest = saved[0];
-        setAddress({
-          name: latest.name,
-          line1: latest.line1,
-          line2: latest.line2,
-          city: latest.city,
-          state: latest.state,
-          postalCode: latest.postalCode,
-          country: latest.country,
-          phone: latest.phone ?? "",
-          email: latest.email || user?.email || "",
-          senderName: latest.senderName ?? "",
-          senderMessage: latest.senderMessage?.trim() || DEFAULT_SENDER_MESSAGE,
-        });
-        addressPrefilled.current = true;
-        return;
-      }
-
-      if (token) {
         try {
           const data = await api<{ orders: Order[] }>("/orders", { sessionId, token });
-          const latest = data.orders[0];
-          if (latest?.shippingAddress) {
-            const sa = latest.shippingAddress;
-            setAddress({
-              ...sa,
-              phone: sa.phone ?? "",
-              senderName: sa.senderName ?? "",
-              senderMessage: sa.senderMessage?.trim() || DEFAULT_SENDER_MESSAGE,
-            });
-            addressPrefilled.current = true;
-            return;
-          }
+          previousOrder = data.orders[0]?.shippingAddress ?? null;
         } catch {
-          // ignore
+          previousOrder = null;
         }
       }
 
-      if (user?.email) {
-        setAddress((a) => ({ ...a, email: user.email }));
+      const choice = chooseCheckoutAddressPrefill({
+        accountAddress,
+        saved: loadSavedAddresses(),
+        previousOrder,
+        enabledCountryCodes,
+      });
+      if (choice.address && isListedShoppingCountry(choice.address.country, countries)) {
+        const source = choice.address;
+        setAddress({
+          name: source.name ?? "",
+          line1: source.line1 ?? "",
+          line2: source.line2,
+          city: source.city ?? "",
+          state: source.state ?? "",
+          postalCode: source.postalCode ?? "",
+          country: source.country ?? "US",
+          phone: source.phone ?? "",
+          email: source.email || user?.email || "",
+          senderName: source.senderName ?? "",
+          senderMessage: source.senderMessage?.trim() || DEFAULT_SENDER_MESSAGE,
+        });
+        setError("");
+      } else {
+        if (choice.notice) setError(choice.notice);
+        if (user?.email) setAddress((a) => ({ ...a, email: user.email }));
       }
-      addressPrefilled.current = true;
     };
 
     void prefill();
-  }, [user, token, sessionId]);
+  }, [user, token, sessionId, countriesLoaded, countries, enabledCountryCodes]);
 
   useEffect(() => {
-    if (!delivery.location?.countryCode) return;
+    if (!delivery.location?.countryCode || !countriesLoaded) return;
+    const iso = delivery.location.countryCode.trim().toUpperCase();
+    if (!isListedShoppingCountry(iso, countries)) return;
+    const postal = delivery.location.postalCode.trim();
     setAddress((current) => {
       if (current.line1) return current;
       return {
         ...current,
-        country: delivery.location!.countryCode,
-        postalCode: current.postalCode || delivery.location!.postalDisplay,
+        country: iso,
+        postalCode: current.postalCode || (isValidPostal(iso, postal) ? postal : ""),
       };
     });
-  }, [delivery.location]);
+  }, [delivery.location, countries, countriesLoaded]);
 
   const captureField = (field: string, value: string) => {
     const a = addressRef.current;
@@ -629,6 +617,9 @@ function CheckoutPageInner() {
           "Please enter a valid mobile number (select country code, then enter your number)."
         );
       }
+      if (!isValidPublicEmail(address.email)) {
+        throw new Error("Enter a valid email with a domain and TLD (for example name@gmail.com).");
+      }
 
       const payload: ShippingAddress = {
         ...address,
@@ -638,12 +629,15 @@ function CheckoutPageInner() {
         senderMessage,
         ...(address.line2?.trim() ? { line2: address.line2.trim() } : { line2: undefined }),
       };
+      if (!isListedShoppingCountry(payload.country, countries)) {
+        throw new Error(SHOPPING_COUNTRY_UNAVAILABLE_MESSAGE);
+      }
       if (!isValidPostal(payload.country, payload.postalCode)) {
         const label = getDeliveryCountry(payload.country)?.postalLabel ?? "postal code";
         throw new Error(`Enter a valid ${label} for the selected country.`);
       }
 
-      const unitsError = validateDeliveryUnits(deliveryUnits, payload);
+      const unitsError = validateDeliveryUnits(deliveryUnits, payload, enabledCountryCodes);
       if (unitsError) throw new Error(unitsError);
 
       const shipments = buildCheckoutShipmentsFromUnits(deliveryUnits, payload);
@@ -723,6 +717,8 @@ function CheckoutPageInner() {
     } catch (err) {
       const message = err instanceof Error ? err.message : "Checkout failed";
       setError(message);
+      setRazorpayPayment(null);
+      setStripeCheckout(null);
       // After cancel/fail, reload cart so items stay visible for another attempt.
       void refresh();
     } finally {
@@ -858,6 +854,7 @@ function CheckoutPageInner() {
               saveForLater={saveForLater}
               onSaveForLaterChange={setSaveForLater}
             />
+            <BillingAddressSection recipient={address} />
 
             {showSplitDelivery && (
               <section className="rounded-lg border border-slate-200 bg-white p-5 sm:p-6 space-y-4">
@@ -984,12 +981,12 @@ function CheckoutPageInner() {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between gap-4">
                 <span className="text-slate-700">Items ({itemCount})</span>
-                <span className="font-medium">{format(displaySubtotal, displayCurrency)}</span>
+                <span className="font-medium">{formatDisplay(displaySubtotal)}</span>
               </div>
               {discount > 0 && (
                 <div className="flex justify-between gap-4 text-green-700">
                   <span>Coupon ({appliedCouponCode})</span>
-                  <span>−{format(discount, displayCurrency)}</span>
+                  <span>−{formatDisplay(discount)}</span>
                 </div>
               )}
               <div className="flex justify-between gap-4">
@@ -1009,7 +1006,7 @@ function CheckoutPageInner() {
                   }
                 >
                   {shippingCharge > 0
-                    ? format(shippingCharge, displayCurrency)
+                    ? formatDisplay(shippingCharge)
                     : "FREE"}
                 </span>
               </div>
@@ -1021,7 +1018,7 @@ function CheckoutPageInner() {
                       each — not on the order total. International partner gifts are a flat $19.
                       Other sellers: under $8 is $6.99, $8–$13.99 is $3.99, and above $13.99 is free.
                       Current shipping fee:{" "}
-                      {format(shippingCharge, displayCurrency)}.
+                      {formatDisplay(shippingCharge)}.
                     </p>
                   ) : showMultiGroupShippingNotice ? (
                     <p className="text-xs text-amber-900 bg-amber-50 border border-amber-100 rounded-md px-3 py-2">
@@ -1031,7 +1028,7 @@ function CheckoutPageInner() {
                         <>
                           {" "}
                           {chargedShipmentCount} of {multiShippingQuote.perShipment.length} deliveries
-                          include shipping ({format(shippingCharge, displayCurrency)} total).
+                          include shipping ({formatDisplay(shippingCharge)} total).
                         </>
                       ) : (
                         <> All deliveries qualify for free shipping.</>
@@ -1040,7 +1037,7 @@ function CheckoutPageInner() {
                   ) : (
                     <FreeShippingNotice
                       quote={freeShippingQuote}
-                      formatMoney={format}
+                      formatMoney={formatDisplay}
                       currency={displayCurrency}
                     />
                   )}
@@ -1049,12 +1046,12 @@ function CheckoutPageInner() {
               <div className="flex justify-between gap-4 pt-2 border-t border-slate-200">
                 <span className="font-bold text-slate-900">Total</span>
                 <span className="font-bold text-nav text-base">
-                  {format(orderTotal, displayCurrency)}
+                  {formatDisplay(orderTotal)}
                 </span>
               </div>
             </div>
 
-            {!isRetry && (
+            {(
               <CouponInput
                 email={address.email}
                 phone={address.phone}
@@ -1064,14 +1061,24 @@ function CheckoutPageInner() {
                 usdInrRate={usdInrRate}
                 formatMoney={format}
                 hasCouponExcludedItems={hasCouponExcludedLines}
-                initialCode={savedCouponCode}
+                initialCode={appliedCouponCode || savedCouponCode}
                 onApplied={(amount, code) => {
                   setDiscount(amount);
                   setAppliedCouponCode(code);
+                  try {
+                    sessionStorage.setItem("blossompot_checkout_coupon", code);
+                  } catch {
+                    /* ignore */
+                  }
                 }}
                 onCleared={() => {
                   setDiscount(0);
                   setAppliedCouponCode("");
+                  try {
+                    sessionStorage.removeItem("blossompot_checkout_coupon");
+                  } catch {
+                    /* ignore */
+                  }
                 }}
               />
             )}
@@ -1161,7 +1168,7 @@ function CheckoutPageInner() {
                       : paymentMethod === "razorpay" && !razorpayReady
                         ? "Loading payment…"
                         : paymentMethod === "razorpay"
-                          ? "Pay with Razorpay"
+                          ? "Pay with UPI / Razorpay"
                           : "Continue to Stripe payment"}
                   </button>
                 )}

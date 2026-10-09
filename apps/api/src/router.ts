@@ -2,6 +2,7 @@ import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda
 import { ok, notFound, corsPreflight, json } from "./lib/response";
 import { allowRequest, clientIp, limitForPath } from "./lib/rate-limit";
 import * as products from "./handlers/products";
+import * as fnpImport from "./handlers/fnp-import";
 import * as categories from "./handlers/categories";
 import * as cart from "./handlers/cart";
 import * as orders from "./handlers/orders";
@@ -32,6 +33,8 @@ import * as paymentLedger from "./handlers/payment-ledger";
 import * as paymentReconciliation from "./handlers/payment-reconciliation";
 import * as vendorManagement from "./handlers/vendor-management";
 import * as marketplaceVendors from "./handlers/marketplace-vendors";
+import * as catalogVendors from "./handlers/catalog-vendors";
+import * as catalogCountries from "./handlers/catalog-countries";
 import * as serviceability from "./handlers/serviceability";
 import * as reviews from "./handlers/reviews";
 import * as gifting from "./handlers/gifting";
@@ -80,6 +83,16 @@ const routes: Route[] = [
     params: ["slug"],
   },
   { method: "POST", pattern: /^\/products\/bulk$/, handler: products.bulkUploadProducts },
+  { method: "POST", pattern: /^\/admin\/imports\/fnp\/preview$/, handler: fnpImport.previewFnpImport },
+  { method: "POST", pattern: /^\/admin\/imports\/fnp\/commit$/, handler: fnpImport.commitFnpImport },
+  { method: "POST", pattern: /^\/admin\/imports\/fnp\/retry$/, handler: fnpImport.retryFnpImport },
+  { method: "GET", pattern: /^\/admin\/imports\/fnp$/, handler: fnpImport.listFnpImports },
+  {
+    method: "GET",
+    pattern: /^\/admin\/imports\/fnp\/([^/]+)$/,
+    handler: fnpImport.getFnpImport,
+    params: ["batchId"],
+  },
   { method: "GET", pattern: /^\/categories$/, handler: categories.listCategories },
   { method: "GET", pattern: /^\/homepage-catalog$/, handler: homepageCatalog.getHomepageCatalogCache },
   { method: "PUT", pattern: /^\/homepage-catalog$/, handler: homepageCatalog.putHomepageCatalogCache },
@@ -168,6 +181,43 @@ const routes: Route[] = [
     pattern: /^\/admin\/vendor-payouts\/([^/]+)$/,
     handler: vendorManagement.deleteVendorPayout,
     params: ["payoutId"],
+  },
+  // Catalog vendor registry (BlossomPot, Orange County, GBO, FNP). Not marketplace applicants.
+  { method: "GET", pattern: /^\/admin\/catalog-vendors$/, handler: catalogVendors.listCatalogVendorsAdmin },
+  { method: "POST", pattern: /^\/admin\/catalog-vendors$/, handler: catalogVendors.createCatalogVendorAdmin },
+  { method: "POST", pattern: /^\/admin\/catalog-vendors\/reorder$/, handler: catalogVendors.reorderCatalogVendorsAdmin },
+  { method: "GET", pattern: /^\/admin\/catalog-countries$/, handler: catalogCountries.listCatalogCountriesAdmin },
+  { method: "PUT", pattern: /^\/admin\/catalog-countries$/, handler: catalogCountries.updateCatalogCountriesAdmin },
+  { method: "GET", pattern: /^\/catalog-countries$/, handler: catalogCountries.listCatalogCountriesPublic },
+  {
+    method: "GET",
+    pattern: /^\/admin\/catalog-vendors\/([^/]+)\/?$/,
+    handler: catalogVendors.getCatalogVendorAdmin,
+    params: ["vendorSlug"],
+  },
+  {
+    method: "PUT",
+    pattern: /^\/admin\/catalog-vendors\/([^/]+)$/,
+    handler: catalogVendors.updateCatalogVendorAdmin,
+    params: ["vendorSlug"],
+  },
+  {
+    method: "POST",
+    pattern: /^\/admin\/catalog-vendors\/([^/]+)\/trash$/,
+    handler: catalogVendors.trashCatalogVendorAdmin,
+    params: ["vendorSlug"],
+  },
+  {
+    method: "POST",
+    pattern: /^\/admin\/catalog-vendors\/([^/]+)\/restore$/,
+    handler: catalogVendors.restoreCatalogVendorAdmin,
+    params: ["vendorSlug"],
+  },
+  {
+    method: "DELETE",
+    pattern: /^\/admin\/catalog-vendors\/([^/]+)$/,
+    handler: catalogVendors.deleteCatalogVendorAdmin,
+    params: ["vendorSlug"],
   },
   // Marketplace vendor partners (signup, portal, admin review)
   { method: "GET", pattern: /^\/marketplace\/vendor-agreement$/, handler: marketplaceVendors.getVendorAgreement },
@@ -441,6 +491,7 @@ const routes: Route[] = [
   { method: "POST", pattern: /^\/events$/, handler: events.recordEvent },
   { method: "GET", pattern: /^\/config\/payments$/, handler: config.getPaymentConfig },
   { method: "GET", pattern: /^\/config\/usd-inr-rate$/, handler: config.getUsdInrRate },
+  { method: "GET", pattern: /^\/config\/usd-rates$/, handler: config.getUsdRates },
   { method: "PUT", pattern: /^\/config\/payments$/, handler: config.updatePaymentConfig },
   { method: "GET", pattern: /^\/blog-images$/, handler: config.getBlogImages },
   { method: "PUT", pattern: /^\/admin\/blog-images$/, handler: config.updateBlogImages },

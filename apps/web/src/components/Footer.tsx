@@ -195,11 +195,6 @@ export function Footer() {
               <li><Link href="/remember" className="hover:text-primary hover:underline">Never Forget an Occasion</Link></li>
               <li><Link href="/forgot-occasion" className="hover:text-primary hover:underline">Forgot a Special Occasion?</Link></li>
               <li>
-                <ShopLocationLink href="/same-day-delivery" category="same-day-gifts" className="hover:text-primary hover:underline">
-                  Same-Day Delivery
-                </ShopLocationLink>
-              </li>
-              <li>
                 <ShopLocationLink href="/flowers" category="flowers" className="hover:text-primary hover:underline">
                   Send Flowers
                 </ShopLocationLink>

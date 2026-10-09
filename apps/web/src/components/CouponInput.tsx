@@ -11,6 +11,7 @@ import {
   convertCurrency,
   isTrialCouponKind,
   trialTargetPayable,
+  isValidPublicEmail,
   type DisplayCurrency,
 } from "@blossompot/shared";
 
@@ -59,7 +60,7 @@ export function CouponInput({
   const apply = async () => {
     const trimmed = code.trim().toUpperCase();
     if (!trimmed) return;
-    const hasEmail = Boolean(email.trim() && email.includes("@"));
+    const hasEmail = Boolean(email.trim() && isValidPublicEmail(email));
     const hasPhone = phone.replace(/\D/g, "").length >= 7;
     if (!hasEmail && !hasPhone) {
       setError("Enter your mobile number or email in the shipping form first");

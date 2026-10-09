@@ -48,6 +48,12 @@ const nextConfig: NextConfig = {
       { source: "/sitemap.rss", destination: "/sitemap.xml", statusCode: 301 },
       { source: "/logo.svg", destination: "/logo.png", statusCode: 301 },
       { source: "/logo.svg/", destination: "/logo.png", statusCode: 301 },
+      { source: "/same-day-delivery", destination: "/products", statusCode: 301 },
+      { source: "/same-day-delivery/", destination: "/products", statusCode: 301 },
+      { source: "/same-day-gifts", destination: "/products", statusCode: 301 },
+      { source: "/same-day-gifts/", destination: "/products", statusCode: 301 },
+      { source: "/collections/same-day-gifts", destination: "/products", statusCode: 301 },
+      { source: "/collections/same-day-gifts/", destination: "/products", statusCode: 301 },
     ];
   },
   async rewrites() {
@@ -73,6 +79,7 @@ const nextConfig: NextConfig = {
   },
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    NEXT_PUBLIC_APP_ENV: process.env.NEXT_PUBLIC_APP_ENV,
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
     NEXT_PUBLIC_RAZORPAY_KEY_ID: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
     NEXT_PUBLIC_COGNITO_USER_POOL_ID: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID,

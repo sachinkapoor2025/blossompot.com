@@ -43,7 +43,7 @@ export default function PrivacyPage() {
           </a>
           .
         </p>
-        <p className="text-slate-500 text-sm">Last updated: July 2026</p>
+        <p className="text-slate-500 text-sm">Last updated: October 2026</p>
         <p>
           <Link href="/" className="text-nav font-semibold hover:underline">
             ← Back to home

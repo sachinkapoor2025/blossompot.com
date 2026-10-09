@@ -10,11 +10,17 @@ import { WhyTrustUsSection } from "@/components/WhyTrustUsSection";
 import { HomeFlowerGuideCta } from "@/components/flower-guide/HomeFlowerGuideCta";
 import { HomeCategoryCarousel } from "@/components/HomeCategoryCarousel";
 import { HomeSeoSection } from "@/components/HomeSeoSection";
+import { FaqAccordion } from "@/components/FaqAccordion";
 import { buildHomeCategoryTiles } from "@/lib/home-category-carousel";
 import { JsonLd } from "@/components/JsonLd";
-import { faqs, homeBanners, countriesMenu } from "@/lib/site";
-import { localizeCopyForCountry } from "@/lib/location-seo-urls";
+import { homeBanners, countriesMenu } from "@/lib/site";
+import { faqsForCountry } from "@/lib/faqs-for-country";
 import { getHomepageCatalogData } from "@/lib/homepage-catalog";
+import {
+  HOME_PRODUCT_SECTIONS,
+  HomeCategoryProductRow,
+  HomeCategoryProductRowFallback,
+} from "@/components/HomeCategoryProductRow";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { faqJsonLd, pageMetadata } from "@/lib/seo";
 import { resolveDeliveryCountry } from "@blossompot/shared";
@@ -23,7 +29,7 @@ import { flowerDeliverySlugForIso } from "@/lib/content/country-flower-delivery"
 export const metadata: Metadata = pageMetadata({
   title: "BlossomPot — Flowers, Cakes & Gifts, Delivered Worldwide",
   description:
-    "Order fresh flowers, cakes, and gift hampers with worldwide delivery. Same-day options in select cities, secure checkout, and gifts for every celebration — shop online today.",
+    "Order fresh flowers, cakes, and gift hampers with worldwide delivery. Secure checkout and gifts for every celebration — shop online today.",
   path: "/",
   absoluteTitle: true,
 });
@@ -40,18 +46,17 @@ export default function HomePage({
   const reviewsPromise = getGoogleReviews();
   return (
     <div>
-      <JsonLd data={[faqJsonLd(faqs)]} />
       <HomeHero banners={[...homeBanners]} />
       <HomeBrandTaglines />
       <Suspense fallback={<HomeBelowHeroFallback />}>
-        <HomeCatalog searchParams={searchParams} reviewsPromise={reviewsPromise} />
+        <HomeBelowHero searchParams={searchParams} reviewsPromise={reviewsPromise} />
       </Suspense>
     </div>
   );
 }
 
-/** Catalog, reviews, and localized copy. Streamed after the hero so LCP is not blocked. */
-async function HomeCatalog({
+/** Resolves the delivery country, then streams the carousel and category rows independently. */
+async function HomeBelowHero({
   searchParams,
   reviewsPromise,
 }: {
@@ -59,21 +64,8 @@ async function HomeCatalog({
   reviewsPromise: ReturnType<typeof getGoogleReviews>;
 }) {
   const params = await searchParams;
-  let giftCount = 0;
-  let categoryCount = 0;
-  let catalogError = "";
   const deliveryCountry = await getStorefrontDeliveryCountry(params.country);
   const destinationName = resolveDeliveryCountry(deliveryCountry).countryName;
-  let categoryTiles = buildHomeCategoryTiles([], []);
-
-  try {
-    const catalog = await getHomepageCatalogData(deliveryCountry);
-    giftCount = catalog.giftCount;
-    categoryCount = catalog.categoryCount;
-    categoryTiles = catalog.tiles;
-  } catch (err) {
-    catalogError = err instanceof Error ? err.message : "Gift catalog is temporarily unavailable.";
-  }
   const selectedFlowerSlug = flowerDeliverySlugForIso(deliveryCountry);
   const countryPages = selectedFlowerSlug
     ? countriesMenu.items.filter((item) => item.slug === selectedFlowerSlug)
@@ -81,7 +73,10 @@ async function HomeCatalog({
 
   return (
     <>
-      <HomeCategoryCarousel tiles={categoryTiles} />
+      <JsonLd data={[faqJsonLd(faqsForCountry(deliveryCountry))]} />
+      <Suspense fallback={<HomeBelowHeroFallback />}>
+        <HomeCategoryCarouselBlock country={deliveryCountry} />
+      </Suspense>
       <TrustStrip />
 
       <div className="max-w-7xl mx-auto px-4 pt-6 pb-2 flex flex-wrap justify-center gap-3">
@@ -118,24 +113,23 @@ async function HomeCatalog({
       ) : null}
 
       <section className="max-w-7xl mx-auto px-4 py-10">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-primary">Gift catalog</h2>
-          <p className="text-sm text-slate-600 mt-1">
-            Browse flowers, cakes, and hampers for {destinationName} — open the full catalog to shop.
-          </p>
+        <p className="text-sm text-slate-600">
+          Flowers, bouquets, cakes, and hampers for {destinationName}.
+        </p>
+        <div className="mt-8 space-y-10">
+          {HOME_PRODUCT_SECTIONS.map((section) => (
+            <Suspense
+              key={section.slug}
+              fallback={<HomeCategoryProductRowFallback title={section.title} />}
+            >
+              <HomeCategoryProductRow
+                slug={section.slug}
+                title={section.title}
+                country={deliveryCountry}
+              />
+            </Suspense>
+          ))}
         </div>
-        {catalogError ? (
-          <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-            {catalogError}
-          </p>
-        ) : (
-          <p className="text-sm text-slate-600 mb-4">
-            {giftCount} gifts available for {destinationName}.
-          </p>
-        )}
-        <Link href="/gift-catalog" className="btn-nav bg-primary inline-flex">
-          Open gift catalog
-        </Link>
       </section>
 
       <section className="max-w-7xl mx-auto px-4 py-12">
@@ -176,7 +170,7 @@ async function HomeCatalog({
         <div className="rounded-3xl bg-gradient-to-br from-primary via-[#9e2d55] to-accent text-white p-8 sm:p-12 text-center shadow-lg shadow-primary/20">
           <h2 className="text-2xl sm:text-3xl font-bold">Send a gift that feels personal</h2>
           <p className="mt-3 text-white/90 max-w-2xl mx-auto">
-            From same-day bouquets to anniversary hampers, BlossomPot helps you celebrate with delivery to {destinationName}.
+            From birthday bouquets to anniversary hampers, BlossomPot helps you celebrate with delivery to {destinationName}.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Link
@@ -209,20 +203,36 @@ async function HomeCatalog({
 
       <section className="max-w-3xl mx-auto px-4 pb-16">
         <h2 className="text-xl font-bold text-primary mb-4">Frequently asked questions</h2>
-        <div className="space-y-4">
-          {faqs.map((f) => (
-            <div key={f.q}>
-              <p className="font-semibold text-primary text-sm">{localizeCopyForCountry(f.q, deliveryCountry)}</p>
-              <p className="text-sm text-slate-600 mt-1">{localizeCopyForCountry(f.a, deliveryCountry)}</p>
-            </div>
-          ))}
-        </div>
-        {categoryCount > 0 && (
-          <p className="text-xs text-slate-400 mt-8">{categoryCount} categories available in catalog</p>
-        )}
+        <FaqAccordion items={faqsForCountry(deliveryCountry)} />
+        <Suspense fallback={null}>
+          <HomeCategoryCount country={deliveryCountry} />
+        </Suspense>
       </section>
     </>
   );
+}
+
+async function HomeCategoryCarouselBlock({ country }: { country: string }) {
+  let categoryTiles = buildHomeCategoryTiles([], []);
+  try {
+    const catalog = await getHomepageCatalogData(country);
+    categoryTiles = catalog.tiles;
+  } catch {
+    categoryTiles = buildHomeCategoryTiles([], []);
+  }
+  return <HomeCategoryCarousel tiles={categoryTiles} />;
+}
+
+async function HomeCategoryCount({ country }: { country: string }) {
+  try {
+    const catalog = await getHomepageCatalogData(country);
+    if (catalog.categoryCount <= 0) return null;
+    return (
+      <p className="text-xs text-slate-400 mt-8">{catalog.categoryCount} categories available in catalog</p>
+    );
+  } catch {
+    return null;
+  }
 }
 
 async function HomeReviews({

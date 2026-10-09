@@ -7,6 +7,7 @@ import {
   createSelectionGuard,
   deliverToDestination,
   navigateAfterLocationCommit,
+  planLocationCategorySync,
   shouldReconcilePathCountry,
   type DeliveryCheckState,
 } from "./country-switch";
@@ -139,6 +140,34 @@ describe("country switch navigation", () => {
   it("keeps the homepage dialog on the homepage", () => {
     assert.equal(deliverToDestination("/", "CA", ""), "/?country=CA");
     assert.equal(deliverToDestination("/", "gb", "country=US"), "/?country=GB");
+  });
+
+  it("adopts an enabled UK page and still leaves a disabled Canada page alone", () => {
+    const uk = planLocationCategorySync({
+      pathname: "/flower-delivery-uk",
+      savedCountry: "US",
+      savedPostal: "90012",
+      pendingCountry: null,
+      enabledCountryCodes: ["US", "GB"],
+    });
+    assert.deepEqual(uk, { action: "adopt", countryCode: "GB", postalCode: "" });
+    const canada = planLocationCategorySync({
+      pathname: "/flower-delivery-canada",
+      savedCountry: "US",
+      savedPostal: "90012",
+      pendingCountry: null,
+      enabledCountryCodes: ["US", "GB"],
+    });
+    assert.deepEqual(canada, { action: "leave", clearPending: false });
+  });
+
+  it("does not clear a saved US ZIP when a guide or non-US shop URL opens", () => {
+    const saved = { savedCountry: "US", savedPostal: "90012", pendingCountry: null as string | null };
+    for (const pathname of ["/flower-delivery-uk", "/locations/canada", "/flowers-to-uk"]) {
+      const plan = planLocationCategorySync({ pathname, ...saved });
+      assert.deepEqual(plan, { action: "leave", clearPending: false });
+    }
+    assert.equal(saved.savedPostal, "90012");
   });
 
   it("keeps the five country-menu guide destinations", () => {

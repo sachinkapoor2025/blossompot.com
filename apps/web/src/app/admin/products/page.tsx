@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useApiClient, useAuth } from "@/lib/auth-context";
 import type { Product } from "@blossompot/shared";
 import {
   DEFAULT_PRODUCT_INVENTORY,
+  fulfillmentVendorSlug,
   LOW_STOCK_THRESHOLD,
   getUnitsSold,
   isFastSelling,
@@ -17,6 +19,7 @@ import { TableControls } from "@/components/admin/TableControls";
 export default function AdminProductsPage() {
   const apiClient = useApiClient();
   const { token } = useAuth();
+  const vendorFilter = useSearchParams().get("vendor") ?? "";
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<{ slug: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,14 +84,12 @@ export default function AdminProductsPage() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return products;
-    return products.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.slug.includes(q) ||
-        p.sku?.toLowerCase().includes(q)
-    );
-  }, [products, search]);
+    return products.filter((p) => {
+      if (vendorFilter && fulfillmentVendorSlug(p) !== vendorFilter) return false;
+      if (!q) return true;
+      return p.name.toLowerCase().includes(q) || p.slug.includes(q) || p.sku?.toLowerCase().includes(q);
+    });
+  }, [products, search, vendorFilter]);
 
   const { items: pageItems, totalPages, total } = paginate(filtered, page, pageSize);
 
@@ -150,6 +151,10 @@ export default function AdminProductsPage() {
           currency: form.currency,
           sku: form.sku || undefined,
           tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+          vendorSlug: fulfillmentVendorSlug({
+            sku: form.sku || undefined,
+            tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+          }),
           published: form.published,
           ...dims,
         }),
@@ -562,7 +567,14 @@ export default function AdminProductsPage() {
           {submitLabel}
         </button>
         {editing && (
-          <button type="button" onClick={resetForm} className="border px-4 py-2 rounded-lg text-sm">
+          <button
+            type="button"
+            onClick={() => {
+              resetForm();
+              setTab("list");
+            }}
+            className="border px-4 py-2 rounded-lg text-sm"
+          >
             Cancel
           </button>
         )}
@@ -574,28 +586,9 @@ export default function AdminProductsPage() {
     <div className="max-w-6xl mx-auto px-4 py-10 space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Products</h1>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              resetForm();
-              setTab("list");
-            }}
-            className={`px-4 py-2 rounded-lg text-sm ${tab === "list" ? "bg-nav text-white" : "border"}`}
-          >
-            All products
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              resetForm();
-              setTab("create");
-            }}
-            className={`px-4 py-2 rounded-lg text-sm ${tab === "create" ? "bg-nav text-white" : "border"}`}
-          >
-            {editing ? "Edit product" : "Add product"}
-          </button>
-        </div>
+        <Link href="/admin/products/new" className="px-4 py-2 rounded-lg text-sm border">
+          Add Product
+        </Link>
       </div>
 
       {missingDimsCount > 0 && (
@@ -907,6 +900,7 @@ export default function AdminProductsPage() {
             <h2 className="text-xl font-bold mb-2">Bulk Upload (CSV)</h2>
             <p className="text-sm text-slate-600 mb-3">
               Download the sample template, fill in your products, then paste or upload the CSV below.
+              New catalog products are added from Add Product so the selected vendor owns the vendor slug.
             </p>
             <button
               type="button"

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { cartItemSchema } from "./cart";
 import { ORDER_STATUS } from "../constants";
+import { isValidPublicEmail } from "../lib/identity";
 import { checkoutAttributionSchema, orderAttributionSchema } from "./attribution";
 import { orderGboFulfillmentSchema } from "./vendor-gbo";
 
@@ -30,7 +31,12 @@ export const shippingAddressSchema = z.object({
   postalCode: z.string().min(1),
   country: z.string().min(2).max(2),
   phone: phoneSchema,
-  email: z.string().email(),
+  email: z
+    .string()
+    .email("Enter a valid email with a domain and TLD (for example name@gmail.com)")
+    .refine(isValidPublicEmail, {
+      message: "Enter a valid email with a domain and TLD (for example name@gmail.com)",
+    }),
   /** Buyer / sender name — shown on shipping label so the recipient knows who sent the gift. */
   senderName: z.string().trim().max(80).optional(),
   /** Personal note from sister — printed on the shipping label. */

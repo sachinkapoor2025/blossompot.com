@@ -237,6 +237,30 @@ export const memoryStore = {
       return { Attributes: updated };
     }
 
+    if (name === "TransactWriteCommand") {
+      const transactItems = (input.TransactItems ?? []) as Array<{
+        Put?: { TableName?: string; Item?: Item };
+      }>;
+      const snapshot: Array<{ table: Map<string, Item>; key: string; previous: Item | undefined }> = [];
+      try {
+        for (const entry of transactItems) {
+          const put = entry.Put;
+          if (!put?.Item) continue;
+          const table = tableFor(put.TableName);
+          const key = itemKey(put.Item.PK, put.Item.SK);
+          snapshot.push({ table, key, previous: table.get(key) });
+          table.set(key, { ...put.Item });
+        }
+      } catch (err) {
+        for (const row of snapshot.reverse()) {
+          if (row.previous) row.table.set(row.key, row.previous);
+          else row.table.delete(row.key);
+        }
+        throw err;
+      }
+      return {};
+    }
+
     if (name === "BatchWriteCommand") {
       const requestItems = (input.RequestItems ?? {}) as Record<
         string,

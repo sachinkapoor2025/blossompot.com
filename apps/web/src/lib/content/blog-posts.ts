@@ -797,7 +797,7 @@ export const blogPosts: BlogPost[] = [
       "With flowers and cake delivery same day, you can combine two classic celebration gifts into one convenient surprise.",
     publishedAt: "2026-08-18",
     updatedAt: "2026-08-25",
-    relatedCategory: "same-day-gifts",
+    relatedCategory: "flowers",
     sections: [
       {
         paragraphs: [
@@ -864,7 +864,7 @@ export const blogPosts: BlogPost[] = [
       "With same day flower delivery near me, you can send a thoughtful bouquet to someone you love without waiting several days.",
     publishedAt: "2026-08-17",
     updatedAt: "2026-08-25",
-    relatedCategory: "same-day-gifts",
+    relatedCategory: "flowers",
     sections: [
       {
         paragraphs: [
@@ -1502,7 +1502,7 @@ export const blogPosts: BlogPost[] = [
       "Sometimes an important celebration arrives before you have had time to choose a present. Flowers, cakes, gift hampers, and personalized presents can all make convenient last-minute choices.",
     publishedAt: "2026-09-01",
     updatedAt: "2026-09-01",
-    relatedCategory: "same-day-gifts",
+    relatedCategory: "flowers",
     sections: [
       {
         paragraphs: [

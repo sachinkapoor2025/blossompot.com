@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { faqs, site } from "@/lib/site";
+import { site } from "@/lib/site";
+import { FaqAccordion } from "@/components/FaqAccordion";
 import { JsonLd } from "@/components/JsonLd";
 import { faqJsonLd, pageMetadata } from "@/lib/seo";
+import { BackToHome } from "@/components/BackToHome";
+import { faqsForCountry } from "@/lib/faqs-for-country";
+import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
+import { countryDisplayName } from "@/lib/location-seo-urls";
 
 export const metadata: Metadata = pageMetadata({
   title: "FAQ — Flowers, Cakes & Gifts Worldwide",
@@ -11,25 +16,27 @@ export const metadata: Metadata = pageMetadata({
   path: "/faq",
 });
 
-export default function FaqPage() {
+export const dynamic = "force-dynamic";
+
+export default async function FaqPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ country?: string }>;
+}) {
+  const params = await searchParams;
+  const country = await getStorefrontDeliveryCountry(params.country);
+  const items = faqsForCountry(country);
+  const destination = countryDisplayName(country);
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
-      <JsonLd data={faqJsonLd(faqs)} />
+      <JsonLd data={faqJsonLd(items)} />
       <h1 className="text-3xl font-bold text-primary mb-2">Frequently Asked Questions</h1>
       <p className="text-slate-600 mb-8">
-        Everything you need to know about sending flowers, cakes, and gifts worldwide with {site.name}.
+        Answers for sending flowers, cakes, and gifts to {destination} with {site.name}. Change the
+        country in the header to see destination-specific delivery notes.
       </p>
-      <div className="space-y-4">
-        {faqs.map((f) => (
-          <details key={f.q} className="border border-slate-200 rounded-lg p-5 bg-white group">
-            <summary className="font-semibold text-primary cursor-pointer list-none flex justify-between items-start gap-4">
-              <span>{f.q}</span>
-              <span className="text-slate-400 group-open:rotate-45 transition-transform text-xl leading-none">+</span>
-            </summary>
-            <p className="text-slate-600 mt-3 leading-relaxed">{f.a}</p>
-          </details>
-        ))}
-      </div>
+      <FaqAccordion items={items} />
       <p className="mt-10 text-sm text-slate-500">
         More guides:{" "}
         <Link href="/shipping" className="text-nav hover:underline">
@@ -48,6 +55,7 @@ export default function FaqPage() {
           Contact
         </Link>
       </p>
+      <BackToHome className="mt-8" />
     </div>
   );
 }

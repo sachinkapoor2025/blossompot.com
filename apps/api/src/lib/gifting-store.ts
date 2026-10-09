@@ -25,7 +25,8 @@ import {
   type UpcomingOccasionView,
 } from "@blossompot/shared";
 import type { Product } from "@blossompot/shared";
-import { isProductStorefrontVisible } from "@blossompot/shared";
+import { isGboHiddenFromStorefront, isProductStorefrontVisible, productAllowedForNewShopping, productForShoppingDecision } from "@blossompot/shared";
+import { loadCatalogVendorRegistry } from "./catalog-vendor-store";
 import { CONFIG_TABLE, CUSTOMERS_TABLE, PRODUCTS_TABLE, now } from "./db";
 import { docClient } from "./db";
 
@@ -699,7 +700,14 @@ export async function loadCatalogProducts(): Promise<Product[]> {
     if (result.Items?.length) items.push(...(result.Items as Product[]));
     ExclusiveStartKey = result.LastEvaluatedKey as Record<string, unknown> | undefined;
   } while (ExclusiveStartKey && items.length < 400);
-  return items.filter((p) => isProductStorefrontVisible(p) && (p.inventory ?? 1) > 0);
+  const vendors = await loadCatalogVendorRegistry();
+  return items.filter(
+    (p) =>
+      isProductStorefrontVisible(p) &&
+      !isGboHiddenFromStorefront(p) &&
+      (p.inventory ?? 1) > 0 &&
+      productAllowedForNewShopping(productForShoppingDecision(p), "US", vendors).available
+  );
 }
 
 export async function recommendForContext(input: {

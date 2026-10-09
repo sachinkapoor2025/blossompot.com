@@ -17,17 +17,28 @@ import {
   isFlashComboSaleActive,
   flashComboUnitPriceUsd,
   productUsesFixedStorefrontPrice,
+  CATALOG_VENDOR_UNAVAILABLE_MESSAGE,
+  GBO_STOREFRONT_UNAVAILABLE_MESSAGE,
+  gboCartLineUnavailableMessage,
+  isGboHiddenFromStorefront,
+  productAllowedForNewShopping,
+  shoppingCountryRejection,
+  storefrontShoppingCountryCodes,
+  mergeCartItems,
   type Cart,
   type CartItem,
 } from "@blossompot/shared";
 import { docClient, CARTS_TABLE, PRODUCTS_TABLE, now, ttlInDays } from "../lib/db";
 import { ok, badRequest, unauthorized } from "../lib/response";
-import { getUserOrSessionKey, getSessionId } from "../lib/auth";
-import { evaluateProductsForLocation } from "./serviceability";
+import { getAuth, getUserOrSessionKey, getSessionId } from "../lib/auth";
+import { cartAvailabilityLocation, evaluateProductsForLocation } from "./serviceability";
 import { formatPostalDisplay } from "@blossompot/shared";
 import { resolveProductImageUrl } from "../lib/images";
 import { upsertSessionProfile } from "../lib/customer-profile";
-import { ensureOrangeCountyProductInDb } from "../lib/orange-county-catalog";
+import { loadCatalogCountries } from "../lib/catalog-country-store";
+import { decideNewShopping, loadCatalogVendorRegistry, withStoredShoppingIdentity } from "../lib/catalog-vendor-store";
+import { getBundledUsarakhiProduct } from "../lib/blossompot-catalog";
+import { ensureOrangeCountyProductInDb, getBundledOrangeCountyProduct } from "../lib/orange-county-catalog";
 import { ensureProductInDb } from "../lib/ensure-product";
 
 /** Stale carts auto-expire after this many days (TTL). */
@@ -86,38 +97,86 @@ async function saveCart(
   cart.updatedAt = timestamp;
 }
 
-export async function getCartHandler(event: APIGatewayProxyEventV2) {
+async function loadCartForRequest(event: APIGatewayProxyEventV2): Promise<{
+  userKey: string;
+  cart: Cart & { createdAt?: string };
+}> {
+  const auth = getAuth(event);
+  const sessionId = getSessionId(event);
+  if (auth && sessionId && auth.userId !== sessionId) {
+    const [accountCart, guestCart] = await Promise.all([getCart(auth.userId), getCart(sessionId)]);
+    if ((guestCart.items ?? []).length > 0) {
+      const items = mergeCartItems(accountCart.items ?? [], guestCart.items ?? []);
+      const merged = { ...accountCart, items };
+      await saveCart(auth.userId, merged, sessionId);
+      await saveCart(sessionId, { items: [], updatedAt: now(), createdAt: guestCart.createdAt }, sessionId);
+      return { userKey: auth.userId, cart: merged };
+    }
+    return { userKey: auth.userId, cart: accountCart };
+  }
   const userKey = getUserOrSessionKey(event);
-  if (!userKey) return unauthorized("Session or auth required");
+  if (!userKey) throw new Error("UNAUTH");
+  return { userKey, cart: await getCart(userKey) };
+}
 
-  const raw = await getCart(userKey);
+export async function getCartHandler(event: APIGatewayProxyEventV2) {
+  let loaded: { userKey: string; cart: Cart & { createdAt?: string } };
+  try {
+    loaded = await loadCartForRequest(event);
+  } catch {
+    return unauthorized("Session or auth required");
+  }
+  const raw = loaded.cart;
   const items = (raw.items ?? []).map((item) => ({
     ...item,
     image: item.image ? resolveProductImageUrl(item.image) : item.image,
   }));
   // Persist backfilled lineIds so subsequent updates work.
   if ((raw.items ?? []).some((i) => !i.lineId)) {
-    await saveCart(userKey, { ...raw, items }, getSessionId(event));
+    await saveCart(loaded.userKey, { ...raw, items }, getSessionId(event));
   }
   const country = event.queryStringParameters?.country ?? event.queryStringParameters?.countryCode;
   const postal = event.queryStringParameters?.postalCode ?? event.queryStringParameters?.zip;
-  if (country && items.length) {
-    const evals = await evaluateProductsForLocation(
-      items.map((i) => ({ slug: i.productSlug, vendorSlug: i.vendorSlug })),
-      { countryCode: country, postalCode: postal ?? "" }
-    );
+  const storedCountries = await loadCatalogCountries();
+  const enabledCountryCodes = storefrontShoppingCountryCodes(storedCountries.countries);
+  const shoppingLocation = cartAvailabilityLocation(country, postal, enabledCountryCodes);
+  if (shoppingLocation && items.length) {
+    const identities = await Promise.all(items.map((item) => withStoredShoppingIdentity(item)));
+    const [evals, registry] = await Promise.all([
+      evaluateProductsForLocation(
+        identities.map((identity, index) => ({
+          slug: items[index]!.productSlug,
+          vendorSlug: identity.vendorSlug,
+          sku: identity.sku ?? items[index]!.sku,
+          tags: identity.tags,
+          internationalDelivery: identity.internationalDelivery,
+        })),
+        { countryCode: shoppingLocation.countryCode, postalCode: shoppingLocation.postalCode }
+      ),
+      loadCatalogVendorRegistry(),
+    ]);
     const bySlug = new Map(evals.map((e) => [e.slug, e]));
-    const flagged = items.map((item) => {
+    const where = shoppingLocation.postalCode
+      ? formatPostalDisplay(shoppingLocation.countryCode, shoppingLocation.postalCode)
+      : shoppingLocation.countryCode;
+    const flagged = identities.map((identity, index) => {
+      const item = items[index]!;
+      const decision = productAllowedForNewShopping(identity, shoppingLocation.countryCode, registry);
       const ev = bySlug.get(item.productSlug);
-      return ev && !ev.deliverable
-        ? {
-            ...item,
-            unavailableForLocation: true,
-            unavailableReason: `No longer available for delivery to ${
-              postal ? formatPostalDisplay(country, postal) : country
-            }.`,
-          }
-        : item;
+      const areaBlocked = Boolean(ev && !ev.deliverable);
+      if (decision.available && !areaBlocked) return item;
+      const unavailableReason = !decision.available
+        ? decision.reason === "gbo_storefront_disabled"
+          ? GBO_STOREFRONT_UNAVAILABLE_MESSAGE
+          : decision.reason === "country_not_allowed"
+            ? `This item cannot be delivered to ${where}.`
+            : CATALOG_VENDOR_UNAVAILABLE_MESSAGE
+        : `No longer available for delivery to ${where}.`;
+      return {
+        ...item,
+        unavailableForLocation: true,
+        unavailableReason,
+      };
     });
     return ok({
       cart: { items: flagged, updatedAt: raw.updatedAt ?? now() },
@@ -128,8 +187,15 @@ export async function getCartHandler(event: APIGatewayProxyEventV2) {
 }
 
 export async function addToCart(event: APIGatewayProxyEventV2) {
-  const userKey = getUserOrSessionKey(event);
-  if (!userKey) return unauthorized("Session or auth required");
+  let userKey: string;
+  let cart: Cart & { createdAt?: string };
+  try {
+    const loaded = await loadCartForRequest(event);
+    userKey = loaded.userKey;
+    cart = loaded.cart;
+  } catch {
+    return unauthorized("Session or auth required");
+  }
 
   const body = JSON.parse(event.body ?? "{}");
   const parsed = addToCartSchema.safeParse({
@@ -140,20 +206,38 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
   if (!parsed.success) {
     return badRequest(parsed.error.issues[0]?.message ?? "Could not add this gift to your cart");
   }
+  const storedCountries = await loadCatalogCountries();
+  const enabledCountryCodes = storefrontShoppingCountryCodes(storedCountries.countries);
+  const deliveryRejection = shoppingCountryRejection(parsed.data.deliveryCountry, enabledCountryCodes);
+  if (deliveryRejection) return badRequest(deliveryRejection);
+  if (enabledCountryCodes.length === 0) {
+    return badRequest("Delivery is not available right now. No countries are enabled for shopping.");
+  }
+  if (isGboHiddenFromStorefront({ slug: parsed.data.productSlug })) {
+    return badRequest(GBO_STOREFRONT_UNAVAILABLE_MESSAGE);
+  }
 
-  const [productResult, cart] = await Promise.all([
-    docClient.send(
-      new GetCommand({
-        TableName: PRODUCTS_TABLE,
-        Key: { PK: productKeys.pk(parsed.data.productSlug), SK: productKeys.sk() },
-      })
-    ),
-    getCart(userKey),
-  ]);
+  const productResult = await docClient.send(
+    new GetCommand({
+      TableName: PRODUCTS_TABLE,
+      Key: { PK: productKeys.pk(parsed.data.productSlug), SK: productKeys.sk() },
+    })
+  );
 
   // Storefront may show catalog fallback before DynamoDB import — upsert on first add.
   let productItem = productResult.Item as Record<string, unknown> | undefined;
   if (!productItem) {
+    const preview = getBundledUsarakhiProduct(parsed.data.productSlug) ?? getBundledOrangeCountyProduct(parsed.data.productSlug);
+    if (preview) {
+      const previewShopping = await decideNewShopping(preview, parsed.data.deliveryCountry || "US");
+      if (!previewShopping.available && (previewShopping.reason === "vendor_disabled" || previewShopping.reason === "gbo_storefront_disabled")) {
+        return badRequest(
+          previewShopping.reason === "gbo_storefront_disabled"
+            ? GBO_STOREFRONT_UNAVAILABLE_MESSAGE
+            : CATALOG_VENDOR_UNAVAILABLE_MESSAGE
+        );
+      }
+    }
     productItem = (await ensureProductInDb(parsed.data.productSlug)) ?? undefined;
   } else if (
     productItem.vendorSlug === "orange-county" ||
@@ -168,6 +252,20 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
     productItem = (await ensureProductInDb(parsed.data.productSlug)) ?? productItem;
   }
   if (!productItem) return badRequest("Product not found");
+  if (isGboHiddenFromStorefront(productItem as { slug?: string; vendorSlug?: string; sku?: string })) {
+    return badRequest(GBO_STOREFRONT_UNAVAILABLE_MESSAGE);
+  }
+  const shoppingDecision = await decideNewShopping(
+    productItem as { slug?: string; vendorSlug?: string; sku?: string; internationalDelivery?: boolean },
+    parsed.data.deliveryCountry || "US"
+  );
+  if (!shoppingDecision.available) {
+    return badRequest(
+      shoppingDecision.reason === "gbo_storefront_disabled"
+        ? GBO_STOREFRONT_UNAVAILABLE_MESSAGE
+        : CATALOG_VENDOR_UNAVAILABLE_MESSAGE
+    );
+  }
 
   const product = productItem as {
     slug: string;
@@ -179,6 +277,7 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
     vendorSlug?: string;
     vendorCost?: number;
     sku?: string;
+    internationalDelivery?: boolean;
     couponExcluded?: boolean;
     tags?: string[];
     categorySlug?: string;
@@ -200,6 +299,9 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
         {
           slug: product.slug,
           vendorSlug: product.vendorSlug,
+          sku: product.sku,
+          tags: product.tags,
+          internationalDelivery: product.internationalDelivery,
           inventory: product.inventory,
         },
       ],
@@ -239,7 +341,8 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
       ? product.price
       : applyCompetitivePriceReduction(product.price, product.currency);
   const couponExcluded =
-    Boolean(product.couponExcluded) || isFlashComboProduct(product.slug);
+    isFlashComboProduct(product.slug) ||
+    (Boolean(product.couponExcluded) && !(product.tags ?? []).includes("tf-usa"));
 
   const existingIdx = cart.items.findIndex(
     (i) =>
@@ -325,6 +428,7 @@ export async function updateCartItem(event: APIGatewayProxyEventV2) {
     cart.items.find((i) => i.lineId === lineId) ??
     cart.items.find((i) => i.productSlug === lineId);
   if (!item) return badRequest("Item not in cart");
+  if (isGboHiddenFromStorefront(item)) return badRequest(gboCartLineUnavailableMessage([item]));
 
   const productSlug = item.productSlug;
   let product = (
@@ -337,6 +441,17 @@ export async function updateCartItem(event: APIGatewayProxyEventV2) {
   ).Item as { inventory: number; vendorSlug?: string; categorySlug?: string } | undefined;
 
   if (!product) {
+    const preview = getBundledUsarakhiProduct(productSlug) ?? getBundledOrangeCountyProduct(productSlug);
+    if (preview) {
+      const previewShopping = await decideNewShopping(preview, "US");
+      if (!previewShopping.available && (previewShopping.reason === "vendor_disabled" || previewShopping.reason === "gbo_storefront_disabled")) {
+        return badRequest(
+          previewShopping.reason === "gbo_storefront_disabled"
+            ? GBO_STOREFRONT_UNAVAILABLE_MESSAGE
+            : CATALOG_VENDOR_UNAVAILABLE_MESSAGE
+        );
+      }
+    }
     product =
       ((await ensureProductInDb(productSlug)) as {
         inventory: number;
@@ -352,6 +467,14 @@ export async function updateCartItem(event: APIGatewayProxyEventV2) {
       } | null) ?? product;
   }
   if (!product) return badRequest("Product not found");
+  const shopping = await decideNewShopping(await withStoredShoppingIdentity({ ...item, ...product, productSlug }), "US");
+  if (!shopping.available && (shopping.reason === "vendor_disabled" || shopping.reason === "gbo_storefront_disabled")) {
+    return badRequest(
+      shopping.reason === "gbo_storefront_disabled"
+        ? GBO_STOREFRONT_UNAVAILABLE_MESSAGE
+        : CATALOG_VENDOR_UNAVAILABLE_MESSAGE
+    );
+  }
   if (quantity > product.inventory) return badRequest("Insufficient inventory");
 
   item.quantity = quantity;

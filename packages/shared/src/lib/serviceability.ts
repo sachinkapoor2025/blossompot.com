@@ -1,5 +1,5 @@
-import { VENDOR_BLOSSOMPOT, VENDOR_ORANGE_COUNTY, VENDOR_GBO } from "../constants";
-import { isGboVendor, parseGboSku, parseGboSlug } from "./gbo";
+import { VENDOR_BLOSSOMPOT, VENDOR_ORANGE_COUNTY, VENDOR_GBO, VENDOR_FNP } from "../constants";
+import { resolveCatalogVendorSlug } from "./vendor-identity";
 import { normalizePostal, normalizePrefix } from "./postal-countries";
 
 export const SERVICE_SCOPES = [
@@ -215,24 +215,28 @@ export function getServiceableVendors(
 
 export function fulfillmentVendorSlug(product: {
   vendorSlug?: string | null;
-  internationalDelivery?: boolean;
+  listingVendorSlug?: string | null;
+  internationalDelivery?: boolean | null;
   slug?: string | null;
+  productSlug?: string | null;
   sku?: string | null;
+  tags?: readonly string[] | null;
 }): string {
-  if (
-    isGboVendor(product.vendorSlug) ||
-    product.internationalDelivery === true ||
-    parseGboSlug(product.slug) ||
-    parseGboSku(product.sku)
-  ) {
-    return VENDOR_GBO;
-  }
-  const slug = product.vendorSlug?.trim();
-  return slug || VENDOR_BLOSSOMPOT;
+  return resolveCatalogVendorSlug(product);
 }
 
 export function isProductDeliverableToLocation(
-  product: { vendorSlug?: string | null; published?: boolean; inventory?: number },
+  product: {
+    vendorSlug?: string | null;
+    listingVendorSlug?: string | null;
+    internationalDelivery?: boolean | null;
+    slug?: string | null;
+    productSlug?: string | null;
+    sku?: string | null;
+    tags?: readonly string[] | null;
+    published?: boolean;
+    inventory?: number;
+  },
   areas: VendorServiceArea[],
   location: DeliveryLocationInput,
   activeVendorSlugs: Set<string>
@@ -241,26 +245,76 @@ export function isProductDeliverableToLocation(
   if (product.published === false || (product.inventory ?? 1) <= 0) {
     return { serviceable: false, reason: "inactive_vendor", vendorSlug };
   }
-  const active =
-    vendorSlug === VENDOR_BLOSSOMPOT ||
-    vendorSlug === VENDOR_GBO ||
-    activeVendorSlugs.has(vendorSlug);
+  const active = activeVendorSlugs.has(vendorSlug);
   return checkVendorServiceability(vendorSlug, areas, location, active);
+}
+
+/**
+ * Location list filter. A product is kept or dropped from its own vendor only.
+ * An empty vendor list does not wipe the catalog. Gift Baskets Overseas is not exempt.
+ */
+export function productKeptForServiceableVendors(
+  product: {
+    vendorSlug?: string | null;
+    listingVendorSlug?: string | null;
+    internationalDelivery?: boolean | null;
+    slug?: string | null;
+    productSlug?: string | null;
+    sku?: string | null;
+    tags?: readonly string[] | null;
+  },
+  vendorSlugs: readonly string[],
+  applyVendorFilter: boolean,
+  countryCode?: string
+): boolean {
+  if (!applyVendorFilter) return true;
+  if (vendorSlugs.length === 0) {
+    const iso = countryCode?.trim().toUpperCase();
+    // A finished non-US check with no covering vendor means nothing can be shown.
+    // An empty US list still keeps the catalog, matching the existing location filter.
+    if (iso && iso !== "US") return false;
+    return true;
+  }
+  return vendorSlugs.includes(fulfillmentVendorSlug(product));
+}
+
+function nationwideUsArea(vendorSlug: string, areaId: string): VendorServiceArea {
+  return {
+    areaId,
+    vendorSlug,
+    countryCode: "US",
+    scope: "COUNTRY",
+    ruleType: "ALLOW",
+    isActive: true,
+    priority: 0,
+  };
+}
+
+/** True when the vendor has ZIP/city/state/radius rules for this country (not country-wide). */
+export function vendorHasLocationScopedAreas(
+  areas: readonly VendorServiceArea[],
+  vendorSlug: string,
+  countryCode: string
+): boolean {
+  const iso = countryCode.trim().toUpperCase();
+  if (!iso) return false;
+  return areas.some(
+    (area) =>
+      area.vendorSlug === vendorSlug &&
+      area.isActive !== false &&
+      area.countryCode.toUpperCase() === iso &&
+      area.scope !== "COUNTRY"
+  );
 }
 
 /** Built-in nationwide US coverage for BlossomPot catalog SKUs (no marketplace vendor). */
 export function defaultBlossompotAreas(): VendorServiceArea[] {
-  return [
-    {
-      areaId: "default-bp-us",
-      vendorSlug: VENDOR_BLOSSOMPOT,
-      countryCode: "US",
-      scope: "COUNTRY",
-      ruleType: "ALLOW",
-      isActive: true,
-      priority: 0,
-    },
-  ];
+  return [nationwideUsArea(VENDOR_BLOSSOMPOT, "default-bp-us")];
+}
+
+/** Built-in nationwide US coverage for FNP catalog SKUs until admin stores areas. */
+export function defaultFnpAreas(): VendorServiceArea[] {
+  return [nationwideUsArea(VENDOR_FNP, "default-fnp-us")];
 }
 
 /** Orange County local prefixes — used until admin overrides exist. */

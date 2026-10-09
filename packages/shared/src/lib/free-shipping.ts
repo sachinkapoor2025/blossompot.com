@@ -307,8 +307,17 @@ export function quoteAddressShipmentShipping(input: {
   const catalogItems = input.items.filter((i) => i.shippingFee != null);
   const otherItems = input.items.filter((i) => i.shippingFee == null);
 
+  const catalogSubtotal = catalogItems.reduce(
+    (sum, i) => sum + cartLineUnitTotal(i) * i.quantity,
+    0
+  );
+  const catalogSubtotalUsd = toUsd(catalogSubtotal, input.currency, input.usdInrRate);
+  const rawCatalogCharge = catalogItems.reduce(
+    (sum, i) => sum + (i.shippingFee ?? 0) * i.quantity,
+    0
+  );
   const catalogCharge = roundDisplayAmount(
-    catalogItems.reduce((sum, i) => sum + (i.shippingFee ?? 0) * i.quantity, 0),
+    catalogSubtotalUsd >= FREE_SHIPPING_MIN_SUBTOTAL_USD ? 0 : rawCatalogCharge,
     input.currency
   );
 

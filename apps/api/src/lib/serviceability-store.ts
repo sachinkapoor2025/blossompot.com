@@ -3,14 +3,18 @@ import { v4 as uuidv4 } from "uuid";
 import {
   VENDOR_BLOSSOMPOT,
   VENDOR_ORANGE_COUNTY,
-  VENDOR_GBO,
+  VENDOR_FNP,
+  CATALOG_VENDOR_SLUGS,
+  catalogVendorShoppingStatus,
   defaultBlossompotAreas,
+  defaultFnpAreas,
   defaultOrangeCountyAreas,
   marketplaceVendorKeys,
   vendorCoverageKeys,
   type MarketplaceVendor,
   type VendorServiceArea,
 } from "@blossompot/shared";
+import { loadCatalogVendorRegistry } from "./catalog-vendor-store";
 import { CONFIG_TABLE, docClient, now } from "./db";
 
 type Cached = { at: number; areas: VendorServiceArea[]; slugs: string[] };
@@ -107,20 +111,26 @@ export async function loadCoverageBundle(): Promise<{
 
   const marketplace = await listMarketplaceVendors();
   const activeMarket = marketplace.filter((v) => v.status === "active" || v.status === "approved");
-  const slugs = [
-    VENDOR_BLOSSOMPOT,
-    VENDOR_ORANGE_COUNTY,
-    VENDOR_GBO,
-    ...activeMarket.map((v) => v.vendorSlug),
-  ];
+  const registry = await loadCatalogVendorRegistry();
+  const catalogActive = CATALOG_VENDOR_SLUGS.filter((slug) =>
+    catalogVendorShoppingStatus(registry.get(slug)!).shoppingAvailable
+  );
+  const slugs = [...new Set([...catalogActive, ...activeMarket.map((v) => v.vendorSlug)])];
 
   const perVendor = await Promise.all(slugs.map((slug) => listVendorAreas(slug)));
   const stored = perVendor.flat();
   const storedByVendor = new Set(stored.map((a) => a.vendorSlug));
 
   const areas = [...stored];
-  if (!storedByVendor.has(VENDOR_BLOSSOMPOT)) areas.push(...defaultBlossompotAreas());
-  if (!storedByVendor.has(VENDOR_ORANGE_COUNTY)) areas.push(...defaultOrangeCountyAreas());
+  if (catalogActive.includes(VENDOR_BLOSSOMPOT) && !storedByVendor.has(VENDOR_BLOSSOMPOT)) {
+    areas.push(...defaultBlossompotAreas());
+  }
+  if (catalogActive.includes(VENDOR_FNP) && !storedByVendor.has(VENDOR_FNP)) {
+    areas.push(...defaultFnpAreas());
+  }
+  if (catalogActive.includes(VENDOR_ORANGE_COUNTY) && !storedByVendor.has(VENDOR_ORANGE_COUNTY)) {
+    areas.push(...defaultOrangeCountyAreas());
+  }
   for (const vendor of activeMarket) {
     if (!storedByVendor.has(vendor.vendorSlug)) {
       areas.push(...legacyZoneAreas(vendor));

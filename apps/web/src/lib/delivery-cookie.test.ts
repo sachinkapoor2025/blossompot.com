@@ -4,7 +4,11 @@ import {
   DELIVERY_COOKIE_MAX_AGE_SECONDS,
   deliveryCookieUpdate,
   isDeliveryCookieFlight,
+  parseDeliveryLocationToken,
 } from "./delivery-location";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { disabledCountryFallback, shoppingCountriesFromGlobal, shoppingCountryOptions } from "./gbo-delivery-countries";
 import { resolveStorefrontCountryIso } from "./location-seo-urls";
 
 function headerBag(record: Record<string, string>) {
@@ -16,6 +20,88 @@ const documentHeaders = headerBag({
   accept: "text/html,application/xhtml+xml",
   "sec-fetch-dest": "document",
   "sec-fetch-mode": "navigate",
+});
+
+describe("shopping country options", () => {
+  it("falls back to the United States before the global list loads", () => {
+    assert.deepEqual(
+      shoppingCountryOptions().map((country) => country.countryCode),
+      ["US"]
+    );
+  });
+
+  it("shows only the globally enabled countries", () => {
+    assert.deepEqual(
+      shoppingCountriesFromGlobal([
+        { countryCode: "US", enabled: true },
+        { countryCode: "GB", enabled: false },
+        { countryCode: "RS", enabled: false },
+      ]).map((country) => country.countryCode),
+      ["US"]
+    );
+    assert.deepEqual(
+      shoppingCountriesFromGlobal([
+        { countryCode: "US", enabled: true },
+        { countryCode: "GB", enabled: true },
+        { countryCode: "RS", enabled: false },
+      ]).map((country) => country.countryCode),
+      ["US", "GB"]
+    );
+    assert.deepEqual(
+      shoppingCountriesFromGlobal([
+        { countryCode: "US", enabled: false },
+        { countryCode: "GB", enabled: true },
+      ]).map((country) => country.countryCode),
+      ["GB"]
+    );
+    assert.deepEqual(
+      shoppingCountriesFromGlobal([{ countryCode: "AU" }, { countryCode: "ZZ" }]).map(
+        (country) => country.countryCode
+      ),
+      ["AU"]
+    );
+  });
+
+  it("replaces a disabled saved country with the United States when the United States is enabled", () => {
+    assert.equal(disabledCountryFallback("RS", [{ countryCode: "US" }]), "US");
+    assert.equal(disabledCountryFallback("GB", [{ countryCode: "US" }, { countryCode: "GB" }]), null);
+    assert.equal(disabledCountryFallback("US", [{ countryCode: "GB" }]), "GB");
+  });
+
+  it("does not write the delivery cookie when the display currency changes", () => {
+    const source = readFileSync(path.join(__dirname, "currency-context.tsx"), "utf8");
+    assert.match(source, /const STORAGE_KEY = "hr_ecom_currency"/);
+    const start = source.indexOf("const setDisplayCurrency");
+    const end = source.indexOf("const convert", start);
+    const fn = source.slice(start, end);
+    assert.equal(fn.includes("bp_dl"), false);
+    assert.equal(fn.includes("writeDeliveryLocation"), false);
+    assert.equal(fn.includes("STORAGE_KEY"), true);
+    assert.equal(fn.includes("MANUAL_KEY"), true);
+  });
+});
+
+describe("stored delivery location", () => {
+  it("keeps a known country and drops an unknown country back to the US", () => {
+    assert.deepEqual(parseDeliveryLocationToken("GB:SW1A1AA"), {
+      countryCode: "GB",
+      postalCode: "SW1A1AA",
+      postalDisplay: "SW1A1AA",
+    });
+    assert.deepEqual(parseDeliveryLocationToken("ZZ:12345"), {
+      countryCode: "US",
+      postalCode: "",
+      postalDisplay: "US",
+    });
+  });
+
+  it("keeps a valid US ZIP", () => {
+    assert.deepEqual(parseDeliveryLocationToken("US:90012"), {
+      countryCode: "US",
+      postalCode: "90012",
+      postalDisplay: "90012",
+    });
+  });
 });
 
 describe("delivery cookie responses", () => {
@@ -102,14 +188,20 @@ describe("delivery cookie responses", () => {
     assert.equal(update?.maxAge, 60 * 60 * 24 * 365);
   });
 
-  it("keeps the cookie format, postal value, and one-year lifetime", () => {
+  it("keeps a US ZIP and clears a foreign postal code", () => {
     const sameCountry = deliveryCookieUpdate({
+      resolvedCountry: "US",
+      requestCookie: "US:90012",
+      flight: false,
+    });
+    assert.equal(sameCountry?.value, "US:90012");
+    assert.equal(sameCountry?.maxAge, DELIVERY_COOKIE_MAX_AGE_SECONDS);
+    const foreign = deliveryCookieUpdate({
       resolvedCountry: "GB",
       requestCookie: "GB:SW1A1AA",
       flight: false,
     });
-    assert.equal(sameCountry?.value, "GB:SW1A1AA");
-    assert.equal(sameCountry?.maxAge, DELIVERY_COOKIE_MAX_AGE_SECONDS);
+    assert.equal(foreign?.value, "GB:SW1A1AA");
     assert.equal(
       resolveStorefrontCountryIso({
         pathname: "/flower-delivery-usa",

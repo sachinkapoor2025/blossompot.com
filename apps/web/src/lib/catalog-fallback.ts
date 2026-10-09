@@ -1,16 +1,24 @@
 import {
+  CATALOG_VENDOR_SLUGS,
+  defaultCatalogVendor,
+  fulfillmentVendorSlug,
+  productForShoppingDecision,
   isSampleCatalogProduct,
   productAllowsAddons,
+  productAllowedForNewShopping,
   productVisibleForDeliveryCountry,
+  productInStorefrontCategory,
   resolveProductImageUrls,
+  coalesceProductImages,
   stripVendorPrivateFields,
   withCompetitiveStorefrontPricing,
   dedupeStorefrontProducts,
   type Product,
+  type ShoppingVendorRecord,
 } from "@blossompot/shared";
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
-import { isRakhiRelatedCategorySlug, isRakhiRelatedProduct } from "./rakhi-filter";
+import { isRakhiRelatedProduct, storefrontSkipsRakhiCategory } from "./rakhi-filter";
 import blossompotCatalog from "../../../../scripts/data/blossompot-catalog.json";
 import tfUsaCatalog from "../../../../scripts/data/tf-usa-catalog.json";
 
@@ -19,6 +27,17 @@ interface CatalogFile {
 }
 
 let cached: Product[] | null = null;
+const bundledVendorBySlug = new Map<string, string>();
+let rememberedShoppingVendors: readonly ShoppingVendorRecord[] | null = null;
+
+/** Last live shopping registry. Fallback rows use the same disabled-vendor decision as the products API. */
+export function rememberStorefrontShoppingVendors(vendors: readonly ShoppingVendorRecord[] | null): void {
+  rememberedShoppingVendors = vendors;
+}
+
+export function hasRememberedStorefrontVendors(): boolean {
+  return Boolean(rememberedShoppingVendors?.length);
+}
 
 function resolveDataPath(filename: string): string | null {
   const candidates = [
@@ -48,8 +67,11 @@ function ingestCatalogProducts(
     if (options.fillMissingOnly && bySlug.has(product.slug)) continue;
     if (isRakhiRelatedProduct(product)) continue;
     if (isSampleCatalogProduct(product)) continue;
+    const vendorSlug = fulfillmentVendorSlug(product);
+    bundledVendorBySlug.set(product.slug, vendorSlug);
     const allowsAddons = productAllowsAddons(product);
     const publicProduct = stripVendorPrivateFields(product) as Product;
+    publicProduct.vendorSlug = vendorSlug;
     publicProduct.allowsAddons = allowsAddons;
     publicProduct.images = resolveProductImageUrls(publicProduct.images);
     publicProduct.createdAt = product.createdAt || "2026-09-23T00:00:00.000Z";
@@ -60,30 +82,25 @@ function ingestCatalogProducts(
 
 /** Read bundled catalog JSON — real BlossomPot SKUs only (never the sample marketplace dump). */
 export function getCatalogProducts(): Product[] {
-  if (cached) return cached;
+  if (cached) return withoutRememberedDisabledVendors(cached);
   const bySlug = new Map<string, Product>();
   ingestCatalogProducts(bySlug, (blossompotCatalog as { products?: unknown }).products);
   ingestCatalogProducts(bySlug, (tfUsaCatalog as { products?: unknown }).products, { fillMissingOnly: true });
   ingestCatalogProducts(bySlug, loadCatalogFile("blossompot-catalog.json"));
   ingestCatalogProducts(bySlug, loadCatalogFile("tf-usa-catalog.json"), { fillMissingOnly: true });
   cached = dedupeStorefrontProducts([...bySlug.values()]);
-  return cached;
+  return withoutRememberedDisabledVendors(cached);
 }
 
 export function getCatalogProduct(slug: string): Product | undefined {
   return getCatalogProducts().find((p) => p.slug === slug);
 }
 
-function productInCategory(product: Product, categorySlug: string): boolean {
-  if (product.categorySlug === categorySlug) return true;
-  return product.additionalCategorySlugs?.includes(categorySlug) ?? false;
-}
-
 export function getCatalogProductsByCategory(categorySlug: string): Product[] {
-  if (isRakhiRelatedCategorySlug(categorySlug)) return [];
+  if (storefrontSkipsRakhiCategory(categorySlug)) return [];
   const bySlug = new Map<string, Product>();
   for (const product of getCatalogProducts()) {
-    if (productInCategory(product, categorySlug)) bySlug.set(product.slug, product);
+    if (productInStorefrontCategory(product, categorySlug)) bySlug.set(product.slug, product);
   }
   return dedupeStorefrontProducts([...bySlug.values()]);
 }
@@ -96,10 +113,15 @@ export function mergeProductsPreferExisting(
   existing: Product[],
   additions: Product[]
 ): Product[] {
+  const catalogBySlug = new Map(additions.map((product) => [product.slug, product]));
   const bySlug = new Map(
     existing
       .filter((p) => !isRakhiRelatedProduct(p) && !isSampleCatalogProduct(p))
-      .map((product) => [product.slug, product])
+      .map((product) => {
+        const catalog = catalogBySlug.get(product.slug);
+        const images = coalesceProductImages(product.images, catalog?.images);
+        return [product.slug, images === product.images ? product : { ...product, images }] as const;
+      })
   );
   for (const product of additions) {
     if (isRakhiRelatedProduct(product)) continue;
@@ -108,18 +130,67 @@ export function mergeProductsPreferExisting(
   }
   return dedupeStorefrontProducts([...bySlug.values()]);
 }
-export function getCatalogProductsForCountry(country: string): Product[] {
-  return getCatalogProducts().filter((product) => productVisibleForDeliveryCountry(product, country));
+const DEFAULT_BUNDLED_VENDORS = CATALOG_VENDOR_SLUGS.map((slug) => defaultCatalogVendor(slug));
+
+/** Vendor slug for the shopping helper. Public cards keep the resolved vendor and omit vendor cost. */
+export function bundledShoppingVendorSlug(product: {
+  slug?: string | null;
+  vendorSlug?: string | null;
+  sku?: string | null;
+  internationalDelivery?: boolean;
+  tags?: string[] | null;
+}): string {
+  const explicit = product.vendorSlug?.trim() || (product.slug ? bundledVendorBySlug.get(product.slug) : undefined);
+  return fulfillmentVendorSlug(productForShoppingDecision({ ...product, vendorSlug: explicit }));
 }
 
-/** Keep API (and live GBO) results for this country — never inject bundled JSON SKUs. */
+/** Disabled and GBO-off vendors are absent. Country and ZIP rules stay on the shopping helper. */
+export function bundledHiddenForDisabledVendor(
+  product: Product,
+  country: string,
+  vendors: readonly ShoppingVendorRecord[]
+): boolean {
+  const decision = productAllowedForNewShopping(
+    { ...product, vendorSlug: bundledShoppingVendorSlug(product) },
+    country,
+    vendors
+  );
+  return decision.reason === "vendor_disabled" || decision.reason === "gbo_storefront_disabled";
+}
+
+function withoutRememberedDisabledVendors(products: Product[], country = "US"): Product[] {
+  const vendors = rememberedShoppingVendors;
+  if (!vendors?.length) return products;
+  return products.filter((product) => !bundledHiddenForDisabledVendor(product, country, vendors));
+}
+
+/**
+ * Bundled JSON is not a second catalog. It may fill a missing SKU only when that
+ * product's built-in vendor delivers to the country. Live admin delivery countries
+ * stay on the product API, which already filtered its own rows.
+ */
+function bundledProductAllowedForCountry(product: Product, country: string): boolean {
+  if (!productVisibleForDeliveryCountry(product, country)) return false;
+  const decision = productAllowedForNewShopping(product, country, DEFAULT_BUNDLED_VENDORS);
+  if (decision.available) return true;
+  if (decision.reason !== "gbo_storefront_disabled") return false;
+  const record = DEFAULT_BUNDLED_VENDORS.find((vendor) => vendor.vendorSlug === decision.vendorSlug);
+  return Boolean(record?.deliveryCountries.includes(country.trim().toUpperCase()));
+}
+
+export function getCatalogProductsForCountry(country: string): Product[] {
+  return getCatalogProducts().filter((product) => bundledProductAllowedForCountry(product, country));
+}
+
+/** API/GBO prices win for shared slugs; fill in published bundled catalog SKUs that Dynamo never imported. */
 export function mergeProductsForCountry(existing: Product[], country: string): Product[] {
-  return dedupeStorefrontProducts(
+  return mergeProductsPreferExisting(
     existing.filter(
       (product) =>
         !isRakhiRelatedProduct(product) &&
         !isSampleCatalogProduct(product) &&
         productVisibleForDeliveryCountry(product, country)
-    )
+    ),
+    getCatalogProductsForCountry(country)
   );
 }

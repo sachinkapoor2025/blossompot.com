@@ -26,12 +26,12 @@ export function exploreMoreLinksForProduct(productSlug?: string, categorySlug?: 
     "flower-bouquets": [
       { label: "Fresh flowers", href: categoryHref("flowers") },
       { label: "Valentine's Day gifts", href: categoryHref("valentines-day-gifts") },
-      { label: "Same-day delivery", href: categoryHref("same-day-gifts") },
+      { label: "Gift catalog", href: "/gift-catalog" },
     ],
     cakes: [
       { label: "Birthday gifts", href: categoryHref("birthday-gifts") },
       { label: "Gift hampers", href: categoryHref("gift-hampers") },
-      { label: "Same-day delivery", href: categoryHref("same-day-gifts") },
+      { label: "Gift catalog", href: "/gift-catalog" },
     ],
     "gift-hampers": [
       { label: "Birthday gifts", href: categoryHref("birthday-gifts") },
@@ -41,7 +41,7 @@ export function exploreMoreLinksForProduct(productSlug?: string, categorySlug?: 
     "birthday-gifts": [
       { label: "Celebration cakes", href: categoryHref("cakes") },
       { label: "Fresh flowers", href: categoryHref("flowers") },
-      { label: "Same-day delivery", href: categoryHref("same-day-gifts") },
+      { label: "Gift catalog", href: "/gift-catalog" },
     ],
     "anniversary-gifts": [
       { label: "Flower bouquets", href: categoryHref("flower-bouquets") },
@@ -57,11 +57,6 @@ export function exploreMoreLinksForProduct(productSlug?: string, categorySlug?: 
       { label: "Plants", href: categoryHref("plants") },
       { label: "Flower bouquets", href: categoryHref("flower-bouquets") },
       { label: "Mother's Day flower guide", href: "/blog/send-mothers-day-flowers-to-mom" },
-    ],
-    "same-day-gifts": [
-      { label: "Flowers", href: categoryHref("flowers") },
-      { label: "Cakes", href: categoryHref("cakes") },
-      { label: "Delivery locations", href: "/delivery-locations" },
     ],
   };
 

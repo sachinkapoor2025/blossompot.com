@@ -67,13 +67,14 @@ export async function InternationalMarketPage({
     } catch {
       products = [];
     }
-    products = shuffleForCity(
-      mergeProductsForCountry(products, countryIso).filter(
-        (p) => isProductStorefrontVisible(p) && productVisibleForDeliveryCountry(p, countryIso)
-      ),
-      loc.slug
-    ).slice(0, 20);
-    products = toListingCardProducts(products);
+    products = toListingCardProducts(
+      shuffleForCity(
+        mergeProductsForCountry(products, countryIso).filter(
+          (p) => isProductStorefrontVisible(p) && productVisibleForDeliveryCountry(p, countryIso)
+        ),
+        loc.slug
+      ).slice(0, 20)
+    );
   }
   return <InternationalLocationPage loc={resolveLocation(loc)} products={products} />;
 }

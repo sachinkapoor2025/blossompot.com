@@ -1,9 +1,9 @@
 /**
  * Resolve a product for storefront/cart: DynamoDB first, then auto-create from
- * live vendor catalogs (Orange County hampers, GBO) when missing.
- * Bundled BlossomPot JSON seed is not created on public product views.
+ * bundled catalog JSON, Orange County hampers, or GBO when missing.
  */
 import { parseGboSlug } from "@blossompot/shared";
+import { ensureUsarakhiCatalogProductInDb } from "./blossompot-catalog";
 import { ensureOrangeCountyProductInDb } from "./orange-county-catalog";
 import { ensureGboProductInDb } from "./gbo-catalog";
 
@@ -15,6 +15,12 @@ export async function ensureProductInDb(slug: string): Promise<Record<string, un
       console.error("ensureGboProductInDb failed", slug, err);
       return null;
     }
+  }
+  try {
+    const bundled = await ensureUsarakhiCatalogProductInDb(slug);
+    if (bundled) return bundled;
+  } catch (err) {
+    console.error("ensureUsarakhiCatalogProductInDb failed", slug, err);
   }
   return ensureOrangeCountyProductInDb(slug);
 }

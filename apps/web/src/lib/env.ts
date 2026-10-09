@@ -9,13 +9,23 @@ export function getAmplifyBranchUrl(): string | undefined {
   return `https://${branch}.${appId}.amplifyapp.com`;
 }
 
-/** Ensure execute-api URLs include the stage (e.g. /prod). */
+/** Ensure execute-api URLs include the stage (e.g. /prod). Dev builds do not use this fallback. */
 export function normalizeApiUrl(url: string): string {
   const trimmed = url.replace(/\/$/, "");
   if (trimmed.includes(".execute-api.") && !/\/(dev|staging|prod)$/.test(trimmed)) {
     return `${trimmed}/prod`;
   }
   return trimmed;
+}
+
+const DEV_API_URL =
+  /^https:\/\/[a-z0-9]+\.execute-api\.[a-z0-9.-]+\.amazonaws\.com\/dev$/;
+
+/** True for the Amplify dev branch. Local development does not set these variables. */
+export function isDevDeployment(): boolean {
+  return (
+    process.env.NEXT_PUBLIC_APP_ENV?.trim() === "dev" || process.env.AWS_BRANCH?.trim() === "dev"
+  );
 }
 
 function readEnv(name: string, fallback: string): string {
@@ -25,6 +35,15 @@ function readEnv(name: string, fallback: string): string {
 
 export function getApiUrl(): string {
   const fromEnv = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (isDevDeployment()) {
+    const trimmed = fromEnv?.replace(/\/$/, "") ?? "";
+    if (!DEV_API_URL.test(trimmed) || trimmed.includes("6y37e2a4j1.execute-api.")) {
+      throw new Error(
+        "Dev deployment requires NEXT_PUBLIC_API_URL to be the dev API stage (/dev). Refusing to use the production API."
+      );
+    }
+    return trimmed;
+  }
   if (fromEnv) return normalizeApiUrl(fromEnv);
   if (process.env.NODE_ENV === "production") return PROD_API_URL;
   return "http://localhost:3001";

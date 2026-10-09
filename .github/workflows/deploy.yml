@@ -1,6 +1,17 @@
 name: Deploy
 
-# Trigger: push to main/dev/feature/* or manual workflow_dispatch.
+# Push targets:
+#   main       → blossompot-prod / blossompot-products-prod / API stage /prod / Amplify branch main
+#   dev        → blossompot-dev  / blossompot-products-dev  / API stage /dev  / Amplify app dsjdlmcsa1pdc branch dev
+#   feature/** → test and build only
+# Manual workflow_dispatch requires environment=dev or prod (the dropdown starts on dev).
+# Prod can be selected only from refs/heads/main. Dev can be selected only from refs/heads/dev.
+# Dev deploys do not receive production payment, SMTP, WhatsApp, Twilio, USPS, Orange County, or GBO secrets.
+# Optional GitHub secrets for dev test payments:
+#   STRIPE_SECRET_KEY_TEST (sk_test_), STRIPE_WEBHOOK_SECRET_TEST (whsec_),
+#   RAZORPAY_KEY_ID_TEST (rzp_test_), RAZORPAY_KEY_SECRET_TEST, RAZORPAY_WEBHOOK_SECRET_TEST,
+#   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_TEST (pk_test_)
+# Leave them unset to keep dev checkout in stub mode and skip outbound email.
 on:
   push:
     branches:
@@ -8,6 +19,15 @@ on:
       - dev
       - "feature/**"
   workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to deploy. Controls the SAM stack and Amplify branch. Does not default to production.
+        required: true
+        type: choice
+        default: dev
+        options:
+          - dev
+          - prod
 
 concurrency:
   group: deploy-${{ github.ref }}
@@ -26,11 +46,41 @@ jobs:
           node-version-file: ".nvmrc"
           cache: npm
       - run: npm ci
+      - run: npm test
       - run: npm run build
 
-  deploy-api:
+  guard:
     runs-on: ubuntu-latest
-    needs: build
+    steps:
+      - name: Reject manual deploy without an explicit environment
+        if: github.event_name == 'workflow_dispatch' && inputs.environment != 'dev' && inputs.environment != 'prod'
+        run: |
+          echo "::error::Choose environment dev or prod. This workflow will not default to production."
+          exit 1
+
+      - name: Reject manual production deploy from a non-main ref
+        if: github.event_name == 'workflow_dispatch' && inputs.environment == 'prod' && github.ref != 'refs/heads/main'
+        run: |
+          echo "::error::Manual production deploy is allowed only from refs/heads/main."
+          exit 1
+
+      - name: Reject manual dev deploy from a non-dev ref
+        if: github.event_name == 'workflow_dispatch' && inputs.environment == 'dev' && github.ref != 'refs/heads/dev'
+        run: |
+          echo "::error::Manual dev deploy is allowed only from refs/heads/dev."
+          exit 1
+
+      - name: Confirm push target
+        if: github.event_name == 'push'
+        run: echo "Push ${{ github.ref }}. main deploys blossompot-prod, dev deploys blossompot-dev, feature branches do not deploy."
+
+  deploy-api-prod:
+    runs-on: ubuntu-latest
+    needs: [build, guard]
+    if: ${{ success() && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.environment == 'prod' && github.ref == 'refs/heads/main')) }}
+    concurrency:
+      group: blossompot-prod
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -39,6 +89,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build -w @blossompot/shared
+
+      - name: Assert production SAM target
+        run: npx tsx scripts/ci/deploy-target.ts assert --config-env prod --stack blossompot-prod --environment prod
 
       - uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -80,6 +133,7 @@ jobs:
           GBO_SANDBOX: ${{ secrets.GBO_SANDBOX }}
           GBO_PAYMENT_TYPE: ${{ secrets.GBO_PAYMENT_TYPE }}
           GBO_AUTH_SCHEME: ${{ secrets.GBO_AUTH_SCHEME }}
+          GBO_STOREFRONT_ENABLED: ${{ secrets.GBO_STOREFRONT_ENABLED }}
         run: |
           # Omit empty WhatsApp/Twilio/marketing overrides so a prior SAM deploy's values are not wiped.
           BASE_URL="${USPS_BASE_URL:-https://apis.usps.com}"
@@ -115,7 +169,13 @@ jobs:
           [ -n "${GBO_SANDBOX:-}" ] && EXTRA="$EXTRA GboSandbox=${GBO_SANDBOX}"
           [ -n "${GBO_PAYMENT_TYPE:-}" ] && EXTRA="$EXTRA GboPaymentType=${GBO_PAYMENT_TYPE}"
           [ -n "${GBO_AUTH_SCHEME:-}" ] && EXTRA="$EXTRA GboAuthScheme=${GBO_AUTH_SCHEME}"
-          sam build && sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --config-env prod \
+          # Live production catalog stays on when the secret is unset. Explicit false, 0, or no hides it.
+          case "$(printf '%s' "${GBO_STOREFRONT_ENABLED:-}" | tr '[:upper:]' '[:lower:]')" in
+            false|0|no) GBO_FLAG=false ;;
+            *) GBO_FLAG=true ;;
+          esac
+          EXTRA="$EXTRA GboStorefrontEnabled=${GBO_FLAG}"
+          sam build && sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --config-env prod --stack-name blossompot-prod \
             --parameter-overrides "\
           Environment=prod \
           SmtpPassword=${SMTP_PASSWORD} \
@@ -129,12 +189,81 @@ jobs:
           UspsPaymentAuthorizationToken=${USPS_PAYMENT_AUTHORIZATION_TOKEN} \
           OrangeCountyVendorApiKey=${ORANGE_COUNTY_VENDOR_API_KEY}${EXTRA}"
 
+      - name: Confirm production stack outputs
+        run: npx tsx scripts/ci/deploy-target.ts assert-stack --environment prod --stack blossompot-prod
+
       # Catalog import OVERWRITES product records and has wiped admin-uploaded images.
       # Run manually only: Actions → Import BlossomPot Catalog (workflow_dispatch).
 
-  deploy-web:
+  deploy-api-dev:
     runs-on: ubuntu-latest
-    needs: deploy-api
+    needs: [build, guard]
+    if: ${{ success() && ((github.event_name == 'push' && github.ref == 'refs/heads/dev') || (github.event_name == 'workflow_dispatch' && inputs.environment == 'dev' && github.ref == 'refs/heads/dev')) }}
+    concurrency:
+      group: blossompot-dev
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w @blossompot/shared
+
+      - name: Assert dev SAM target
+        run: npx tsx scripts/ci/deploy-target.ts assert --config-env default --stack blossompot-dev --environment dev
+
+      - name: Write dev parameter overrides
+        env:
+          STRIPE_SECRET_KEY_TEST: ${{ secrets.STRIPE_SECRET_KEY_TEST }}
+          STRIPE_WEBHOOK_SECRET_TEST: ${{ secrets.STRIPE_WEBHOOK_SECRET_TEST }}
+          RAZORPAY_KEY_ID_TEST: ${{ secrets.RAZORPAY_KEY_ID_TEST }}
+          RAZORPAY_KEY_SECRET_TEST: ${{ secrets.RAZORPAY_KEY_SECRET_TEST }}
+          RAZORPAY_WEBHOOK_SECRET_TEST: ${{ secrets.RAZORPAY_WEBHOOK_SECRET_TEST }}
+          GBO_DEV_API_TOKEN: ${{ secrets.GBO_DEV_API_TOKEN }}
+        run: npx tsx scripts/ci/deploy-target.ts dev-overrides > "$RUNNER_TEMP/dev-parameter-overrides.txt"
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: aws-actions/setup-sam@v3
+
+      - name: SAM Deploy
+        working-directory: infrastructure
+        run: |
+          set -euo pipefail
+          OVERRIDES=$(cat "$RUNNER_TEMP/dev-parameter-overrides.txt")
+          case "$OVERRIDES" in
+            *sk_live_*|*rk_live_*|*pk_live_*)
+              echo "::error::Dev overrides include a live payment key."
+              exit 1
+              ;;
+          esac
+          # A failed changeset leaves a new stack here with no resources. Remove only that empty stack.
+          DEV_STACK_STATUS=$(aws cloudformation describe-stacks --stack-name blossompot-dev --query "Stacks[0].StackStatus" --output text 2>/dev/null || echo "MISSING")
+          if [ "$DEV_STACK_STATUS" = "REVIEW_IN_PROGRESS" ]; then
+            echo "Deleting empty blossompot-dev stack left in REVIEW_IN_PROGRESS."
+            aws cloudformation delete-stack --stack-name blossompot-dev
+            aws cloudformation wait stack-delete-complete --stack-name blossompot-dev
+          fi
+          sam build && sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --config-env default --stack-name blossompot-dev \
+            --parameter-overrides "$OVERRIDES"
+
+      - name: Confirm dev stack outputs
+        run: npx tsx scripts/ci/deploy-target.ts assert-stack --environment dev --stack blossompot-dev
+
+  deploy-web-prod:
+    runs-on: ubuntu-latest
+    needs: [build, guard, deploy-api-prod]
+    if: ${{ success() && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.environment == 'prod' && github.ref == 'refs/heads/main')) }}
+    concurrency:
+      group: blossompot-prod
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -148,26 +277,26 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
-      - name: Sync Stripe and Razorpay public keys to Amplify
+      - name: Sync Stripe and Razorpay public keys to Amplify main
         env:
           AMPLIFY_APP_ID: ${{ secrets.AMPLIFY_APP_ID }}
           STRIPE_PK: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
           RAZOR_KEY_ID: ${{ secrets.RAZOR_KEY_ID }}
+          GBO_STOREFRONT_ENABLED: ${{ secrets.GBO_STOREFRONT_ENABLED }}
         run: |
-          APP_ID="${AMPLIFY_APP_ID:-d1vlvm5li37k6g}"
-          BRANCH="${GITHUB_REF_NAME}"
-          if [ "$BRANCH" != "main" ] && [ "$BRANCH" != "dev" ]; then
-            echo "Skip Amplify env sync for branch $BRANCH"
-            exit 0
-          fi
-          EXISTING=$(aws amplify get-branch --app-id "$APP_ID" --branch-name "$BRANCH" \
-            --query 'branch.environmentVariables' --output json 2>/dev/null || echo '{}')
+          APP_ID=$(npx tsx scripts/ci/deploy-target.ts amplify-app-id)
+          export APP_ID
+          APP_JSON=$(aws amplify get-app --region us-east-1 --app-id "$APP_ID" --output json)
+          export APP_JSON
+          npx tsx scripts/ci/deploy-target.ts assert-amplify-app
+          EXISTING=$(aws amplify get-branch --region us-east-1 --app-id "$APP_ID" --branch-name main \
+            --query 'branch.environmentVariables' --output json)
           export EXISTING
-          MERGED=$(python3 -c "import json,os; e=json.loads(os.environ.get('EXISTING') or '{}'); s=(os.environ.get('STRIPE_PK') or '').strip(); r=(os.environ.get('RAZOR_KEY_ID') or '').strip(); e.update({k:v for k,v in [('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY',s),('RAZOR_KEY_ID',r),('NEXT_PUBLIC_RAZORPAY_KEY_ID',r)] if v}); print(json.dumps(e))")
+          MERGED=$(python3 -c "import json,os; e=json.loads(os.environ.get('EXISTING') or '{}'); s=(os.environ.get('STRIPE_PK') or '').strip(); r=(os.environ.get('RAZOR_KEY_ID') or '').strip(); g=(os.environ.get('GBO_STOREFRONT_ENABLED') or '').strip().lower(); g='false' if g in ('false','0','no') else 'true'; e.update({k:v for k,v in [('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY',s),('RAZOR_KEY_ID',r),('NEXT_PUBLIC_RAZORPAY_KEY_ID',r)] if v}); e['GBO_STOREFRONT_ENABLED']=g; print(json.dumps(e))")
           export MERGED
           ENV_STRING=$(python3 -c "import json,os; d=json.loads(os.environ.get('MERGED') or '{}'); print(','.join(f'{k}={v}' for k,v in d.items()))")
-          aws amplify update-branch --app-id "$APP_ID" --branch-name "$BRANCH" --environment-variables "$ENV_STRING" >/dev/null
-          echo "Amplify $BRANCH env updated with Stripe publishable key and Razorpay key id (values not logged)."
+          aws amplify update-branch --app-id "$APP_ID" --branch-name main --environment-variables "$ENV_STRING" >/dev/null
+          echo "Amplify main env updated with Stripe publishable key and Razorpay key id (values not logged)."
         continue-on-error: true
 
       - name: Export SAM outputs for web build
@@ -178,8 +307,10 @@ jobs:
               --query "Stacks[0].Outputs[?OutputKey=='$1'].OutputValue | [0]" \
               --output text
           }
-
-          echo "NEXT_PUBLIC_API_URL=$(output ApiUrl)" >> "$GITHUB_ENV"
+          API_URL=$(output ApiUrl)
+          TABLE=$(output ProductsTableName)
+          npx tsx scripts/ci/deploy-target.ts assert-url --environment prod --url "$API_URL" --table "$TABLE"
+          echo "NEXT_PUBLIC_API_URL=${API_URL}" >> "$GITHUB_ENV"
           echo "NEXT_PUBLIC_COGNITO_USER_POOL_ID=$(output UserPoolId)" >> "$GITHUB_ENV"
           echo "NEXT_PUBLIC_COGNITO_CLIENT_ID=$(output UserPoolClientId)" >> "$GITHUB_ENV"
           echo "NEXT_PUBLIC_CDN_URL=https://$(output CloudFrontDomain)" >> "$GITHUB_ENV"
@@ -202,3 +333,67 @@ jobs:
           echo "Stripe: STRIPE_SECRET_KEY on Lambda; NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY on Amplify."
           echo "Razorpay: RAZOR_KEY_ID + RAZOR_KEY_SECRET on Lambda; RAZOR_KEY_ID on Amplify."
           echo "Optional: STRIPE_WEBHOOK_SECRET + Dashboard webhook {ApiUrl}/webhooks/stripe"
+
+  deploy-web-dev:
+    runs-on: ubuntu-latest
+    needs: [build, guard, deploy-api-dev]
+    if: ${{ success() && ((github.event_name == 'push' && github.ref == 'refs/heads/dev') || (github.event_name == 'workflow_dispatch' && inputs.environment == 'dev' && github.ref == 'refs/heads/dev')) }}
+    concurrency:
+      group: blossompot-dev
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+          cache: npm
+      - run: npm ci
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Export dev SAM outputs
+        run: |
+          set -euo pipefail
+          output() {
+            aws cloudformation describe-stacks \
+              --region us-east-1 \
+              --stack-name blossompot-dev \
+              --query "Stacks[0].Outputs[?OutputKey=='$1'].OutputValue | [0]" \
+              --output text
+          }
+          API_URL=$(output ApiUrl)
+          TABLE=$(output ProductsTableName)
+          npx tsx scripts/ci/deploy-target.ts assert-url --environment dev --url "$API_URL" --table "$TABLE"
+          CDN=$(output CloudFrontDomain)
+          if [ "$CDN" = "d2d01h4hac5hqs.cloudfront.net" ]; then
+            echo "::error::Dev stack is using the production CloudFront distribution."
+            exit 1
+          fi
+          echo "NEXT_PUBLIC_API_URL=${API_URL}" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_APP_ENV=dev" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_COGNITO_USER_POOL_ID=$(output UserPoolId)" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_COGNITO_CLIENT_ID=$(output UserPoolClientId)" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_CDN_URL=https://${CDN}" >> "$GITHUB_ENV"
+          echo "DEV_PRODUCTS_TABLE=${TABLE}" >> "$GITHUB_ENV"
+          echo "DEV_USER_POOL_ID=$(output UserPoolId)" >> "$GITHUB_ENV"
+          echo "DEV_USER_POOL_CLIENT_ID=$(output UserPoolClientId)" >> "$GITHUB_ENV"
+          echo "DEV_CDN=${CDN}" >> "$GITHUB_ENV"
+
+      - name: Publish dev configuration to Amplify app dsjdlmcsa1pdc branch dev
+        env:
+          AMPLIFY_APP_ID: ${{ secrets.AMPLIFY_APP_ID }}
+          STRIPE_PK_TEST: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_TEST }}
+          RAZOR_KEY_ID_TEST: ${{ secrets.RAZORPAY_KEY_ID_TEST }}
+          GBO_DEV_API_TOKEN: ${{ secrets.GBO_DEV_API_TOKEN }}
+        run: npx tsx scripts/ci/deploy-target.ts publish-dev-amplify
+
+      - run: npm run build -w @blossompot/shared
+      - run: npm run build -w @blossompot/web
+        env:
+          NEXT_PUBLIC_APP_ENV: dev
+          NEXT_PUBLIC_COGNITO_REGION: ${{ env.AWS_REGION }}
+          NEXT_PUBLIC_USD_INR_RATE: ${{ secrets.NEXT_PUBLIC_USD_INR_RATE }}

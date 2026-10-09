@@ -3,7 +3,9 @@
 import { useState, useEffect, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
 import { useCart } from "@/lib/cart-context";
+import { wishlistEntryHref } from "@/lib/wishlist-href";
 import { categoryHref } from "@/lib/category-urls";
 import { categoryLocationHref, parseLocationShopPath } from "@/lib/location-seo-urls";
 import {
@@ -18,23 +20,73 @@ import { SiteLogoLink } from "@/components/SiteLogo";
 import { DeliveryLocationChip } from "@/components/DeliveryLocationChip";
 import { DeliveryLocationBanner } from "@/components/DeliveryLocationBanner";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
-import { countryMenuDestination, navigateAfterLocationCommit } from "@/lib/country-switch";
+import { countryMenuDestination, deliverToDestination, navigateAfterLocationCommit } from "@/lib/country-switch";
 import { COUNTRY_GUIDE_HREF, useCountrySearch, useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
+
+function CitiesCountryField({
+  id,
+  value,
+  onChange,
+}: {
+  id: string;
+  value: string;
+  onChange: (countryCode: string) => void;
+}) {
+  const { countries } = useGboDeliveryCountries();
+  return (
+    <div className="px-3 pb-2">
+      <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-400" htmlFor={id}>
+        Country
+      </label>
+      <select
+        id={id}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm"
+      >
+        {countries.some((c) => c.countryCode === value) ? null : (
+          <option value={value}>{value}</option>
+        )}
+        {countries.map((c) => (
+          <option key={c.countryCode} value={c.countryCode}>
+            {c.countryName}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
 
 function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const { openSelector, location } = useDeliveryLocation();
+  const { openSelector, location, setLocation } = useDeliveryLocation();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const menu = cityMenuForCountry(
-    countryIsoFromPathname(pathname, searchParams.get("country")) ?? location?.countryCode
-  );
+  const pathIso =
+    countryIsoFromPathname(pathname, searchParams.get("country")) ?? location?.countryCode ?? "US";
+  const [menuIso, setMenuIso] = useState(pathIso);
+  const menu = cityMenuForCountry(menuIso);
   const visible = filterCityMenuLinks(menu.links, query);
+
+  useEffect(() => {
+    setMenuIso(pathIso);
+  }, [pathIso]);
 
   useEffect(() => {
     setQuery("");
   }, [menu.heading]);
+
+  const router = useRouter();
+  const chooseMenuCountry = (countryCode: string) => {
+    const iso = countryCode.trim().toUpperCase();
+    setMenuIso(iso);
+    navigateAfterLocationCommit({
+      href: deliverToDestination(pathname, iso, searchParams.toString()),
+      commit: () => setLocation({ countryCode: iso, postalCode: "", postalDisplay: iso }),
+      navigate: (url) => router.push(url),
+    });
+  };
 
   return (
     <div
@@ -58,6 +110,7 @@ function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
             <p className="px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
               {menu.heading}
             </p>
+            <CitiesCountryField id="cities-country" value={menuIso} onChange={chooseMenuCountry} />
             <div className="px-3 pb-2">
               <input
                 value={query}
@@ -101,7 +154,7 @@ function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
                 openSelector();
               }}
             >
-              Other country — enter postal code
+              United States — enter ZIP code
             </button>
           </div>
         </div>
@@ -252,10 +305,24 @@ function AccountLink() {
   );
 }
 
-function WishlistLink() {
+function WishlistMenuLink({ onNavigate }: { onNavigate?: () => void }) {
+  const { user } = useAuth();
   return (
     <Link
-      href="/wishlist"
+      href={wishlistEntryHref(Boolean(user))}
+      onClick={onNavigate}
+      className="flex flex-col items-center gap-1 px-2 py-3 text-xs font-semibold text-primary hover:bg-slate-50"
+    >
+      Wishlist
+    </Link>
+  );
+}
+
+function WishlistLink() {
+  const { user } = useAuth();
+  return (
+    <Link
+      href={wishlistEntryHref(Boolean(user))}
       className="flex h-10 w-10 shrink-0 items-center justify-center text-nav hover:text-primary"
       aria-label="Wishlist"
     >
@@ -320,6 +387,21 @@ function DesktopHeaderAction({
   );
 }
 
+function DesktopWishlistAction() {
+  const { user } = useAuth();
+  return (
+    <DesktopHeaderAction href={wishlistEntryHref(Boolean(user))} label="Wish Lists">
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+        />
+      </svg>
+    </DesktopHeaderAction>
+  );
+}
+
 function DesktopCartAction() {
   const { itemCount } = useCart();
 
@@ -357,13 +439,18 @@ export function Header() {
   const { countries, loaded: countriesLoaded } = useGboDeliveryCountries();
   const countrySearch = useCountrySearch(countries);
   const cityCountryIso =
-    countryIsoFromPathname(pathname, searchParams.get("country")) ?? deliveryLocation?.countryCode;
-  const cityMenu = cityMenuForCountry(cityCountryIso);
+    countryIsoFromPathname(pathname, searchParams.get("country")) ?? deliveryLocation?.countryCode ?? "US";
+  const [cityMenuIso, setCityMenuIso] = useState(cityCountryIso);
+  const cityMenu = cityMenuForCountry(cityMenuIso);
   const cityVisible = filterCityMenuLinks(cityMenu.links, cityQuery);
 
   useEffect(() => {
-    setCityQuery("");
+    setCityMenuIso(cityCountryIso);
   }, [cityCountryIso]);
+
+  useEffect(() => {
+    setCityQuery("");
+  }, [cityMenuIso]);
 
   const isActive = (href: string, category?: string) => {
     if (href === "/") return pathname === "/" && !activeCategory;
@@ -464,15 +551,7 @@ export function Header() {
               />
             </svg>
           </DesktopHeaderAction>
-          <DesktopHeaderAction href="/wishlist" label="Wish Lists">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-              />
-            </svg>
-          </DesktopHeaderAction>
+          <DesktopWishlistAction />
           <DesktopCartAction />
         </div>
       </div>
@@ -551,6 +630,20 @@ export function Header() {
                     <p className="px-4 pt-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
                       {cityMenu.heading}
                     </p>
+                    <CitiesCountryField
+                      id="cities-country-mobile"
+                      value={cityMenuIso}
+                      onChange={(iso) => {
+                        setCityMenuIso(iso);
+                        closeMenu();
+                        navigateAfterLocationCommit({
+                          href: deliverToDestination(pathname, iso, searchParams.toString()),
+                          commit: () =>
+                            setLocation({ countryCode: iso, postalCode: "", postalDisplay: iso }),
+                          navigate: (url) => router.push(url),
+                        });
+                      }}
+                    />
                     <input
                       value={cityQuery}
                       onChange={(e) => setCityQuery(e.target.value)}
@@ -586,7 +679,7 @@ export function Header() {
                         openSelector();
                       }}
                     >
-                      Other country — enter postal code
+                      United States — enter ZIP code
                     </button>
                   </div>
                 )}
@@ -674,13 +767,7 @@ export function Header() {
               >
                 Account
               </Link>
-              <Link
-                href="/wishlist"
-                onClick={closeMenu}
-                className="flex flex-col items-center gap-1 px-2 py-3 text-xs font-semibold text-primary hover:bg-slate-50"
-              >
-                Wishlist
-              </Link>
+              <WishlistMenuLink onNavigate={closeMenu} />
               <Link
                 href="/cart"
                 onClick={closeMenu}

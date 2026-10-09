@@ -17,7 +17,6 @@ export const HOMEPAGE_TILE_IDENTITY = [
   { slug: "wedding-gifts", label: "Wedding", href: "/wedding-gifts" },
   { slug: "cakes", label: "Cakes", href: "/cakes" },
   { slug: "gift-hampers", label: "Hampers", href: "/gift-hampers" },
-  { slug: "same-day-gifts", label: "Same-Day", href: "/same-day-delivery" },
   { slug: "plants", label: "Plants", href: "/plants" },
   { slug: "personalized-gifts", label: "Personalized", href: "/personalized-gifts" },
   { slug: "celebration-gifts", label: "Celebration", href: "/celebration-gifts" },

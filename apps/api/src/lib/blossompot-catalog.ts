@@ -5,7 +5,13 @@
  * Same pattern as orange-county-catalog.ts for hampers.
  */
 import { PutCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
-import { productKeys, categoryKeys, DEFAULT_PRODUCT_INVENTORY, isSampleCatalogProduct } from "@blossompot/shared";
+import {
+  productKeys,
+  categoryKeys,
+  DEFAULT_PRODUCT_INVENTORY,
+  fulfillmentVendorSlug,
+  isSampleCatalogProduct,
+} from "@blossompot/shared";
 import { docClient, PRODUCTS_TABLE, now } from "./db";
 import catalogJson from "../data/blossompot-catalog.json";
 
@@ -121,7 +127,7 @@ export async function ensureUsarakhiCategoriesInDb(): Promise<number> {
   return created;
 }
 
-function catalogProductToDbItem(bundled: CatalogProduct, ts: string) {
+export function catalogProductToDbItem(bundled: CatalogProduct, ts: string) {
   const categorySlug = bundled.categorySlug;
   return {
     name: bundled.name,
@@ -136,6 +142,11 @@ function catalogProductToDbItem(bundled: CatalogProduct, ts: string) {
     sku: bundled.sku,
     inventory: bundled.inventory ?? DEFAULT_PRODUCT_INVENTORY,
     tags: bundled.tags ?? [],
+    vendorSlug: fulfillmentVendorSlug({
+      slug: bundled.slug,
+      sku: bundled.sku,
+      tags: bundled.tags,
+    }),
     ...(bundled.couponExcluded ? { couponExcluded: true } : {}),
     ...(bundled.deliveryFee != null ? { deliveryFee: bundled.deliveryFee } : {}),
     ...(bundled.shippingNote ? { shippingNote: bundled.shippingNote } : {}),
@@ -177,11 +188,20 @@ export async function ensureUsarakhiCatalogProductInDb(
   return item;
 }
 
+export function bundledCatalogProductsMissingFrom(existingSlugs: Set<string>): CatalogProduct[] {
+  return listBundledCatalogProducts().filter((product) => !existingSlugs.has(product.slug));
+}
+
 /** Create Dynamo rows for bundled catalog SKUs that are not in the table yet. */
 export async function persistMissingBundledCatalogProducts(
-  existingSlugs: Set<string>
+  existingSlugs: Set<string>,
+  limit = Number.POSITIVE_INFINITY
 ): Promise<Record<string, unknown>[]> {
-  const missing = listBundledCatalogProducts().filter((product) => !existingSlugs.has(product.slug));
+  const cap = Number.isFinite(limit) ? Math.max(0, Math.floor(limit)) : Number.POSITIVE_INFINITY;
+  const missing = bundledCatalogProductsMissingFrom(existingSlugs).slice(
+    0,
+    Number.isFinite(cap) ? cap : undefined
+  );
   if (missing.length === 0) return [];
 
   const ts = now();

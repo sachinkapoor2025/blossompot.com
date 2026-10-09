@@ -43,7 +43,7 @@ export const site = {
   foundingDate: "2024",
   tagline: "Flowers ♥ Cakes ♥ Gifts — Delivering Smiles",
   description:
-    "BlossomPot.com — premium online gifting for flowers, bouquets, cakes, and curated gifts with worldwide delivery. Same-day options in select cities, elegant designs for birthdays, anniversaries, Valentine's Day, Mother's Day, and more.",
+    "BlossomPot.com — premium online gifting for flowers, bouquets, cakes, and curated gifts with worldwide delivery. Elegant designs for birthdays, anniversaries, Valentine's Day, Mother's Day, and more.",
   supportEmail: "support@blossompot.com",
   phone: SUPPORT_PHONE_DISPLAY,
   whatsapp: SUPPORT_PHONE_DIGITS,
@@ -67,7 +67,7 @@ export const giftSetsMenu = {
     { label: "Flower Bouquets", href: categoryHref("flower-bouquets"), category: "flower-bouquets" },
     { label: "Cakes", href: categoryHref("cakes"), category: "cakes" },
     { label: "Gift Hampers", href: categoryHref("gift-hampers"), category: "gift-hampers" },
-    { label: "Overseas Gifts", href: "/gift-catalog" },
+    { label: "Gift Catalog", href: "/gift-catalog" },
   ],
 } as const;
 
@@ -82,8 +82,7 @@ export const navItems = [
   { label: "Anniversary", href: categoryHref("anniversary-gifts"), category: "anniversary-gifts" },
   { label: "Valentine's", href: categoryHref("valentines-day-gifts"), category: "valentines-day-gifts" },
   { label: "Hampers", href: categoryHref("gift-hampers"), category: "gift-hampers" },
-  { label: "Overseas", href: "/gift-catalog" },
-  { label: "Same-Day", href: categoryHref("same-day-gifts"), category: "same-day-gifts" },
+  { label: "Gift Catalog", href: "/gift-catalog" },
   { label: "Remember", href: "/remember" },
 ] as const;
 
@@ -168,7 +167,7 @@ export const homeBanners = [
   },
   {
     src: "/banners/home-banner-flowers.jpg",
-    alt: "Fresh flowers from blossompot.com — roses, mixed bouquets, and same-day delivery",
+    alt: "Fresh flowers from blossompot.com — roses, mixed bouquets, and worldwide delivery",
     href: "/flowers",
     layout: "full" as const,
     imageFit: "contain" as const,
@@ -177,7 +176,7 @@ export const homeBanners = [
     titleAccent: "fresh flowers",
     description: "Roses, mixed bouquets, sunflowers and more for every occasion.",
     cta: "Shop Flowers",
-    pill: "Premium quality · Same-day delivery · Freshness guaranteed",
+    pill: "Premium quality · Worldwide delivery · Freshness guaranteed",
   },
 ] as const;
 
@@ -189,7 +188,6 @@ export const homeCategoryOrder = [
   "anniversary-gifts",
   "gift-hampers",
   "personalized-gifts",
-  "same-day-gifts",
 ] as const;
 
 export const setSizeCategoryOrder = [] as const;
@@ -216,13 +214,9 @@ export function whatsappLinkLabel(fallback = "Chat on WhatsApp"): string {
 }
 
 export function whatsappChatUrl(message = "Hi BlossomPot, I need help with a gift order."): string {
-  const groupUrl = site.whatsappGroupInviteUrl?.trim();
-  if (groupUrl) return groupUrl;
-  const digits = site.whatsapp.replace(/\D/g, "");
-  if (digits) {
-    return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
-  }
-  return `https://wa.me/?text=${encodeURIComponent(message)}`;
+  const digits = (site.whatsapp.replace(/\D/g, "") || DEFAULT_SUPPORT_PHONE_DIGITS).replace(/^0+/, "");
+  const text = message.trim() || "Hi BlossomPot, I need help with a gift order.";
+  return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`;
 }
 
 export const testimonials = [
@@ -279,8 +273,8 @@ export const faqs = [
     a: "Flowers, bouquets, cakes, gift hampers, personalized gifts, plants, and occasion collections for birthdays, anniversaries, Valentine's Day, Mother's Day, weddings, and more — with worldwide delivery.",
   },
   {
-    q: "Do you offer same-day delivery?",
-    a: "Same-day gift options are available in select US cities when you order before the local cut-off. Look for the Same-Day collection or filter on product pages.",
+    q: "How long does delivery take?",
+    a: "Delivery windows depend on the product and the recipient address. Estimated timing is shown on the product page and at checkout after you choose the delivery country.",
   },
   {
     q: "Can I add a gift message?",

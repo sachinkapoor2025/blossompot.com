@@ -11,12 +11,12 @@ import { pageMetadata } from "@/lib/seo";
 import { requestSeoPath } from "@/lib/request-seo-path";
 import { loadProducts, toListingCardProducts } from "@/lib/product-loader";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
-import { groupStorefrontProductsOnce, type Product, type Category } from "@blossompot/shared";
+import { groupStorefrontProductsOnce, noProductsForDeliveryCountryMessage, type Product, type Category } from "@blossompot/shared";
 import { categoryHref } from "@/lib/category-urls";
 import { localizeShopCopy, localizeShopText, locationShopHeading } from "@/lib/location-seo-urls";
 import { homeCategoryOrder, orderCategories } from "@/lib/site";
 import { ListingPageSkeleton } from "@/components/route-skeletons";
-import { isRakhiRelatedCategorySlug, isRakhiRelatedProduct } from "@/lib/rakhi-filter";
+import { isRakhiRelatedProduct, productsNotShownInSections, storefrontSkipsRakhiCategory } from "@/lib/rakhi-filter";
 
 /** Match PDP: no ISR HTML with stale product prices. */
 export const dynamic = "force-dynamic";
@@ -57,10 +57,6 @@ const CATEGORY_SEO: Record<string, { title: string; description: string }> = {
     title: "Anniversary Gifts Worldwide | BlossomPot",
     description: "Anniversary roses, bouquets, and romantic gifts for worldwide delivery.",
   },
-  "same-day-gifts": {
-    title: "Same-Day Gifts | Select Cities | BlossomPot",
-    description: "Same-day eligible gifts in select ZIP codes — confirm cut-off at checkout.",
-  },
 };
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
@@ -91,7 +87,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   const shopSeo = localizeShopCopy(seoPath, {
     title: "Shop Flowers, Cakes & Gifts — Worldwide Delivery | BlossomPot",
     description:
-      "Browse flowers, bouquets, cakes, and curated gift hampers. Birthday, anniversary, Valentine’s, and same-day options with clear worldwide delivery guidance.",
+      "Browse flowers, bouquets, cakes, and curated gift hampers. Birthday, anniversary, and Valentine’s gifts with clear worldwide delivery guidance.",
   });
   return pageMetadata({
     title: shopSeo.title,
@@ -124,7 +120,7 @@ async function ProductsPageContent({ searchParams }: Props) {
       api<{ categories: Category[] }>("/categories", { revalidate: 45 }),
     ]);
     products = liveProducts.filter((p) => !isRakhiRelatedProduct(p));
-    categories = categoriesData.categories.filter((c) => !isRakhiRelatedCategorySlug(c.slug));
+    categories = categoriesData.categories.filter((c) => !storefrontSkipsRakhiCategory(c.slug));
   } catch {
     products = [];
     categories = [];
@@ -146,8 +142,15 @@ async function ProductsPageContent({ searchParams }: Props) {
   const productsByCategory = homeCategoryOrder.map((slug) => ({
     slug,
     name: categoryMap.get(slug)?.name ?? slug.replace(/-/g, " "),
-    products: grouped.get(slug) ?? [],
+    products: (grouped.get(slug) ?? []).slice(0, 8),
   }));
+  const ungrouped = productsNotShownInSections(
+    products,
+    homeCategoryOrder.flatMap((slug) => grouped.get(slug) ?? [])
+  ).slice(0, 8);
+  const ungroupedTitle = ungrouped.every((product) => product.categorySlug === "rakhi-hampers")
+    ? "Rakhi Hampers"
+    : "More gifts";
   const showGrouped = !search && !category;
 
   return (
@@ -194,7 +197,11 @@ async function ProductsPageContent({ searchParams }: Props) {
       )}
 
       {products.length === 0 ? (
-        <p className="text-slate-600">No products found. Try another category or search term.</p>
+        <p className="text-slate-600">
+          {!search && deliveryCountry
+            ? noProductsForDeliveryCountryMessage(deliveryCountry)
+            : "No products found. Try another category or search term."}
+        </p>
       ) : showGrouped ? (
         <div className="space-y-10">
           {productsByCategory.map((section) =>
@@ -210,6 +217,12 @@ async function ProductsPageContent({ searchParams }: Props) {
               </section>
             ) : null
           )}
+          {ungrouped.length > 0 ? (
+            <section>
+              <h2 className="text-xl font-bold text-primary mb-4">{ungroupedTitle}</h2>
+              <GroupedProductCards products={toListingCardProducts(ungrouped)} />
+            </section>
+          ) : null}
         </div>
       ) : (
         <ProductGrid products={toListingCardProducts(products)} sort={sort} />

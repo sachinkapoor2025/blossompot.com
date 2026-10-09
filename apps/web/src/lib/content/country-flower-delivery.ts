@@ -58,7 +58,6 @@ const birthday = { label: "Birthday gifts", href: categoryHref("birthday-gifts")
 const anniversary = { label: "Anniversary gifts", href: categoryHref("anniversary-gifts") };
 const valentines = { label: "Valentine's gifts", href: categoryHref("valentines-day-gifts") };
 const mothers = { label: "Mother's Day gifts", href: categoryHref("mothers-day-gifts") };
-const sameDay = { label: "Same-day delivery", href: categoryHref("same-day-gifts") };
 const wedding = { label: "Wedding gifts", href: categoryHref("wedding-gifts") };
 const celebration = { label: "Celebration gifts", href: categoryHref("celebration-gifts") };
 
@@ -70,28 +69,28 @@ const PAGES: Record<CountryFlowerDeliverySlug, CountryFlowerDeliveryContent> = {
     countryName: "United States",
     title: "Flower Delivery in USA | Fresh Flowers Nationwide | BlossomPot",
     description:
-      "Order flower delivery in the USA. Fresh bouquets, same-day options in select cities, cakes and gift hampers with nationwide shipping to all 50 states.",
+      "Order flower delivery in the USA. Fresh bouquets, cakes and gift hampers with nationwide shipping to all 50 states.",
     h1: "Flower Delivery in the USA",
     intro:
-      "BlossomPot delivers flowers, bouquets, cakes, and curated gift hampers across the United States. Recipients in all 50 states, the District of Columbia, and Puerto Rico can receive a gift from our catalog — whether you are ordering from the same city or from another country. This USA flower delivery page is the destination hub: ZIP-level timing, same-day windows where coverage allows, and the collections people actually send for birthdays, anniversaries, Valentine’s Day, and Mother’s Day. We pack from within America so stems and celebration cakes travel on a domestic path, not an invented network of local florist storefronts in every town.",
+      "BlossomPot delivers flowers, bouquets, cakes, and curated gift hampers across the United States. Recipients in all 50 states, the District of Columbia, and Puerto Rico can receive a gift from our catalog — whether you are ordering from the same city or from another country. This USA flower delivery page is the destination hub: ZIP-level timing and the collections people actually send for birthdays, anniversaries, Valentine’s Day, and Mother’s Day. We pack from within America so stems and celebration cakes travel on a domestic path, not an invented network of local florist storefronts in every town.",
     availability:
-      "Nationwide USA destination coverage is live. Same-day flower delivery depends on the recipient ZIP and the local cut-off — it is not a promise for every address. Standard nationwide windows typically take several business days with tracking.",
+      "Nationwide USA destination coverage is live. Standard nationwide windows typically take several business days with tracking.",
     howItWorksHeading: "How USA flower delivery works",
     howItWorks:
       "Choose an arrangement or gift, add a personal message, and enter the recipient’s US street, city, state, and ZIP at checkout. Stripe accepts USD cards; Razorpay is available for INR when enabled. After payment you receive confirmation and can follow order status. For a specific city, open that location page — for example gifts to California, New York, Texas, or Florida — to see timezone-aware cut-offs instead of a single national clock.",
     categoriesHeading: "Flowers and gifts to send in the USA",
     categoriesIntro:
-      "Start with fresh flowers or a signature bouquet, then add a cake or hamper when you want the gift to feel complete. Same-day collections appear only for eligible destinations before cut-off.",
-    categories: [flowers, bouquets, cakes, hampers, birthday, valentines, mothers, sameDay],
+      "Start with fresh flowers or a signature bouquet, then add a cake or hamper when you want the gift to feel complete.",
+    categories: [flowers, bouquets, cakes, hampers, birthday, valentines, mothers],
     occasionsHeading: "USA occasions people send flowers for",
     occasions: [
       {
         h3: "Birthdays and thank-yous across all 50 states",
-        text: "A mixed bouquet or rose dozen still leads US birthday orders. Pair flowers with a celebration cake when the recipient is hosting at home. Nationwide shipping covers college towns and suburbs that rarely have same-day florist vans — those addresses use the standard window.",
+        text: "A mixed bouquet or rose dozen still leads US birthday orders. Pair flowers with a celebration cake when the recipient is hosting at home. Nationwide shipping covers college towns and suburbs as well as major metros.",
       },
       {
         h3: "Valentine’s Day and Mother’s Day peaks",
-        text: "US Valentine’s Day (February 14) and Mother’s Day (second Sunday in May) are the two largest flower weeks. Order early in peak weeks; same-day inventory is ZIP-limited. Red roses, mixed pastels, and gift hampers with chocolates are the usual catalog starting points.",
+        text: "US Valentine’s Day (February 14) and Mother’s Day (second Sunday in May) are the two largest flower weeks. Order early in peak weeks. Red roses, mixed pastels, and gift hampers with chocolates are the usual catalog starting points.",
       },
       {
         h3: "Thanksgiving, graduations, and sympathy",
@@ -114,7 +113,6 @@ const PAGES: Record<CountryFlowerDeliverySlug, CountryFlowerDeliveryContent> = {
     whyHeading: "Why order USA flower delivery with BlossomPot",
     whyPoints: [
       "Live destination coverage in all 50 states, DC, and Puerto Rico.",
-      "Same-day options only where the ZIP and clock actually allow them.",
       "Secure checkout with Stripe (USD) or Razorpay (INR) and a personal gift message.",
       "City and state pages that already exist — this country page does not replace /gifts-to-* URLs.",
     ],
@@ -129,8 +127,8 @@ const PAGES: Record<CountryFlowerDeliverySlug, CountryFlowerDeliveryContent> = {
         a: "Yes. Destination flower delivery includes all 50 states, DC, and Puerto Rico. Timing still depends on the recipient ZIP and product type.",
       },
       {
-        q: "Can I get same-day flower delivery in the USA?",
-        a: "Same-day is available for eligible ZIP codes before the local cut-off. Open the recipient’s city page or the same-day collection to check whether that address qualifies.",
+        q: "How long does USA flower delivery take?",
+        a: "Standard nationwide windows typically take several business days with tracking. Timing still depends on the recipient ZIP and product type.",
       },
       {
         q: "Can someone outside the USA order flowers for a US recipient?",
@@ -144,7 +142,6 @@ const PAGES: Record<CountryFlowerDeliverySlug, CountryFlowerDeliveryContent> = {
     relatedHubs: [
       { label: "USA country hub", href: "/locations/united-states" },
       { label: "Delivery locations index", href: "/delivery-locations" },
-      { label: "Same-day delivery", href: "/same-day-delivery" },
       { label: "Shipping & delivery", href: "/shipping" },
     ],
     locale: "en-US",
@@ -162,7 +159,7 @@ const PAGES: Record<CountryFlowerDeliverySlug, CountryFlowerDeliveryContent> = {
     intro:
       "BlossomPot delivers flowers, bouquets, cakes, and gift hampers to addresses across the United Kingdom. Shop the UK catalog, add a gift message, and enter the recipient’s UK street, city, and postcode at checkout. This page is the UK destination hub — London, Manchester, and the rest of Britain — with collections for birthdays, anniversaries, Mothering Sunday, and everyday thank-yous.",
     availability:
-      "UK destination coverage is live for gifts in the United Kingdom catalog. Timing depends on the recipient postcode and product. Same-day options appear only where coverage and the local cut-off allow.",
+      "UK destination coverage is live for gifts in the United Kingdom catalog. Timing depends on the recipient postcode and product.",
     howItWorksHeading: "How flower delivery works in the UK",
     howItWorks:
       "Choose an arrangement or gift from the UK catalog, add a personal message, and enter the recipient’s United Kingdom address at checkout. Pay securely, then follow order status after confirmation. For London or Manchester notes, open those city pages. Use a UK postcode for the recipient — not an overseas ZIP.",
@@ -214,8 +211,8 @@ const PAGES: Record<CountryFlowerDeliverySlug, CountryFlowerDeliveryContent> = {
         a: "The recipient’s UK street, city, and postcode.",
       },
       {
-        q: "Do you offer same-day flower delivery in the UK?",
-        a: "Same-day options appear only where coverage and the local cut-off allow. Check the product page and checkout guidance for that postcode.",
+        q: "How long does UK flower delivery take?",
+        a: "Timing depends on the recipient postcode and product. Check the product page and checkout guidance.",
       },
       {
         q: "Can I pay with a UK card?",
@@ -243,14 +240,14 @@ const PAGES: Record<CountryFlowerDeliverySlug, CountryFlowerDeliveryContent> = {
     intro:
       "BlossomPot delivers flowers, bouquets, cakes, and gift hampers to addresses across Canada. Shop the Canada catalog, add a gift message, and enter the recipient’s Canadian street, city, province, and postal code at checkout. This page is the Canada destination hub for Toronto, Vancouver, Montreal, Calgary, and the rest of the country.",
     availability:
-      "Canada destination coverage is live for gifts in the Canadian catalog. Timing depends on the recipient postal code and product. Same-day options appear only where coverage and the local cut-off allow.",
+      "Canada destination coverage is live for gifts in the Canadian catalog. Timing depends on the recipient postal code and product.",
     howItWorksHeading: "How flower delivery works in Canada",
     howItWorks:
       "Choose a gift from the Canada catalog, add a personal message, and enter the recipient’s Canadian address at checkout. Pay securely, then follow order status after confirmation. Open Ontario, British Columbia, Alberta, or Quebec pages for regional notes. Use a Canadian postal code for the recipient.",
     categoriesHeading: "Flowers and gifts to send in Canada",
     categoriesIntro:
       "Birthday and thank-you orders often start with mixed flowers or a rose bouquet. Hampers travel well when you want snacks and treats alongside blooms.",
-    categories: [flowers, bouquets, hampers, birthday, cakes, anniversary, sameDay, mothers],
+    categories: [flowers, bouquets, hampers, birthday, cakes, anniversary, mothers],
     occasionsHeading: "Canadian dates that change how you order",
     occasions: [
       {
@@ -297,8 +294,8 @@ const PAGES: Record<CountryFlowerDeliverySlug, CountryFlowerDeliveryContent> = {
         a: "The recipient’s Canadian street, city, province, and postal code.",
       },
       {
-        q: "Do you offer same-day delivery in Canada?",
-        a: "Same-day options appear only where coverage and the local cut-off allow. Check the product page for that postal code.",
+        q: "How long does Canada flower delivery take?",
+        a: "Timing depends on the recipient postal code and product. Check the product page for that postal code.",
       },
       {
         q: "Can I pay with a Canadian card?",
@@ -326,7 +323,7 @@ const PAGES: Record<CountryFlowerDeliverySlug, CountryFlowerDeliveryContent> = {
     intro:
       "BlossomPot delivers flowers, bouquets, cakes, and gift hampers to addresses across Australia. Shop the Australia catalog, add a gift message, and enter the recipient’s Australian street, suburb, state, and postcode at checkout. This page is the Australia destination hub for Sydney, Melbourne, Brisbane, Perth, and the rest of the country.",
     availability:
-      "Australia destination coverage is live for gifts in the Australian catalog. Timing depends on the recipient postcode and product. Same-day options appear only where coverage and the local cut-off allow.",
+      "Australia destination coverage is live for gifts in the Australian catalog. Timing depends on the recipient postcode and product.",
     howItWorksHeading: "How flower delivery works in Australia",
     howItWorks:
       "Choose a gift from the Australia catalog, add a personal message, and enter the recipient’s Australian address at checkout. Pay securely, then follow order status after confirmation. Open New South Wales, Victoria, Queensland, or Western Australia pages for state notes.",
@@ -380,8 +377,8 @@ const PAGES: Record<CountryFlowerDeliverySlug, CountryFlowerDeliveryContent> = {
         a: "The recipient’s Australian street, suburb, state, and postcode.",
       },
       {
-        q: "Do you offer same-day delivery in Australia?",
-        a: "Same-day options appear only where coverage and the local cut-off allow. Check the product page for that postcode.",
+        q: "How long does Australia flower delivery take?",
+        a: "Timing depends on the recipient postcode and product. Check the product page for that postcode.",
       },
       {
         q: "Can I pay with an Australian card?",
@@ -409,7 +406,7 @@ const PAGES: Record<CountryFlowerDeliverySlug, CountryFlowerDeliveryContent> = {
     intro:
       "BlossomPot delivers flowers, bouquets, cakes, and gift hampers to addresses in the United Arab Emirates. Shop the UAE catalog, add a gift message, and enter the recipient’s UAE street, city, and emirate at checkout. This page is the UAE destination hub for Dubai, Abu Dhabi, Sharjah, and the other emirates.",
     availability:
-      "UAE destination coverage is live for gifts in the UAE catalog. Timing depends on the recipient city and product. Same-day options appear only where coverage and the local cut-off allow.",
+      "UAE destination coverage is live for gifts in the UAE catalog. Timing depends on the recipient city and product.",
     howItWorksHeading: "How flower delivery works in the UAE",
     howItWorks:
       "Choose a gift from the UAE catalog, add a personal message, and enter the recipient’s UAE address at checkout. Pay securely, then follow order status after confirmation. Dubai, Abu Dhabi, and Sharjah are the usual destination cities.",
@@ -461,8 +458,8 @@ const PAGES: Record<CountryFlowerDeliverySlug, CountryFlowerDeliveryContent> = {
         a: "The recipient’s UAE street, city, and emirate.",
       },
       {
-        q: "Do you offer same-day delivery in the UAE?",
-        a: "Same-day options appear only where coverage and the local cut-off allow. Check the product page for that city.",
+        q: "How long does UAE flower delivery take?",
+        a: "Timing depends on the recipient city and product. Check the product page for that city.",
       },
       {
         q: "Can I pay with a UAE card?",

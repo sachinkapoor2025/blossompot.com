@@ -30,9 +30,12 @@
     "import:blossompot": "tsx scripts/import-blossompot.ts",
     "import:blossompot:fetch": "tsx scripts/import-blossompot.ts --fetch-only",
     "import:orange-county": "tsx scripts/import-orange-county.ts",
+    "import:fnp-usa": "tsx --env-file=apps/api/.env scripts/import-fnp-usa.ts",
     "generate:orange-county-catalog": "tsx scripts/generate-orange-county-catalog.ts",
     "seed:inventory": "tsx scripts/seed-inventory.ts",
     "seed:serviceability": "tsx scripts/seed-serviceability.ts",
+    "seed:catalog-vendors": "tsx scripts/seed-catalog-vendors.ts",
+    "seed:catalog-countries": "tsx scripts/seed-catalog-countries.ts",
     "fix:seo-descriptions": "tsx scripts/fix-seo-descriptions.ts",
     "migrate:images": "tsx scripts/migrate-images-to-s3.ts",
     "host:images": "tsx scripts/host-images-to-s3.ts",
@@ -51,7 +54,7 @@
     "load:ssr": "k6 run scripts/load/ssr.js",
     "load:local": "node scripts/load/run-local.mjs",
     "load:smoke": "bash scripts/load/smoke.sh",
-    "test": "npm run test -w @blossompot/shared"
+    "test": "npm run test -w @blossompot/shared && npm run build -w @blossompot/shared && tsx --test apps/web/src/lib/env.test.ts scripts/ci/deploy-target.test.ts scripts/ci/dev-catalog-persist.test.ts apps/web/src/lib/delivery-cookie.test.ts apps/web/src/lib/location-seo-urls.test.ts apps/web/src/lib/country-switch.test.ts apps/web/src/lib/shopping-catalog.test.ts apps/web/src/lib/checkout-address.test.ts apps/web/src/lib/checkout-shipments.test.ts apps/web/src/components/country-flower-products.test.ts apps/api/src/handlers/serviceability-location.test.ts apps/api/src/handlers/catalog-vendors.test.ts apps/api/src/handlers/vendor-availability.test.ts apps/api/src/handlers/catalog-countries.test.ts apps/web/src/lib/admin-country-management.test.ts apps/api/src/lib/gbo-client.cache.test.ts && tsx --tsconfig apps/web/tsconfig.test.json --test apps/web/src/lib/gbo-storefront-listing.test.ts"
   },
   "devDependencies": {
     "@aws-sdk/client-dynamodb": "^3.716.0",

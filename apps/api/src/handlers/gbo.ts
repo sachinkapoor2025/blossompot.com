@@ -1,9 +1,13 @@
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
 import {
+  VENDOR_GBO,
   gboCreateOrderSchema,
   gboGiftDetailQuerySchema,
   gboGiftQuerySchema,
+  isGboStorefrontEnabled,
+  isPublicGboCatalogPath,
 } from "@blossompot/shared";
+import { decideNewShopping } from "../lib/catalog-vendor-store";
 import {
   GboClientError,
   gboCreateOrder,
@@ -14,7 +18,11 @@ import {
   gboListCountries,
   gboListGifts,
 } from "../lib/gbo-client";
-import { json, ok, okCached, badRequest, unauthorized } from "../lib/response";
+import { json, ok, badRequest, notFound, unauthorized } from "../lib/response";
+
+function requestPath(event: APIGatewayProxyEventV2): string {
+  return event.rawPath || event.requestContext?.http?.path || "";
+}
 
 function query(event: APIGatewayProxyEventV2): Record<string, string> {
   const out: Record<string, string> = {};
@@ -40,6 +48,15 @@ function sandboxFlag(event: APIGatewayProxyEventV2): boolean | undefined {
   if (v === "1" || v === "true") return true;
   if (v === "0" || v === "false") return false;
   return undefined;
+}
+
+/** Public GBO shopping uses the same new-shopping decision as the rest of the storefront. */
+async function gboOpenForNewShopping(country: string): Promise<boolean> {
+  const decision = await decideNewShopping(
+    { vendorSlug: VENDOR_GBO, internationalDelivery: true },
+    country
+  );
+  return decision.available;
 }
 
 function gboFail(err: unknown): APIGatewayProxyResultV2 {
@@ -101,6 +118,14 @@ export async function gboGiftsHandler(
     sandbox: q.sandbox,
   });
   if (!parsed.success) return badRequest(parsed.error.issues[0]?.message ?? "Invalid gift query");
+  if (isPublicGboCatalogPath(requestPath(event)) && !(await gboOpenForNewShopping(parsed.data.country))) {
+    return ok({
+      country: parsed.data.country,
+      count: 0,
+      gifts: [],
+      storefrontEnabled: isGboStorefrontEnabled(),
+    });
+  }
   try {
     const gifts = await gboListGifts(parsed.data, { sandbox: parsed.data.sandbox ?? sandboxFlag(event) });
     const body = {
@@ -109,7 +134,8 @@ export async function gboGiftsHandler(
       gifts,
     };
     if (parsed.data.sandbox || sandboxFlag(event)) return ok(body);
-    return okCached(body, 45);
+    // Vendor enablement can change inside the old 45s window, so do not CDN-cache the public list.
+    return ok(body);
   } catch (err) {
     return gboFail(err);
   }
@@ -125,6 +151,9 @@ export async function gboGiftDetailHandler(
     sandbox: q.sandbox,
   });
   if (!parsed.success) return badRequest(parsed.error.issues[0]?.message ?? "country and productId required");
+  if (isPublicGboCatalogPath(requestPath(event)) && !(await gboOpenForNewShopping(parsed.data.country))) {
+    return notFound("Product not found");
+  }
   try {
     const gift = await gboResolveGift(parsed.data.country, parsed.data.productId, {
       sandbox: parsed.data.sandbox ?? sandboxFlag(event),

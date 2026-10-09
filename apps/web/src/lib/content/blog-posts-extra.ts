@@ -424,7 +424,7 @@ export const extraBlogPosts: BlogPost[] = [
       "When you need to send a thoughtful gift at short notice, same day flower delivery New York can make it easier to surprise someone with a beautiful bouquet.",
     publishedAt: "2026-09-02",
     updatedAt: "2026-09-02",
-    relatedCategory: "same-day-gifts",
+    relatedCategory: "flowers",
     sections: [
       {
         paragraphs: [
@@ -904,7 +904,7 @@ export const extraBlogPosts: BlogPost[] = [
       "When you need to send a thoughtful gift at short notice, same day flower delivery UK can make it easier to arrange a beautiful floral surprise.",
     publishedAt: "2026-09-04",
     updatedAt: "2026-09-04",
-    relatedCategory: "same-day-gifts",
+    relatedCategory: "flowers",
     sections: [
       {
         paragraphs: [
@@ -2299,7 +2299,7 @@ export const extraBlogPosts: BlogPost[] = [
       "Finding reliable same day flower delivery Dubai options can make it easier to send a thoughtful floral surprise when you need it quickly.",
     publishedAt: "2026-09-08",
     updatedAt: "2026-09-08",
-    relatedCategory: "same-day-gifts",
+    relatedCategory: "flowers",
     sections: [
       {
         paragraphs: [
@@ -3675,7 +3675,7 @@ export const extraBlogPosts: BlogPost[] = [
       "When you need to send a beautiful gift quickly, searching for same day flower delivery near me is one of the easiest ways to find a thoughtful solution.",
     publishedAt: "2026-09-09",
     updatedAt: "2026-09-09",
-    relatedCategory: "same-day-gifts",
+    relatedCategory: "flowers",
     sections: [
       {
         paragraphs: [
@@ -4813,7 +4813,7 @@ export const extraBlogPosts: BlogPost[] = [
       "With online flower, cake and gift delivery services, you can choose a beautiful present and have it delivered on the same day.",
     publishedAt: "2026-09-13",
     updatedAt: "2026-09-13",
-    relatedCategory: "same-day-gifts",
+    relatedCategory: "flowers",
     sections: [
       {
         paragraphs: [

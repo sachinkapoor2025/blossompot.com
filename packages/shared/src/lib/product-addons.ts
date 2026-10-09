@@ -1,5 +1,6 @@
 import { VENDOR_ORANGE_COUNTY } from "../constants";
 import { isGboVendor, parseGboSku, parseGboSlug } from "./gbo";
+import { cdnUploadUrl } from "./image-url";
 
 export type ProductAddonGroup = "cake-extras" | "personalization";
 
@@ -10,8 +11,11 @@ export type ProductAddonDef = {
   group: ProductAddonGroup;
   /** Short weight / pack label for UI. */
   detail: string;
-  /** Path under CloudFront `/uploads/`. */
-  image: string;
+  /**
+   * Related thumbnail: absolute URL, site path, or path under CloudFront `/uploads/`.
+   * Leave empty when no related photo exists — the picker then hides the thumbnail.
+   */
+  image?: string;
 };
 
 /** Max packs of a single add-on per cart line. */
@@ -25,7 +29,7 @@ export const PRODUCT_ADDONS: readonly ProductAddonDef[] = [
     priceUsd: 4,
     group: "cake-extras",
     detail: "Birthday candle set",
-    image: "editorial/addons/cake-candle.jpg",
+    image: "/addons/cake-candle.jpg",
   },
   {
     id: "name-printing",
@@ -33,7 +37,7 @@ export const PRODUCT_ADDONS: readonly ProductAddonDef[] = [
     priceUsd: 8,
     group: "personalization",
     detail: "Print a name on the cake",
-    image: "editorial/addons/name-printing.jpg",
+    image: "/addons/name-printing.webp",
   },
   {
     id: "greeting-card",
@@ -41,7 +45,7 @@ export const PRODUCT_ADDONS: readonly ProductAddonDef[] = [
     priceUsd: 5,
     group: "personalization",
     detail: "Handwritten-style card",
-    image: "editorial/addons/greeting-card.jpg",
+    image: "/addons/greeting-card.webp",
   },
   {
     id: "message-plaque",
@@ -49,7 +53,7 @@ export const PRODUCT_ADDONS: readonly ProductAddonDef[] = [
     priceUsd: 6,
     group: "personalization",
     detail: "Short message on a cake plaque",
-    image: "editorial/addons/message-plaque.jpg",
+    image: "/addons/message-plaque.webp",
   },
 ] as const;
 
@@ -65,6 +69,17 @@ const ADDON_BY_ID = new Map(PRODUCT_ADDONS.map((a) => [a.id, a]));
 
 export function getProductAddon(id: string): ProductAddonDef | undefined {
   return ADDON_BY_ID.get(id);
+}
+
+/**
+ * Thumbnail for an add-on. Returns null when there is no related photo,
+ * so the picker can omit the image instead of showing a broken icon.
+ */
+export function productAddonImageUrl(image: string | undefined | null): string | null {
+  const value = image?.trim() ?? "";
+  if (!value) return null;
+  if (/^https?:\/\//i.test(value) || value.startsWith("/")) return value;
+  return cdnUploadUrl(value);
 }
 
 export function productAllowsAddons(product: {

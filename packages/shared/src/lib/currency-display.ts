@@ -103,6 +103,16 @@ export function currencyForCountryCode(countryIso: string): DisplayCurrency {
   return "USD";
 }
 
+/**
+ * Display currencies for the selected delivery country.
+ * The country's own currency, plus INR when it is different. Never the full currency list.
+ */
+export function displayCurrenciesForCountry(countryIso: string): DisplayCurrency[] {
+  const local = currencyForCountryCode(countryIso);
+  if (local === "INR") return ["INR"];
+  return [local, "INR"];
+}
+
 /** Unique storefront currencies covering every delivery country plus INR. */
 export function storefrontCurrenciesForDelivery(): DisplayCurrency[] {
   const seen = new Set<DisplayCurrency>(["USD", "INR"]);
