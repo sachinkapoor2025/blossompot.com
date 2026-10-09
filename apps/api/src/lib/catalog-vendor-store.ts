@@ -78,14 +78,16 @@ type ShoppingIdentity = {
   vendorSlug?: string | null;
   tags?: readonly string[] | null;
   sku?: string | null;
-  internationalDelivery?: boolean | null;
+  internationalDelivery?: boolean;
 };
 
 /**
  * Cart lines often omit vendorSlug. Read the stored product's tag so the existing
  * shopping decision can see an FNP import. This does not write the cart line.
  */
-export async function withStoredShoppingIdentity<T extends ShoppingIdentity>(item: T): Promise<T> {
+export async function withStoredShoppingIdentity<T extends ShoppingIdentity>(
+  item: T
+): Promise<T & ShoppingIdentity> {
   const identified = productForShoppingDecision(item);
   if (identified.vendorSlug?.trim()) return identified;
   const slug = (item.productSlug || item.slug || "").trim();

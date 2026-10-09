@@ -141,9 +141,16 @@ export async function getCartHandler(event: APIGatewayProxyEventV2) {
   const enabledCountryCodes = storefrontShoppingCountryCodes(storedCountries.countries);
   const shoppingLocation = cartAvailabilityLocation(country, postal, enabledCountryCodes);
   if (shoppingLocation && items.length) {
+    const identities = await Promise.all(items.map((item) => withStoredShoppingIdentity(item)));
     const [evals, registry] = await Promise.all([
       evaluateProductsForLocation(
-        items.map((i) => ({ slug: i.productSlug, vendorSlug: i.vendorSlug, sku: i.sku })),
+        identities.map((identity, index) => ({
+          slug: items[index]!.productSlug,
+          vendorSlug: identity.vendorSlug,
+          sku: identity.sku ?? items[index]!.sku,
+          tags: identity.tags,
+          internationalDelivery: identity.internationalDelivery,
+        })),
         { countryCode: shoppingLocation.countryCode, postalCode: shoppingLocation.postalCode }
       ),
       loadCatalogVendorRegistry(),
@@ -152,8 +159,8 @@ export async function getCartHandler(event: APIGatewayProxyEventV2) {
     const where = shoppingLocation.postalCode
       ? formatPostalDisplay(shoppingLocation.countryCode, shoppingLocation.postalCode)
       : shoppingLocation.countryCode;
-    const flagged = await Promise.all(items.map(async (item) => {
-      const identity = await withStoredShoppingIdentity(item);
+    const flagged = identities.map((identity, index) => {
+      const item = items[index]!;
       const decision = productAllowedForNewShopping(identity, shoppingLocation.countryCode, registry);
       const ev = bySlug.get(item.productSlug);
       const areaBlocked = Boolean(ev && !ev.deliverable);
@@ -170,7 +177,7 @@ export async function getCartHandler(event: APIGatewayProxyEventV2) {
         unavailableForLocation: true,
         unavailableReason,
       };
-    }));
+    });
     return ok({
       cart: { items: flagged, updatedAt: raw.updatedAt ?? now() },
       locationRevalidated: true,
@@ -270,6 +277,7 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
     vendorSlug?: string;
     vendorCost?: number;
     sku?: string;
+    internationalDelivery?: boolean;
     couponExcluded?: boolean;
     tags?: string[];
     categorySlug?: string;
@@ -291,6 +299,9 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
         {
           slug: product.slug,
           vendorSlug: product.vendorSlug,
+          sku: product.sku,
+          tags: product.tags,
+          internationalDelivery: product.internationalDelivery,
           inventory: product.inventory,
         },
       ],

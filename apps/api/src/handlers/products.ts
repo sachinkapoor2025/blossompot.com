@@ -24,6 +24,7 @@ import {
   NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE,
   productAllowedForNewShopping,
   productForShoppingDecision,
+  fulfillmentVendorSlug,
   catalogVendorShoppingStatus,
   listingGroupsForProducts,
   orderProductsByVendor,
@@ -117,14 +118,16 @@ function vendorHiddenFromStorefront(decision: { available: boolean; reason?: str
 }
 
 function forStorefront(product: Product): Product {
+  const vendorSlug = fulfillmentVendorSlug(product);
   const allowsAddons = productAllowsAddons(product);
   const stripped = stripVendorPrivateFields(
     withCompetitiveStorefrontPricing(withResolvedProductImages(product))
   );
   const { sourceUrl: _sourceUrl, importBatchId: _importBatchId, ...publicProduct } = stripped;
-  const international = product.vendorSlug === VENDOR_GBO || product.internationalDelivery === true;
+  const international = vendorSlug === VENDOR_GBO || product.internationalDelivery === true;
   return {
     ...publicProduct,
+    vendorSlug,
     allowsAddons,
     ...(international
       ? {
@@ -414,6 +417,7 @@ export async function createProduct(event: APIGatewayProxyEventV2) {
   const inventory = parsed.data.inventory ?? DEFAULT_PRODUCT_INVENTORY;
   const item: Product & { PK: string; SK: string; GSI1PK: string; GSI1SK: string } = {
     ...parsed.data,
+    vendorSlug: fulfillmentVendorSlug(parsed.data),
     inventory,
     slug,
     PK: productKeys.pk(slug),
@@ -771,6 +775,7 @@ export async function bulkUploadProducts(event: APIGatewayProxyEventV2) {
     const tags = parsed.data.tags
       ? parsed.data.tags.split(",").map((t) => t.trim()).filter(Boolean)
       : [];
+    const vendorSlug = fulfillmentVendorSlug({ ...parsed.data, tags });
 
     const existing = await docClient.send(
       new GetCommand({
@@ -791,6 +796,7 @@ export async function bulkUploadProducts(event: APIGatewayProxyEventV2) {
       ...parsed.data,
       slug,
       tags,
+      vendorSlug,
       images: [],
       PK: productKeys.pk(slug),
       SK: productKeys.sk(),

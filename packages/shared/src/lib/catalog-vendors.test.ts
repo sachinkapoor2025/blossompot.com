@@ -117,7 +117,7 @@ describe("phase 3 leaves existing catalog behavior in place", () => {
     });
     assert.equal(draft.published, false);
     assert.equal(draft.inventory, 0);
-    assert.equal(draft.vendorSlug, undefined);
+    assert.equal(draft.vendorSlug, "fnp");
     assert.equal(fnpImportWriteBlocked({ environment: "prod" }).blocked, true);
   });
 

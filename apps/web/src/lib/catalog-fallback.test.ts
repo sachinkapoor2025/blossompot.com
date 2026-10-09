@@ -22,6 +22,7 @@ describe("bundled catalog fallback", () => {
     assert.ok(pastel);
     assert.equal(pastel?.name, "Perfectly Pastel Premium");
     assert.equal(pastel?.categorySlug, "flowers");
+    assert.equal(pastel?.vendorSlug, "fnp");
     assert.ok(typeof pastel?.price === "number" && pastel.price > 0);
     assert.ok((pastel?.images ?? []).some((url) => String(url).includes("fnp.com")));
   });

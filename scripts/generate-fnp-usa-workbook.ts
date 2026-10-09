@@ -8,7 +8,8 @@
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from "fs";
 import { resolve } from "path";
 import * as XLSX from "xlsx";
-import { FNP_IMPORT_TAG, fnpSourceKey, mapFnpCategory } from "../packages/shared/src/lib/fnp-import";
+import { FNP_IMPORT_TAG } from "../packages/shared/src/constants";
+import { fnpSourceKey, mapFnpCategory } from "../packages/shared/src/lib/fnp-import";
 import { slugify } from "../packages/shared/src/lib/slug";
 
 const ROOT = resolve(process.cwd());

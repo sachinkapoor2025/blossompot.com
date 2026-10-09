@@ -243,8 +243,10 @@ export async function checkout(event: APIGatewayProxyEventV2) {
     return badRequest(gboCartLineUnavailableMessage(cart.items ?? []));
   }
   const newShoppingCountry = (parsed.data.shippingAddress.country ?? "US").trim() || "US";
+  const shoppingIdentities: Array<Awaited<ReturnType<typeof withStoredShoppingIdentity<CartItem>>>> = [];
   for (const item of cart.items as CartItem[]) {
     const identity = await withStoredShoppingIdentity(item);
+    shoppingIdentities.push(identity);
     const decision = await decideNewShopping(identity, newShoppingCountry);
     if (!decision.available) {
       return badRequest(
@@ -289,7 +291,13 @@ export async function checkout(event: APIGatewayProxyEventV2) {
   if (!destPostal) return badRequest("A delivery postal / ZIP code is required");
 
   const serviceabilityRows = await evaluateProductsForLocation(
-    orderItems.map((i) => ({ slug: i.productSlug, vendorSlug: i.vendorSlug })),
+    shoppingIdentities.map((identity, index) => ({
+      slug: orderItems[index]!.productSlug,
+      vendorSlug: identity.vendorSlug,
+      sku: identity.sku ?? orderItems[index]!.sku,
+      tags: identity.tags,
+      internationalDelivery: identity.internationalDelivery,
+    })),
     { countryCode: destCountry, postalCode: destPostal }
   );
   const blocked = serviceabilityRows.find((row) => !row.deliverable);

@@ -1,18 +1,30 @@
-import { VENDOR_FNP } from "../constants";
+import { FNP_IMPORT_TAG, VENDOR_BLOSSOMPOT, VENDOR_FNP } from "../constants";
 import { productSchema, type Product } from "../schemas/product";
 import { slugify } from "./slug";
+import { resolveCatalogVendorSlug } from "./vendor-identity";
 
 export const FNP_IMPORT_COMMIT_BATCH_SIZE = 20;
 export const FNP_IMPORT_PREVIEW_MAX_ROWS = 1000;
-export const FNP_IMPORT_TAG = "fnp-usa-import";
 
-/** Imported FNP rows often have the import tag and no vendor slug. The shopping helper still needs that vendor. */
-export function productForShoppingDecision<T extends { vendorSlug?: string | null; tags?: readonly string[] | null }>(
+/**
+ * Copy a resolved vendor onto a product that has no slug yet.
+ * A legacy row that still resolves to BlossomPot is left unchanged so a cart line
+ * can load the stored product before the BlossomPot default is applied.
+ */
+export function productForShoppingDecision<T extends {
+  vendorSlug?: string | null;
+  tags?: readonly string[] | null;
+  internationalDelivery?: boolean | null;
+  slug?: string | null;
+  productSlug?: string | null;
+  sku?: string | null;
+}>(
   product: T
 ): T {
   if (product.vendorSlug?.trim()) return product;
-  if ((product.tags ?? []).includes(FNP_IMPORT_TAG)) return { ...product, vendorSlug: VENDOR_FNP };
-  return product;
+  const resolved = resolveCatalogVendorSlug(product);
+  if (resolved === VENDOR_BLOSSOMPOT) return product;
+  return { ...product, vendorSlug: resolved };
 }
 export const FNP_IMAGE_HOST = "static-assets-prod.fnp.com";
 
@@ -662,6 +674,7 @@ export function buildFnpProductDraft(args: {
     sku: args.row.slug,
     inventory: 0,
     tags: [FNP_IMPORT_TAG],
+    vendorSlug: VENDOR_FNP,
     published: false,
     indexable: false,
     sourceUrl: args.row.sourceUrl,

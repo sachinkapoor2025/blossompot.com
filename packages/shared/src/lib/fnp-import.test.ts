@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { FNP_IMPORT_TAG, VENDOR_FNP } from "../constants";
 import {
   FNP_CATEGORY_MAP,
   FNP_IMPORT_COMMIT_BATCH_SIZE,
-  FNP_IMPORT_TAG,
   buildFnpProductDraft,
   fnpImportWriteBlocked,
   fnpRakhiTargetsStaySeparate,
@@ -141,7 +141,7 @@ describe("FNP import plan", () => {
     assert.equal(draft.currency, "USD");
     assert.deepEqual(draft.tags, [FNP_IMPORT_TAG]);
     assert.equal(draft.internationalDelivery, undefined);
-    assert.equal(draft.vendorSlug, undefined);
+    assert.equal(draft.vendorSlug, VENDOR_FNP);
     assert.equal(isProductStorefrontVisible(draft), false);
     assert.equal(isProductSearchIndexable(draft), false);
 

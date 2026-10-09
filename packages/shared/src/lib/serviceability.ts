@@ -1,5 +1,5 @@
 import { VENDOR_BLOSSOMPOT, VENDOR_ORANGE_COUNTY, VENDOR_GBO, VENDOR_FNP } from "../constants";
-import { isGboVendor, parseGboSku, parseGboSlug } from "./gbo";
+import { resolveCatalogVendorSlug } from "./vendor-identity";
 import { normalizePostal, normalizePrefix } from "./postal-countries";
 
 export const SERVICE_SCOPES = [
@@ -215,24 +215,28 @@ export function getServiceableVendors(
 
 export function fulfillmentVendorSlug(product: {
   vendorSlug?: string | null;
-  internationalDelivery?: boolean;
+  listingVendorSlug?: string | null;
+  internationalDelivery?: boolean | null;
   slug?: string | null;
+  productSlug?: string | null;
   sku?: string | null;
+  tags?: readonly string[] | null;
 }): string {
-  if (
-    isGboVendor(product.vendorSlug) ||
-    product.internationalDelivery === true ||
-    parseGboSlug(product.slug) ||
-    parseGboSku(product.sku)
-  ) {
-    return VENDOR_GBO;
-  }
-  const slug = product.vendorSlug?.trim();
-  return slug || VENDOR_BLOSSOMPOT;
+  return resolveCatalogVendorSlug(product);
 }
 
 export function isProductDeliverableToLocation(
-  product: { vendorSlug?: string | null; published?: boolean; inventory?: number },
+  product: {
+    vendorSlug?: string | null;
+    listingVendorSlug?: string | null;
+    internationalDelivery?: boolean | null;
+    slug?: string | null;
+    productSlug?: string | null;
+    sku?: string | null;
+    tags?: readonly string[] | null;
+    published?: boolean;
+    inventory?: number;
+  },
   areas: VendorServiceArea[],
   location: DeliveryLocationInput,
   activeVendorSlugs: Set<string>
@@ -252,9 +256,12 @@ export function isProductDeliverableToLocation(
 export function productKeptForServiceableVendors(
   product: {
     vendorSlug?: string | null;
-    internationalDelivery?: boolean;
+    listingVendorSlug?: string | null;
+    internationalDelivery?: boolean | null;
     slug?: string | null;
+    productSlug?: string | null;
     sku?: string | null;
+    tags?: readonly string[] | null;
   },
   vendorSlugs: readonly string[],
   applyVendorFilter: boolean,

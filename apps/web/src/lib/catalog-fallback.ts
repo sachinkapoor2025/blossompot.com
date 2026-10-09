@@ -67,10 +67,11 @@ function ingestCatalogProducts(
     if (options.fillMissingOnly && bySlug.has(product.slug)) continue;
     if (isRakhiRelatedProduct(product)) continue;
     if (isSampleCatalogProduct(product)) continue;
-    const vendorSlug = product.vendorSlug?.trim();
-    if (vendorSlug) bundledVendorBySlug.set(product.slug, vendorSlug);
+    const vendorSlug = fulfillmentVendorSlug(product);
+    bundledVendorBySlug.set(product.slug, vendorSlug);
     const allowsAddons = productAllowsAddons(product);
     const publicProduct = stripVendorPrivateFields(product) as Product;
+    publicProduct.vendorSlug = vendorSlug;
     publicProduct.allowsAddons = allowsAddons;
     publicProduct.images = resolveProductImageUrls(publicProduct.images);
     publicProduct.createdAt = product.createdAt || "2026-09-23T00:00:00.000Z";
@@ -131,7 +132,7 @@ export function mergeProductsPreferExisting(
 }
 const DEFAULT_BUNDLED_VENDORS = CATALOG_VENDOR_SLUGS.map((slug) => defaultCatalogVendor(slug));
 
-/** Vendor slug for the shopping helper. Public cards stay free of stored vendor identity. */
+/** Vendor slug for the shopping helper. Public cards keep the resolved vendor and omit vendor cost. */
 export function bundledShoppingVendorSlug(product: {
   slug?: string | null;
   vendorSlug?: string | null;

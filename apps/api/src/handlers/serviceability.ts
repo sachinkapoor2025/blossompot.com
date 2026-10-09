@@ -320,7 +320,16 @@ export async function adminCoverageSummary(event: APIGatewayProxyEventV2) {
 }
 
 export async function evaluateProductsForLocation(
-  products: Array<{ slug: string; vendorSlug?: string; published?: boolean; inventory?: number; sku?: string; internationalDelivery?: boolean; productSlug?: string }>,
+  products: Array<{
+    slug: string;
+    vendorSlug?: string | null;
+    published?: boolean;
+    inventory?: number;
+    sku?: string | null;
+    internationalDelivery?: boolean | null;
+    productSlug?: string | null;
+    tags?: readonly string[] | null;
+  }>,
   location: { countryCode: string; postalCode: string; stateCode?: string; city?: string }
 ) {
   const { areas, activeVendorSlugs } = await loadCoverageBundle();

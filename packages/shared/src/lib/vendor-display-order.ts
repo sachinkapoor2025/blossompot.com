@@ -11,9 +11,11 @@ export type VendorDisplaySource = {
 
 export type VendorSortableProduct = {
   vendorSlug?: string | null;
-  internationalDelivery?: boolean;
+  internationalDelivery?: boolean | null;
   slug?: string | null;
+  productSlug?: string | null;
   sku?: string | null;
+  tags?: readonly string[] | null;
   /** Computed listing key. Not stored on the product record. */
   listingVendorSlug?: string;
   listingVendorName?: string;

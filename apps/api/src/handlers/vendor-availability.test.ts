@@ -19,6 +19,8 @@ type Handler = (event: APIGatewayProxyEventV2) => Promise<APIGatewayProxyResultV
 
 let listProducts: Handler;
 let getProduct: Handler;
+let createProduct: Handler;
+let bulkUploadProducts: Handler;
 let addToCart: Handler;
 let getCartHandler: Handler;
 let checkout: Handler;
@@ -41,6 +43,8 @@ before(async () => {
   const products = await import("./products");
   listProducts = products.listProducts;
   getProduct = products.getProduct;
+  createProduct = products.createProduct;
+  bulkUploadProducts = products.bulkUploadProducts;
   const cart = await import("./cart");
   addToCart = cart.addToCart;
   getCartHandler = cart.getCartHandler;
@@ -456,6 +460,195 @@ describe("catalog vendor availability for new shopping", { concurrency: false },
     );
     assert.equal(slugsOf(manhattan.body).includes("phase4-oc"), false);
     assert.equal(slugsOf(manhattan.body).includes("phase4-owned"), true);
+  });
+
+  it("hides only BlossomPot when that vendor is disabled and keeps the resolved public slug", async () => {
+    await setVendor("blossompot", true);
+    await setVendor("fnp", true);
+    await setVendor("orange-county", true);
+    await setVendor("gift-baskets-overseas", true);
+
+    await setVendor("blossompot", false);
+    const hidden = resultOf(
+      await listProducts(shopperEvent({ queryStringParameters: { country: "US", postalCode: "92612" } }))
+    );
+    assert.equal(slugsOf(hidden.body).includes("phase4-owned"), false);
+    assert.equal(slugsOf(hidden.body).includes("phase4-other-tag"), false);
+    assert.equal(slugsOf(hidden.body).includes("phase4-fnp"), true);
+    assert.equal(slugsOf(hidden.body).includes("phase4-fnp-tag"), true);
+    assert.equal(slugsOf(hidden.body).includes("phase4-oc"), true);
+    assert.equal(slugsOf(hidden.body).includes("phase4-gbo"), true);
+    const publicRows = hidden.body.products as Array<{ slug: string; vendorSlug?: string; vendorCost?: number }>;
+    assert.equal(publicRows.find((row) => row.slug === "phase4-fnp")?.vendorSlug, "fnp");
+    assert.equal(publicRows.find((row) => row.slug === "phase4-fnp-tag")?.vendorSlug, "fnp");
+    assert.equal(publicRows.find((row) => row.slug === "phase4-oc")?.vendorSlug, "orange-county");
+    assert.equal(publicRows.find((row) => row.slug === "phase4-gbo")?.vendorSlug, "gift-baskets-overseas");
+    assert.equal(publicRows.some((row) => row.vendorCost != null), false);
+
+    const ownedPage = resultOf(await getProduct(shopperEvent({ pathParameters: { slug: "phase4-owned" } })));
+    assert.equal(ownedPage.statusCode, 404);
+    const fnpPage = resultOf(
+      await getProduct(
+        shopperEvent({ pathParameters: { slug: "phase4-fnp-tag" }, queryStringParameters: { country: "US", postalCode: "10001" } })
+      )
+    );
+    assert.equal(fnpPage.statusCode, 200);
+    assert.equal((fnpPage.body.product as { vendorSlug?: string }).vendorSlug, "fnp");
+    assert.equal((fnpPage.body.availability as { deliverable?: boolean }).deliverable, true);
+
+    const outsideOrangeCounty = resultOf(
+      await listProducts(shopperEvent({ queryStringParameters: { country: "US", postalCode: "10001" } }))
+    );
+    assert.equal(slugsOf(outsideOrangeCounty.body).includes("phase4-oc"), false);
+    assert.equal(slugsOf(outsideOrangeCounty.body).includes("phase4-fnp"), true);
+
+    const added = resultOf(
+      await addToCart(
+        shopperEvent({
+          headers: { "x-session-id": "phase4-identity-shopper" },
+          body: JSON.stringify({ productSlug: "phase4-fnp-tag", quantity: 1 }),
+          requestContext: { http: { method: "POST", path: "/cart/items" } },
+        })
+      )
+    );
+    assert.equal(added.statusCode, 200);
+    const cart = resultOf(
+      await getCartHandler(
+        shopperEvent({
+          headers: { "x-session-id": "phase4-identity-shopper" },
+          queryStringParameters: { country: "US", postalCode: "10001" },
+        })
+      )
+    );
+    const line = (cart.body.cart as { items: Array<{ productSlug: string; vendorSlug?: string; unavailableForLocation?: boolean }> }).items.find(
+      (item) => item.productSlug === "phase4-fnp-tag"
+    );
+    assert.ok(line);
+    assert.equal(line.vendorSlug, undefined);
+    assert.equal(line.unavailableForLocation, undefined);
+
+    const order = resultOf(
+      await checkout(
+        shopperEvent({
+          headers: { "x-session-id": "phase4-identity-shopper" },
+          body: JSON.stringify({
+            paymentMethod: "stripe",
+            shippingAddress: {
+              name: "A Recipient",
+              line1: "1 Main",
+              city: "New York",
+              state: "NY",
+              postalCode: "10001",
+              country: "US",
+              phone: "+1 408 555 0100",
+              email: "shopper@blossompot.test",
+              senderName: "A Sender",
+              senderMessage: "Thinking of you today",
+            },
+          }),
+          requestContext: { http: { method: "POST", path: "/checkout" } },
+        })
+      )
+    );
+    if (order.statusCode === 400) {
+      const message = String(order.body.error ?? "");
+      assert.equal(message.includes("temporarily unavailable"), false);
+      assert.equal(message.includes("not available for delivery"), false);
+    } else {
+      assert.equal(order.statusCode < 500, true);
+    }
+
+    await setVendor("blossompot", true);
+    const restored = resultOf(await listProducts(shopperEvent({ queryStringParameters: { country: "US" } })));
+    assert.equal(slugsOf(restored.body).includes("phase4-owned"), true);
+    assert.equal(slugsOf(restored.body).includes("phase4-other-tag"), true);
+  });
+
+  it("saves vendor identity on manual create and CSV import", async () => {
+    const admin = {
+      headers: { authorization: "Bearer dev:admin@blossompot.test:admin" },
+      requestContext: { http: { method: "POST", path: "/products" } },
+    };
+    const created = resultOf(
+      await createProduct({
+        ...admin,
+        body: JSON.stringify({
+          name: "Identity Legacy Rose",
+          description: "Owned",
+          price: 12,
+          categorySlug: "flowers",
+          currency: "USD",
+          tags: ["birthday"],
+        }),
+      } as unknown as APIGatewayProxyEventV2)
+    );
+    assert.equal(created.statusCode, 201);
+    assert.equal((created.body.product as { vendorSlug?: string }).vendorSlug, "blossompot");
+
+    const tagged = resultOf(
+      await createProduct({
+        ...admin,
+        body: JSON.stringify({
+          name: "Identity Tagged Fnp",
+          description: "FNP",
+          price: 12,
+          categorySlug: "flowers",
+          currency: "USD",
+          tags: ["fnp-usa-import"],
+        }),
+      } as unknown as APIGatewayProxyEventV2)
+    );
+    assert.equal(tagged.statusCode, 201);
+    assert.equal((tagged.body.product as { vendorSlug?: string }).vendorSlug, "fnp");
+
+    const explicit = resultOf(
+      await createProduct({
+        ...admin,
+        body: JSON.stringify({
+          name: "Identity Explicit County",
+          description: "County",
+          price: 12,
+          categorySlug: "flowers",
+          currency: "USD",
+          vendorSlug: "orange-county",
+          tags: ["fnp-usa-import"],
+        }),
+      } as unknown as APIGatewayProxyEventV2)
+    );
+    assert.equal(explicit.statusCode, 201);
+    assert.equal((explicit.body.product as { vendorSlug?: string }).vendorSlug, "orange-county");
+
+    const bulk = resultOf(
+      await bulkUploadProducts({
+        ...admin,
+        requestContext: { http: { method: "POST", path: "/products/bulk" } },
+        body: JSON.stringify({
+          rows: [
+            {
+              name: "Identity Csv Rose",
+              description: "Owned",
+              price: "15",
+              categorySlug: "flowers",
+              currency: "USD",
+              tags: "flowers,birthday",
+            },
+            {
+              name: "Identity Csv Fnp",
+              description: "FNP",
+              price: "15",
+              categorySlug: "flowers",
+              currency: "USD",
+              vendorSlug: "fnp",
+              tags: "birthday",
+            },
+          ],
+        }),
+      } as unknown as APIGatewayProxyEventV2)
+    );
+    assert.equal(bulk.statusCode, 200);
+    const products = bulk.body.products as Array<{ name: string; vendorSlug?: string }>;
+    assert.equal(products.find((row) => row.name === "Identity Csv Rose")?.vendorSlug, "blossompot");
+    assert.equal(products.find((row) => row.name === "Identity Csv Fnp")?.vendorSlug, "fnp");
   });
 
   it("does not apply the new-shopping gate to existing vendor fulfillment code", () => {

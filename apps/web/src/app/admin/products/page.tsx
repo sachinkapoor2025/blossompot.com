@@ -151,6 +151,10 @@ export default function AdminProductsPage() {
           currency: form.currency,
           sku: form.sku || undefined,
           tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+          vendorSlug: fulfillmentVendorSlug({
+            sku: form.sku || undefined,
+            tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+          }),
           published: form.published,
           ...dims,
         }),
