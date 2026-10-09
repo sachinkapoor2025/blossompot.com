@@ -169,9 +169,10 @@ jobs:
           [ -n "${GBO_SANDBOX:-}" ] && EXTRA="$EXTRA GboSandbox=${GBO_SANDBOX}"
           [ -n "${GBO_PAYMENT_TYPE:-}" ] && EXTRA="$EXTRA GboPaymentType=${GBO_PAYMENT_TYPE}"
           [ -n "${GBO_AUTH_SCHEME:-}" ] && EXTRA="$EXTRA GboAuthScheme=${GBO_AUTH_SCHEME}"
-          case "$(printf '%s' "${GBO_STOREFRONT_ENABLED:-false}" | tr '[:upper:]' '[:lower:]')" in
-            true|1|yes) GBO_FLAG=true ;;
-            *) GBO_FLAG=false ;;
+          # Live production catalog stays on when the secret is unset. Explicit false, 0, or no hides it.
+          case "$(printf '%s' "${GBO_STOREFRONT_ENABLED:-}" | tr '[:upper:]' '[:lower:]')" in
+            false|0|no) GBO_FLAG=false ;;
+            *) GBO_FLAG=true ;;
           esac
           EXTRA="$EXTRA GboStorefrontEnabled=${GBO_FLAG}"
           sam build && sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --config-env prod --stack-name blossompot-prod \
@@ -291,7 +292,7 @@ jobs:
           EXISTING=$(aws amplify get-branch --region us-east-1 --app-id "$APP_ID" --branch-name main \
             --query 'branch.environmentVariables' --output json)
           export EXISTING
-          MERGED=$(python3 -c "import json,os; e=json.loads(os.environ.get('EXISTING') or '{}'); s=(os.environ.get('STRIPE_PK') or '').strip(); r=(os.environ.get('RAZOR_KEY_ID') or '').strip(); g=(os.environ.get('GBO_STOREFRONT_ENABLED') or 'false').strip().lower(); g='true' if g in ('true','1','yes') else 'false'; e.update({k:v for k,v in [('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY',s),('RAZOR_KEY_ID',r),('NEXT_PUBLIC_RAZORPAY_KEY_ID',r)] if v}); e['GBO_STOREFRONT_ENABLED']=g; print(json.dumps(e))")
+          MERGED=$(python3 -c "import json,os; e=json.loads(os.environ.get('EXISTING') or '{}'); s=(os.environ.get('STRIPE_PK') or '').strip(); r=(os.environ.get('RAZOR_KEY_ID') or '').strip(); g=(os.environ.get('GBO_STOREFRONT_ENABLED') or '').strip().lower(); g='false' if g in ('false','0','no') else 'true'; e.update({k:v for k,v in [('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY',s),('RAZOR_KEY_ID',r),('NEXT_PUBLIC_RAZORPAY_KEY_ID',r)] if v}); e['GBO_STOREFRONT_ENABLED']=g; print(json.dumps(e))")
           export MERGED
           ENV_STRING=$(python3 -c "import json,os; d=json.loads(os.environ.get('MERGED') or '{}'); print(','.join(f'{k}={v}' for k,v in d.items()))")
           aws amplify update-branch --app-id "$APP_ID" --branch-name main --environment-variables "$ENV_STRING" >/dev/null

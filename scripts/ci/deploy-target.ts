@@ -170,6 +170,16 @@ export function devGboApiToken(env: Record<string, string | undefined>): string 
 }
 
 /**
+ * Production already serves the live Gift Baskets Overseas catalog.
+ * An empty secret must not hide it. Only an explicit false, 0, or no turns the storefront off.
+ * Dev does not use this helper; dev stays off unless `GBO_DEV_API_TOKEN` is set.
+ */
+export function productionGboStorefrontEnabled(raw: string | undefined): boolean {
+  const value = (raw ?? "").trim().toLowerCase();
+  return value !== "false" && value !== "0" && value !== "no";
+}
+
+/**
  * Dev overrides never read production secret names (STRIPE_SECRET_KEY, SMTP_PASSWORD, GBO_API_TOKEN, …).
  * Empty values are explicit so CloudFormation does not keep a previous live value.
  * GBO uses the live partner API. The storefront flag is on only when `GBO_DEV_API_TOKEN` is set.

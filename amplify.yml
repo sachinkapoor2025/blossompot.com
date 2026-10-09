@@ -51,6 +51,11 @@ applications:
                     } >> "$ENV_FILE"
                   fi
                 fi
+                # Same rule as the production API: unset keeps the live catalog; explicit false, 0, or no hides it.
+                case "$(printf '%s' "${GBO_STOREFRONT_ENABLED:-}" | tr '[:upper:]' '[:lower:]')" in
+                  false|0|no) echo "GBO_STOREFRONT_ENABLED=false" >> "$ENV_FILE" ;;
+                  *) echo "GBO_STOREFRONT_ENABLED=true" >> "$ENV_FILE" ;;
+                esac
                 npm run build -w @blossompot/web
               else
                 echo "Refusing to build Amplify branch '${BRANCH:-unset}'. Expected dev or main. This build will not select blossompot-prod."

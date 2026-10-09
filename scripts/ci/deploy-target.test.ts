@@ -27,6 +27,7 @@ import {
   devAmplifyEnvironment,
   devFrontendBuildEnv,
   devParameterOverrides,
+  productionGboStorefrontEnabled,
   publishDevAmplifyConfig,
   resolveBlossomPotAmplifyAppId,
   resolveDevAmplifyAppId,
@@ -120,6 +121,27 @@ test("dev real GBO mode uses the live API only when the dev token is present", (
   assert.doesNotMatch(devWeb, /secrets\.GBO_API_TOKEN/);
   const shared = readFileSync(resolve(root, "packages/shared/src/schemas/vendor-gbo.ts"), "utf8");
   assert.match(shared, new RegExp(DEV_GBO_UPSTREAM_BASE_URL.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  assert.match(prodApi, /false\|0\|no\) GBO_FLAG=false/);
+  assert.match(prodApi, /\*\) GBO_FLAG=true/);
+  assert.doesNotMatch(prodApi, /GBO_STOREFRONT_ENABLED:-\s*false/);
+  assert.match(prodWeb, /false','0','no'/);
+  assert.doesNotMatch(prodWeb, /or 'false'/);
+  const amplify = readFileSync(resolve(root, "amplify.yml"), "utf8");
+  const amplifyMain = amplify.split('"$BRANCH" = "main"')[1] ?? "";
+  assert.match(amplifyMain, /false\|0\|no\) echo "GBO_STOREFRONT_ENABLED=false"/);
+  assert.match(amplifyMain, /echo "GBO_STOREFRONT_ENABLED=true"/);
+});
+
+test("production GBO storefront stays on unless the flag is explicitly off", () => {
+  assert.equal(productionGboStorefrontEnabled(undefined), true);
+  assert.equal(productionGboStorefrontEnabled(""), true);
+  assert.equal(productionGboStorefrontEnabled("true"), true);
+  assert.equal(productionGboStorefrontEnabled("YES"), true);
+  assert.equal(productionGboStorefrontEnabled("1"), true);
+  assert.equal(productionGboStorefrontEnabled("false"), false);
+  assert.equal(productionGboStorefrontEnabled("FALSE"), false);
+  assert.equal(productionGboStorefrontEnabled("0"), false);
+  assert.equal(productionGboStorefrontEnabled("no"), false);
 });
 
 test("dev overrides accept Stripe and Razorpay test keys only", () => {
