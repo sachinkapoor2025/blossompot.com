@@ -169,6 +169,143 @@ export function previewVendorImport(
   };
 }
 
+export const PRODUCT_IMPORT_SAMPLE_NOTICE =
+  "SAMPLE — replace these rows before import. They are not production products.";
+
+export const PRODUCT_IMPORT_COLUMNS = [
+  "name",
+  "description",
+  "sku",
+  "categorySlug",
+  "additionalCategorySlugs",
+  "imageUrls",
+  "price",
+  "currency",
+  "compareAtPrice",
+  "inventory",
+  "published",
+  "tags",
+  "seoTitle",
+  "seoDescription",
+  "weightOz",
+  "lengthIn",
+  "widthIn",
+  "heightIn",
+  "sourceUrl",
+] as const;
+
+const SAMPLE_PRODUCTS = [
+  {
+    name: "Sample Red Roses",
+    description: "Sample description for a dozen roses. Replace before import.",
+    sku: "sample-red-roses",
+    categorySlug: "flowers",
+    additionalCategorySlugs: "birthday",
+    imageUrls: "https://cdn.example.com/sample-roses.jpg",
+    price: "24.00",
+    currency: "USD",
+    compareAtPrice: "29.00",
+    inventory: "",
+    published: "",
+    tags: "flowers,sample",
+    seoTitle: "Sample Red Roses",
+    seoDescription: "Replace this sample.",
+    weightOz: "",
+    lengthIn: "",
+    widthIn: "",
+    heightIn: "",
+    sourceUrl: "",
+  },
+  {
+    name: "Sample Gift Hamper",
+    description: "Sample description for a gift hamper. Replace before import.",
+    sku: "sample-gift-hamper",
+    categorySlug: "gift-hampers",
+    additionalCategorySlugs: "birthday|flowers",
+    imageUrls: "https://cdn.example.com/sample-hamper.jpg|https://cdn.example.com/sample-hamper-side.jpg",
+    price: "48.00",
+    currency: "USD",
+    compareAtPrice: "",
+    inventory: "10",
+    published: "false",
+    tags: "hamper,sample",
+    seoTitle: "",
+    seoDescription: "",
+    weightOz: "32",
+    lengthIn: "12",
+    widthIn: "10",
+    heightIn: "6",
+    sourceUrl: "https://example.com/sample-hamper",
+  },
+] as const;
+
+export function productImportJsonTemplate(): {
+  notice: string;
+  products: Array<Record<string, unknown>>;
+} {
+  return {
+    notice: PRODUCT_IMPORT_SAMPLE_NOTICE,
+    products: SAMPLE_PRODUCTS.map((product) => ({
+      name: product.name,
+      description: product.description,
+      sku: product.sku,
+      categorySlug: product.categorySlug,
+      additionalCategorySlugs: product.additionalCategorySlugs.split("|").filter(Boolean),
+      images: product.imageUrls.split("|").filter(Boolean),
+      price: Number(product.price),
+      currency: product.currency,
+      ...(product.compareAtPrice ? { compareAtPrice: Number(product.compareAtPrice) } : {}),
+      ...(product.inventory ? { inventory: Number(product.inventory) } : {}),
+      tags: product.tags.split(",").filter(Boolean),
+      ...(product.seoTitle ? { seoTitle: product.seoTitle } : {}),
+      ...(product.seoDescription ? { seoDescription: product.seoDescription } : {}),
+      ...(product.weightOz ? { weightOz: Number(product.weightOz) } : {}),
+      ...(product.lengthIn ? { lengthIn: Number(product.lengthIn) } : {}),
+      ...(product.widthIn ? { widthIn: Number(product.widthIn) } : {}),
+      ...(product.heightIn ? { heightIn: Number(product.heightIn) } : {}),
+      ...(product.sourceUrl ? { sourceUrl: product.sourceUrl } : {}),
+    })),
+  };
+}
+
+export function productImportWorkbookSheets(): {
+  productUpload: string[][];
+  instructions: string[][];
+  allowedValues: string[][];
+} {
+  return {
+    productUpload: [
+      [...PRODUCT_IMPORT_COLUMNS],
+      PRODUCT_IMPORT_COLUMNS.map((column) => SAMPLE_PRODUCTS[0][column]),
+      PRODUCT_IMPORT_COLUMNS.map((column) => SAMPLE_PRODUCTS[1][column]),
+    ],
+    instructions: [
+      ["BlossomPot product import"],
+      [PRODUCT_IMPORT_SAMPLE_NOTICE],
+      ["Vendor and delivery countries are selected on the Add Product page. Do not rely on columns in this file."],
+      ["If vendorSlug or deliveryCountries is present, it must match the page selection or the row is rejected."],
+      ["Required: name, description, sku, categorySlug, at least one imageUrls value, price."],
+      ["SKU must be unique. The product slug is generated from the name and must also be unique."],
+      ["additionalCategorySlugs and imageUrls use a pipe (|). Tags use a comma. JSON templates use arrays."],
+      ["Blank published means unpublished. Blank inventory uses the vendor default, then 200."],
+      ["Blank currency means USD. compareAtPrice is optional and is not required to be higher than price."],
+      ["Each image URL is requested by the server. A well-formed URL is not enough; the response must be HTTP 200-299."],
+      ["One invalid row blocks the whole batch. Nothing is written until you approve the preview."],
+      ["The commit writes at most 50 products in one transaction (100 DynamoDB actions: product plus SKU reservation)."],
+      ["Existing products, orders, and inventory are not changed. A matching slug or SKU rejects the batch."],
+      ["Gift Baskets Overseas vendors, SKUs, and slugs are rejected. United Kingdom is GB."],
+    ],
+    allowedValues: [
+      ["field", "allowed"],
+      ["currency", "USD | INR | blank (USD)"],
+      ["published", "true | false | blank (unpublished)"],
+      ["additionalCategorySlugs", "existing category slugs separated by |"],
+      ["imageUrls", "http or https URLs separated by |"],
+      ["categorySlug", "an existing category slug"],
+    ],
+  };
+}
+
 export function integrationSettingsNote(integrationType: CatalogIntegrationType): string {
   if (integrationType === "partner-api") {
     return "Gift Baskets Overseas and the vendor API pages are the live API integrations. A generic endpoint mapper is not part of this catalog.";

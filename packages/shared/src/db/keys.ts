@@ -29,6 +29,15 @@ export const importBatchKeys = {
   gsi1sk: (createdAt: string, batchId: string) => `${createdAt}#${batchId}`,
 };
 
+/**
+ * Reservation for one catalog SKU. Written with the product in the same transaction.
+ * Legacy products do not have this row until a later import reserves that SKU.
+ */
+export const productSkuKeys = {
+  pk: (sku: string) => `SKU#${sku.trim().toLowerCase()}`,
+  sk: () => "META" as const,
+};
+
 /** Idempotency pointer for one FNP product URL. */
 export const importSourceKeys = {
   pk: (sourceKey: string) => `IMPORTSRC#${sourceKey}`,

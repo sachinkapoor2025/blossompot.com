@@ -170,6 +170,76 @@ function applyUpdate(item: Item, input: UpdateCommandInput): Item {
   return updated;
 }
 
+function splitCondition(expr: string, op: "OR" | "AND"): string[] {
+  const parts: string[] = [];
+  let depth = 0;
+  let current = "";
+  for (let i = 0; i < expr.length; i += 1) {
+    const ch = expr[i] ?? "";
+    if (ch === "(") depth += 1;
+    else if (ch === ")") depth -= 1;
+    if (depth === 0 && expr.slice(i, i + op.length + 2).toUpperCase() === ` ${op} `) {
+      parts.push(current.trim());
+      current = "";
+      i += op.length + 1;
+      continue;
+    }
+    current += ch;
+  }
+  if (current.trim()) parts.push(current.trim());
+  return parts;
+}
+
+function conditionName(token: string, names: Record<string, string> | undefined): string {
+  const trimmed = token.trim();
+  if (trimmed.startsWith("#")) return names?.[trimmed] ?? trimmed.slice(1);
+  return trimmed;
+}
+
+function conditionValue(token: string, values: Record<string, unknown> | undefined): unknown {
+  const trimmed = token.trim();
+  if (trimmed.startsWith(":")) return values?.[trimmed];
+  return trimmed;
+}
+
+/** Enough of DynamoDB conditions for SKU ownership and attribute checks. */
+export function memoryConditionPasses(
+  expression: string | undefined,
+  item: Item | undefined,
+  values?: Record<string, unknown>,
+  names?: Record<string, string>
+): boolean {
+  if (!expression || !expression.trim()) return true;
+  const wrapped = expression.trim();
+  const expr = wrapped.startsWith("(") && wrapped.endsWith(")") ? wrapped.slice(1, -1).trim() : wrapped;
+  const orParts = splitCondition(expr, "OR");
+  if (orParts.length > 1) return orParts.some((part) => memoryConditionPasses(part, item, values, names));
+  const andParts = splitCondition(expr, "AND");
+  if (andParts.length > 1) return andParts.every((part) => memoryConditionPasses(part, item, values, names));
+  const exists = expr.match(/^attribute_exists\((.+)\)$/i);
+  if (exists) {
+    const name = conditionName(exists[1] ?? "", names);
+    return item != null && item[name] !== undefined;
+  }
+  const missing = expr.match(/^attribute_not_exists\((.+)\)$/i);
+  if (missing) {
+    const name = conditionName(missing[1] ?? "", names);
+    return item == null || item[name] === undefined;
+  }
+  const equals = expr.match(/^([#A-Za-z0-9_]+)\s*=\s*(:[A-Za-z0-9_]+)$/);
+  if (equals) {
+    const name = conditionName(equals[1] ?? "", names);
+    return item?.[name] === conditionValue(equals[2] ?? "", values);
+  }
+  return false;
+}
+
+function transactionCancelled(): Error {
+  const err = new Error("Transaction cancelled");
+  err.name = "TransactionCanceledException";
+  return err;
+}
+
 export const memoryStore = {
   send: async (command: { input: unknown; constructor: { name: string } }) => {
     const name = command.constructor.name;
@@ -239,17 +309,79 @@ export const memoryStore = {
 
     if (name === "TransactWriteCommand") {
       const transactItems = (input.TransactItems ?? []) as Array<{
-        Put?: { TableName?: string; Item?: Item };
+        Put?: {
+          TableName?: string;
+          Item?: Item;
+          ConditionExpression?: string;
+          ExpressionAttributeValues?: Record<string, unknown>;
+          ExpressionAttributeNames?: Record<string, string>;
+        };
+        Delete?: {
+          TableName?: string;
+          Key?: Item;
+          ConditionExpression?: string;
+          ExpressionAttributeValues?: Record<string, unknown>;
+          ExpressionAttributeNames?: Record<string, string>;
+        };
+        Update?: UpdateCommandInput;
+        ConditionCheck?: {
+          TableName?: string;
+          Key?: Item;
+          ConditionExpression?: string;
+          ExpressionAttributeValues?: Record<string, unknown>;
+          ExpressionAttributeNames?: Record<string, string>;
+        };
       }>;
+      const planned: Array<{ table: Map<string, Item>; key: string; next: Item | null }> = [];
+      for (const entry of transactItems) {
+        if (entry.Put?.Item) {
+          const put = entry.Put;
+          const table = tableFor(put.TableName);
+          const key = itemKey(put.Item?.PK, put.Item?.SK);
+          const current = table.get(key);
+          if (!memoryConditionPasses(put.ConditionExpression, current, put.ExpressionAttributeValues, put.ExpressionAttributeNames)) {
+            throw transactionCancelled();
+          }
+          planned.push({ table, key, next: { ...put.Item } });
+          continue;
+        }
+        if (entry.Delete?.Key) {
+          const del = entry.Delete;
+          const table = tableFor(del.TableName);
+          const key = itemKey(del.Key?.PK, del.Key?.SK);
+          const current = table.get(key);
+          if (!memoryConditionPasses(del.ConditionExpression, current, del.ExpressionAttributeValues, del.ExpressionAttributeNames)) {
+            throw transactionCancelled();
+          }
+          planned.push({ table, key, next: null });
+          continue;
+        }
+        if (entry.Update?.Key) {
+          const update = entry.Update;
+          const table = tableFor(update.TableName);
+          const key = itemKey(update.Key?.PK, update.Key?.SK);
+          const current = table.get(key);
+          if (!memoryConditionPasses(update.ConditionExpression, current, update.ExpressionAttributeValues, update.ExpressionAttributeNames)) {
+            throw transactionCancelled();
+          }
+          planned.push({ table, key, next: applyUpdate(current ?? { PK: update.Key?.PK, SK: update.Key?.SK }, update) });
+          continue;
+        }
+        if (entry.ConditionCheck?.Key) {
+          const check = entry.ConditionCheck;
+          const table = tableFor(check.TableName);
+          const current = table.get(itemKey(check.Key?.PK, check.Key?.SK));
+          if (!memoryConditionPasses(check.ConditionExpression, current, check.ExpressionAttributeValues, check.ExpressionAttributeNames)) {
+            throw transactionCancelled();
+          }
+        }
+      }
       const snapshot: Array<{ table: Map<string, Item>; key: string; previous: Item | undefined }> = [];
       try {
-        for (const entry of transactItems) {
-          const put = entry.Put;
-          if (!put?.Item) continue;
-          const table = tableFor(put.TableName);
-          const key = itemKey(put.Item.PK, put.Item.SK);
-          snapshot.push({ table, key, previous: table.get(key) });
-          table.set(key, { ...put.Item });
+        for (const row of planned) {
+          snapshot.push({ table: row.table, key: row.key, previous: row.table.get(row.key) });
+          if (row.next) row.table.set(row.key, row.next);
+          else row.table.delete(row.key);
         }
       } catch (err) {
         for (const row of snapshot.reverse()) {

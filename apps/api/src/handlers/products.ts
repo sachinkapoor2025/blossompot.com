@@ -34,7 +34,8 @@ import {
 } from "@blossompot/shared";
 import { decideNewShopping, loadCatalogVendorRegistry } from "../lib/catalog-vendor-store";
 import { docClient, PRODUCTS_TABLE, CONFIG_TABLE, now, slugify } from "../lib/db";
-import { ok, created, badRequest, notFound, forbidden } from "../lib/response";
+import { deleteCatalogProduct, insertCatalogProduct, isTransactionConflict, replaceCatalogProduct, SKU_TAKEN_MESSAGE } from "../lib/catalog-sku-write";
+import { ok, created, badRequest, notFound, forbidden, json } from "../lib/response";
 import { evaluateProductsForLocation, parseLocationQuery, resolveShoppingLocation } from "./serviceability";
 import { getAuth, requireAdmin } from "../lib/auth";
 import { withResolvedProductImages, resolveProductImageUrl } from "../lib/images";
@@ -415,6 +416,12 @@ export async function createProduct(event: APIGatewayProxyEventV2) {
   const slug = slugify(parsed.data.name);
   const timestamp = now();
   const inventory = parsed.data.inventory ?? DEFAULT_PRODUCT_INVENTORY;
+  const existing = await docClient.send(
+    new GetCommand({
+      TableName: PRODUCTS_TABLE,
+      Key: { PK: productKeys.pk(slug), SK: productKeys.sk() },
+    })
+  );
   const item: Product & { PK: string; SK: string; GSI1PK: string; GSI1SK: string } = {
     ...parsed.data,
     vendorSlug: fulfillmentVendorSlug(parsed.data),
@@ -424,11 +431,24 @@ export async function createProduct(event: APIGatewayProxyEventV2) {
     SK: productKeys.sk(),
     GSI1PK: productKeys.gsi1pk(parsed.data.categorySlug),
     GSI1SK: productKeys.gsi1sk(slug),
-    createdAt: timestamp,
+    createdAt: typeof existing.Item?.createdAt === "string" ? existing.Item.createdAt : timestamp,
     updatedAt: timestamp,
   };
 
-  await docClient.send(new PutCommand({ TableName: PRODUCTS_TABLE, Item: item }));
+  try {
+    if (existing.Item) {
+      await replaceCatalogProduct({
+        item,
+        previousSku: existing.Item.sku,
+        nextSku: typeof item.sku === "string" ? item.sku : undefined,
+      });
+    } else {
+      await insertCatalogProduct(item);
+    }
+  } catch (err) {
+    if (isTransactionConflict(err)) return json(409, { error: SKU_TAKEN_MESSAGE });
+    throw err;
+  }
   invalidateProductListCache();
   return created({ product: item });
 }
@@ -480,7 +500,16 @@ export async function updateProduct(event: APIGatewayProxyEventV2) {
     updated.GSI1SK = productKeys.gsi1sk(slug);
   }
 
-  await docClient.send(new PutCommand({ TableName: PRODUCTS_TABLE, Item: updated }));
+  try {
+    await replaceCatalogProduct({
+      item: updated,
+      previousSku: previous.sku,
+      nextSku: typeof updated.sku === "string" ? updated.sku : undefined,
+    });
+  } catch (err) {
+    if (isTransactionConflict(err)) return json(409, { error: SKU_TAKEN_MESSAGE });
+    throw err;
+  }
   invalidateProductListCache();
 
   if (parsed.data.inventory !== undefined) {
@@ -676,14 +705,23 @@ export async function deleteAllSampleProducts(event: APIGatewayProxyEventV2) {
       sampleSlugs.has(slug) &&
       (item.isSampleReview === true || String(item.reviewId ?? "").startsWith("sample-"));
     if (!isSampleMeta && !isSampleReview) continue;
-    await docClient.send(
-      new DeleteCommand({
-        TableName: PRODUCTS_TABLE,
-        Key: { PK: pk, SK: sk },
-      })
-    );
-    if (isSampleMeta) deletedProducts++;
-    else deletedReviews++;
+    if (isSampleMeta) {
+      try {
+        await deleteCatalogProduct(slug, item.sku);
+      } catch (err) {
+        if (!isTransactionConflict(err)) throw err;
+        continue;
+      }
+      deletedProducts++;
+    } else {
+      await docClient.send(
+        new DeleteCommand({
+          TableName: PRODUCTS_TABLE,
+          Key: { PK: pk, SK: sk },
+        })
+      );
+      deletedReviews++;
+    }
   }
 
   const vendors = await deleteSampleMarketplaceVendors();
@@ -718,10 +756,9 @@ export async function convertSampleProductToReal(event: APIGatewayProxyEventV2) 
     vendorSlug?: string;
     fulfilledByName?: string;
   };
-  await docClient.send(
-    new PutCommand({
-      TableName: PRODUCTS_TABLE,
-      Item: {
+  try {
+    await replaceCatalogProduct({
+      item: {
         ...product,
         isSampleProduct: false,
         tags,
@@ -729,8 +766,13 @@ export async function convertSampleProductToReal(event: APIGatewayProxyEventV2) 
         fulfilledByName: body.fulfilledByName ?? product.fulfilledByName,
         updatedAt: now(),
       },
-    })
-  );
+      previousSku: product.sku,
+      nextSku: typeof product.sku === "string" ? product.sku : undefined,
+    });
+  } catch (err) {
+    if (isTransactionConflict(err)) return json(409, { error: SKU_TAKEN_MESSAGE });
+    throw err;
+  }
   invalidateProductListCache();
   return ok({ slug, isSampleProduct: false });
 }
@@ -742,12 +784,19 @@ export async function deleteProduct(event: APIGatewayProxyEventV2) {
   const slug = event.pathParameters?.slug;
   if (!slug) return badRequest("Slug required");
 
-  await docClient.send(
-    new DeleteCommand({
+  const existing = await docClient.send(
+    new GetCommand({
       TableName: PRODUCTS_TABLE,
       Key: { PK: productKeys.pk(slug), SK: productKeys.sk() },
     })
   );
+  if (!existing.Item) return notFound("Product not found");
+  try {
+    await deleteCatalogProduct(slug, existing.Item.sku);
+  } catch (err) {
+    if (isTransactionConflict(err)) return json(409, { error: SKU_TAKEN_MESSAGE });
+    throw err;
+  }
   invalidateProductListCache();
   return ok({ deleted: true });
 }
@@ -806,7 +855,15 @@ export async function bulkUploadProducts(event: APIGatewayProxyEventV2) {
       updatedAt: timestamp,
     };
 
-    await docClient.send(new PutCommand({ TableName: PRODUCTS_TABLE, Item: item }));
+    try {
+      await insertCatalogProduct(item);
+    } catch (err) {
+      if (isTransactionConflict(err)) {
+        errors.push({ row: i + 1, error: `SKU or slug is already reserved (slug=${slug}). Nothing for this row was saved.` });
+        continue;
+      }
+      throw err;
+    }
     createdProducts.push(item as Product);
   }
 

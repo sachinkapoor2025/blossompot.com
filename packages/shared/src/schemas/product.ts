@@ -24,6 +24,13 @@ export const productSchema = z.object({
   /** Wholesale cost from vendor — never expose on public storefront APIs. */
   vendorCost: z.number().positive().optional(),
   /**
+   * Optional ISO-3166 alpha-2 countries for this product.
+   * Absent or empty inherits the vendor's deliveryCountries.
+   * A stored list can be narrower than the vendor and never widens it.
+   * Gift Baskets Overseas ignores this field and keeps SKU/slug country matching.
+   */
+  deliveryCountries: z.array(z.string().regex(/^[A-Z]{2}$/)).max(50).optional(),
+  /**
    * Public storefront flag: show dry-fruit / chocolate add-on picker.
    * Set by API after stripping vendorSlug (true for BlossomPot, false for OC).
    */

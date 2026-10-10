@@ -11,6 +11,7 @@ import {
   productKeys,
   metaDescription,
 } from "@blossompot/shared";
+import { insertCatalogProduct, isTransactionConflict } from "./catalog-sku-write";
 import { docClient, PRODUCTS_TABLE, now } from "./db";
 import catalogJson from "../data/orange-county-hampers.json";
 
@@ -166,7 +167,14 @@ export async function ensureOrangeCountyProductInDb(slug: string): Promise<Recor
     updatedAt: ts,
   };
 
-  await docClient.send(new PutCommand({ TableName: PRODUCTS_TABLE, Item: item }));
+  try {
+    await insertCatalogProduct(item);
+  } catch (err) {
+    if (!isTransactionConflict(err)) throw err;
+    const raced = await docClient.send(new GetCommand({ TableName: PRODUCTS_TABLE, Key: key }));
+    if (raced.Item) return raced.Item as Record<string, unknown>;
+    throw err;
+  }
   console.log(`upserted orange-county product ${slug} inventory=${ORANGE_COUNTY_PRODUCT_INVENTORY}`);
   return item;
 }

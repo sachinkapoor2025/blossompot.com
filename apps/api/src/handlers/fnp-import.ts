@@ -1,5 +1,5 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { GetCommand, PutCommand, QueryCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
+import { GetCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import type { APIGatewayProxyEventV2 } from "aws-lambda";
 import { createHash, randomUUID } from "node:crypto";
 import { z } from "zod";
@@ -24,6 +24,7 @@ import {
   type FnpImportPlanRow,
 } from "@blossompot/shared";
 import { getAuth } from "../lib/auth";
+import { deleteImportedProductIfUnchanged, insertCatalogProduct, isTransactionConflict } from "../lib/catalog-sku-write";
 import { docClient, now, PRODUCTS_TABLE } from "../lib/db";
 import { badRequest, forbidden, notFound, ok } from "../lib/response";
 import { invalidateCategoryCache } from "./categories";
@@ -132,7 +133,7 @@ async function loadCatalogCategories(): Promise<CatalogCategory[]> {
 }
 
 function isConditionalFailure(err: unknown): boolean {
-  return Boolean(err && typeof err === "object" && "name" in err && (err as { name: string }).name === "ConditionalCheckFailedException");
+  return isTransactionConflict(err);
 }
 
 async function getItem(pk: string, sk: string): Promise<Record<string, unknown> | undefined> {
@@ -433,16 +434,10 @@ async function importReadyRow(
     GSI1SK: productKeys.gsi1sk(draft.slug),
   };
   try {
-    await docClient.send(
-      new PutCommand({
-        TableName: PRODUCTS_TABLE,
-        Item: productItem,
-        ConditionExpression: "attribute_not_exists(PK)",
-      })
-    );
+    await insertCatalogProduct(productItem);
   } catch (err) {
     if (!isConditionalFailure(err)) throw err;
-    return { status: "conflict", message: `Slug "${row.slug}" was created by another write. It was not overwritten.` };
+    return { status: "conflict", message: `Slug or SKU "${row.slug}" was reserved by another write. It was not overwritten.` };
   }
 
   try {
@@ -469,17 +464,21 @@ async function importReadyRow(
     if (winner?.productSlug === draft.slug) {
       return { status: "imported", message: "Imported unpublished.", productSlug: draft.slug };
     }
-    await docClient.send(
-      new DeleteCommand({
-        TableName: PRODUCTS_TABLE,
-        Key: { PK: productKeys.pk(draft.slug), SK: productKeys.sk() },
-        ConditionExpression: "sourceUrl = :url",
-        ExpressionAttributeValues: { ":url": row.sourceUrl },
-      })
-    );
+    const cleanup = await deleteImportedProductIfUnchanged({
+      slug: draft.slug,
+      sku: draft.sku ?? draft.slug,
+      sourceUrl: row.sourceUrl,
+    });
+    if (cleanup === "deleted") {
+      return {
+        status: "error",
+        message: "The FNP URL is already linked to a different product. The new product was removed.",
+      };
+    }
     return {
       status: "error",
-      message: "The FNP URL is already linked to a different product. The new product was removed.",
+      message:
+        "The FNP URL is already linked to a different product. The new product was kept because its SKU, source, or reservation no longer matches this import.",
     };
   }
 

@@ -166,7 +166,8 @@ function withoutRememberedDisabledVendors(products: Product[], country = "US"): 
 
 /**
  * Bundled JSON is not a second catalog. It may fill a missing SKU only when that
- * product's built-in vendor delivers to the country. Live admin delivery countries
+ * product's built-in vendor delivers to the country. A product deliveryCountries
+ * list is honored when the bundled row has one. Live admin delivery countries
  * stay on the product API, which already filtered its own rows.
  */
 function bundledProductAllowedForCountry(product: Product, country: string): boolean {

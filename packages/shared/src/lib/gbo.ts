@@ -415,7 +415,39 @@ export function isGboCatalogProduct(product: {
 }
 
 /**
- * GBO SKU destination (`gbo:{CC}:{id}`). Local products do not carry a country.
+ * Non-GBO product country list. Absent, empty, or GBO products inherit other rules.
+ * GBO country stays on the SKU or slug and is not read from this field.
+ */
+export function restrictedDeliveryCountries(product: {
+  vendorSlug?: string | null;
+  internationalDelivery?: boolean | null;
+  slug?: string | null;
+  sku?: string | null;
+  deliveryCountries?: readonly string[] | null;
+}): readonly string[] | null {
+  if (
+    isGboCatalogProduct({
+      vendorSlug: product.vendorSlug,
+      internationalDelivery: product.internationalDelivery === true,
+      slug: product.slug,
+      sku: product.sku,
+    })
+  ) {
+    return null;
+  }
+  if (!product.deliveryCountries?.length) return null;
+  const codes: string[] = [];
+  for (const raw of product.deliveryCountries) {
+    const code = String(raw ?? "").trim().toUpperCase();
+    if (!/^[A-Z]{2}$/.test(code) || codes.includes(code)) continue;
+    codes.push(code);
+  }
+  return codes.length > 0 ? codes : null;
+}
+
+/**
+ * GBO SKU destination (`gbo:{CC}:{id}`). Local products do not carry a country
+ * unless `deliveryCountries` is stored on the product.
  */
 export function catalogProductCountry(product: {
   vendorSlug?: string | null;
@@ -431,7 +463,8 @@ export function catalogProductCountry(product: {
 
 /**
  * GBO SKUs must match the destination country. Untagged GBO rows stay hidden.
- * Every other product is decided by the vendor's delivery countries, not a product field.
+ * A non-GBO product with deliveryCountries must include the destination.
+ * A product without that field stays visible here; vendor coverage is checked separately.
  */
 export function productVisibleForDeliveryCountry(
   product: {
@@ -439,6 +472,7 @@ export function productVisibleForDeliveryCountry(
     internationalDelivery?: boolean;
     slug?: string | null;
     sku?: string | null;
+    deliveryCountries?: readonly string[] | null;
   },
   country: string
 ): boolean {
@@ -447,6 +481,8 @@ export function productVisibleForDeliveryCountry(
   const ref = parseGboSku(product.sku) ?? parseGboSlug(product.slug);
   if (ref) return ref.country === iso;
   if (isGboCatalogProduct(product)) return false;
+  const own = restrictedDeliveryCountries(product);
+  if (own) return own.includes(iso);
   return true;
 }
 

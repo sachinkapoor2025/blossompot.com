@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { CATALOG_INTEGRATION_TYPES, CATALOG_STORAGE_LABEL, type CatalogIntegrationType } from "@blossompot/shared";
 import * as XLSX from "xlsx";
@@ -21,12 +21,10 @@ import {
   VENDOR_STATUS_HELP,
   VENDOR_STORAGE_HELP,
   integrationSettingsNote,
-  previewVendorImport,
+  productImportJsonTemplate,
+  productImportWorkbookSheets,
   slugifyVendorName,
-  vendorImportTemplateColumns,
   type AddProductMethod,
-  type PreparedVendorProduct,
-  type VendorImportPreview,
 } from "@/lib/admin-vendor-management";
 
 type Vendor = {
@@ -34,8 +32,17 @@ type Vendor = {
   vendorName: string;
   enabled: boolean;
   integrationType: CatalogIntegrationType;
+  deliveryCountries?: string[];
   defaultInventory?: number;
   trashedAt?: string;
+};
+
+type ImportPreview = {
+  ok: boolean;
+  writes: false;
+  batchErrors: string[];
+  rows: Array<{ row: number; errors: string[]; name?: string; slug?: string; sku?: string; published?: boolean }>;
+  imageValidation?: string;
 };
 
 const NEW_VENDOR = "__new__";
@@ -50,7 +57,10 @@ export default function AddProductPage() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [preview, setPreview] = useState<VendorImportPreview | null>(null);
+  const [preview, setPreview] = useState<ImportPreview | null>(null);
+  const [importRows, setImportRows] = useState<Record<string, unknown>[]>([]);
+  const [enabledCountries, setEnabledCountries] = useState<Array<{ countryCode: string; countryName: string }>>([]);
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [manual, setManual] = useState({
     name: "",
     sku: "",
@@ -75,10 +85,18 @@ export default function AddProductPage() {
 
   const load = useCallback(async () => {
     if (!token) return;
-    const data = await api<{ vendors: Vendor[] }>("/admin/catalog-vendors", { token });
+    const [data, countries] = await Promise.all([
+      api<{ vendors: Vendor[] }>("/admin/catalog-vendors", { token }),
+      api<{ countries: Array<{ countryCode: string; countryName?: string; enabled: boolean }> }>("/admin/catalog-countries", { token }),
+    ]);
     const active = data.vendors.filter((vendor) => !vendor.trashedAt);
     setVendorCount(data.vendors.length);
     setVendors(active);
+    setEnabledCountries(
+      countries.countries
+        .filter((country) => country.enabled)
+        .map((country) => ({ countryCode: country.countryCode, countryName: country.countryName || country.countryCode }))
+    );
     setDeliveryRows(applyVendorDeliveryCountries(["US"]));
     setVendorSlug((current) => current || active[0]?.vendorSlug || "");
   }, [token]);
@@ -88,6 +106,17 @@ export default function AddProductPage() {
   }, [load]);
 
   const selected = vendors.find((vendor) => vendor.vendorSlug === vendorSlug) ?? null;
+  const coveredKey = (selected?.deliveryCountries ?? []).join(",");
+  const countryChoices = useMemo(() => {
+    const covered = new Set(coveredKey.split(",").filter(Boolean).map((code) => code.toUpperCase()));
+    return enabledCountries.filter((country) => covered.has(country.countryCode.toUpperCase()));
+  }, [coveredKey, enabledCountries]);
+
+  useEffect(() => {
+    setSelectedCountries(countryChoices.map((country) => country.countryCode));
+    setPreview(null);
+    setImportRows([]);
+  }, [countryChoices]);
 
   function chooseVendor(value: string) {
     setPreview(null);
@@ -137,37 +166,51 @@ export default function AddProductPage() {
     }
   }
 
-  async function createManual(event: FormEvent) {
-    event.preventDefault();
+  async function previewRows(rows: Record<string, unknown>[]) {
     if (!token || !selected) return;
+    if (selectedCountries.length === 0) {
+      setError("Select at least one delivery country for this vendor.");
+      return;
+    }
     setBusy(true);
     setError(null);
+    setImportRows(rows);
     try {
-      const inventory =
-        manual.inventory.trim() === "" ? selected.defaultInventory : Number(manual.inventory);
-      await api("/products", {
+      const result = await api<ImportPreview>("/admin/imports/products/preview", {
         method: "POST",
         token,
         body: JSON.stringify({
-          name: manual.name,
-          description: manual.description,
-          price: Number(manual.price),
-          currency: manual.currency,
-          categorySlug: manual.categorySlug,
-          inventory,
-          published: manual.published,
           vendorSlug: selected.vendorSlug,
-          ...(manual.sku ? { sku: manual.sku } : {}),
-          ...(manual.imageUrl ? { images: [manual.imageUrl] } : {}),
+          deliveryCountries: selectedCountries,
+          rows,
         }),
       });
-      setMessage(`Created under ${selected.vendorName}.`);
-      setManual({ name: "", sku: "", description: "", price: "", currency: "USD", categorySlug: "", inventory: "", published: false, imageUrl: "" });
+      setPreview(result);
+      setMessage(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not create the product");
+      setPreview(null);
+      setError(err instanceof Error ? err.message : "Could not preview the batch");
     } finally {
       setBusy(false);
     }
+  }
+
+  async function createManual(event: FormEvent) {
+    event.preventDefault();
+    const inventory = manual.inventory.trim() === "" ? undefined : Number(manual.inventory);
+    await previewRows([
+      {
+        name: manual.name,
+        description: manual.description,
+        sku: manual.sku,
+        price: Number(manual.price),
+        currency: manual.currency,
+        categorySlug: manual.categorySlug,
+        ...(inventory != null ? { inventory } : {}),
+        published: manual.published,
+        ...(manual.imageUrl ? { imageUrls: manual.imageUrl } : {}),
+      },
+    ]);
   }
 
   async function readFile(file: File) {
@@ -179,17 +222,15 @@ export default function AddProductPage() {
       records = Array.isArray(parsed) ? parsed : parsed.products ?? [];
     } else {
       const book = XLSX.read(buffer, { type: "array" });
-      const sheet = book.Sheets[book.SheetNames[0] ?? ""];
+      const sheet = book.Sheets["Product Upload"] ?? book.Sheets[book.SheetNames[0] ?? ""];
       records = sheet ? (XLSX.utils.sheet_to_json(sheet) as Record<string, unknown>[]) : [];
     }
-    setPreview(previewVendorImport(records, selected.vendorSlug, selected.defaultInventory));
-    setMessage(null);
+    await previewRows(records);
   }
 
   function downloadTemplate(kind: "excel" | "json") {
-    const columns = vendorImportTemplateColumns();
     if (kind === "json") {
-      const sample = { products: [Object.fromEntries(columns.map((column) => [column, ""]))] };
+      const sample = productImportJsonTemplate();
       const blob = new Blob([JSON.stringify(sample, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -199,27 +240,34 @@ export default function AddProductPage() {
       URL.revokeObjectURL(url);
       return;
     }
-    const sheet = XLSX.utils.aoa_to_sheet([[...columns]]);
+    const sheets = productImportWorkbookSheets();
     const book = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(book, sheet, "Products");
+    XLSX.utils.book_append_sheet(book, XLSX.utils.aoa_to_sheet(sheets.productUpload), "Product Upload");
+    XLSX.utils.book_append_sheet(book, XLSX.utils.aoa_to_sheet(sheets.instructions), "Instructions");
+    XLSX.utils.book_append_sheet(book, XLSX.utils.aoa_to_sheet(sheets.allowedValues), "Allowed Values");
     XLSX.writeFile(book, "blossompot-products.xlsx");
   }
 
   async function commitImport() {
-    if (!token || !preview) return;
-    const products = preview.rows.flatMap((row) => (row.product && row.errors.length === 0 ? [row.product] : []));
+    if (!token || !selected || !preview?.ok) return;
     setBusy(true);
     setError(null);
-    let created = 0;
     try {
-      for (const product of products) {
-        await api("/products", { method: "POST", token, body: JSON.stringify(product satisfies PreparedVendorProduct) });
-        created += 1;
-      }
-      setMessage(`Imported ${created} product${created === 1 ? "" : "s"} for ${selected?.vendorName}.`);
+      const result = await api<{ created: number }>("/admin/imports/products/commit", {
+        method: "POST",
+        token,
+        body: JSON.stringify({
+          vendorSlug: selected.vendorSlug,
+          deliveryCountries: selectedCountries,
+          rows: importRows,
+        }),
+      });
+      setMessage(`Imported ${result.created} unpublished product${result.created === 1 ? "" : "s"} for ${selected.vendorName}.`);
       setPreview(null);
+      setImportRows([]);
+      setManual({ name: "", sku: "", description: "", price: "", currency: "USD", categorySlug: "", inventory: "", published: false, imageUrl: "" });
     } catch (err) {
-      setError(err instanceof Error ? err.message : `Import stopped after ${created} products`);
+      setError(err instanceof Error ? err.message : "Import was not saved");
     } finally {
       setBusy(false);
     }
@@ -337,7 +385,34 @@ export default function AddProductPage() {
 
       {selected ? (
         <section className="space-y-3 rounded-xl border bg-white p-4">
-          <h2 className="font-semibold">2. Add products for {selected.vendorName}</h2>
+          <h2 className="font-semibold">2. Delivery countries for {selected.vendorName}</h2>
+          <p className="text-xs text-slate-500">
+            Only countries that are globally enabled and already on this vendor are listed. This selection cannot add a country the vendor does not deliver to.
+          </p>
+          {countryChoices.length === 0 ? (
+            <p className="text-sm text-red-600">This vendor has no globally enabled delivery country.</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              {countryChoices.map((country) => (
+                <label key={country.countryCode} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedCountries.includes(country.countryCode)}
+                    onChange={(event) => {
+                      setPreview(null);
+                      setSelectedCountries((current) =>
+                        event.target.checked
+                          ? [...current, country.countryCode]
+                          : current.filter((code) => code !== country.countryCode)
+                      );
+                    }}
+                  />
+                  {country.countryName} ({country.countryCode})
+                </label>
+              ))}
+            </div>
+          )}
+          <h2 className="font-semibold">3. Add products for {selected.vendorName}</h2>
           <div className="flex flex-wrap gap-2">
             {ADD_PRODUCT_METHODS.map((item) => (
               <button
@@ -357,19 +432,19 @@ export default function AddProductPage() {
           {method === "manual" ? (
             <form onSubmit={(event) => void createManual(event)} className="space-y-3">
               <input required placeholder="Name" value={manual.name} onChange={(event) => setManual({ ...manual, name: event.target.value })} className="w-full rounded-lg border px-3 py-2" />
-              <input placeholder="SKU" value={manual.sku} onChange={(event) => setManual({ ...manual, sku: event.target.value })} className="w-full rounded-lg border px-3 py-2" />
+              <input required placeholder="SKU" value={manual.sku} onChange={(event) => setManual({ ...manual, sku: event.target.value })} className="w-full rounded-lg border px-3 py-2" />
               <textarea required placeholder="Description" value={manual.description} onChange={(event) => setManual({ ...manual, description: event.target.value })} className="w-full rounded-lg border px-3 py-2" />
               <input required placeholder="Price" value={manual.price} onChange={(event) => setManual({ ...manual, price: event.target.value })} className="w-full rounded-lg border px-3 py-2" />
               <input required placeholder="Category slug" value={manual.categorySlug} onChange={(event) => setManual({ ...manual, categorySlug: event.target.value })} className="w-full rounded-lg border px-3 py-2" />
               <input placeholder={selected.defaultInventory != null ? `Inventory (default ${selected.defaultInventory})` : "Inventory"} value={manual.inventory} onChange={(event) => setManual({ ...manual, inventory: event.target.value })} className="w-full rounded-lg border px-3 py-2" />
-              <input placeholder="Image URL" value={manual.imageUrl} onChange={(event) => setManual({ ...manual, imageUrl: event.target.value })} className="w-full rounded-lg border px-3 py-2" />
+              <input required placeholder="Image URL" value={manual.imageUrl} onChange={(event) => setManual({ ...manual, imageUrl: event.target.value })} className="w-full rounded-lg border px-3 py-2" />
               <label className="flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={manual.published} onChange={(event) => setManual({ ...manual, published: event.target.checked })} />
                 Published
               </label>
               <p className="text-xs text-slate-500">Vendor slug {selected.vendorSlug} is applied by this form.</p>
-              <button type="submit" disabled={busy} className="rounded-lg bg-nav px-4 py-2 text-sm text-white">
-                Create product
+              <button type="submit" disabled={busy || selectedCountries.length === 0} className="rounded-lg bg-nav px-4 py-2 text-sm text-white">
+                Preview product
               </button>
             </form>
           ) : null}
@@ -378,35 +453,41 @@ export default function AddProductPage() {
 
           {method === "excel" || method === "json" ? (
             <div className="space-y-3 text-sm">
-              <p>Upload a file for {selected.vendorName}. The vendor slug in the file is ignored.</p>
+              <p>Upload a file for {selected.vendorName}. Vendor and countries come from this page. A conflicting value in the file is rejected.</p>
               <button type="button" className="rounded-lg border px-3 py-2" onClick={() => downloadTemplate(method === "excel" ? "excel" : "json")}>
                 Download {method === "excel" ? "Excel" : "JSON"} template
               </button>
               <input
                 type="file"
-                accept={method === "excel" ? ".xlsx,.xls,.csv" : ".json"}
+                accept={method === "excel" ? ".xlsx,.xls" : ".json"}
                 onChange={(event) => {
                   const file = event.target.files?.[0];
                   if (file) void readFile(file).catch((err) => setError(err instanceof Error ? err.message : "Could not read the file"));
                 }}
               />
-              {preview ? (
-                <div className="space-y-2">
-                  <p>
-                    {preview.valid} valid, {preview.invalid} with errors. Nothing is written until you confirm.
-                  </p>
-                  <ul className="max-h-48 space-y-1 overflow-auto">
-                    {preview.rows.map((row) => (
-                      <li key={row.row}>
-                        Row {row.row}: {row.errors.length ? row.errors.join("; ") : row.product?.name}
-                      </li>
-                    ))}
-                  </ul>
-                  <button type="button" disabled={busy || preview.valid === 0} onClick={() => void commitImport()} className="rounded-lg bg-nav px-4 py-2 text-white">
-                    Import {preview.valid} products
-                  </button>
-                </div>
-              ) : null}
+            </div>
+          ) : null}
+          {preview && method !== "api" ? (
+            <div className="space-y-2 text-sm">
+              <p>
+                {preview.ok
+                  ? `${preview.rows.length} valid. Nothing is written until you approve.`
+                  : "The batch is blocked. Fix every error before import."}
+              </p>
+              {preview.imageValidation ? <p className="text-xs text-slate-500">{preview.imageValidation}</p> : null}
+              <ul className="max-h-48 space-y-1 overflow-auto">
+                {preview.batchErrors.map((error) => (
+                  <li key={error}>Batch: {error}</li>
+                ))}
+                {preview.rows.map((row) => (
+                  <li key={row.row}>
+                    Row {row.row}: {row.errors.length ? row.errors.join("; ") : row.name}
+                  </li>
+                ))}
+              </ul>
+              <button type="button" disabled={busy || !preview.ok} onClick={() => void commitImport()} className="rounded-lg bg-nav px-4 py-2 text-white">
+                Approve and import {preview.rows.length} products
+              </button>
             </div>
           ) : null}
         </section>

@@ -13,7 +13,7 @@ import {
   isFastSelling,
   productHasShippingDims,
 } from "@blossompot/shared";
-import { formatMoney, paginate, downloadCsv } from "@/lib/admin-utils";
+import { formatMoney, paginate } from "@/lib/admin-utils";
 import { TableControls } from "@/components/admin/TableControls";
 
 export default function AdminProductsPage() {
@@ -45,9 +45,7 @@ export default function AdminProductsPage() {
     widthIn: "",
     heightIn: "",
   });
-  const [csv, setCsv] = useState("");
   const [message, setMessage] = useState("");
-  const [lastSlug, setLastSlug] = useState("");
   const [uploadingSlug, setUploadingSlug] = useState<string | null>(null);
   const [deletingImage, setDeletingImage] = useState<string | null>(null);
   const [tab, setTab] = useState<"list" | "create">("list");
@@ -132,41 +130,6 @@ export default function AdminProductsPage() {
     const heightIn = parseDim(form.heightIn, "Height (in)");
     if (heightIn == null) return null;
     return { weightOz, lengthIn, widthIn, heightIn };
-  };
-
-  const createProduct = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const dims = shippingDimsPayload();
-    if (!dims) return;
-    try {
-      const result = await apiClient<{ product: { slug: string } }>("/products", {
-        method: "POST",
-        body: JSON.stringify({
-          name: form.name,
-          description: form.description,
-          price: parseFloat(form.price),
-          compareAtPrice: form.compareAtPrice ? parseFloat(form.compareAtPrice) : undefined,
-          inventory: parseInt(form.inventory, 10),
-          categorySlug: form.categorySlug,
-          currency: form.currency,
-          sku: form.sku || undefined,
-          tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
-          vendorSlug: fulfillmentVendorSlug({
-            sku: form.sku || undefined,
-            tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
-          }),
-          published: form.published,
-          ...dims,
-        }),
-      });
-      setLastSlug(result.product.slug);
-      setMessage(`Product "${form.name}" created!`);
-      resetForm();
-      load();
-      setTab("list");
-    } catch (err) {
-      setMessage(err instanceof Error ? err.message : "Failed");
-    }
   };
 
   const saveEdit = async (e: React.FormEvent) => {
@@ -275,30 +238,6 @@ export default function AdminProductsPage() {
       });
     } catch {
       /* non-blocking */
-    }
-  };
-
-  const bulkUpload = async () => {
-    const lines = csv.trim().split("\n");
-    if (lines.length < 2) {
-      setMessage("CSV needs header + at least one row");
-      return;
-    }
-    const headers = lines[0].split(",").map((h) => h.trim());
-    const rows = lines.slice(1).map((line) => {
-      const values = line.split(",").map((v) => v.trim());
-      return Object.fromEntries(headers.map((h, i) => [h, values[i]]));
-    });
-
-    try {
-      const result = await apiClient<{ created: number; errors: unknown[] }>("/products/bulk", {
-        method: "POST",
-        body: JSON.stringify({ rows }),
-      });
-      setMessage(`Bulk upload: ${result.created} created, ${result.errors.length} errors`);
-      load();
-    } catch (err) {
-      setMessage(err instanceof Error ? err.message : "Bulk upload failed");
     }
   };
 
@@ -871,86 +810,16 @@ export default function AdminProductsPage() {
         </>
       )}
 
-      {tab === "create" && (
+      {tab === "create" && editing && (
         <div className="space-y-8">
-          <ProductForm
-            onSubmit={editing ? saveEdit : createProduct}
-            submitLabel={editing ? "Save changes" : "Create product"}
-          />
-          {!editing && lastSlug && (
-            <div className="p-4 border rounded-lg bg-white">
-              <p className="text-sm mb-2">
-                Upload images for <code>{lastSlug}</code>
-              </p>
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                disabled={uploadingSlug !== null}
-                onChange={(e) => {
-                  if (e.currentTarget.files?.length) {
-                    void uploadImages(e.currentTarget.files, lastSlug);
-                    e.currentTarget.value = "";
-                  }
-                }}
-              />
-            </div>
-          )}
-          <div>
-            <h2 className="text-xl font-bold mb-2">Bulk Upload (CSV)</h2>
-            <p className="text-sm text-slate-600 mb-3">
-              Download the sample template, fill in your products, then paste or upload the CSV below.
-              New catalog products are added from Add Product so the selected vendor owns the vendor slug.
-            </p>
-            <button
-              type="button"
-              onClick={() =>
-                downloadCsv("blossompot-product-import-template.csv", [
-                  [
-                    "name",
-                    "description",
-                    "price",
-                    "compareAtPrice",
-                    "currency",
-                    "categorySlug",
-                    "sku",
-                    "inventory",
-                    "tags",
-                    "seoTitle",
-                    "seoDescription",
-                    "published",
-                  ],
-                  [
-                    "Premium Mixed Bouquet",
-                    "Fresh seasonal flowers arranged for gifting",
-                    "12.99",
-                    "15.99",
-                    "USD",
-                    "mixed-bouquet-classic",
-                    "RAK-001",
-                    "50",
-                    "flowers,birthday",
-                    "Premium Mixed Bouquet | BlossomPot",
-                    "Shop premium flowers with worldwide delivery",
-                    "true",
-                  ],
-                ])
-              }
-              className="text-sm text-nav border border-nav px-4 py-2 rounded-lg hover:bg-nav/5 mb-4"
-            >
-              Download sample CSV template
-            </button>
-            <textarea
-              value={csv}
-              onChange={(e) => setCsv(e.target.value)}
-              rows={6}
-              className="w-full border rounded-lg px-3 py-2 font-mono text-sm"
-              placeholder={"name,description,price,categorySlug,inventory,currency,sku\n..."}
-            />
-            <button onClick={bulkUpload} className="mt-2 bg-slate-800 text-white px-6 py-2 rounded-lg">
-              Upload CSV
-            </button>
-          </div>
+          <ProductForm onSubmit={saveEdit} submitLabel="Save changes" />
+          <p className="text-sm text-slate-600">
+            New products are added from{" "}
+            <Link href="/admin/products/new" className="font-medium text-nav underline">
+              Add Product
+            </Link>
+            . That import previews the whole batch and does not overwrite existing products.
+          </p>
         </div>
       )}
     </div>

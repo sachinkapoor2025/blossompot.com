@@ -1,6 +1,6 @@
 import { VENDOR_GBO } from "../constants";
 import { catalogVendorKeys, marketplaceVendorKeys } from "../db/keys";
-import { isGboStorefrontEnabled } from "./gbo";
+import { isGboStorefrontEnabled, restrictedDeliveryCountries } from "./gbo";
 import { fulfillmentVendorSlug } from "./serviceability";
 import {
   CATALOG_STORAGE_LABEL,
@@ -216,6 +216,34 @@ function asVendorMap(
  * A missing vendorSlug follows BlossomPot. Marketplace slugs that are not catalog vendors are left to serviceability.
  * This does not decide historical order fulfillment.
  */
+function shoppingDestination(country: string | null | undefined): string {
+  const iso = (country ?? "").trim().toUpperCase();
+  return /^[A-Z]{2}$/.test(iso) ? iso : "US";
+}
+
+function productCountryRestriction(
+  product: {
+    vendorSlug?: string | null;
+    internationalDelivery?: boolean | null;
+    slug?: string | null;
+    sku?: string | null;
+    productSlug?: string | null;
+    deliveryCountries?: readonly string[] | null;
+  },
+  vendorSlug: string,
+  dest: string
+): NewShoppingDecision | null {
+  const own = restrictedDeliveryCountries({
+    ...product,
+    slug: product.slug ?? product.productSlug,
+    vendorSlug,
+  });
+  if (own && !own.includes(dest)) {
+    return { available: false, vendorSlug, reason: "country_not_allowed" };
+  }
+  return null;
+}
+
 export function productAllowedForNewShopping(
   product: {
     vendorSlug?: string | null;
@@ -223,6 +251,7 @@ export function productAllowedForNewShopping(
     slug?: string | null;
     sku?: string | null;
     productSlug?: string | null;
+    deliveryCountries?: readonly string[] | null;
   },
   country: string | null | undefined,
   vendors: ReadonlyMap<string, ShoppingVendorRecord> | readonly ShoppingVendorRecord[],
@@ -232,9 +261,12 @@ export function productAllowedForNewShopping(
     ...product,
     slug: product.slug ?? product.productSlug,
   });
+  const dest = shoppingDestination(country);
   const registry = asVendorMap(vendors);
   const stored = registry.get(vendorSlug);
-  if (!isCatalogVendorSlug(vendorSlug) && !stored) return { available: true, vendorSlug };
+  if (!isCatalogVendorSlug(vendorSlug) && !stored) {
+    return productCountryRestriction(product, vendorSlug, dest) ?? { available: true, vendorSlug };
+  }
   const record = stored ?? defaultCatalogVendor(vendorSlug as CatalogVendorSlug);
   const status = catalogVendorShoppingStatus(
     { vendorSlug, enabled: record.enabled, trashedAt: record.trashedAt },
@@ -252,12 +284,10 @@ export function productAllowedForNewShopping(
     };
   }
 
-  const iso = (country ?? "").trim().toUpperCase();
-  const dest = /^[A-Z]{2}$/.test(iso) ? iso : "US";
   if (!record.deliveryCountries.includes(dest)) {
     return { available: false, vendorSlug, reason: "country_not_allowed" };
   }
-  return { available: true, vendorSlug };
+  return productCountryRestriction(product, vendorSlug, dest) ?? { available: true, vendorSlug };
 }
 
 /**
