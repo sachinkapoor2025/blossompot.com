@@ -58,6 +58,7 @@ describe("location SEO shop URLs", () => {
     assert.equal(isLocationUrlExemptPath("/gift-catalog"), true);
     assert.equal(shopPathForLocation("/", "US"), "/");
     assert.equal(shopPathForLocation("/remember", "GB"), "/remember");
+    assert.equal(shopPathForLocation("/flower-delivery-usa", "GB"), "/flower-delivery-uk");
   });
 
   it("updates category URLs when the selected country changes", () => {

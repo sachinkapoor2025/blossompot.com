@@ -1,9 +1,14 @@
 import { CountryFlowerDeliveryPage } from "@/components/CountryFlowerDeliveryPage";
 import { countryFlowerDeliveryMetadata } from "@/lib/content/country-flower-delivery";
+import { notFoundIfShoppingCountryDisabled } from "@/lib/shopping-country-gate";
 
-export const metadata = countryFlowerDeliveryMetadata("canada");
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+export async function generateMetadata() {
+  await notFoundIfShoppingCountryDisabled("/flower-delivery-canada");
+  return countryFlowerDeliveryMetadata("canada");
+}
 
 export default function FlowerDeliveryCanadaPage() {
   return <CountryFlowerDeliveryPage country="canada" />;

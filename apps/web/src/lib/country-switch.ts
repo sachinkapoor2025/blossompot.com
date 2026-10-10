@@ -58,11 +58,9 @@ export function applyDeliveryCheck(previous: DeliveryCheckState, update: Deliver
   };
 }
 
-/** Countries menu: featured countries keep their guide path; every other country stays on `/`. */
-export function countryMenuDestination(countryCode: string, guideHref?: string): string {
-  const iso = countryCode.trim().toUpperCase();
-  const path = guideHref?.split("?")[0] || "/";
-  return `${path}?country=${iso}`;
+/** Countries menu uses the same page-preserving destination as the delivery dialog. */
+export function countryMenuDestination(pathname: string, countryCode: string, search = ""): string {
+  return deliverToDestination(pathname, countryCode, search);
 }
 
 /** Deliver-to dialog. Homepage stays on `/?country=`, because `/` is location-exempt. */

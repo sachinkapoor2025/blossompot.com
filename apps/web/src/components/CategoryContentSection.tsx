@@ -143,7 +143,7 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
             {categoryName.toLowerCase()}.
           </p>
           <a
-            href={whatsappChatUrl(`Hi! I need help choosing a ${categoryName} for worldwide delivery.`)}
+            href={whatsappChatUrl(`Hi! I need help choosing a ${categoryName}.`)}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex text-sm font-semibold text-nav hover:underline"

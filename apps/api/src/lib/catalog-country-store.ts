@@ -11,6 +11,7 @@ const CACHE_MS = 30_000;
 type CachedCountries = {
   at: number;
   countries: CatalogCountrySetting[];
+  defaultCountry: string;
   source: "config" | "default";
   updatedAt: string | null;
   updatedBy?: string;

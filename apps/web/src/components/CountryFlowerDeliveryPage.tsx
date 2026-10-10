@@ -10,6 +10,8 @@ import {
   getCountryFlowerDelivery,
   type CountryFlowerDeliverySlug,
 } from "@/lib/content/country-flower-delivery";
+import { flowerDeliveryPathForIso } from "@/lib/location-seo-urls";
+import { notFoundIfShoppingCountryDisabled } from "@/lib/shopping-country-gate";
 import { countryPageInlineLinks } from "@/lib/content/page-inline-links";
 import { applyInlineLinks } from "@/lib/inline-links";
 import { breadcrumbJsonLd, canonical, faqJsonLd } from "@/lib/seo";
@@ -25,11 +27,14 @@ function FlowerGuideProducts({ country }: { country: CountryFlowerDeliverySlug }
   );
 }
 
-export function CountryFlowerDeliveryPage({
+export async function CountryFlowerDeliveryPage({
   country,
 }: {
   country: CountryFlowerDeliverySlug;
 }) {
+  const countryIsoForGate = flowerDeliveryCountryIso(country);
+  const flowerPath = flowerDeliveryPathForIso(countryIsoForGate);
+  if (flowerPath) await notFoundIfShoppingCountryDisabled(flowerPath);
   const page = getCountryFlowerDelivery(country);
   const countryIso = flowerDeliveryCountryIso(country);
   const cityMenu = cityMenuForCountry(countryIso);

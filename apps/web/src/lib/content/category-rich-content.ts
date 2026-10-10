@@ -74,10 +74,10 @@ function giftCategory(
     headline,
     intro,
     delivery: {
-      heading: "Worldwide Delivery",
+      heading: "Delivery details",
       paragraphs: [
-        "BlossomPot delivers worldwide with clear shipping expectations. Same-day options appear in select cities when you order before the local cut-off.",
-        "Enter the recipient address at checkout to see available delivery windows. Most products support a personal gift message.",
+        "Enter the recipient’s address at checkout to review which products and dates are available for that order.",
+        "Most products support a personal gift message. Delivery dates and charges are shown before you pay.",
       ],
     },
     highlights: {
@@ -92,7 +92,7 @@ function giftCategory(
       heading: "Why Order from BlossomPot",
       bullets: [
         "Premium flowers, cakes, and curated gifts in one place",
-        "Clear worldwide delivery messaging",
+        "Delivery details shown for the recipient’s address at checkout",
         "Gift messages on most products",
         "Secure Stripe (USD) and Razorpay (INR) checkout",
         "WhatsApp and email support",
@@ -105,17 +105,17 @@ function giftCategory(
         "Add to cart and enter the recipient delivery address.",
         "Add a gift message if desired.",
         "Pay securely with Stripe or Razorpay.",
-        "We pack carefully and ship for worldwide delivery.",
+        "Review the delivery details shown for that address, then complete checkout.",
       ],
     },
     faqs: [
       {
-        q: "Do you deliver worldwide?",
-        a: "Yes. BlossomPot delivers gifts worldwide. Same-day options are available in select cities when ordered before cut-off.",
+        q: "How do I check whether a gift can be delivered?",
+        a: "Enter the recipient’s address at checkout and review the products, dates, and charges shown for that order.",
       },
       {
         q: "Can I order from another country?",
-        a: "Yes. Enter the recipient address at checkout. We accept orders worldwide with Stripe (USD) or Razorpay (INR).",
+        a: "You can shop online and enter the recipient’s address at checkout. Available products and dates depend on that address.",
       },
       {
         q: "Can I add a gift message?",
@@ -129,9 +129,9 @@ function giftCategory(
 export const categoryRichContent: Record<string, CategoryRichContent> = {
   flowers: giftCategory(
     "flowers",
-    "Fresh Flowers for Worldwide Delivery — Birthdays & Everyday Celebrations",
+    "Fresh Flowers for Birthdays and Everyday Celebrations",
     [
-      "Shop fresh flowers for birthdays, anniversaries, thank-yous, and everyday celebrations. BlossomPot arrangements are styled for premium gifting with clear worldwide delivery expectations.",
+      "Shop fresh flowers for birthdays, anniversaries, thank-yous, and everyday celebrations. Choose an arrangement and review the delivery details for the recipient’s address at checkout.",
       "Choose classic roses, mixed blooms, or elegant white arrangements — then add a personal message at checkout.",
     ],
     "Popular Flower Styles",
@@ -147,7 +147,7 @@ export const categoryRichContent: Record<string, CategoryRichContent> = {
   ),
   "flower-bouquets": giftCategory(
     "flower-bouquets",
-    "Signature Flower Bouquets — Worldwide Doorstep Delivery",
+    "Signature Flower Bouquets",
     [
       "Signature flower bouquets designed for gifting moments that deserve a wow presentation. Ideal for doorstep surprises, office celebrations, and romantic evenings.",
     ],
@@ -164,7 +164,7 @@ export const categoryRichContent: Record<string, CategoryRichContent> = {
   ),
   cakes: giftCategory(
     "cakes",
-    "Celebration Cakes for Worldwide Delivery",
+    "Celebration Cakes",
     [
       "Order celebration cakes online for birthdays, anniversaries, and parties. From chocolate truffle to red velvet and designer birthday cakes, BlossomPot makes sweet moments easy to send.",
     ],
@@ -183,7 +183,7 @@ export const categoryRichContent: Record<string, CategoryRichContent> = {
     "birthday-gifts",
     "Birthday Gifts — Flowers, Cakes & Combos",
     [
-      "Birthday gifts that feel complete — flowers, cakes, hampers, and combos curated for joyful celebrations worldwide.",
+      "Birthday gifts that feel complete — flowers, cakes, hampers, and combos chosen for a celebration.",
     ],
     "Birthday Gift Ideas",
     [
@@ -210,12 +210,12 @@ export const categoryRichContent: Record<string, CategoryRichContent> = {
     ],
     "Celebrate Another Year",
     [
-      "Anniversary gifting is about the feeling as much as the product. Choose something elegant, add a short message, and let the delivery do the rest.",
+      "Anniversary gifting is about the feeling as much as the product. Choose something elegant and add a short message where the product allows it.",
     ]
   ),
   "gift-hampers": giftCategory(
     "gift-hampers",
-    "Gift Hampers for Worldwide Delivery",
+    "Gift Hampers",
     [
       "Curated gift hampers with sweets, treats, and thoughtful extras — perfect when you want one complete celebration package.",
     ],

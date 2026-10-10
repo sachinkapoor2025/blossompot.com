@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, it } from "node:test";
-import { COUNTRY_GUIDE_HREF } from "./gbo-delivery-countries";
 import {
   applyDeliveryCheck,
   countryMenuDestination,
@@ -32,11 +33,11 @@ describe("country switch navigation", () => {
     let navigated = false;
 
     navigateAfterLocationCommit({
-      href: countryMenuDestination("GB", COUNTRY_GUIDE_HREF.GB),
+      href: countryMenuDestination("/", "GB", ""),
       commit: () => check,
       navigate: (href) => {
         assert.equal(resolved, false);
-        assert.equal(href, "/flower-delivery-uk?country=GB");
+        assert.equal(href, "/?country=GB");
         navigated = true;
       },
     });
@@ -170,12 +171,37 @@ describe("country switch navigation", () => {
     assert.equal(saved.savedPostal, "90012");
   });
 
-  it("keeps the five country-menu guide destinations", () => {
-    assert.equal(countryMenuDestination("US", COUNTRY_GUIDE_HREF.US), "/flower-delivery-usa?country=US");
-    assert.equal(countryMenuDestination("GB", COUNTRY_GUIDE_HREF.GB), "/flower-delivery-uk?country=GB");
-    assert.equal(countryMenuDestination("CA", COUNTRY_GUIDE_HREF.CA), "/flower-delivery-canada?country=CA");
-    assert.equal(countryMenuDestination("AU", COUNTRY_GUIDE_HREF.AU), "/flower-delivery-australia?country=AU");
-    assert.equal(countryMenuDestination("AE", COUNTRY_GUIDE_HREF.AE), "/flower-delivery-uae?country=AE");
-    assert.equal(countryMenuDestination("FR"), "/?country=FR");
+  it("keeps the countries menu on the same destination as the delivery dialog", () => {
+    const cases: Array<[string, string, string]> = [
+      ["/", "CA", ""],
+      ["/flowers-to-usa", "GB", ""],
+      ["/flower-delivery-usa", "GB", ""],
+      ["/cakes", "GB", ""],
+      ["/locations", "GB", ""],
+      ["/about", "GB", ""],
+      ["/flower-delivery-usa", "IN", ""],
+    ];
+    for (const [pathname, country, search] of cases) {
+      assert.equal(
+        countryMenuDestination(pathname, country, search),
+        deliverToDestination(pathname, country, search),
+        `${pathname} ${country}`
+      );
+    }
+    assert.equal(countryMenuDestination("/", "CA", ""), "/?country=CA");
+    assert.equal(countryMenuDestination("/flowers-to-usa", "GB", "sort=featured"), "/flowers-to-uk?sort=featured");
+    assert.equal(countryMenuDestination("/flower-delivery-usa", "GB", ""), "/flower-delivery-uk");
+    assert.equal(countryMenuDestination("/cakes", "GB", ""), "/cakes-to-uk");
+    assert.equal(countryMenuDestination("/locations", "GB", ""), "/locations?country=GB");
+    assert.equal(countryMenuDestination("/about", "GB", ""), "/about?country=GB");
+    assert.equal(countryMenuDestination("/flower-delivery-usa", "IN", ""), "/flower-delivery-usa?country=IN");
+  });
+
+  it("offers the countries menu from the enabled country list", () => {
+    const header = readFileSync(path.join(__dirname, "../components/Header.tsx"), "utf8");
+    assert.equal(header.includes("COUNTRY_GUIDE_HREF"), false);
+    assert.match(header, /useGboDeliveryCountries/);
+    assert.match(header, /countryMenuDestination\(pathname, countryCode, searchParams\.toString\(\)\)/);
+    assert.match(header, /countryMenuDestination\(pathname, c\.countryCode, searchParams\.toString\(\)\)/);
   });
 });

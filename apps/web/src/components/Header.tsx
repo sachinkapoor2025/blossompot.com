@@ -21,7 +21,7 @@ import { DeliveryLocationChip } from "@/components/DeliveryLocationChip";
 import { DeliveryLocationBanner } from "@/components/DeliveryLocationBanner";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
 import { countryMenuDestination, deliverToDestination, navigateAfterLocationCommit } from "@/lib/country-switch";
-import { COUNTRY_GUIDE_HREF, useCountrySearch, useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
+import { useCountrySearch, useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
 
 function CitiesCountryField({
   id,
@@ -180,11 +180,11 @@ function CountriesMenu({
   const selectedCountry =
     countryIsoFromPathname(pathname, searchParams.get("country")) ?? location?.countryCode;
 
-  const chooseCountry = (countryCode: string, href?: string) => {
+  const chooseCountry = (countryCode: string) => {
     setOpen(false);
     onNavigate?.();
     navigateAfterLocationCommit({
-      href: countryMenuDestination(countryCode, href),
+      href: countryMenuDestination(pathname, countryCode, searchParams.toString()),
       commit: () =>
         setLocation({
           countryCode,
@@ -229,7 +229,6 @@ function CountriesMenu({
               <p className="px-4 py-2 text-sm text-slate-500">Loading countries…</p>
             ) : (
               filtered.map((c) => {
-                const guide = COUNTRY_GUIDE_HREF[c.countryCode];
                 return (
                   <button
                     key={c.countryCode}
@@ -240,7 +239,7 @@ function CountriesMenu({
                         : "text-slate-700 hover:bg-blue-50 hover:text-nav"
                     }`}
                     onClick={() => {
-                      void chooseCountry(c.countryCode, guide);
+                      void chooseCountry(c.countryCode);
                     }}
                   >
                     {c.countryName}
@@ -710,7 +709,6 @@ export function Header() {
                       <p className="px-4 py-2 text-sm text-slate-500">Loading countries…</p>
                     ) : (
                       countrySearch.filtered.map((c) => {
-                        const guide = COUNTRY_GUIDE_HREF[c.countryCode];
                         return (
                           <button
                             key={c.countryCode}
@@ -723,7 +721,7 @@ export function Header() {
                             onClick={() => {
                               closeMenu();
                               navigateAfterLocationCommit({
-                                href: countryMenuDestination(c.countryCode, guide),
+                                href: countryMenuDestination(pathname, c.countryCode, searchParams.toString()),
                                 commit: () =>
                                   setLocation({
                                     countryCode: c.countryCode,

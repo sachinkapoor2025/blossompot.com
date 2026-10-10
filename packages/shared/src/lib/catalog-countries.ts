@@ -56,6 +56,53 @@ export function noProductsForDeliveryCountryMessage(countryCode: string): string
 }
 
 /**
+ * Indexable homepage country.
+ * An explicit enabled code is kept. A missing or disabled code uses USA when USA is enabled,
+ * otherwise the first enabled country. Returns null only when nothing is enabled.
+ * This does not enable a country and does not choose the shopper's selected country.
+ */
+export function resolveDefaultShoppingCountry(
+  countries: readonly { countryCode: string; enabled: boolean }[],
+  explicit?: string | null
+): string | null {
+  const enabled = enabledCatalogCountries(countries as CatalogCountrySetting[]).map((country) => country.countryCode);
+  if (enabled.length === 0) return null;
+  const code = (explicit ?? "").trim().toUpperCase();
+  if (code && enabled.includes(code)) return code;
+  if (enabled.includes("US")) return "US";
+  return enabled[0] ?? null;
+}
+
+/**
+ * Accept an admin default country only when it is known and enabled.
+ * A blank value stores the same US-then-first fallback used for older rows.
+ */
+export function normalizeDefaultCountry(
+  raw: string | null | undefined,
+  countries: readonly CatalogCountrySetting[]
+): { defaultCountry: string } | { error: string } {
+  const enabled = enabledCatalogCountries(countries);
+  if (enabled.length === 0) return { error: "At least one country must be enabled." };
+  const trimmed = (raw ?? "").trim();
+  if (!trimmed) {
+    const fallback = resolveDefaultShoppingCountry(countries, null);
+    if (!fallback) return { error: "At least one country must be enabled." };
+    return { defaultCountry: fallback };
+  }
+  const code = trimmed.toUpperCase();
+  if (!/^[A-Z]{2}$/.test(code)) {
+    return { error: `"${trimmed}" is not a two-letter country code.` };
+  }
+  if (!getDeliveryCountry(code)) {
+    return { error: `"${code}" is not a known delivery country.` };
+  }
+  if (!enabled.some((country) => country.countryCode === code)) {
+    return { error: `"${code}" is not an enabled country.` };
+  }
+  return { defaultCountry: code };
+}
+
+/**
  * Customer country for shopping.
  * A globally enabled code is kept. Otherwise USA when it is enabled, otherwise the first enabled country.
  * Returns null only when nothing is enabled.
@@ -137,26 +184,39 @@ export function normalizeCatalogCountries(
   return { countries };
 }
 
+export type StoredCatalogCountries = {
+  countries: CatalogCountrySetting[];
+  defaultCountry: string;
+  source: "config" | "default";
+  updatedAt: string | null;
+  updatedBy?: string;
+};
+
+function usaOnlyCatalogCountries(): StoredCatalogCountries {
+  return {
+    countries: defaultCatalogCountries(),
+    defaultCountry: "US",
+    source: "default",
+    updatedAt: null,
+  };
+}
+
 export function readStoredCatalogCountries(
   item: Record<string, unknown> | null | undefined
-): { countries: CatalogCountrySetting[]; source: "config" | "default"; updatedAt: string | null; updatedBy?: string } {
-  if (!item) {
-    return { countries: defaultCatalogCountries(), source: "default", updatedAt: null };
-  }
+): StoredCatalogCountries {
+  if (!item) return usaOnlyCatalogCountries();
   const parsed = catalogCountriesConfigSchema.safeParse({
     countries: item.countries,
+    defaultCountry: typeof item.defaultCountry === "string" ? item.defaultCountry : undefined,
     updatedAt: item.updatedAt ?? "",
     updatedBy: item.updatedBy,
   });
-  if (!parsed.success) {
-    return { countries: defaultCatalogCountries(), source: "default", updatedAt: null };
-  }
+  if (!parsed.success) return usaOnlyCatalogCountries();
   const normalized = normalizeCatalogCountries(parsed.data.countries);
-  if ("error" in normalized) {
-    return { countries: defaultCatalogCountries(), source: "default", updatedAt: null };
-  }
+  if ("error" in normalized) return usaOnlyCatalogCountries();
   return {
     countries: normalized.countries,
+    defaultCountry: resolveDefaultShoppingCountry(normalized.countries, parsed.data.defaultCountry) ?? "US",
     source: "config",
     updatedAt: parsed.data.updatedAt || null,
     ...(parsed.data.updatedBy ? { updatedBy: parsed.data.updatedBy } : {}),
@@ -180,10 +240,13 @@ export function enabledCatalogCountries(
 export function toCatalogCountriesConfig(
   countries: readonly CatalogCountrySetting[],
   updatedAt: string,
-  updatedBy?: string
+  updatedBy?: string,
+  defaultCountry?: string
 ): CatalogCountriesConfig {
+  const resolved = normalizeDefaultCountry(defaultCountry, [...countries]);
   return {
     countries: countries.map((country) => ({ ...country })),
+    ...("defaultCountry" in resolved ? { defaultCountry: resolved.defaultCountry } : {}),
     updatedAt,
     ...(updatedBy ? { updatedBy } : {}),
   };

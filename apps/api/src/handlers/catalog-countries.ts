@@ -5,6 +5,7 @@ import {
   catalogCountryKeys,
   catalogCountryName,
   normalizeCatalogCountries,
+  normalizeDefaultCountry,
   updateCatalogCountriesSchema,
   type CatalogCountrySetting,
 } from "@blossompot/shared";
@@ -29,6 +30,7 @@ export async function listCatalogCountriesAdmin(event: APIGatewayProxyEventV2) {
     source: stored.source,
     updatedAt: stored.updatedAt,
     ...(stored.updatedBy ? { updatedBy: stored.updatedBy } : {}),
+    defaultCountry: stored.defaultCountry,
     countries: stored.countries.map((country) => withName(country, true)),
   });
 }
@@ -37,6 +39,7 @@ export async function listCatalogCountriesAdmin(event: APIGatewayProxyEventV2) {
 export async function listCatalogCountriesPublic() {
   const stored = await loadCatalogCountries();
   return ok({
+    defaultCountry: stored.defaultCountry,
     countries: catalogCountriesForStorefront(stored.countries).map((country) =>
       withName(country, false)
     ),
@@ -60,6 +63,8 @@ export async function updateCatalogCountriesAdmin(event: APIGatewayProxyEventV2)
   }
   const normalized = normalizeCatalogCountries(parsed.data.countries);
   if ("error" in normalized) return badRequest(normalized.error);
+  const defaultCountry = normalizeDefaultCountry(parsed.data.defaultCountry, normalized.countries);
+  if ("error" in defaultCountry) return badRequest(defaultCountry.error);
 
   const updatedAt = now();
   await docClient.send(
@@ -69,6 +74,7 @@ export async function updateCatalogCountriesAdmin(event: APIGatewayProxyEventV2)
         PK: catalogCountryKeys.pk,
         SK: catalogCountryKeys.sk,
         countries: normalized.countries,
+        defaultCountry: defaultCountry.defaultCountry,
         updatedAt,
         updatedBy: auth.email,
       },
@@ -80,6 +86,7 @@ export async function updateCatalogCountriesAdmin(event: APIGatewayProxyEventV2)
     source: "config" as const,
     updatedAt,
     updatedBy: auth.email,
+    defaultCountry: defaultCountry.defaultCountry,
     countries: normalized.countries.map((country) => withName(country, true)),
   });
 }

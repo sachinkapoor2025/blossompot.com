@@ -10,29 +10,31 @@ import { WhyTrustUsSection } from "@/components/WhyTrustUsSection";
 import { HomeFlowerGuideCta } from "@/components/flower-guide/HomeFlowerGuideCta";
 import { HomeCategoryCarousel } from "@/components/HomeCategoryCarousel";
 import { HomeSeoSection } from "@/components/HomeSeoSection";
-import { FaqAccordion } from "@/components/FaqAccordion";
 import { buildHomeCategoryTiles } from "@/lib/home-category-carousel";
 import { JsonLd } from "@/components/JsonLd";
 import { homeBanners, countriesMenu } from "@/lib/site";
-import { faqsForCountry } from "@/lib/faqs-for-country";
 import { getHomepageCatalogData } from "@/lib/homepage-catalog";
 import {
   HOME_PRODUCT_SECTIONS,
   HomeCategoryProductRow,
   HomeCategoryProductRowFallback,
 } from "@/components/HomeCategoryProductRow";
-import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
+import { getIndexableHomeCountry, getStorefrontDeliveryCountry } from "@/lib/storefront-country";
+import { countrySeoContent } from "@/lib/content/country-seo-registry";
 import { faqJsonLd, pageMetadata } from "@/lib/seo";
 import { resolveDeliveryCountry } from "@blossompot/shared";
 import { flowerDeliverySlugForIso } from "@/lib/content/country-flower-delivery";
 
-export const metadata: Metadata = pageMetadata({
-  title: "BlossomPot — Flowers, Cakes & Gifts, Delivered Worldwide",
-  description:
-    "Order fresh flowers, cakes, and gift hampers with worldwide delivery. Secure checkout and gifts for every celebration — shop online today.",
-  path: "/",
-  absoluteTitle: true,
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const country = await getIndexableHomeCountry();
+  const article = countrySeoContent(country, "home");
+  return pageMetadata({
+    title: article.title,
+    description: article.description,
+    path: "/",
+    absoluteTitle: true,
+  });
+}
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -65,6 +67,8 @@ async function HomeBelowHero({
 }) {
   const params = await searchParams;
   const deliveryCountry = await getStorefrontDeliveryCountry(params.country);
+  const indexableCountry = await getIndexableHomeCountry();
+  const indexableSeo = countrySeoContent(indexableCountry, "home");
   const destinationName = resolveDeliveryCountry(deliveryCountry).countryName;
   const selectedFlowerSlug = flowerDeliverySlugForIso(deliveryCountry);
   const countryPages = selectedFlowerSlug
@@ -73,7 +77,7 @@ async function HomeBelowHero({
 
   return (
     <>
-      <JsonLd data={[faqJsonLd(faqsForCountry(deliveryCountry))]} />
+      <JsonLd data={[faqJsonLd(indexableSeo.faqs)]} />
       <Suspense fallback={<HomeBelowHeroFallback />}>
         <HomeCategoryCarouselBlock country={deliveryCountry} />
       </Suspense>
@@ -164,7 +168,7 @@ async function HomeBelowHero({
       </Suspense>
 
       <HomeFlowerGuideCta />
-      <HomeSeoSection countryIso={deliveryCountry} />
+      <HomeSeoSection countryIso={indexableCountry} />
 
       <section className="max-w-7xl mx-auto px-4 py-12">
         <div className="rounded-3xl bg-gradient-to-br from-primary via-[#9e2d55] to-accent text-white p-8 sm:p-12 text-center shadow-lg shadow-primary/20">
@@ -202,8 +206,6 @@ async function HomeBelowHero({
       </section>
 
       <section className="max-w-3xl mx-auto px-4 pb-16">
-        <h2 className="text-xl font-bold text-primary mb-4">Frequently asked questions</h2>
-        <FaqAccordion items={faqsForCountry(deliveryCountry)} />
         <Suspense fallback={null}>
           <HomeCategoryCount country={deliveryCountry} />
         </Suspense>

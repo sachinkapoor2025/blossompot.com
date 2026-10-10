@@ -61,7 +61,7 @@ export function DeliveryLocationProvider({ children }: { children: ReactNode }) 
   const [pendingCountry, setPendingCountry] = useState<string | null>(null);
   const [selectorOpen, setSelectorOpen] = useState(false);
   const [selectorCountryPrefill, setSelectorCountryPrefill] = useState<string | null>(null);
-  const { countries, loaded: countriesLoaded, fromConfig } = useGboDeliveryCountries();
+  const { countries, loaded: countriesLoaded, fromConfig, defaultCountry } = useGboDeliveryCountries();
   const selectionRef = useRef(0);
   const checkLocationRef = useRef<(location: StoredDeliveryLocation, requestId: number) => Promise<CheckResponse>>(
     async () => ({ serviceable: false })
@@ -136,10 +136,10 @@ export function DeliveryLocationProvider({ children }: { children: ReactNode }) 
 
   useEffect(() => {
     if (!countriesLoaded || !fromConfig || !location) return;
-    const fallback = disabledCountryFallback(location.countryCode, countries);
+    const fallback = disabledCountryFallback(location.countryCode, countries, defaultCountry);
     if (!fallback) return;
     void setLocation({ countryCode: fallback, postalCode: "", postalDisplay: fallback });
-  }, [countries, countriesLoaded, fromConfig, location, setLocation]);
+  }, [countries, countriesLoaded, defaultCountry, fromConfig, location, setLocation]);
 
   useEffect(() => {
     const existing = readDeliveryLocation();

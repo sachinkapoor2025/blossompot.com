@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   catalogCountriesForStorefront,
   getDeliveryCountry,
+  resolveDefaultShoppingCountry,
   SHOPPING_COUNTRY_ISO,
   type DeliveryCountryConfig,
 } from "@blossompot/shared";
@@ -40,19 +41,20 @@ export function shoppingCountriesFromGlobal(
 
 /**
  * Country to write into `bp_dl` when the saved country is no longer globally enabled.
- * USA when it is enabled, otherwise the first enabled country. Null when no rewrite is needed.
+ * Uses the configured default when it is still enabled, otherwise USA, otherwise the first enabled country.
  */
 export function disabledCountryFallback(
   savedCode: string | null | undefined,
-  countries: readonly { countryCode: string }[]
+  countries: readonly { countryCode: string }[],
+  defaultCountry?: string | null
 ): string | null {
   const code = (savedCode ?? "").trim().toUpperCase();
   if (!code) return null;
   if (countries.some((country) => country.countryCode === code)) return null;
-  const fallback =
-    countries.find((country) => country.countryCode === "US")?.countryCode ??
-    countries[0]?.countryCode ??
-    null;
+  const fallback = resolveDefaultShoppingCountry(
+    countries.map((country) => ({ countryCode: country.countryCode, enabled: true })),
+    defaultCountry
+  );
   if (!fallback || fallback === code) return null;
   return fallback;
 }
@@ -67,6 +69,7 @@ export function isListedShoppingCountry(
 
 export function useGboDeliveryCountries() {
   const [countries, setCountries] = useState<DeliveryCountryConfig[]>(() => shoppingCountryOptions());
+  const [defaultCountry, setDefaultCountry] = useState<string | null>("US");
   const [loaded, setLoaded] = useState(false);
   const [fromConfig, setFromConfig] = useState(false);
 
@@ -74,11 +77,14 @@ export function useGboDeliveryCountries() {
     let cancelled = false;
     void import("./api")
       .then(({ api }) =>
-        api<{ countries?: { countryCode?: string }[] }>("/catalog-countries", { revalidate: false })
+        api<{ countries?: { countryCode?: string }[]; defaultCountry?: string }>("/catalog-countries", {
+          revalidate: false,
+        })
       )
       .then((data) => {
         if (cancelled) return;
         setCountries(shoppingCountriesFromGlobal(data.countries ?? []));
+        setDefaultCountry(typeof data.defaultCountry === "string" ? data.defaultCountry : null);
         setFromConfig(true);
         setLoaded(true);
       })
@@ -91,7 +97,10 @@ export function useGboDeliveryCountries() {
     };
   }, []);
 
-  return useMemo(() => ({ countries, loaded, fromConfig }), [countries, loaded, fromConfig]);
+  return useMemo(
+    () => ({ countries, loaded, fromConfig, defaultCountry }),
+    [countries, loaded, fromConfig, defaultCountry]
+  );
 }
 
 export function filterDeliveryCountries(countries: DeliveryCountryConfig[], query: string) {

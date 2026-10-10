@@ -7,13 +7,15 @@ import { ProductGrid } from "@/components/ProductGrid";
 import type { ProductSort } from "@/components/ProductSortBar";
 import { SearchTracker } from "@/components/SearchTracker";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { catalogShopSeo, resolveCategoryPageSeo } from "@/lib/content/category-country-seo";
 import { pageMetadata } from "@/lib/seo";
 import { requestSeoPath } from "@/lib/request-seo-path";
 import { loadProducts, toListingCardProducts } from "@/lib/product-loader";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
+import { notFoundIfShoppingCountryDisabled } from "@/lib/shopping-country-gate";
 import { groupStorefrontProductsOnce, noProductsForDeliveryCountryMessage, type Product, type Category } from "@blossompot/shared";
 import { categoryHref } from "@/lib/category-urls";
-import { localizeShopCopy, localizeShopText, locationShopHeading } from "@/lib/location-seo-urls";
+import { locationShopHeading } from "@/lib/location-seo-urls";
 import { homeCategoryOrder, orderCategories } from "@/lib/site";
 import { ListingPageSkeleton } from "@/components/route-skeletons";
 import { isRakhiRelatedProduct, productsNotShownInSections, storefrontSkipsRakhiCategory } from "@/lib/rakhi-filter";
@@ -32,67 +34,35 @@ function resolveSort(raw?: string): ProductSort {
   return SORT_VALUES.includes(raw as ProductSort) ? (raw as ProductSort) : "featured";
 }
 
-const CATEGORY_SEO: Record<string, { title: string; description: string }> = {
-  flowers: {
-    title: "Flowers Worldwide — Fresh Arrangements | BlossomPot",
-    description: "Shop fresh flowers and bouquets with worldwide delivery. Birthday, anniversary, and everyday gifts.",
-  },
-  "flower-bouquets": {
-    title: "Flower Bouquets Worldwide | BlossomPot",
-    description: "Designer flower bouquets for worldwide delivery — romantic, celebratory, and thank-you styles.",
-  },
-  cakes: {
-    title: "Celebration Cakes Worldwide | BlossomPot",
-    description: "Birthday and celebration cakes with clear worldwide delivery guidance from BlossomPot.",
-  },
-  "gift-hampers": {
-    title: "Gift Hampers Worldwide | BlossomPot",
-    description: "Curated gift hampers and celebration boxes shipped worldwide.",
-  },
-  "birthday-gifts": {
-    title: "Birthday Gifts Worldwide | BlossomPot",
-    description: "Birthday flowers, cakes, and gift combos with worldwide delivery options.",
-  },
-  "anniversary-gifts": {
-    title: "Anniversary Gifts Worldwide | BlossomPot",
-    description: "Anniversary roses, bouquets, and romantic gifts for worldwide delivery.",
-  },
-};
-
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const params = await searchParams;
   const seoPath = await requestSeoPath("/products");
+  await notFoundIfShoppingCountryDisabled(seoPath);
+  const shopSeo = catalogShopSeo(seoPath);
   if (params.search) {
-    // Search result URLs stay usable but are noindexed; canonical points at the shop hub.
-    const copy = localizeShopCopy(seoPath, {
-      title: `Search: ${params.search} — Flowers & Gifts Worldwide`,
-      description: `Search results for "${params.search}" — flowers, cakes, and gifts with worldwide delivery from BlossomPot.`,
-    });
     return pageMetadata({
-      title: copy.title,
-      description: copy.description,
+      title: `Search: ${params.search} | BlossomPot`,
+      description: `Search results for "${params.search}". ${shopSeo.description}`,
       path: seoPath,
       noIndex: true,
+      absoluteTitle: true,
     });
   }
-  if (params.category && CATEGORY_SEO[params.category]) {
-    const seo = localizeShopCopy(seoPath, CATEGORY_SEO[params.category]);
+  if (params.category) {
+    const categorySeo = resolveCategoryPageSeo(params.category, "/products");
     return pageMetadata({
-      title: seo.title,
-      description: seo.description,
+      title: categorySeo.title,
+      description: categorySeo.description,
       path: `/products?category=${params.category}`,
       noIndex: true,
+      absoluteTitle: true,
     });
   }
-  const shopSeo = localizeShopCopy(seoPath, {
-    title: "Shop Flowers, Cakes & Gifts — Worldwide Delivery | BlossomPot",
-    description:
-      "Browse flowers, bouquets, cakes, and curated gift hampers. Birthday, anniversary, and Valentine’s gifts with clear worldwide delivery guidance.",
-  });
   return pageMetadata({
     title: shopSeo.title,
     description: shopSeo.description,
     path: seoPath,
+    absoluteTitle: true,
   });
 }
 
@@ -109,6 +79,8 @@ async function ProductsPageContent({ searchParams }: Props) {
   const search = params.search;
   const category = params.category;
   const sort = resolveSort(params.sort);
+  const seoPath = await requestSeoPath("/products");
+  await notFoundIfShoppingCountryDisabled(seoPath);
   const deliveryCountry = await getStorefrontDeliveryCountry(params.country);
 
   let products: Product[] = [];
@@ -126,7 +98,6 @@ async function ProductsPageContent({ searchParams }: Props) {
     categories = [];
   }
 
-  const seoPath = await requestSeoPath("/products");
   const h1 = locationShopHeading(
     seoPath,
     search
@@ -166,12 +137,7 @@ async function ProductsPageContent({ searchParams }: Props) {
         <h1 className="text-3xl font-bold text-primary">{h1}</h1>
       </div>
       {!search && !category && (
-        <p className="text-slate-600 mb-8 max-w-2xl">
-          {localizeShopText(
-            seoPath,
-            "Flowers, bouquets, cakes, and curated gifts for birthdays, anniversaries, and everyday thank-yous — with clear worldwide delivery expectations. Enter the recipient address at checkout to see available windows."
-          )}
-        </p>
+        <p className="text-slate-600 mb-8 max-w-2xl">{catalogShopSeo(seoPath).intro}</p>
       )}
 
       {categories.length > 0 && (
