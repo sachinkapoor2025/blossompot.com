@@ -68,6 +68,7 @@ export * from "./lib/schedule-delivery";
 export * from "./lib/marketing-email-html";
 export * from "./lib/marketing-campaign-emails";
 export * from "./lib/gifting-marketing-email";
+export * from "./lib/collection-2026-email";
 export * from "./lib/home-page-banners";
 export * from "./lib/order-number";
 export * from "./lib/order-status";
