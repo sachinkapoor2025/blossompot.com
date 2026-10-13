@@ -3,7 +3,7 @@
  * Each domain has its own table; builders below are grouped per table.
  */
 
-// ---- products table (products + categories) ----
+// ---- products table (products + categories + combos) ----
 export const productKeys = {
   pk: (slug: string) => `PRODUCT#${slug}`,
   sk: () => "META" as const,
@@ -16,6 +16,16 @@ export const categoryKeys = {
   sk: () => "META" as const,
   /** GSI1: list all categories without table Scan */
   gsi1pk: () => "ENTITY#CATEGORY" as const,
+  gsi1sk: (sortOrder: number, slug: string) =>
+    `${String(Math.max(0, sortOrder || 0)).padStart(6, "0")}#${slug}`,
+};
+
+export const comboKeys = {
+  pk: (slug: string) => `COMBO#${slug}`,
+  sk: () => "META" as const,
+  /** GSI1: list combos without a table Scan. Same partition style as categories. */
+  gsi1pk: () => "ENTITY#COMBO" as const,
+  /** Same zero-padded sort order as categoryKeys.gsi1sk. */
   gsi1sk: (sortOrder: number, slug: string) =>
     `${String(Math.max(0, sortOrder || 0)).padStart(6, "0")}#${slug}`,
 };

@@ -19,7 +19,7 @@ interface CartContextValue {
     contact?: { name?: string; email?: string; phone?: string },
     addons?: ProductAddonSelection[],
     shippingOptionLabel?: string
-  ) => Promise<void>;
+  ) => Promise<Cart>;
   updateItem: (lineId: string, quantity: number) => Promise<void>;
   removeItem: (lineId: string) => Promise<void>;
   itemCount: number;
@@ -113,7 +113,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
         })(),
       }),
     });
-    setCart(normalizeCart(data.cart));
+    const cart = normalizeCart(data.cart);
+    setCart(cart);
     const sig = cartLineOptionsSignature(addons, shippingOptionLabel);
     const added = data.cart.items.find(
       (i) =>
@@ -129,6 +130,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         : undefined,
       contact
     );
+    return cart;
   };
 
   const removeItem = async (lineId: string) => {

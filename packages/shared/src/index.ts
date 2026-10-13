@@ -1,6 +1,9 @@
 export * from "./schemas/product";
 export * from "./schemas/review";
 export * from "./schemas/category";
+export * from "./schemas/combo";
+export * from "./lib/combo-record";
+export * from "./lib/combo-generator";
 export * from "./schemas/homepage-catalog";
 export * from "./schemas/cart";
 export * from "./schemas/order";
@@ -47,6 +50,7 @@ export * from "./lib/vendor-pricing";
 export * from "./lib/image-url";
 export * from "./lib/product-images";
 export * from "./lib/storefront-dedupe";
+export * from "./lib/storefront-rakhi";
 export * from "./lib/catalog-images";
 export * from "./lib/product-sales";
 export * from "./lib/product-sales-intelligence";

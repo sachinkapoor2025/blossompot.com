@@ -4,7 +4,26 @@ import Link from "next/link";
 import { useState } from "react";
 import { estimatedDeliveryShort } from "@blossompot/shared";
 import type { ProductAddonSelection } from "@blossompot/shared";
+import { addComboComponentsToCart } from "@/lib/combo-cart";
 import { useCart } from "@/lib/cart-context";
+
+export type CartControlLine = {
+  quantity: number;
+  lineId?: string;
+};
+
+/**
+ * Listing cards render one cart action.
+ * The add button stays until every tracked line is in the cart, then the quantity control replaces it.
+ */
+export function cartControlMode(lines: readonly CartControlLine[]): "add" | "in-cart" {
+  if (lines.length === 0 || lines.some((line) => line.quantity <= 0 || !line.lineId)) return "add";
+  return "in-cart";
+}
+
+export function cartControlActions(mode: "add" | "in-cart"): { add: boolean; viewCart: boolean } {
+  return mode === "in-cart" ? { add: false, viewCart: true } : { add: true, viewCart: false };
+}
 
 function TrashIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
@@ -48,6 +67,10 @@ interface AddToCartControlProps {
   /** Selected product add-ons with quantities (BlossomPot only). */
   addons?: ProductAddonSelection[];
   shippingOptionLabel?: string;
+  /** When set, one control adds and tracks both component lines. */
+  combo?: {
+    components: readonly [{ slug: string; name: string }, { slug: string; name: string }];
+  };
 }
 
 export function AddToCartControl({
@@ -59,18 +82,71 @@ export function AddToCartControl({
   getContact,
   addons = [],
   shippingOptionLabel,
+  combo,
 }: AddToCartControlProps) {
   const { sessionReady, addItem, updateItem, removeItem, quantityFor, lineIdFor } = useCart();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [addedNote, setAddedNote] = useState("");
 
-  const quantity = quantityFor(productSlug, addons, shippingOptionLabel);
-  const lineId = lineIdFor(productSlug, addons, shippingOptionLabel);
-  const inCart = quantity > 0 && Boolean(lineId);
+  const tracked = combo
+    ? combo.components.map((component) => ({
+        quantity: quantityFor(component.slug),
+        lineId: lineIdFor(component.slug),
+      }))
+    : [
+        {
+          quantity: quantityFor(productSlug, addons, shippingOptionLabel),
+          lineId: lineIdFor(productSlug, addons, shippingOptionLabel),
+        },
+      ];
+  const quantity = Math.min(...tracked.map((line) => line.quantity));
+  const lineId = tracked[0]?.lineId;
+  const actions = cartControlActions(cartControlMode(tracked));
   const addonsPayload = addons.length ? addons : undefined;
 
-  const run = async (fn: () => Promise<void>) => {
+  const addCurrent = async () => {
+    if (!combo) {
+      await addItem(productSlug, 1, getContact?.(), addonsPayload, shippingOptionLabel);
+      return;
+    }
+    const result = await addComboComponentsToCart(combo.components, quantityFor(combo.components[0].slug), {
+      addItem: (slug) => addItem(slug),
+      updateItem,
+      removeItem,
+    });
+    if (!result.ok) throw new Error(result.message);
+  };
+
+  const decreaseCurrent = async () => {
+    if (!combo) {
+      if (!lineId) return;
+      if (quantity <= 1) await removeItem(lineId);
+      else await updateItem(lineId, quantity - 1);
+      return;
+    }
+    if (quantity <= 1) {
+      for (const line of tracked) {
+        if (line.lineId) await removeItem(line.lineId);
+      }
+      return;
+    }
+    for (const line of tracked) {
+      if (line.lineId) await updateItem(line.lineId, line.quantity - 1);
+    }
+  };
+
+  const removeCurrent = async () => {
+    if (!combo) {
+      if (lineId) await removeItem(lineId);
+      return;
+    }
+    for (const line of tracked) {
+      if (line.lineId) await removeItem(line.lineId);
+    }
+  };
+
+  const run = async (fn: () => Promise<unknown>) => {
     setError("");
     setBusy(true);
     try {
@@ -90,7 +166,7 @@ export function AddToCartControl({
   const isDetail = variant === "detail";
   const addLabel = disabled ? "Out of Stock" : busy ? "Adding..." : isDetail ? "Add to cart" : "Add to cart";
 
-  if (!inCart || !lineId) {
+  if (actions.add) {
     return (
       <div className={className}>
         {error && <p className="text-xs text-red-600 mb-1">{error}</p>}
@@ -100,8 +176,7 @@ export function AddToCartControl({
           onClick={(e) => {
             stop(e);
             void run(async () => {
-              const contact = getContact?.();
-              await addItem(productSlug, 1, contact, addonsPayload, shippingOptionLabel);
+              await addCurrent();
               setAddedNote(`Added! Est. delivery ${estimatedDeliveryShort()}`);
               window.setTimeout(() => setAddedNote(""), 5000);
             });
@@ -127,7 +202,7 @@ export function AddToCartControl({
         disabled={busy}
         onClick={(e) => {
           stop(e);
-          void run(() => (quantity <= 1 ? removeItem(lineId) : updateItem(lineId, quantity - 1)));
+          void run(() => decreaseCurrent());
         }}
         className={stepBtnClass}
       >
@@ -142,7 +217,7 @@ export function AddToCartControl({
         disabled={busy || disabled}
         onClick={(e) => {
           stop(e);
-          void run(() => addItem(productSlug, 1, getContact?.(), addonsPayload, shippingOptionLabel));
+          void run(() => addCurrent());
         }}
         className={stepBtnClass}
       >
@@ -158,7 +233,7 @@ export function AddToCartControl({
       disabled={busy}
       onClick={(e) => {
         stop(e);
-        void run(() => removeItem(lineId));
+        void run(() => removeCurrent());
       }}
       className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full hover:bg-white/10 active:scale-95 disabled:opacity-50 transition"
     >
@@ -177,7 +252,7 @@ export function AddToCartControl({
             disabled={busy}
             onClick={(e) => {
               stop(e);
-              void run(() => (quantity <= 1 ? removeItem(lineId) : updateItem(lineId, quantity - 1)));
+              void run(() => decreaseCurrent());
             }}
             className={detailPillBtnClass}
           >
@@ -190,7 +265,7 @@ export function AddToCartControl({
             disabled={busy || disabled}
             onClick={(e) => {
               stop(e);
-              void run(() => addItem(productSlug, 1, getContact?.(), addonsPayload, shippingOptionLabel));
+              void run(() => addCurrent());
             }}
             className={detailPillBtnClass}
           >
@@ -206,7 +281,7 @@ export function AddToCartControl({
           {removeButton}
         </div>
       )}
-      {!isDetail && (
+      {actions.viewCart && !isDetail && (
         <Link
           href="/cart"
           onClick={(e) => e.stopPropagation()}
