@@ -1,6 +1,6 @@
 "use client";
 
-import { trustFacts, trustHighlights } from "@/lib/trust";
+import { homepageFestivalTrust, trustHighlights } from "@/lib/trust";
 import { TrustBadges } from "@/components/TrustBadges";
 import { localizeCopyForCountry } from "@/lib/location-seo-urls";
 import { useStorefrontCountryIso } from "@/lib/use-storefront-country";
@@ -13,13 +13,14 @@ export function WhyTrustUsSection() {
     <section className="bg-white border-y border-slate-100" aria-labelledby="why-trust-heading">
       <div className="max-w-7xl mx-auto px-4 py-12 md:py-14">
         <div className="text-center max-w-2xl mx-auto mb-10">
-          <p className="text-xs font-bold uppercase tracking-widest text-nav mb-2">{trustFacts.seasonLabel}</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-nav mb-2">
+            {homepageFestivalTrust.seasonLabel}
+          </p>
           <h2 id="why-trust-heading" className="text-2xl md:text-3xl font-bold text-primary mb-3">
-            Why customers trust BlossomPot
+            {homepageFestivalTrust.heading}
           </h2>
           <p className="text-slate-600 text-sm md:text-base leading-relaxed">
-            BlossomPot delivers {copy(trustFacts.catalog.toLowerCase())}. {copy(trustFacts.fulfillment)}.{" "}
-            {copy(trustFacts.support)}.
+            {copy(homepageFestivalTrust.intro)}
           </p>
         </div>
 

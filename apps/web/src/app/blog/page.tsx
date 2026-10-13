@@ -10,7 +10,7 @@ export const revalidate = 60;
 export const metadata: Metadata = pageMetadata({
   title: "Gifting Blog — Flowers, Cakes & Celebration Ideas",
   description:
-    "Guides and ideas for sending flowers, cakes, and thoughtful gifts across the USA — birthdays, anniversaries, Valentine's Day, and more from BlossomPot.",
+    "Guides and ideas for sending flowers, cakes, and thoughtful gifts across the USA — including Diwali, Bhai Dooj, birthdays, and more from BlossomPot.",
   path: "/blog",
 });
 
@@ -20,8 +20,9 @@ export default async function BlogPage() {
     <div className="max-w-5xl mx-auto px-4 py-12 overflow-x-hidden">
       <h1 className="text-3xl font-bold text-primary mb-2">Gifting Guides & Blog</h1>
       <p className="text-slate-600 mb-8">
-        Ideas and tips for sending flowers, cakes, and thoughtful gifts across the USA — for birthdays,
-        anniversaries, and everyday celebrations. For deeper flower meanings, seasons and care, visit the{" "}
+        Ideas and tips for sending flowers, cakes, and thoughtful gifts across the USA — including Diwali
+        and Bhai Dooj, birthdays, anniversaries, and everyday celebrations. For deeper flower meanings,
+        seasons and care, visit the{" "}
         <Link href="/flower-guide" className="text-nav font-semibold hover:underline">
           Flower Knowledge Centre
         </Link>

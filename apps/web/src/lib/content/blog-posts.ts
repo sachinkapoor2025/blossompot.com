@@ -1,4 +1,5 @@
 import { extraBlogPosts } from "./blog-posts-extra";
+import { festivalBlogPosts } from "./blog-posts-festivals";
 
 export interface BlogPost {
   slug: string;
@@ -1777,6 +1778,7 @@ export const blogPosts: BlogPost[] = [
     ],
   },
   ...extraBlogPosts,
+  ...festivalBlogPosts,
 ];
 
 export function getBlogPost(slug: string): BlogPost | undefined {

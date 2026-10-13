@@ -3,8 +3,8 @@ import { notFound } from "next/navigation";
 import { InternationalLocationPage } from "@/components/geo/InternationalLocationPage";
 import { pageMetadata } from "@/lib/seo";
 import { mergeProductsForCountry } from "@/lib/catalog-fallback";
-import { shuffleForCity } from "@/lib/city-products";
-import { loadProducts, toListingCardProducts } from "@/lib/product-loader";
+import { featuredLocationProducts } from "@/lib/city-products";
+import { loadProducts } from "@/lib/product-loader";
 import {
   isProductStorefrontVisible,
   productVisibleForDeliveryCountry,
@@ -63,17 +63,16 @@ export async function InternationalMarketPage({
   let products: Product[] = [];
   if (/^[A-Z]{2}$/.test(countryIso)) {
     try {
-      products = await loadProducts({ country: countryIso });
+      products = await loadProducts({ country: countryIso, skipPostal: true });
     } catch {
       products = [];
     }
-    products = toListingCardProducts(
-      shuffleForCity(
-        mergeProductsForCountry(products, countryIso).filter(
-          (p) => isProductStorefrontVisible(p) && productVisibleForDeliveryCountry(p, countryIso)
-        ),
-        loc.slug
-      ).slice(0, 20)
+    products = featuredLocationProducts(
+      mergeProductsForCountry(products, countryIso).filter(
+        (p) => isProductStorefrontVisible(p) && productVisibleForDeliveryCountry(p, countryIso)
+      ),
+      loc.slug,
+      20
     );
   }
   return <InternationalLocationPage loc={resolveLocation(loc)} products={products} />;

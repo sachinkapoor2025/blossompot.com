@@ -281,6 +281,8 @@ export async function loadProducts(params?: {
   category?: string;
   search?: string;
   country?: string;
+  /** Location SEO pages should not shrink the catalog to the shopper's ZIP. */
+  skipPostal?: boolean;
 }): Promise<Product[]> {
   if (params?.category && storefrontSkipsRakhiCategory(params.category)) {
     return [];
@@ -289,7 +291,7 @@ export async function loadProducts(params?: {
   const requested = params?.country ?? (await getStorefrontDeliveryCountry());
   if (!requested) return [];
   const country = catalogCountry(requested);
-  const postalCode = await getStorefrontDeliveryPostal();
+  const postalCode = params?.skipPostal ? undefined : await getStorefrontDeliveryPostal();
   const qs = catalogQuery({
     category: params?.category,
     search: params?.search,
