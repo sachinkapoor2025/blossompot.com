@@ -54,8 +54,6 @@ const nextConfig: NextConfig = {
       { source: "/same-day-gifts/", destination: "/products", statusCode: 301 },
       { source: "/collections/same-day-gifts", destination: "/products", statusCode: 301 },
       { source: "/collections/same-day-gifts/", destination: "/products", statusCode: 301 },
-      { source: "/terms-and-conditions", destination: "/terms", statusCode: 301 },
-      { source: "/terms-and-conditions/", destination: "/terms", statusCode: 301 },
     ];
   },
   async rewrites() {

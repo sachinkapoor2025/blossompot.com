@@ -16,7 +16,7 @@ export async function getBlogImageMap(): Promise<Record<string, string>> {
 export function applyBlogImages(posts: BlogPost[], images: Record<string, string>): BlogPost[] {
   return posts.map((post) => ({
     ...post,
-    image: images[post.slug] || post.image,
+    image: images[post.slug] || undefined,
   }));
 }
 

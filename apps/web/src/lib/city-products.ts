@@ -1,34 +1,3 @@
-import {
-  productGalleryNeedsCatalogPhotos,
-  resolveProductImageUrls,
-  type Product,
-} from "@blossompot/shared";
-import { toListingCardProducts } from "./listing-card";
-
-const LOCATION_FEATURED_LIMIT = 24;
-
-/** Prefer products that already have real gallery photos so location cards are not blank. */
-export function productsWithDisplayableImages(products: readonly Product[]): Product[] {
-  return products.filter((product) => !productGalleryNeedsCatalogPhotos(product.images));
-}
-
-/**
- * Stable featured set for /gifts-to-{slug} and international location pages.
- * Uses the city shuffle, then keeps products with photos when enough exist.
- */
-export function featuredLocationProducts(
-  products: readonly Product[],
-  locationSlug: string,
-  limit = LOCATION_FEATURED_LIMIT
-): Product[] {
-  const withPhotos = productsWithDisplayableImages(products);
-  const pool = withPhotos.length >= Math.min(limit, 8) ? withPhotos : products;
-  return toListingCardProducts(shuffleForCity(pool, locationSlug).slice(0, limit)).map((product) => ({
-    ...product,
-    images: resolveProductImageUrls(product.images),
-  }));
-}
-
 /** Stable numeric seed from a city slug (same city → same seed). */
 function seedFromString(value: string): number {
   let hash = 2166136261;

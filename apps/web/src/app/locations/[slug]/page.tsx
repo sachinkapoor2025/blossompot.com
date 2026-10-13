@@ -13,9 +13,9 @@ import {
   publishedGeoLocations,
 } from "@/lib/content/geo/locations";
 import { mergeProductsForCountry } from "@/lib/catalog-fallback";
-import { featuredLocationProducts } from "@/lib/city-products";
+import { shuffleForCity } from "@/lib/city-products";
 import { ListingPageSkeleton } from "@/components/route-skeletons";
-import { loadProducts } from "@/lib/product-loader";
+import { loadProducts, toListingCardProducts } from "@/lib/product-loader";
 import { giftsCatalogCountryIso, giftsCatalogLocationHref } from "@/lib/location-seo-urls";
 import { notFoundIfShoppingCountryDisabled } from "@/lib/shopping-country-gate";
 import { pageMetadata } from "@/lib/seo";
@@ -78,12 +78,12 @@ async function SeoLocationContent({ params }: Props) {
     // The products API has no seed/limit that preserves that shuffle, so the
     // full country catalog is still requested and then sliced. Repeat views use
     // the 45s catalog cache instead of another uncached download.
-    products = await loadProducts({ country: "US", skipPostal: true });
+    products = await loadProducts({ country: "US" });
   } catch {
     products = [];
   }
   products = mergeProductsForCountry(products, "US");
-  const cityProducts = featuredLocationProducts(products, slug);
+  const cityProducts = toListingCardProducts(shuffleForCity(products, slug).slice(0, 24));
   const path = locationPublicPath(slug);
 
   if (geo.type === "state") {

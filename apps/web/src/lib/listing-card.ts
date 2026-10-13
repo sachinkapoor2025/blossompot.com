@@ -1,4 +1,4 @@
-import { resolveProductImageUrls, type Product } from "@blossompot/shared";
+import type { Product } from "@blossompot/shared";
 
 /** Keeps client-side dedupe rank (description length > 80) without shipping the full HTML body. */
 const LISTING_DESCRIPTION_STUB = "x".repeat(81);
@@ -14,7 +14,6 @@ export function toListingCardProducts(products: Product[]): Product[] {
     return {
       ...product,
       description,
-      images: resolveProductImageUrls(product.images),
       seoTitle: undefined,
       seoDescription: undefined,
       shortDescription: undefined,

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { HomeHero } from "@/components/HomeHero";
 import { HomeBrandTaglines } from "@/components/HomeBrandTaglines";
 import { CustomerReviews } from "@/components/CustomerReviews";
-import { FestivalGiftReviews } from "@/components/FestivalGiftReviews";
 import { getGoogleReviews } from "@/lib/google-reviews";
 import { TrustStrip } from "@/components/TrustStrip";
 import { WhyTrustUsSection } from "@/components/WhyTrustUsSection";
@@ -167,7 +166,6 @@ async function HomeBelowHero({
       <Suspense fallback={<HomeReviewsFallback />}>
         <HomeReviews reviewsPromise={reviewsPromise} />
       </Suspense>
-      <FestivalGiftReviews />
 
       <HomeFlowerGuideCta />
       <HomeSeoSection countryIso={indexableCountry} />

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { Product } from "@blossompot/shared";
-import { isFastSelling, resolveProductImageUrls } from "@blossompot/shared";
+import { isFastSelling } from "@blossompot/shared";
 import { AddToCartControl } from "@/components/AddToCartControl";
 import { WishlistButton } from "@/components/WishlistButton";
 import { FastSellingBadge } from "@/components/FastSellingBadge";
@@ -44,7 +44,7 @@ export function HomeProductCard({
         <WishlistButton product={product} className="!top-2 !right-2 z-20" />
         <Link href={`/products/${product.slug}`} className="absolute inset-0 z-[1] block" prefetch={false}>
           <ProductImageRotator
-            images={resolveProductImageUrls(product.images)}
+            images={product.images ?? []}
             alt={product.name}
             staggerKey={product.slug}
             className="pointer-events-none absolute inset-0 h-full w-full"
