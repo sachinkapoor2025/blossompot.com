@@ -1,13 +1,16 @@
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
 import {
   VENDOR_GBO,
+  formatGboProductSlug,
   gboCreateOrderSchema,
   gboGiftDetailQuerySchema,
+  gboGiftNumericId,
   gboGiftQuerySchema,
   isGboStorefrontEnabled,
   isPublicGboCatalogPath,
 } from "@blossompot/shared";
 import { decideNewShopping } from "../lib/catalog-vendor-store";
+import { slugsMarkedUnpublished } from "../lib/product-publication";
 import {
   GboClientError,
   gboCreateOrder,
@@ -22,6 +25,20 @@ import { json, ok, badRequest, notFound, unauthorized } from "../lib/response";
 
 function requestPath(event: APIGatewayProxyEventV2): string {
   return event.rawPath || event.requestContext?.http?.path || "";
+}
+
+/** Drops partner gifts whose stored catalog row is unpublished. Gifts with no row stay listed. */
+async function giftsStillPublished<T extends { id: number | string; name?: string }>(
+  country: string,
+  gifts: T[]
+): Promise<T[]> {
+  const slugs = gifts.map((gift) => {
+    const productId = gboGiftNumericId(gift);
+    return productId ? formatGboProductSlug(country, productId, gift.name) : "";
+  });
+  const hidden = await slugsMarkedUnpublished(slugs);
+  if (hidden.size === 0) return gifts;
+  return gifts.filter((_, index) => !hidden.has(slugs[index] ?? ""));
 }
 
 function query(event: APIGatewayProxyEventV2): Record<string, string> {
@@ -128,10 +145,13 @@ export async function gboGiftsHandler(
   }
   try {
     const gifts = await gboListGifts(parsed.data, { sandbox: parsed.data.sandbox ?? sandboxFlag(event) });
+    const visible = isPublicGboCatalogPath(requestPath(event))
+      ? await giftsStillPublished(parsed.data.country, gifts)
+      : gifts;
     const body = {
       country: parsed.data.country,
-      count: gifts.length,
-      gifts,
+      count: visible.length,
+      gifts: visible,
     };
     if (parsed.data.sandbox || sandboxFlag(event)) return ok(body);
     // Vendor enablement can change inside the old 45s window, so do not CDN-cache the public list.
@@ -158,6 +178,15 @@ export async function gboGiftDetailHandler(
     const gift = await gboResolveGift(parsed.data.country, parsed.data.productId, {
       sandbox: parsed.data.sandbox ?? sandboxFlag(event),
     });
+    if (isPublicGboCatalogPath(requestPath(event))) {
+      const productId = gboGiftNumericId(gift);
+      const slug = productId
+        ? formatGboProductSlug(parsed.data.country, productId, gift.name)
+        : "";
+      if (slug && (await slugsMarkedUnpublished([slug])).has(slug)) {
+        return notFound("Product not found");
+      }
+    }
     return ok({ gift });
   } catch (err) {
     return gboFail(err);

@@ -40,6 +40,11 @@ import { decideNewShopping, loadCatalogVendorRegistry, withStoredShoppingIdentit
 import { getBundledUsarakhiProduct } from "../lib/blossompot-catalog";
 import { ensureOrangeCountyProductInDb, getBundledOrangeCountyProduct } from "../lib/orange-county-catalog";
 import { ensureProductInDb } from "../lib/ensure-product";
+import {
+  isStoredProductUnpublished,
+  slugsMarkedUnpublished,
+  unpublishedProductMessage,
+} from "../lib/product-publication";
 
 /** Stale carts auto-expire after this many days (TTL). */
 const CART_TTL_DAYS = 30;
@@ -179,11 +184,26 @@ export async function getCartHandler(event: APIGatewayProxyEventV2) {
       };
     });
     return ok({
-      cart: { items: flagged, updatedAt: raw.updatedAt ?? now() },
+      cart: { items: await flagUnpublishedCartItems(flagged), updatedAt: raw.updatedAt ?? now() },
       locationRevalidated: true,
     });
   }
-  return ok({ cart: { items, updatedAt: raw.updatedAt ?? now() } });
+  return ok({ cart: { items: await flagUnpublishedCartItems(items), updatedAt: raw.updatedAt ?? now() } });
+}
+
+/** Marks lines the catalog has unpublished. Quantities and other lines stay as stored. */
+async function flagUnpublishedCartItems(items: CartItem[]): Promise<CartItem[]> {
+  const hidden = await slugsMarkedUnpublished(items.map((item) => item.productSlug));
+  if (hidden.size === 0) return items;
+  return items.map((item) =>
+    hidden.has(item.productSlug)
+      ? {
+          ...item,
+          unavailableForLocation: true,
+          unavailableReason: unpublishedProductMessage(item.name),
+        }
+      : item
+  );
 }
 
 export async function addToCart(event: APIGatewayProxyEventV2) {
@@ -226,6 +246,11 @@ export async function addToCart(event: APIGatewayProxyEventV2) {
 
   // Storefront may show catalog fallback before DynamoDB import — upsert on first add.
   let productItem = productResult.Item as Record<string, unknown> | undefined;
+  if (productItem && isStoredProductUnpublished(productItem as { published?: boolean })) {
+    return badRequest(
+      unpublishedProductMessage(typeof productItem.name === "string" ? productItem.name : "")
+    );
+  }
   if (!productItem) {
     const preview = getBundledUsarakhiProduct(parsed.data.productSlug) ?? getBundledOrangeCountyProduct(parsed.data.productSlug);
     if (preview) {
@@ -438,7 +463,17 @@ export async function updateCartItem(event: APIGatewayProxyEventV2) {
         Key: { PK: productKeys.pk(productSlug), SK: productKeys.sk() },
       })
     )
-  ).Item as { inventory: number; vendorSlug?: string; categorySlug?: string } | undefined;
+  ).Item as {
+    inventory: number;
+    vendorSlug?: string;
+    categorySlug?: string;
+    published?: boolean;
+    name?: string;
+  } | undefined;
+
+  if (product && isStoredProductUnpublished(product)) {
+    return badRequest(unpublishedProductMessage(product.name || item.name));
+  }
 
   if (!product) {
     const preview = getBundledUsarakhiProduct(productSlug) ?? getBundledOrangeCountyProduct(productSlug);

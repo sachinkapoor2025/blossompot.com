@@ -41,6 +41,7 @@ import { getAuth, requireAdmin } from "../lib/auth";
 import { withResolvedProductImages, resolveProductImageUrl } from "../lib/images";
 import { syncInventoryAlertState } from "../lib/inventory";
 import { ensureProductInDb } from "../lib/ensure-product";
+import { slugsMarkedUnpublished, readProductPublication } from "../lib/product-publication";
 import { getBundledUsarakhiProduct, listBundledCatalogProducts, persistMissingBundledCatalogProducts } from "../lib/blossompot-catalog";
 import { getBundledOrangeCountyProduct } from "../lib/orange-county-catalog";
 
@@ -273,6 +274,8 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
       isProductStorefrontVisible(p) &&
       !isGboHiddenFromStorefront(p)
   );
+  const unpublished = await slugsMarkedUnpublished(items.map((product) => product.slug));
+  if (unpublished.size > 0) items = items.filter((product) => !unpublished.has(product.slug));
   if (search) {
     items = items.filter(
       (p) =>
@@ -322,31 +325,40 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
   const nowMs = Date.now();
   const cached = productGetCache.get(slug);
   if (cached && nowMs - cached.at < PRODUCT_GET_CACHE_TTL_MS) {
-    if (isGboHiddenFromStorefront(cached.product)) return notFound("Product not found");
-    const location = await resolveShoppingLocation(parseLocationQuery(event));
-    if (!location) return notFound(NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE);
-    const visible = productVisibleForDeliveryCountry(cached.product, location.countryCode);
-    const shopping = await decideNewShopping(cached.product, location.countryCode);
-    if (vendorHiddenFromStorefront(shopping)) return notFound("Product not found");
-    if (!visible || !shopping.available) {
+    const publication = await readProductPublication(slug);
+    if (publication.found && publication.unpublished) {
+      productGetCache.delete(slug);
+      return notFound("Product not found");
+    }
+    if (!publication.found) {
+      productGetCache.delete(slug);
+    } else {
+      if (isGboHiddenFromStorefront(cached.product)) return notFound("Product not found");
+      const location = await resolveShoppingLocation(parseLocationQuery(event));
+      if (!location) return notFound(NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE);
+      const visible = productVisibleForDeliveryCountry(cached.product, location.countryCode);
+      const shopping = await decideNewShopping(cached.product, location.countryCode);
+      if (vendorHiddenFromStorefront(shopping)) return notFound("Product not found");
+      if (!visible || !shopping.available) {
+        return ok({
+          product: forStorefront(cached.product),
+          availability: {
+            deliverable: false,
+            reason: shopping.reason ?? "country_not_allowed",
+            location,
+          },
+        });
+      }
+      const [evalRow] = await evaluateProductsForLocation([cached.product], location);
       return ok({
         product: forStorefront(cached.product),
         availability: {
-          deliverable: false,
-          reason: shopping.reason ?? "country_not_allowed",
+          deliverable: Boolean(evalRow?.deliverable),
+          reason: evalRow?.reason,
           location,
         },
       });
     }
-    const [evalRow] = await evaluateProductsForLocation([cached.product], location);
-    return ok({
-      product: forStorefront(cached.product),
-      availability: {
-        deliverable: Boolean(evalRow?.deliverable),
-        reason: evalRow?.reason,
-        location,
-      },
-    });
   }
 
   const result = await docClient.send(
