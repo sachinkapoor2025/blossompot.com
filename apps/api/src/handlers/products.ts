@@ -19,6 +19,7 @@ import {
   productInStorefrontCategory,
   productVisibleForDeliveryCountry,
   dedupeStorefrontProducts,
+  isRakhiRelatedProduct,
   coalesceProductImages,
   isGboHiddenFromStorefront,
   NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE,
@@ -117,6 +118,45 @@ async function persistAndMergeBundledCatalog(items: Product[], category?: string
 
 function vendorHiddenFromStorefront(decision: { available: boolean; reason?: string }): boolean {
   return !decision.available && (decision.reason === "vendor_disabled" || decision.reason === "gbo_storefront_disabled");
+}
+
+/** Same rank signal listing cards keep for `dedupeStorefrontProducts` (length > 80). */
+const LISTING_DESCRIPTION_STUB = "x".repeat(81);
+
+const LISTING_CARD_OMIT = new Set([
+  "seoTitle",
+  "seoDescription",
+  "shippingNote",
+  "shippingOptions",
+  "shortDescription",
+  "variants",
+  "imageAssets",
+  "PK",
+  "SK",
+  "GSI1PK",
+  "GSI1SK",
+]);
+
+function wantsListingCardView(event: APIGatewayProxyEventV2): boolean {
+  const headers = event.headers ?? {};
+  const value = headers["x-blossompot-listing-view"] ?? headers["X-Blossompot-Listing-View"];
+  return value?.trim().toLowerCase() === "card";
+}
+
+/**
+ * Storefront list projection. Rakhi text is removed first, while description and seoTitle
+ * are still present. A long description then becomes the 81-character dedupe stub.
+ */
+export function toListingCardProduct<T extends { description?: string }>(product: T): T {
+  const description =
+    (product.description ?? "").length > 80 ? LISTING_DESCRIPTION_STUB : product.description;
+  const next: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(product)) {
+    if (LISTING_CARD_OMIT.has(key)) continue;
+    next[key] = value;
+  }
+  if (description !== undefined) next.description = description;
+  return next as T;
 }
 
 function forStorefront(product: Product): Product {
@@ -301,11 +341,14 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
   const deliverable = new Set(evals.filter((e) => e.deliverable).map((e) => e.slug));
   items = items.filter((p) => deliverable.has(p.slug));
   const products = items.map(forStorefront);
+  const cardView = wantsListingCardView(event);
+  const visible = cardView ? products.filter((product) => !isRakhiRelatedProduct(product)) : products;
+  const responseProducts = cardView ? visible.map(toListingCardProduct) : products;
   const listing =
     event.headers?.["x-blossompot-listing-groups"] === "1" ||
     event.headers?.["X-Blossompot-Listing-Groups"] === "1"
       ? {
-          listingGroups: listingGroupsForProducts(items, vendorRecords),
+          listingGroups: listingGroupsForProducts(cardView ? visible : items, vendorRecords),
           listingVendors: vendorRecords.map((vendor) => ({
             vendorSlug: vendor.vendorSlug,
             vendorName: vendor.vendorName,
@@ -314,7 +357,7 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
           })),
         }
       : {};
-  return ok({ products, location, filtered: true, ...listing });
+  return ok({ products: responseProducts, location, filtered: true, ...listing });
 }
 
 export async function getProduct(event: APIGatewayProxyEventV2) {
