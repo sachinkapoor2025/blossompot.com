@@ -209,7 +209,6 @@ export function Footer() {
               <li><Link href="/become-a-vendor" className="hover:text-primary hover:underline">Become a Vendor</Link></li>
               <li><Link href="/returns" className="hover:text-primary hover:underline">Returns &amp; Guarantee</Link></li>
               <li><Link href="/contact" className="hover:text-primary hover:underline">Contact Us</Link></li>
-              <li><Link href="/terms" className="hover:text-primary hover:underline">Terms &amp; Conditions</Link></li>
             </ul>
           </div>
 
@@ -251,9 +250,6 @@ export function Footer() {
               every mile.
             </p>
             <p className="flex flex-wrap gap-x-3 gap-y-1">
-              <Link href="/terms" className="hover:text-primary underline underline-offset-2">
-                Terms &amp; Conditions
-              </Link>
               <Link href="/privacy" className="hover:text-primary underline underline-offset-2">
                 Privacy
               </Link>
