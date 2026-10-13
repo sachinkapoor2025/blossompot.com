@@ -368,3 +368,24 @@ export function quoteAddressShipmentShipping(input: {
   );
   return { totalCharge, perVendor };
 }
+
+/**
+ * Sheet-shipping amount to show on one cart or product line, in the same
+ * currency as `line.shippingFee`.
+ *
+ * Catalog sheet fees are one bucket inside `quoteAddressShipmentShipping`:
+ * the bucket is waived for every catalog line, or each line keeps
+ * `shippingFee * quantity`. This does not re-decide the $14 threshold.
+ * Threshold, Gift Baskets Overseas, and flash-combo charges are not split
+ * onto lines — those items have no `shippingFee`, so this returns null.
+ */
+export function applicableCatalogLineShippingCharge(
+  quote: { perVendor: Array<Pick<FreeShippingQuote, "charge" | "policy">> },
+  line: { shippingFee?: number; quantity: number }
+): number | null {
+  if (line.shippingFee == null) return null;
+  const catalog = quote.perVendor.find((q) => q.policy === "catalog");
+  if (!catalog) return null;
+  if (catalog.charge === 0) return 0;
+  return line.shippingFee * line.quantity;
+}
