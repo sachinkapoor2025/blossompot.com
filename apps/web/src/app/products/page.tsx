@@ -10,10 +10,12 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { catalogShopSeo, resolveCategoryPageSeo } from "@/lib/content/category-country-seo";
 import { pageMetadata } from "@/lib/seo";
 import { requestSeoPath } from "@/lib/request-seo-path";
-import { loadProducts, toListingCardProducts } from "@/lib/product-loader";
+import { loadStorefrontCatalog, toListingCardProducts } from "@/lib/product-loader";
+import { presentShopCatalog } from "@/lib/catalog-load-state";
+import { CatalogLoadError } from "@/components/CatalogLoadError";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { notFoundIfShoppingCountryDisabled } from "@/lib/shopping-country-gate";
-import { groupStorefrontProductsOnce, noProductsForDeliveryCountryMessage, type Product, type Category } from "@blossompot/shared";
+import { groupStorefrontProductsOnce, noProductsForDeliveryCountryMessage, type Category } from "@blossompot/shared";
 import { categoryHref } from "@/lib/category-urls";
 import { locationShopHeading } from "@/lib/location-seo-urls";
 import { homeCategoryOrder, orderCategories } from "@/lib/site";
@@ -83,20 +85,17 @@ async function ProductsPageContent({ searchParams }: Props) {
   await notFoundIfShoppingCountryDisabled(seoPath);
   const deliveryCountry = await getStorefrontDeliveryCountry(params.country);
 
-  let products: Product[] = [];
-  let categories: Category[] = [];
-
-  try {
-    const [liveProducts, categoriesData] = await Promise.all([
-      loadProducts({ search, category, country: deliveryCountry }),
-      api<{ categories: Category[] }>("/categories", { revalidate: 45 }),
-    ]);
-    products = liveProducts.filter((p) => !isRakhiRelatedProduct(p));
-    categories = categoriesData.categories.filter((c) => !storefrontSkipsRakhiCategory(c.slug));
-  } catch {
-    products = [];
-    categories = [];
-  }
+  const [productLoad, categoriesData] = await Promise.all([
+    loadStorefrontCatalog({ search, category, country: deliveryCountry }),
+    api<{ categories?: Category[] }>("/categories", { revalidate: 45 }).catch(() => null),
+  ]);
+  const products = productLoad.ok
+    ? productLoad.products.filter((p) => !isRakhiRelatedProduct(p))
+    : [];
+  const categories = Array.isArray(categoriesData?.categories)
+    ? categoriesData.categories.filter((c) => !storefrontSkipsRakhiCategory(c.slug))
+    : [];
+  const shop = presentShopCatalog(productLoad.ok ? { ok: true, products } : { ok: false });
 
   const h1 = locationShopHeading(
     seoPath,
@@ -126,7 +125,9 @@ async function ProductsPageContent({ searchParams }: Props) {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
-      {search ? <SearchTracker query={search} resultCount={products.length} /> : null}
+      {search && shop.state !== "error" ? (
+        <SearchTracker query={search} resultCount={products.length} />
+      ) : null}
       <Breadcrumbs
         items={[
           { label: "Home", href: "/" },
@@ -162,7 +163,9 @@ async function ProductsPageContent({ searchParams }: Props) {
         </div>
       )}
 
-      {products.length === 0 ? (
+      {shop.state === "error" ? (
+        <CatalogLoadError />
+      ) : shop.state === "empty" ? (
         <p className="text-slate-600">
           {!search && deliveryCountry
             ? noProductsForDeliveryCountryMessage(deliveryCountry)

@@ -20,13 +20,13 @@ import {
 } from "@/lib/location-seo-urls";
 import { requestSeoPath } from "@/lib/request-seo-path";
 import { ListingPageSkeleton } from "@/components/route-skeletons";
-import { loadProductsByCategory, toListingCardProducts } from "@/lib/product-loader";
-import { getCatalogProductsByCategory } from "@/lib/catalog-fallback";
+import { loadCategoryPageProducts, toListingCardProducts } from "@/lib/product-loader";
+import { CatalogLoadError } from "@/components/CatalogLoadError";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { notFoundIfShoppingCountryDisabled } from "@/lib/shopping-country-gate";
 import { categoryOrder } from "@/lib/site";
 import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, pageMetadata } from "@/lib/seo";
-import { type Product, type Category, productVisibleForDeliveryCountry } from "@blossompot/shared";
+import { type Category } from "@blossompot/shared";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -77,24 +77,12 @@ async function CategoryPageContent({ params, searchParams }: Props) {
   if (!isKnownCategorySlug(slug)) notFound();
   const deliveryCountry = await getStorefrontDeliveryCountry(query.country);
 
-  let category: Category | null = null;
-  let products: Product[] = [];
-
-  try {
-    const [catData, categoryProducts] = await Promise.all([
-      api<{ category: Category }>(`/categories/${slug}`, { revalidate: 45 }),
-      loadProductsByCategory(slug, deliveryCountry),
-    ]);
-    category = catData.category;
-    products = categoryProducts;
-  } catch {
-    products = await loadProductsByCategory(slug, deliveryCountry);
-  }
-  if (products.length === 0) {
-    products = getCatalogProductsByCategory(slug).filter((product) =>
-      productVisibleForDeliveryCountry(product, deliveryCountry)
-    );
-  }
+  const [categoryData, categoryLoad] = await Promise.all([
+    api<{ category?: Category }>(`/categories/${slug}`, { revalidate: 45 }).catch(() => null),
+    loadCategoryPageProducts(slug, deliveryCountry),
+  ]);
+  const category = categoryData?.category ?? null;
+  const products = categoryLoad.state === "products" ? categoryLoad.products : [];
 
   const name = category?.name ?? slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   const headingName: Record<string, string> = {
@@ -139,7 +127,9 @@ async function CategoryPageContent({ params, searchParams }: Props) {
       <Breadcrumbs items={crumbs} />
       <h1 className="text-3xl font-bold text-primary mb-8">{h1}</h1>
 
-      {products.length > 0 ? (
+      {categoryLoad.state === "error" ? (
+        <CatalogLoadError />
+      ) : products.length > 0 ? (
         <ProductGrid products={toListingCardProducts(products)} sort={sort} />
       ) : (
         <p className="text-slate-500">
