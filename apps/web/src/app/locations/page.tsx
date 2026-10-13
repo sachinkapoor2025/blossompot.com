@@ -66,7 +66,7 @@ export default function LocationsHubPage() {
         <ul className="grid gap-4 sm:grid-cols-2">
           {markets.map((market) => (
             <li key={market.slug} className="rounded-xl border border-slate-200 bg-white p-4">
-              <h3 className="font-semibold text-primary mb-1">
+              <h3 className="font-display font-semibold text-primary mb-1">
                 <Link href={internationalPath(market)} className="hover:underline">
                   {market.label}
                 </Link>

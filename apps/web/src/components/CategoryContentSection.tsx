@@ -32,7 +32,7 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
           </header>
 
           <section>
-            <h3 className="text-xl font-semibold text-primary mb-3">{content.delivery.heading}</h3>
+            <h3 className="font-display text-xl font-semibold text-primary mb-3">{content.delivery.heading}</h3>
             {content.delivery.paragraphs.map((p, i) => (
               <p key={i} className="mb-3">
                 {applyInlineLinks(p, inlineLinks, { usedHrefs, max: 4 })}
@@ -41,7 +41,7 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
           </section>
 
           <section>
-            <h3 className="text-xl font-semibold text-primary mb-3">{content.highlights.heading}</h3>
+            <h3 className="font-display text-xl font-semibold text-primary mb-3">{content.highlights.heading}</h3>
             {content.highlights.paragraphs && content.highlights.paragraphs.length > 0 ? (
               <div className="space-y-3 text-slate-700 leading-relaxed">
                 {content.highlights.paragraphs.map((p, i) => (
@@ -62,7 +62,7 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
 
           {content.tradition && (
             <section>
-              <h3 className="text-xl font-semibold text-primary mb-3">{content.tradition.heading}</h3>
+              <h3 className="font-display text-xl font-semibold text-primary mb-3">{content.tradition.heading}</h3>
               {content.tradition.paragraphs.map((p, i) => (
                 <p key={i} className="mb-3">
                   {applyInlineLinks(p, inlineLinks, { usedHrefs, max: 4 })}
@@ -73,7 +73,7 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
 
           <div className="grid sm:grid-cols-2 gap-6">
             <section className="bg-slate-50 rounded-xl p-6 h-full">
-              <h3 className="text-lg font-semibold text-primary mb-4">{content.whyUs.heading}</h3>
+              <h3 className="font-display text-lg font-semibold text-primary mb-4">{content.whyUs.heading}</h3>
               <ul className="space-y-2 text-sm">
                 {content.whyUs.bullets.map((b) => (
                   <li key={b} className="flex items-start gap-2">
@@ -85,7 +85,7 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
             </section>
 
             <section className="bg-white border border-slate-200 rounded-xl p-6 h-full">
-              <h3 className="text-lg font-semibold text-primary mb-4">{content.howTo.heading}</h3>
+              <h3 className="font-display text-lg font-semibold text-primary mb-4">{content.howTo.heading}</h3>
               <ol className="space-y-3 text-sm list-decimal list-inside marker:font-semibold marker:text-nav">
                 {content.howTo.steps.map((step, i) => (
                   <li key={i} className="pl-1">

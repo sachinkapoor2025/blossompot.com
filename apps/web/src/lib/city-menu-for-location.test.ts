@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { cityLinks, cityNavHref } from "./site";
-import { cityMenuForCountry } from "./city-menu-for-location";
+import { cityMenuForCountry, footerCityColumns } from "./city-menu-for-location";
 
 describe("US city nav list", () => {
   it("keeps featured metros after New Jersey on gifts-to URLs", () => {
@@ -36,5 +36,20 @@ describe("US city nav list", () => {
       ca.links.some((link) => link.slug === "los-angeles"),
       false
     );
+  });
+
+  it("previews six US footer cities and expands the rest alphabetically once", () => {
+    const { preview, all } = footerCityColumns(cityLinks, "US");
+    assert.deepEqual(
+      preview.map((link) => link.slug),
+      ["california", "florida", "new-york", "texas", "chicago", "dallas"]
+    );
+    assert.equal(all.length, cityLinks.length);
+    assert.deepEqual(
+      all.map((link) => link.slug),
+      [...cityLinks].sort((a, b) => a.label.localeCompare(b.label)).map((link) => link.slug)
+    );
+    const seen = new Set(all.map((link) => link.slug));
+    assert.equal(seen.size, all.length);
   });
 });

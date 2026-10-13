@@ -11,5 +11,5 @@ export async function generateMetadata() {
 }
 
 export default function FlowerDeliveryUsaPage() {
-  return <CountryFlowerDeliveryPage country="usa" />;
+  return <CountryFlowerDeliveryPage country="usa" align="center" />;
 }

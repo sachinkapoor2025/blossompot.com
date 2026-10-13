@@ -32,6 +32,8 @@ import {
   flashComboSaleEndsAt,
   FLASH_COMBO_SHIPPING_USD,
   resolveCatalogShippingFee,
+  applicableCatalogLineShippingCharge,
+  quoteAddressShipmentShipping,
 } from "@blossompot/shared";
 import { EstimatedDeliveryNote } from "@/components/EstimatedDeliveryNote";
 import { ProductCareAccordions } from "@/components/ProductCareAccordions";
@@ -40,7 +42,7 @@ import { flowerGuideForProduct } from "@/lib/content/flower-guide/products";
 import { ScheduleDeliveryPicker } from "@/components/ScheduleDeliveryPicker";
 import type { Product, ProductAddonSelection } from "@blossompot/shared";
 import { FastSellingBanner } from "@/components/FastSellingBadge";
-import { looksLikeHtml, shortPlainDescription } from "@/lib/html-text";
+import { looksLikeHtml, plainDescriptionBlocks, sanitizeProductHtml, shortPlainDescription } from "@/lib/html-text";
 import { getProductIncludes } from "@/lib/product-includes";
 import { fulfillmentVendorSlug, isGboVendor, parseGboSlug, VENDOR_GBO } from "@blossompot/shared";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
@@ -137,7 +139,7 @@ export function ProductDetailClient({
   const captureLead = useDebouncedLeadCapture(sessionId);
   const captureLeadNow = useLeadCapture(sessionId);
   const { cart, itemCount } = useCart();
-  const { format } = useCurrency();
+  const { format, formatDisplay, convert, displayCurrency, usdInrRate } = useCurrency();
   const locationSet = Boolean(delivery.location);
   const vendorKey = product.internationalDelivery
     ? VENDOR_GBO
@@ -185,6 +187,30 @@ export function ProductDetailClient({
     })
   );
   const catalogShipFee = resolveCatalogShippingFee(product, shippingOptionLabel);
+  const productShippingLine =
+    catalogShipFee == null
+      ? null
+      : {
+          price: convert(
+            product.price + (product.currency === "USD" ? addonsUsdTotal : 0),
+            product.currency
+          ),
+          quantity: 1,
+          productSlug: product.slug,
+          vendorSlug: product.vendorSlug,
+          shippingFee: convert(catalogShipFee, product.currency),
+        };
+  const applicableCatalogShipping =
+    productShippingLine == null
+      ? null
+      : applicableCatalogLineShippingCharge(
+          quoteAddressShipmentShipping({
+            items: [productShippingLine],
+            currency: displayCurrency,
+            usdInrRate,
+          }),
+          productShippingLine
+        );
   /** Add-on catalog is USD; show combined display when shopper has extras selected. */
   const displayTotal =
     addonsUsdTotal > 0 && product.currency === "USD"
@@ -316,15 +342,23 @@ export function ProductDetailClient({
                         : "border-slate-300 bg-white text-slate-700"
                     }`}
                   >
-                    {option.label} · {format(option.price, product.currency)}
+                    {option.label}
+                    {applicableCatalogShipping === 0
+                      ? " · Free"
+                      : ` · ${format(option.price, product.currency)}`}
                   </button>
                 ))}
               </div>
+              {applicableCatalogShipping === 0 ? (
+                <p className="mt-2 text-sm text-slate-600">Shipping: Free</p>
+              ) : null}
             </div>
-          ) : catalogShipFee != null ? (
+          ) : applicableCatalogShipping != null ? (
             <p className="mb-4 text-sm text-slate-600">
-              Shipping: {catalogShipFee === 0 ? "Free" : format(catalogShipFee, product.currency)}{" "}
-              in the selected currency (charged separately at checkout)
+              Shipping:{" "}
+              {applicableCatalogShipping === 0
+                ? "Free"
+                : `${formatDisplay(applicableCatalogShipping)} in the selected currency (charged separately at checkout)`}
             </p>
           ) : null}
           {product.shippingNote && catalogShipFee == null ? (
@@ -502,13 +536,15 @@ export function ProductDetailClient({
           <div className="space-y-8">
             {descriptionIsHtml ? (
               <article
-                className="product-html-description text-slate-700 leading-relaxed max-w-4xl prose prose-slate prose-a:text-nav prose-strong:text-primary prose-ul:my-3 prose-li:my-0.5"
-                dangerouslySetInnerHTML={{ __html: product.description }}
+                className="product-html-description text-slate-700 max-w-4xl"
+                dangerouslySetInnerHTML={{ __html: sanitizeProductHtml(product.description) }}
               />
             ) : (
-              <article className="text-slate-700 leading-relaxed space-y-4 max-w-4xl">
-                {product.description.split(/(?<=\.)\s+/).map((para, i) => (
-                  <p key={i}>{para}</p>
+              <article className="product-html-description text-slate-700 max-w-4xl">
+                {plainDescriptionBlocks(product.description).map((block, i) => (
+                  <p key={i} className="whitespace-pre-line">
+                    {block}
+                  </p>
                 ))}
               </article>
             )}

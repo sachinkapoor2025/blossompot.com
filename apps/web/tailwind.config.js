@@ -11,7 +11,8 @@ module.exports = {
         petal: "#fff5f8",
       },
       fontFamily: {
-        sans: ["var(--font-sans)", "Source Sans 3", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: ["var(--font-sans)", "DM Sans", "ui-sans-serif", "system-ui", "sans-serif"],
+        serif: ["var(--font-display)", "Cormorant Garamond", "ui-serif", "Georgia", "serif"],
         display: ["var(--font-display)", "Cormorant Garamond", "ui-serif", "Georgia", "serif"],
       },
     },

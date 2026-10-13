@@ -190,7 +190,7 @@ export function StateGeoTemplate({
         </VisualHeading>
         <VisualHeading
           as={compactSeo ? "h2" : "h3"}
-          className="text-lg font-semibold text-primary mb-4"
+          className="font-display text-lg font-semibold text-primary mb-4"
         >
           Frequently asked questions — {place}
         </VisualHeading>
@@ -319,7 +319,7 @@ export function CityGeoTemplate({
         <h2 className="text-xl font-bold text-primary mb-2">
           Cake delivery {geo.name} &amp; same day gift delivery {geo.name}
         </h2>
-        <h3 className="text-lg font-semibold text-primary mb-4">
+        <h3 className="font-display text-lg font-semibold text-primary mb-4">
           Frequently asked questions — {place}
         </h3>
         <div className="space-y-4">

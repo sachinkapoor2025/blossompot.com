@@ -1,7 +1,6 @@
 "use client";
 
 import { trustFacts, trustHighlights } from "@/lib/trust";
-import { TrustBadges } from "@/components/TrustBadges";
 import { localizeCopyForCountry } from "@/lib/location-seo-urls";
 import { useStorefrontCountryIso } from "@/lib/use-storefront-country";
 
@@ -23,7 +22,7 @@ export function WhyTrustUsSection() {
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {trustHighlights.map((item) => {
             const inner = (
               <>
@@ -50,10 +49,6 @@ export function WhyTrustUsSection() {
               </div>
             );
           })}
-        </div>
-
-        <div className="max-w-3xl mx-auto">
-          <TrustBadges />
         </div>
       </div>
     </section>

@@ -19,18 +19,26 @@ import { cityNavHref } from "@/lib/site";
 import { cityMenuForCountry } from "@/lib/city-menu-for-location";
 import { siteUrl } from "@/lib/env";
 
-function FlowerGuideProducts({ country }: { country: CountryFlowerDeliverySlug }) {
+function FlowerGuideProducts({
+  country,
+  centered = false,
+}: {
+  country: CountryFlowerDeliverySlug;
+  centered?: boolean;
+}) {
   return (
     <Suspense fallback={<ListingPageSkeleton />}>
-      <CountryFlowerProductSection country={country} />
+      <CountryFlowerProductSection country={country} centered={centered} />
     </Suspense>
   );
 }
 
 export async function CountryFlowerDeliveryPage({
   country,
+  align,
 }: {
   country: CountryFlowerDeliverySlug;
+  align?: "center";
 }) {
   const countryIsoForGate = flowerDeliveryCountryIso(country);
   const flowerPath = flowerDeliveryPathForIso(countryIsoForGate);
@@ -43,6 +51,7 @@ export async function CountryFlowerDeliveryPage({
     href: cityNavHref(city),
   }));
   const productsFirst = country === "usa";
+  const centered = align === "center";
   const inlineLinks = countryPageInlineLinks[country] ?? [];
   const usedHrefs = new Set<string>();
   const crumbs = [
@@ -94,8 +103,9 @@ export async function CountryFlowerDeliveryPage({
         ]}
       />
       <Breadcrumbs items={crumbs} />
-      {productsFirst ? <FlowerGuideProducts country={country} /> : null}
-      <h1 className="text-3xl font-bold text-primary mb-3">{page.h1}</h1>
+      {productsFirst ? <FlowerGuideProducts country={country} centered={centered} /> : null}
+      <div className={centered ? "max-w-3xl mx-auto" : "contents"}>
+      <h1 className={`text-3xl font-bold text-primary mb-3${centered ? " text-center" : ""}`}>{page.h1}</h1>
       {productsFirst ? null : <FlowerGuideProducts country={country} />}
 
       <p className="text-slate-600 mb-6 max-w-3xl leading-relaxed">
@@ -140,7 +150,7 @@ export async function CountryFlowerDeliveryPage({
               key={occasion.h3}
               className="rounded-xl border border-primary/10 bg-white p-5 shadow-sm shadow-primary/5"
             >
-              <h3 className="font-semibold text-primary mb-2">{occasion.h3}</h3>
+              <h3 className="font-display font-semibold text-primary mb-2">{occasion.h3}</h3>
               <p className="text-sm text-slate-700 leading-relaxed">{occasion.text}</p>
             </article>
           ))}
@@ -173,9 +183,9 @@ export async function CountryFlowerDeliveryPage({
       </section>
 
       <section className="mb-10 rounded-3xl border border-primary/15 bg-gradient-to-br from-rose-50 via-white to-orange-50 p-6 sm:p-8">
-        <h2 className="text-xl sm:text-2xl font-bold text-primary">{page.ctaHeading}</h2>
-        <p className="mt-2 text-slate-600 max-w-2xl">{page.ctaText}</p>
-        <div className="mt-5 flex flex-wrap gap-3">
+        <h2 className={`text-xl sm:text-2xl font-bold text-primary${centered ? " text-center" : ""}`}>{page.ctaHeading}</h2>
+        <p className={`mt-2 text-slate-600 max-w-2xl${centered ? " mx-auto" : ""}`}>{page.ctaText}</p>
+        <div className={`mt-5 flex flex-wrap gap-3${centered ? " justify-center" : ""}`}>
           <Link
             href={page.primaryCta.href}
             className="inline-flex min-h-11 items-center rounded-full bg-nav px-5 text-sm font-semibold text-white hover:opacity-95"
@@ -215,6 +225,7 @@ export async function CountryFlowerDeliveryPage({
           ))}
         </ul>
       </section>
+      </div>
     </div>
   );
 }

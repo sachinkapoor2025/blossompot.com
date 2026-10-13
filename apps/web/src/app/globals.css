@@ -25,12 +25,33 @@ body {
     radial-gradient(1200px 520px at 12% -8%, rgba(224, 122, 154, 0.16), transparent 58%),
     radial-gradient(900px 480px at 92% 0%, rgba(47, 143, 107, 0.12), transparent 55%),
     linear-gradient(180deg, #f7fcf8 0%, #f3faf5 42%, #fff8fb 100%);
-  font-family: var(--font-sans), "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans), "DM Sans", ui-sans-serif, system-ui, sans-serif;
 }
 
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+/* Compact interface headings stay in the UI face. Editorial headings are larger. */
+h2.text-sm,
+h2.text-xs {
+  font-family: var(--font-sans), "DM Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+/*
+  Type scale follows the existing hierarchy.
+  Page titles: 1.5rem–1.875rem, weight 700, Cormorant Garamond.
+  Section headings: 1.25rem–1.875rem, weight 600–700, Cormorant Garamond.
+  Editorial h3.font-display: 1.125rem–1.25rem, weight 600, Cormorant Garamond.
+  Body, navigation, forms, prices, and product names: DM Sans.
+  Body copy: 1rem / 400 / line-height 1.5. Card names: 0.875rem / 600.
+  h3 is interface text unless it opts into .font-display.
+*/
 h1,
 h2,
-h3,
 .font-display {
   font-family: var(--font-display), "Cormorant Garamond", ui-serif, Georgia, serif;
 }
@@ -96,4 +117,99 @@ h3,
 
 .early-bird-emphasis {
   letter-spacing: 0.02em;
+}
+
+/* FAQ questions sit in h3 for structure. They are interface text, not editorial headings. */
+.faq-accordion h3,
+.faq-accordion h3 button {
+  font-family: var(--font-sans), "DM Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+.product-html-description {
+  font-family: var(--font-sans), "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.product-html-description :where(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--font-display), "Cormorant Garamond", ui-serif, Georgia, serif;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 1.25rem 0 0.5rem;
+}
+
+.product-html-description h1 {
+  font-size: 1.375rem;
+}
+
+.product-html-description h2 {
+  font-size: 1.25rem;
+}
+
+.product-html-description h3 {
+  font-size: 1.125rem;
+}
+
+.product-html-description :where(h4, h5, h6) {
+  font-size: 1rem;
+}
+
+.product-html-description :where(strong, b) {
+  font-family: inherit;
+  font-weight: 600;
+}
+
+.product-html-description :where(span, div, font) {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.product-html-description :where(p, ul, ol, table, blockquote) {
+  margin: 0 0 1rem;
+}
+
+.product-html-description :where(ul, ol) {
+  padding-left: 1.25rem;
+}
+
+.product-html-description li {
+  margin: 0.25rem 0;
+}
+
+.product-html-description li > p {
+  margin: 0;
+}
+
+.product-html-description a {
+  color: var(--nav);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.product-html-description a:hover {
+  color: var(--primary);
+}
+
+.product-html-description table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.product-html-description :where(th, td) {
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.product-html-description img {
+  max-width: 100%;
+  height: auto;
 }

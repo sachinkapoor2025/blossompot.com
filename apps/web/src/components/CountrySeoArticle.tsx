@@ -6,11 +6,14 @@ export function CountrySeoArticle({
   article,
   headingLevel = "h1",
   omitHeading = false,
+  centerFaq = false,
 }: {
   article: CountrySeoContent;
   headingLevel?: "h1" | "h2";
   /** The surrounding page already rendered this article's heading. */
   omitHeading?: boolean;
+  /** Center the FAQ block. Question text stays left-aligned. */
+  centerFaq?: boolean;
 }) {
   const Heading = headingLevel;
 
@@ -20,10 +23,10 @@ export function CountrySeoArticle({
       aria-labelledby={omitHeading ? undefined : "country-seo-heading"}
     >
       <div className="max-w-7xl mx-auto px-4 py-12 sm:py-16">
-        <article className="max-w-3xl space-y-8 text-slate-700 leading-relaxed">
+        <article className={`max-w-3xl space-y-8 text-slate-700 leading-relaxed${centerFaq ? " mx-auto" : ""}`}>
           <header>
             {omitHeading ? null : (
-              <Heading id="country-seo-heading" className="text-3xl font-bold text-primary mb-4">
+              <Heading id="country-seo-heading" className="font-display text-3xl font-bold text-primary mb-4">
                 {article.heading}
               </Heading>
             )}
@@ -49,7 +52,7 @@ export function CountrySeoArticle({
 
           {article.sections.map((section) => (
             <section key={section.heading}>
-              <h2 className="text-xl font-semibold text-primary mb-3">{section.heading}</h2>
+              <h2 className="font-display text-xl font-semibold text-primary mb-3">{section.heading}</h2>
               {section.paragraphs.map((paragraph) => (
                 <p key={paragraph} className="mb-4">
                   {paragraph}
@@ -59,7 +62,7 @@ export function CountrySeoArticle({
                 <div className="space-y-4">
                   {section.items.map((item) => (
                     <div key={item.title}>
-                      <h3 className="font-semibold text-primary">
+                      <h3 className="font-display font-semibold text-primary">
                         {item.href ? (
                           <Link href={item.href} className="hover:underline">
                             {item.title}
@@ -91,7 +94,7 @@ export function CountrySeoArticle({
 
           {article.steps.length > 0 ? (
             <section>
-              <h2 className="text-xl font-semibold text-primary mb-3">{article.stepsHeading}</h2>
+              <h2 className="font-display text-xl font-semibold text-primary mb-3">{article.stepsHeading}</h2>
               <ol className="space-y-3 list-decimal list-inside">
                 {article.steps.map((step) => (
                   <li key={step.title}>
@@ -106,7 +109,7 @@ export function CountrySeoArticle({
 
           {article.closing.heading ? (
             <section>
-              <h2 className="text-xl font-semibold text-primary mb-4">{article.closing.heading}</h2>
+              <h2 className="font-display text-xl font-semibold text-primary mb-4">{article.closing.heading}</h2>
               {article.closing.paragraphs.map((paragraph) => (
                 <p key={paragraph} className="mb-4">
                   {paragraph}
@@ -117,8 +120,8 @@ export function CountrySeoArticle({
         </article>
 
         {article.faqs.length > 0 ? (
-          <section className="mt-12 pt-10 border-t border-slate-200 max-w-3xl">
-            <h2 className="text-xl font-semibold text-primary mb-6">Frequently asked questions</h2>
+          <section className={`mt-12 pt-10 border-t border-slate-200 max-w-3xl${centerFaq ? " mx-auto" : ""}`}>
+            <h2 className={`font-display text-xl font-semibold text-primary mb-6${centerFaq ? " text-center" : ""}`}>Frequently asked questions</h2>
             <FaqAccordion items={article.faqs} />
           </section>
         ) : null}

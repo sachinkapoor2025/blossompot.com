@@ -197,11 +197,12 @@ describe("country switch navigation", () => {
     assert.equal(countryMenuDestination("/flower-delivery-usa", "IN", ""), "/flower-delivery-usa?country=IN");
   });
 
-  it("offers the countries menu from the enabled country list", () => {
+  it("does not offer a countries menu in the header", () => {
     const header = readFileSync(path.join(__dirname, "../components/Header.tsx"), "utf8");
     assert.equal(header.includes("COUNTRY_GUIDE_HREF"), false);
+    assert.equal(header.includes("function CountriesMenu"), false);
+    assert.equal(header.includes("countriesMenu"), false);
+    assert.equal(header.includes("countryMenuDestination"), false);
     assert.match(header, /useGboDeliveryCountries/);
-    assert.match(header, /countryMenuDestination\(pathname, countryCode, searchParams\.toString\(\)\)/);
-    assert.match(header, /countryMenuDestination\(pathname, c\.countryCode, searchParams\.toString\(\)\)/);
   });
 });

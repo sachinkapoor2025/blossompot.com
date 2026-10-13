@@ -199,7 +199,7 @@ export default async function FlowerGuidePage({ params }: Props) {
               <div className="mt-5 grid sm:grid-cols-2 gap-3">
                 {guide.varieties.map((v) => (
                   <div key={v.name} className="rounded-2xl border border-[#eadfd8] bg-white p-4">
-                    <h3 className="font-semibold text-primary">{v.name}</h3>
+                    <h3 className="font-display font-semibold text-primary">{v.name}</h3>
                     <p className="text-sm text-slate-600 mt-1">{v.summary}</p>
                   </div>
                 ))}

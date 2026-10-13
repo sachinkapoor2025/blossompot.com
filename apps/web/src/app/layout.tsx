@@ -37,17 +37,21 @@ const display = localFont({
   ],
   variable: "--font-display",
   display: "swap",
+  adjustFontFallback: "Times New Roman",
+  fallback: ["ui-serif", "Georgia", "serif"],
 });
 
 const sans = localFont({
   src: [
-    { path: "../fonts/source-sans-3-latin-400-normal.woff2", weight: "400", style: "normal" },
-    { path: "../fonts/source-sans-3-latin-500-normal.woff2", weight: "500", style: "normal" },
-    { path: "../fonts/source-sans-3-latin-600-normal.woff2", weight: "600", style: "normal" },
-    { path: "../fonts/source-sans-3-latin-700-normal.woff2", weight: "700", style: "normal" },
+    { path: "../fonts/dm-sans-latin-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/dm-sans-latin-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/dm-sans-latin-600-normal.woff2", weight: "600", style: "normal" },
+    { path: "../fonts/dm-sans-latin-700-normal.woff2", weight: "700", style: "normal" },
   ],
   variable: "--font-sans",
   display: "swap",
+  adjustFontFallback: "Arial",
+  fallback: ["ui-sans-serif", "system-ui", "sans-serif"],
 });
 
 const { google: googleSiteVerification, bing: bingSiteVerification } = getSiteVerification();

@@ -44,7 +44,7 @@ function ShowMoreGrid({ products }: { products: BlogShowMoreProduct[] }) {
                 <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
                   {product.categoryLabel}
                 </span>
-                <span className="text-sm font-semibold text-slate-900 line-clamp-2 group-hover:text-nav">
+                <span className="font-sans text-sm font-semibold text-slate-900 line-clamp-2 group-hover:text-nav">
                   {product.name}
                 </span>
               </div>
