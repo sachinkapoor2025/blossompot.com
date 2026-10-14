@@ -8,17 +8,14 @@ export const HOME_PRODUCT_ROW_LIMIT = 8;
 
 /**
  * Homepage section rule, applied before the row is sliced.
- * Rakhi hampers merged into another category are removed.
- * Gift hampers keeps only that primary category.
+ * Rakhi products are removed, then only the section's primary category remains.
  */
 export function productsForHomeSection(slug: string, products: Product[]): Product[] {
   const withoutRakhi = products.filter(
     (product) => product.categorySlug !== "rakhi-hampers" && !isRakhiRelatedProduct(product)
   );
-  if (slug === "gift-hampers") {
-    return withoutRakhi.filter((product) => product.categorySlug === "gift-hampers");
-  }
-  return withoutRakhi;
+  // Homepage rows stay on the primary category. Additional-category matches belong on the category page.
+  return withoutRakhi.filter((product) => product.categorySlug === slug);
 }
 
 /** Same eight products the homepage row already showed from the full loaded list. */

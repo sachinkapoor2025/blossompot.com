@@ -209,10 +209,13 @@ export function mapGboGiftStorefrontCategories(gift: {
   return { categorySlug, additionalCategorySlugs };
 }
 
+/**
+ * Occasion categories where a generic flower or bouquet must not appear only
+ * because GBO tagging added that slug. Anniversary and Valentine's are not in
+ * this set: an explicit additional assignment belongs on those category pages.
+ */
 const OCCASION_CATEGORY_SLUGS = new Set([
   "birthday-gifts",
-  "valentines-day-gifts",
-  "anniversary-gifts",
   "mothers-day-gifts",
   "wedding-gifts",
 ]);

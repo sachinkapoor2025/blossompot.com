@@ -5,6 +5,7 @@ import {
   updateProductSchema,
   bulkProductRowSchema,
   productKeys,
+  categoryKeys,
   marketplaceVendorKeys,
   vendorCoverageKeys,
   DEFAULT_PRODUCT_INVENTORY,
@@ -208,6 +209,66 @@ let productListCache: { at: number; items: Product[] } | null = null;
 const categoryProductCache = new Map<string, { at: number; items: Product[] }>();
 const productGetCache = new Map<string, { at: number; product: Product }>();
 
+/**
+ * Primary-category partitions already stored on GSI1.
+ * Unioned with live category rows so an extra slug is found without a table scan.
+ */
+const CATEGORY_PARTITIONS = [
+  "flowers",
+  "flower-bouquets",
+  "cakes",
+  "birthday-gifts",
+  "anniversary-gifts",
+  "valentines-day-gifts",
+  "mothers-day-gifts",
+  "wedding-gifts",
+  "gift-hampers",
+  "personalized-gifts",
+  "plants",
+  "celebration-gifts",
+  "same-day-gifts",
+  "rakhi-hampers",
+] as const;
+
+let categorySlugCache: { at: number; slugs: string[] } | null = null;
+
+async function queryStoredCategorySlugs(): Promise<string[]> {
+  const slugs: string[] = [];
+  let ExclusiveStartKey: Record<string, unknown> | undefined;
+  do {
+    const result = await docClient.send(
+      new QueryCommand({
+        TableName: PRODUCTS_TABLE,
+        IndexName: "GSI1",
+        KeyConditionExpression: "GSI1PK = :pk",
+        ExpressionAttributeValues: { ":pk": categoryKeys.gsi1pk() },
+        ExclusiveStartKey,
+      })
+    );
+    for (const item of result.Items ?? []) {
+      const slug = (item as { slug?: unknown }).slug;
+      if (typeof slug === "string" && slug.trim()) slugs.push(slug.trim());
+    }
+    ExclusiveStartKey = result.LastEvaluatedKey as Record<string, unknown> | undefined;
+  } while (ExclusiveStartKey);
+  return slugs;
+}
+
+async function categoryPartitions(): Promise<string[]> {
+  const nowMs = Date.now();
+  let stored = categorySlugCache?.slugs ?? [];
+  if (!categorySlugCache || nowMs - categorySlugCache.at >= PRODUCT_LIST_CACHE_TTL_MS) {
+    stored = await queryStoredCategorySlugs();
+    categorySlugCache = { at: nowMs, slugs: stored };
+  }
+  return [...new Set<string>([...CATEGORY_PARTITIONS, ...stored])];
+}
+
+function belongsOnCategoryPage(product: Product, category: string): boolean {
+  if (product.categorySlug === category) return true;
+  return productInStorefrontCategory(product, category);
+}
+
 async function queryProductsByCategory(categorySlug: string): Promise<Product[]> {
   const nowMs = Date.now();
   const hit = categoryProductCache.get(categorySlug);
@@ -262,6 +323,7 @@ async function scanAllProducts(): Promise<Product[]> {
 export function invalidateProductListCache(categorySlug?: string) {
   productListCache = null;
   productGetCache.clear();
+  categorySlugCache = null;
   if (categorySlug) categoryProductCache.delete(categorySlug);
   else categoryProductCache.clear();
 }
@@ -291,13 +353,14 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
     } else if (category === "rakhi-hampers") {
       items = await queryProductsByCategory(category);
     } else {
-      const [primary, hampers] = await Promise.all([
-        queryProductsByCategory(category),
-        queryProductsByCategory("rakhi-hampers"),
-      ]);
-      const bySlug = new Map(primary.map((p) => [p.slug, p]));
-      for (const product of hampers) {
-        if (product.additionalCategorySlugs?.includes(category)) bySlug.set(product.slug, product);
+      const primary = await queryProductsByCategory(category);
+      const bySlug = new Map(primary.map((product) => [product.slug, product]));
+      const partitions = (await categoryPartitions()).filter((slug) => slug !== category);
+      const others = await Promise.all(partitions.map((slug) => queryProductsByCategory(slug)));
+      for (const product of others.flat()) {
+        if (bySlug.has(product.slug)) continue;
+        if (!belongsOnCategoryPage(product, category)) continue;
+        bySlug.set(product.slug, product);
       }
       items = [...bySlug.values()];
     }

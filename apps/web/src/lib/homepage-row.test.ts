@@ -96,6 +96,14 @@ describe("homepage row selection", () => {
     assert.notDeepEqual(slugs(loaded.slice(0, 8)), expected);
   });
 
+  it("does not show a product on a homepage row only because of an additional category", () => {
+    const flowers = numbered("flowers", 3, "flower");
+    const cake = product("occasion-cake", "cakes", { additionalCategorySlugs: ["flowers"] });
+    const row = slugs(selectHomepageRowProducts("flowers", [cake, ...flowers]));
+    assert.equal(row.includes("occasion-cake"), false);
+    assert.deepEqual(row, flowers.map((item) => item.slug));
+  });
+
   it("keeps only primary gift hampers when a hamper and a flower lead the list", () => {
     const hamper = product("rakhi-hamper", "rakhi-hampers", {
       additionalCategorySlugs: ["gift-hampers"],

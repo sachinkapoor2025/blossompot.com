@@ -125,7 +125,7 @@ describe("gbo helpers", () => {
     );
   });
 
-  it("keeps generic flower SKUs off Birthday and Valentine listings", () => {
+  it("keeps generic flower SKUs off Birthday listings", () => {
     assert.equal(
       productInStorefrontCategory(
         { categorySlug: "flower-bouquets", additionalCategorySlugs: ["birthday-gifts"] },
@@ -139,6 +139,37 @@ describe("gbo helpers", () => {
         "birthday-gifts"
       ),
       true
+    );
+  });
+
+  it("allows an assigned bouquet or cake on Anniversary and Valentine category pages", () => {
+    assert.equal(
+      productInStorefrontCategory(
+        { categorySlug: "flower-bouquets", additionalCategorySlugs: ["anniversary-gifts"] },
+        "anniversary-gifts"
+      ),
+      true
+    );
+    assert.equal(
+      productInStorefrontCategory(
+        { categorySlug: "flower-bouquets", additionalCategorySlugs: ["valentines-day-gifts"] },
+        "valentines-day-gifts"
+      ),
+      true
+    );
+    assert.equal(
+      productInStorefrontCategory(
+        { categorySlug: "cakes", additionalCategorySlugs: ["anniversary-gifts"] },
+        "anniversary-gifts"
+      ),
+      true
+    );
+    assert.equal(
+      productInStorefrontCategory(
+        { categorySlug: "cakes", additionalCategorySlugs: ["flowers"] },
+        "anniversary-gifts"
+      ),
+      false
     );
   });
 
