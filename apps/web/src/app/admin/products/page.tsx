@@ -13,6 +13,7 @@ import {
   isFastSelling,
   productHasShippingDims,
 } from "@blossompot/shared";
+import { optionalShippingDims } from "@/lib/admin-product-dims";
 import { mergeSavedAdminProduct } from "@/lib/admin-product-row";
 import { formatMoney, paginate } from "@/lib/admin-utils";
 import { TableControls } from "@/components/admin/TableControls";
@@ -112,32 +113,19 @@ export default function AdminProductsPage() {
     setEditing(null);
   };
 
-  const parseDim = (value: string, label: string): number | null => {
-    const n = parseFloat(value);
-    if (!Number.isFinite(n) || n <= 0) {
-      setMessage(`${label} is required and must be greater than 0.`);
-      return null;
-    }
-    return n;
-  };
-
-  const shippingDimsPayload = () => {
-    const weightOz = parseDim(form.weightOz, "Weight (oz)");
-    if (weightOz == null) return null;
-    const lengthIn = parseDim(form.lengthIn, "Length (in)");
-    if (lengthIn == null) return null;
-    const widthIn = parseDim(form.widthIn, "Width (in)");
-    if (widthIn == null) return null;
-    const heightIn = parseDim(form.heightIn, "Height (in)");
-    if (heightIn == null) return null;
-    return { weightOz, lengthIn, widthIn, heightIn };
-  };
-
   const saveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editing) return;
-    const dims = shippingDimsPayload();
-    if (!dims) return;
+    const dims = optionalShippingDims({
+      weightOz: form.weightOz,
+      lengthIn: form.lengthIn,
+      widthIn: form.widthIn,
+      heightIn: form.heightIn,
+    });
+    if (!dims.ok) {
+      setMessage(dims.message);
+      return;
+    }
     try {
       const saved = await apiClient<{ product: Product }>(`/products/${editing.slug}`, {
         method: "PUT",
@@ -152,7 +140,7 @@ export default function AdminProductsPage() {
           sku: form.sku || undefined,
           tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
           published: form.published,
-          ...dims,
+          ...dims.dims,
         }),
       });
       setMessage(`Product "${form.name}" updated.`);
@@ -449,47 +437,39 @@ export default function AdminProductsPage() {
         </label>
       </div>
       <div>
-        <p className="text-sm font-medium text-slate-700 mb-2">Shipping dimensions (required)</p>
+        <p className="text-sm font-medium text-slate-700 mb-2">Shipping dimensions</p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <input
-            placeholder="Weight (oz) *"
+            placeholder="Weight (oz)"
             type="number"
-            step="0.1"
-            min="0.1"
+            step="any"
             value={form.weightOz}
             onChange={(e) => setForm({ ...form, weightOz: e.target.value })}
             className="border rounded-lg px-3 py-2"
-            required
           />
           <input
-            placeholder="Length (in) *"
+            placeholder="Length (in)"
             type="number"
-            step="0.1"
-            min="0.1"
+            step="any"
             value={form.lengthIn}
             onChange={(e) => setForm({ ...form, lengthIn: e.target.value })}
             className="border rounded-lg px-3 py-2"
-            required
           />
           <input
-            placeholder="Width (in) *"
+            placeholder="Width (in)"
             type="number"
-            step="0.1"
-            min="0.1"
+            step="any"
             value={form.widthIn}
             onChange={(e) => setForm({ ...form, widthIn: e.target.value })}
             className="border rounded-lg px-3 py-2"
-            required
           />
           <input
-            placeholder="Height (in) *"
+            placeholder="Height (in)"
             type="number"
-            step="0.1"
-            min="0.1"
+            step="any"
             value={form.heightIn}
             onChange={(e) => setForm({ ...form, heightIn: e.target.value })}
             className="border rounded-lg px-3 py-2"
-            required
           />
         </div>
         <p className="text-xs text-slate-500 mt-1">Used for USPS rate quotes and label purchase.</p>
