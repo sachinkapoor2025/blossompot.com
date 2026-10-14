@@ -42,7 +42,7 @@ import { getAuth, requireAdmin } from "../lib/auth";
 import { withResolvedProductImages, resolveProductImageUrl } from "../lib/images";
 import { syncInventoryAlertState } from "../lib/inventory";
 import { ensureProductInDb } from "../lib/ensure-product";
-import { slugsMarkedUnpublished, readProductPublication } from "../lib/product-publication";
+import { readProductPublication, slugsMarkedUnpublished, storedPublishedBySlug } from "../lib/product-publication";
 import { getBundledUsarakhiProduct, listBundledCatalogProducts, persistMissingBundledCatalogProducts } from "../lib/blossompot-catalog";
 import { getBundledOrangeCountyProduct } from "../lib/orange-county-catalog";
 
@@ -605,6 +605,20 @@ export async function listAdminProducts(event: APIGatewayProxyEventV2) {
   } else if (sampleFilter === "false" || sampleFilter === "real") {
     items = items.filter((p) => !isSampleCatalogProduct(p));
   }
+
+  // The scan cache can be five minutes old on another Lambda. Refresh only `published`.
+  const publishedNow = await storedPublishedBySlug([...dynamoSlugs]);
+  items = items.map((item) => {
+    if (!publishedNow.has(item.slug)) return item;
+    const published = publishedNow.get(item.slug);
+    if (published === undefined) {
+      const next = { ...item };
+      delete (next as { published?: boolean }).published;
+      return next;
+    }
+    if (item.published === published) return item;
+    return { ...item, published };
+  });
 
   return ok({
     products: items.map(withResolvedProductImages),

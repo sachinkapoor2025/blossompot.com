@@ -35,13 +35,51 @@ async function readStoredPublication(slug: string): Promise<StoredPublication> {
   };
 }
 
+const PUBLICATION_READ_CHUNK = 25;
+
+async function readPublishedFlag(slug: string): Promise<{ slug: string; published?: boolean } | null> {
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: PRODUCTS_TABLE,
+      Key: { PK: productKeys.pk(slug), SK: productKeys.sk() },
+      ProjectionExpression: "published, slug",
+      ConsistentRead: true,
+    })
+  );
+  const item = result.Item as { published?: boolean; slug?: string } | undefined;
+  if (!item) return null;
+  const published = typeof item.published === "boolean" ? item.published : undefined;
+  return {
+    slug: typeof item.slug === "string" && item.slug ? item.slug : slug,
+    ...(published === undefined ? {} : { published }),
+  };
+}
+
+/**
+ * Current `published` flag for stored rows.
+ * A missing attribute is `undefined` so callers keep the schema default.
+ * Rows that are not in the table are omitted.
+ */
+export async function storedPublishedBySlug(slugs: readonly string[]): Promise<Map<string, boolean | undefined>> {
+  const unique = [...new Set(slugs.map((slug) => slug.trim()).filter(Boolean))];
+  const flags = new Map<string, boolean | undefined>();
+  for (let index = 0; index < unique.length; index += PUBLICATION_READ_CHUNK) {
+    const slice = unique.slice(index, index + PUBLICATION_READ_CHUNK);
+    const rows = await Promise.all(slice.map((slug) => readPublishedFlag(slug)));
+    for (const row of rows) {
+      if (!row) continue;
+      flags.set(row.slug, row.published);
+    }
+  }
+  return flags;
+}
+
 /** Slugs whose current catalog row is unpublished. Missing rows are not included. */
 export async function slugsMarkedUnpublished(slugs: readonly string[]): Promise<Set<string>> {
   const unique = [...new Set(slugs.map((slug) => slug.trim()).filter(Boolean))];
   const hidden = new Set<string>();
-  const chunkSize = 25;
-  for (let index = 0; index < unique.length; index += chunkSize) {
-    const slice = unique.slice(index, index + chunkSize);
+  for (let index = 0; index < unique.length; index += PUBLICATION_READ_CHUNK) {
+    const slice = unique.slice(index, index + PUBLICATION_READ_CHUNK);
     const rows = await Promise.all(slice.map((slug) => readStoredPublication(slug)));
     for (const row of rows) {
       if (row.unpublished) hidden.add(row.slug);

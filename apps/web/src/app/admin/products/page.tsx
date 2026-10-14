@@ -13,6 +13,7 @@ import {
   isFastSelling,
   productHasShippingDims,
 } from "@blossompot/shared";
+import { mergeSavedAdminProduct } from "@/lib/admin-product-row";
 import { formatMoney, paginate } from "@/lib/admin-utils";
 import { TableControls } from "@/components/admin/TableControls";
 
@@ -55,7 +56,7 @@ export default function AdminProductsPage() {
     setLoading(true);
     const qs =
       sampleFilter === "all" ? "" : `?sample=${sampleFilter === "sample" ? "true" : "false"}`;
-    Promise.all([
+    return Promise.all([
       apiClient<{ products: Product[]; meta?: { sampleCount: number; realCount: number } }>(
         `/admin/products${qs}`
       ),
@@ -138,7 +139,7 @@ export default function AdminProductsPage() {
     const dims = shippingDimsPayload();
     if (!dims) return;
     try {
-      await apiClient(`/products/${editing.slug}`, {
+      const saved = await apiClient<{ product: Product }>(`/products/${editing.slug}`, {
         method: "PUT",
         body: JSON.stringify({
           name: form.name,
@@ -156,8 +157,11 @@ export default function AdminProductsPage() {
       });
       setMessage(`Product "${form.name}" updated.`);
       resetForm();
-      load();
       setTab("list");
+      setProducts((current) => mergeSavedAdminProduct(current, saved.product));
+      void load().finally(() => {
+        setProducts((current) => mergeSavedAdminProduct(current, saved.product));
+      });
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Update failed");
     }
@@ -196,12 +200,15 @@ export default function AdminProductsPage() {
       return;
     }
     try {
-      await apiClient(`/products/${slug}`, {
+      const saved = await apiClient<{ product: Product }>(`/products/${slug}`, {
         method: "PUT",
         body: JSON.stringify({ inventory: Math.floor(inventory) }),
       });
       setMessage(`Stock updated for ${slug}.`);
-      load();
+      setProducts((current) => mergeSavedAdminProduct(current, saved.product));
+      void load().finally(() => {
+        setProducts((current) => mergeSavedAdminProduct(current, saved.product));
+      });
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Stock update failed");
     }
