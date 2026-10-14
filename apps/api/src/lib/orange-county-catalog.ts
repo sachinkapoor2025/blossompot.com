@@ -11,8 +11,9 @@ import {
   productKeys,
   metaDescription,
 } from "@blossompot/shared";
-import { insertCatalogProduct, isTransactionConflict } from "./catalog-sku-write";
+import { insertCatalogProduct, isTransactionConflict, transactCatalogItems } from "./catalog-sku-write";
 import { docClient, PRODUCTS_TABLE, now } from "./db";
+import { isStoredProductUnpublished } from "./product-publication";
 import catalogJson from "../data/orange-county-hampers.json";
 
 type CatalogProduct = {
@@ -41,6 +42,18 @@ type CatalogProduct = {
 
 const products = (catalogJson as { products: CatalogProduct[] }).products ?? [];
 const bySlug = new Map(products.map((p) => [p.slug, p]));
+
+/** Allows `published = true` only while the row is still missing the flag or is not exactly false. */
+const PUBLISHED_STILL_ELIGIBLE = "(attribute_not_exists(published) OR published = :pub)";
+
+function orangeCountyRefresh(keepUnpublished: boolean, values: Record<string, unknown>) {
+  return {
+    UpdateExpression: keepUnpublished
+      ? "SET inventory = :inv, vendorSlug = :vs, updatedAt = :u, images = :images, description = :description, seoTitle = :seoTitle, seoDescription = :seoDescription, tags = :tags"
+      : "SET inventory = :inv, vendorSlug = :vs, updatedAt = :u, published = :pub, images = :images, description = :description, seoTitle = :seoTitle, seoDescription = :seoDescription, tags = :tags",
+    ExpressionAttributeValues: values,
+  };
+}
 
 export function getBundledOrangeCountyProduct(slug: string): CatalogProduct | undefined {
   return bySlug.get(slug);
@@ -103,37 +116,99 @@ export async function ensureOrangeCountyProductInDb(slug: string): Promise<Recor
   if (existing.Item) {
     const inv = Number(existing.Item.inventory ?? 0);
     const images = bundled.images ?? [];
-    await docClient.send(
-      new UpdateCommand({
-        TableName: PRODUCTS_TABLE,
-        Key: key,
-        UpdateExpression:
-          "SET inventory = :inv, vendorSlug = :vs, updatedAt = :u, published = :pub, images = :images, description = :description, seoTitle = :seoTitle, seoDescription = :seoDescription, tags = :tags",
-        ExpressionAttributeValues: {
-          ":inv": Math.max(inv, ORANGE_COUNTY_PRODUCT_INVENTORY),
-          ":vs": VENDOR_ORANGE_COUNTY,
-          ":u": ts,
-          ":pub": true,
-          ":images": images,
-          ":description": bundled.description,
-          ":seoTitle": bundled.seoTitle,
-          ":seoDescription": bundled.seoDescription,
-          ":tags": bundled.tags ?? ["rakhi-hamper", "gift-hamper", "raksha-bandhan"],
-        },
-      })
-    );
-    return {
+    const tags = bundled.tags ?? ["rakhi-hamper", "gift-hamper", "raksha-bandhan"];
+    const inventory = Math.max(inv, ORANGE_COUNTY_PRODUCT_INVENTORY);
+    // An unpublished catalog row stays unpublished. A missing flag still refreshes as published.
+    const keepUnpublished = isStoredProductUnpublished(existing.Item as { published?: boolean });
+    const values: Record<string, unknown> = {
+      ":inv": inventory,
+      ":vs": VENDOR_ORANGE_COUNTY,
+      ":u": ts,
+      ":images": images,
+      ":description": bundled.description,
+      ":seoTitle": bundled.seoTitle,
+      ":seoDescription": bundled.seoDescription,
+      ":tags": tags,
+    };
+    if (!keepUnpublished) values[":pub"] = true;
+    const refreshed = {
       ...existing.Item,
-      inventory: Math.max(inv, ORANGE_COUNTY_PRODUCT_INVENTORY),
+      inventory,
       vendorSlug: VENDOR_ORANGE_COUNTY,
-      published: true,
+      published: keepUnpublished ? false : true,
       updatedAt: ts,
       images,
       description: bundled.description,
       seoTitle: bundled.seoTitle,
       seoDescription: bundled.seoDescription,
-      tags: bundled.tags ?? ["rakhi-hamper", "gift-hamper", "raksha-bandhan"],
+      tags,
     };
+    if (keepUnpublished) {
+      await docClient.send(
+        new UpdateCommand({
+          TableName: PRODUCTS_TABLE,
+          Key: key,
+          ...orangeCountyRefresh(true, values),
+        })
+      );
+      return refreshed;
+    }
+
+    // Setting published true must fail if an unpublish landed after the read.
+    const publishing = orangeCountyRefresh(false, values);
+    try {
+      await transactCatalogItems([
+        {
+          Update: {
+            TableName: PRODUCTS_TABLE,
+            Key: key,
+            ...publishing,
+            ConditionExpression: PUBLISHED_STILL_ELIGIBLE,
+          },
+        },
+      ]);
+    } catch (err) {
+      if (!isTransactionConflict(err)) throw err;
+      const current = await docClient.send(new GetCommand({ TableName: PRODUCTS_TABLE, Key: key }));
+      if (!current.Item) throw err;
+      const unpublishedNow = isStoredProductUnpublished(current.Item as { published?: boolean });
+      const { ":pub": _published, ...safeValues } = values;
+      try {
+        if (unpublishedNow) {
+          await docClient.send(
+            new UpdateCommand({
+              TableName: PRODUCTS_TABLE,
+              Key: key,
+              ...orangeCountyRefresh(true, safeValues),
+            })
+          );
+        } else {
+          await transactCatalogItems([
+            {
+              Update: {
+                TableName: PRODUCTS_TABLE,
+                Key: key,
+                ...publishing,
+                ConditionExpression: `attribute_exists(PK) AND ${PUBLISHED_STILL_ELIGIBLE}`,
+              },
+            },
+          ]);
+        }
+      } catch (retryErr) {
+        if (!isTransactionConflict(retryErr)) throw retryErr;
+        await docClient.send(
+          new UpdateCommand({
+            TableName: PRODUCTS_TABLE,
+            Key: key,
+            ...orangeCountyRefresh(true, safeValues),
+          })
+        );
+      }
+      const fresh = await docClient.send(new GetCommand({ TableName: PRODUCTS_TABLE, Key: key }));
+      if (!fresh.Item) throw err;
+      return fresh.Item as Record<string, unknown>;
+    }
+    return refreshed;
   }
 
   const categorySlug = bundled.categorySlug || ORANGE_COUNTY_CATEGORY_SLUG;
