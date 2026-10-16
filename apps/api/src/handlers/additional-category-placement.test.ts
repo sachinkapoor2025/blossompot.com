@@ -144,6 +144,61 @@ describe("category pages include additional category assignments", { concurrency
     assert.equal(hampers.includes("extra-flower-on-hampers"), false);
 
     const birthday = slugsOf(resultOf(await categoryList("birthday-gifts")).body);
-    assert.equal(birthday.includes("extra-birthday-bouquet"), false);
+    assert.equal(birthday.filter((slug) => slug === "extra-birthday-bouquet").length, 1);
+  });
+
+  it("lists assigned birthday flowers, bouquets, and cakes once and keeps the other filters", async () => {
+    await putProduct(row("birthday-flower", "flowers", { additionalCategorySlugs: ["birthday-gifts"] }));
+    await putProduct(row("birthday-bouquet", "flower-bouquets", { additionalCategorySlugs: ["birthday-gifts"] }));
+    await putProduct(row("birthday-cake", "cakes", { additionalCategorySlugs: ["birthday-gifts"] }));
+    await putProduct(row("plain-flower", "flowers"));
+    await putProduct(row("plain-bouquet", "flower-bouquets", { additionalCategorySlugs: ["flowers"] }));
+    await putProduct(
+      row("unpublished-birthday-flower", "flowers", {
+        additionalCategorySlugs: ["birthday-gifts"],
+        published: false,
+      })
+    );
+    await putProduct(
+      row("sold-out-birthday-cake", "cakes", {
+        additionalCategorySlugs: ["birthday-gifts"],
+        inventory: 0,
+      })
+    );
+    await putProduct(row("mothers-flower", "flowers", { additionalCategorySlugs: ["mothers-day-gifts"] }));
+    await putProduct(row("wedding-bouquet", "flower-bouquets", { additionalCategorySlugs: ["wedding-gifts"] }));
+    await putProduct(row("mothers-cake", "cakes", { additionalCategorySlugs: ["mothers-day-gifts"] }));
+    invalidateProductListCache();
+
+    const birthday = slugsOf(resultOf(await categoryList("birthday-gifts")).body);
+    for (const slug of ["birthday-flower", "birthday-bouquet", "birthday-cake", "extra-birthday-bouquet"]) {
+      assert.equal(birthday.filter((value) => value === slug).length, 1, slug);
+    }
+    for (const slug of [
+      "plain-flower",
+      "plain-bouquet",
+      "unpublished-birthday-flower",
+      "sold-out-birthday-cake",
+      "mothers-flower",
+      "wedding-bouquet",
+      "extra-unrelated-tulip",
+    ]) {
+      assert.equal(birthday.includes(slug), false, slug);
+    }
+
+    const mothers = slugsOf(resultOf(await categoryList("mothers-day-gifts")).body);
+    assert.equal(mothers.includes("mothers-flower"), false);
+    assert.equal(mothers.filter((slug) => slug === "mothers-cake").length, 1);
+
+    const wedding = slugsOf(resultOf(await categoryList("wedding-gifts")).body);
+    assert.equal(wedding.includes("wedding-bouquet"), false);
+
+    const anniversary = slugsOf(resultOf(await categoryList("anniversary-gifts")).body);
+    assert.equal(anniversary.filter((slug) => slug === "extra-anniversary-bouquet").length, 1);
+    assert.equal(anniversary.includes("birthday-flower"), false);
+
+    const valentines = slugsOf(resultOf(await categoryList("valentines-day-gifts")).body);
+    assert.equal(valentines.filter((slug) => slug === "extra-valentine-bouquet").length, 1);
+    assert.equal(valentines.includes("birthday-bouquet"), false);
   });
 });

@@ -125,12 +125,34 @@ describe("gbo helpers", () => {
     );
   });
 
-  it("keeps generic flower SKUs off Birthday listings", () => {
+  it("shows an assigned flower, bouquet, or cake on Birthday and keeps unassigned florals off", () => {
+    assert.equal(
+      productInStorefrontCategory(
+        { categorySlug: "flowers", additionalCategorySlugs: ["birthday-gifts"] },
+        "birthday-gifts"
+      ),
+      true
+    );
     assert.equal(
       productInStorefrontCategory(
         { categorySlug: "flower-bouquets", additionalCategorySlugs: ["birthday-gifts"] },
         "birthday-gifts"
       ),
+      true
+    );
+    assert.equal(
+      productInStorefrontCategory(
+        { categorySlug: "cakes", additionalCategorySlugs: ["birthday-gifts"] },
+        "birthday-gifts"
+      ),
+      true
+    );
+    assert.equal(
+      productInStorefrontCategory({ categorySlug: "flowers" }, "birthday-gifts"),
+      false
+    );
+    assert.equal(
+      productInStorefrontCategory({ categorySlug: "flower-bouquets", additionalCategorySlugs: ["flowers"] }, "birthday-gifts"),
       false
     );
     assert.equal(
@@ -140,6 +162,32 @@ describe("gbo helpers", () => {
       ),
       true
     );
+  });
+
+  it("keeps generic flowers and bouquets off Mother's Day and Wedding", () => {
+    for (const occasion of ["mothers-day-gifts", "wedding-gifts"]) {
+      assert.equal(
+        productInStorefrontCategory(
+          { categorySlug: "flowers", additionalCategorySlugs: [occasion] },
+          occasion
+        ),
+        false
+      );
+      assert.equal(
+        productInStorefrontCategory(
+          { categorySlug: "flower-bouquets", additionalCategorySlugs: [occasion] },
+          occasion
+        ),
+        false
+      );
+      assert.equal(
+        productInStorefrontCategory(
+          { categorySlug: "cakes", additionalCategorySlugs: [occasion] },
+          occasion
+        ),
+        true
+      );
+    }
   });
 
   it("allows an assigned bouquet or cake on Anniversary and Valentine category pages", () => {

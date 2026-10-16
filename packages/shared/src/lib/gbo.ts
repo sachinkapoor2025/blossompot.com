@@ -211,11 +211,10 @@ export function mapGboGiftStorefrontCategories(gift: {
 
 /**
  * Occasion categories where a generic flower or bouquet must not appear only
- * because GBO tagging added that slug. Anniversary and Valentine's are not in
- * this set: an explicit additional assignment belongs on those category pages.
+ * because tagging added that slug. Birthday, Anniversary, and Valentine's are
+ * not in this set: an explicit additional assignment belongs on those pages.
  */
-const OCCASION_CATEGORY_SLUGS = new Set([
-  "birthday-gifts",
+const FLORAL_EXCLUDED_OCCASION_SLUGS = new Set([
   "mothers-day-gifts",
   "wedding-gifts",
 ]);
@@ -230,7 +229,7 @@ export function productInStorefrontCategory(
   if (!slug) return false;
   if (product.categorySlug === slug) return true;
   if (!product.additionalCategorySlugs?.includes(slug)) return false;
-  if (OCCASION_CATEGORY_SLUGS.has(slug) && GENERIC_FLORAL_PRIMARY.has(product.categorySlug ?? "")) {
+  if (FLORAL_EXCLUDED_OCCASION_SLUGS.has(slug) && GENERIC_FLORAL_PRIMARY.has(product.categorySlug ?? "")) {
     return false;
   }
   return true;
