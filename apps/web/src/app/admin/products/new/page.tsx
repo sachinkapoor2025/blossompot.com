@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { CATALOG_INTEGRATION_TYPES, CATALOG_STORAGE_LABEL, type CatalogIntegrationType } from "@blossompot/shared";
+import { CATALOG_INTEGRATION_TYPES, CATALOG_STORAGE_LABEL, assignProductCategories, type CatalogIntegrationType } from "@blossompot/shared";
+import { ProductCategoryFields } from "@/components/admin/ProductCategoryFields";
 import * as XLSX from "xlsx";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
@@ -60,6 +61,7 @@ export default function AddProductPage() {
   const [preview, setPreview] = useState<ImportPreview | null>(null);
   const [importRows, setImportRows] = useState<Record<string, unknown>[]>([]);
   const [enabledCountries, setEnabledCountries] = useState<Array<{ countryCode: string; countryName: string }>>([]);
+  const [categories, setCategories] = useState<Array<{ slug: string; name: string }>>([]);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [manual, setManual] = useState({
     name: "",
@@ -68,6 +70,7 @@ export default function AddProductPage() {
     price: "",
     currency: "USD",
     categorySlug: "",
+    additionalCategorySlugs: [] as string[],
     inventory: "",
     published: false,
     imageUrl: "",
@@ -85,10 +88,12 @@ export default function AddProductPage() {
 
   const load = useCallback(async () => {
     if (!token) return;
-    const [data, countries] = await Promise.all([
+    const [data, countries, categoryData] = await Promise.all([
       api<{ vendors: Vendor[] }>("/admin/catalog-vendors", { token }),
       api<{ countries: Array<{ countryCode: string; countryName?: string; enabled: boolean }> }>("/admin/catalog-countries", { token }),
+      api<{ categories: Array<{ slug: string; name: string }> }>("/categories", { token }),
     ]);
+    setCategories(categoryData.categories);
     const active = data.vendors.filter((vendor) => !vendor.trashedAt);
     setVendorCount(data.vendors.length);
     setVendors(active);
@@ -198,6 +203,15 @@ export default function AddProductPage() {
   async function createManual(event: FormEvent) {
     event.preventDefault();
     const inventory = manual.inventory.trim() === "" ? undefined : Number(manual.inventory);
+    const assigned = assignProductCategories({
+      categorySlug: manual.categorySlug,
+      additionalCategorySlugs: manual.additionalCategorySlugs,
+      knownSlugs: new Set(categories.map((category) => category.slug)),
+    });
+    if (!assigned.ok) {
+      setError(assigned.error);
+      return;
+    }
     await previewRows([
       {
         name: manual.name,
@@ -205,7 +219,8 @@ export default function AddProductPage() {
         sku: manual.sku,
         price: Number(manual.price),
         currency: manual.currency,
-        categorySlug: manual.categorySlug,
+        categorySlug: assigned.categorySlug,
+        additionalCategorySlugs: assigned.additionalCategorySlugs ?? [],
         ...(inventory != null ? { inventory } : {}),
         published: manual.published,
         ...(manual.imageUrl ? { imageUrls: manual.imageUrl } : {}),
@@ -265,7 +280,7 @@ export default function AddProductPage() {
       setMessage(`Imported ${result.created} unpublished product${result.created === 1 ? "" : "s"} for ${selected.vendorName}.`);
       setPreview(null);
       setImportRows([]);
-      setManual({ name: "", sku: "", description: "", price: "", currency: "USD", categorySlug: "", inventory: "", published: false, imageUrl: "" });
+      setManual({ name: "", sku: "", description: "", price: "", currency: "USD", categorySlug: "", additionalCategorySlugs: [], inventory: "", published: false, imageUrl: "" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Import was not saved");
     } finally {
@@ -435,7 +450,13 @@ export default function AddProductPage() {
               <input required placeholder="SKU" value={manual.sku} onChange={(event) => setManual({ ...manual, sku: event.target.value })} className="w-full rounded-lg border px-3 py-2" />
               <textarea required placeholder="Description" value={manual.description} onChange={(event) => setManual({ ...manual, description: event.target.value })} className="w-full rounded-lg border px-3 py-2" />
               <input required placeholder="Price" value={manual.price} onChange={(event) => setManual({ ...manual, price: event.target.value })} className="w-full rounded-lg border px-3 py-2" />
-              <input required placeholder="Category slug" value={manual.categorySlug} onChange={(event) => setManual({ ...manual, categorySlug: event.target.value })} className="w-full rounded-lg border px-3 py-2" />
+              <ProductCategoryFields
+                categories={categories}
+                categorySlug={manual.categorySlug}
+                additionalCategorySlugs={manual.additionalCategorySlugs}
+                onCategorySlug={(categorySlug) => setManual({ ...manual, categorySlug })}
+                onAdditionalCategorySlugs={(additionalCategorySlugs) => setManual({ ...manual, additionalCategorySlugs })}
+              />
               <input placeholder={selected.defaultInventory != null ? `Inventory (default ${selected.defaultInventory})` : "Inventory"} value={manual.inventory} onChange={(event) => setManual({ ...manual, inventory: event.target.value })} className="w-full rounded-lg border px-3 py-2" />
               <input required placeholder="Image URL" value={manual.imageUrl} onChange={(event) => setManual({ ...manual, imageUrl: event.target.value })} className="w-full rounded-lg border px-3 py-2" />
               <label className="flex items-center gap-2 text-sm">

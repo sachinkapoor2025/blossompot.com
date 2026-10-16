@@ -4,13 +4,25 @@
  * Countries without an entry use the neutral article.
  */
 
-export type CountrySeoPage = "home" | "flowers" | "delivery-locations";
+export type CountrySeoPage =
+  | "home"
+  | "flowers"
+  | "delivery-locations"
+  | "bouquets"
+  | "cakes"
+  | "birthday-gifts"
+  | "anniversary-gifts"
+  | "valentines-day-gifts"
+  | "hampers"
+  | "combos";
 
 export type SeoLink = { label: string; href: string };
 
 export type SeoSection = {
   heading: string;
   paragraphs: string[];
+  /** Paragraphs that follow the section links. */
+  paragraphsAfter?: string[];
   items?: { title: string; text: string; href?: string }[];
   links?: SeoLink[];
 };
@@ -27,7 +39,13 @@ export type CountrySeoContent = {
   sections: SeoSection[];
   stepsHeading: string;
   steps: { title: string; text: string }[];
+  /** Joiner between a step title and its text. Defaults to an em dash. */
+  stepSeparator?: string;
   faqs: { q: string; a: string }[];
+  /** Visible FAQ heading. Defaults to the existing question label. */
+  faqHeading?: string;
+  /** Place the FAQ block before the closing section. */
+  faqBeforeClosing?: boolean;
   closing: { heading: string; paragraphs: string[] };
 };
 
@@ -277,116 +295,183 @@ const usaFlowers: CountrySeoContent = {
   countryCode: "US",
   page: "flowers",
   availability: "approved",
-  title: "Send Flowers to USA Online | Flower Delivery USA – BlossomPot",
+  title: "Send Flowers to USA Online | Flower Delivery – BlossomPot",
   description:
-    "Send flowers to the USA with BlossomPot. Shop roses, mixed bouquets, orchids, and birthday flowers for loved ones. Check delivery availability by ZIP code.",
-  heading: "Send Flowers to the USA",
+    "Send flowers to the USA with BlossomPot. Explore roses, lilies, orchids, and bouquets for birthdays, anniversaries, and special occasions. Check delivery options online.",
+  heading: "Send Flowers to the USA Online with BlossomPot",
   intro: [
-    "Sending flowers across the United States is simple with BlossomPot. Shop online from wherever you are and enter the recipient’s US address to check product availability and delivery options. Delivery timing can vary by ZIP code, flower arrangement, order time, and local availability. Same-day delivery may be available for eligible products in selected areas; check the product page and checkout details before ordering.",
+    "Make every occasion special with beautiful flower delivery across the United States. With BlossomPot, you can explore stunning bouquets, fresh roses, elegant lilies, orchids, and mixed floral arrangements for your loved ones. Whether you are celebrating a birthday, anniversary, or special milestone, find flowers that help you express your feelings from anywhere in the world.",
+    "Choose your favourite floral arrangement, enter the recipient’s US delivery address, and check the available delivery options at checkout. Delivery availability and timing depend on the destination, selected arrangement, order time, and local florist availability.",
   ],
   callsToAction: [{ label: "Shop Flowers", href: "/flowers-to-usa" }],
   sections: [
     {
-      heading: "Shop Flowers for Every Occasion",
+      heading: "Shop Flowers by Occasion",
       paragraphs: [],
       items: [
         {
           title: "Birthday Flowers",
-          text: "Celebrate their special day with bright bouquets, colourful blooms, and elegant floral gifts.",
+          text: "Make birthdays brighter with colourful flower bouquets, elegant roses, lilies, and cheerful mixed arrangements. Surprise friends, family members, or your partner with a thoughtful floral gift delivered to their doorstep in the USA.",
         },
         {
           title: "Anniversary Flowers",
-          text: "Share your love with classic red roses, romantic arrangements, and flowers chosen for a meaningful milestone.",
+          text: "Celebrate love and togetherness with romantic red roses, premium bouquets, and elegant floral arrangements. Choose a beautiful anniversary flower gift to make your special moments even more memorable.",
         },
         {
           title: "Thank-You Flowers",
-          text: "Show appreciation with cheerful mixed bouquets and thoughtful floral arrangements.",
+          text: "Express gratitude with fresh-looking mixed bouquets, vibrant seasonal blooms, and elegant floral gifts. Send thank-you flowers to friends, family, colleagues, or anyone who deserves a thoughtful surprise.",
         },
         {
           title: "Congratulations Flowers",
-          text: "Celebrate a new job, graduation, promotion, or another exciting achievement with a beautiful bouquet.",
+          text: "Celebrate achievements and exciting milestones with beautiful flowers. From graduations and new jobs to promotions and personal accomplishments, choose an arrangement that makes every success feel special.",
         },
         {
           title: "Just-Because Flowers",
-          text: "Send an unexpected surprise to brighten an ordinary day and remind someone that they are loved.",
+          text: "You don't need a special occasion to make someone smile. Send a surprise bouquet to brighten an ordinary day and remind your loved ones that you are thinking of them.",
         },
         {
-          title: "Sympathy and Thoughtful Flowers",
-          text: "Choose a gentle, elegant arrangement to express care and support during a difficult time, where available.",
+          title: "Sympathy Flowers",
+          text: "Express your care, comfort, and support with graceful floral arrangements. Choose appropriate sympathy flowers to share your condolences with friends and family during difficult times, subject to local availability.",
+        },
+      ],
+    },
+    {
+      heading: "Explore Popular Flowers Online",
+      paragraphs: [],
+      items: [
+        {
+          title: "Roses",
+          text: "Classic roses are a timeless choice for expressing love, appreciation, and affection. Explore romantic red roses and other colours for birthdays, anniversaries, and meaningful celebrations.",
+        },
+        {
+          title: "Lilies",
+          text: "Elegant lilies bring beauty and sophistication to floral gifts. Choose lily arrangements for special occasions, thoughtful gestures, and memorable celebrations.",
+        },
+        {
+          title: "Orchids",
+          text: "Send an elegant floral gift with beautiful orchids. Their distinctive appearance makes them a lovely choice for celebrations, appreciation, and special milestones.",
+        },
+        {
+          title: "Mixed Flower Bouquets",
+          text: "Brighten someone's day with a colourful combination of flowers. Mixed bouquets offer a cheerful way to celebrate birthdays, send congratulations, or surprise someone just because.",
         },
       ],
     },
     {
       heading: "Flower Delivery Across the USA",
       paragraphs: [
-        "Popular destinations include New York, Los Angeles, Chicago, Houston, Dallas, San Francisco, Miami, Seattle, Boston, Atlanta, Austin, and San Diego. Availability should always be confirmed using the recipient’s complete delivery address.",
+        "Send flowers to loved ones across the United States with BlossomPot. Browse available arrangements and check delivery options for the recipient's location before placing your order.",
       ],
-      links: USA_PLACE_LINKS.filter((link) => link.label !== "California" && link.label !== "Texas" && link.label !== "Florida" && link.label !== "New Jersey"),
+      links: [
+        { label: "Flowers to New York", href: "/gifts-to-new-york" },
+        { label: "Flowers to Los Angeles", href: "/gifts-to-los-angeles" },
+        { label: "Flowers to San Francisco", href: "/gifts-to-san-francisco" },
+        { label: "Flowers to Chicago", href: "/gifts-to-chicago" },
+        { label: "Flowers to Houston", href: "/gifts-to-houston" },
+        { label: "Flowers to Dallas", href: "/gifts-to-dallas" },
+        { label: "Flowers to Austin", href: "/gifts-to-austin" },
+        { label: "Flowers to Atlanta", href: "/gifts-to-atlanta" },
+        { label: "Flowers to Miami", href: "/gifts-to-miami" },
+        { label: "Flowers to Seattle", href: "/gifts-to-seattle" },
+        { label: "Flowers to Boston", href: "/gifts-to-boston" },
+      ],
+      paragraphsAfter: [
+        "Enter the complete recipient address, including the ZIP code, to confirm which flowers and delivery options are available in the destination area.",
+      ],
     },
     {
       heading: "Why Choose BlossomPot for Flower Delivery?",
       paragraphs: [],
       items: [
         {
-          title: "Flower styles for different moments",
-          text: "Browse roses, mixed bouquets, orchids, and other floral arrangements.",
+          title: "A Variety of Floral Arrangements",
+          text: "Explore roses, lilies, orchids, mixed bouquets, and other floral designs for different occasions and preferences.",
         },
         {
-          title: "Occasion-ready choices",
-          text: "Find flowers for birthdays, anniversaries, congratulations, thank-you messages, and everyday surprises.",
+          title: "Flowers for Every Celebration",
+          text: "Find thoughtful flower gifts for birthdays, anniversaries, congratulations, thank-you gestures, and everyday surprises.",
         },
         {
-          title: "Convenient online ordering",
-          text: "Choose a design and enter the recipient’s delivery details online.",
+          title: "Convenient Online Shopping",
+          text: "Browse available designs online, select your preferred arrangement, and provide the recipient's delivery details in a few simple steps.",
         },
         {
-          title: "Personal message option",
-          text: "Add a gift message to eligible products to make your surprise more personal.",
+          title: "Personalised Gift Messages",
+          text: "Add a personal message to eligible flower orders to make your gift more meaningful and memorable.",
         },
         {
-          title: "Delivery information at checkout",
-          text: "Review the available delivery dates and options for the destination before completing your order.",
+          title: "Clear Delivery Options",
+          text: "Check the available delivery dates, charges, and other applicable details during checkout before confirming your purchase.",
         },
         {
-          title: "Customer assistance",
-          text: "Contact BlossomPot support if you need help choosing a product or checking delivery details.",
+          title: "Helpful Customer Support",
+          text: "Get assistance with product selection, order-related questions, and delivery information through BlossomPot's available customer support channels.",
         },
       ],
     },
   ],
-  stepsHeading: "",
-  steps: [],
+  stepsHeading: "How to Order Flowers Online in the USA",
+  stepSeparator: ": ",
+  steps: [
+    {
+      title: "Explore flower arrangements",
+      text: "Browse the available bouquets and floral gifts on BlossomPot.",
+    },
+    {
+      title: "Choose your favourite flowers",
+      text: "Select an arrangement that suits the occasion and your budget.",
+    },
+    {
+      title: "Enter delivery details",
+      text: "Provide the recipient's complete US address and ZIP code.",
+    },
+    {
+      title: "Check delivery availability",
+      text: "Review the available delivery dates, charges, and options.",
+    },
+    {
+      title: "Complete your order",
+      text: "Add a gift message if available and proceed with checkout.",
+    },
+  ],
+  faqHeading: "Frequently Asked Questions",
+  faqBeforeClosing: true,
   faqs: [
     {
       q: "Can I send flowers to the USA from another country?",
-      a: "You can shop online from outside the United States and enter an eligible US delivery address at checkout. Available products and delivery options depend on the destination.",
+      a: "Yes, you can shop online from your location and enter the recipient's US address. Available products, payment methods, and delivery options will depend on BlossomPot's checkout services.",
     },
     {
-      q: "How do I check flower delivery availability?",
-      a: "Enter the recipient’s complete address, including the ZIP code, and review the delivery options shown on the product page or at checkout.",
+      q: "Does BlossomPot offer same-day flower delivery in the USA?",
+      a: "Same-day delivery may be available for eligible arrangements in selected locations. Check the product details and checkout options for the recipient's ZIP code before ordering.",
     },
     {
-      q: "Can I send flowers to New York, Los Angeles, or Chicago?",
-      a: "You can check delivery availability for these and other US destinations by entering the recipient’s address at checkout. Product selection and delivery dates may vary by location.",
+      q: "Which flowers can I send through BlossomPot?",
+      a: "Available options may include roses, lilies, orchids, mixed bouquets, and other floral arrangements. The selection depends on the destination and local availability.",
     },
     {
-      q: "Can I include a personal message with the flowers?",
-      a: "A personal message can be added to eligible products. Check the product details and checkout options when placing your order.",
+      q: "Can I send flowers for birthdays and anniversaries?",
+      a: "Yes, you can explore suitable arrangements for birthdays, anniversaries, congratulations, thank-you gifts, and other special occasions, depending on the products available.",
     },
     {
-      q: "What types of flowers can I order?",
-      a: "The collection may include roses, mixed bouquets, orchids, lilies, pastel arrangements, and seasonal floral designs. Product availability can change.",
+      q: "How can I check flower delivery availability?",
+      a: "Select your preferred arrangement and enter the recipient's complete address, including the ZIP code, wherever requested. Review the delivery information displayed on the product page or at checkout.",
     },
     {
-      q: "How early should I order flowers?",
-      a: "For a specific occasion, order in advance when possible. Available dates depend on the product, destination, and local delivery capacity.",
+      q: "Can I include a message with my flower delivery?",
+      a: "A personal gift message may be available for eligible products. Check the product page and ordering options to confirm availability.",
     },
     {
-      q: "How can I get help with my order?",
-      a: `For assistance with products or delivery details, contact BlossomPot at ${SUPPORT_EMAIL} or use the contact options shown on the website.`,
+      q: "How long does flower delivery take in the USA?",
+      a: "Delivery timing varies by destination, order time, flower availability, and the selected delivery option. Review the estimated delivery date shown during checkout before placing your order.",
     },
   ],
-  closing: { heading: "", paragraphs: [] },
+  closing: {
+    heading: "Make Every Moment Special with BlossomPot",
+    paragraphs: [
+      "From romantic roses to cheerful mixed bouquets, flowers are a thoughtful way to stay connected with the people who matter most. Explore BlossomPot's available floral arrangements, choose a bouquet for your occasion, and check delivery options to send a meaningful surprise across the USA.",
+    ],
+  },
 };
 
 const usaDeliveryLocations: CountrySeoContent = {
@@ -563,10 +648,611 @@ const usaDeliveryLocations: CountrySeoContent = {
   },
 };
 
+function bullet(title: string): { title: string; text: string } {
+  return { title, text: "" };
+}
+
+function usaCategoryArticle(
+  page: CountrySeoPage,
+  content: Pick<
+    CountrySeoContent,
+    "title" | "description" | "heading" | "intro" | "sections" | "faqHeading" | "faqs"
+  >
+): CountrySeoContent {
+  return {
+    countryCode: "US",
+    page,
+    availability: "approved",
+    callsToAction: [],
+    stepsHeading: "",
+    steps: [],
+    faqBeforeClosing: false,
+    closing: { heading: "", paragraphs: [] },
+    ...content,
+  };
+}
+
+const usaBouquets = usaCategoryArticle("bouquets", {
+  title: "Flower Bouquets Delivery to USA | Order Bouquets Online | BlossomPot",
+  description:
+    "Order signature flower bouquets for delivery in the USA. Roses, mixed and seasonal bouquets with a gift message.",
+  heading: "Flower Bouquets Delivered to the USA — Made to Impress",
+  intro: [
+    'Some gifts need a proper "wow" moment when the door opens. A hand-tied bouquet does exactly that. BlossomPot bouquets are chosen for full, generous shapes and fresh colour, so the unboxing feels as special as the occasion.',
+    "Whether it is a romantic evening, an office celebration or a surprise for your mum, you can order a bouquet online for delivery in the USA in a few minutes.",
+  ],
+  sections: [
+    {
+      heading: "Bouquet Delivery Across the USA",
+      paragraphs: [
+        "We deliver bouquets to homes and offices across the USA. In select cities, same-day delivery is available if you order before the local cut-off. Type the recipient's address at checkout to see the delivery options and dates available to them.",
+      ],
+    },
+    {
+      heading: "Bouquet Styles to Choose From",
+      paragraphs: [],
+      items: [
+        bullet("Rose bouquets, from a dozen red roses to grand statement bunches"),
+        bullet("Mixed seasonal bouquets for bright, colourful celebrations"),
+        bullet("Sunflower and yellow bouquets for happy, sunny moods"),
+        bullet("White and blush bouquets for refined, quiet occasions"),
+        bullet("Flower and wine or cake combos for bigger milestones"),
+      ],
+    },
+    {
+      heading: "Bouquet Gifting Tips",
+      paragraphs: [
+        "Keep the message short and warm. One honest sentence usually lands better than a long poem. For big milestones, pair the bouquet with a cake or a gift hamper so the surprise feels complete.",
+        "Pick the colour to match the mood: red for love, pink for affection, yellow for cheer, white for calm and respect.",
+      ],
+    },
+    {
+      heading: "Why Order Bouquets from BlossomPot",
+      paragraphs: [],
+      items: [
+        bullet("Signature bouquets, cakes and hampers on one site"),
+        bullet("Delivery windows shown clearly before payment"),
+        bullet("Gift message on most products"),
+        bullet("Secure checkout with Stripe (USD) and Razorpay (INR)"),
+        bullet("Quick help on WhatsApp and email"),
+      ],
+    },
+  ],
+  faqHeading: "Frequently Asked Questions — Bouquets to USA",
+  faqs: [
+    {
+      q: "Can I send a bouquet to the USA from India or another country?",
+      a: "Yes. Add the USA delivery address at checkout and pay in USD (Stripe) or INR (Razorpay).",
+    },
+    {
+      q: "What is the difference between a bouquet and a flower arrangement?",
+      a: "A bouquet is a hand-tied bunch of flowers, ready to be placed in a vase. An arrangement is styled in a container such as a basket or box and needs no extra work.",
+    },
+    {
+      q: "Can I get a bouquet delivered on the same day?",
+      a: "In select cities, yes, provided you place the order before the local cut-off. The checkout page shows what is available for the address you enter.",
+    },
+    {
+      q: "Can I add a message to my bouquet order?",
+      a: "Yes. Most bouquets support a personal gift message and a preferred delivery date.",
+    },
+    {
+      q: "Which bouquet is best for a first anniversary or a first date?",
+      a: "A classic red rose bouquet feels romantic without being over the top. For a first date or a new relationship, a smaller dozen-rose bouquet is a safe and sweet choice.",
+    },
+    {
+      q: "Can I combine a bouquet with a cake or a gift?",
+      a: "Yes. Browse our flower and wine combos, or add a cake or hamper to the same order for a complete surprise.",
+    },
+  ],
+});
+
+const usaCakes = usaCategoryArticle("cakes", {
+  title: "Order Cakes Online USA | Birthday & Anniversary Cake Delivery | BlossomPot",
+  description:
+    "Send cakes to the USA from BlossomPot. Chocolate, cheesecake, brownie and celebration cakes with a personal message.",
+  heading: "Order Cakes Online for Delivery in the USA",
+  intro: [
+    "A cake turns an ordinary afternoon into a celebration. If you cannot be at the party, you can still be part of it by sending a cake to the USA through BlossomPot.",
+    "Choose from chocolate cakes, cheesecakes, brownie cakes, tiramisu, cake pops and celebration cakes for birthdays, anniversaries, Valentine's Day and everything in between.",
+  ],
+  sections: [
+    {
+      heading: "Cake Delivery Across the USA",
+      paragraphs: [
+        "We deliver cakes to addresses across the USA. Same-day delivery is available in select cities when you order before the local cut-off. Type in the recipient's address at checkout to see the delivery options available for their location.",
+      ],
+    },
+    {
+      heading: "Cake Favourites",
+      paragraphs: [],
+      items: [
+        bullet("Rich chocolate cakes and brownie cakes for serious chocolate lovers"),
+        bullet("Cheesecakes in classic and assorted flavours"),
+        bullet("Birthday cakes such as strawberry funfetti and tiramisu"),
+        bullet("Cake pops and cupcakes for smaller, easy-to-share treats"),
+        bullet("Cake and flower combos for a bigger surprise"),
+      ],
+    },
+    {
+      heading: "Sweet Moments, Shared from Far Away",
+      paragraphs: [
+        "Plan a video call, ask the family to gather around the cake and cut it together. Or send one to a friend's office and watch the whole team gather in the kitchen. A cake does not need a big occasion. It just needs someone to think of the person it is for.",
+      ],
+    },
+    {
+      heading: "Why Order Cakes from BlossomPot",
+      paragraphs: [],
+      items: [
+        bullet("Cakes, flowers and gift hampers in one order"),
+        bullet("Delivery dates shown before you pay"),
+        bullet("Gift message on most products"),
+        bullet("Secure Stripe (USD) and Razorpay (INR) checkout"),
+        bullet("WhatsApp and email support"),
+      ],
+    },
+  ],
+  faqHeading: "Frequently Asked Questions — Cakes to USA",
+  faqs: [
+    {
+      q: "Can I order a cake online for someone in the USA?",
+      a: "Yes. Choose a cake, enter the recipient's USA address at checkout and pay in USD or INR.",
+    },
+    {
+      q: "Do you deliver cakes the same day?",
+      a: "Same-day cake delivery is available in select cities when ordered before the local cut-off. Checkout will show if it is available for your recipient.",
+    },
+    {
+      q: "Can I put a message on the cake?",
+      a: "Most cakes support a personal gift message, and some designer and personalised options allow a custom note. Check the product page for details.",
+    },
+    {
+      q: "Are eggless or special-diet cakes available?",
+      a: "Availability changes by product, so please check the product description or message us on WhatsApp before ordering for anyone with allergies or dietary needs.",
+    },
+    {
+      q: "Can I send a cake with flowers?",
+      a: "Yes. We have cake and rose combos, and you can add a bouquet to the same order.",
+    },
+    {
+      q: "What if the recipient is not at home?",
+      a: "Add a contact number and delivery notes at checkout so the delivery partner can reach the recipient. If anything goes wrong, contact our support team and we will help.",
+    },
+  ],
+});
+
+const usaBirthdayGifts = usaCategoryArticle("birthday-gifts", {
+  title: "Birthday Gifts to USA | Send Birthday Flowers, Cakes & Combos | BlossomPot",
+  description:
+    "Send birthday gifts to the USA online. Birthday flowers, cakes, hampers and gift sets with a personal message.",
+  heading: "Send Birthday Gifts to the USA — Make Their Day Special",
+  intro: [
+    "Missing a birthday is the worst part of living far away. A well-chosen gift fixes a lot of that. BlossomPot helps you send birthday gifts to the USA that feel thoughtful, look beautiful and arrive in time for the celebration.",
+    "Pick from birthday flowers, cakes, hampers, plant gift sets and sweet boxes, all with space for your own message.",
+  ],
+  sections: [
+    {
+      heading: "Birthday Gift Delivery in the USA",
+      paragraphs: [
+        "We deliver birthday gifts across the USA. In select cities, same-day delivery is available if you order before the local cut-off. At checkout, enter the recipient's address and choose the date you want the gift to arrive.",
+      ],
+    },
+    {
+      heading: "Birthday Gift Ideas",
+      paragraphs: [],
+      items: [
+        bullet("Birthday flower bouquets for a bright, colourful surprise"),
+        bullet("Celebration cakes with a personal note"),
+        bullet("Sweet boxes and hampers filled with treats"),
+        bullet("Succulent and plant gift sets for people who prefer something that lasts"),
+        bullet("Flower and balloon combos for a party feel"),
+      ],
+    },
+    {
+      heading: "Make the Birthday Feel Close",
+      paragraphs: [
+        'The best birthday gifts say "I know you." Think about what they actually enjoy. A chocolate lover will love a brownie cake, a plant person will enjoy a succulent set, and a classic romantic will smile at roses. Add one line in your own words and the gift becomes personal.',
+      ],
+    },
+    {
+      heading: "Why Order Birthday Gifts from BlossomPot",
+      paragraphs: [],
+      items: [
+        bullet("Flowers, cakes and gifts in one checkout"),
+        bullet("Pick your delivery date at checkout"),
+        bullet("Personal gift message on most products"),
+        bullet("Secure Stripe (USD) and Razorpay (INR) payment"),
+        bullet("WhatsApp and email help"),
+      ],
+    },
+  ],
+  faqHeading: "Frequently Asked Questions — Birthday Gifts to USA",
+  faqs: [
+    {
+      q: "How do I send a birthday gift to someone in the USA?",
+      a: "Choose a gift, enter the recipient's address and preferred date at checkout, add your message and pay. We take care of the delivery.",
+    },
+    {
+      q: "Can I schedule delivery for the exact birthday?",
+      a: "Yes. You can set a preferred delivery date at checkout, and we recommend ordering a few days early for the best chance of a date match.",
+    },
+    {
+      q: "What are the best birthday gifts to send abroad?",
+      a: "Flowers, cakes and gift hampers are the most popular because they feel festive and are easy to enjoy straight away. Plants and gift sets are great for longer-lasting gifts.",
+    },
+    {
+      q: "Can I send a surprise gift without the recipient knowing?",
+      a: "Yes. Just add the recipient's address and a short note with your name. If you want it to stay secret, avoid contacting them about the delivery date.",
+    },
+    {
+      q: "Is same-day birthday gift delivery available?",
+      a: "In select cities, yes, for orders placed before the local cut-off time. The checkout page shows the available options.",
+    },
+    {
+      q: "Can I combine flowers, cake and a gift in one order?",
+      a: "Yes. You can add several items to your cart and write one gift message for the whole surprise.",
+    },
+  ],
+});
+
+const usaAnniversaryGifts = usaCategoryArticle("anniversary-gifts", {
+  title: "Anniversary Gifts to USA | Send Roses, Cakes & Gift Sets | BlossomPot",
+  description:
+    "Send anniversary gifts to the USA. Romantic roses, anniversary cakes, hampers and gift sets with a personal message.",
+  heading: "Anniversary Gifts Delivered to the USA — Celebrate Every Year Together",
+  intro: [
+    "An anniversary is a quiet kind of milestone. It is not about big gestures, it is about showing that you remember. BlossomPot makes it easy to send anniversary gifts to the USA, whether you are celebrating your own, your parents' or a close friend's.",
+    "Choose roses, a chocolate or brownie cake, a gift hamper or a combo of all three, then add a message that sounds like you.",
+  ],
+  sections: [
+    {
+      heading: "Anniversary Gift Delivery in the USA",
+      paragraphs: [
+        "We deliver anniversary gifts to addresses across the USA. Same-day delivery is available in select cities when you order before the local cut-off. At checkout, enter the recipient's address and pick the date you want the gift to arrive.",
+      ],
+    },
+    {
+      heading: "Anniversary Gift Ideas",
+      paragraphs: [],
+      items: [
+        bullet("Red roses and rose bouquets for timeless romance"),
+        bullet("Anniversary cakes, such as cookies and cream brownie cake and triple chocolate brownie cake"),
+        bullet("Flower and wine combos for a toast across the miles"),
+        bullet("Gift hampers with sweets, treats and small extras"),
+        bullet("Cake and rose combos for a full surprise"),
+      ],
+    },
+    {
+      heading: 'Gifts That Say More Than "Happy Anniversary"',
+      paragraphs: [
+        "The card matters as much as the gift. Mention a real memory, such as the first trip you took or the small joke only the two of you understand. For parents' anniversaries, a bouquet plus a cake makes the whole family feel included, even from far away.",
+      ],
+    },
+    {
+      heading: "Why Order Anniversary Gifts from BlossomPot",
+      paragraphs: [],
+      items: [
+        bullet("Roses, cakes and hampers on one site"),
+        bullet("Choose your own delivery date"),
+        bullet("Personal gift message on most products"),
+        bullet("Secure payment with Stripe (USD) or Razorpay (INR)"),
+        bullet("Help from our team on WhatsApp and email"),
+      ],
+    },
+  ],
+  faqHeading: "Frequently Asked Questions — Anniversary Gifts to USA",
+  faqs: [
+    {
+      q: "What is the best anniversary gift to send to the USA?",
+      a: "Roses and a cake are the most popular combination. If you want something different, a flower and wine combo or a hamper makes a thoughtful choice.",
+    },
+    {
+      q: "Can I schedule the gift for the exact anniversary date?",
+      a: "Yes. Choose your preferred delivery date at checkout. We suggest ordering a few days ahead to keep the date safe.",
+    },
+    {
+      q: "Can I send anniversary gifts to my parents in the USA?",
+      a: "Yes. Enter their address at checkout, add a warm message and choose a bouquet, cake or hamper. Many customers send a flower and cake pair.",
+    },
+    {
+      q: "Do you offer same-day anniversary gift delivery?",
+      a: "Same-day delivery is available in select cities for orders placed before the local cut-off. Checkout will show if it is available for the address.",
+    },
+    {
+      q: "Can I add a handwritten-style message?",
+      a: "Most products support a personal gift message, so you can add your own words to the card.",
+    },
+    {
+      q: "I need help choosing a gift. Who can I ask?",
+      a: "Message us on WhatsApp or email support@blossompot.com. We will help you choose a gift and confirm the delivery details.",
+    },
+  ],
+});
+
+const usaValentinesGifts = usaCategoryArticle("valentines-day-gifts", {
+  title: "Valentine's Day Gifts to USA | Romantic Flowers & Gift Sets | BlossomPot",
+  description:
+    "Send Valentine's Day gifts to the USA online. Romantic gift sets, personalised gifts and flowers with a love note.",
+  heading: "Valentine's Day Gifts for the USA — Say It with Something Special",
+  intro: [
+    "Long-distance Valentine's Day can feel lonely, but it does not have to. A gift that arrives on the right day, with a message only you could write, reminds your partner you are close even when you are not.",
+    "BlossomPot has romantic gift sets, personalised keepsakes, treats and mugs that are picked for February delivery in the USA. Pair any of them with roses or a cake for a full romantic surprise.",
+  ],
+  sections: [
+    {
+      heading: "Valentine's Day Delivery to the USA",
+      paragraphs: [
+        "We deliver Valentine's Day gifts across the USA, with clear shipping windows shown before you pay. Same-day delivery is available in select cities when you order before the local cut-off. Because Valentine's week is busy, we recommend ordering early.",
+      ],
+    },
+    {
+      heading: "Valentine's Gift Ideas",
+      paragraphs: [],
+      items: [
+        bullet("Romantic gift sets for couples"),
+        bullet("Personalised Valentine gifts with a name or message"),
+        bullet("Love frames and charm gifts to keep for years"),
+        bullet("Funny and sweet mugs for the partner who loves a joke"),
+        bullet("Valentine treats and cupcakes to share"),
+        bullet("Roses and flowers to go with any gift"),
+      ],
+    },
+    {
+      heading: "Choosing the Right Valentine's Gift",
+      paragraphs: [
+        "Think about your partner's personality first. A romantic will love roses and a love note, a joker will smile at a funny mug, and a sentimental partner will treasure a framed memory or personalised gift. If you are not sure, combine something sweet with something lasting.",
+      ],
+    },
+    {
+      heading: "Why Order Valentine's Gifts from BlossomPot",
+      paragraphs: [],
+      items: [
+        bullet("Delivery to the USA with clear shipping windows"),
+        bullet("Gifts chosen with USA delivery in mind"),
+        bullet("Gift message on most products"),
+        bullet("Secure checkout with Razorpay and Stripe"),
+        bullet("WhatsApp and email support"),
+      ],
+    },
+  ],
+  faqHeading: "Frequently Asked Questions — Valentine's Day Gifts to USA",
+  faqs: [
+    {
+      q: "How early should I order Valentine's Day gifts for the USA?",
+      a: "We recommend ordering at least a week ahead, as this is a busy gifting period. Early orders give you more delivery date choices.",
+    },
+    {
+      q: "What is a good Valentine's Day gift for a long-distance partner?",
+      a: "A personalised gift or a framed keepsake, paired with a bouquet, works very well because it feels personal and lasts beyond the day.",
+    },
+    {
+      q: "Can I add a love note to my gift?",
+      a: "Yes. Most products support a gift message, so you can write your own note at checkout.",
+    },
+    {
+      q: "Can I send Valentine's gifts to a workplace?",
+      a: "Yes, you can enter an office address. Just add a contact number so the delivery partner can reach the recipient.",
+    },
+    {
+      q: "Are personalised Valentine's gifts available?",
+      a: "Yes, we have personalised gift sets. Check the product page to see what can be customised.",
+    },
+    {
+      q: "Can I send Valentine's Day gifts from outside the USA?",
+      a: "Yes. Enter the USA address and pay in USD with Stripe or in INR with Razorpay.",
+    },
+  ],
+});
+
+const usaHampers = usaCategoryArticle("hampers", {
+  title: "Gift Hampers to USA | Gift Baskets & Curated Boxes | BlossomPot",
+  description:
+    "Send gift hampers to the USA. Curated gift baskets with treats, snacks, spa sets and more. Gift message included.",
+  heading: "Gift Hampers Delivered to the USA — One Box, Many Reasons to Smile",
+  intro: [
+    "Can't decide what to send? A hamper solves that. Instead of one gift, it brings a whole collection of treats, snacks and small luxuries in a single box that looks great on arrival.",
+    'BlossomPot gift hampers are curated for birthdays, thank-yous, housewarmings, festive seasons and quiet "thinking of you" moments. Add flowers or a cake to make it even bigger.',
+  ],
+  sections: [
+    {
+      heading: "Gift Hamper Delivery in the USA",
+      paragraphs: [
+        "We deliver hampers across the USA. Same-day delivery is available in select cities when you order before the local cut-off. Enter the recipient's address at checkout to see what is available, and add a gift message to make it personal.",
+      ],
+    },
+    {
+      heading: "What You Can Find in Our Hampers",
+      paragraphs: [],
+      items: [
+        bullet("Gourmet snack baskets and chocolate treats"),
+        bullet("Spa and self-care baskets for a relaxing day off"),
+        bullet("Wine, beer and celebration hampers for adults"),
+        bullet("Birthday gift baskets and festive hampers"),
+        bullet("Fragrance and chocolate sets for men and women"),
+      ],
+      paragraphsAfter: ["Please check the product page for exact contents before you order."],
+    },
+    {
+      heading: "When a Hamper Is the Perfect Choice",
+      paragraphs: [
+        "Hampers shine when you want variety in one box. They are great for thanking a colleague, welcoming a new neighbour, celebrating a promotion or sending a warm message to someone who is unwell. For teams and clients, hampers make a polished, corporate-friendly gesture.",
+      ],
+    },
+    {
+      heading: "Why Order Hampers from BlossomPot",
+      paragraphs: [],
+      items: [
+        bullet("Hampers, flowers and cakes in one order"),
+        bullet("Delivery windows shown clearly at checkout"),
+        bullet("Gift message on most products"),
+        bullet("Secure Stripe (USD) and Razorpay (INR) payment"),
+        bullet("WhatsApp and email support"),
+      ],
+    },
+  ],
+  faqHeading: "Frequently Asked Questions — Gift Hampers to USA",
+  faqs: [
+    {
+      q: "Can I send a gift hamper to the USA from another country?",
+      a: "Yes. Enter the USA address at checkout and pay in USD with Stripe or in INR with Razorpay.",
+    },
+    {
+      q: "What is the difference between a gift hamper and a gift basket?",
+      a: "The two terms are often used for the same thing: a curated collection of gifts in one package. Hampers are usually boxed or crated, while baskets are woven.",
+    },
+    {
+      q: "Are wine and beer hampers available?",
+      a: "Yes, we have wine and beer hampers. Please check the product details and make sure the recipient is of legal drinking age.",
+    },
+    {
+      q: "Can I send a hamper to an office or a client?",
+      a: "Yes. Enter the business address and a contact number, and add a professional message at checkout.",
+    },
+    {
+      q: "Can I add flowers or a cake to my hamper order?",
+      a: "Yes. Add a bouquet or cake to your cart, and write one gift message for the whole surprise.",
+    },
+    {
+      q: "How do I know what is inside a hamper?",
+      a: "Each product page lists the contents. If you need help, message us on WhatsApp and we will guide you.",
+    },
+  ],
+});
+
+const usaCombos: CountrySeoContent = {
+  countryCode: "US",
+  page: "combos",
+  availability: "approved",
+  title: "Combo Gifts to USA | Flower, Cake & Gift Combos | BlossomPot",
+  description:
+    "Shop gift combos for delivery in the USA. Pair beautiful flower bouquets with cakes, treats and curated gifts to make every celebration special.",
+  heading: "Combo Gifts Delivered to the USA — Make Every Gift More Special",
+  intro: [
+    "Sometimes one gift says it all. Other times, combining two thoughtful gifts makes the moment even more memorable. BlossomPot brings together flowers, cakes, treats and curated gifts in combinations designed to make birthdays, anniversaries and everyday surprises feel special.",
+    "Explore our available gift combos, discover pairings for different occasions and choose a combination that feels right for the person you are celebrating.",
+  ],
+  callsToAction: [],
+  sections: [
+    {
+      heading: "Gift Combos for Every Celebration",
+      paragraphs: [
+        "Every celebration has its own personality. A beautiful bouquet paired with a cake can make a birthday feel complete, while flowers alongside a box of treats can turn an ordinary day into a thoughtful surprise.",
+      ],
+      items: [
+        {
+          title: "Flowers and Cake Combos",
+          text: "Pair colourful bouquets with cakes for birthdays, anniversaries and celebrations.",
+        },
+        {
+          title: "Flowers and Treats",
+          text: "Combine fresh-looking floral arrangements with snacks or sweet treats.",
+        },
+        {
+          title: "Cake and Gift Combos",
+          text: "Bring together a celebratory cake and a curated gift for an extra-special surprise.",
+        },
+        {
+          title: "Thoughtful Gift Pairings",
+          text: "Discover combinations that bring together different gifts in one convenient selection.",
+        },
+      ],
+    },
+    {
+      heading: "Choose a Combo That Matches the Moment",
+      paragraphs: [
+        "Think about the occasion and the person receiving your gift. Bright flowers and a celebration cake work well for birthdays. Romantic blooms with a favourite treat can make an anniversary feel more personal. For a simple gesture of appreciation, choose a combination that reflects the recipient's tastes.",
+        "Add a personal message where the selected products support one, and let your gift express what words sometimes cannot.",
+      ],
+    },
+    {
+      heading: "Combo Gift Delivery Across the USA",
+      paragraphs: [
+        "Shopping for someone who lives far away can still feel personal. Browse the available combos, choose your preferred combination and enter the recipient's delivery address to check the options available for their location.",
+        "Delivery dates, availability and applicable charges depend on the selected products and destination. Review the details shown during checkout before completing your order.",
+      ],
+    },
+    {
+      heading: "Why Choose BlossomPot Gift Combos?",
+      paragraphs: [],
+      items: [
+        {
+          title: "Thoughtful pairings",
+          text: "Bring two complementary gifts together in one selection.",
+        },
+        {
+          title: "More ways to celebrate",
+          text: "Explore combinations for birthdays, anniversaries and other special moments.",
+        },
+        {
+          title: "Convenient online shopping",
+          text: "Browse available combos in one place.",
+        },
+        {
+          title: "Personal touches",
+          text: "Add a gift message where supported by the selected products.",
+        },
+        {
+          title: "Clear checkout details",
+          text: "Review product availability, pricing and delivery options before ordering.",
+        },
+      ],
+    },
+  ],
+  stepsHeading: "How to Order a Gift Combo Online",
+  steps: [
+    { title: "", text: "Browse the available combos on this page." },
+    { title: "", text: "Choose a combination that suits your occasion and budget." },
+    { title: "", text: "Add the combo to your cart and review its items." },
+    { title: "", text: "Enter the recipient's address and check the available delivery options." },
+    { title: "", text: "Review your order and complete checkout." },
+  ],
+  faqHeading: "Frequently Asked Questions About Gift Combos",
+  faqBeforeClosing: true,
+  faqs: [
+    {
+      q: "What is included in a BlossomPot gift combo?",
+      a: "Each combo combines the products shown on its product card. Open the selected combo to review its contents before ordering.",
+    },
+    {
+      q: "Can I send a flower and cake combo for a birthday?",
+      a: "Yes, you can choose a flower and cake combination when one is available. Check the individual combo details to confirm its contents.",
+    },
+    {
+      q: "Can I send a combo gift to someone in the USA from another country?",
+      a: "You can shop for delivery to a supported USA address. Enter the recipient's address during checkout to check the available delivery options.",
+    },
+    {
+      q: "Can I add a personal message to a combo?",
+      a: "Message availability depends on the selected products and the options offered during checkout.",
+    },
+    {
+      q: "How much does a gift combo cost?",
+      a: "Prices vary by combination. Review the displayed price and order total before completing checkout.",
+    },
+    {
+      q: "Can I choose the delivery date for my combo?",
+      a: "Check the delivery options shown for the recipient's address during checkout. Available dates depend on the selected products and destination.",
+    },
+  ],
+  closing: {
+    heading: "Make Their Day Extra Special with BlossomPot",
+    paragraphs: [
+      "From flowers paired with cakes to combinations of treats and thoughtful gifts, the right pairing can make a celebration feel more personal. Explore BlossomPot's available combos and find a meaningful way to send a little happiness to someone in the USA.",
+    ],
+  },
+};
+
 const approvedSeo: Record<CountrySeoPage, Record<string, CountrySeoContent>> = {
   home: { US: usaHome },
   flowers: { US: usaFlowers },
   "delivery-locations": { US: usaDeliveryLocations },
+  bouquets: { US: usaBouquets },
+  cakes: { US: usaCakes },
+  "birthday-gifts": { US: usaBirthdayGifts },
+  "anniversary-gifts": { US: usaAnniversaryGifts },
+  "valentines-day-gifts": { US: usaValentinesGifts },
+  hampers: { US: usaHampers },
+  combos: { US: usaCombos },
 };
 
 function neutralCountrySeo(page: CountrySeoPage): CountrySeoContent {

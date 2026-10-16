@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { displayCurrenciesForCountry } from "@blossompot/shared";
-import { useCurrency, type DisplayCurrency } from "@/lib/currency-context";
+import { useCurrency } from "@/lib/currency-context";
 import { useStorefrontCountryIso } from "@/lib/use-storefront-country";
 
 export function CurrencySwitcher() {
@@ -25,31 +25,32 @@ export function CurrencySwitcher() {
 
   return (
     <div
-      className="fixed right-0 z-30 shadow-lg rounded-l-md overflow-hidden pointer-events-auto bg-slate-900/95 bottom-[9.25rem] md:bottom-auto md:top-1/2 md:-translate-y-1/2"
-      aria-label="Currency"
+      className="fixed right-0 z-30 overflow-hidden rounded-l-xl shadow-[0_8px_18px_rgba(74,21,44,0.18)] pointer-events-auto bottom-[9.25rem] md:bottom-auto md:top-1/2 md:-translate-y-1/2"
+      role="group"
+      aria-label="Display currency"
     >
-      <label className="sr-only" htmlFor="storefront-currency">
-        Display currency
-      </label>
-      <select
-        id="storefront-currency"
-        value={value}
-        onChange={(e) => setDisplayCurrency(e.target.value as DisplayCurrency)}
-        title="Display currency"
-        className="appearance-none bg-primary text-white font-bold text-[11px] sm:text-xs tracking-wide py-3 sm:py-3.5 pl-2.5 pr-7 w-[4.5rem] sm:w-[5.25rem] max-w-[30vw] border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/40"
-        style={{
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='white' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E\")",
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "right 0.45rem center",
-        }}
-      >
-        {options.map((code) => (
-          <option key={code} value={code} className="bg-white text-slate-900">
+      {options.map((code) => {
+        const selected = code === value;
+        return (
+          <button
+            key={code}
+            type="button"
+            aria-pressed={selected}
+            onClick={() => setDisplayCurrency(code)}
+            className={`relative block h-11 w-[4.5rem] border-0 px-2 text-center text-xs font-bold tracking-wide cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white ${
+              selected ? "bg-[var(--primary-deep)] text-white" : "bg-[#f8e4ee] text-[var(--primary-deep)]"
+            }`}
+          >
             {code}
-          </option>
-        ))}
-      </select>
+            {selected ? (
+              <span
+                className="pointer-events-none absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-white"
+                aria-hidden
+              />
+            ) : null}
+          </button>
+        );
+      })}
     </div>
   );
 }

@@ -25,9 +25,14 @@ export type ComboPublishResult = {
   skips: ComboPublishSkip[];
 };
 
+type StoredComboIdentity = {
+  slug: string;
+  productSlugs?: readonly string[];
+};
+
 type ComboPublishStorage = {
   insertCombo: (input: ComboDraft, timestamp?: string) => Promise<unknown>;
-  queryCombos: () => Promise<Array<{ slug: string }>>;
+  queryCombos: () => Promise<StoredComboIdentity[]>;
 };
 
 /**
@@ -53,24 +58,30 @@ export async function publishGeneratedCombos(
     input.limitPerVendor ?? DEFAULT_COMBOS_PER_VENDOR
   );
   const timestamp = input.timestamp ?? now();
-  const existing = new Set((await storage.queryCombos()).map((combo) => combo.slug));
+  const existingSlugs = new Set<string>();
+  const existingPairs = new Map<string, string>();
+  rememberStoredCombos(await storage.queryCombos(), existingSlugs, existingPairs);
   const skips: ComboPublishSkip[] = [];
   let inserted = 0;
 
   for (const draft of drafts) {
-    if (existing.has(draft.slug)) {
-      skips.push({ slug: draft.slug, reason: "existing-combo" });
+    const representedBy = existingComboSlug(draft, existingSlugs, existingPairs);
+    if (representedBy) {
+      skips.push({ slug: representedBy, reason: "existing-combo" });
       continue;
     }
     try {
       await storage.insertCombo(draft, timestamp);
-      existing.add(draft.slug);
+      existingSlugs.add(draft.slug);
+      const key = componentSetKey(draft.productSlugs);
+      if (key) existingPairs.set(key, draft.slug);
       inserted += 1;
     } catch (err) {
       if (!(err instanceof ComboSlugConflictError)) throw err;
-      const stored = (await storage.queryCombos()).some((combo) => combo.slug === draft.slug);
-      if (stored) existing.add(draft.slug);
-      skips.push({ slug: draft.slug, reason: stored ? "existing-combo" : "product-slug" });
+      const stored = await storage.queryCombos();
+      rememberStoredCombos(stored, existingSlugs, existingPairs);
+      const matched = existingComboSlug(draft, existingSlugs, existingPairs);
+      skips.push({ slug: matched ?? draft.slug, reason: matched ? "existing-combo" : "product-slug" });
     }
   }
 
@@ -80,4 +91,34 @@ export async function publishGeneratedCombos(
     skipped: skips.length,
     skips,
   };
+}
+
+function rememberStoredCombos(
+  stored: readonly StoredComboIdentity[],
+  existingSlugs: Set<string>,
+  existingPairs: Map<string, string>
+): void {
+  for (const combo of stored) {
+    existingSlugs.add(combo.slug);
+    const key = componentSetKey(combo.productSlugs);
+    if (key && !existingPairs.has(key)) existingPairs.set(key, combo.slug);
+  }
+}
+
+/** Stored slug for this draft when the slug or the same unordered components already exist. */
+function existingComboSlug(
+  draft: ComboDraft,
+  existingSlugs: Set<string>,
+  existingPairs: Map<string, string>
+): string | undefined {
+  if (existingSlugs.has(draft.slug)) return draft.slug;
+  const key = componentSetKey(draft.productSlugs);
+  return key ? existingPairs.get(key) : undefined;
+}
+
+function componentSetKey(slugs: readonly string[] | undefined): string | undefined {
+  if (!slugs || slugs.length < 2) return undefined;
+  const normalized = slugs.map((slug) => slug.trim()).filter((slug) => slug.length > 0);
+  if (new Set(normalized).size !== normalized.length) return undefined;
+  return [...normalized].sort().join("\0");
 }

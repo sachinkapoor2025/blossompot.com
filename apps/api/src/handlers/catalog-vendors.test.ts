@@ -339,4 +339,106 @@ describe("admin catalog vendor API", { concurrency: false }, () => {
     const orders = (listed.body.vendors as Array<{ displayOrder?: number }>).map((vendor) => vendor.displayOrder);
     assert.deepEqual(orders, orders.map((_, index) => index + 1));
   });
+
+  it("leaves product publication unchanged across vendor enable, disable, trash, and restore", async () => {
+    async function putProduct(slug: string, extra: Record<string, unknown>) {
+      await docClient.send(
+        new PutCommand({
+          TableName: productsTable,
+          Item: {
+            PK: `PRODUCT#${slug}`,
+            SK: "META",
+            slug,
+            name: slug,
+            description: "Keep me",
+            price: 12,
+            currency: "USD",
+            categorySlug: "cakes",
+            additionalCategorySlugs: ["flowers"],
+            inventory: 9,
+            images: ["https://cdn.example.com/a.jpg"],
+            ...extra,
+          },
+        })
+      );
+    }
+    async function stored(slug: string) {
+      const row = await docClient.send(
+        new GetCommand({ TableName: productsTable, Key: { PK: `PRODUCT#${slug}`, SK: "META" } })
+      );
+      return row.Item;
+    }
+
+    await putProduct("vendor-toggle-live", { vendorSlug: "fnp", published: true });
+    await putProduct("vendor-toggle-draft", { vendorSlug: "fnp", published: false });
+    await putProduct("vendor-toggle-other", { vendorSlug: "orange-county", published: true });
+
+    const denied = resultOf(
+      await updateCatalogVendorAdmin(
+        event({
+          token: "Bearer dev:shopper@blossompot.test:customer",
+          vendorSlug: "fnp",
+          body: { enabled: false, deliveryCountries: ["US"] },
+        })
+      )
+    );
+    assert.equal(denied.statusCode, 403);
+    assert.equal((await stored("vendor-toggle-live"))?.published, true);
+    assert.equal((await stored("vendor-toggle-draft"))?.published, false);
+
+    const disabled = resultOf(
+      await updateCatalogVendorAdmin(event({ vendorSlug: "fnp", body: { enabled: false, deliveryCountries: ["US"] } }))
+    );
+    assert.equal(disabled.statusCode, 200);
+    assert.equal((disabled.body.vendor as { enabled?: boolean }).enabled, false);
+    assert.equal(disabled.body.productsUnpublished, undefined);
+    assert.equal(disabled.body.productsPublished, undefined);
+    const live = await stored("vendor-toggle-live");
+    assert.equal(live?.published, true);
+    assert.equal(live?.vendorSlug, "fnp");
+    assert.equal(live?.categorySlug, "cakes");
+    assert.deepEqual(live?.additionalCategorySlugs, ["flowers"]);
+    assert.equal(live?.inventory, 9);
+    assert.equal(live?.price, 12);
+    assert.equal(live?.description, "Keep me");
+    assert.equal((await stored("vendor-toggle-draft"))?.published, false);
+    assert.equal((await stored("vendor-toggle-other"))?.published, true);
+
+    const enabled = resultOf(
+      await updateCatalogVendorAdmin(event({ vendorSlug: "fnp", body: { enabled: true, deliveryCountries: ["US"] } }))
+    );
+    assert.equal(enabled.statusCode, 200);
+    assert.equal((enabled.body.vendor as { enabled?: boolean }).enabled, true);
+    assert.equal(enabled.body.productsPublished, undefined);
+    assert.equal((await stored("vendor-toggle-live"))?.published, true);
+    assert.equal((await stored("vendor-toggle-draft"))?.published, false);
+    assert.equal((await stored("vendor-toggle-draft"))?.vendorSlug, "fnp");
+    assert.equal((await stored("vendor-toggle-other"))?.published, true);
+
+    const trashed = resultOf(
+      await trashCatalogVendorAdmin(event({ vendorSlug: "fnp", body: { confirmName: "FNP" } }))
+    );
+    assert.equal(trashed.statusCode, 200);
+    assert.equal((trashed.body.vendor as { enabled?: boolean }).enabled, false);
+    assert.equal((await stored("vendor-toggle-live"))?.published, true);
+    assert.equal((await stored("vendor-toggle-draft"))?.published, false);
+    assert.equal((await stored("vendor-toggle-other"))?.published, true);
+
+    const restored = resultOf(await restoreCatalogVendorAdmin(event({ vendorSlug: "fnp" })));
+    assert.equal(restored.statusCode, 200);
+    assert.equal((restored.body.vendor as { enabled?: boolean }).enabled, false);
+    assert.equal((restored.body.vendor as { trashedAt?: string }).trashedAt, undefined);
+    assert.equal((await stored("vendor-toggle-live"))?.published, true);
+    assert.equal((await stored("vendor-toggle-draft"))?.published, false);
+
+    const enabledAgain = resultOf(
+      await updateCatalogVendorAdmin(event({ vendorSlug: "fnp", body: { enabled: true, deliveryCountries: ["US"] } }))
+    );
+    assert.equal(enabledAgain.statusCode, 200);
+    assert.equal((enabledAgain.body.vendor as { enabled?: boolean }).enabled, true);
+    assert.equal((await stored("vendor-toggle-draft"))?.published, false);
+    assert.equal((await stored("vendor-toggle-live"))?.published, true);
+    assert.equal((await stored("vendor-toggle-other"))?.published, true);
+    assert.equal((await stored("vendor-toggle-other"))?.vendorSlug, "orange-county");
+  });
 });

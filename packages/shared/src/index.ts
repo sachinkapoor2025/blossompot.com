@@ -88,6 +88,7 @@ export * from "./lib/fnp-import";
 export * from "./lib/catalog-sku";
 export * from "./lib/sku-reservation-backfill";
 export * from "./lib/product-import";
+export * from "./lib/product-categories";
 export * from "./lib/product-addons";
 export * from "./lib/cart-merge";
 export * from "./lib/flash-sale";

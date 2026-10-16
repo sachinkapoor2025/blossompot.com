@@ -5,11 +5,12 @@ import {
   countrySeoContent,
   countrySeoHrefs,
   hasApprovedCountrySeo,
+  type CountrySeoPage,
 } from "./country-seo-registry";
 
 const USA_CITIES = ["New York", "Los Angeles", "Chicago", "Houston", "Dallas", "San Francisco", "Atlanta"];
 
-function articleText(countryCode: string, page: "home" | "flowers" | "delivery-locations" = "home"): string {
+function articleText(countryCode: string, page: CountrySeoPage = "home"): string {
   const article = countrySeoContent(countryCode, page);
   return JSON.stringify(article);
 }
@@ -32,8 +33,38 @@ describe("country SEO registry", () => {
 
   it("keeps approved USA flowers and delivery-location copy without enabling a country", () => {
     const flowers = countrySeoContent("US", "flowers");
-    assert.equal(flowers.title, "Send Flowers to USA Online | Flower Delivery USA – BlossomPot");
-    assert.equal(flowers.heading, "Send Flowers to the USA");
+    assert.equal(flowers.title, "Send Flowers to USA Online | Flower Delivery – BlossomPot");
+    assert.equal(flowers.heading, "Send Flowers to the USA Online with BlossomPot");
+    assert.deepEqual(
+      flowers.sections.map((section) => section.heading),
+      [
+        "Shop Flowers by Occasion",
+        "Explore Popular Flowers Online",
+        "Flower Delivery Across the USA",
+        "Why Choose BlossomPot for Flower Delivery?",
+      ]
+    );
+    assert.equal(flowers.stepsHeading, "How to Order Flowers Online in the USA");
+    assert.equal(flowers.faqHeading, "Frequently Asked Questions");
+    assert.equal(flowers.faqBeforeClosing, true);
+    assert.equal(flowers.closing.heading, "Make Every Moment Special with BlossomPot");
+    assert.deepEqual(
+      flowers.faqs.map((faq) => faq.q),
+      [
+        "Can I send flowers to the USA from another country?",
+        "Does BlossomPot offer same-day flower delivery in the USA?",
+        "Which flowers can I send through BlossomPot?",
+        "Can I send flowers for birthdays and anniversaries?",
+        "How can I check flower delivery availability?",
+        "Can I include a message with my flower delivery?",
+        "How long does flower delivery take in the USA?",
+      ]
+    );
+    assert.match(flowers.faqs[1]?.a ?? "", /Same-day delivery may be available/);
+    const flowerHrefs = countrySeoHrefs(flowers);
+    assert.equal(flowerHrefs.includes("/gifts-to-new-york"), true);
+    assert.equal(flowerHrefs.includes("/gifts-to-boston"), true);
+    assert.equal(flowerHrefs.some((href) => href.includes("amplifyapp.com")), false);
     assert.equal(flowers.faqs.length, 7);
     const locations = countrySeoContent("US", "delivery-locations");
     assert.equal(locations.heading, "Explore Our USA Delivery Locations");
@@ -50,7 +81,18 @@ describe("country SEO registry", () => {
   });
 
   it("uses neutral copy for a country without approved content", () => {
-    for (const page of ["home", "flowers", "delivery-locations"] as const) {
+    for (const page of [
+      "home",
+      "flowers",
+      "delivery-locations",
+      "bouquets",
+      "cakes",
+      "birthday-gifts",
+      "anniversary-gifts",
+      "valentines-day-gifts",
+      "hampers",
+      "combos",
+    ] as const) {
       const article = countrySeoContent("GB", page);
       assert.equal(article.availability, "neutral");
       assert.equal(hasApprovedCountrySeo("GB", page), false);

@@ -9,6 +9,12 @@ import {
 
 const APPROVED_CATEGORY_PAGE: Partial<Record<string, CountrySeoPage>> = {
   flowers: "flowers",
+  "flower-bouquets": "bouquets",
+  cakes: "cakes",
+  "birthday-gifts": "birthday-gifts",
+  "anniversary-gifts": "anniversary-gifts",
+  "valentines-day-gifts": "valentines-day-gifts",
+  "gift-hampers": "hampers",
 };
 
 export type ResolvedCategorySeo = {

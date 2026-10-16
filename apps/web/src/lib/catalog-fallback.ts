@@ -1,6 +1,4 @@
 import {
-  CATALOG_VENDOR_SLUGS,
-  defaultCatalogVendor,
   fulfillmentVendorSlug,
   productForShoppingDecision,
   isSampleCatalogProduct,
@@ -130,8 +128,6 @@ export function mergeProductsPreferExisting(
   }
   return dedupeStorefrontProducts([...bySlug.values()]);
 }
-const DEFAULT_BUNDLED_VENDORS = CATALOG_VENDOR_SLUGS.map((slug) => defaultCatalogVendor(slug));
-
 /** Vendor slug for the shopping helper. Public cards keep the resolved vendor and omit vendor cost. */
 export function bundledShoppingVendorSlug(product: {
   slug?: string | null;
@@ -160,23 +156,27 @@ export function bundledHiddenForDisabledVendor(
 
 function withoutRememberedDisabledVendors(products: Product[], country = "US"): Product[] {
   const vendors = rememberedShoppingVendors;
-  if (!vendors?.length) return products;
-  return products.filter((product) => !bundledHiddenForDisabledVendor(product, country, vendors));
+  if (!vendors?.length) return [];
+  return products.filter(
+    (product) => product.published !== false && !bundledHiddenForDisabledVendor(product, country, vendors)
+  );
 }
 
 /**
- * Bundled JSON is not a second catalog. It may fill a missing SKU only when that
- * product's built-in vendor delivers to the country. A product deliveryCountries
- * list is honored when the bundled row has one. Live admin delivery countries
- * stay on the product API, which already filtered its own rows.
+ * Bundled JSON fills a missing SKU only when the remembered live vendor registry
+ * allows that product and it is published for this country. An unknown registry
+ * adds nothing. Country rules stay on the product. ZIP checks stay on the shopping helper.
  */
 function bundledProductAllowedForCountry(product: Product, country: string): boolean {
+  if (product.published === false) return false;
   if (!productVisibleForDeliveryCountry(product, country)) return false;
-  const decision = productAllowedForNewShopping(product, country, DEFAULT_BUNDLED_VENDORS);
-  if (decision.available) return true;
-  if (decision.reason !== "gbo_storefront_disabled") return false;
-  const record = DEFAULT_BUNDLED_VENDORS.find((vendor) => vendor.vendorSlug === decision.vendorSlug);
-  return Boolean(record?.deliveryCountries.includes(country.trim().toUpperCase()));
+  const vendors = rememberedShoppingVendors;
+  if (!vendors?.length) return false;
+  return productAllowedForNewShopping(
+    { ...product, vendorSlug: bundledShoppingVendorSlug(product) },
+    country,
+    vendors
+  ).available;
 }
 
 export function getCatalogProductsForCountry(country: string): Product[] {
@@ -185,12 +185,15 @@ export function getCatalogProductsForCountry(country: string): Product[] {
 
 /** API/GBO prices win for shared slugs; fill in published bundled catalog SKUs that Dynamo never imported. */
 export function mergeProductsForCountry(existing: Product[], country: string): Product[] {
+  const vendors = rememberedShoppingVendors;
   return mergeProductsPreferExisting(
     existing.filter(
       (product) =>
+        product.published !== false &&
         !isRakhiRelatedProduct(product) &&
         !isSampleCatalogProduct(product) &&
-        productVisibleForDeliveryCountry(product, country)
+        productVisibleForDeliveryCountry(product, country) &&
+        !(vendors?.length && bundledHiddenForDisabledVendor(product, country, vendors))
     ),
     getCatalogProductsForCountry(country)
   );

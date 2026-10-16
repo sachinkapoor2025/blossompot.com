@@ -22,13 +22,21 @@ export type MemoryComboPublishResult =
 export async function publishSeededMemoryCombos(): Promise<MemoryComboPublishResult> {
   if (process.env.USE_MEMORY_DB !== "true") return { ran: false, reason: "not-memory" };
 
-  const products = (await readMemoryProducts()).filter(isMemoryComboSource);
-  const vendors = vendorRanking(await loadCatalogVendorRegistry());
-  const result = await publishGeneratedCombos({ products, vendors });
+  const result = await publishGeneratedCombos(await loadComboPublishInputs());
   return { ran: true, ...result };
 }
 
-function isMemoryComboSource(product: Product): product is Product & ComboSourceProduct {
+/** Eligible catalog products and vendor order for one explicit publish run. */
+export async function loadComboPublishInputs(): Promise<{
+  products: ComboSourceProduct[];
+  vendors: VendorDisplaySource[];
+}> {
+  const products = (await readCatalogProducts()).filter(isComboSource);
+  const vendors = vendorRanking(await loadCatalogVendorRegistry());
+  return { products, vendors };
+}
+
+function isComboSource(product: Product): product is Product & ComboSourceProduct {
   return (
     product.published !== false &&
     (product.inventory ?? 0) > 0 &&
@@ -48,7 +56,7 @@ function vendorRanking(registry: Awaited<ReturnType<typeof loadCatalogVendorRegi
   }));
 }
 
-async function readMemoryProducts(): Promise<Product[]> {
+async function readCatalogProducts(): Promise<Product[]> {
   const items: Product[] = [];
   let ExclusiveStartKey: Record<string, unknown> | undefined;
   do {

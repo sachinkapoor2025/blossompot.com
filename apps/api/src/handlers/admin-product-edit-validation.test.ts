@@ -26,6 +26,7 @@ let createProduct: Handler;
 let listProductsMissingDims: Handler;
 let docClient: { send: (command: unknown) => Promise<unknown> };
 let productKeys: { pk: (slug: string) => string; sk: () => string; gsi1pk: (category: string) => string; gsi1sk: (slug: string) => string };
+let categoryKeys: { pk: (slug: string) => string; sk: () => string };
 let productsTable: string;
 
 const admin = { headers: { authorization: "Bearer dev:admin@blossompot.test:admin" } };
@@ -36,6 +37,19 @@ before(async () => {
   productsTable = db.PRODUCTS_TABLE;
   const shared = await import("@blossompot/shared");
   productKeys = shared.productKeys;
+  categoryKeys = shared.categoryKeys;
+  await docClient.send(
+    new PutCommand({
+      TableName: productsTable,
+      Item: {
+        PK: categoryKeys.pk("flowers"),
+        SK: categoryKeys.sk(),
+        slug: "flowers",
+        name: "Flowers",
+        published: true,
+      },
+    })
+  );
   const products = await import("./products");
   updateProduct = products.updateProduct;
   createProduct = products.createProduct;

@@ -196,6 +196,13 @@ function conditionName(token: string, names: Record<string, string> | undefined)
   return trimmed;
 }
 
+function sameConditionValue(left: unknown, right: unknown): boolean {
+  if (Array.isArray(left) && Array.isArray(right)) {
+    return left.length === right.length && left.every((value, index) => sameConditionValue(value, right[index]));
+  }
+  return left === right;
+}
+
 function conditionValue(token: string, values: Record<string, unknown> | undefined): unknown {
   const trimmed = token.trim();
   if (trimmed.startsWith(":")) return values?.[trimmed];
@@ -229,7 +236,7 @@ export function memoryConditionPasses(
   const equals = expr.match(/^([#A-Za-z0-9_]+)\s*=\s*(:[A-Za-z0-9_]+)$/);
   if (equals) {
     const name = conditionName(equals[1] ?? "", names);
-    return item?.[name] === conditionValue(equals[2] ?? "", values);
+    return sameConditionValue(item?.[name], conditionValue(equals[2] ?? "", values));
   }
   return false;
 }

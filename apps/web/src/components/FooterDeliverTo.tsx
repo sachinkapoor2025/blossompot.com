@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cityMenuForCountry, footerCityColumns } from "@/lib/city-menu-for-location";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
+import { footerUsaTopicHeading } from "@/lib/footer-usa-topic";
 import { COUNTRY_GUIDE_HREF } from "@/lib/gbo-delivery-countries";
 import { countryDisplayName, countryIsoFromPathname } from "@/lib/location-seo-urls";
 import { countriesMenu, cityNavHref } from "@/lib/site";
@@ -39,6 +40,8 @@ export function FooterDeliverTo({
   const menu = cityMenuForCountry(iso);
   const guideHref = COUNTRY_GUIDE_HREF[iso];
   const guide = guideHref ? countriesMenu.items.find((item) => item.href === guideHref) : undefined;
+  const topicLabel =
+    guide?.href === "/flower-delivery-usa" ? (footerUsaTopicHeading(pathname) ?? guide.label) : guide?.label;
   const cityLinks = menu.links.map((city) => ({
     label: city.menuLabel ?? city.label,
     href: city.href ?? cityNavHref(city),
@@ -62,7 +65,7 @@ export function FooterDeliverTo({
       {guide ? (
         <p className="mt-3 text-center text-sm leading-6">
           <Link href={guide.href} className={linkClass}>
-            {guide.label}
+            {topicLabel}
           </Link>
         </p>
       ) : null}

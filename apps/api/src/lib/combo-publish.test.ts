@@ -79,7 +79,7 @@ describe("combo publishing", { concurrency: 1 }, () => {
     assert.equal(first.inserted, 1);
     assert.equal(first.skips.length, 0);
 
-    await store.updateCombo("roses-cake", { name: "Admin Rose and Cake" }, "2026-02-02T00:00:00.000Z");
+    await store.updateCombo("cake-roses", { name: "Admin Rose and Cake" }, "2026-02-02T00:00:00.000Z");
     const second = await publishGeneratedCombos({
       products,
       vendors,
@@ -89,15 +89,15 @@ describe("combo publishing", { concurrency: 1 }, () => {
     assert.equal(second.generated, 1);
     assert.equal(second.inserted, 0);
     assert.equal(second.skipped, 1);
-    assert.deepEqual(second.skips, [{ slug: "roses-cake", reason: "existing-combo" }]);
-    const row = await comboRow("roses-cake");
+    assert.deepEqual(second.skips, [{ slug: "cake-roses", reason: "existing-combo" }]);
+    const row = await comboRow("cake-roses");
     assert.equal(row?.name, "Admin Rose and Cake");
     assert.equal(row?.createdAt, "2026-02-01T00:00:00.000Z");
     assert.equal(row?.updatedAt, "2026-02-02T00:00:00.000Z");
   });
 
   it("skips a combo slug reserved by a product and leaves that product unchanged", async () => {
-    const slug = "publish-roses-publish-cake";
+    const slug = "publish-cake-publish-roses";
     await docClient.send(
       new PutCommand({
         TableName: productsTable,
@@ -153,10 +153,44 @@ describe("combo publishing", { concurrency: 1 }, () => {
         .filter((combo) => combo.slug.startsWith("limit-"))
         .map((combo) => combo.productSlugs),
       [
-        ["limit-roses", "limit-cake"],
+        ["limit-cake", "limit-plant"],
         ["limit-fnp-a", "limit-fnp-b"],
       ]
     );
+  });
+
+  it("skips a stored pair whose combo slug lists the components in reverse order", async () => {
+    const storedSlug = "kept-roses-kept-cake";
+    await store.insertCombo(
+      {
+        slug: storedSlug,
+        name: "Admin kept pair",
+        description: "Edited by admin",
+        productSlugs: ["kept-roses", "kept-cake"],
+        sortOrder: 3,
+      },
+      "2026-05-02T00:00:00.000Z"
+    );
+
+    const result = await publishGeneratedCombos({
+      products: [
+        product("kept-cake", "cakes", "blossompot", "Kept Cake"),
+        product("kept-roses", "flowers", "blossompot", "Kept Roses"),
+      ],
+      vendors,
+      timestamp: "2026-05-03T00:00:00.000Z",
+    });
+
+    assert.equal(result.generated, 1);
+    assert.equal(result.inserted, 0);
+    assert.deepEqual(result.skips, [{ slug: storedSlug, reason: "existing-combo" }]);
+    assert.equal(await comboRow("kept-cake-kept-roses"), undefined);
+    const row = await comboRow(storedSlug);
+    assert.equal(row?.name, "Admin kept pair");
+    assert.equal(row?.description, "Edited by admin");
+    assert.deepEqual(row?.productSlugs, ["kept-roses", "kept-cake"]);
+    assert.equal(row?.createdAt, "2026-05-02T00:00:00.000Z");
+    assert.equal(row?.updatedAt, "2026-05-02T00:00:00.000Z");
   });
 
   it("returns an empty result when there is nothing to publish", async () => {
@@ -187,7 +221,7 @@ describe("combo publishing", { concurrency: 1 }, () => {
       /storage unavailable/
     );
 
-    assert.equal((await comboRow("err-roses-err-cake"))?.name, "err-roses and err-cake");
-    assert.equal(await comboRow("err-roses-err-plant"), undefined);
+    assert.equal((await comboRow("err-cake-err-plant"))?.name, "err-cake and err-plant");
+    assert.equal(await comboRow("err-cake-err-roses"), undefined);
   });
 });

@@ -1,7 +1,7 @@
 import { VENDOR_GBO } from "../constants";
 import { catalogVendorKeys, marketplaceVendorKeys } from "../db/keys";
 import { isGboStorefrontEnabled, restrictedDeliveryCountries } from "./gbo";
-import { fulfillmentVendorSlug } from "./serviceability";
+import { normalizedFulfillmentVendorSlug } from "./serviceability";
 import {
   CATALOG_STORAGE_LABEL,
   CATALOG_VENDOR_SLUGS,
@@ -251,13 +251,14 @@ export function productAllowedForNewShopping(
     slug?: string | null;
     sku?: string | null;
     productSlug?: string | null;
+    tags?: readonly string[] | null;
     deliveryCountries?: readonly string[] | null;
   },
   country: string | null | undefined,
   vendors: ReadonlyMap<string, ShoppingVendorRecord> | readonly ShoppingVendorRecord[],
   env: Record<string, string | undefined> = process.env
 ): NewShoppingDecision {
-  const vendorSlug = fulfillmentVendorSlug({
+  const vendorSlug = normalizedFulfillmentVendorSlug({
     ...product,
     slug: product.slug ?? product.productSlug,
   });

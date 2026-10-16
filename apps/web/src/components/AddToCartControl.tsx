@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { estimatedDeliveryShort } from "@blossompot/shared";
 import type { ProductAddonSelection } from "@blossompot/shared";
-import { addComboComponentsToCart } from "@/lib/combo-cart";
+import { addComboComponentsToCart, comboComponentLine, comboQuantityChange } from "@/lib/combo-cart";
 import { useCart } from "@/lib/cart-context";
 
 export type CartControlLine = {
@@ -84,16 +84,13 @@ export function AddToCartControl({
   shippingOptionLabel,
   combo,
 }: AddToCartControlProps) {
-  const { sessionReady, addItem, updateItem, removeItem, quantityFor, lineIdFor } = useCart();
+  const { cart, sessionReady, addItem, updateItem, removeItem, quantityFor, lineIdFor } = useCart();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [addedNote, setAddedNote] = useState("");
 
   const tracked = combo
-    ? combo.components.map((component) => ({
-        quantity: quantityFor(component.slug),
-        lineId: lineIdFor(component.slug),
-      }))
+    ? combo.components.map((component) => comboComponentLine(cart, component))
     : [
         {
           quantity: quantityFor(productSlug, addons, shippingOptionLabel),
@@ -110,7 +107,10 @@ export function AddToCartControl({
       await addItem(productSlug, 1, getContact?.(), addonsPayload, shippingOptionLabel);
       return;
     }
-    const result = await addComboComponentsToCart(combo.components, quantityFor(combo.components[0].slug), {
+    const result = await addComboComponentsToCart(
+      combo.components,
+      comboComponentLine(cart, combo.components[0]).quantity,
+      {
       addItem: (slug) => addItem(slug),
       updateItem,
       removeItem,
@@ -125,15 +125,12 @@ export function AddToCartControl({
       else await updateItem(lineId, quantity - 1);
       return;
     }
-    if (quantity <= 1) {
-      for (const line of tracked) {
-        if (line.lineId) await removeItem(line.lineId);
-      }
+    const change = comboQuantityChange(tracked, "decrease");
+    if (change.kind === "remove") {
+      for (const id of change.lineIds) await removeItem(id);
       return;
     }
-    for (const line of tracked) {
-      if (line.lineId) await updateItem(line.lineId, line.quantity - 1);
-    }
+    for (const update of change.updates) await updateItem(update.lineId, update.quantity);
   };
 
   const removeCurrent = async () => {
@@ -141,8 +138,9 @@ export function AddToCartControl({
       if (lineId) await removeItem(lineId);
       return;
     }
-    for (const line of tracked) {
-      if (line.lineId) await removeItem(line.lineId);
+    const change = comboQuantityChange(tracked, "remove");
+    if (change.kind === "remove") {
+      for (const id of change.lineIds) await removeItem(id);
     }
   };
 

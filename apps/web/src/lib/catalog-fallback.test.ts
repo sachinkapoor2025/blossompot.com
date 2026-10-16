@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { beforeEach, describe, it } from "node:test";
 import { CATALOG_VENDOR_SLUGS, defaultCatalogVendor, type Product, type ShoppingVendorRecord } from "@blossompot/shared";
 import {
   bundledHiddenForDisabledVendor,
@@ -13,11 +13,16 @@ import {
 } from "./catalog-fallback";
 
 describe("bundled catalog fallback", () => {
+  beforeEach(() => {
+    rememberStorefrontShoppingVendors(defaultVendors());
+  });
+
   it("includes published FNP USA products with name, image, price, and category", () => {
     const products = getCatalogProducts();
     const fnp = products.filter((product) => (product.tags ?? []).includes("fnp-usa-import"));
-    // 23 FNP rows are Rakhi gifts and stay off the public storefront by existing filter.
-    assert.equal(fnp.length, 748);
+    // Rakhi rows are removed while the catalog is read. Rows that resolve as Gift Baskets
+    // Overseas stay out while that storefront flag is off, so this is the visible FNP tag count.
+    assert.equal(fnp.length, 730);
     const pastel = getCatalogProduct("perfectly-pastel-premium");
     assert.ok(pastel);
     assert.equal(pastel?.name, "Perfectly Pastel Premium");
@@ -63,7 +68,7 @@ describe("bundled catalog fallback", () => {
 
   it("injects missing catalog SKUs for the shopping country", () => {
     const merged = mergeProductsForCountry([], "US");
-    assert.ok(merged.length >= 771);
+    assert.equal(merged.length, 756);
     assert.ok(merged.some((product) => product.slug === "perfectly-pastel-premium"));
   });
 
@@ -99,8 +104,56 @@ describe("bundled catalog fallback", () => {
     rememberStorefrontShoppingVendors(null);
     assert.equal(
       mergeProductsForCountry([], "US").some((product) => product.slug === "perfectly-pastel-premium"),
-      true
+      false
     );
+    assert.equal(getCatalogProducts().some((product) => product.slug === "perfectly-pastel-premium"), false);
+  });
+
+  it("keeps a published enabled product and drops an unpublished one", () => {
+    const draft = fallbackProduct({ slug: "fallback-draft", vendorSlug: "fnp", published: false });
+    const live = fallbackProduct({ slug: "fallback-live", vendorSlug: "fnp", published: true });
+    const merged = mergeProductsForCountry([draft, live], "US");
+    assert.equal(merged.some((product) => product.slug === "fallback-draft"), false);
+    assert.equal(merged.some((product) => product.slug === "fallback-live"), true);
+    assert.equal(merged.some((product) => product.slug === "perfectly-pastel-premium"), true);
+  });
+
+  it("matches FNP case, the import tag, a blank slug, and Gift Baskets Overseas signals", () => {
+    const vendors = defaultVendors();
+    const fnpOff = vendors.map((vendor) => (vendor.vendorSlug === "fnp" ? { ...vendor, enabled: false } : vendor));
+    const uppercase = fallbackProduct({ slug: "fallback-fnp-case", vendorSlug: "FNP" });
+    const tagged = fallbackProduct({ slug: "fallback-fnp-tag", vendorSlug: "  ", tags: ["fnp-usa-import"] });
+    const blank = fallbackProduct({ slug: "fallback-blank", vendorSlug: "  " });
+    const gbo = fallbackProduct({
+      slug: "fallback-gbo",
+      vendorSlug: "fnp",
+      sku: "gbo:US:44",
+      internationalDelivery: true,
+    });
+    assert.equal(bundledHiddenForDisabledVendor(uppercase, "US", vendors), false);
+    assert.equal(bundledHiddenForDisabledVendor(uppercase, "US", fnpOff), true);
+    assert.equal(bundledHiddenForDisabledVendor(tagged, "US", fnpOff), true);
+    assert.equal(bundledHiddenForDisabledVendor(blank, "US", fnpOff), false);
+    const previousGbo = process.env.GBO_STOREFRONT_ENABLED;
+    process.env.GBO_STOREFRONT_ENABLED = "true";
+    try {
+      assert.equal(bundledHiddenForDisabledVendor(gbo, "US", fnpOff), false);
+      const gboOff = vendors.map((vendor) =>
+        vendor.vendorSlug === "gift-baskets-overseas" ? { ...vendor, enabled: false } : vendor
+      );
+      assert.equal(bundledHiddenForDisabledVendor(gbo, "US", gboOff), true);
+    } finally {
+      if (previousGbo === undefined) delete process.env.GBO_STOREFRONT_ENABLED;
+      else process.env.GBO_STOREFRONT_ENABLED = previousGbo;
+    }
+    rememberStorefrontShoppingVendors(fnpOff);
+    const merged = mergeProductsForCountry(
+      [uppercase, tagged, blank],
+      "US"
+    );
+    assert.equal(merged.some((product) => product.slug === "fallback-fnp-case"), false);
+    assert.equal(merged.some((product) => product.slug === "fallback-fnp-tag"), false);
+    assert.equal(merged.some((product) => product.slug === "fallback-blank"), true);
   });
 
   it("hides a disabled Orange County product and leaves an enabled one to the ZIP rules", () => {
@@ -131,4 +184,20 @@ describe("bundled catalog fallback", () => {
 
 function defaultVendors(): ShoppingVendorRecord[] {
   return CATALOG_VENDOR_SLUGS.map((slug) => defaultCatalogVendor(slug));
+}
+
+function fallbackProduct(extra: Partial<Product> & { slug: string }): Product {
+  return {
+    name: extra.slug,
+    description: "Fallback row",
+    price: 20,
+    currency: "USD",
+    categorySlug: "flowers",
+    images: [],
+    inventory: 4,
+    published: true,
+    createdAt: "2026-01-01T00:00:00.000Z",
+    updatedAt: "2026-01-01T00:00:00.000Z",
+    ...extra,
+  } as Product;
 }

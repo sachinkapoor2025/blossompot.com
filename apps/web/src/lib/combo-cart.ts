@@ -1,8 +1,20 @@
-import type { Cart } from "@blossompot/shared";
+import { cartLineOptionsSignature, type Cart } from "@blossompot/shared";
 
 export type ComboCartComponent = {
   slug: string;
   name: string;
+};
+
+/** Cart API default when a combo add does not choose a shipping option. */
+const COMBO_DEFAULT_SHIPPING_LABEL = "2nd Day";
+
+export type ComboQuantityChange =
+  | { kind: "update"; updates: { lineId: string; quantity: number }[] }
+  | { kind: "remove"; lineIds: string[] };
+
+type ComboLineSource = {
+  slug: string;
+  shippingOptionLabel?: string;
 };
 
 export type ComboCartClient = {
@@ -17,12 +29,54 @@ function detail(err: unknown): string {
   return err instanceof Error && err.message.trim() ? err.message.trim() : "Something went wrong";
 }
 
-function plainLineId(cart: Cart, slug: string): string | undefined {
-  const item = cart.items.find(
-    (line) => line.productSlug === slug && !(line.addons && line.addons.length > 0) && !line.shippingOptionLabel
+function lineLabel(label?: string | null): string {
+  return (label ?? "").trim().toLowerCase();
+}
+
+/**
+ * The cart line a combo component controls.
+ * Plain products match a line with no shipping label.
+ * Products that receive the cart's default shipping label match that line.
+ */
+export function comboComponentLine(
+  cart: Cart | null | undefined,
+  component: ComboLineSource
+): { quantity: number; lineId?: string } {
+  const items = (cart?.items ?? []).filter(
+    (line) => line.productSlug === component.slug && !(line.addons && line.addons.length > 0)
   );
-  if (!item) return undefined;
-  return item.lineId ?? item.productSlug;
+  const wanted = component.shippingOptionLabel?.trim();
+  const item = wanted
+    ? items.find((line) => lineLabel(line.shippingOptionLabel) === wanted.toLowerCase())
+    : items.find((line) => !lineLabel(line.shippingOptionLabel)) ??
+      items.find((line) => lineLabel(line.shippingOptionLabel) === COMBO_DEFAULT_SHIPPING_LABEL.toLowerCase());
+  if (!item) return { quantity: 0 };
+  const plain = cartLineOptionsSignature(item.addons, item.shippingOptionLabel) === "";
+  return {
+    quantity: item.quantity,
+    lineId: item.lineId ?? (plain ? item.productSlug : undefined),
+  };
+}
+
+/** Decrement or remove both component lines together. */
+export function comboQuantityChange(
+  lines: readonly { quantity: number; lineId?: string }[],
+  direction: "decrease" | "remove"
+): ComboQuantityChange {
+  const quantity = lines.length ? Math.min(...lines.map((line) => line.quantity)) : 0;
+  if (direction === "remove" || quantity <= 1) {
+    return { kind: "remove", lineIds: lines.flatMap((line) => (line.lineId ? [line.lineId] : [])) };
+  }
+  return {
+    kind: "update",
+    updates: lines.flatMap((line) =>
+      line.lineId ? [{ lineId: line.lineId, quantity: line.quantity - 1 }] : []
+    ),
+  };
+}
+
+function plainLineId(cart: Cart, component: ComboCartComponent): string | undefined {
+  return comboComponentLine(cart, component).lineId;
 }
 
 /**
@@ -48,7 +102,7 @@ export async function addComboComponentsToCart(
   } catch (err) {
     const reason = `Could not add both gifts. ${detail(err)}`;
     try {
-      const lineId = plainLineId(firstCart, first.slug);
+      const lineId = plainLineId(firstCart, first);
       if (!lineId) throw new Error("Missing cart line");
       if (previousFirstQuantity <= 0) await client.removeItem(lineId);
       else await client.updateItem(lineId, previousFirstQuantity);

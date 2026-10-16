@@ -27,6 +27,7 @@ import {
   productAllowedForNewShopping,
   productForShoppingDecision,
   fulfillmentVendorSlug,
+  assignProductCategories,
   catalogVendorShoppingStatus,
   listingGroupsForProducts,
   orderProductsByVendor,
@@ -161,7 +162,7 @@ export function toListingCardProduct<T extends { description?: string }>(product
 }
 
 function forStorefront(product: Product): Product {
-  const vendorSlug = fulfillmentVendorSlug(product);
+  const vendorSlug = fulfillmentVendorSlug(product).trim().toLowerCase();
   const allowsAddons = productAllowsAddons(product);
   const stripped = stripVendorPrivateFields(
     withCompetitiveStorefrontPricing(withResolvedProductImages(product))
@@ -523,6 +524,23 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
   });
 }
 
+async function knownCategorySlugs(slugs: readonly string[]): Promise<Set<string>> {
+  const unique = [...new Set(slugs.map((slug) => slug.trim()).filter(Boolean))];
+  const found = new Set<string>();
+  await Promise.all(
+    unique.map(async (slug) => {
+      const result = await docClient.send(
+        new GetCommand({
+          TableName: PRODUCTS_TABLE,
+          Key: { PK: categoryKeys.pk(slug), SK: categoryKeys.sk() },
+        })
+      );
+      if (result.Item) found.add(slug);
+    })
+  );
+  return found;
+}
+
 export async function createProduct(event: APIGatewayProxyEventV2) {
   const auth = getAuth(event);
   if (!auth?.isAdmin) return forbidden();
@@ -530,6 +548,16 @@ export async function createProduct(event: APIGatewayProxyEventV2) {
   const body = JSON.parse(event.body ?? "{}");
   const parsed = createProductSchema.safeParse(body);
   if (!parsed.success) return badRequest(parsed.error.message);
+
+  const assignedCategories = assignProductCategories({
+    categorySlug: parsed.data.categorySlug,
+    additionalCategorySlugs: parsed.data.additionalCategorySlugs,
+    knownSlugs: await knownCategorySlugs([
+      parsed.data.categorySlug,
+      ...(parsed.data.additionalCategorySlugs ?? []),
+    ]),
+  });
+  if (!assignedCategories.ok) return badRequest(assignedCategories.error);
 
   const slug = slugify(parsed.data.name);
   const timestamp = now();
@@ -542,12 +570,16 @@ export async function createProduct(event: APIGatewayProxyEventV2) {
   );
   const item: Product & { PK: string; SK: string; GSI1PK: string; GSI1SK: string } = {
     ...parsed.data,
+    categorySlug: assignedCategories.categorySlug,
+    ...(assignedCategories.additionalCategorySlugs !== undefined
+      ? { additionalCategorySlugs: assignedCategories.additionalCategorySlugs }
+      : {}),
     vendorSlug: fulfillmentVendorSlug(parsed.data),
     inventory,
     slug,
     PK: productKeys.pk(slug),
     SK: productKeys.sk(),
-    GSI1PK: productKeys.gsi1pk(parsed.data.categorySlug),
+    GSI1PK: productKeys.gsi1pk(assignedCategories.categorySlug),
     GSI1SK: productKeys.gsi1sk(slug),
     createdAt: typeof existing.Item?.createdAt === "string" ? existing.Item.createdAt : timestamp,
     updatedAt: timestamp,
@@ -598,6 +630,26 @@ export async function updateProduct(event: APIGatewayProxyEventV2) {
   const parsed = updateProductSchema.safeParse(body);
   if (!parsed.success) return badRequest(parsed.error.message);
 
+  let categorySlug = parsed.data.categorySlug;
+  let additionalCategorySlugs = parsed.data.additionalCategorySlugs;
+  if (parsed.data.categorySlug !== undefined || parsed.data.additionalCategorySlugs !== undefined) {
+    const primary = parsed.data.categorySlug ?? previous.categorySlug ?? "";
+    const assigned = assignProductCategories({
+      categorySlug: primary,
+      additionalCategorySlugs: parsed.data.additionalCategorySlugs,
+      knownSlugs: await knownCategorySlugs([primary, ...(parsed.data.additionalCategorySlugs ?? [])]),
+    });
+    if (!assigned.ok) return badRequest(assigned.error);
+    categorySlug = assigned.categorySlug;
+    if (parsed.data.additionalCategorySlugs !== undefined) {
+      additionalCategorySlugs = assigned.additionalCategorySlugs ?? [];
+    } else if ((previous.additionalCategorySlugs ?? []).includes(assigned.categorySlug)) {
+      additionalCategorySlugs = (previous.additionalCategorySlugs ?? []).filter(
+        (slug) => slug !== assigned.categorySlug
+      );
+    }
+  }
+
   const allowShrinkImages = body?.replaceImages === true;
   const imageUpdate =
     parsed.data.images !== undefined
@@ -609,12 +661,14 @@ export async function updateProduct(event: APIGatewayProxyEventV2) {
   const updated = {
     ...previous,
     ...parsed.data,
+    ...(categorySlug !== undefined ? { categorySlug } : {}),
+    ...(additionalCategorySlugs !== undefined ? { additionalCategorySlugs } : {}),
     ...(imageUpdate ? { images: imageUpdate.images } : {}),
     updatedAt: now(),
   } as Product & { PK: string; SK: string; GSI1PK: string; GSI1SK: string };
 
-  if (parsed.data.categorySlug) {
-    updated.GSI1PK = productKeys.gsi1pk(parsed.data.categorySlug);
+  if (categorySlug) {
+    updated.GSI1PK = productKeys.gsi1pk(categorySlug);
     updated.GSI1SK = productKeys.gsi1sk(slug);
   }
 
@@ -951,6 +1005,15 @@ export async function bulkUploadProducts(event: APIGatewayProxyEventV2) {
       continue;
     }
 
+    const assignedCategories = assignProductCategories({
+      categorySlug: parsed.data.categorySlug,
+      knownSlugs: await knownCategorySlugs([parsed.data.categorySlug]),
+    });
+    if (!assignedCategories.ok) {
+      errors.push({ row: i + 1, error: assignedCategories.error });
+      continue;
+    }
+
     const slug = slugify(parsed.data.name);
     const timestamp = now();
     const tags = parsed.data.tags
@@ -975,13 +1038,14 @@ export async function bulkUploadProducts(event: APIGatewayProxyEventV2) {
 
     const item = {
       ...parsed.data,
+      categorySlug: assignedCategories.categorySlug,
       slug,
       tags,
       vendorSlug,
       images: [],
       PK: productKeys.pk(slug),
       SK: productKeys.sk(),
-      GSI1PK: productKeys.gsi1pk(parsed.data.categorySlug),
+      GSI1PK: productKeys.gsi1pk(assignedCategories.categorySlug),
       GSI1SK: productKeys.gsi1sk(slug),
       createdAt: timestamp,
       updatedAt: timestamp,

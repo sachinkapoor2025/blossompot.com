@@ -7,6 +7,7 @@ export function CountrySeoArticle({
   headingLevel = "h1",
   omitHeading = false,
   centerFaq = false,
+  headingClassName = "font-display text-3xl font-bold text-primary mb-4",
 }: {
   article: CountrySeoContent;
   headingLevel?: "h1" | "h2";
@@ -14,8 +15,20 @@ export function CountrySeoArticle({
   omitHeading?: boolean;
   /** Center the FAQ block. Question text stays left-aligned. */
   centerFaq?: boolean;
+  /** Page heading classes. Defaults to the existing article title. */
+  headingClassName?: string;
 }) {
   const Heading = headingLevel;
+  const stepSeparator = article.stepSeparator ?? " — ";
+  const faq =
+    article.faqs.length > 0 ? (
+      <section className={`mt-12 pt-10 border-t border-slate-200 max-w-3xl${centerFaq ? " mx-auto" : ""}`}>
+        <h2 className={`font-display text-xl font-semibold text-primary mb-6${centerFaq ? " text-center" : ""}`}>
+          {article.faqHeading ?? "Frequently asked questions"}
+        </h2>
+        <FaqAccordion items={article.faqs} />
+      </section>
+    ) : null;
 
   return (
     <section
@@ -26,7 +39,7 @@ export function CountrySeoArticle({
         <article className={`max-w-3xl space-y-8 text-slate-700 leading-relaxed${centerFaq ? " mx-auto" : ""}`}>
           <header>
             {omitHeading ? null : (
-              <Heading id="country-seo-heading" className="font-display text-3xl font-bold text-primary mb-4">
+              <Heading id="country-seo-heading" className={headingClassName}>
                 {article.heading}
               </Heading>
             )}
@@ -71,7 +84,7 @@ export function CountrySeoArticle({
                           item.title
                         )}
                       </h3>
-                      <p>{item.text}</p>
+                      {item.text ? <p>{item.text}</p> : null}
                     </div>
                   ))}
                 </div>
@@ -89,6 +102,11 @@ export function CountrySeoArticle({
                   ))}
                 </div>
               ) : null}
+              {section.paragraphsAfter?.map((paragraph) => (
+                <p key={paragraph} className="mt-4">
+                  {paragraph}
+                </p>
+              ))}
             </section>
           ))}
 
@@ -97,15 +115,21 @@ export function CountrySeoArticle({
               <h2 className="font-display text-xl font-semibold text-primary mb-3">{article.stepsHeading}</h2>
               <ol className="space-y-3 list-decimal list-inside">
                 {article.steps.map((step) => (
-                  <li key={step.title}>
-                    <span className="font-semibold text-primary">{step.title}</span>
-                    {" — "}
+                  <li key={step.title || step.text}>
+                    {step.title ? (
+                      <>
+                        <span className="font-semibold text-primary">{step.title}</span>
+                        {stepSeparator}
+                      </>
+                    ) : null}
                     {step.text}
                   </li>
                 ))}
               </ol>
             </section>
           ) : null}
+
+          {article.faqBeforeClosing ? faq : null}
 
           {article.closing.heading ? (
             <section>
@@ -119,12 +143,7 @@ export function CountrySeoArticle({
           ) : null}
         </article>
 
-        {article.faqs.length > 0 ? (
-          <section className={`mt-12 pt-10 border-t border-slate-200 max-w-3xl${centerFaq ? " mx-auto" : ""}`}>
-            <h2 className={`font-display text-xl font-semibold text-primary mb-6${centerFaq ? " text-center" : ""}`}>Frequently asked questions</h2>
-            <FaqAccordion items={article.faqs} />
-          </section>
-        ) : null}
+        {article.faqBeforeClosing ? null : faq}
       </div>
     </section>
   );

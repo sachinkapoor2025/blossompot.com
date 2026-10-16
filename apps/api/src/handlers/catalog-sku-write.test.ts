@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { before, describe, it } from "node:test";
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
 import { GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
-import { productSkuKeys } from "@blossompot/shared";
+import { categoryKeys, productSkuKeys } from "@blossompot/shared";
 
 process.env.USE_MEMORY_DB = "true";
 process.env.ENVIRONMENT = "local";
@@ -54,6 +54,18 @@ before(async () => {
   const db = await import("../lib/db");
   docClient = db.docClient as typeof docClient;
   productsTable = db.PRODUCTS_TABLE;
+  await docClient.send(
+    new PutCommand({
+      TableName: productsTable,
+      Item: {
+        PK: categoryKeys.pk("flowers"),
+        SK: categoryKeys.sk(),
+        slug: "flowers",
+        name: "Flowers",
+        published: true,
+      },
+    })
+  );
 });
 
 async function skuOwner(sku: string): Promise<string | undefined> {

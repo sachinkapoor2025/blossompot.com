@@ -17,8 +17,7 @@ export function WhyTrustUsSection() {
             Why customers trust BlossomPot
           </h2>
           <p className="text-slate-600 text-sm md:text-base leading-relaxed">
-            BlossomPot delivers {copy(trustFacts.catalog.toLowerCase())}. {copy(trustFacts.fulfillment)}.{" "}
-            {copy(trustFacts.support)}.
+            BlossomPot delivers curated flowers, cakes and gift hampers for birthdays, anniversaries, and other special occasions across the USA. Choose from a beautiful range of gifts to make every celebration memorable. Our customer support team is available via WhatsApp and email to assist you with your orders.
           </p>
         </div>
 

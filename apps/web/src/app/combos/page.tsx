@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
+import { CountrySeoArticle } from "@/components/CountrySeoArticle";
 import { HomeProductCard } from "@/components/HomeProductCard";
 import { ProductSortBar, type ProductSort } from "@/components/ProductSortBar";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -8,9 +9,10 @@ import { CatalogLoadError } from "@/components/CatalogLoadError";
 import { JsonLd } from "@/components/JsonLd";
 import { ListingPageSkeleton } from "@/components/route-skeletons";
 import { COMBOS_HEADING, COMBOS_PATH, loadCombosPage, sortStorefrontCombos } from "@/lib/combos-page";
+import { countrySeoContent } from "@/lib/content/country-seo-registry";
 import { countryDisplayName } from "@/lib/location-seo-urls";
 import { requestSeoPath } from "@/lib/request-seo-path";
-import { breadcrumbJsonLd, itemListJsonLd, pageMetadata } from "@/lib/seo";
+import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, pageMetadata } from "@/lib/seo";
 import { notFoundIfShoppingCountryDisabled } from "@/lib/shopping-country-gate";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 
@@ -19,6 +21,7 @@ interface Props {
 }
 
 const SORT_VALUES: ProductSort[] = ["featured", "price-asc", "price-desc", "name-asc", "name-desc"];
+const combosArticle = countrySeoContent("US", "combos");
 
 function resolveSort(raw?: string): ProductSort {
   return SORT_VALUES.includes(raw as ProductSort) ? (raw as ProductSort) : "featured";
@@ -31,9 +34,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const path = await requestSeoPath(COMBOS_PATH);
   await notFoundIfShoppingCountryDisabled(path);
   return pageMetadata({
-    title: `${COMBOS_HEADING} | BlossomPot`,
-    description:
-      "Shop combos on BlossomPot. Choose a product and check delivery availability for the recipient’s address at checkout.",
+    title: combosArticle.title,
+    description: combosArticle.description,
     path,
     absoluteTitle: true,
   });
@@ -71,10 +73,10 @@ async function CombosPageContent({ searchParams }: Props) {
             `${COMBOS_HEADING} — BlossomPot`,
             combos.map((combo) => ({ name: combo.name, path: COMBOS_PATH }))
           ),
+          faqJsonLd(combosArticle.faqs),
         ]}
       />
       <Breadcrumbs items={crumbs} />
-      <h1 className="text-3xl font-bold text-primary mb-8">{COMBOS_HEADING}</h1>
 
       {categoryLoad.state === "error" ? (
         <CatalogLoadError />
@@ -97,6 +99,10 @@ async function CombosPageContent({ searchParams }: Props) {
           </Link>
         </p>
       )}
+      <CountrySeoArticle
+        article={combosArticle}
+        headingClassName="text-3xl font-bold text-primary mb-4"
+      />
     </div>
   );
 }

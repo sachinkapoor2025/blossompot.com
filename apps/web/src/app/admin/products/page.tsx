@@ -2,12 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useApiClient, useAuth } from "@/lib/auth-context";
 import type { Product } from "@blossompot/shared";
 import {
+  CATALOG_VENDOR_SLUGS,
   DEFAULT_PRODUCT_INVENTORY,
-  fulfillmentVendorSlug,
+  assignProductCategories,
+  defaultCatalogVendor,
   LOW_STOCK_THRESHOLD,
   getUnitsSold,
   isFastSelling,
@@ -15,14 +17,29 @@ import {
 } from "@blossompot/shared";
 import { optionalShippingDims } from "@/lib/admin-product-dims";
 import { mergeSavedAdminProduct } from "@/lib/admin-product-row";
+import {
+  adminVendorFilterOptions,
+  filterAdminProducts,
+  type AdminVendorFilterOption,
+} from "@/lib/admin-product-vendor-filter";
+import { ProductCategoryFields } from "@/components/admin/ProductCategoryFields";
 import { formatMoney, paginate } from "@/lib/admin-utils";
 import { TableControls } from "@/components/admin/TableControls";
 
 export default function AdminProductsPage() {
   const apiClient = useApiClient();
   const { token } = useAuth();
-  const vendorFilter = useSearchParams().get("vendor") ?? "";
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const vendorFilter = (searchParams.get("vendor") ?? "").trim().toLowerCase();
   const [products, setProducts] = useState<Product[]>([]);
+  const [vendorOptions, setVendorOptions] = useState<AdminVendorFilterOption[]>(() =>
+    CATALOG_VENDOR_SLUGS.map((slug) => ({
+      vendorSlug: slug,
+      vendorName: defaultCatalogVendor(slug).vendorName,
+    }))
+  );
   const [categories, setCategories] = useState<{ slug: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -36,6 +53,7 @@ export default function AdminProductsPage() {
     description: "",
     price: "",
     categorySlug: "",
+    additionalCategorySlugs: [] as string[],
     inventory: String(DEFAULT_PRODUCT_INVENTORY),
     currency: "USD" as "USD" | "INR",
     sku: "",
@@ -77,19 +95,39 @@ export default function AdminProductsPage() {
   }, [load]);
 
   useEffect(() => {
+    apiClient<{ vendors: Array<{ vendorSlug: string; vendorName: string }> }>("/admin/catalog-vendors")
+      .then((data) => setVendorOptions(adminVendorFilterOptions(data.vendors)))
+      .catch(() => {
+        /* Built-in names stay available when the vendor list cannot be loaded. */
+      });
+  }, [apiClient]);
+
+  useEffect(() => {
     apiClient<{ count: number }>("/admin/shipping/products-missing-dims")
       .then((d) => setMissingDimsCount(d.count))
       .catch(() => setMissingDimsCount(0));
   }, [apiClient, products]);
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return products.filter((p) => {
-      if (vendorFilter && fulfillmentVendorSlug(p) !== vendorFilter) return false;
-      if (!q) return true;
-      return p.name.toLowerCase().includes(q) || p.slug.includes(q) || p.sku?.toLowerCase().includes(q);
-    });
-  }, [products, search, vendorFilter]);
+  const filtered = useMemo(
+    () => filterAdminProducts(products, { vendor: vendorFilter, search }),
+    [products, search, vendorFilter]
+  );
+  const vendorChoices = useMemo(() => {
+    if (!vendorFilter || vendorFilter === "all" || vendorOptions.some((vendor) => vendor.vendorSlug === vendorFilter)) {
+      return vendorOptions;
+    }
+    return [...vendorOptions, { vendorSlug: vendorFilter, vendorName: vendorFilter }];
+  }, [vendorOptions, vendorFilter]);
+
+  const setVendorFilter = (slug: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    const next = slug.trim().toLowerCase();
+    if (!next || next === "all") params.delete("vendor");
+    else params.set("vendor", next);
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    setPage(1);
+  };
 
   const { items: pageItems, totalPages, total } = paginate(filtered, page, pageSize);
 
@@ -98,7 +136,8 @@ export default function AdminProductsPage() {
       name: "",
       description: "",
       price: "",
-      categorySlug: categories[0]?.slug ?? "",
+      categorySlug: "",
+      additionalCategorySlugs: [],
       inventory: String(DEFAULT_PRODUCT_INVENTORY),
       currency: "USD",
       sku: "",
@@ -126,6 +165,15 @@ export default function AdminProductsPage() {
       setMessage(dims.message);
       return;
     }
+    const categoriesAssigned = assignProductCategories({
+      categorySlug: form.categorySlug,
+      additionalCategorySlugs: form.additionalCategorySlugs,
+      knownSlugs: new Set(categories.map((category) => category.slug)),
+    });
+    if (!categoriesAssigned.ok) {
+      setMessage(categoriesAssigned.error);
+      return;
+    }
     try {
       const saved = await apiClient<{ product: Product }>(`/products/${editing.slug}`, {
         method: "PUT",
@@ -135,7 +183,8 @@ export default function AdminProductsPage() {
           price: parseFloat(form.price),
           compareAtPrice: form.compareAtPrice ? parseFloat(form.compareAtPrice) : undefined,
           inventory: parseInt(form.inventory, 10),
-          categorySlug: form.categorySlug,
+          categorySlug: categoriesAssigned.categorySlug,
+          additionalCategorySlugs: categoriesAssigned.additionalCategorySlugs ?? [],
           currency: form.currency,
           sku: form.sku || undefined,
           tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
@@ -162,6 +211,7 @@ export default function AdminProductsPage() {
       description: p.description,
       price: String(p.price),
       categorySlug: p.categorySlug,
+      additionalCategorySlugs: p.additionalCategorySlugs ?? [],
       inventory: String(p.inventory),
       currency: p.currency,
       sku: p.sku ?? "",
@@ -406,24 +456,17 @@ export default function AdminProductsPage() {
             className="w-full border rounded-lg px-3 py-2"
           />
         </label>
-        <label className="block">
-          <span className="block text-sm font-medium text-slate-700 mb-1">
-            Category <span className="text-red-600">*</span>
-          </span>
-          <select
-            value={form.categorySlug}
-            onChange={(e) => setForm({ ...form, categorySlug: e.target.value })}
-            className="w-full border rounded-lg px-3 py-2"
-            required
-          >
-            <option value="">Select category</option>
-            {categories.map((c) => (
-              <option key={c.slug} value={c.slug}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="space-y-3 sm:col-span-2">
+          <ProductCategoryFields
+            categories={categories}
+            categorySlug={form.categorySlug}
+            additionalCategorySlugs={form.additionalCategorySlugs}
+            onCategorySlug={(categorySlug) => setForm({ ...form, categorySlug })}
+            onAdditionalCategorySlugs={(additionalCategorySlugs) =>
+              setForm({ ...form, additionalCategorySlugs })
+            }
+          />
+        </div>
         <label className="block">
           <span className="block text-sm font-medium text-slate-700 mb-1">Currency</span>
           <select
@@ -569,11 +612,32 @@ export default function AdminProductsPage() {
               Remove all sample products
             </button>
           </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="text-sm text-slate-600" htmlFor="admin-product-vendor">
+              Vendor
+            </label>
+            <select
+              id="admin-product-vendor"
+              value={vendorFilter && vendorFilter !== "all" ? vendorFilter : ""}
+              onChange={(event) => setVendorFilter(event.target.value)}
+              className="border rounded-lg bg-white px-3 py-2 text-sm"
+            >
+              <option value="">All vendors</option>
+              {vendorChoices.map((vendor) => (
+                <option key={vendor.vendorSlug} value={vendor.vendorSlug}>
+                  {vendor.vendorName}
+                </option>
+              ))}
+            </select>
+          </div>
           <input
             type="search"
             placeholder="Search by name, slug, SKU…"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             className="w-full border rounded-lg px-3 py-2 text-sm"
           />
           <TableControls
