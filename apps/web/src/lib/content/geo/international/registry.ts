@@ -1,5 +1,3 @@
-import { getGeoLocation, isGeoPublished, locationLabel } from "../locations";
-import { locationPublicPath } from "../../seo-data";
 import { AUSTRALIA_LOCATIONS } from "./content-australia";
 import { CANADA_LOCATIONS } from "./content-canada";
 import { EUROPE_LOCATIONS } from "./content-europe";
@@ -118,26 +116,6 @@ export function childLocations(loc: InternationalLocation): InternationalLocatio
   return (loc.childSlugs ?? [])
     .map((slug) => bySlug.get(slug))
     .filter((child): child is InternationalLocation => Boolean(child && isInternationalIndexable(child)));
-}
-
-export function relatedLocationLinks(loc: InternationalLocation): { label: string; href: string }[] {
-  const out: { label: string; href: string }[] = [];
-  const seen = new Set<string>();
-  for (const slug of loc.relatedSlugs ?? []) {
-    if (slug === loc.slug || seen.has(slug)) continue;
-    const intl = bySlug.get(slug);
-    if (intl && isInternationalIndexable(intl)) {
-      seen.add(slug);
-      out.push({ label: intl.label, href: internationalPath(intl) });
-      continue;
-    }
-    const usa = getGeoLocation(slug);
-    if (usa && isGeoPublished(usa)) {
-      seen.add(slug);
-      out.push({ label: locationLabel(usa), href: locationPublicPath(usa.slug) });
-    }
-  }
-  return out;
 }
 
 export function locationsByKind(kind: LocationKind): InternationalLocation[] {

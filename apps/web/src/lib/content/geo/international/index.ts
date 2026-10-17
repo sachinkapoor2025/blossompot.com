@@ -18,7 +18,6 @@ export {
   isInternationalIndexable,
   isMarketSlug,
   publishedInternationalLocations,
-  relatedLocationLinks,
   resolveInternationalPath,
   resolveLocation,
 } from "./registry";
