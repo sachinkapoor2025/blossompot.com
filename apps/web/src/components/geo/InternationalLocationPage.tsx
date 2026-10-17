@@ -13,15 +13,13 @@ import {
 } from "@/lib/content/geo/international";
 import { relatedLocationLinks } from "@/lib/content/geo/international/related-location-links";
 import { categoryHref } from "@/lib/category-urls";
+import { applyInlineLinks } from "@/lib/inline-links";
 
-const serviceLinks = [
-  { label: "Flowers", href: categoryHref("flowers") },
-  { label: "Bouquets", href: categoryHref("flower-bouquets") },
-  { label: "Cakes", href: categoryHref("cakes") },
-  { label: "Gift hampers", href: categoryHref("gift-hampers") },
-  { label: "Shipping", href: "/shipping" },
-  { label: "FAQ", href: "/faq" },
-  { label: "Contact", href: "/contact" },
+const catalogLinks = [
+  { phrase: "gift hampers", href: categoryHref("gift-hampers") },
+  { phrase: "bouquets", href: categoryHref("flower-bouquets") },
+  { phrase: "flowers", href: categoryHref("flowers") },
+  { phrase: "cakes", href: categoryHref("cakes") },
 ];
 
 export function InternationalLocationPage({
@@ -72,19 +70,12 @@ export function InternationalLocationPage({
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-3">What you can send</h2>
         <p className="text-slate-700 mb-3 max-w-3xl leading-relaxed">
-          The live catalog is flowers, bouquets, cakes, and gift hampers for delivery to a United States
-          address. Open a product page for inventory and timing — we do not invent local stock lists for
-          cities where we are only an origin market.
+          {applyInlineLinks(
+            "The live catalog is flowers, bouquets, cakes, and gift hampers for delivery to a United States address. Open a product page for inventory and timing — we do not invent local stock lists for cities where we are only an origin market.",
+            catalogLinks,
+            { currentPath: loc.path }
+          )}
         </p>
-        <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
-          {serviceLinks.map((link) => (
-            <li key={link.href}>
-              <Link href={link.href} className="text-nav hover:underline">
-                {link.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
       </section>
 
       {loc.serviceMode === "destination" ? (
@@ -128,13 +119,7 @@ export function InternationalLocationPage({
           <li>Real US destination coverage with state and city pages that already exist.</li>
           <li>Honest origin-market guides — we do not invent foreign storefronts or fake reviews.</li>
           <li>Secure checkout (Stripe USD / Razorpay INR) and a personal gift message.</li>
-          <li>
-            Human support via{" "}
-            <Link href="/contact" className="text-nav hover:underline">
-              contact
-            </Link>{" "}
-            and WhatsApp.
-          </li>
+          <li>Human support via the contact page and WhatsApp.</li>
         </ul>
       </section>
 

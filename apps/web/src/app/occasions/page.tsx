@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
+import { marketingPageInlineLinks } from "@/lib/content/page-inline-links";
 import { occasionPages } from "@/lib/content/occasions";
+import { applyInlineLinks } from "@/lib/inline-links";
 import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
@@ -28,8 +30,11 @@ export default function OccasionsIndexPage() {
       <Breadcrumbs items={crumbs} />
       <h1 className="text-3xl font-bold text-primary mb-3">Shop by occasion</h1>
       <p className="text-slate-600 max-w-3xl mb-8 leading-relaxed">
-        Choose an occasion hub for gift ideas, etiquette notes, and curated flowers, cakes, and
-        hampers with worldwide delivery guidance on every product.
+        {applyInlineLinks(
+          "Choose an occasion hub for gift ideas, etiquette notes, and curated flowers, cakes, and hampers with worldwide delivery guidance on every product.",
+          marketingPageInlineLinks.occasions,
+          { currentPath: path }
+        )}
       </p>
       <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {occasionPages.map((o) => (

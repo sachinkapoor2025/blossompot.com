@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { site } from "@/lib/site";
+import { marketingPageInlineLinks } from "@/lib/content/page-inline-links";
+import { applyInlineLinks } from "@/lib/inline-links";
 import { pageMetadata } from "@/lib/seo";
 import { siteUrl } from "@/lib/env";
 
@@ -11,6 +13,7 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default function PressPage() {
+  const inlineLinks = marketingPageInlineLinks.press;
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
       <h1 className="text-3xl font-bold text-primary mb-6">Press & media</h1>
@@ -19,9 +22,11 @@ export default function PressPage() {
           <h2 className="text-xl font-semibold text-primary">About BlossomPot</h2>
           <p>
             {site.name} ({siteUrl}) is an online florist and gifting store operated by Divit Global
-            Ventures, helping shoppers send premium flowers, cakes, and curated gifts across the
-            United States. Orders fulfill domestically with clear delivery expectations on every
-            product page.
+            Ventures, helping shoppers send premium{" "}
+            {applyInlineLinks("flowers, cakes, and curated gifts across the United States", inlineLinks, {
+              currentPath: "/press",
+            })}
+            . Orders fulfill domestically with clear delivery expectations on every product page.
           </p>
           <ul className="list-disc pl-5 space-y-1">
             <li>Flowers, bouquets, cakes, and gift hampers for worldwide delivery</li>

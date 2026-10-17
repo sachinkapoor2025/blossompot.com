@@ -13,7 +13,7 @@ import {
 import { flowerDeliveryPathForIso } from "@/lib/location-seo-urls";
 import { notFoundIfShoppingCountryDisabled } from "@/lib/shopping-country-gate";
 import { countryPageInlineLinks } from "@/lib/content/page-inline-links";
-import { applyInlineLinks } from "@/lib/inline-links";
+import { applyInlineLinks, normalizeInternalPath } from "@/lib/inline-links";
 import { breadcrumbJsonLd, canonical, faqJsonLd } from "@/lib/seo";
 import { cityNavHref } from "@/lib/site";
 import { cityMenuForCountry } from "@/lib/city-menu-for-location";
@@ -54,6 +54,13 @@ export async function CountryFlowerDeliveryPage({
   const centered = align === "center";
   const inlineLinks = countryPageInlineLinks[country] ?? [];
   const usedHrefs = new Set<string>();
+  const usedPhrases = new Set<string>();
+  const blockedHrefs = new Set(
+    [...page.categories, ...countryCityLinks, page.primaryCta, page.secondaryCta, ...page.relatedHubs].map(
+      (link) => normalizeInternalPath(link.href)
+    )
+  );
+  const linkOpts = { usedHrefs, usedPhrases, blockedHrefs, currentPath: page.href };
   const crumbs = [
     { label: "Home", href: "/" },
     { label: page.menuLabel },
@@ -109,7 +116,7 @@ export async function CountryFlowerDeliveryPage({
       {productsFirst ? null : <FlowerGuideProducts country={country} />}
 
       <p className="text-slate-600 mb-6 max-w-3xl leading-relaxed">
-        {applyInlineLinks(page.intro, inlineLinks, { usedHrefs, currentPath: page.href, max: 4 })}
+        {applyInlineLinks(page.intro, inlineLinks, linkOpts)}
       </p>
 
       <div className="mb-8 rounded-xl border border-primary/15 bg-petal/80 px-4 py-3 text-sm text-slate-800">
@@ -119,14 +126,14 @@ export async function CountryFlowerDeliveryPage({
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-3">{page.howItWorksHeading}</h2>
         <p className="text-slate-700 leading-relaxed max-w-3xl">
-          {applyInlineLinks(page.howItWorks, inlineLinks, { usedHrefs, currentPath: page.href, max: 4 })}
+          {applyInlineLinks(page.howItWorks, inlineLinks, linkOpts)}
         </p>
       </section>
 
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-3">{page.categoriesHeading}</h2>
         <p className="text-slate-700 mb-4 max-w-3xl leading-relaxed">
-          {applyInlineLinks(page.categoriesIntro, inlineLinks, { usedHrefs, currentPath: page.href, max: 4 })}
+          {applyInlineLinks(page.categoriesIntro, inlineLinks, linkOpts)}
         </p>
         <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {page.categories.map((cat) => (
@@ -160,7 +167,7 @@ export async function CountryFlowerDeliveryPage({
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-3">{page.citiesHeading}</h2>
         <p className="text-slate-700 mb-3 max-w-3xl leading-relaxed">
-          {applyInlineLinks(page.citiesIntro, inlineLinks, { usedHrefs, currentPath: page.href, max: 4 })}
+          {applyInlineLinks(page.citiesIntro, inlineLinks, linkOpts)}
         </p>
         <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
           {countryCityLinks.map((link) => (
@@ -215,7 +222,7 @@ export async function CountryFlowerDeliveryPage({
         <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
           {page.relatedHubs
             .filter((link) => !link.href.startsWith("/flower-delivery-") || link.href === page.href)
-            .slice(0, 4)
+            .slice(0, 3)
             .map((link) => (
             <li key={link.href}>
               <Link href={link.href} className="text-nav hover:underline">

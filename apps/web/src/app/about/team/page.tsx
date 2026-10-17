@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
 import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
+import { applyInlineLinks } from "@/lib/inline-links";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = pageMetadata({
@@ -52,7 +53,12 @@ export default function AboutTeamPage() {
           <article key={a.name} className="border-t border-slate-200 pt-6">
             <h2 className="text-xl font-bold text-primary">{a.name}</h2>
             <p className="text-sm text-slate-500 mb-3">{a.role}</p>
-            <p className="text-slate-700 leading-relaxed">{a.bio}</p>
+            <p className="text-slate-700 leading-relaxed">
+              {applyInlineLinks(a.bio, [{ phrase: "press page", href: "/press" }], {
+                currentPath: path,
+                max: 1,
+              })}
+            </p>
           </article>
         ))}
       </div>

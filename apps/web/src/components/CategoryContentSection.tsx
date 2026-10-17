@@ -17,6 +17,7 @@ interface Props {
 export function CategoryContentSection({ content, categoryName, deliveryCountryIso }: Props) {
   const inlineLinks = categoryPageInlineLinks[content.slug] ?? [];
   const usedHrefs = new Set<string>();
+  const usedPhrases = new Set<string>();
 
   return (
     <div className="mt-12 pt-10 border-t border-slate-200">
@@ -26,7 +27,7 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
             <h2 className="text-2xl font-bold text-primary mb-4">{content.headline}</h2>
             {content.intro.map((p, i) => (
               <p key={i} className="mb-4">
-                {applyInlineLinks(p, inlineLinks, { usedHrefs, currentPath: categoryHref(content.slug), max: 4 })}
+                {applyInlineLinks(p, inlineLinks, { usedHrefs, usedPhrases, currentPath: categoryHref(content.slug) })}
               </p>
             ))}
           </header>
@@ -35,7 +36,7 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
             <h3 className="font-display text-xl font-semibold text-primary mb-3">{content.delivery.heading}</h3>
             {content.delivery.paragraphs.map((p, i) => (
               <p key={i} className="mb-3">
-                {applyInlineLinks(p, inlineLinks, { usedHrefs, max: 4 })}
+                {applyInlineLinks(p, inlineLinks, { usedHrefs, usedPhrases })}
               </p>
             ))}
           </section>
@@ -65,7 +66,7 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
               <h3 className="font-display text-xl font-semibold text-primary mb-3">{content.tradition.heading}</h3>
               {content.tradition.paragraphs.map((p, i) => (
                 <p key={i} className="mb-3">
-                  {applyInlineLinks(p, inlineLinks, { usedHrefs, max: 4 })}
+                  {applyInlineLinks(p, inlineLinks, { usedHrefs, usedPhrases })}
                 </p>
               ))}
             </section>

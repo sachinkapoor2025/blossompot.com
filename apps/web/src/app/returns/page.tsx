@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { marketingPageInlineLinks } from "@/lib/content/page-inline-links";
+import { applyInlineLinks } from "@/lib/inline-links";
 import { site, whatsappChatUrl, whatsappLinkLabel } from "@/lib/site";
 import { JsonLd } from "@/components/JsonLd";
 import { faqJsonLd, pageMetadata } from "@/lib/seo";
@@ -38,7 +40,11 @@ export default function ReturnsPage() {
       <div className="space-y-6 text-slate-700 leading-relaxed text-sm sm:text-base">
         <p>
           At {site.name}, we know a gift is more than an item — it&apos;s a moment you&apos;re creating for
-          someone you care about. Whether it&apos;s fresh flowers, a cake, or a curated hamper, we want every
+          someone you care about. Whether it&apos;s{" "}
+          {applyInlineLinks("fresh flowers, a cake, or a curated hamper", marketingPageInlineLinks.returns, {
+            currentPath: "/returns",
+          })}
+          , we want every
           delivery to arrive exactly as you imagined. If something goes wrong, we will make it right.
         </p>
 
@@ -219,9 +225,6 @@ export default function ReturnsPage() {
         <p>Our team typically responds within a few hours, and faster around major gifting occasions.</p>
 
         <p className="text-slate-500 text-sm">Last updated: August 2026</p>
-        <Link href="/" className="text-nav font-semibold hover:underline inline-block">
-          ← Back to home
-        </Link>
       </div>
     </div>
   );

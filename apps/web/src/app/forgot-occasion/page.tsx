@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { GiftRecommendation } from "@blossompot/shared";
+import { marketingPageInlineLinks } from "@/lib/content/page-inline-links";
+import { applyInlineLinks } from "@/lib/inline-links";
 import { fetchEmergencyGifts } from "@/lib/gifting";
 
 const CATS = [
@@ -29,7 +31,11 @@ export default function ForgotOccasionPage() {
       <p className="text-sm font-semibold text-red-600">Forgot a special occasion?</p>
       <h1 className="text-3xl font-bold text-primary mt-2">Don&apos;t worry. We&apos;ve got you.</h1>
       <p className="text-slate-600 mt-3">
-        Last-minute flowers, cakes, and combos scored from live inventory — not a random list.
+        {applyInlineLinks(
+          "Last-minute flowers, cakes, and combos scored from live inventory — not a random list.",
+          marketingPageInlineLinks["forgot-occasion"],
+          { currentPath: "/forgot-occasion" }
+        )}
       </p>
       <div className="flex flex-wrap gap-2 mt-6">
         {CATS.map((cat) => (

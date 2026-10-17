@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { BlogShowMoreProducts } from "@/components/BlogShowMoreProducts";
-import { categoryHref } from "@/lib/category-urls";
 import { JsonLd } from "@/components/JsonLd";
 import { loadBlogPostWithImage } from "@/lib/blog-images";
 import { listAllBlogPosts } from "@/lib/content/blog-posts";
@@ -46,6 +44,7 @@ export default async function BlogPostPage({ params }: Props) {
   ];
   const inlineLinks = blogPageInlineLinks[post.slug] ?? [];
   const usedHrefs = new Set<string>();
+  const usedPhrases = new Set<string>();
 
   return (
     <div className="overflow-x-hidden">
@@ -92,56 +91,13 @@ export default async function BlogPostPage({ params }: Props) {
               )}
               {section.paragraphs.map((p, j) => (
                 <p key={j} className="text-slate-700 leading-relaxed mb-4 break-words [overflow-wrap:anywhere]">
-                  {applyInlineLinks(p, inlineLinks, { usedHrefs, currentPath: `/blog/${post.slug}`, max: 4 })}
+                  {applyInlineLinks(p, inlineLinks, { usedHrefs, usedPhrases, currentPath: `/blog/${post.slug}` })}
                 </p>
               ))}
             </section>
           ))}
         </div>
 
-        {post.slug === "how-to-keep-flowers-fresh-longer" ? (
-          <p className="mt-8 text-sm text-slate-600">
-            Continue in the{" "}
-            <Link href="/flower-guide/flower-care" className="text-nav font-semibold hover:underline">
-              Flower Care Centre
-            </Link>{" "}
-            for rose, tulip, lily and hydrangea-specific steps.
-          </p>
-        ) : null}
-        {post.slug === "rose-color-meanings-for-gifting" ? (
-          <p className="mt-8 text-sm text-slate-600">
-            Read the full{" "}
-            <Link href="/flower-guide/rose" className="text-nav font-semibold hover:underline">
-              rose encyclopedia
-            </Link>{" "}
-            and the{" "}
-            <Link href="/flower-guide/flower-meanings" className="text-nav font-semibold hover:underline">
-              flower meanings
-            </Link>{" "}
-            hub.
-          </p>
-        ) : null}
-
-        {post.relatedCategory && (
-          <div className="mt-10 p-6 bg-slate-50 rounded-xl border min-w-0">
-            <h2 className="font-semibold text-primary mb-2">Shop related gifts</h2>
-            <Link href={categoryHref(post.relatedCategory)} className="text-nav font-semibold hover:underline">
-              Browse {post.relatedCategory.replace(/-/g, " ")} →
-            </Link>
-          </div>
-        )}
-
-        <div className="mt-8 pt-6 border-t flex flex-wrap gap-4 text-sm">
-          <Link href="/" className="text-nav hover:underline">
-            Shop BlossomPot home →
-          </Link>
-          <Link href="/flowers" className="text-nav hover:underline">
-            Shop flowers →
-          </Link>
-          <Link href="/blog" className="text-nav hover:underline">
-            ← All articles
-          </Link>
-        </div>
       </article>
 
       <div className="max-w-5xl mx-auto px-4 pb-12">

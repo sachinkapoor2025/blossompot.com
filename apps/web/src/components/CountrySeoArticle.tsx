@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { FaqAccordion } from "@/components/FaqAccordion";
-import type { CountrySeoContent } from "@/lib/content/country-seo-registry";
+import { countrySeoHrefs, type CountrySeoContent } from "@/lib/content/country-seo-registry";
+import { seoArticleInlineLinks } from "@/lib/content/page-inline-links";
+import { applyInlineLinks, normalizeInternalPath } from "@/lib/inline-links";
 
 export function CountrySeoArticle({
   article,
@@ -8,6 +10,7 @@ export function CountrySeoArticle({
   omitHeading = false,
   centerFaq = false,
   headingClassName = "font-display text-3xl font-bold text-primary mb-4",
+  currentPath,
 }: {
   article: CountrySeoContent;
   headingLevel?: "h1" | "h2";
@@ -17,8 +20,16 @@ export function CountrySeoArticle({
   centerFaq?: boolean;
   /** Page heading classes. Defaults to the existing article title. */
   headingClassName?: string;
+  /** Skip links that point at this page. */
+  currentPath?: string;
 }) {
   const Heading = headingLevel;
+  const inlineLinks = seoArticleInlineLinks[article.page] ?? [];
+  const usedHrefs = new Set<string>();
+  const usedPhrases = new Set<string>();
+  const blockedHrefs = new Set(countrySeoHrefs(article).map((href) => normalizeInternalPath(href)));
+  const linkOpts = { usedHrefs, usedPhrases, blockedHrefs, currentPath };
+  const linked = (paragraph: string) => applyInlineLinks(paragraph, inlineLinks, linkOpts);
   const stepSeparator = article.stepSeparator ?? " — ";
   const faq =
     article.faqs.length > 0 ? (
@@ -45,7 +56,7 @@ export function CountrySeoArticle({
             )}
             {article.intro.map((paragraph) => (
               <p key={paragraph} className="mb-4">
-                {paragraph}
+                {linked(paragraph)}
               </p>
             ))}
             {article.callsToAction.length > 0 ? (
@@ -68,7 +79,7 @@ export function CountrySeoArticle({
               <h2 className="font-display text-xl font-semibold text-primary mb-3">{section.heading}</h2>
               {section.paragraphs.map((paragraph) => (
                 <p key={paragraph} className="mb-4">
-                  {paragraph}
+                  {linked(paragraph)}
                 </p>
               ))}
               {section.items && section.items.length > 0 ? (
@@ -104,7 +115,7 @@ export function CountrySeoArticle({
               ) : null}
               {section.paragraphsAfter?.map((paragraph) => (
                 <p key={paragraph} className="mt-4">
-                  {paragraph}
+                  {linked(paragraph)}
                 </p>
               ))}
             </section>
@@ -136,7 +147,7 @@ export function CountrySeoArticle({
               <h2 className="font-display text-xl font-semibold text-primary mb-4">{article.closing.heading}</h2>
               {article.closing.paragraphs.map((paragraph) => (
                 <p key={paragraph} className="mb-4">
-                  {paragraph}
+                  {linked(paragraph)}
                 </p>
               ))}
             </section>

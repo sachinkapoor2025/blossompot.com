@@ -57,7 +57,7 @@ function relatedExcept(slug: string) {
     )
     .filter((c): c is { label: string; href: string; text: string } => Boolean(c));
 
-  return picked.slice(0, 4);
+  return picked.slice(0, 3);
 }
 
 function giftCategory(

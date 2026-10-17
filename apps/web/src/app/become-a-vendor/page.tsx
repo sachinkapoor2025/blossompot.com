@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
 import { breadcrumbJsonLd, faqJsonLd, pageMetadata } from "@/lib/seo";
+import { marketingPageInlineLinks } from "@/lib/content/page-inline-links";
+import { applyInlineLinks } from "@/lib/inline-links";
 import { site } from "@/lib/site";
 import { VendorSignupForm } from "./VendorSignupForm";
 
@@ -164,8 +166,11 @@ export default function BecomeAVendorPage() {
         <section>
           <h2 className="font-display text-3xl font-semibold text-primary mb-3">What you can sell</h2>
           <p className="text-slate-600 mb-4">
-            Flowers, cakes, chocolates, gifts, balloons, plants, personalized gifts, hampers, and
-            occasion collections for weddings, anniversaries, birthdays, and festivals.
+            {applyInlineLinks(
+              "Flowers, cakes, chocolates, gifts, balloons, plants, personalized gifts, hampers, and occasion collections for weddings, anniversaries, birthdays, and festivals.",
+              marketingPageInlineLinks.vendor,
+              { currentPath: "/become-a-vendor" }
+            )}
           </p>
         </section>
 

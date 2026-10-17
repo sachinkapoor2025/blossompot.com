@@ -15,6 +15,8 @@ import { mergeProductsForCountry } from "@/lib/catalog-fallback";
 import { loadProducts } from "@/lib/product-loader";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, pageMetadata } from "@/lib/seo";
+import { marketingPageInlineLinks } from "@/lib/content/page-inline-links";
+import { applyInlineLinks } from "@/lib/inline-links";
 import { site } from "@/lib/site";
 import { isProductStorefrontVisible, type Product } from "@blossompot/shared";
 
@@ -94,7 +96,9 @@ export default async function OccasionSlugPage({ params }: Props) {
       />
       <Breadcrumbs items={crumbs} />
       <h1 className="text-3xl font-bold text-primary mb-3">{occasion.h1}</h1>
-      <p className="text-slate-600 mb-6 max-w-3xl leading-relaxed">{occasion.intro}</p>
+      <p className="text-slate-600 mb-6 max-w-3xl leading-relaxed">
+        {applyInlineLinks(occasion.intro, marketingPageInlineLinks.occasions, { currentPath: path })}
+      </p>
 
       {filtered.length > 0 ? (
         <HomeProductList
@@ -109,18 +113,6 @@ export default async function OccasionSlugPage({ params }: Props) {
           </Link>
         </p>
       )}
-
-      <p className="mt-6 text-sm text-slate-600">
-        Looking for more? Visit our{" "}
-        <Link href={categoryHref} className="text-nav hover:underline">
-          related collection
-        </Link>{" "}
-        or{" "}
-        <Link href="/products" className="text-nav hover:underline">
-          shop all gifts
-        </Link>
-        .
-      </p>
 
       <section className="mt-12 max-w-3xl">
         <h2 className="text-xl font-bold text-primary mb-3">Etiquette &amp; gifting tips</h2>

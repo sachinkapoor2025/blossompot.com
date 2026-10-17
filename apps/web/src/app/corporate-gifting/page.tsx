@@ -35,6 +35,8 @@ export default function CorporateGiftingPage() {
   const path = "/corporate-gifting";
   const inlineLinks = marketingPageInlineLinks.corporate;
   const usedHrefs = new Set<string>();
+  const usedPhrases = new Set<string>();
+  const linkOpts = { usedHrefs, usedPhrases, currentPath: path };
   const crumbs = [
     { label: "Home", href: "/" },
     { label: "Corporate Gifting" },
@@ -55,7 +57,7 @@ export default function CorporateGiftingPage() {
           {applyInlineLinks(
             `${site.name} helps teams send flowers, bouquets, cakes, and curated gift hampers for client thank-yous, employee recognition, and celebration moments across the United States. Orders can start from our public catalog for smaller sends, or begin with a quote request when you need coordinated quantities, multiple addresses, or a defined delivery window.`,
             inlineLinks,
-            { usedHrefs, currentPath: path, max: 4 }
+            linkOpts
           )}
         </p>
         <p>
@@ -64,7 +66,13 @@ export default function CorporateGiftingPage() {
           and timing, and our support team will respond with realistic options based on current catalog and
           fulfillment capacity. {site.name} is operated by {site.legalName}.
         </p>
-        <p>Popular corporate starting points include flowers, gift hampers, and celebration gifts. For branding or press questions, see our press kit.</p>
+        <p>
+          {applyInlineLinks(
+            "Popular corporate starting points include flowers, gift hampers, and celebration gifts. For branding or press questions, see our press kit.",
+            inlineLinks,
+            linkOpts
+          )}
+        </p>
       </div>
 
       <h2 className="text-xl font-bold text-primary mb-3">Request a quote</h2>

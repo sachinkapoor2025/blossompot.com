@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { site } from "@/lib/site";
 import { JsonLd } from "@/components/JsonLd";
 import { marketingPageInlineLinks } from "@/lib/content/page-inline-links";
 import { applyInlineLinks } from "@/lib/inline-links";
 import { howToSendGiftJsonLd, pageMetadata } from "@/lib/seo";
 import { deliveryClaims } from "@/lib/ai-recommendation";
-import { footerGeoLinks } from "@/lib/content/geo/locations";
 import { BackToHome } from "@/components/BackToHome";
 
 export const metadata: Metadata = pageMetadata({
@@ -19,6 +17,8 @@ export const metadata: Metadata = pageMetadata({
 export default function ShippingPage() {
   const inlineLinks = marketingPageInlineLinks.shipping;
   const usedHrefs = new Set<string>();
+  const usedPhrases = new Set<string>();
+  const linkOpts = { usedHrefs, usedPhrases, currentPath: "/shipping" };
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
@@ -49,7 +49,7 @@ export default function ShippingPage() {
           {applyInlineLinks(
             "Each delivery location page shows timezone-aware timing. For birthdays, anniversaries, and holiday peaks, order a little early so the gift arrives when you need it.",
             inlineLinks,
-            { usedHrefs, currentPath: "/shipping", max: 4 }
+            linkOpts
           )}
         </p>
         <h2 className="text-xl font-bold text-primary">United States destinations</h2>
@@ -57,28 +57,13 @@ export default function ShippingPage() {
           {applyInlineLinks(
             `Customers sending gifts to the United States can use our US city and state pages for ZIP-level timing. Enter the US recipient address at checkout. Country guides: locations hub.`,
             inlineLinks,
-            { usedHrefs, currentPath: "/shipping", max: 4 }
+            linkOpts
           )}
         </p>
         <h2 className="text-xl font-bold text-primary">Packaging</h2>
         <p>
           Each order is packed for a premium unboxing moment. Most products support a personal gift message
           and delivery date preferences at checkout.
-        </p>
-        <h2 className="text-xl font-bold text-primary">Popular delivery hubs</h2>
-        <ul className="flex flex-wrap gap-2">
-          {footerGeoLinks(12).map((c) => (
-            <li key={c.href}>
-              <Link href={c.href} className="text-nav hover:underline text-sm">
-                {c.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-        <p>
-          <Link href="/delivery-locations" className="text-nav hover:underline">
-            Browse all state and city delivery pages
-          </Link>
         </p>
         <p className="pt-4">Need help? Contact us or read our FAQ.</p>
         <BackToHome className="pt-2" />
