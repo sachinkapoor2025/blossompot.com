@@ -248,10 +248,12 @@ function catalogQuery(params?: {
   search?: string;
   country?: string | null;
   postalCode?: string | null;
+  slugs?: readonly string[];
 }): string {
   const query = new URLSearchParams();
   if (params?.category) query.set("category", params.category);
   if (params?.search) query.set("search", params.search);
+  if (params?.slugs) query.set("slugs", params.slugs.join(","));
   query.set("country", catalogCountry(params?.country));
   const postal = params?.postalCode?.trim();
   if (postal) query.set("postalCode", postal);
@@ -279,12 +281,29 @@ export async function loadProducts(params?: {
  * Same read as `loadProducts`, with failure kept distinct from an empty list.
  * Callers that still want the previous array should use `loadProducts`.
  */
+const COMPONENT_SLUG_CHUNK = 100;
+
 export async function loadStorefrontCatalog(params?: {
   category?: string;
   search?: string;
   country?: string;
+  /** When set, the products API reads these slugs instead of the uncategorized catalog. */
+  slugs?: readonly string[];
 }): Promise<{ ok: true; products: Product[] } | { ok: false }> {
   try {
+    const slugs = params?.slugs;
+    if (slugs && slugs.length > COMPONENT_SLUG_CHUNK) {
+      const products: Product[] = [];
+      for (let index = 0; index < slugs.length; index += COMPONENT_SLUG_CHUNK) {
+        const loaded = await loadStorefrontCatalog({
+          ...params,
+          slugs: slugs.slice(index, index + COMPONENT_SLUG_CHUNK),
+        });
+        if (!loaded.ok) return { ok: false };
+        products.push(...loaded.products);
+      }
+      return { ok: true, products };
+    }
     const loaded = await readStorefrontCatalog({ ...params, listingView: "card" });
     if (!loaded.ok) return { ok: false };
     return { ok: true, products: loaded.products };
@@ -334,6 +353,7 @@ async function readStorefrontCatalog(params?: {
   category?: string;
   search?: string;
   country?: string;
+  slugs?: readonly string[];
   /** Shop, search, category, and homepage rows. Other loaders keep the full list body. */
   listingView?: "card";
 }): Promise<CatalogRead> {
@@ -346,10 +366,11 @@ async function readStorefrontCatalog(params?: {
   const country = catalogCountry(requested);
   const postalCode = await getStorefrontDeliveryPostal();
   const qs = catalogQuery({
-    category: params?.category,
-    search: params?.search,
+    category: params?.slugs ? undefined : params?.category,
+    search: params?.slugs ? undefined : params?.search,
     country: requested,
     postalCode,
+    slugs: params?.slugs,
   });
 
   const catalog = { failed: false };
@@ -384,10 +405,13 @@ async function readStorefrontCatalog(params?: {
   ]);
 
   let extra = gboResult;
-  if (params?.category) {
+  if (params?.slugs) {
+    const wanted = new Set(params.slugs);
+    extra = gboResult.filter((product) => wanted.has(product.slug));
+  } else if (params?.category) {
     extra = gboResult.filter((product) => productInStorefrontCategory(product, params.category as string));
   }
-  if (params?.search) {
+  if (!params?.slugs && params?.search) {
     extra = extra.filter((product) => productMatchesSearchQuery(product, params.search as string));
   }
 

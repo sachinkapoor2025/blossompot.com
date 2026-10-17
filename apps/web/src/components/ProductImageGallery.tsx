@@ -4,6 +4,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { resolveImageUrls } from "@/lib/images";
 import { site } from "@/lib/site";
 import {
+  fallbackImageElement,
+  galleryMainImage,
+  galleryThumbImage,
+  galleryZoomImage,
+  optimizedImageUrl,
+  STOREFRONT_PROBE_WIDTH,
+} from "@/lib/storefront-image";
+import {
   selectDisplayableProductImages,
   type SizedProductImage,
 } from "@blossompot/shared";
@@ -44,6 +52,26 @@ function getObjectContainBounds(cw: number, ch: number, nw: number, nh: number):
     width,
     height,
   };
+}
+
+function ThumbImage({ src }: { src: string }) {
+  const sized = galleryThumbImage(src);
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={sized.src}
+      srcSet={sized.srcSet}
+      sizes={sized.sizes}
+      data-original={src}
+      alt=""
+      className="w-full h-full object-cover"
+      loading="lazy"
+      decoding="async"
+      onError={(event) => {
+        fallbackImageElement(event.currentTarget);
+      }}
+    />
+  );
 }
 
 function useDesktopHoverZoom() {
@@ -105,7 +133,7 @@ export function ProductImageGallery({ images, alt }: ProductImageGalleryProps) {
         remaining -= 1;
         if (remaining === 0) finish();
       };
-      img.src = url;
+      img.src = optimizedImageUrl(url, STOREFRONT_PROBE_WIDTH);
     });
 
     return () => {
@@ -222,6 +250,8 @@ export function ProductImageGallery({ images, alt }: ProductImageGalleryProps) {
   }
 
   const showZoom = isDesktop && isHovering && lens && imageBounds;
+  const main = galleryMainImage(current);
+  const zoomSrc = galleryZoomImage(current);
 
   return (
     <>
@@ -241,11 +271,16 @@ export function ProductImageGallery({ images, alt }: ProductImageGalleryProps) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             ref={imgRef}
-            src={current}
+            src={main.src}
+            srcSet={main.srcSet}
+            sizes={main.sizes}
+            data-original={current}
             alt={`${alt} — image ${selected + 1} of ${imgs.length}`}
             onLoad={() => setImageBounds(updateBounds())}
             onError={(event) => {
-              event.currentTarget.src = site.logoSrc;
+              const img = event.currentTarget;
+              if (fallbackImageElement(img)) return;
+              img.src = site.logoSrc;
             }}
             className="w-full h-full object-contain p-2 transition-transform duration-200 group-hover:scale-[1.02] md:group-hover:scale-100 select-none"
             draggable={false}
@@ -268,7 +303,7 @@ export function ProductImageGallery({ images, alt }: ProductImageGalleryProps) {
                 style={{
                   width: ZOOM_PANEL_SIZE,
                   height: ZOOM_PANEL_SIZE,
-                  backgroundImage: `url(${current})`,
+                  backgroundImage: `url(${JSON.stringify(main.src)})`,
                   backgroundRepeat: "no-repeat",
                   backgroundSize: `${imageBounds.width * ZOOM_LEVEL}px ${imageBounds.height * ZOOM_LEVEL}px`,
                   backgroundPosition: `${lens.bgX}px ${lens.bgY}px`,
@@ -321,7 +356,7 @@ export function ProductImageGallery({ images, alt }: ProductImageGalleryProps) {
                 }`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={src} alt="" className="w-full h-full object-cover" />
+                <ThumbImage src={src} />
               </button>
             ))}
           </div>
@@ -368,10 +403,14 @@ export function ProductImageGallery({ images, alt }: ProductImageGalleryProps) {
 
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={current}
+            src={zoomSrc}
+            data-original={current}
             alt={alt}
             className="max-w-full max-h-[85vh] object-contain"
             onClick={(e) => e.stopPropagation()}
+            onError={(event) => {
+              fallbackImageElement(event.currentTarget);
+            }}
           />
 
           {imgs.length > 1 && (
@@ -389,7 +428,7 @@ export function ProductImageGallery({ images, alt }: ProductImageGalleryProps) {
                   }`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={src} alt="" className="w-full h-full object-cover" />
+                  <ThumbImage src={src} />
                 </button>
               ))}
             </div>

@@ -91,6 +91,91 @@ function mergeBundledCatalogProducts(items: Product[], category?: string): Produ
   return [...bySlug.values()];
 }
 
+const COMPONENT_SLUG_LOOKUP_LIMIT = 100;
+
+function parseComponentSlugLookup(raw: string | undefined): string[] | null {
+  if (raw == null) return null;
+  const slugs: string[] = [];
+  const seen = new Set<string>();
+  for (const part of raw.split(",")) {
+    let slug = part.trim();
+    try {
+      slug = decodeURIComponent(slug).trim();
+    } catch {
+      slug = part.trim();
+    }
+    if (!slug || seen.has(slug)) continue;
+    seen.add(slug);
+    slugs.push(slug);
+  }
+  return slugs;
+}
+
+/** Point reads for combo components. Same PK/SK as product detail, without a table scan or catalog writes. */
+async function getProductsBySlugs(slugs: readonly string[]): Promise<Product[]> {
+  const items: Product[] = [];
+  for (let index = 0; index < slugs.length; index += 25) {
+    const chunk = slugs.slice(index, index + 25);
+    const found = await Promise.all(
+      chunk.map(async (slug) => {
+        const result = await docClient.send(
+          new GetCommand({
+            TableName: PRODUCTS_TABLE,
+            Key: { PK: productKeys.pk(slug), SK: productKeys.sk() },
+          })
+        );
+        return result.Item as Product | undefined;
+      })
+    );
+    for (const item of found) {
+      if (item) items.push(item);
+    }
+  }
+  return overlayRequestedBundledProducts(items, slugs);
+}
+
+function bundledCatalogRow(slug: string) {
+  const bundled = getBundledUsarakhiProduct(slug);
+  if (!bundled || bundled.published === false || isSampleCatalogProduct(bundled)) return undefined;
+  return bundled;
+}
+
+/** Same bundled price and image overlay as the full catalog list, limited to the requested slugs. */
+function overlayRequestedBundledProducts(items: Product[], slugs: readonly string[]): Product[] {
+  const wanted = new Set(slugs);
+  const bySlug = new Map<string, Product>();
+  for (const product of items) {
+    if (!wanted.has(product.slug)) continue;
+    const bundled = bundledCatalogRow(product.slug);
+    const images = coalesceProductImages(product.images, bundled?.images);
+    const tfUsa = (product.tags ?? bundled?.tags ?? []).includes("tf-usa");
+    bySlug.set(product.slug, {
+      ...product,
+      images,
+      ...(tfUsa && bundled?.price != null ? { price: bundled.price } : {}),
+      ...(tfUsa && bundled && "deliveryFee" in bundled ? { deliveryFee: bundled.deliveryFee } : {}),
+      ...(tfUsa ? { couponExcluded: false } : {}),
+    });
+  }
+  const stamp = "2026-09-23T00:00:00.000Z";
+  for (const slug of wanted) {
+    if (bySlug.has(slug)) continue;
+    const bundled = bundledCatalogRow(slug);
+    if (!bundled) continue;
+    bySlug.set(slug, {
+      ...bundled,
+      currency: bundled.currency ?? "USD",
+      inventory: bundled.inventory ?? DEFAULT_PRODUCT_INVENTORY,
+      tags: bundled.tags ?? [],
+      images: bundled.images ?? [],
+      published: bundled.published !== false,
+      createdAt: stamp,
+      updatedAt: stamp,
+    } as Product);
+  }
+  return [...bySlug.values()];
+}
+
 const BUNDLED_CATALOG_PERSIST_BATCH = 25;
 
 async function persistAndMergeBundledCatalog(items: Product[], category?: string): Promise<Product[]> {
@@ -332,10 +417,16 @@ export function invalidateProductListCache(categorySlug?: string) {
 export async function listProducts(event: APIGatewayProxyEventV2) {
   const category = event.queryStringParameters?.category;
   const search = event.queryStringParameters?.search?.toLowerCase();
+  const componentSlugs = parseComponentSlugLookup(event.queryStringParameters?.slugs);
 
   let items: Product[] = [];
 
-  if (category) {
+  if (componentSlugs) {
+    if (componentSlugs.length > COMPONENT_SLUG_LOOKUP_LIMIT) {
+      return badRequest(`At most ${COMPONENT_SLUG_LOOKUP_LIMIT} slugs`);
+    }
+    items = componentSlugs.length > 0 ? await getProductsBySlugs(componentSlugs) : [];
+  } else if (category) {
     if (isRakhiSetSizeCategory(category)) {
       const all = await scanAllProducts();
       items = all.filter((product) => productMatchesRakhiSetCategory(product, category));
@@ -369,7 +460,7 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
     items = await scanAllProducts();
   }
 
-  items = await persistAndMergeBundledCatalog(items, category);
+  if (!componentSlugs) items = await persistAndMergeBundledCatalog(items, category);
 
   items = items.filter(
     (p) =>

@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { afterEach, describe, it } from "node:test";
 import type { Product } from "@blossompot/shared";
-import { loadCombosPage, presentStorefrontCombo, type ComboRecordView } from "./combos-page";
+import {
+  comboComponentSlugs,
+  loadCombosPage,
+  presentStorefrontCombo,
+  sortStorefrontCombos,
+  type ComboRecordView,
+} from "./combos-page";
 
 const originalFetch = globalThis.fetch;
 
@@ -137,8 +143,35 @@ describe("combos page", () => {
     );
     assert.equal(view.combos[0]?.price, 35);
     assert.equal(seen.some((url) => url.includes("/combos")), true);
-    assert.equal(seen.some((url) => url.includes("/products?") && url.includes("country=US")), true);
-    assert.equal(seen.some((url) => url.includes("category=combos")), false);
+    const productUrl = seen.find((url) => url.includes("/products?"));
+    assert.ok(productUrl);
+    const requested = new URL(productUrl, "http://127.0.0.1:3001").searchParams;
+    assert.equal(requested.get("country"), "US");
+    assert.equal(requested.get("category"), null);
+    assert.deepEqual(requested.get("slugs")?.split(",").sort(), ["cake", "gb-cake", "roses"]);
+  });
+
+  it("hides a combo whose component is absent from the eligible catalog", async () => {
+    globalThis.fetch = routeFetch({
+      combos: [roseAndCake],
+      products: [product("roses", 20, { name: "Roses" })],
+    });
+    const view = await loadCombosPage("US");
+    assert.equal(view.state, "empty");
+  });
+
+  it("does not request products when no published combo has both components", async () => {
+    const seen: string[] = [];
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+      seen.push(String(input));
+      return routeFetch({
+        combos: [{ slug: "draft", name: "Draft", productSlugs: ["roses", "cake"], published: false }],
+      })(input);
+    }) as typeof fetch;
+    const view = await loadCombosPage("US");
+    assert.equal(view.state, "empty");
+    assert.equal(seen.some((url) => url.includes("/products?")), false);
+    assert.deepEqual(comboComponentSlugs([{ slug: "draft", name: "Draft", productSlugs: ["roses", "cake"], published: false }]), []);
   });
 
   it("leaves a successful catalog with no eligible combos empty", async () => {
@@ -153,5 +186,45 @@ describe("combos page", () => {
     assert.equal((await loadCombosPage("US")).state, "error");
     globalThis.fetch = routeFetch({ combos: [roseAndCake], fail: "products" });
     assert.equal((await loadCombosPage("GB")).state, "error");
+  });
+});
+
+function pricedCombo(slug: string, name: string, price: number, sortOrder: number) {
+  return { slug, name, price, sortOrder };
+}
+
+describe("combo listing sort", () => {
+  const combos = [
+    pricedCombo("bloom", "Bloom Box", 80, 2),
+    pricedCombo("amber", "Amber Cake", 40, 0),
+    pricedCombo("cedar", "Cedar Hamper", 120, 1),
+  ];
+
+  it("sorts by featured order, price, and name without changing the combo price", () => {
+    assert.deepEqual(
+      sortStorefrontCombos(combos, "featured").map((combo) => combo.slug),
+      ["amber", "cedar", "bloom"]
+    );
+    assert.deepEqual(
+      sortStorefrontCombos(combos, "price-asc").map((combo) => combo.price),
+      [40, 80, 120]
+    );
+    assert.deepEqual(
+      sortStorefrontCombos(combos, "price-desc").map((combo) => combo.price),
+      [120, 80, 40]
+    );
+    assert.deepEqual(
+      sortStorefrontCombos(combos, "name-asc").map((combo) => combo.name),
+      ["Amber Cake", "Bloom Box", "Cedar Hamper"]
+    );
+    assert.deepEqual(
+      sortStorefrontCombos(combos, "name-desc").map((combo) => combo.name),
+      ["Cedar Hamper", "Bloom Box", "Amber Cake"]
+    );
+    const converted = combos.map((combo) => ({ ...combo, price: combo.price * 95 }));
+    assert.deepEqual(
+      sortStorefrontCombos(converted, "price-asc").map((combo) => combo.slug),
+      sortStorefrontCombos(combos, "price-asc").map((combo) => combo.slug)
+    );
   });
 });

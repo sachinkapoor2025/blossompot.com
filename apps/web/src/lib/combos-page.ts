@@ -90,19 +90,36 @@ export function presentStorefrontCombo<T extends PricedComponent>(
   };
 }
 
+/** Slugs that can still become a visible combo. Unpublished or incomplete records are ignored. */
+export function comboComponentSlugs(combos: readonly ComboRecordView[]): string[] {
+  const slugs: string[] = [];
+  const seen = new Set<string>();
+  for (const combo of combos) {
+    if (combo.published === false || combo.productSlugs.length !== 2) continue;
+    for (const slug of combo.productSlugs) {
+      const trimmed = slug.trim();
+      if (!trimmed || seen.has(trimmed)) continue;
+      seen.add(trimmed);
+      slugs.push(trimmed);
+    }
+  }
+  return slugs;
+}
+
 export async function loadCombosPage(country?: string): Promise<CombosPageView> {
   try {
-    const [records, catalog] = await Promise.all([
-      api<{ combos?: ComboRecordView[] }>("/combos", { revalidate: false }),
-      loadStorefrontCatalog({ country }),
-    ]);
+    const records = await api<{ combos?: ComboRecordView[] }>("/combos", { revalidate: false });
+    const combos = records.combos ?? [];
+    const slugs = comboComponentSlugs(combos);
+    if (slugs.length === 0) return { state: "empty", combos: [] };
+    const catalog = await loadStorefrontCatalog({ country, slugs });
     if (!catalog.ok) return { state: "error", combos: [] };
     const products = new Map(catalog.products.map((product) => [product.slug, product]));
-    const combos = (records.combos ?? [])
+    const visible = combos
       .map((combo) => presentStorefrontCombo(combo, products))
       .filter((combo): combo is StorefrontCombo => combo != null);
-    if (combos.length === 0) return { state: "empty", combos: [] };
-    return { state: "combos", combos };
+    if (visible.length === 0) return { state: "empty", combos: [] };
+    return { state: "combos", combos: visible };
   } catch {
     return { state: "error", combos: [] };
   }

@@ -10,6 +10,7 @@ import { ProductImageRotator } from "@/components/ProductImageRotator";
 import type { StorefrontCombo } from "@/lib/combos-page";
 import { useCurrency } from "@/lib/currency-context";
 import { resolveImageUrl } from "@/lib/images";
+import { comboHalfImage, fallbackImageElement } from "@/lib/storefront-image";
 import { getDiscountPercent } from "@/lib/pricing";
 import { useOptionalDeliveryLocation } from "@/lib/delivery-location-context";
 
@@ -34,9 +35,22 @@ function ComboHalfImage({ image, alt }: { image: string | null; alt: string }) {
       </div>
     );
   }
+  const sized = comboHalfImage(src);
   return (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={src} alt={alt} className="h-full w-full object-cover object-center" loading="lazy" decoding="async" />
+    <img
+      src={sized.src}
+      srcSet={sized.srcSet}
+      sizes={sized.sizes}
+      data-original={src}
+      alt={alt}
+      className="h-full w-full object-cover object-center"
+      loading="lazy"
+      decoding="async"
+      onError={(event) => {
+        fallbackImageElement(event.currentTarget);
+      }}
+    />
   );
 }
 

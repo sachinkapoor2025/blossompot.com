@@ -3,7 +3,8 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { CountrySeoArticle } from "@/components/CountrySeoArticle";
 import { HomeProductCard } from "@/components/HomeProductCard";
-import { ProductSortBar, type ProductSort } from "@/components/ProductSortBar";
+import { ListingFilterBar } from "@/components/ListingFilterBar";
+import { type ProductSort } from "@/components/ProductSortBar";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { CatalogLoadError } from "@/components/CatalogLoadError";
 import { JsonLd } from "@/components/JsonLd";
@@ -83,7 +84,7 @@ async function CombosPageContent({ searchParams }: Props) {
       ) : combos.length > 0 ? (
         <>
           <Suspense fallback={<div className="mb-4 h-9" aria-hidden />}>
-            <ProductSortBar />
+            <ListingFilterBar count={combos.length} total={combos.length} />
           </Suspense>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-stretch">
             {combos.map((combo) => (

@@ -45,33 +45,74 @@ interface CurrencyContextValue {
 
 const CurrencyContext = createContext<CurrencyContextValue | null>(null);
 
-function readCachedRate(): number | null {
-  if (typeof window === "undefined") return null;
-  const cachedAt = sessionStorage.getItem(RATE_CACHE_AT_KEY);
-  const cached = sessionStorage.getItem(RATE_CACHE_KEY);
+export type StorefrontFxQuote = {
+  rate: number;
+  source: string;
+  rates: Partial<Record<DisplayCurrency, number>>;
+};
+
+function roundFxRate(rate: number): number {
+  return Math.round(rate * 10_000) / 10_000;
+}
+
+function sessionStore(): Storage | null {
+  try {
+    if (typeof sessionStorage === "undefined") return null;
+    return sessionStorage;
+  } catch {
+    return null;
+  }
+}
+
+function readCachedQuote(): StorefrontFxQuote | null {
+  const storage = sessionStore();
+  if (!storage) return null;
+  const cachedAt = storage.getItem(RATE_CACHE_AT_KEY);
+  const cached = storage.getItem(RATE_CACHE_KEY);
   if (!cached || !cachedAt) return null;
   if (Date.now() - Number(cachedAt) > RATE_CACHE_TTL_MS) return null;
-  const n = Number(cached);
-  return n > 0 ? n : null;
+  const rate = Number(cached);
+  if (!(rate > 0)) return null;
+  let storedRates: Partial<Record<DisplayCurrency, number>> = {};
+  const rawRates = storage.getItem(RATES_CACHE_KEY);
+  if (rawRates) {
+    try {
+      storedRates = JSON.parse(rawRates) as Partial<Record<DisplayCurrency, number>>;
+    } catch {
+      storedRates = {};
+    }
+  }
+  return {
+    rate,
+    source: "session-cache",
+    rates: { ...DEFAULT_USD_RATES, ...storedRates, INR: rate, USD: 1 },
+  };
 }
 
-function storeCachedRate(rate: number) {
-  sessionStorage.setItem(RATE_CACHE_KEY, String(rate));
-  sessionStorage.setItem(RATE_CACHE_AT_KEY, String(Date.now()));
+function storeCachedQuote(rate: number, rates: Partial<Record<DisplayCurrency, number>>) {
+  const storage = sessionStore();
+  if (!storage) return;
+  storage.setItem(RATE_CACHE_KEY, String(rate));
+  storage.setItem(RATE_CACHE_AT_KEY, String(Date.now()));
+  storage.setItem(RATES_CACHE_KEY, JSON.stringify(rates));
 }
 
-async function fetchUsdInrRate(): Promise<{ rate: number; source: string }> {
-  const sessionCached = readCachedRate();
-  if (sessionCached) return { rate: sessionCached, source: "session-cache" };
+let inFlightQuote: Promise<StorefrontFxQuote> | null = null;
 
+async function requestFxQuote(): Promise<StorefrontFxQuote> {
   try {
     const res = await fetch("/api/fx-rates", { cache: "no-store" });
     if (res.ok) {
-      const data = (await res.json()) as { rate?: number; source?: string };
+      const data = (await res.json()) as {
+        rate?: number;
+        source?: string;
+        rates?: Partial<Record<DisplayCurrency, number>>;
+      };
       if (data.rate && data.rate > 0) {
-        const rate = Math.round(data.rate * 10_000) / 10_000;
-        storeCachedRate(rate);
-        return { rate, source: data.source ?? "fx-proxy" };
+        const rate = roundFxRate(data.rate);
+        const rates = { ...DEFAULT_USD_RATES, ...data.rates, INR: rate, USD: 1 };
+        storeCachedQuote(rate, rates);
+        return { rate, source: data.source ?? "fx-proxy", rates };
       }
     }
   } catch {
@@ -83,14 +124,31 @@ async function fetchUsdInrRate(): Promise<{ rate: number; source: string }> {
     if (!res.ok) throw new Error("api rate failed");
     const data = (await res.json()) as { rate?: number; source?: string };
     if (!data.rate || data.rate <= 0) throw new Error("invalid api rate");
-    const rate = Math.round(data.rate * 10_000) / 10_000;
-    storeCachedRate(rate);
-    return { rate, source: data.source ?? "api" };
+    const rate = roundFxRate(data.rate);
+    const rates = { ...DEFAULT_USD_RATES, INR: rate, USD: 1 };
+    storeCachedQuote(rate, rates);
+    return { rate, source: data.source ?? "api", rates };
   } catch {
     /* fall through */
   }
 
-  return { rate: ENV_FALLBACK, source: "fallback" };
+  return {
+    rate: ENV_FALLBACK,
+    source: "fallback",
+    rates: { ...DEFAULT_USD_RATES, INR: ENV_FALLBACK, USD: 1 },
+  };
+}
+
+/** One in-flight `/api/fx-rates` call shared by overlapping refreshes. */
+export function loadStorefrontFxQuote(): Promise<StorefrontFxQuote> {
+  const cached = readCachedQuote();
+  if (cached) return Promise.resolve(cached);
+  if (!inFlightQuote) {
+    inFlightQuote = requestFxQuote().finally(() => {
+      inFlightQuote = null;
+    });
+  }
+  return inFlightQuote;
 }
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
@@ -106,28 +164,11 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [rateLoading, setRateLoading] = useState(true);
 
   const refreshRate = useCallback(async () => {
-    const { rate, source } = await fetchUsdInrRate();
-    setUsdInrRate(rate);
-    setRateSource(source);
+    const quote = await loadStorefrontFxQuote();
+    setUsdInrRate(quote.rate);
+    setRateSource(quote.source);
+    setUsdRates(quote.rates);
     setRateLoading(false);
-    try {
-      const cachedFx = sessionStorage.getItem(RATES_CACHE_KEY);
-      if (cachedFx) {
-        const parsed = JSON.parse(cachedFx) as Partial<Record<DisplayCurrency, number>>;
-        setUsdRates({ ...DEFAULT_USD_RATES, ...parsed, INR: rate, USD: 1 });
-      }
-      const res = await fetch("/api/fx-rates", { cache: "no-store" });
-      if (res.ok) {
-        const live = (await res.json()) as { rates?: Partial<Record<DisplayCurrency, number>> };
-        if (live?.rates) {
-          const next = { ...DEFAULT_USD_RATES, ...live.rates, INR: rate, USD: 1 };
-          setUsdRates(next);
-          sessionStorage.setItem(RATES_CACHE_KEY, JSON.stringify(next));
-        }
-      }
-    } catch {
-      setUsdRates((prev) => ({ ...DEFAULT_USD_RATES, ...prev, INR: rate, USD: 1 }));
-    }
   }, []);
 
   useEffect(() => {

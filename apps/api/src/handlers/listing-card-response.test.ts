@@ -155,6 +155,30 @@ function cardSlugsMatchStorefront(plain: Array<Record<string, unknown>>, card: s
 }
 
 describe("listing card response", { concurrency: false }, () => {
+  it("reads requested combo component slugs without returning the rest of the catalog", async () => {
+    const view = await both({
+      country: "US",
+      slugs: "card-rose,card-uk,card-hidden,card-stock,card-cake,missing-combo-part",
+    });
+    assert.deepEqual(slugsOf(view.plain.body).sort(), ["card-cake", "card-rose"]);
+    assert.equal(slugsOf(view.plain.body).includes("card-search"), false);
+    assert.equal(slugsOf(view.card.body).includes("card-search"), false);
+    cardSlugsMatchStorefront(productsOf(view.plain.body), slugsOf(view.card.body));
+
+    const empty = resultOf(await listProducts(shopperEvent({ queryStringParameters: { country: "US", slugs: "" } })));
+    assert.equal(empty.statusCode, 200);
+    assert.deepEqual(slugsOf(empty.body), []);
+
+    const tooMany = resultOf(
+      await listProducts(
+        shopperEvent({
+          queryStringParameters: { country: "US", slugs: Array.from({ length: 101 }, (_, index) => `slug-${index}`).join(",") },
+        })
+      )
+    );
+    assert.equal(tooMany.statusCode, 400);
+  });
+
   it("keeps the description stub from changing duplicate rank", () => {
     const rich = {
       slug: "rich-rose",
