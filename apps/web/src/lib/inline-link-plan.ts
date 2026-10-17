@@ -1,5 +1,6 @@
 /** Contextual keyword links inside body copy. Navigation, product grids, and directories are separate. */
-export const MAX_INLINE_LINKS = 3;
+export const MIN_INLINE_LINKS = 3;
+export const MAX_INLINE_LINKS = 5;
 
 export type PhraseLink = { phrase: string; href: string };
 
@@ -33,7 +34,7 @@ export function phraseKey(phrase: string): string {
 }
 
 /**
- * Picks up to {@link MAX_INLINE_LINKS} non-overlapping phrases.
+ * Picks between {@link MIN_INLINE_LINKS} and {@link MAX_INLINE_LINKS} non-overlapping phrases when the copy contains them.
  * Longer phrases win first so "gift hampers" is not split into "hampers".
  * The same anchor text and the same destination are used only once.
  */

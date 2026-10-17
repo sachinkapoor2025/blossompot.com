@@ -1,13 +1,17 @@
 ﻿import { categoryHref } from "@/lib/category-urls";
-import { locationPublicPath } from "@/lib/content/seo-data";
 
 /** Homepage SEO inline links for BlossomPot gifting copy. */
 export const homepageInlineLinks = [
   { phrase: "flower bouquets", href: categoryHref("flower-bouquets") },
-  { phrase: "anniversaries", href: categoryHref("anniversary-gifts") },
   { phrase: "Valentine’s Day", href: categoryHref("valentines-day-gifts") },
+  { phrase: "Valentine's Day", href: categoryHref("valentines-day-gifts") },
+  { phrase: "Mother’s Day", href: categoryHref("mothers-day-gifts") },
+  { phrase: "Mother's Day", href: categoryHref("mothers-day-gifts") },
   { phrase: "gift hampers", href: categoryHref("gift-hampers") },
+  { phrase: "anniversaries", href: categoryHref("anniversary-gifts") },
+  { phrase: "birthdays", href: categoryHref("birthday-gifts") },
   { phrase: "bouquets", href: categoryHref("flower-bouquets") },
+  { phrase: "gifts", href: "/gifts" },
 ] as const;
 
 export const categoryPageInlineLinks: Record<string, readonly { phrase: string; href: string }[]> = {
@@ -17,11 +21,13 @@ export const categoryPageInlineLinks: Record<string, readonly { phrase: string; 
     { phrase: "bouquet", href: categoryHref("flower-bouquets") },
   ],
   "flower-bouquets": [
+    { phrase: "gift message", href: "/blog/what-to-write-in-a-gift-message" },
     { phrase: "cake", href: categoryHref("cakes") },
     { phrase: "hamper", href: categoryHref("gift-hampers") },
     { phrase: "flowers", href: categoryHref("flowers") },
   ],
   cakes: [
+    { phrase: "gift message", href: "/blog/what-to-write-in-a-gift-message" },
     { phrase: "birthdays", href: categoryHref("birthday-gifts") },
     { phrase: "anniversaries", href: categoryHref("anniversary-gifts") },
     { phrase: "flowers", href: categoryHref("flowers") },
@@ -32,6 +38,7 @@ export const categoryPageInlineLinks: Record<string, readonly { phrase: string; 
     { phrase: "hampers", href: categoryHref("gift-hampers") },
   ],
   "anniversary-gifts": [
+    { phrase: "gift message", href: "/blog/what-to-write-in-a-gift-message" },
     { phrase: "roses", href: categoryHref("flower-bouquets") },
     { phrase: "cakes", href: categoryHref("cakes") },
     { phrase: "flowers", href: categoryHref("flowers") },
@@ -57,6 +64,7 @@ export const categoryPageInlineLinks: Record<string, readonly { phrase: string; 
     { phrase: "birthday", href: categoryHref("birthday-gifts") },
   ],
   "gift-hampers": [
+    { phrase: "gift message", href: "/blog/what-to-write-in-a-gift-message" },
     { phrase: "corporate-friendly", href: "/corporate-gifting" },
     { phrase: "flowers", href: categoryHref("flowers") },
     { phrase: "cakes", href: categoryHref("cakes") },
@@ -81,37 +89,46 @@ export const categoryPageInlineLinks: Record<string, readonly { phrase: string; 
 /** Place names in country landing copy. Product phrases are already buttons on those pages. */
 export const countryPageInlineLinks: Record<string, readonly { phrase: string; href: string }[]> = {
   usa: [
-    { phrase: "California", href: locationPublicPath("california") },
-    { phrase: "New York", href: locationPublicPath("new-york") },
-    { phrase: "Florida", href: locationPublicPath("florida") },
+    { phrase: "anniversaries", href: categoryHref("anniversary-gifts") },
+    { phrase: "graduation", href: "/occasions/graduation" },
+    { phrase: "thank-you", href: "/occasions/thank-you" },
+    { phrase: "sympathy", href: "/occasions/sympathy" },
   ],
   uk: [
-    { phrase: "London", href: "/locations/europe/united-kingdom/london" },
-    { phrase: "Manchester", href: "/locations/europe/united-kingdom/manchester" },
-    { phrase: "United Kingdom", href: "/locations/europe/united-kingdom" },
+    { phrase: "Mothering Sunday", href: "/occasions/mothers-day" },
+    { phrase: "gift message", href: "/blog/what-to-write-in-a-gift-message" },
+    { phrase: "thank-you", href: "/occasions/thank-you" },
   ],
   canada: [
-    { phrase: "Vancouver", href: "/locations/canada/british-columbia/vancouver" },
-    { phrase: "Montreal", href: "/locations/canada/quebec/montreal" },
-    { phrase: "Toronto", href: "/locations/canada/ontario/toronto" },
+    { phrase: "British Columbia", href: "/locations/canada/british-columbia" },
+    { phrase: "thank-you", href: "/occasions/thank-you" },
+    { phrase: "Ontario", href: "/locations/canada/ontario" },
+    { phrase: "Alberta", href: "/locations/canada/alberta" },
+    { phrase: "Quebec", href: "/locations/canada/quebec" },
   ],
   australia: [
-    { phrase: "Melbourne", href: "/locations/australia/victoria/melbourne" },
-    { phrase: "Brisbane", href: "/locations/australia/queensland/brisbane" },
-    { phrase: "Sydney", href: "/locations/australia/new-south-wales/sydney" },
+    { phrase: "New South Wales", href: "/locations/australia/new-south-wales" },
+    { phrase: "Western Australia", href: "/locations/australia/western-australia" },
+    { phrase: "Queensland", href: "/locations/australia/queensland" },
+    { phrase: "thank-yous", href: "/occasions/thank-you" },
+    { phrase: "Victoria", href: "/locations/australia/victoria" },
   ],
   uae: [
-    { phrase: "rose bouquets", href: categoryHref("flower-bouquets") },
-    { phrase: "Celebration gifts", href: categoryHref("celebration-gifts") },
-    { phrase: "hampers", href: categoryHref("gift-hampers") },
+    { phrase: "gift message", href: "/blog/what-to-write-in-a-gift-message" },
+    { phrase: "housewarmings", href: "/occasions/housewarming" },
+    { phrase: "graduations", href: "/occasions/graduation" },
   ],
 };
 
 export const marketingPageInlineLinks: Record<string, readonly { phrase: string; href: string }[]> = {
   about: [
+    { phrase: "celebration cakes", href: categoryHref("cakes") },
     { phrase: "fresh flowers", href: categoryHref("flowers") },
+    { phrase: "Mother’s Day", href: categoryHref("mothers-day-gifts") },
+    { phrase: "Mother's Day", href: categoryHref("mothers-day-gifts") },
     { phrase: "gift hampers", href: categoryHref("gift-hampers") },
     { phrase: "contact page", href: "/contact" },
+    { phrase: "anniversary", href: categoryHref("anniversary-gifts") },
   ],
   shipping: [
     { phrase: "delivery location page", href: "/delivery-locations" },
@@ -139,6 +156,7 @@ export const marketingPageInlineLinks: Record<string, readonly { phrase: string;
     { phrase: "shop", href: "/products" },
   ],
   press: [
+    { phrase: "United States", href: "/flower-delivery-usa" },
     { phrase: "flowers", href: categoryHref("flowers") },
     { phrase: "cakes", href: categoryHref("cakes") },
   ],
@@ -149,6 +167,7 @@ export const marketingPageInlineLinks: Record<string, readonly { phrase: string;
   ],
   returns: [
     { phrase: "fresh flowers", href: categoryHref("flowers") },
+    { phrase: "hamper", href: categoryHref("gift-hampers") },
     { phrase: "cake", href: categoryHref("cakes") },
   ],
   vendor: [
@@ -182,7 +201,11 @@ export const marketingPageInlineLinks: Record<string, readonly { phrase: string;
     { phrase: "gift", href: "/gifts" },
     { phrase: "flowers", href: categoryHref("flowers") },
   ],
-  contact: [{ phrase: "delivery", href: "/shipping" }],
+  contact: [
+    { phrase: "select cities", href: "/delivery-locations" },
+    { phrase: "Same-day", href: categoryHref("same-day-gifts") },
+    { phrase: "delivery", href: "/shipping" },
+  ],
   "forgot-occasion": [
     { phrase: "flowers", href: categoryHref("flowers") },
     { phrase: "cakes", href: categoryHref("cakes") },
@@ -194,10 +217,16 @@ export const marketingPageInlineLinks: Record<string, readonly { phrase: string;
 export const seoArticleInlineLinks: Record<string, readonly { phrase: string; href: string }[]> = {
   home: [
     { phrase: "flower bouquets", href: categoryHref("flower-bouquets") },
-    { phrase: "anniversaries", href: categoryHref("anniversary-gifts") },
     { phrase: "Valentine’s Day", href: categoryHref("valentines-day-gifts") },
+    { phrase: "Valentine's Day", href: categoryHref("valentines-day-gifts") },
+    { phrase: "Mother’s Day", href: categoryHref("mothers-day-gifts") },
+    { phrase: "Mother's Day", href: categoryHref("mothers-day-gifts") },
     { phrase: "gift hampers", href: categoryHref("gift-hampers") },
+    { phrase: "anniversaries", href: categoryHref("anniversary-gifts") },
+    { phrase: "birthdays", href: categoryHref("birthday-gifts") },
     { phrase: "bouquets", href: categoryHref("flower-bouquets") },
+    { phrase: "cakes", href: categoryHref("cakes") },
+    { phrase: "gifts", href: "/gifts" },
   ],
   flowers: [
     { phrase: "birthday", href: categoryHref("birthday-gifts") },
@@ -210,9 +239,12 @@ export const seoArticleInlineLinks: Record<string, readonly { phrase: string; hr
     { phrase: "gifts", href: "/gifts" },
   ],
   bouquets: [
+    { phrase: "gift hamper", href: categoryHref("gift-hampers") },
+    { phrase: "same-day", href: categoryHref("same-day-gifts") },
     { phrase: "bouquet", href: categoryHref("flowers") },
     { phrase: "roses", href: categoryHref("flowers") },
     { phrase: "cake", href: categoryHref("cakes") },
+    { phrase: "USA", href: "/flower-delivery-usa" },
   ],
   cakes: [
     { phrase: "anniversaries", href: categoryHref("anniversary-gifts") },
@@ -231,9 +263,11 @@ export const seoArticleInlineLinks: Record<string, readonly { phrase: string; hr
     { phrase: "cake", href: categoryHref("cakes") },
   ],
   "valentines-day-gifts": [
+    { phrase: "Same-day", href: categoryHref("same-day-gifts") },
     { phrase: "roses", href: categoryHref("flower-bouquets") },
     { phrase: "cake", href: categoryHref("cakes") },
     { phrase: "flowers", href: categoryHref("flowers") },
+    { phrase: "USA", href: "/flower-delivery-usa" },
   ],
   hampers: [
     { phrase: "birthdays", href: categoryHref("birthday-gifts") },
@@ -250,9 +284,19 @@ export const seoArticleInlineLinks: Record<string, readonly { phrase: string; hr
 
 export const cityPageInlineLinks = [
   { phrase: "gift hampers", href: categoryHref("gift-hampers") },
+  { phrase: "Mother’s Day", href: categoryHref("mothers-day-gifts") },
+  { phrase: "Mother's Day", href: categoryHref("mothers-day-gifts") },
+  { phrase: "Valentine’s Day", href: categoryHref("valentines-day-gifts") },
+  { phrase: "Valentine's Day", href: categoryHref("valentines-day-gifts") },
+  { phrase: "same-day", href: categoryHref("same-day-gifts") },
+  { phrase: "same day", href: categoryHref("same-day-gifts") },
+  { phrase: "bouquets", href: categoryHref("flower-bouquets") },
+  { phrase: "birthday", href: categoryHref("birthday-gifts") },
+  { phrase: "anniversary", href: categoryHref("anniversary-gifts") },
   { phrase: "flowers", href: categoryHref("flowers") },
-  { phrase: "cakes", href: categoryHref("cakes") },
   { phrase: "hampers", href: categoryHref("gift-hampers") },
+  { phrase: "cakes", href: categoryHref("cakes") },
+  { phrase: "cake", href: categoryHref("cakes") },
 ] as const;
 
 export const statePageInlineLinks = cityPageInlineLinks;
@@ -261,20 +305,20 @@ export const blogPageInlineLinks: Record<string, readonly { phrase: string; href
   "how-to-keep-flowers-fresh-longer": [
     { phrase: "bouquet", href: categoryHref("flower-bouquets") },
     { phrase: "flowers", href: categoryHref("flowers") },
-    { phrase: "flower care", href: "/flower-guide/flower-care" },
-    { phrase: "flower meanings", href: "/flower-guide/flower-meanings" },
+    { phrase: "roses", href: "/flower-guide/rose" },
+    { phrase: "plants", href: categoryHref("plants") },
   ],
   "rose-color-meanings-for-gifting": [
-    { phrase: "rose", href: "/flower-guide/rose" },
-    { phrase: "flower meanings", href: "/flower-guide/flower-meanings" },
+    { phrase: "Valentine's Day", href: categoryHref("valentines-day-gifts") },
     { phrase: "red roses", href: categoryHref("flower-bouquets") },
-    { phrase: "anniversary", href: categoryHref("anniversary-gifts") },
+    { phrase: "flowers", href: categoryHref("flowers") },
+    { phrase: "rose", href: "/flower-guide/rose" },
+    { phrase: "gift", href: "/gifts" },
   ],
   "what-to-write-in-a-gift-message": [
     { phrase: "birthday", href: categoryHref("birthday-gifts") },
     { phrase: "anniversary", href: categoryHref("anniversary-gifts") },
-    { phrase: "Mother's Day", href: categoryHref("mothers-day-gifts") },
-    { phrase: "flowers", href: categoryHref("flowers") },
+    { phrase: "gift", href: "/gifts" },
   ],
   "luxury-flower-bouquet-delivery": [
     { phrase: "flower bouquet", href: categoryHref("flower-bouquets") },
@@ -289,16 +333,23 @@ export const blogPageInlineLinks: Record<string, readonly { phrase: string; href
     { phrase: "same-day", href: categoryHref("flowers") },
   ],
   "online-cake-delivery-usa": [
+    { phrase: "personalized gifts", href: categoryHref("personalized-gifts") },
+    { phrase: "same-day", href: categoryHref("same-day-gifts") },
+    { phrase: "birthday", href: categoryHref("birthday-gifts") },
+    { phrase: "anniversary", href: categoryHref("anniversary-gifts") },
+    { phrase: "flowers", href: categoryHref("flowers") },
     { phrase: "cakes", href: categoryHref("cakes") },
-    { phrase: "birthday gifts", href: categoryHref("birthday-gifts") },
-    { phrase: "same-day", href: categoryHref("flowers") },
-    { phrase: "delivery locations", href: "/delivery-locations" },
+    { phrase: "USA", href: "/flower-delivery-usa" },
   ],
   "send-flowers-online-usa": [
+    { phrase: "personalized gifts", href: categoryHref("personalized-gifts") },
+    { phrase: "bouquets", href: categoryHref("flower-bouquets") },
+    { phrase: "hampers", href: categoryHref("gift-hampers") },
+    { phrase: "birthday", href: categoryHref("birthday-gifts") },
+    { phrase: "anniversary", href: categoryHref("anniversary-gifts") },
     { phrase: "flowers", href: categoryHref("flowers") },
-    { phrase: "flower bouquets", href: categoryHref("flower-bouquets") },
+    { phrase: "cakes", href: categoryHref("cakes") },
     { phrase: "USA", href: "/flower-delivery-usa" },
-    { phrase: "same-day", href: categoryHref("flowers") },
   ],
   "birthday-flowers-delivery": [
     { phrase: "birthday flowers", href: categoryHref("birthday-gifts") },
@@ -313,34 +364,46 @@ export const blogPageInlineLinks: Record<string, readonly { phrase: string; href
     { phrase: "USA", href: "/flower-delivery-usa" },
   ],
   "personalized-gift-boxes-online": [
-    { phrase: "personalized gifts", href: categoryHref("personalized-gifts") },
-    { phrase: "gift hampers", href: categoryHref("gift-hampers") },
+    { phrase: "delivery locations", href: "/delivery-locations" },
+    { phrase: "hampers", href: categoryHref("gift-hampers") },
     { phrase: "birthday", href: categoryHref("birthday-gifts") },
     { phrase: "anniversary", href: categoryHref("anniversary-gifts") },
+    { phrase: "flowers", href: categoryHref("flowers") },
+    { phrase: "cakes", href: categoryHref("cakes") },
   ],
   "flowers-and-cake-delivery-same-day": [
-    { phrase: "same-day", href: categoryHref("flowers") },
+    { phrase: "same-day", href: categoryHref("same-day-gifts") },
+    { phrase: "same day", href: categoryHref("same-day-gifts") },
+    { phrase: "birthday", href: categoryHref("birthday-gifts") },
+    { phrase: "anniversary", href: categoryHref("anniversary-gifts") },
+    { phrase: "bouquet", href: categoryHref("flower-bouquets") },
     { phrase: "flowers", href: categoryHref("flowers") },
-    { phrase: "cake", href: categoryHref("cakes") },
-    { phrase: "delivery locations", href: "/delivery-locations" },
+    { phrase: "cakes", href: categoryHref("cakes") },
   ],
   "same-day-flower-delivery-near-me": [
     { phrase: "same-day flower delivery", href: categoryHref("flowers") },
-    { phrase: "flowers", href: categoryHref("flowers") },
-    { phrase: "city page", href: "/delivery-locations" },
-    { phrase: "USA", href: "/flower-delivery-usa" },
+    { phrase: "bouquets", href: categoryHref("flower-bouquets") },
+    { phrase: "hampers", href: categoryHref("gift-hampers") },
+    { phrase: "birthday", href: categoryHref("birthday-gifts") },
+    { phrase: "cakes", href: categoryHref("cakes") },
   ],
   "flower-delivery-usa": [
-    { phrase: "USA flower delivery", href: "/flower-delivery-usa" },
+    { phrase: "Mother's Day", href: categoryHref("mothers-day-gifts") },
+    { phrase: "Valentine's Day", href: categoryHref("valentines-day-gifts") },
+    { phrase: "same-day", href: categoryHref("same-day-gifts") },
+    { phrase: "bouquets", href: categoryHref("flower-bouquets") },
+    { phrase: "birthday", href: categoryHref("birthday-gifts") },
+    { phrase: "anniversary", href: categoryHref("anniversary-gifts") },
     { phrase: "flowers", href: categoryHref("flowers") },
-    { phrase: "same-day", href: categoryHref("flowers") },
-    { phrase: "delivery locations", href: "/delivery-locations" },
+    { phrase: "USA", href: "/flower-delivery-usa" },
   ],
   "anniversary-gift-ideas-for-her-him": [
-    { phrase: "anniversary gifts", href: categoryHref("anniversary-gifts") },
+    { phrase: "personalized gifts", href: categoryHref("personalized-gifts") },
+    { phrase: "hampers", href: categoryHref("gift-hampers") },
+    { phrase: "anniversary", href: categoryHref("anniversary-gifts") },
     { phrase: "flowers", href: categoryHref("flowers") },
-    { phrase: "gift hampers", href: categoryHref("gift-hampers") },
     { phrase: "cakes", href: categoryHref("cakes") },
+    { phrase: "roses", href: categoryHref("flower-bouquets") },
   ],
   "best-cakes-for-birthday-parties": [
     { phrase: "birthday cake", href: categoryHref("cakes") },
@@ -367,15 +430,20 @@ export const blogPageInlineLinks: Record<string, readonly { phrase: string; href
   ],
   "flower-meanings-by-color-guide": [
     { phrase: "flower meanings", href: "/flower-guide/flower-meanings" },
-    { phrase: "flowers by colour", href: "/flower-guide/flowers-by-colour" },
-    { phrase: "rose", href: "/flower-guide/rose" },
+    { phrase: "Mother's Day", href: categoryHref("mothers-day-gifts") },
+    { phrase: "Valentine's Day", href: categoryHref("valentines-day-gifts") },
+    { phrase: "red roses", href: categoryHref("flower-bouquets") },
     { phrase: "flowers", href: categoryHref("flowers") },
   ],
   "last-minute-gift-ideas-usa": [
-    { phrase: "same-day", href: categoryHref("flowers") },
-    { phrase: "cakes", href: categoryHref("cakes") },
+    { phrase: "personalized gifts", href: categoryHref("personalized-gifts") },
+    { phrase: "gift hampers", href: categoryHref("gift-hampers") },
+    { phrase: "same-day", href: categoryHref("same-day-gifts") },
+    { phrase: "birthday", href: categoryHref("birthday-gifts") },
+    { phrase: "anniversary", href: categoryHref("anniversary-gifts") },
     { phrase: "flowers", href: categoryHref("flowers") },
-    { phrase: "delivery locations", href: "/delivery-locations" },
+    { phrase: "cakes", href: categoryHref("cakes") },
+    { phrase: "USA", href: "/flower-delivery-usa" },
   ],
   "nationwide-flower-delivery-usa": [
     { phrase: "nationwide flower delivery", href: "/flower-delivery-usa" },
@@ -384,15 +452,19 @@ export const blogPageInlineLinks: Record<string, readonly { phrase: string; href
     { phrase: "delivery locations", href: "/delivery-locations" },
   ],
   "best-flowers-to-send-for-birthday": [
-    { phrase: "birthday flowers", href: categoryHref("birthday-gifts") },
-    { phrase: "flower bouquets", href: categoryHref("flower-bouquets") },
-    { phrase: "cakes", href: categoryHref("cakes") },
+    { phrase: "red roses", href: "/flower-guide/rose" },
+    { phrase: "bouquets", href: categoryHref("flower-bouquets") },
+    { phrase: "birthday", href: categoryHref("birthday-gifts") },
     { phrase: "flowers", href: categoryHref("flowers") },
+    { phrase: "hamper", href: categoryHref("gift-hampers") },
+    { phrase: "cake", href: categoryHref("cakes") },
   ],
   "valentines-day-flowers-delivery": [
+    { phrase: "personalized gifts", href: categoryHref("personalized-gifts") },
     { phrase: "Valentine's Day", href: categoryHref("valentines-day-gifts") },
-    { phrase: "flower bouquets", href: categoryHref("flower-bouquets") },
-    { phrase: "anniversary", href: categoryHref("anniversary-gifts") },
-    { phrase: "same-day", href: categoryHref("flowers") },
+    { phrase: "red roses", href: categoryHref("flower-bouquets") },
+    { phrase: "hampers", href: categoryHref("gift-hampers") },
+    { phrase: "flowers", href: categoryHref("flowers") },
+    { phrase: "cakes", href: categoryHref("cakes") },
   ],
 };

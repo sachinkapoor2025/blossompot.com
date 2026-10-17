@@ -8,6 +8,7 @@ import {
 } from "@/lib/inline-link-plan";
 
 export {
+  MIN_INLINE_LINKS,
   MAX_INLINE_LINKS,
   normalizeInternalPath,
   phraseKey,

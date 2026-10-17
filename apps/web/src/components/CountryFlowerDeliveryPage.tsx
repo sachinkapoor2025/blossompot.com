@@ -158,7 +158,9 @@ export async function CountryFlowerDeliveryPage({
               className="rounded-xl border border-primary/10 bg-white p-5 shadow-sm shadow-primary/5"
             >
               <h3 className="font-display font-semibold text-primary mb-2">{occasion.h3}</h3>
-              <p className="text-sm text-slate-700 leading-relaxed">{occasion.text}</p>
+              <p className="text-sm text-slate-700 leading-relaxed">
+                {applyInlineLinks(occasion.text, inlineLinks, linkOpts)}
+              </p>
             </article>
           ))}
         </div>

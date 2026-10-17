@@ -83,7 +83,7 @@ export function exploreMoreLinksForProduct(productSlug?: string, categorySlug?: 
     if (!link?.href || seen.has(link.href)) continue;
     seen.add(link.href);
     unique.push(link);
-    if (unique.length === 3) break;
+    if (unique.length === 5) break;
   }
   return unique;
 }

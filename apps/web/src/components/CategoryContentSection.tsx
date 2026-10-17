@@ -54,7 +54,7 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
                 {content.highlights.items.map((item) => (
                   <li key={item} className="flex items-start gap-2">
                     <span className="text-nav mt-0.5 shrink-0">✓</span>
-                    {item}
+                    {applyInlineLinks(item, inlineLinks, { usedHrefs, usedPhrases })}
                   </li>
                 ))}
               </ul>
