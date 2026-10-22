@@ -34,7 +34,7 @@ describe("country SEO registry", () => {
   it("keeps approved USA flowers and delivery-location copy without enabling a country", () => {
     const flowers = countrySeoContent("US", "flowers");
     assert.equal(flowers.title, "Send Flowers to USA Online | Flower Delivery – BlossomPot");
-    assert.equal(flowers.heading, "Send Flowers to the USA Online with BlossomPot");
+    assert.equal(flowers.heading, "Send Flowers to USA");
     assert.deepEqual(
       flowers.sections.map((section) => section.heading),
       [

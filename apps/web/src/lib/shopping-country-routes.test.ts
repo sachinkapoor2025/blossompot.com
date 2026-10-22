@@ -101,7 +101,7 @@ describe("shopping country routes", () => {
 
   it("does not advertise the redirected same-day URL as a landing page", () => {
     const promo = readFileSync(path.join(__dirname, "../components/BlossomPotPromoBar.tsx"), "utf8");
-    const llms = readFileSync(path.join(__dirname, "../app/llms.txt/route.ts"), "utf8");
+    const llms = readFileSync(path.join(__dirname, "llms-document.ts"), "utf8");
     const redirects = readFileSync(path.join(__dirname, "../../next.config.ts"), "utf8");
     assert.equal(promo.includes("$75"), false);
     assert.equal(promo.includes("same-day"), false);

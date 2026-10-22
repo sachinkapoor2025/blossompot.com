@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SCHEDULE_DELIVERY_HORIZON_DAYS, scheduleDeliveryMaxDate } from "@blossompot/shared";
+import {
+  SCHEDULE_DELIVERY_HORIZON_DAYS,
+  isValidScheduleDeliveryDate,
+  scheduleDeliveryMaxDate,
+} from "@blossompot/shared";
 import {
   loadPreferredDeliveryDate,
   preferredDeliveryDateBounds,
@@ -38,6 +42,11 @@ export function ScheduleDeliveryPicker({
   }, []);
 
   const onChange = (next: string) => {
+    if (next && !isValidScheduleDeliveryDate(next)) {
+      setValue("");
+      savePreferredDeliveryDate("");
+      return;
+    }
     setValue(next);
     savePreferredDeliveryDate(next);
   };

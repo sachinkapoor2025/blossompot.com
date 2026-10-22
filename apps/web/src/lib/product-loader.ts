@@ -67,7 +67,9 @@ function catalogCountry(country?: string | null): string {
 }
 
 async function fetchGboStorefrontProducts(iso: string): Promise<Product[]> {
-  const data = await api<{ gifts: GboGift[] }>(`/gbo/gifts?country=${iso}`, { revalidate: false });
+  const data = await api<{ gifts: GboGift[] }>(`/gbo/gifts?country=${iso}`, {
+    revalidate: CATALOG_REVALIDATE_SECONDS,
+  });
   return (data.gifts ?? [])
     .filter((gift) => gboGiftNumericId(gift) != null)
     .map((gift) => {
@@ -136,7 +138,7 @@ export async function loadProductForCountry(
     try {
       const data = await api<{ gift: GboGift }>(
         `/gbo/gifts/${gboRef.productId}?country=${gboRef.country}`,
-        { revalidate: false }
+        { revalidate: CATALOG_REVALIDATE_SECONDS }
       );
       if (!data.gift) return null;
       const mapped = gboGiftToProduct(gboRef.country, data.gift);
@@ -157,7 +159,7 @@ export async function loadProductForCountry(
       product: Product;
       availability?: { deliverable?: boolean; reason?: string };
     }>(`/products/${encodeURIComponent(decoded)}?${locationQuery.toString()}`, {
-      revalidate: false,
+      revalidate: CATALOG_REVALIDATE_SECONDS,
     });
     if (!isStorefrontVisible(data.product)) return null;
     if (vendorHiddenFromStorefront(data.availability?.reason)) return null;
@@ -210,7 +212,7 @@ export async function loadProduct(slug: string): Promise<Product | null> {
   if (isGboHiddenFromStorefront({ slug: decoded })) return null;
   try {
     const data = await api<{ product: Product }>(`/products/${encodeURIComponent(decoded)}`, {
-      revalidate: false,
+      revalidate: CATALOG_REVALIDATE_SECONDS,
     });
     if (!isStorefrontVisible(data.product)) return null;
     return rememberProduct(data.product);
@@ -221,7 +223,7 @@ export async function loadProduct(slug: string): Promise<Product | null> {
       try {
         const data = await api<{ gift: GboGift }>(
           `/gbo/gifts/${gboRef.productId}?country=${gboRef.country}`,
-          { revalidate: false }
+          { revalidate: CATALOG_REVALIDATE_SECONDS }
         );
         if (data.gift) {
           const mapped = gboGiftToProduct(gboRef.country, data.gift);
@@ -378,7 +380,7 @@ async function readStorefrontCatalog(params?: {
     api<{ products: Product[]; listingGroups?: ListingVendorGroup[]; listingVendors?: VendorDisplaySource[] }>(
       `/products${qs}`,
       {
-        revalidate: false,
+        revalidate: CATALOG_REVALIDATE_SECONDS,
         headers: {
           "x-blossompot-listing-groups": "1",
           ...(params?.listingView === "card" ? { "x-blossompot-listing-view": "card" } : {}),

@@ -125,7 +125,7 @@ async function CategoryPageContent({ params, searchParams }: Props) {
         ]}
       />
       <Breadcrumbs items={crumbs} />
-      {pageSeo.article ? null : <h1 className="text-3xl font-bold text-primary mb-8">{h1}</h1>}
+      <h1 className="text-3xl font-bold text-primary mb-8">{h1}</h1>
 
       {categoryLoad.state === "error" ? (
         <CatalogLoadError />
@@ -143,6 +143,7 @@ async function CategoryPageContent({ params, searchParams }: Props) {
       {pageSeo.article ? (
         <CountrySeoArticle
           article={pageSeo.article}
+          omitHeading
           headingClassName="text-3xl font-bold text-primary mb-4"
         />
       ) : rich ? (

@@ -21,8 +21,8 @@ describe("category country SEO", () => {
     const seo = resolveCategoryPageSeo("flowers", "/flowers-to-usa");
     assert.equal(seo.source, "approved");
     assert.equal(seo.title, "Send Flowers to USA Online | Flower Delivery – BlossomPot");
-    assert.equal(seo.h1, "Send Flowers to the USA Online with BlossomPot");
-    assert.equal(seo.article?.heading, "Send Flowers to the USA Online with BlossomPot");
+    assert.equal(seo.h1, "Send Flowers to USA");
+    assert.equal(seo.article?.heading, "Send Flowers to USA");
     assert.equal(
       seo.description,
       "Send flowers to the USA with BlossomPot. Explore roses, lilies, orchids, and bouquets for birthdays, anniversaries, and special occasions. Check delivery options online."
@@ -47,7 +47,7 @@ describe("category country SEO", () => {
         slug: "flower-bouquets",
         path: "/bouquets-to-usa",
         title: "Flower Bouquets Delivery to USA | Order Bouquets Online | BlossomPot",
-        h1: "Flower Bouquets Delivered to the USA — Made to Impress",
+        h1: "Send Bouquets to USA",
         sections: [
           "Bouquet Delivery Across the USA",
           "Bouquet Styles to Choose From",
@@ -60,7 +60,7 @@ describe("category country SEO", () => {
         slug: "cakes",
         path: "/cakes-to-usa",
         title: "Order Cakes Online USA | Birthday & Anniversary Cake Delivery | BlossomPot",
-        h1: "Order Cakes Online for Delivery in the USA",
+        h1: "Send Cakes to USA",
         sections: [
           "Cake Delivery Across the USA",
           "Cake Favourites",
@@ -73,7 +73,7 @@ describe("category country SEO", () => {
         slug: "birthday-gifts",
         path: "/birthday-gifts-to-usa",
         title: "Birthday Gifts to USA | Send Birthday Flowers, Cakes & Combos | BlossomPot",
-        h1: "Send Birthday Gifts to the USA — Make Their Day Special",
+        h1: "Send Birthday Gifts to USA",
         sections: [
           "Birthday Gift Delivery in the USA",
           "Birthday Gift Ideas",
@@ -86,7 +86,7 @@ describe("category country SEO", () => {
         slug: "anniversary-gifts",
         path: "/anniversary-gifts-to-usa",
         title: "Anniversary Gifts to USA | Send Roses, Cakes & Gift Sets | BlossomPot",
-        h1: "Anniversary Gifts Delivered to the USA — Celebrate Every Year Together",
+        h1: "Send Anniversary Gifts to USA",
         sections: [
           "Anniversary Gift Delivery in the USA",
           "Anniversary Gift Ideas",
@@ -99,7 +99,7 @@ describe("category country SEO", () => {
         slug: "valentines-day-gifts",
         path: "/valentines-day-gifts-to-usa",
         title: "Valentine's Day Gifts to USA | Romantic Flowers & Gift Sets | BlossomPot",
-        h1: "Valentine's Day Gifts for the USA — Say It with Something Special",
+        h1: "Send Valentine's Day Gifts to USA",
         sections: [
           "Valentine's Day Delivery to the USA",
           "Valentine's Gift Ideas",
@@ -112,7 +112,7 @@ describe("category country SEO", () => {
         slug: "gift-hampers",
         path: "/hampers-to-usa",
         title: "Gift Hampers to USA | Gift Baskets & Curated Boxes | BlossomPot",
-        h1: "Gift Hampers Delivered to the USA — One Box, Many Reasons to Smile",
+        h1: "Send Hampers to USA",
         sections: [
           "Gift Hamper Delivery in the USA",
           "What You Can Find in Our Hampers",
@@ -152,10 +152,11 @@ describe("category country SEO", () => {
     );
     const grid = page.indexOf("<ProductGrid");
     const article = page.indexOf("<CountrySeoArticle");
-    const listingHeading = page.indexOf("pageSeo.article ? null : <h1");
+    const listingHeading = page.indexOf('<h1 className="text-3xl font-bold text-primary mb-8">{h1}</h1>');
     assert.ok(listingHeading >= 0);
     assert.ok(grid > listingHeading);
     assert.ok(article > grid);
+    assert.equal(page.includes("pageSeo.article ? null : <h1"), false);
   });
 
   it("does not follow a shopper country on the generic category URL", () => {

@@ -79,6 +79,9 @@ export default function CheckoutPage() {
   );
 }
 
+const SHORT_MESSAGE_ERROR =
+  "Please write a short message, it will be printed on the shipping label";
+
 function CheckoutPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -98,6 +101,7 @@ function CheckoutPageInner() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("razorpay");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [checkoutForm, setCheckoutForm] = useState<HTMLFormElement | null>(null);
   const [discount, setDiscount] = useState(0);
   const [appliedCouponCode, setAppliedCouponCode] = useState("");
   const [savedCouponCode, setSavedCouponCode] = useState("");
@@ -122,6 +126,19 @@ function CheckoutPageInner() {
   const addressPrefilled = useRef(false);
   const addressRef = useRef(address);
   addressRef.current = address;
+
+  useEffect(() => {
+    if (!checkoutForm) return;
+    const onInvalid = (event: Event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLTextAreaElement)) return;
+      if (target.value.trim().length >= 10) return;
+      event.preventDefault();
+      setError(SHORT_MESSAGE_ERROR);
+    };
+    checkoutForm.addEventListener("invalid", onInvalid, true);
+    return () => checkoutForm.removeEventListener("invalid", onInvalid, true);
+  }, [checkoutForm]);
 
   useEffect(() => {
     if (retryOrderId || cartLoading) return;
@@ -610,7 +627,7 @@ function CheckoutPageInner() {
         throw new Error("Please enter your name (sender) so the recipient knows who sent the gift.");
       }
       if (senderMessage.length < 10) {
-        throw new Error("Please write a short message for your brother (it will appear on the shipping label).");
+        throw new Error(SHORT_MESSAGE_ERROR);
       }
       if (!isValidShippingPhone(phone)) {
         throw new Error(
@@ -843,6 +860,7 @@ function CheckoutPageInner() {
         {!isRetry && <ScheduleDeliveryPicker className="mb-6" />}
 
         <form
+          ref={setCheckoutForm}
           onSubmit={handleCheckout}
           className="grid lg:grid-cols-[1fr_minmax(280px,360px)] gap-8 lg:gap-10 items-start"
         >

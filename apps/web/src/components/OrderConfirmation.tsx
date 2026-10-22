@@ -346,9 +346,11 @@ export function OrderConfirmation({ order, paid }: OrderConfirmationProps) {
                 <TruckIcon />
               </div>
               <div>
-                <p className="font-semibold text-slate-900 text-sm">Worldwide delivery</p>
+                <p className="font-semibold text-slate-900 text-sm">
+                  Delivery is available in selected locations.
+                </p>
                 <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                  Ships to the recipient country you chose at checkout. Timing depends on destination.
+                  Please check availability for your destination.
                 </p>
               </div>
             </div>
@@ -369,7 +371,7 @@ export function OrderConfirmation({ order, paid }: OrderConfirmationProps) {
         {/* Actions */}
         {paid && (
           <div className="mt-6 rounded-xl border border-amber-100 bg-amber-50/80 p-4 text-center">
-            <p className="text-sm font-semibold text-amber-950 mb-1">Help other sisters find us</p>
+            <p className="text-sm font-semibold text-amber-950 mb-1">Help others find us</p>
             <p className="text-xs text-amber-900/90 mb-3 leading-relaxed">
               Your review helps other shoppers choose BlossomPot with confidence for USA gift delivery.
             </p>

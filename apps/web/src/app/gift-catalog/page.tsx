@@ -3,7 +3,6 @@ import { Suspense } from "react";
 import { OverseasGiftGrid } from "@/components/OverseasGiftGrid";
 import { ListingPageSkeleton } from "@/components/route-skeletons";
 import { loadProducts, toListingCardProducts } from "@/lib/product-loader";
-import { countryDisplayName } from "@/lib/location-seo-urls";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { pageMetadata } from "@/lib/seo";
 import { resolveDeliveryCountry, type Product } from "@blossompot/shared";
@@ -47,7 +46,7 @@ async function GiftCatalogContent({
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
-      <h1 className="text-3xl font-bold text-primary mb-2">{`Gift catalog to ${countryDisplayName(deliveryCountry)}`}</h1>
+      <h1 className="text-3xl font-bold text-primary mb-2">Gift Catalog</h1>
       <p className="text-sm text-slate-600 mb-8">
         {products.length
           ? `${products.length} gifts for ${destinationName}. Scroll for more.`

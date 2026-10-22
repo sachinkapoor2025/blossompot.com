@@ -18,9 +18,9 @@ export {
   isInternationalIndexable,
   isMarketSlug,
   publishedInternationalLocations,
-  relatedLocationLinks,
   resolveInternationalPath,
   resolveLocation,
 } from "./registry";
 export { assertInternationalComplete, findDuplicateIntroPrefixes, wordCount } from "./quality";
+export { relatedLocationLinks } from "./related-location-links";
 export { internationalJsonLd } from "./seo";

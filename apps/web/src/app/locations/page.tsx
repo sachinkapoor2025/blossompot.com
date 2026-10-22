@@ -80,10 +80,6 @@ export default function LocationsHubPage() {
 
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-3">USA destination examples</h2>
-        <p className="text-slate-700 mb-3 max-w-3xl leading-relaxed">
-          Existing indexed URLs stay on <code className="text-xs">/gifts-to-{"{slug}"}</code>. This hub does
-          not replace them.
-        </p>
         <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
           {usaExamples.map((ex) => (
             <li key={ex.slug}>

@@ -6,13 +6,17 @@ import { useOptionalDeliveryLocation } from "@/lib/delivery-location-context";
 export function CountryReviewSources({
   countryCode,
   compact = false,
+  omitIds,
 }: {
   countryCode?: string | null;
   compact?: boolean;
+  /** Hide platforms that do not have a verified BlossomPot profile. */
+  omitIds?: readonly string[];
 }) {
   const delivery = useOptionalDeliveryLocation();
   const iso = countryCode || delivery?.location?.countryCode || "US";
-  const sources = reviewSourcesForCountry(iso);
+  const hidden = new Set(omitIds ?? []);
+  const sources = reviewSourcesForCountry(iso).filter((source) => !hidden.has(source.id));
 
   return (
     <div className={compact ? "mt-4" : "mt-6"}>

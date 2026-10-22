@@ -65,7 +65,7 @@ export function CustomerReviews({ data }: CustomerReviewsProps) {
             </Link>
           </p>
           <div className="mx-auto mt-8 max-w-3xl">
-            <CountryReviewSources compact />
+            <CountryReviewSources compact omitIds={["trustpilot", "bbb"]} />
           </div>
         </div>
       </section>
@@ -118,7 +118,7 @@ export function CustomerReviews({ data }: CustomerReviewsProps) {
           </Link>
         </p>
         <div className="mx-auto mt-8 max-w-3xl">
-          <CountryReviewSources compact />
+          <CountryReviewSources compact omitIds={["trustpilot", "bbb"]} />
         </div>
       </div>
     </section>

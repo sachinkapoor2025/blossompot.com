@@ -23,13 +23,18 @@ describe("early bird promo", () => {
     const now = new Date("2026-09-11T12:00:00-04:00");
     const min = scheduleDeliveryMinDate(now);
     const max = scheduleDeliveryMaxDate(now);
-    assert.equal(min, "2026-09-11");
+    assert.equal(min, "2026-09-12");
     assert.equal(SCHEDULE_DELIVERY_HORIZON_DAYS, 90);
     assert.equal(max, "2026-12-10");
     assert.equal(isValidScheduleDeliveryDate(min, now), true);
     assert.equal(isValidScheduleDeliveryDate(max, now), true);
+    assert.equal(isValidScheduleDeliveryDate("2026-09-11", now), false);
     assert.equal(isValidScheduleDeliveryDate("2026-09-10", now), false);
     assert.equal(isValidScheduleDeliveryDate("2026-12-11", now), false);
+    // Still Sep 11 in New York; tomorrow stays Sep 12.
+    assert.equal(scheduleDeliveryMinDate(new Date("2026-09-12T03:30:00Z")), "2026-09-12");
+    // Just after midnight in New York; tomorrow moves to Sep 13.
+    assert.equal(scheduleDeliveryMinDate(new Date("2026-09-12T04:30:00Z")), "2026-09-13");
     assert.equal(preferredDeliveryDateToIso("2026-08-15"), "2026-08-15T16:00:00.000Z");
   });
 });

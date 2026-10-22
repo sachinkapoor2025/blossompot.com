@@ -33,20 +33,23 @@ export function isEarlyBirdPromoActive(date = new Date()): boolean {
   return calendarDayKeyAmericaNy(date) <= EARLY_BIRD_ENDS_DATE;
 }
 
-/** Min selectable delivery date = today (America/New_York). */
-export function scheduleDeliveryMinDate(date = new Date()): string {
-  return calendarDayKeyAmericaNy(date);
-}
-
 function addIsoDays(ymd: string, days: number): string {
   const [y, m, d] = ymd.split("-").map(Number);
   const next = new Date(Date.UTC(y!, m! - 1, d! + days));
   return next.toISOString().slice(0, 10);
 }
 
-/** Latest selectable delivery date (inclusive) = today + horizon. */
+/**
+ * First selectable delivery date = tomorrow in America/New_York.
+ * Today is same-day delivery and stays disabled.
+ */
+export function scheduleDeliveryMinDate(date = new Date()): string {
+  return addIsoDays(calendarDayKeyAmericaNy(date), 1);
+}
+
+/** Latest selectable delivery date (inclusive) = today in America/New_York + horizon. */
 export function scheduleDeliveryMaxDate(date = new Date()): string {
-  return addIsoDays(scheduleDeliveryMinDate(date), SCHEDULE_DELIVERY_HORIZON_DAYS);
+  return addIsoDays(calendarDayKeyAmericaNy(date), SCHEDULE_DELIVERY_HORIZON_DAYS);
 }
 
 export function isValidScheduleDeliveryDate(

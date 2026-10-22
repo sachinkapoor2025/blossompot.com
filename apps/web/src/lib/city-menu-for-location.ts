@@ -1,5 +1,5 @@
 import { getDeliveryCountry } from "@blossompot/shared";
-import { internationalPath, publishedInternationalLocations } from "./content/geo/international";
+import { internationalPath, publishedInternationalLocations } from "./content/geo/international/registry";
 import { countryIsoFromPathname } from "./location-seo-urls";
 import { cityLinks, type CityNavLink } from "./site";
 

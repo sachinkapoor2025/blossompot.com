@@ -468,8 +468,8 @@ export function Footer() {
           </p>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <p>
-              © {new Date().getFullYear()} {site.name}.com. All rights reserved. Premium gifting across
-              every mile.
+              © {new Date().getFullYear()} {site.name}.com. All rights reserved. Thoughtful gifts,
+              beautifully delivered.
             </p>
             <p className="flex flex-wrap gap-x-3 gap-y-1">
               <Link href="/privacy" className="hover:text-primary underline underline-offset-2">
@@ -478,10 +478,10 @@ export function Footer() {
               <Link href="/press" className="hover:text-primary underline underline-offset-2">
                 Press
               </Link>
-              <Link href="/llms.txt" className="hover:text-primary underline underline-offset-2">
+              <Link href="/llms" className="hover:text-primary underline underline-offset-2">
                 LLMs.txt
               </Link>
-              <Link href="/humans.txt" className="hover:text-primary underline underline-offset-2">
+              <Link href="/humans" className="hover:text-primary underline underline-offset-2">
                 Humans.txt
               </Link>
             </p>

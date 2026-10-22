@@ -233,6 +233,11 @@ export async function checkout(event: APIGatewayProxyEventV2) {
   const parsed = checkoutSchema.safeParse(body);
   if (!parsed.success) return badRequest(parsed.error.message);
 
+  const preferredDeliveryDate = parsed.data.preferredDeliveryDate?.trim();
+  if (preferredDeliveryDate && !isValidScheduleDeliveryDate(preferredDeliveryDate)) {
+    return badRequest("Scheduled delivery must be a future date within the next 90 days");
+  }
+
   const cartResponse = await getCartHandler(event);
   const cartBody = JSON.parse(
     typeof cartResponse === "string" ? cartResponse : (cartResponse.body ?? "{}")
@@ -427,11 +432,6 @@ export async function checkout(event: APIGatewayProxyEventV2) {
   const vendorFulfillments = buildInitialVendorFulfillments(orderItems as CartItem[]);
 
   const orderNumber = await allocateOrderNumberForCart(orderItems as CartItem[], vendorSlugs);
-
-  const preferredDeliveryDate = parsed.data.preferredDeliveryDate?.trim();
-  if (preferredDeliveryDate && !isValidScheduleDeliveryDate(preferredDeliveryDate)) {
-    return badRequest("Scheduled delivery must be today through 28 August 2026");
-  }
 
   const attribution = parsed.data.attribution
     ? {
