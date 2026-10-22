@@ -17,18 +17,9 @@ import {
   tzDisplayName,
 } from "@/lib/content/geo/locations";
 import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, serviceAreaJsonLd } from "@/lib/seo";
-import { categoryHref } from "@/lib/category-urls";
 import { applyInlineLinks } from "@/lib/inline-links";
 import { cityPageInlineLinks, statePageInlineLinks } from "@/lib/content/page-inline-links";
 import type { Product } from "@blossompot/shared";
-
-const categoryLinks = [
-  { label: "Flowers", href: categoryHref("flowers") },
-  { label: "Bouquets", href: categoryHref("flower-bouquets") },
-  { label: "Cakes", href: categoryHref("cakes") },
-  { label: "Hampers", href: categoryHref("gift-hampers") },
-  { label: "Birthday", href: categoryHref("birthday-gifts") },
-];
 
 function VisualHeading({
   as,
@@ -93,6 +84,7 @@ export function StateGeoTemplate({
       : childCities.slice(0, 6)
     : neighbors;
   const usedHrefs = new Set<string>();
+  const usedPhrases = new Set<string>();
   const crumbs = [
     { label: "Home", href: "/" },
     { label: "Shop", href: "/products" },
@@ -127,7 +119,7 @@ export function StateGeoTemplate({
       </div>
 
       <p className="text-slate-600 mb-4 max-w-3xl leading-relaxed">
-        {applyInlineLinks(geo.introParagraph, statePageInlineLinks, { usedHrefs, currentPath: path, max: 4 })}
+        {applyInlineLinks(geo.introParagraph, statePageInlineLinks, { usedHrefs, usedPhrases, currentPath: path })}
       </p>
 
       <div className="mb-8 rounded-xl border border-primary/15 bg-petal/80 px-4 py-3 text-sm text-slate-800">
@@ -155,34 +147,20 @@ export function StateGeoTemplate({
         </ul>
       </section>
 
-      <section className="mt-12 grid md:grid-cols-2 gap-6">
-        <div>
-          <h2 className="text-xl font-bold text-primary mb-3">Shop categories for {place}</h2>
-          <ul className="flex flex-wrap gap-2">
-            {categoryLinks.map((c) => (
-              <li key={c.href}>
-                <Link href={c.href} className="btn-nav text-xs">
-                  {c.label}
+      {nearbyLinks.length > 0 && (
+        <section className="mt-12">
+          <h2 className="text-xl font-bold text-primary mb-3">{nearbyHeading}</h2>
+          <ul className="space-y-2 text-sm">
+            {nearbyLinks.map((n) => (
+              <li key={n.slug}>
+                <Link href={locationPublicPath(n.slug)} className="text-nav hover:underline">
+                  Send gifts to {locationLabel(n)}
                 </Link>
               </li>
             ))}
           </ul>
-        </div>
-        {nearbyLinks.length > 0 && (
-          <div>
-            <h2 className="text-xl font-bold text-primary mb-3">{nearbyHeading}</h2>
-            <ul className="space-y-2 text-sm">
-              {nearbyLinks.map((n) => (
-                <li key={n.slug}>
-                  <Link href={locationPublicPath(n.slug)} className="text-nav hover:underline">
-                    Send gifts to {locationLabel(n)}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </section>
+        </section>
+      )}
 
       <section className="mt-12">
         <VisualHeading as={compactSeo ? "p" : "h2"} className="text-xl font-bold text-primary mb-2">
@@ -190,7 +168,7 @@ export function StateGeoTemplate({
         </VisualHeading>
         <VisualHeading
           as={compactSeo ? "h2" : "h3"}
-          className="text-lg font-semibold text-primary mb-4"
+          className="font-display text-lg font-semibold text-primary mb-4"
         >
           Frequently asked questions — {place}
         </VisualHeading>
@@ -219,6 +197,7 @@ export function CityGeoTemplate({
   const nearbyLinks = resolveNearbyLinks(geo, geo.slug);
   const showNearby = nearbyLinks.length >= 3;
   const usedHrefs = new Set<string>();
+  const usedPhrases = new Set<string>();
   const crumbs = [
     { label: "Home", href: "/" },
     { label: "Shop", href: "/products" },
@@ -255,7 +234,7 @@ export function CityGeoTemplate({
       </div>
 
       <p className="text-slate-600 mb-4 max-w-3xl leading-relaxed">
-        {applyInlineLinks(geo.introParagraph, cityPageInlineLinks, { usedHrefs, currentPath: path, max: 4 })}
+        {applyInlineLinks(geo.introParagraph, cityPageInlineLinks, { usedHrefs, usedPhrases, currentPath: path })}
       </p>
 
       <div className="mb-8 rounded-xl border border-primary/15 bg-petal/80 px-4 py-3 text-sm text-slate-800">
@@ -279,47 +258,37 @@ export function CityGeoTemplate({
         )}
       </div>
 
-      <section className="mt-12 grid md:grid-cols-2 gap-6">
-        <div>
-          <h2 className="text-xl font-bold text-primary mb-3">Shop categories for {place}</h2>
-          <ul className="flex flex-wrap gap-2">
-            {categoryLinks.map((c) => (
-              <li key={c.href}>
-                <Link href={c.href} className="btn-nav text-xs">
-                  {c.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+      {(parent || showNearby) && (
+        <section className="mt-12 grid md:grid-cols-2 gap-6">
           {parent && (
-            <p className="mt-4 text-sm">
+            <p className="text-sm">
               <Link href={locationPublicPath(parent.slug)} className="text-nav hover:underline">
                 All gift delivery cities in {locationLabel(parent)}
               </Link>
             </p>
           )}
-        </div>
-        {showNearby && (
-          <div>
-            <h2 className="text-xl font-bold text-primary mb-3">Nearby gift delivery pages</h2>
-            <ul className="space-y-2 text-sm">
-              {nearbyLinks.map((n) => (
-                <li key={n.href}>
-                  <Link href={n.href} className="text-nav hover:underline">
-                    Send gifts to {n.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </section>
+          {showNearby && (
+            <div>
+              <h2 className="text-xl font-bold text-primary mb-3">Nearby gift delivery pages</h2>
+              <ul className="space-y-2 text-sm">
+                {nearbyLinks.map((n) => (
+                  <li key={n.href}>
+                    <Link href={n.href} className="text-nav hover:underline">
+                      Send gifts to {n.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </section>
+      )}
 
       <section className="mt-12">
         <h2 className="text-xl font-bold text-primary mb-2">
           Cake delivery {geo.name} &amp; same day gift delivery {geo.name}
         </h2>
-        <h3 className="text-lg font-semibold text-primary mb-4">
+        <h3 className="font-display text-lg font-semibold text-primary mb-4">
           Frequently asked questions — {place}
         </h3>
         <div className="space-y-4">

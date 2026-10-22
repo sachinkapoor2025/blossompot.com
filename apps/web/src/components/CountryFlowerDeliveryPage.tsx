@@ -10,26 +10,39 @@ import {
   getCountryFlowerDelivery,
   type CountryFlowerDeliverySlug,
 } from "@/lib/content/country-flower-delivery";
+import { flowerDeliveryPathForIso } from "@/lib/location-seo-urls";
+import { notFoundIfShoppingCountryDisabled } from "@/lib/shopping-country-gate";
 import { countryPageInlineLinks } from "@/lib/content/page-inline-links";
-import { applyInlineLinks } from "@/lib/inline-links";
+import { applyInlineLinks, normalizeInternalPath } from "@/lib/inline-links";
 import { breadcrumbJsonLd, canonical, faqJsonLd } from "@/lib/seo";
 import { cityNavHref } from "@/lib/site";
 import { cityMenuForCountry } from "@/lib/city-menu-for-location";
 import { siteUrl } from "@/lib/env";
 
-function FlowerGuideProducts({ country }: { country: CountryFlowerDeliverySlug }) {
+function FlowerGuideProducts({
+  country,
+  centered = false,
+}: {
+  country: CountryFlowerDeliverySlug;
+  centered?: boolean;
+}) {
   return (
     <Suspense fallback={<ListingPageSkeleton />}>
-      <CountryFlowerProductSection country={country} />
+      <CountryFlowerProductSection country={country} centered={centered} />
     </Suspense>
   );
 }
 
-export function CountryFlowerDeliveryPage({
+export async function CountryFlowerDeliveryPage({
   country,
+  align,
 }: {
   country: CountryFlowerDeliverySlug;
+  align?: "center";
 }) {
+  const countryIsoForGate = flowerDeliveryCountryIso(country);
+  const flowerPath = flowerDeliveryPathForIso(countryIsoForGate);
+  if (flowerPath) await notFoundIfShoppingCountryDisabled(flowerPath);
   const page = getCountryFlowerDelivery(country);
   const countryIso = flowerDeliveryCountryIso(country);
   const cityMenu = cityMenuForCountry(countryIso);
@@ -38,8 +51,16 @@ export function CountryFlowerDeliveryPage({
     href: cityNavHref(city),
   }));
   const productsFirst = country === "usa";
+  const centered = align === "center";
   const inlineLinks = countryPageInlineLinks[country] ?? [];
   const usedHrefs = new Set<string>();
+  const usedPhrases = new Set<string>();
+  const blockedHrefs = new Set(
+    [...page.categories, ...countryCityLinks, page.primaryCta, page.secondaryCta, ...page.relatedHubs].map(
+      (link) => normalizeInternalPath(link.href)
+    )
+  );
+  const linkOpts = { usedHrefs, usedPhrases, blockedHrefs, currentPath: page.href };
   const crumbs = [
     { label: "Home", href: "/" },
     { label: page.menuLabel },
@@ -89,12 +110,13 @@ export function CountryFlowerDeliveryPage({
         ]}
       />
       <Breadcrumbs items={crumbs} />
-      {productsFirst ? <FlowerGuideProducts country={country} /> : null}
-      <h1 className="text-3xl font-bold text-primary mb-3">{page.h1}</h1>
+      {productsFirst ? <FlowerGuideProducts country={country} centered={centered} /> : null}
+      <div className={centered ? "max-w-3xl mx-auto" : "contents"}>
+      <h1 className={`text-3xl font-bold text-primary mb-3${centered ? " text-center" : ""}`}>{page.h1}</h1>
       {productsFirst ? null : <FlowerGuideProducts country={country} />}
 
       <p className="text-slate-600 mb-6 max-w-3xl leading-relaxed">
-        {applyInlineLinks(page.intro, inlineLinks, { usedHrefs, currentPath: page.href, max: 4 })}
+        {applyInlineLinks(page.intro, inlineLinks, linkOpts)}
       </p>
 
       <div className="mb-8 rounded-xl border border-primary/15 bg-petal/80 px-4 py-3 text-sm text-slate-800">
@@ -104,14 +126,14 @@ export function CountryFlowerDeliveryPage({
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-3">{page.howItWorksHeading}</h2>
         <p className="text-slate-700 leading-relaxed max-w-3xl">
-          {applyInlineLinks(page.howItWorks, inlineLinks, { usedHrefs, currentPath: page.href, max: 4 })}
+          {applyInlineLinks(page.howItWorks, inlineLinks, linkOpts)}
         </p>
       </section>
 
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-3">{page.categoriesHeading}</h2>
         <p className="text-slate-700 mb-4 max-w-3xl leading-relaxed">
-          {applyInlineLinks(page.categoriesIntro, inlineLinks, { usedHrefs, currentPath: page.href, max: 4 })}
+          {applyInlineLinks(page.categoriesIntro, inlineLinks, linkOpts)}
         </p>
         <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {page.categories.map((cat) => (
@@ -135,8 +157,10 @@ export function CountryFlowerDeliveryPage({
               key={occasion.h3}
               className="rounded-xl border border-primary/10 bg-white p-5 shadow-sm shadow-primary/5"
             >
-              <h3 className="font-semibold text-primary mb-2">{occasion.h3}</h3>
-              <p className="text-sm text-slate-700 leading-relaxed">{occasion.text}</p>
+              <h3 className="font-display font-semibold text-primary mb-2">{occasion.h3}</h3>
+              <p className="text-sm text-slate-700 leading-relaxed">
+                {applyInlineLinks(occasion.text, inlineLinks, linkOpts)}
+              </p>
             </article>
           ))}
         </div>
@@ -145,7 +169,7 @@ export function CountryFlowerDeliveryPage({
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-3">{page.citiesHeading}</h2>
         <p className="text-slate-700 mb-3 max-w-3xl leading-relaxed">
-          {applyInlineLinks(page.citiesIntro, inlineLinks, { usedHrefs, currentPath: page.href, max: 4 })}
+          {applyInlineLinks(page.citiesIntro, inlineLinks, linkOpts)}
         </p>
         <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
           {countryCityLinks.map((link) => (
@@ -168,9 +192,9 @@ export function CountryFlowerDeliveryPage({
       </section>
 
       <section className="mb-10 rounded-3xl border border-primary/15 bg-gradient-to-br from-rose-50 via-white to-orange-50 p-6 sm:p-8">
-        <h2 className="text-xl sm:text-2xl font-bold text-primary">{page.ctaHeading}</h2>
-        <p className="mt-2 text-slate-600 max-w-2xl">{page.ctaText}</p>
-        <div className="mt-5 flex flex-wrap gap-3">
+        <h2 className={`text-xl sm:text-2xl font-bold text-primary${centered ? " text-center" : ""}`}>{page.ctaHeading}</h2>
+        <p className={`mt-2 text-slate-600 max-w-2xl${centered ? " mx-auto" : ""}`}>{page.ctaText}</p>
+        <div className={`mt-5 flex flex-wrap gap-3${centered ? " justify-center" : ""}`}>
           <Link
             href={page.primaryCta.href}
             className="inline-flex min-h-11 items-center rounded-full bg-nav px-5 text-sm font-semibold text-white hover:opacity-95"
@@ -200,7 +224,7 @@ export function CountryFlowerDeliveryPage({
         <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
           {page.relatedHubs
             .filter((link) => !link.href.startsWith("/flower-delivery-") || link.href === page.href)
-            .slice(0, 4)
+            .slice(0, 3)
             .map((link) => (
             <li key={link.href}>
               <Link href={link.href} className="text-nav hover:underline">
@@ -210,6 +234,7 @@ export function CountryFlowerDeliveryPage({
           ))}
         </ul>
       </section>
+      </div>
     </div>
   );
 }

@@ -186,9 +186,9 @@ export function FlashSaleSection({ product }: { product: Product | null }) {
                 </div>
               </div>
               <Link href={`/products/${product.slug}`} className="block px-3 py-3 lg:block">
-                <h3 className="font-semibold text-sm text-slate-900 line-clamp-2 hover:text-nav">
+                <p className="font-sans text-sm font-semibold leading-5 text-slate-900 line-clamp-2 hover:text-nav">
                   {product.name}
-                </h3>
+                </p>
                 <div className="mt-2 flex items-center gap-2">
                   <span className="text-nav font-bold">
                     {format(product.price, product.currency)}

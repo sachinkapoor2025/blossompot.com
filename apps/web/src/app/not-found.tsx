@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { BackToHome } from "@/components/BackToHome";
+import { notFoundMetadata } from "@/lib/not-found-metadata";
+
+export const metadata = notFoundMetadata;
 
 export default function NotFound() {
   return (

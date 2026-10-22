@@ -23,10 +23,9 @@ import {
 import { api } from "./api";
 import {
   bundledHiddenForDisabledVendor,
-  getCatalogProducts,
-  getCatalogProductsForCountry,
   rememberStorefrontShoppingVendors,
 } from "./catalog-fallback";
+import { presentCategoryPage, presentHomeCategoryRow, type CatalogView } from "./catalog-load-state";
 import { toListingCardProducts } from "./listing-card";
 import { isRakhiRelatedProduct, storefrontSkipsRakhiCategory } from "./rakhi-filter";
 import { availabilityAllowsPurchase } from "./product-availability-copy";
@@ -122,23 +121,6 @@ function decodeProductSlug(slug: string): string {
   } catch {
     return slug.trim();
   }
-}
-
-function catalogListingExtras(params?: {
-  category?: string;
-  search?: string;
-  country?: string;
-}): Product[] {
-  let extras = (
-    params?.country ? getCatalogProductsForCountry(params.country) : getCatalogProducts()
-  ).filter(isStorefrontVisible);
-  if (params?.category) {
-    extras = extras.filter((product) => productInStorefrontCategory(product, params.category as string));
-  }
-  if (params?.search) {
-    extras = extras.filter((product) => productMatchesSearchQuery(product, params.search as string));
-  }
-  return extras;
 }
 
 export async function loadProductForCountry(
@@ -266,15 +248,25 @@ function catalogQuery(params?: {
   search?: string;
   country?: string | null;
   postalCode?: string | null;
+  slugs?: readonly string[];
 }): string {
   const query = new URLSearchParams();
   if (params?.category) query.set("category", params.category);
   if (params?.search) query.set("search", params.search);
+  if (params?.slugs) query.set("slugs", params.slugs.join(","));
   query.set("country", catalogCountry(params?.country));
   const postal = params?.postalCode?.trim();
   if (postal) query.set("postalCode", postal);
   return `?${query.toString()}`;
 }
+
+type CatalogRead = {
+  /** False when the products request failed or the body was not a product list. */
+  ok: boolean;
+  products: Product[];
+  /** Visible products returned by the products API, before bundled extras. */
+  apiProductCount: number;
+};
 
 /** Shared list loader — same API + cache policy as `loadProduct` (PDP). */
 export async function loadProducts(params?: {
@@ -282,27 +274,122 @@ export async function loadProducts(params?: {
   search?: string;
   country?: string;
 }): Promise<Product[]> {
+  return (await readStorefrontCatalog(params)).products;
+}
+
+/**
+ * Same read as `loadProducts`, with failure kept distinct from an empty list.
+ * Callers that still want the previous array should use `loadProducts`.
+ */
+const COMPONENT_SLUG_CHUNK = 100;
+
+export async function loadStorefrontCatalog(params?: {
+  category?: string;
+  search?: string;
+  country?: string;
+  /** When set, the products API reads these slugs instead of the uncategorized catalog. */
+  slugs?: readonly string[];
+}): Promise<{ ok: true; products: Product[] } | { ok: false }> {
+  try {
+    const slugs = params?.slugs;
+    if (slugs && slugs.length > COMPONENT_SLUG_CHUNK) {
+      const products: Product[] = [];
+      for (let index = 0; index < slugs.length; index += COMPONENT_SLUG_CHUNK) {
+        const loaded = await loadStorefrontCatalog({
+          ...params,
+          slugs: slugs.slice(index, index + COMPONENT_SLUG_CHUNK),
+        });
+        if (!loaded.ok) return { ok: false };
+        products.push(...loaded.products);
+      }
+      return { ok: true, products };
+    }
+    const loaded = await readStorefrontCatalog({ ...params, listingView: "card" });
+    if (!loaded.ok) return { ok: false };
+    return { ok: true, products: loaded.products };
+  } catch {
+    return { ok: false };
+  }
+}
+
+/**
+ * Homepage category row. A successful empty API list is not filled from bundled JSON.
+ * A failed request returns an error and no products.
+ */
+export async function loadHomeCategoryProducts(
+  categorySlug: string,
+  country?: string
+): Promise<CatalogView> {
+  return loadVisibleCategory(categorySlug, country, presentHomeCategoryRow);
+}
+
+/** Category page. A successful empty API list is not filled from bundled JSON. */
+export async function loadCategoryPageProducts(
+  categorySlug: string,
+  country?: string
+): Promise<CatalogView> {
+  return loadVisibleCategory(categorySlug, country, presentCategoryPage);
+}
+
+async function loadVisibleCategory(
+  categorySlug: string,
+  country: string | undefined,
+  present: typeof presentHomeCategoryRow
+): Promise<CatalogView> {
+  try {
+    const loaded = await readStorefrontCatalog({ category: categorySlug, country, listingView: "card" });
+    const visible = dedupeStorefrontProducts(loaded.products.filter(isStorefrontVisible));
+    return present(
+      loaded.ok
+        ? { ok: true, apiProductCount: loaded.apiProductCount, products: visible }
+        : { ok: false }
+    );
+  } catch {
+    return { state: "error", products: [] };
+  }
+}
+
+async function readStorefrontCatalog(params?: {
+  category?: string;
+  search?: string;
+  country?: string;
+  slugs?: readonly string[];
+  /** Shop, search, category, and homepage rows. Other loaders keep the full list body. */
+  listingView?: "card";
+}): Promise<CatalogRead> {
   if (params?.category && storefrontSkipsRakhiCategory(params.category)) {
-    return [];
+    return { ok: true, products: [], apiProductCount: 0 };
   }
 
   const requested = params?.country ?? (await getStorefrontDeliveryCountry());
-  if (!requested) return [];
+  if (!requested) return { ok: true, products: [], apiProductCount: 0 };
   const country = catalogCountry(requested);
   const postalCode = await getStorefrontDeliveryPostal();
   const qs = catalogQuery({
-    category: params?.category,
-    search: params?.search,
+    category: params?.slugs ? undefined : params?.category,
+    search: params?.slugs ? undefined : params?.search,
     country: requested,
     postalCode,
+    slugs: params?.slugs,
   });
 
+  const catalog = { failed: false };
   const [dbResult, gboResult] = await Promise.all([
     api<{ products: Product[]; listingGroups?: ListingVendorGroup[]; listingVendors?: VendorDisplaySource[] }>(
       `/products${qs}`,
-      { revalidate: false, headers: { "x-blossompot-listing-groups": "1" } }
+      {
+        revalidate: false,
+        headers: {
+          "x-blossompot-listing-groups": "1",
+          ...(params?.listingView === "card" ? { "x-blossompot-listing-view": "card" } : {}),
+        },
+      }
     )
       .then((data) => {
+        if (!data || !Array.isArray(data.products)) {
+          catalog.failed = true;
+          return null;
+        }
         const aligned = filterAlignedListingGroups(data.products, data.listingGroups, isStorefrontVisible);
         return {
           products: rememberProducts(aligned.products),
@@ -310,15 +397,21 @@ export async function loadProducts(params?: {
           listingVendors: data.listingVendors ?? [],
         };
       })
-      .catch(() => null),
+      .catch(() => {
+        catalog.failed = true;
+        return null;
+      }),
     loadGboStorefrontProducts(country).catch(() => [] as Product[]),
   ]);
 
   let extra = gboResult;
-  if (params?.category) {
+  if (params?.slugs) {
+    const wanted = new Set(params.slugs);
+    extra = gboResult.filter((product) => wanted.has(product.slug));
+  } else if (params?.category) {
     extra = gboResult.filter((product) => productInStorefrontCategory(product, params.category as string));
   }
-  if (params?.search) {
+  if (!params?.slugs && params?.search) {
     extra = extra.filter((product) => productMatchesSearchQuery(product, params.search as string));
   }
 
@@ -326,26 +419,26 @@ export async function loadProducts(params?: {
   const seen = new Set(apiProducts.map((product) => product.slug));
   const listingVendors = dbResult?.listingVendors ?? [];
   if (listingVendors.length) rememberStorefrontShoppingVendors(shoppingRecords(listingVendors));
-  const bundledExtras = dbResult
-    ? withoutDisabledVendors(catalogListingExtras({ ...params, country }), country, listingVendors)
-    : [];
-  const visibleGbo = dbResult ? withoutDisabledVendors(extra, country, listingVendors) : extra;
-  const extras = [...visibleGbo, ...bundledExtras].filter((product) => {
+  // Bundled JSON is not merged here. It does not apply the products API's inventory,
+  // live vendor registry, or location-deliverability checks.
+  const visibleGbo = dbResult ? withoutDisabledVendors(extra, country, listingVendors) : [];
+  const extras = visibleGbo.filter((product) => {
     if (seen.has(product.slug)) return false;
     seen.add(product.slug);
     return true;
   });
   const vendors = dbResult?.listingVendors ?? [];
   const arranged = arrangeStorefrontProducts(apiProducts, dbResult?.listingGroups, extras, vendors);
-  return annotateStorefrontListing(filterLiveForCountry(arranged, country), vendors);
+  return {
+    ok: !catalog.failed,
+    apiProductCount: apiProducts.length,
+    products: annotateStorefrontListing(filterLiveForCountry(arranged, country), vendors),
+  };
 }
 
 export { toListingCardProducts };
 
-/**
- * Category grids: live API first, then fill missing hamper/catalog SKUs.
- * Never overwrite an API product with bundled catalog prices.
- */
+/** Category grids from the live products API. Bundled JSON is not a fallback catalog. */
 export async function loadProductsByCategory(categorySlug: string, country?: string): Promise<Product[]> {
   let products: Product[] = [];
   try {

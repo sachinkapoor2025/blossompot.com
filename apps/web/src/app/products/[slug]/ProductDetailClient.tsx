@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AddToCartControl } from "@/components/AddToCartControl";
-import { ProductAddonsPicker } from "@/components/ProductAddonsPicker";
 import { ProductImageGallery } from "@/components/ProductImageGallery";
 import { WishlistButton } from "@/components/WishlistButton";
 import { TrustBadges } from "@/components/TrustBadges";
@@ -25,22 +24,22 @@ import {
   isFastSelling,
   getUnitsSold,
   estimatedDeliveryLabel,
-  sumAddonPrices,
-  getProductAddon,
   isFlashComboProduct,
   isFlashComboSaleActive,
   flashComboSaleEndsAt,
   FLASH_COMBO_SHIPPING_USD,
   resolveCatalogShippingFee,
+  applicableCatalogLineShippingCharge,
+  quoteAddressShipmentShipping,
 } from "@blossompot/shared";
 import { EstimatedDeliveryNote } from "@/components/EstimatedDeliveryNote";
 import { ProductCareAccordions } from "@/components/ProductCareAccordions";
 import { LearnAboutFlower } from "@/components/flower-guide/LearnAboutFlower";
 import { flowerGuideForProduct } from "@/lib/content/flower-guide/products";
 import { ScheduleDeliveryPicker } from "@/components/ScheduleDeliveryPicker";
-import type { Product, ProductAddonSelection } from "@blossompot/shared";
+import type { Product } from "@blossompot/shared";
 import { FastSellingBanner } from "@/components/FastSellingBadge";
-import { looksLikeHtml, shortPlainDescription } from "@/lib/html-text";
+import { looksLikeHtml, plainDescriptionBlocks, sanitizeProductHtml, shortPlainDescription } from "@/lib/html-text";
 import { getProductIncludes } from "@/lib/product-includes";
 import { fulfillmentVendorSlug, isGboVendor, parseGboSlug, VENDOR_GBO } from "@blossompot/shared";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
@@ -137,7 +136,7 @@ export function ProductDetailClient({
   const captureLead = useDebouncedLeadCapture(sessionId);
   const captureLeadNow = useLeadCapture(sessionId);
   const { cart, itemCount } = useCart();
-  const { format } = useCurrency();
+  const { format, formatDisplay, convert, displayCurrency, usdInrRate } = useCurrency();
   const locationSet = Boolean(delivery.location);
   const vendorKey = product.internationalDelivery
     ? VENDOR_GBO
@@ -153,7 +152,6 @@ export function ProductDetailClient({
   const [productUrl, setProductUrl] = useState("");
   const [galleryImages, setGalleryImages] = useState(product.images ?? []);
   const [selectedVariant, setSelectedVariant] = useState(0);
-  const [addons, setAddons] = useState<ProductAddonSelection[]>([]);
   const [shippingOptionLabel, setShippingOptionLabel] = useState(
     product.shippingOptions?.find((o) => o.label === "2nd Day")?.label ??
       product.shippingOptions?.[0]?.label
@@ -164,34 +162,34 @@ export function ProductDetailClient({
   }, [product.slug, product.images]);
 
   useEffect(() => {
-    setAddons([]);
-  }, [product.slug]);
-
-  useEffect(() => {
     trackProductView(product.slug);
     setProductUrl(window.location.href);
   }, [product.slug]);
 
   const price = format(product.price, product.currency);
-  const addonsUsdTotal = sumAddonPrices(
-    addons.map((s) => {
-      const def = getProductAddon(s.id);
-      return {
-        id: s.id,
-        name: def?.name ?? s.id,
-        price: def?.priceUsd ?? 0,
-        quantity: s.quantity,
-      };
-    })
-  );
   const catalogShipFee = resolveCatalogShippingFee(product, shippingOptionLabel);
-  /** Add-on catalog is USD; show combined display when shopper has extras selected. */
-  const displayTotal =
-    addonsUsdTotal > 0 && product.currency === "USD"
-      ? format(product.price + addonsUsdTotal, product.currency)
-      : addonsUsdTotal > 0
-        ? format(product.price, product.currency)
-        : price;
+  const productShippingLine =
+    catalogShipFee == null
+      ? null
+      : {
+          price: convert(product.price, product.currency),
+          quantity: 1,
+          productSlug: product.slug,
+          vendorSlug: product.vendorSlug,
+          shippingFee: convert(catalogShipFee, product.currency),
+        };
+  const applicableCatalogShipping =
+    productShippingLine == null
+      ? null
+      : applicableCatalogLineShippingCharge(
+          quoteAddressShipmentShipping({
+            items: [productShippingLine],
+            currency: displayCurrency,
+            usdInrRate,
+          }),
+          productShippingLine
+        );
+  const displayTotal = price;
   const comparePrice =
     product.compareAtPrice && product.compareAtPrice > product.price
       ? format(product.compareAtPrice, product.currency)
@@ -203,7 +201,6 @@ export function ProductDetailClient({
     cart?.items.filter((i) => i.productSlug === product.slug).reduce((s, i) => s + i.quantity, 0) ?? 0;
   const inCart = cartQuantity > 0;
   const isGboProduct = isGboVendor(product.vendorSlug) || Boolean(parseGboSlug(product.slug));
-  const showAddons = product.allowsAddons === true && !isGboProduct;
   const lowStock = product.inventory > 0 && product.inventory <= LOW_STOCK_THRESHOLD;
   const fastSelling = isFastSelling(product);
   const unitsSold = getUnitsSold(product);
@@ -268,11 +265,6 @@ export function ProductDetailClient({
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-4">
             {comparePrice && <span className="text-lg text-slate-400 line-through">{comparePrice}</span>}
             <span className="text-2xl sm:text-3xl font-bold text-primary">{displayTotal}</span>
-            {addonsUsdTotal > 0 && product.currency === "USD" ? (
-              <span className="text-sm text-slate-500">
-                includes +{format(addonsUsdTotal, "USD")} add-ons
-              </span>
-            ) : null}
             {discount !== null && (
               <span className="text-sm font-semibold text-green-600">{discount}% OFF</span>
             )}
@@ -316,15 +308,23 @@ export function ProductDetailClient({
                         : "border-slate-300 bg-white text-slate-700"
                     }`}
                   >
-                    {option.label} · {format(option.price, product.currency)}
+                    {option.label}
+                    {applicableCatalogShipping === 0
+                      ? " · Free"
+                      : ` · ${format(option.price, product.currency)}`}
                   </button>
                 ))}
               </div>
+              {applicableCatalogShipping === 0 ? (
+                <p className="mt-2 text-sm text-slate-600">Shipping: Free</p>
+              ) : null}
             </div>
-          ) : catalogShipFee != null ? (
+          ) : applicableCatalogShipping != null ? (
             <p className="mb-4 text-sm text-slate-600">
-              Shipping: {catalogShipFee === 0 ? "Free" : format(catalogShipFee, product.currency)}{" "}
-              in the selected currency (charged separately at checkout)
+              Shipping:{" "}
+              {applicableCatalogShipping === 0
+                ? "Free"
+                : `${formatDisplay(applicableCatalogShipping)} in the selected currency (charged separately at checkout)`}
             </p>
           ) : null}
           {product.shippingNote && catalogShipFee == null ? (
@@ -374,10 +374,6 @@ export function ProductDetailClient({
           <ProductCareAccordions product={product} />
           {flowerGuide ? <LearnAboutFlower guide={flowerGuide} /> : null}
 
-          {showAddons ? (
-            <ProductAddonsPicker selected={addons} onChange={setAddons} className="mb-4" />
-          ) : null}
-
           {inCart ? (
             <div className="mb-3">
               <div className="flex flex-wrap items-center gap-3 mb-3">
@@ -406,7 +402,6 @@ export function ProductDetailClient({
                     fullWidth
                     variant="detail"
                     shippingOptionLabel={shippingOptionLabel}
-                    addons={addons}
                     getContact={getContact}
                   />
                 </div>
@@ -446,7 +441,6 @@ export function ProductDetailClient({
                     fullWidth
                     variant="detail"
                     shippingOptionLabel={shippingOptionLabel}
-                    addons={addons}
                     getContact={getContact}
                   />
                 </div>
@@ -502,13 +496,15 @@ export function ProductDetailClient({
           <div className="space-y-8">
             {descriptionIsHtml ? (
               <article
-                className="product-html-description text-slate-700 leading-relaxed max-w-4xl prose prose-slate prose-a:text-nav prose-strong:text-primary prose-ul:my-3 prose-li:my-0.5"
-                dangerouslySetInnerHTML={{ __html: product.description }}
+                className="product-html-description text-slate-700 max-w-4xl"
+                dangerouslySetInnerHTML={{ __html: sanitizeProductHtml(product.description) }}
               />
             ) : (
-              <article className="text-slate-700 leading-relaxed space-y-4 max-w-4xl">
-                {product.description.split(/(?<=\.)\s+/).map((para, i) => (
-                  <p key={i}>{para}</p>
+              <article className="product-html-description text-slate-700 max-w-4xl">
+                {plainDescriptionBlocks(product.description).map((block, i) => (
+                  <p key={i} className="whitespace-pre-line">
+                    {block}
+                  </p>
                 ))}
               </article>
             )}
@@ -636,7 +632,6 @@ export function ProductDetailClient({
     <StickyAddToCartBar
       product={product}
       getContact={getContact}
-      addons={addons}
       shippingOptionLabel={shippingOptionLabel}
       disabled={!deliverable}
     />

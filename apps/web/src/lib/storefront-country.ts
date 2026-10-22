@@ -1,4 +1,4 @@
-import { resolveEnabledShoppingCountry, SHOPPING_COUNTRY_ISO } from "@blossompot/shared";
+import { resolveDefaultShoppingCountry, SHOPPING_COUNTRY_ISO } from "@blossompot/shared";
 import { cookies, headers } from "next/headers";
 import { api } from "./api";
 import { DELIVERY_LOCATION_COOKIE, parseDeliveryLocationToken } from "./delivery-location";
@@ -19,9 +19,47 @@ function decodeCookieValue(raw: string): string {
   }
 }
 
-type EnabledCache = { at: number; codes: string[] | null };
+type EnabledCache = { at: number; codes: string[] | null; defaultCountry: string };
 let enabledCache: EnabledCache | null = null;
 const ENABLED_CACHE_MS = 30_000;
+
+type StorefrontCountryConfig = { codes: string[] | null; defaultCountry: string };
+
+/**
+ * Globally enabled shopping countries and the admin default used by indexable homepage SEO.
+ * A failed read falls back to the USA default. This does not read the shopper's cookie.
+ */
+async function loadStorefrontCountryConfig(): Promise<StorefrontCountryConfig> {
+  const now = Date.now();
+  if (enabledCache && now - enabledCache.at < ENABLED_CACHE_MS) {
+    return { codes: enabledCache.codes, defaultCountry: enabledCache.defaultCountry };
+  }
+  try {
+    const data = await api<{ countries?: { countryCode?: string }[]; defaultCountry?: string }>(
+      "/catalog-countries",
+      { revalidate: 30 }
+    );
+    const codes = [
+      ...new Set(
+        (data.countries ?? [])
+          .map((country) => (country.countryCode ?? "").trim().toUpperCase())
+          .filter((code) => /^[A-Z]{2}$/.test(code))
+      ),
+    ];
+    const defaultCountry =
+      codes.length === 0
+        ? ""
+        : (resolveDefaultShoppingCountry(
+            codes.map((countryCode) => ({ countryCode, enabled: true })),
+            data.defaultCountry
+          ) ?? "");
+    enabledCache = { at: now, codes, defaultCountry };
+    return { codes, defaultCountry };
+  } catch {
+    if (enabledCache) return { codes: enabledCache.codes, defaultCountry: enabledCache.defaultCountry };
+    return { codes: [SHOPPING_COUNTRY_ISO], defaultCountry: SHOPPING_COUNTRY_ISO };
+  }
+}
 
 /**
  * Globally enabled shopping countries.
@@ -29,20 +67,12 @@ const ENABLED_CACHE_MS = 30_000;
  * A failed read falls back to the USA default.
  */
 export async function loadEnabledShoppingCountryCodes(): Promise<string[] | null> {
-  const now = Date.now();
-  if (enabledCache && now - enabledCache.at < ENABLED_CACHE_MS) return enabledCache.codes;
-  try {
-    const data = await api<{ countries?: { countryCode?: string }[] }>("/catalog-countries", {
-      revalidate: 30,
-    });
-    const codes = (data.countries ?? [])
-      .map((country) => (country.countryCode ?? "").trim().toUpperCase())
-      .filter((code) => /^[A-Z]{2}$/.test(code));
-    enabledCache = { at: now, codes: [...new Set(codes)] };
-    return enabledCache.codes;
-  } catch {
-    return enabledCache?.codes ?? [SHOPPING_COUNTRY_ISO];
-  }
+  return (await loadStorefrontCountryConfig()).codes;
+}
+
+/** Admin default country for the indexable `/` article. Does not follow the shopper's cookie. */
+export async function getIndexableHomeCountry(): Promise<string> {
+  return (await loadStorefrontCountryConfig()).defaultCountry;
 }
 
 /** ISO-2 country from ?country=, middleware header, or the delivery-location cookie, validated against the global list. */
@@ -65,14 +95,10 @@ export async function getStorefrontDeliveryCountry(
       raw = null;
     }
   }
-  const enabled = await loadEnabledShoppingCountryCodes();
-  if (!enabled || enabled.length === 0) return "";
-  return (
-    resolveEnabledShoppingCountry(
-      raw,
-      enabled.map((countryCode) => ({ countryCode, enabled: true }))
-    ) ?? ""
-  );
+  const config = await loadStorefrontCountryConfig();
+  if (!config.codes || config.codes.length === 0 || !config.defaultCountry) return "";
+  if (raw && config.codes.includes(raw)) return raw;
+  return config.defaultCountry;
 }
 
 /** Postal/ZIP from the delivery-location cookie, when the shopper has entered one. */

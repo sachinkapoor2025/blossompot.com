@@ -103,6 +103,7 @@ When admin (or Orange County vendor tracking) changes order status (accepted, pr
 | Method | Path | Purpose |
 |--------|------|---------|
 | GET | `/products` | List/search products. Optional `country` + `postalCode` filters to vendors that can fulfill that location. Omit for full catalog (SEO). |
+| GET | `/combos` | Published combo records (`slug`, `name`, `productSlugs`). Does not store or return a combo price. |
 | GET | `/products/{slug}` | Product detail. Optional `country` + `postalCode` adds `availability`. |
 | GET/POST | `/location/check-serviceability` | Guest: country + postal → serviceable vendors |
 | GET | `/admin/vendors/{vendorSlug}/service-areas` | Admin: list vendor coverage rules |

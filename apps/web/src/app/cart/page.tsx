@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import {
+  applicableCatalogLineShippingCharge,
   quoteAddressShipmentShipping,
   quoteFreeShippingThreshold,
 } from "@blossompot/shared";
@@ -44,7 +45,7 @@ function CartQuantityControls({
   const { addItem, updateItem, removeItem } = useCart();
   const [busy, setBusy] = useState(false);
 
-  const run = async (fn: () => Promise<void>) => {
+  const run = async (fn: () => Promise<unknown>) => {
     setBusy(true);
     try {
       await fn();
@@ -127,20 +128,24 @@ export default function CartPage() {
     return sum + convert(cartLineUnitTotal(i) * i.quantity, lineCurrency);
   }, 0);
   const currency = displayCurrency;
+  const quoteItems = items.map((i) => ({
+    price: convert(cartLineUnitTotal(i), (i.currency ?? cartCurrency) as DisplayCurrency),
+    quantity: i.quantity,
+    vendorSlug: i.vendorSlug,
+    productSlug: i.productSlug,
+    shippingFee:
+      i.shippingFee != null
+        ? convert(i.shippingFee, (i.currency ?? cartCurrency) as DisplayCurrency)
+        : undefined,
+  }));
   const multiVendorShipping = quoteAddressShipmentShipping({
-    items: items.map((i) => ({
-      price: convert(cartLineUnitTotal(i), (i.currency ?? cartCurrency) as DisplayCurrency),
-      quantity: i.quantity,
-      vendorSlug: i.vendorSlug,
-      productSlug: i.productSlug,
-      shippingFee:
-        i.shippingFee != null
-          ? convert(i.shippingFee, (i.currency ?? cartCurrency) as DisplayCurrency)
-          : undefined,
-    })),
+    items: quoteItems,
     currency,
     usdInrRate,
   });
+  const catalogLineShipping = quoteItems.map((line) =>
+    applicableCatalogLineShippingCharge(multiVendorShipping, line)
+  );
   const shippingQuote =
     multiVendorShipping.perVendor.find((q) => !q.qualifiesForFreeShipping) ??
     multiVendorShipping.perVendor[0] ??
@@ -174,11 +179,12 @@ export default function CartPage() {
             </h1>
 
             <ul className="space-y-6">
-              {items.map((item) => {
+              {items.map((item, index) => {
                 const lineCurrency = (item.currency ?? currency) as DisplayCurrency;
                 const unit = cartLineUnitTotal(item);
                 const lineTotal = unit * item.quantity;
                 const lineKey = item.lineId ?? item.productSlug;
+                const lineShipping = catalogLineShipping[index];
 
                 return (
                   <li
@@ -219,12 +225,10 @@ export default function CartPage() {
                           </p>
                         ) : null}
                         <AddonList item={item} format={format} />
-                        {item.shippingFee != null ? (
+                        {lineShipping != null ? (
                           <p className="text-xs text-slate-600">
                             Shipping{item.shippingOptionLabel ? ` (${item.shippingOptionLabel})` : ""}:{" "}
-                            {item.shippingFee === 0
-                              ? "Free"
-                              : format(item.shippingFee * item.quantity, lineCurrency)}
+                            {lineShipping === 0 ? "Free" : formatDisplay(lineShipping)}
                           </p>
                         ) : null}
                         <CartQuantityControls

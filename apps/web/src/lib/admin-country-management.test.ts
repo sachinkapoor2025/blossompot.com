@@ -76,6 +76,21 @@ describe("global country admin", () => {
     );
   });
 
+  it("sends an enabled default country and rejects a disabled one", () => {
+    const rows = toggleCountryChoice(
+      applyStoredGlobalCountries([{ countryCode: "US", enabled: true }]),
+      "GB",
+      true
+    );
+    const saved = globalCountrySaveRequest(rows, "GB");
+    assert.equal("error" in saved, false);
+    if ("error" in saved) return;
+    assert.equal(saved.body.defaultCountry, "GB");
+    assert.deepEqual(globalCountrySaveRequest(rows, "CA"), {
+      error: '"CA" is not an enabled country.',
+    });
+  });
+
   it("rejects zero enabled countries", () => {
     const rows = applyStoredGlobalCountries([{ countryCode: "US", enabled: true }]).map((row) => ({
       ...row,

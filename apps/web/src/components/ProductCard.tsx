@@ -30,9 +30,9 @@ export function ProductCard({ product }: { product: Product }) {
         </Link>
       </div>
       <Link href={`/products/${product.slug}`} className="block p-4">
-        <h3 className="font-semibold text-slate-900 group-hover:text-primary line-clamp-2 min-h-[2.5rem] transition-colors">
+        <p className="font-sans font-semibold leading-5 text-slate-900 group-hover:text-primary line-clamp-2 min-h-[2.5rem] transition-colors">
           {product.name}
-        </h3>
+        </p>
         <div className="mt-2 flex items-center gap-2 w-full">
           <p className="text-primary font-bold">{format(product.price, product.currency)}</p>
           {product.compareAtPrice && product.compareAtPrice > product.price && (

@@ -12,7 +12,6 @@ import {
   navItems,
   cityNavHref,
   cityNavMenuLabel,
-  countriesMenu,
 } from "@/lib/site";
 import { cityMenuForCountry, countryIsoFromPathname, filterCityMenuLinks } from "@/lib/city-menu-for-location";
 import { SearchBar } from "@/components/SearchBar";
@@ -20,8 +19,8 @@ import { SiteLogoLink } from "@/components/SiteLogo";
 import { DeliveryLocationChip } from "@/components/DeliveryLocationChip";
 import { DeliveryLocationBanner } from "@/components/DeliveryLocationBanner";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
-import { countryMenuDestination, deliverToDestination, navigateAfterLocationCommit } from "@/lib/country-switch";
-import { COUNTRY_GUIDE_HREF, useCountrySearch, useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
+import { deliverToDestination, navigateAfterLocationCommit } from "@/lib/country-switch";
+import { useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
 
 function CitiesCountryField({
   id,
@@ -156,98 +155,6 @@ function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
             >
               United States — enter ZIP code
             </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function CountriesMenu({
-  active,
-  onNavigate,
-}: {
-  active: boolean;
-  onNavigate?: () => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const { setLocation, location } = useDeliveryLocation();
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const { countries, loaded } = useGboDeliveryCountries();
-  const { query, setQuery, filtered } = useCountrySearch(countries);
-  const selectedCountry =
-    countryIsoFromPathname(pathname, searchParams.get("country")) ?? location?.countryCode;
-
-  const chooseCountry = (countryCode: string, href?: string) => {
-    setOpen(false);
-    onNavigate?.();
-    navigateAfterLocationCommit({
-      href: countryMenuDestination(countryCode, href),
-      commit: () =>
-        setLocation({
-          countryCode,
-          postalCode: "",
-          postalDisplay: countryCode,
-        }),
-      navigate: (url) => router.push(url),
-    });
-  };
-
-  return (
-    <div
-      className="relative shrink-0"
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
-    >
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        aria-haspopup="true"
-        className={`btn-nav gap-1 ${active || open ? "btn-nav-active" : ""}`}
-      >
-        {countriesMenu.label}
-        <span className={`text-xs transition-transform ${open ? "rotate-180" : ""}`}>▼</span>
-      </button>
-      {open && (
-        <div className="absolute top-full right-0 pt-1.5 z-[100]">
-          <div className="min-w-[280px] max-h-[min(70vh,420px)] overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-xl">
-            <p className="px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-              Delivery countries
-            </p>
-            <div className="px-3 pb-2">
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search countries…"
-                className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm"
-              />
-            </div>
-            {!loaded ? (
-              <p className="px-4 py-2 text-sm text-slate-500">Loading countries…</p>
-            ) : (
-              filtered.map((c) => {
-                const guide = COUNTRY_GUIDE_HREF[c.countryCode];
-                return (
-                  <button
-                    key={c.countryCode}
-                    type="button"
-                    className={`block w-full px-4 py-2.5 text-left text-sm whitespace-nowrap ${
-                      c.countryCode === selectedCountry
-                        ? "bg-blue-50 font-semibold text-nav"
-                        : "text-slate-700 hover:bg-blue-50 hover:text-nav"
-                    }`}
-                    onClick={() => {
-                      void chooseCountry(c.countryCode, guide);
-                    }}
-                  >
-                    {c.countryName}
-                  </button>
-                );
-              })
-            )}
           </div>
         </div>
       )}
@@ -433,11 +340,8 @@ export function Header() {
   const activeCategory = searchParams.get("category");
   const [menuOpen, setMenuOpen] = useState(false);
   const [citiesOpen, setCitiesOpen] = useState(false);
-  const [countriesOpen, setCountriesOpen] = useState(false);
   const [cityQuery, setCityQuery] = useState("");
   const { openSelector, setLocation, location: deliveryLocation } = useDeliveryLocation();
-  const { countries, loaded: countriesLoaded } = useGboDeliveryCountries();
-  const countrySearch = useCountrySearch(countries);
   const cityCountryIso =
     countryIsoFromPathname(pathname, searchParams.get("country")) ?? deliveryLocation?.countryCode ?? "US";
   const [cityMenuIso, setCityMenuIso] = useState(cityCountryIso);
@@ -472,18 +376,14 @@ export function Header() {
     return item.href;
   };
 
-  const isCountriesActive = countriesMenu.items.some((item) => pathname === item.href);
-
   const closeMenu = () => {
     setMenuOpen(false);
     setCitiesOpen(false);
-    setCountriesOpen(false);
   };
 
   useEffect(() => {
     setMenuOpen(false);
     setCitiesOpen(false);
-    setCountriesOpen(false);
   }, [pathname, activeCategory]);
 
   useEffect(() => {
@@ -570,7 +470,6 @@ export function Header() {
               </Link>
             ))}
             <CitiesMenu />
-            <CountriesMenu active={isCountriesActive} />
           </div>
         </div>
       </nav>
@@ -681,64 +580,6 @@ export function Header() {
                     >
                       United States — enter ZIP code
                     </button>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <button
-                  type="button"
-                  onClick={() => setCountriesOpen((v) => !v)}
-                  className={`w-full flex items-center justify-between rounded-lg px-4 py-3 text-sm font-semibold ${
-                    isCountriesActive || countriesOpen
-                      ? "bg-nav text-white"
-                      : "text-primary hover:bg-blue-50 hover:text-nav"
-                  }`}
-                >
-                  {countriesMenu.label}
-                  <span className={`text-xs transition-transform ${countriesOpen ? "rotate-180" : ""}`}>▼</span>
-                </button>
-                {countriesOpen && (
-                  <div className="mt-1 ml-2 max-h-72 overflow-y-auto border-l-2 border-slate-100 pl-2 space-y-1">
-                    <input
-                      value={countrySearch.query}
-                      onChange={(e) => countrySearch.setQuery(e.target.value)}
-                      placeholder="Search countries…"
-                      className="mx-2 mb-1 w-[calc(100%-1rem)] rounded-md border border-slate-200 px-2 py-1.5 text-sm"
-                    />
-                    {!countriesLoaded ? (
-                      <p className="px-4 py-2 text-sm text-slate-500">Loading countries…</p>
-                    ) : (
-                      countrySearch.filtered.map((c) => {
-                        const guide = COUNTRY_GUIDE_HREF[c.countryCode];
-                        return (
-                          <button
-                            key={c.countryCode}
-                            type="button"
-                            className={`block w-full rounded-lg px-4 py-2.5 text-left text-sm ${
-                              c.countryCode === cityCountryIso
-                                ? "bg-blue-50 font-semibold text-nav"
-                                : "text-slate-700 hover:bg-blue-50 hover:text-nav"
-                            }`}
-                            onClick={() => {
-                              closeMenu();
-                              navigateAfterLocationCommit({
-                                href: countryMenuDestination(c.countryCode, guide),
-                                commit: () =>
-                                  setLocation({
-                                    countryCode: c.countryCode,
-                                    postalCode: "",
-                                    postalDisplay: c.countryCode,
-                                  }),
-                                navigate: (url) => router.push(url),
-                              });
-                            }}
-                          >
-                            {c.countryName}
-                          </button>
-                        );
-                      })
-                    )}
                   </div>
                 )}
               </div>

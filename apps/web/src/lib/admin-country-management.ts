@@ -91,25 +91,38 @@ export function formatDeliveryCountryList(codes: readonly string[]): string {
   return labels.join(", ");
 }
 
-export function globalCountrySaveRequest(rows: readonly CountryChoice[]):
+export function globalCountrySaveRequest(
+  rows: readonly CountryChoice[],
+  defaultCountry?: string | null
+):
   | {
       path: "/admin/catalog-countries";
       method: "PUT";
-      body: { countries: { countryCode: string; enabled: boolean }[] };
+      body: { countries: { countryCode: string; enabled: boolean }[]; defaultCountry?: string };
     }
   | { error: string } {
   if (!rows.some((row) => row.selected)) {
     return { error: GLOBAL_COUNTRY_REQUIRED_MESSAGE };
   }
+  const countries = rows.map((row) => ({
+    countryCode: row.countryCode,
+    enabled: row.selected,
+  }));
+  const requested = (defaultCountry ?? "").trim().toUpperCase();
+  if (!requested) {
+    return {
+      path: "/admin/catalog-countries",
+      method: "PUT",
+      body: { countries },
+    };
+  }
+  if (!countries.some((country) => country.countryCode === requested && country.enabled)) {
+    return { error: `"${requested}" is not an enabled country.` };
+  }
   return {
     path: "/admin/catalog-countries",
     method: "PUT",
-    body: {
-      countries: rows.map((row) => ({
-        countryCode: row.countryCode,
-        enabled: row.selected,
-      })),
-    },
+    body: { countries, defaultCountry: requested },
   };
 }
 

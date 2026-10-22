@@ -17,6 +17,7 @@ interface Props {
 export function CategoryContentSection({ content, categoryName, deliveryCountryIso }: Props) {
   const inlineLinks = categoryPageInlineLinks[content.slug] ?? [];
   const usedHrefs = new Set<string>();
+  const usedPhrases = new Set<string>();
 
   return (
     <div className="mt-12 pt-10 border-t border-slate-200">
@@ -26,22 +27,22 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
             <h2 className="text-2xl font-bold text-primary mb-4">{content.headline}</h2>
             {content.intro.map((p, i) => (
               <p key={i} className="mb-4">
-                {applyInlineLinks(p, inlineLinks, { usedHrefs, currentPath: categoryHref(content.slug), max: 4 })}
+                {applyInlineLinks(p, inlineLinks, { usedHrefs, usedPhrases, currentPath: categoryHref(content.slug) })}
               </p>
             ))}
           </header>
 
           <section>
-            <h3 className="text-xl font-semibold text-primary mb-3">{content.delivery.heading}</h3>
+            <h3 className="font-display text-xl font-semibold text-primary mb-3">{content.delivery.heading}</h3>
             {content.delivery.paragraphs.map((p, i) => (
               <p key={i} className="mb-3">
-                {applyInlineLinks(p, inlineLinks, { usedHrefs, max: 4 })}
+                {applyInlineLinks(p, inlineLinks, { usedHrefs, usedPhrases })}
               </p>
             ))}
           </section>
 
           <section>
-            <h3 className="text-xl font-semibold text-primary mb-3">{content.highlights.heading}</h3>
+            <h3 className="font-display text-xl font-semibold text-primary mb-3">{content.highlights.heading}</h3>
             {content.highlights.paragraphs && content.highlights.paragraphs.length > 0 ? (
               <div className="space-y-3 text-slate-700 leading-relaxed">
                 {content.highlights.paragraphs.map((p, i) => (
@@ -53,7 +54,7 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
                 {content.highlights.items.map((item) => (
                   <li key={item} className="flex items-start gap-2">
                     <span className="text-nav mt-0.5 shrink-0">✓</span>
-                    {item}
+                    {applyInlineLinks(item, inlineLinks, { usedHrefs, usedPhrases })}
                   </li>
                 ))}
               </ul>
@@ -62,10 +63,10 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
 
           {content.tradition && (
             <section>
-              <h3 className="text-xl font-semibold text-primary mb-3">{content.tradition.heading}</h3>
+              <h3 className="font-display text-xl font-semibold text-primary mb-3">{content.tradition.heading}</h3>
               {content.tradition.paragraphs.map((p, i) => (
                 <p key={i} className="mb-3">
-                  {applyInlineLinks(p, inlineLinks, { usedHrefs, max: 4 })}
+                  {applyInlineLinks(p, inlineLinks, { usedHrefs, usedPhrases })}
                 </p>
               ))}
             </section>
@@ -73,7 +74,7 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
 
           <div className="grid sm:grid-cols-2 gap-6">
             <section className="bg-slate-50 rounded-xl p-6 h-full">
-              <h3 className="text-lg font-semibold text-primary mb-4">{content.whyUs.heading}</h3>
+              <h3 className="font-display text-lg font-semibold text-primary mb-4">{content.whyUs.heading}</h3>
               <ul className="space-y-2 text-sm">
                 {content.whyUs.bullets.map((b) => (
                   <li key={b} className="flex items-start gap-2">
@@ -85,7 +86,7 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
             </section>
 
             <section className="bg-white border border-slate-200 rounded-xl p-6 h-full">
-              <h3 className="text-lg font-semibold text-primary mb-4">{content.howTo.heading}</h3>
+              <h3 className="font-display text-lg font-semibold text-primary mb-4">{content.howTo.heading}</h3>
               <ol className="space-y-3 text-sm list-decimal list-inside marker:font-semibold marker:text-nav">
                 {content.howTo.steps.map((step, i) => (
                   <li key={i} className="pl-1">
@@ -143,7 +144,7 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
             {categoryName.toLowerCase()}.
           </p>
           <a
-            href={whatsappChatUrl(`Hi! I need help choosing a ${categoryName} for worldwide delivery.`)}
+            href={whatsappChatUrl(`Hi! I need help choosing a ${categoryName}.`)}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex text-sm font-semibold text-nav hover:underline"

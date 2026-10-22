@@ -56,7 +56,7 @@ export function exploreMoreLinksForProduct(productSlug?: string, categorySlug?: 
     "mothers-day-gifts": [
       { label: "Plants", href: categoryHref("plants") },
       { label: "Flower bouquets", href: categoryHref("flower-bouquets") },
-      { label: "Mother's Day flower guide", href: "/blog/send-mothers-day-flowers-to-mom" },
+      { label: "Mother's Day flower guide", href: "/blog/mothers-day-flower-delivery-online" },
     ],
   };
 
@@ -83,7 +83,7 @@ export function exploreMoreLinksForProduct(productSlug?: string, categorySlug?: 
     if (!link?.href || seen.has(link.href)) continue;
     seen.add(link.href);
     unique.push(link);
-    if (unique.length === 4) break;
+    if (unique.length === 5) break;
   }
   return unique;
 }

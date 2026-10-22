@@ -45,7 +45,7 @@ export function SecondaryCityLanding({ city }: { city: SecondaryCity }) {
       </section>
 
       <section>
-        <h3 className="text-lg font-semibold text-primary mb-3">Delivery to {city.name}</h3>
+        <h3 className="font-display text-lg font-semibold text-primary mb-3">Delivery to {city.name}</h3>
         <p className="mb-3">
           Standard delivery to {place} uses our nationwide windows after dispatch. Nearby express coverage
           for major metros is listed on our{" "}
@@ -60,7 +60,7 @@ export function SecondaryCityLanding({ city }: { city: SecondaryCity }) {
       </section>
 
       <section>
-        <h3 className="text-lg font-semibold text-primary mb-3">Shop by category</h3>
+        <h3 className="font-display text-lg font-semibold text-primary mb-3">Shop by category</h3>
         <ul className="grid sm:grid-cols-2 gap-2 text-sm">
           {(
             [
@@ -82,7 +82,7 @@ export function SecondaryCityLanding({ city }: { city: SecondaryCity }) {
       </section>
 
       <section>
-        <h3 className="text-lg font-semibold text-primary mb-4">FAQ — {city.name}</h3>
+        <h3 className="font-display text-lg font-semibold text-primary mb-4">FAQ — {city.name}</h3>
         <div className="space-y-4">
           {faqs.map((f) => (
             <div key={f.q}>

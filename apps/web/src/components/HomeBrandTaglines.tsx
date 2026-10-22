@@ -25,10 +25,7 @@ export function HomeBrandTaglines() {
             —
           </span>
         </p>
-        <h1
-          className="mt-2 font-display text-xl sm:text-2xl italic text-[#1A3D34]"
-          style={{ fontFamily: "var(--font-display), Georgia, serif" }}
-        >
+        <h1 className="mt-2 font-display text-xl sm:text-2xl font-semibold text-[#1A3D34]">
           Delivering Smiles — Flowers, Cakes & Gifts for Every Celebration
         </h1>
       </div>

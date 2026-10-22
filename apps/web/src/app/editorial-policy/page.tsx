@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
 import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
+import { marketingPageInlineLinks } from "@/lib/content/page-inline-links";
+import { applyInlineLinks } from "@/lib/inline-links";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = pageMetadata({
@@ -89,7 +91,7 @@ export default function EditorialPolicyPage() {
         <section>
           <h2 className="text-xl font-bold text-primary mb-2">Commercial relationship</h2>
           <p>
-            {site.name} sells flowers, cakes, and gifts. Editorial pages support shopping decisions and
+            {site.name} sells {applyInlineLinks("flowers, cakes, and gifts", marketingPageInlineLinks.editorial, { currentPath: path })}. Editorial pages support shopping decisions and
             may link to product collections. That commercial context is disclosed by the nature of the
             site; we still avoid fake scarcity, fabricated testimonials, and unverifiable superlatives.
           </p>

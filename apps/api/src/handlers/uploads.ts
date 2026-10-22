@@ -4,7 +4,7 @@ import type { APIGatewayProxyEventV2 } from "aws-lambda";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
 import path from "path";
-import { ok, badRequest, forbidden } from "../lib/response";
+import { ok, badRequest, forbidden, json } from "../lib/response";
 import { getAuth } from "../lib/auth";
 
 const BUCKET = process.env.UPLOAD_BUCKET;
@@ -145,9 +145,10 @@ export async function attachImageToProduct(event: APIGatewayProxyEventV2) {
   const imageUrl = body.imageUrl as string;
   if (!imageUrl) return badRequest("imageUrl required");
 
-  const { GetCommand, PutCommand } = await import("@aws-sdk/lib-dynamodb");
+  const { GetCommand, TransactWriteCommand } = await import("@aws-sdk/lib-dynamodb");
   const { docClient, PRODUCTS_TABLE, now } = await import("../lib/db");
   const { productKeys, mergeProductImages } = await import("@blossompot/shared");
+  const { isTransactionConflict, productSkuGuard, SKU_TAKEN_MESSAGE } = await import("../lib/catalog-sku-write");
 
   const existing = await docClient.send(
     new GetCommand({
@@ -160,8 +161,27 @@ export async function attachImageToProduct(event: APIGatewayProxyEventV2) {
   const currentImages = (existing.Item.images as string[]) ?? [];
   const images = mergeProductImages(currentImages, [imageUrl]);
   const updated = { ...existing.Item, images, updatedAt: now() };
+  const guard = productSkuGuard(existing.Item.sku);
 
-  await docClient.send(new PutCommand({ TableName: PRODUCTS_TABLE, Item: updated }));
+  try {
+    await docClient.send(
+      new TransactWriteCommand({
+        TransactItems: [
+          {
+            Put: {
+              TableName: PRODUCTS_TABLE,
+              Item: updated,
+              ConditionExpression: guard.ConditionExpression,
+              ...(guard.ExpressionAttributeValues ? { ExpressionAttributeValues: guard.ExpressionAttributeValues } : {}),
+            },
+          },
+        ],
+      })
+    );
+  } catch (err) {
+    if (isTransactionConflict(err)) return json(409, { error: SKU_TAKEN_MESSAGE });
+    throw err;
+  }
   await recordUploadRegistry(slug, imageUrl, keyFromPublicUrl(imageUrl));
   const { withResolvedProductImages } = await import("../lib/images");
   return ok({ product: withResolvedProductImages(updated) });
@@ -178,9 +198,10 @@ export async function deleteImageFromProduct(event: APIGatewayProxyEventV2) {
   const imageUrl = body.imageUrl as string;
   if (!imageUrl) return badRequest("imageUrl required");
 
-  const { GetCommand, PutCommand } = await import("@aws-sdk/lib-dynamodb");
+  const { GetCommand, TransactWriteCommand } = await import("@aws-sdk/lib-dynamodb");
   const { docClient, PRODUCTS_TABLE, now } = await import("../lib/db");
   const { productKeys } = await import("@blossompot/shared");
+  const { isTransactionConflict, productSkuGuard, SKU_TAKEN_MESSAGE } = await import("../lib/catalog-sku-write");
 
   const existing = await docClient.send(
     new GetCommand({
@@ -195,7 +216,26 @@ export async function deleteImageFromProduct(event: APIGatewayProxyEventV2) {
 
   const images = currentImages.filter((image) => image !== imageUrl);
   const updated = { ...existing.Item, images, updatedAt: now() };
-  await docClient.send(new PutCommand({ TableName: PRODUCTS_TABLE, Item: updated }));
+  const guard = productSkuGuard(existing.Item.sku);
+  try {
+    await docClient.send(
+      new TransactWriteCommand({
+        TransactItems: [
+          {
+            Put: {
+              TableName: PRODUCTS_TABLE,
+              Item: updated,
+              ConditionExpression: guard.ConditionExpression,
+              ...(guard.ExpressionAttributeValues ? { ExpressionAttributeValues: guard.ExpressionAttributeValues } : {}),
+            },
+          },
+        ],
+      })
+    );
+  } catch (err) {
+    if (isTransactionConflict(err)) return json(409, { error: SKU_TAKEN_MESSAGE });
+    throw err;
+  }
 
   let storageDeleted = false;
   try {

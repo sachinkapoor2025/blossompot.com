@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { CountrySeoArticle } from "@/components/CountrySeoArticle";
+import { countrySeoContent } from "@/lib/content/country-seo-registry";
 import { locationPublicPath } from "@/lib/content/seo-data";
 import {
   geoCitiesInState,
@@ -10,19 +12,21 @@ import {
 } from "@/lib/content/geo/locations";
 import { pageMetadata } from "@/lib/seo";
 
+const usaDeliverySeo = countrySeoContent("US", "delivery-locations");
+
 export const metadata: Metadata = pageMetadata({
-  title: "Gift Delivery Locations — All 50 States, DC & Puerto Rico",
-  description:
-    "BlossomPot delivers flowers, cakes, and gifts to all 50 states, DC and Puerto Rico. Browse state hubs and major city delivery pages.",
+  title: usaDeliverySeo.title,
+  description: usaDeliverySeo.description,
   path: "/delivery-locations",
 });
 
 export default function DeliveryLocationsPage() {
-  const states = geoStates();
   const published = new Set(publishedGeoLocations().map((g) => g.slug));
+  const states = geoStates().filter((state) => published.has(state.slug));
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
+    <>
+    <div className="max-w-7xl mx-auto px-4 pt-10">
       <Breadcrumbs
         items={[
           { label: "Home", href: "/" },
@@ -30,18 +34,17 @@ export default function DeliveryLocationsPage() {
           { label: "Delivery locations" },
         ]}
       />
-      <h1 className="text-3xl font-bold text-primary mb-3">
-        Gift delivery locations across the USA
-      </h1>
+    </div>
+    <CountrySeoArticle article={usaDeliverySeo} />
+    <div className="max-w-7xl mx-auto px-4 py-10">
       <p className="text-slate-600 max-w-3xl mb-8 leading-relaxed">
-        Delivering to all 50 states, DC and Puerto Rico. Open a state hub for city pages, cut-offs,
-        and local FAQs. Same-day options appear only where coverage and the local clock allow.
         Ordering from Canada, Australia, the UK, or Europe? Start at the{" "}
         <Link href="/locations" className="text-nav hover:underline">
           international locations hub
         </Link>
         .
       </p>
+      <h2 className="text-2xl font-bold text-primary mb-6">Browse published USA state and city pages</h2>
 
       <div className="space-y-8">
         {states.map((st) => {
@@ -73,5 +76,6 @@ export default function DeliveryLocationsPage() {
         })}
       </div>
     </div>
+    </>
   );
 }

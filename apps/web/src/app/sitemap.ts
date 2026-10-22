@@ -3,11 +3,7 @@ import { api } from "@/lib/api";
 import { isProductSearchIndexable, dedupeStorefrontProducts, type Product } from "@blossompot/shared";
 import { siteUrl } from "@/lib/env";
 import { categoryHref } from "@/lib/category-urls";
-import {
-  categoryLocationHref,
-  giftsCatalogLocationHref,
-  PRIMARY_LOCATION_SITEMAP_ISOS,
-} from "@/lib/location-seo-urls";
+import { shoppingCountrySitemapPaths } from "@/lib/location-seo-urls";
 import { categoryOrder } from "@/lib/site";
 import { listAllBlogPosts } from "@/lib/content/blog-posts";
 import { allCollectionSlugs } from "@/lib/collections";
@@ -17,6 +13,30 @@ import { internationalPath, publishedInternationalLocations } from "@/lib/conten
 import { allOccasionSlugs } from "@/lib/content/occasions";
 import { allGiftGuideSlugs } from "@/lib/content/recipients";
 import { flowerSitemapPaths } from "@/lib/content/flower-guide";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+/**
+ * Enabled shopping countries for country-specific sitemap URLs.
+ * A failed read keeps the USA-only fallback. A successful empty list adds no shopping-country URLs.
+ */
+async function enabledShoppingSitemapCountries(): Promise<string[]> {
+  try {
+    const data = await api<{ countries?: { countryCode?: string }[] }>("/catalog-countries", {
+      revalidate: false,
+    });
+    return [
+      ...new Set(
+        (data.countries ?? [])
+          .map((country) => (country.countryCode ?? "").trim().toUpperCase())
+          .filter((code) => /^[A-Z]{2}$/.test(code))
+      ),
+    ];
+  } catch {
+    return ["US"];
+  }
+}
 
 function mergeProducts(apiProducts: Product[]): Product[] {
   return dedupeStorefrontProducts(apiProducts.filter((p) => isProductSearchIndexable(p)));
@@ -33,7 +53,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/about/team`, lastModified: now, changeFrequency: "monthly", priority: 0.55 },
     { url: `${siteUrl}/shipping`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${siteUrl}/faq`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${siteUrl}/same-day-delivery`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
     { url: `${siteUrl}/corporate-gifting`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${siteUrl}/remember`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
     { url: `${siteUrl}/forgot-occasion`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
@@ -47,11 +66,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/editorial-policy`, lastModified: now, changeFrequency: "monthly", priority: 0.45 },
     { url: `${siteUrl}/delivery-locations`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${siteUrl}/locations`, lastModified: now, changeFrequency: "weekly", priority: 0.82 },
-    { url: `${siteUrl}/flower-delivery-usa`, lastModified: now, changeFrequency: "weekly", priority: 0.86 },
-    { url: `${siteUrl}/flower-delivery-uk`, lastModified: now, changeFrequency: "weekly", priority: 0.84 },
-    { url: `${siteUrl}/flower-delivery-canada`, lastModified: now, changeFrequency: "weekly", priority: 0.84 },
-    { url: `${siteUrl}/flower-delivery-australia`, lastModified: now, changeFrequency: "weekly", priority: 0.84 },
-    { url: `${siteUrl}/flower-delivery-uae`, lastModified: now, changeFrequency: "weekly", priority: 0.84 },
     { url: `${siteUrl}/occasions`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${siteUrl}/gifts`, lastModified: now, changeFrequency: "weekly", priority: 0.78 },
     { url: `${siteUrl}/become-a-vendor`, lastModified: now, changeFrequency: "monthly", priority: 0.65 },
@@ -67,20 +81,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.85,
   }));
 
-  const categoryLocationRoutes = PRIMARY_LOCATION_SITEMAP_ISOS.flatMap((iso) => [
-    ...categoryOrder.map((slug) => ({
-      url: `${siteUrl}${categoryLocationHref(slug, iso)}`,
+  const enabledShoppingCountries = await enabledShoppingSitemapCountries();
+  const categoryLocationRoutes = shoppingCountrySitemapPaths(enabledShoppingCountries, categoryOrder).map(
+    (path) => ({
+      url: `${siteUrl}${path}`,
       lastModified: now,
       changeFrequency: "weekly" as const,
-      priority: 0.8,
-    })),
-    {
-      url: `${siteUrl}${giftsCatalogLocationHref(iso)}`,
-      lastModified: now,
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    },
-  ]);
+      priority: path.startsWith("/flower-delivery-") ? 0.86 : 0.8,
+    })
+  );
 
   // City geo URLs live in /sitemap-geo.xml; keep state hubs here for discovery.
   const locationRoutes = publishedGeoLocations()

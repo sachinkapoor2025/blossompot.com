@@ -5,6 +5,8 @@ import { getGoogleReviews } from "@/lib/google-reviews";
 import { ReviewForm } from "@/components/ReviewForm";
 import { CountryReviewSources } from "@/components/CountryReviewSources";
 import { JsonLd } from "@/components/JsonLd";
+import { marketingPageInlineLinks } from "@/lib/content/page-inline-links";
+import { applyInlineLinks } from "@/lib/inline-links";
 import { trustFacts } from "@/lib/trust";
 import { site } from "@/lib/site";
 import { pageMetadata, canonical } from "@/lib/seo";
@@ -55,12 +57,12 @@ export default async function ReviewsPage() {
       <section className="max-w-3xl mx-auto px-4 pt-12 pb-6">
         <h1 className="text-3xl font-bold text-primary mb-3">Customer Reviews</h1>
         <p className="text-slate-600 leading-relaxed mb-2">
-          {trustFacts.seasonLabel} — we&apos;re building trust one delivery at a time. Customers order from
+          {trustFacts.seasonLabel} — we&apos;re building trust one {applyInlineLinks("delivery", marketingPageInlineLinks.reviews, { currentPath: "/reviews", max: 1 })} at a time. Customers order from
           BlossomPot for {trustFacts.fulfillment.toLowerCase()}.
         </p>
         <CountryReviewSources countryCode={country} />
         <p className="text-sm text-slate-500 mt-6">
-          Received your gift?{" "}
+          Received your {applyInlineLinks("gift", marketingPageInlineLinks.reviews, { currentPath: "/reviews", max: 1 })}?{" "}
           <a href="#write-review" className="text-nav font-semibold hover:underline">
             Write a review below
           </a>

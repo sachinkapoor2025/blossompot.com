@@ -28,7 +28,8 @@ import {
 } from "@blossompot/shared";
 import { requireAdmin, requireSuperAdmin } from "../lib/auth";
 import { docClient, CONFIG_TABLE, PRODUCTS_TABLE, ORDERS_TABLE, now } from "../lib/db";
-import { ok, created, badRequest, forbidden, unauthorized, notFound } from "../lib/response";
+import { ok, created, badRequest, forbidden, unauthorized, notFound, json } from "../lib/response";
+import { insertCatalogProduct, isTransactionConflict, replaceCatalogProduct } from "../lib/catalog-sku-write";
 import { sendEmail } from "../lib/email";
 import {
   hashPassword,
@@ -571,8 +572,27 @@ export async function vendorUpsertProduct(event: APIGatewayProxyEventV2) {
     createdAt: (existing.Item?.createdAt as string) ?? ts,
     updatedAt: ts,
   };
+  const preservedSku = typeof existing.Item?.sku === "string" ? existing.Item.sku : undefined;
+  if (preservedSku) product.sku = preservedSku;
 
-  await docClient.send(new PutCommand({ TableName: PRODUCTS_TABLE, Item: product }));
+  try {
+    if (existing.Item) {
+      await replaceCatalogProduct({
+        item: product,
+        previousSku: existing.Item.sku,
+        nextSku: preservedSku,
+      });
+    } else {
+      await insertCatalogProduct(product);
+    }
+  } catch (err) {
+    if (isTransactionConflict(err)) {
+      return json(409, {
+        error: "This product was saved by another write. The existing SKU reservation was left unchanged.",
+      });
+    }
+    throw err;
+  }
 
   if (approvalStatus === "pending_approval") {
     await notifyAdminVendors(

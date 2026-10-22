@@ -12,6 +12,11 @@ import {
   type AuthUser,
   type RegisterResult,
   type ForgotPasswordDelivery,
+  captureSessionGeneration,
+  hasCognitoBrowserSession,
+  isCognitoConfigured,
+  isExplicitLogout,
+  isSessionGenerationCurrent,
   loadStoredAuth,
   restoreSession,
   login as cognitoLogin,
@@ -21,6 +26,7 @@ import {
   resendConfirmationCode as cognitoResendCode,
   forgotPassword as cognitoForgotPassword,
   confirmForgotPassword as cognitoConfirmForgotPassword,
+  shouldLoadCognitoSdk,
 } from "./cognito";
 
 interface AuthContextValue {
@@ -47,23 +53,62 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    void restoreSession()
-      .then((next) => {
-        if (!cancelled) setUser(next ?? loadStoredAuth());
-      })
-      .catch(() => {
-        if (!cancelled) {
-          cognitoLogout();
-          setUser(null);
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
+
+    const publishStored = () => {
+      const stored = loadStoredAuth();
+      if (!cancelled) setUser(stored);
+      return stored;
+    };
+
+    const needsSdk = (storedToken: string | null | undefined) =>
+      shouldLoadCognitoSdk({
+        configured: isCognitoConfigured(),
+        hasBrowserSession: hasCognitoBrowserSession(),
+        storedToken,
       });
 
+    const refreshIfNeeded = () => {
+      const generation = captureSessionGeneration();
+      const stored = publishStored();
+      if (isExplicitLogout()) {
+        if (!cancelled) {
+          setUser(null);
+          setLoading(false);
+        }
+        return;
+      }
+      if (!needsSdk(stored?.token)) {
+        if (!cancelled) setLoading(false);
+        return;
+      }
+      void restoreSession()
+        .then((next) => {
+          if (cancelled || !isSessionGenerationCurrent(generation)) return;
+          setUser(next ?? loadStoredAuth());
+        })
+        .catch(() => {
+          if (cancelled || !isSessionGenerationCurrent(generation)) return;
+          cognitoLogout();
+          setUser(null);
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+    };
+
+    refreshIfNeeded();
+
     const onFocus = () => {
+      const generation = captureSessionGeneration();
+      const stored = publishStored();
+      if (isExplicitLogout()) {
+        if (!cancelled) setUser(null);
+        return;
+      }
+      if (!needsSdk(stored?.token)) return;
       void restoreSession().then((next) => {
-        if (!cancelled) setUser(next);
+        if (cancelled || !isSessionGenerationCurrent(generation)) return;
+        setUser(next);
       });
     };
     window.addEventListener("focus", onFocus);

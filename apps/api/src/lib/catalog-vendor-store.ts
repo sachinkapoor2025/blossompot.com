@@ -79,19 +79,19 @@ type ShoppingIdentity = {
   tags?: readonly string[] | null;
   sku?: string | null;
   internationalDelivery?: boolean;
+  deliveryCountries?: readonly string[] | null;
 };
 
 /**
- * Cart lines often omit vendorSlug. Read the stored product's tag so the existing
- * shopping decision can see an FNP import. This does not write the cart line.
+ * Cart lines often omit vendorSlug. Read the stored product so the shopping
+ * decision can see an FNP tag and a product deliveryCountries list.
+ * This does not write the cart line or the product.
  */
 export async function withStoredShoppingIdentity<T extends ShoppingIdentity>(
   item: T
 ): Promise<T & ShoppingIdentity> {
-  const identified = productForShoppingDecision(item);
-  if (identified.vendorSlug?.trim()) return identified;
   const slug = (item.productSlug || item.slug || "").trim();
-  if (!slug) return identified;
+  if (!slug) return productForShoppingDecision(item);
   const result = await docClient.send(
     new GetCommand({
       TableName: PRODUCTS_TABLE,
@@ -99,13 +99,14 @@ export async function withStoredShoppingIdentity<T extends ShoppingIdentity>(
     })
   );
   const stored = result.Item as ShoppingIdentity | undefined;
-  if (!stored) return identified;
+  if (!stored) return productForShoppingDecision(item);
   return productForShoppingDecision({
     ...item,
-    slug: stored.slug ?? slug,
-    vendorSlug: stored.vendorSlug,
-    tags: stored.tags,
+    slug: item.slug ?? stored.slug ?? slug,
+    vendorSlug: item.vendorSlug ?? stored.vendorSlug,
+    tags: item.tags ?? stored.tags,
     sku: item.sku ?? stored.sku,
     internationalDelivery: item.internationalDelivery ?? stored.internationalDelivery,
+    deliveryCountries: item.deliveryCountries ?? stored.deliveryCountries,
   });
 }

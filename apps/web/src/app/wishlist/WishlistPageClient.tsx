@@ -114,9 +114,9 @@ export function WishlistPageClient({ recommendedProducts }: Props) {
                 </Link>
               </div>
               <Link href={`/products/${item.slug}`} className="block p-3 flex-1">
-                <h3 className="font-semibold text-sm text-slate-900 line-clamp-2 min-h-[2.5rem] hover:text-nav">
+                <p className="font-sans text-sm font-semibold leading-5 text-slate-900 line-clamp-2 min-h-[2.5rem] hover:text-nav">
                   {item.name}
-                </h3>
+                </p>
                 <div className="mt-2 flex items-center gap-2 w-full">
                   <span className="text-nav font-bold">
                     {format(item.price, item.currency as DisplayCurrency)}

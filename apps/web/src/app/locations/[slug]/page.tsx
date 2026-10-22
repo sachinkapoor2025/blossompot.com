@@ -16,7 +16,8 @@ import { mergeProductsForCountry } from "@/lib/catalog-fallback";
 import { shuffleForCity } from "@/lib/city-products";
 import { ListingPageSkeleton } from "@/components/route-skeletons";
 import { loadProducts, toListingCardProducts } from "@/lib/product-loader";
-import { giftsCatalogCountryIso } from "@/lib/location-seo-urls";
+import { giftsCatalogCountryIso, giftsCatalogLocationHref } from "@/lib/location-seo-urls";
+import { notFoundIfShoppingCountryDisabled } from "@/lib/shopping-country-gate";
 import { pageMetadata } from "@/lib/seo";
 import ProductsPage, { generateMetadata as generateProductsMetadata } from "../../products/page";
 
@@ -35,6 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const catalogIso = giftsCatalogCountryIso(slug);
   if (catalogIso && !getGeoLocation(slug)) {
+    await notFoundIfShoppingCountryDisabled(giftsCatalogLocationHref(catalogIso));
     return generateProductsMetadata({
       searchParams: Promise.resolve({ country: catalogIso }),
     });
@@ -63,6 +65,7 @@ async function SeoLocationContent({ params }: Props) {
   const { slug } = await params;
   const catalogIso = giftsCatalogCountryIso(slug);
   if (catalogIso && !getGeoLocation(slug)) {
+    await notFoundIfShoppingCountryDisabled(giftsCatalogLocationHref(catalogIso));
     return <ProductsPage searchParams={Promise.resolve({ country: catalogIso })} />;
   }
 

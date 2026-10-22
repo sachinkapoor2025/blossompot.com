@@ -610,7 +610,7 @@ export function MembershipJourney({
             <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h3 className="text-lg font-bold text-primary">Custom Plan</h3>
+                  <h3 className="font-display text-lg font-bold text-primary">Custom Plan</h3>
                   <p className="text-sm text-slate-600 mt-1">
                     Choose a length from {CUSTOM_PLAN_DURATION_MIN} to {CUSTOM_PLAN_DURATION_MAX} months. Skip to use 1
                     year.

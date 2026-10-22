@@ -82,6 +82,7 @@ export const navItems = [
   { label: "Anniversary", href: categoryHref("anniversary-gifts"), category: "anniversary-gifts" },
   { label: "Valentine's", href: categoryHref("valentines-day-gifts"), category: "valentines-day-gifts" },
   { label: "Hampers", href: categoryHref("gift-hampers"), category: "gift-hampers" },
+  { label: "Combos", href: "/combos" },
   { label: "Gift Catalog", href: "/gift-catalog" },
   { label: "Remember", href: "/remember" },
 ] as const;

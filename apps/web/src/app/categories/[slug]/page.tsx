@@ -7,25 +7,26 @@ import { ProductGrid } from "@/components/ProductGrid";
 import type { ProductSort } from "@/components/ProductSortBar";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { CategoryContentSection } from "@/components/CategoryContentSection";
+import { CountrySeoArticle } from "@/components/CountrySeoArticle";
 import { JsonLd } from "@/components/JsonLd";
 import { getCategoryContent } from "@/lib/content/category-content";
-import { getCategoryPageSeo } from "@/lib/content/category-seo";
+import { resolveCategoryPageSeo } from "@/lib/content/category-country-seo";
 import { getCategoryRichContent } from "@/lib/content/category-rich-content";
 import { categoryHref } from "@/lib/category-urls";
 import {
   countryDisplayName,
   giftsCatalogLocationHref,
-  localizeShopCopy,
   parseLocationShopPath,
 } from "@/lib/location-seo-urls";
 import { requestSeoPath } from "@/lib/request-seo-path";
 import { ListingPageSkeleton } from "@/components/route-skeletons";
-import { loadProductsByCategory, toListingCardProducts } from "@/lib/product-loader";
-import { getCatalogProductsByCategory } from "@/lib/catalog-fallback";
+import { loadCategoryPageProducts, toListingCardProducts } from "@/lib/product-loader";
+import { CatalogLoadError } from "@/components/CatalogLoadError";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
+import { notFoundIfShoppingCountryDisabled } from "@/lib/shopping-country-gate";
 import { categoryOrder } from "@/lib/site";
 import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, pageMetadata } from "@/lib/seo";
-import { type Product, type Category, productVisibleForDeliveryCountry } from "@blossompot/shared";
+import { type Category } from "@blossompot/shared";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -48,46 +49,15 @@ export const revalidate = 0;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const seo = getCategoryPageSeo(slug);
   const path = await requestSeoPath(categoryHref(slug));
-
-  if (seo) {
-    const localized = localizeShopCopy(path, seo);
-    return pageMetadata({
-      title: localized.title,
-      description: localized.description,
-      path,
-      absoluteTitle: true,
-    });
-  }
-
-  try {
-    const data = await api<{ category: Category }>(`/categories/${slug}`, { revalidate: 3600 });
-    const c = data.category;
-    const fallback = localizeShopCopy(path, {
-      title: `${c.name} | Worldwide Delivery | BlossomPot`,
-      description:
-        c.seoDescription ??
-        c.description?.slice(0, 160) ??
-        `Shop ${c.name} with fast worldwide delivery from BlossomPot — flowers, cakes, and thoughtful gifts.`,
-    });
-    return pageMetadata({
-      title: fallback.title,
-      description: fallback.description,
-      path,
-    });
-  } catch {
-    const label = slug.replace(/-/g, " ");
-    const fallback = localizeShopCopy(path, {
-      title: `${label} | BlossomPot`,
-      description: `Shop ${label} with worldwide delivery from BlossomPot.`,
-    });
-    return pageMetadata({
-      title: fallback.title,
-      description: fallback.description,
-      path,
-    });
-  }
+  await notFoundIfShoppingCountryDisabled(path);
+  const seo = resolveCategoryPageSeo(slug, path);
+  return pageMetadata({
+    title: seo.title,
+    description: seo.description,
+    path,
+    absoluteTitle: true,
+  });
 }
 
 export default function CategoryPage(props: Props) {
@@ -102,28 +72,17 @@ async function CategoryPageContent({ params, searchParams }: Props) {
   const { slug } = await params;
   const query = await searchParams;
   const sort = resolveSort(query.sort);
+  const seoPath = await requestSeoPath(categoryHref(slug));
+  await notFoundIfShoppingCountryDisabled(seoPath);
+  if (!isKnownCategorySlug(slug)) notFound();
   const deliveryCountry = await getStorefrontDeliveryCountry(query.country);
 
-  if (!isKnownCategorySlug(slug)) notFound();
-
-  let category: Category | null = null;
-  let products: Product[] = [];
-
-  try {
-    const [catData, categoryProducts] = await Promise.all([
-      api<{ category: Category }>(`/categories/${slug}`, { revalidate: 45 }),
-      loadProductsByCategory(slug, deliveryCountry),
-    ]);
-    category = catData.category;
-    products = categoryProducts;
-  } catch {
-    products = await loadProductsByCategory(slug, deliveryCountry);
-  }
-  if (products.length === 0) {
-    products = getCatalogProductsByCategory(slug).filter((product) =>
-      productVisibleForDeliveryCountry(product, deliveryCountry)
-    );
-  }
+  const [categoryData, categoryLoad] = await Promise.all([
+    api<{ category?: Category }>(`/categories/${slug}`, { revalidate: 45 }).catch(() => null),
+    loadCategoryPageProducts(slug, deliveryCountry),
+  ]);
+  const category = categoryData?.category ?? null;
+  const products = categoryLoad.state === "products" ? categoryLoad.products : [];
 
   const name = category?.name ?? slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   const headingName: Record<string, string> = {
@@ -136,25 +95,13 @@ async function CategoryPageContent({ params, searchParams }: Props) {
     "valentines-day-gifts": "Valentine's Day Gifts",
   };
   const seoCategoryName = headingName[slug] ?? name;
-  const seoPath = await requestSeoPath(categoryHref(slug));
   const located = parseLocationShopPath(seoPath);
-  const pageSeo = localizeShopCopy(seoPath, getCategoryPageSeo(slug) ?? { title: "", description: "", h1: `${name} — Worldwide Delivery` });
-  const deliveryCountryName = countryDisplayName(located?.countryIso ?? deliveryCountry);
-  const menuHeading: Record<string, string> = {
-    flowers: "Send Flowers",
-    "flower-bouquets": "Flower Bouquets",
-    cakes: "Celebration Cakes",
-    "birthday-gifts": "Birthday Gifts",
-    "anniversary-gifts": "Anniversary Gifts",
-    "valentines-day-gifts": "Valentine's Day Gifts",
-    "gift-hampers": "Gift Hampers",
-  };
-  const h1 = menuHeading[slug]
-    ? `${menuHeading[slug]} to ${deliveryCountryName}`
-    : pageSeo.h1 || `${name} — Delivery to ${deliveryCountryName}`;
+  const pageSeo = resolveCategoryPageSeo(slug, seoPath);
+  const deliveryCountryName = countryDisplayName(deliveryCountry);
+  const h1 = pageSeo.h1;
   const baseDescription =
     category?.description?.trim() ||
-    `Browse our ${name} collection — flowers, cakes, and thoughtful gifts with delivery to ${countryDisplayName(deliveryCountry)} from BlossomPot.`;
+    `Browse the ${name} collection on BlossomPot. Choose a product and check delivery availability for the recipient’s address at checkout.`;
   const extra = getCategoryContent(slug);
   const rich = getCategoryRichContent(slug);
   const shopHref = located ? giftsCatalogLocationHref(deliveryCountry) : "/products";
@@ -174,13 +121,15 @@ async function CategoryPageContent({ params, searchParams }: Props) {
             `${name} — BlossomPot`,
             products.map((p) => ({ name: p.name, path: `/products/${p.slug}` }))
           ),
-          ...(rich ? [faqJsonLd(rich.faqs)] : []),
+          ...(pageSeo.article ? [faqJsonLd(pageSeo.article.faqs)] : rich ? [faqJsonLd(rich.faqs)] : []),
         ]}
       />
       <Breadcrumbs items={crumbs} />
-      <h1 className="text-3xl font-bold text-primary mb-8">{h1}</h1>
+      {pageSeo.article ? null : <h1 className="text-3xl font-bold text-primary mb-8">{h1}</h1>}
 
-      {products.length > 0 ? (
+      {categoryLoad.state === "error" ? (
+        <CatalogLoadError />
+      ) : products.length > 0 ? (
         <ProductGrid products={toListingCardProducts(products)} sort={sort} />
       ) : (
         <p className="text-slate-500">
@@ -191,7 +140,12 @@ async function CategoryPageContent({ params, searchParams }: Props) {
         </p>
       )}
 
-      {rich ? (
+      {pageSeo.article ? (
+        <CountrySeoArticle
+          article={pageSeo.article}
+          headingClassName="text-3xl font-bold text-primary mb-4"
+        />
+      ) : rich ? (
         <CategoryContentSection
           content={rich}
           categoryName={seoCategoryName}
@@ -230,23 +184,23 @@ async function CategoryPageContent({ params, searchParams }: Props) {
           </section>
 
           <section className="mt-10 p-6 bg-slate-50 rounded-xl">
-            <h2 className="font-semibold text-primary mb-3">Why order {seoCategoryName} from BlossomPot?</h2>
+            <h2 className="font-semibold text-primary mb-3">How to order {seoCategoryName} from BlossomPot</h2>
             <ul className="grid sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-2 text-sm text-slate-600">
               <li className="flex gap-2">
                 <span className="text-nav shrink-0">✓</span>
-                Delivery to {countryDisplayName(deliveryCountry)} with clear shipping windows
+                Choose a product from this collection
               </li>
               <li className="flex gap-2">
                 <span className="text-nav shrink-0">✓</span>
-                Gifts chosen for delivery in {countryDisplayName(deliveryCountry)}
+                Enter the recipient’s address at checkout
               </li>
               <li className="flex gap-2">
                 <span className="text-nav shrink-0">✓</span>
-                Gift messages available on most products
+                Review the dates and charges shown for that order
               </li>
               <li className="flex gap-2">
                 <span className="text-nav shrink-0">✓</span>
-                Secure checkout with Razorpay and Stripe
+                Add a message when the product allows it
               </li>
             </ul>
           </section>

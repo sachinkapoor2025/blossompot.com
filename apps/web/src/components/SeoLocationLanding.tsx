@@ -97,7 +97,7 @@ export function SeoLocationLanding({ location, related }: Props) {
           </header>
 
           <section>
-            <h3 className="text-xl font-semibold text-primary mb-3">{content.delivery.heading}</h3>
+            <h3 className="font-display text-xl font-semibold text-primary mb-3">{content.delivery.heading}</h3>
             {content.delivery.paragraphs.map((p, i) => (
               <p key={i} className="mb-3">
                 {p}
@@ -106,7 +106,7 @@ export function SeoLocationLanding({ location, related }: Props) {
           </section>
 
           <section>
-            <h3 className="text-xl font-semibold text-primary mb-3">Popular searches for {place}</h3>
+            <h3 className="font-display text-xl font-semibold text-primary mb-3">Popular searches for {place}</h3>
             <ul className="flex flex-wrap gap-2 text-sm">
               {location.keywords.slice(0, 12).map((kw) => (
                 <li key={kw} className="bg-white border border-slate-200 rounded-full px-3 py-1 text-slate-600">
@@ -119,7 +119,7 @@ export function SeoLocationLanding({ location, related }: Props) {
 
         <aside className="space-y-6">
           <section className="bg-slate-50 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-primary mb-4">Shop gifts for {place}</h3>
+            <h3 className="font-display text-lg font-semibold text-primary mb-4">Shop gifts for {place}</h3>
             <ul className="space-y-3 text-sm">
               {sharedCategories.map((cat) => (
                 <li key={cat.slug}>
@@ -148,7 +148,7 @@ export function SeoLocationLanding({ location, related }: Props) {
       </div>
 
       <section className="mt-10 pt-8 border-t border-slate-200">
-        <h3 className="text-xl font-semibold text-primary mb-6">FAQ — Send gifts to {place}</h3>
+        <h3 className="font-display text-xl font-semibold text-primary mb-6">FAQ — Send gifts to {place}</h3>
         <div className="grid md:grid-cols-2 gap-6">
           {content.faqs.map((faq) => (
             <div key={faq.q} className="bg-white border border-slate-100 rounded-xl p-5">

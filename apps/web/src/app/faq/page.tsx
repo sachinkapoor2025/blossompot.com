@@ -43,10 +43,6 @@ export default async function FaqPage({
           Shipping
         </Link>
         {" · "}
-        <Link href="/blog" className="text-nav hover:underline">
-          Blog
-        </Link>
-        {" · "}
         <Link href="/flowers" className="text-nav hover:underline">
           Shop flowers
         </Link>

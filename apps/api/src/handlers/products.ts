@@ -5,6 +5,7 @@ import {
   updateProductSchema,
   bulkProductRowSchema,
   productKeys,
+  categoryKeys,
   marketplaceVendorKeys,
   vendorCoverageKeys,
   DEFAULT_PRODUCT_INVENTORY,
@@ -19,12 +20,14 @@ import {
   productInStorefrontCategory,
   productVisibleForDeliveryCountry,
   dedupeStorefrontProducts,
+  isRakhiRelatedProduct,
   coalesceProductImages,
   isGboHiddenFromStorefront,
   NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE,
   productAllowedForNewShopping,
   productForShoppingDecision,
   fulfillmentVendorSlug,
+  assignProductCategories,
   catalogVendorShoppingStatus,
   listingGroupsForProducts,
   orderProductsByVendor,
@@ -34,12 +37,14 @@ import {
 } from "@blossompot/shared";
 import { decideNewShopping, loadCatalogVendorRegistry } from "../lib/catalog-vendor-store";
 import { docClient, PRODUCTS_TABLE, CONFIG_TABLE, now, slugify } from "../lib/db";
-import { ok, created, badRequest, notFound, forbidden } from "../lib/response";
+import { deleteCatalogProduct, insertCatalogProduct, isTransactionConflict, replaceCatalogProduct, SKU_TAKEN_MESSAGE } from "../lib/catalog-sku-write";
+import { ok, created, badRequest, notFound, forbidden, json } from "../lib/response";
 import { evaluateProductsForLocation, parseLocationQuery, resolveShoppingLocation } from "./serviceability";
 import { getAuth, requireAdmin } from "../lib/auth";
 import { withResolvedProductImages, resolveProductImageUrl } from "../lib/images";
 import { syncInventoryAlertState } from "../lib/inventory";
 import { ensureProductInDb } from "../lib/ensure-product";
+import { readProductPublication, slugsMarkedUnpublished, storedPublishedBySlug } from "../lib/product-publication";
 import { getBundledUsarakhiProduct, listBundledCatalogProducts, persistMissingBundledCatalogProducts } from "../lib/blossompot-catalog";
 import { getBundledOrangeCountyProduct } from "../lib/orange-county-catalog";
 
@@ -86,6 +91,91 @@ function mergeBundledCatalogProducts(items: Product[], category?: string): Produ
   return [...bySlug.values()];
 }
 
+const COMPONENT_SLUG_LOOKUP_LIMIT = 100;
+
+function parseComponentSlugLookup(raw: string | undefined): string[] | null {
+  if (raw == null) return null;
+  const slugs: string[] = [];
+  const seen = new Set<string>();
+  for (const part of raw.split(",")) {
+    let slug = part.trim();
+    try {
+      slug = decodeURIComponent(slug).trim();
+    } catch {
+      slug = part.trim();
+    }
+    if (!slug || seen.has(slug)) continue;
+    seen.add(slug);
+    slugs.push(slug);
+  }
+  return slugs;
+}
+
+/** Point reads for combo components. Same PK/SK as product detail, without a table scan or catalog writes. */
+async function getProductsBySlugs(slugs: readonly string[]): Promise<Product[]> {
+  const items: Product[] = [];
+  for (let index = 0; index < slugs.length; index += 25) {
+    const chunk = slugs.slice(index, index + 25);
+    const found = await Promise.all(
+      chunk.map(async (slug) => {
+        const result = await docClient.send(
+          new GetCommand({
+            TableName: PRODUCTS_TABLE,
+            Key: { PK: productKeys.pk(slug), SK: productKeys.sk() },
+          })
+        );
+        return result.Item as Product | undefined;
+      })
+    );
+    for (const item of found) {
+      if (item) items.push(item);
+    }
+  }
+  return overlayRequestedBundledProducts(items, slugs);
+}
+
+function bundledCatalogRow(slug: string) {
+  const bundled = getBundledUsarakhiProduct(slug);
+  if (!bundled || bundled.published === false || isSampleCatalogProduct(bundled)) return undefined;
+  return bundled;
+}
+
+/** Same bundled price and image overlay as the full catalog list, limited to the requested slugs. */
+function overlayRequestedBundledProducts(items: Product[], slugs: readonly string[]): Product[] {
+  const wanted = new Set(slugs);
+  const bySlug = new Map<string, Product>();
+  for (const product of items) {
+    if (!wanted.has(product.slug)) continue;
+    const bundled = bundledCatalogRow(product.slug);
+    const images = coalesceProductImages(product.images, bundled?.images);
+    const tfUsa = (product.tags ?? bundled?.tags ?? []).includes("tf-usa");
+    bySlug.set(product.slug, {
+      ...product,
+      images,
+      ...(tfUsa && bundled?.price != null ? { price: bundled.price } : {}),
+      ...(tfUsa && bundled && "deliveryFee" in bundled ? { deliveryFee: bundled.deliveryFee } : {}),
+      ...(tfUsa ? { couponExcluded: false } : {}),
+    });
+  }
+  const stamp = "2026-09-23T00:00:00.000Z";
+  for (const slug of wanted) {
+    if (bySlug.has(slug)) continue;
+    const bundled = bundledCatalogRow(slug);
+    if (!bundled) continue;
+    bySlug.set(slug, {
+      ...bundled,
+      currency: bundled.currency ?? "USD",
+      inventory: bundled.inventory ?? DEFAULT_PRODUCT_INVENTORY,
+      tags: bundled.tags ?? [],
+      images: bundled.images ?? [],
+      published: bundled.published !== false,
+      createdAt: stamp,
+      updatedAt: stamp,
+    } as Product);
+  }
+  return [...bySlug.values()];
+}
+
 const BUNDLED_CATALOG_PERSIST_BATCH = 25;
 
 async function persistAndMergeBundledCatalog(items: Product[], category?: string): Promise<Product[]> {
@@ -117,8 +207,47 @@ function vendorHiddenFromStorefront(decision: { available: boolean; reason?: str
   return !decision.available && (decision.reason === "vendor_disabled" || decision.reason === "gbo_storefront_disabled");
 }
 
+/** Same rank signal listing cards keep for `dedupeStorefrontProducts` (length > 80). */
+const LISTING_DESCRIPTION_STUB = "x".repeat(81);
+
+const LISTING_CARD_OMIT = new Set([
+  "seoTitle",
+  "seoDescription",
+  "shippingNote",
+  "shippingOptions",
+  "shortDescription",
+  "variants",
+  "imageAssets",
+  "PK",
+  "SK",
+  "GSI1PK",
+  "GSI1SK",
+]);
+
+function wantsListingCardView(event: APIGatewayProxyEventV2): boolean {
+  const headers = event.headers ?? {};
+  const value = headers["x-blossompot-listing-view"] ?? headers["X-Blossompot-Listing-View"];
+  return value?.trim().toLowerCase() === "card";
+}
+
+/**
+ * Storefront list projection. Rakhi text is removed first, while description and seoTitle
+ * are still present. A long description then becomes the 81-character dedupe stub.
+ */
+export function toListingCardProduct<T extends { description?: string }>(product: T): T {
+  const description =
+    (product.description ?? "").length > 80 ? LISTING_DESCRIPTION_STUB : product.description;
+  const next: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(product)) {
+    if (LISTING_CARD_OMIT.has(key)) continue;
+    next[key] = value;
+  }
+  if (description !== undefined) next.description = description;
+  return next as T;
+}
+
 function forStorefront(product: Product): Product {
-  const vendorSlug = fulfillmentVendorSlug(product);
+  const vendorSlug = fulfillmentVendorSlug(product).trim().toLowerCase();
   const allowsAddons = productAllowsAddons(product);
   const stripped = stripVendorPrivateFields(
     withCompetitiveStorefrontPricing(withResolvedProductImages(product))
@@ -165,6 +294,66 @@ const PRODUCT_GET_CACHE_TTL_MS = 5 * 60_000; // 5 minutes
 let productListCache: { at: number; items: Product[] } | null = null;
 const categoryProductCache = new Map<string, { at: number; items: Product[] }>();
 const productGetCache = new Map<string, { at: number; product: Product }>();
+
+/**
+ * Primary-category partitions already stored on GSI1.
+ * Unioned with live category rows so an extra slug is found without a table scan.
+ */
+const CATEGORY_PARTITIONS = [
+  "flowers",
+  "flower-bouquets",
+  "cakes",
+  "birthday-gifts",
+  "anniversary-gifts",
+  "valentines-day-gifts",
+  "mothers-day-gifts",
+  "wedding-gifts",
+  "gift-hampers",
+  "personalized-gifts",
+  "plants",
+  "celebration-gifts",
+  "same-day-gifts",
+  "rakhi-hampers",
+] as const;
+
+let categorySlugCache: { at: number; slugs: string[] } | null = null;
+
+async function queryStoredCategorySlugs(): Promise<string[]> {
+  const slugs: string[] = [];
+  let ExclusiveStartKey: Record<string, unknown> | undefined;
+  do {
+    const result = await docClient.send(
+      new QueryCommand({
+        TableName: PRODUCTS_TABLE,
+        IndexName: "GSI1",
+        KeyConditionExpression: "GSI1PK = :pk",
+        ExpressionAttributeValues: { ":pk": categoryKeys.gsi1pk() },
+        ExclusiveStartKey,
+      })
+    );
+    for (const item of result.Items ?? []) {
+      const slug = (item as { slug?: unknown }).slug;
+      if (typeof slug === "string" && slug.trim()) slugs.push(slug.trim());
+    }
+    ExclusiveStartKey = result.LastEvaluatedKey as Record<string, unknown> | undefined;
+  } while (ExclusiveStartKey);
+  return slugs;
+}
+
+async function categoryPartitions(): Promise<string[]> {
+  const nowMs = Date.now();
+  let stored = categorySlugCache?.slugs ?? [];
+  if (!categorySlugCache || nowMs - categorySlugCache.at >= PRODUCT_LIST_CACHE_TTL_MS) {
+    stored = await queryStoredCategorySlugs();
+    categorySlugCache = { at: nowMs, slugs: stored };
+  }
+  return [...new Set<string>([...CATEGORY_PARTITIONS, ...stored])];
+}
+
+function belongsOnCategoryPage(product: Product, category: string): boolean {
+  if (product.categorySlug === category) return true;
+  return productInStorefrontCategory(product, category);
+}
 
 async function queryProductsByCategory(categorySlug: string): Promise<Product[]> {
   const nowMs = Date.now();
@@ -220,6 +409,7 @@ async function scanAllProducts(): Promise<Product[]> {
 export function invalidateProductListCache(categorySlug?: string) {
   productListCache = null;
   productGetCache.clear();
+  categorySlugCache = null;
   if (categorySlug) categoryProductCache.delete(categorySlug);
   else categoryProductCache.clear();
 }
@@ -227,10 +417,16 @@ export function invalidateProductListCache(categorySlug?: string) {
 export async function listProducts(event: APIGatewayProxyEventV2) {
   const category = event.queryStringParameters?.category;
   const search = event.queryStringParameters?.search?.toLowerCase();
+  const componentSlugs = parseComponentSlugLookup(event.queryStringParameters?.slugs);
 
   let items: Product[] = [];
 
-  if (category) {
+  if (componentSlugs) {
+    if (componentSlugs.length > COMPONENT_SLUG_LOOKUP_LIMIT) {
+      return badRequest(`At most ${COMPONENT_SLUG_LOOKUP_LIMIT} slugs`);
+    }
+    items = componentSlugs.length > 0 ? await getProductsBySlugs(componentSlugs) : [];
+  } else if (category) {
     if (isRakhiSetSizeCategory(category)) {
       const all = await scanAllProducts();
       items = all.filter((product) => productMatchesRakhiSetCategory(product, category));
@@ -249,13 +445,14 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
     } else if (category === "rakhi-hampers") {
       items = await queryProductsByCategory(category);
     } else {
-      const [primary, hampers] = await Promise.all([
-        queryProductsByCategory(category),
-        queryProductsByCategory("rakhi-hampers"),
-      ]);
-      const bySlug = new Map(primary.map((p) => [p.slug, p]));
-      for (const product of hampers) {
-        if (product.additionalCategorySlugs?.includes(category)) bySlug.set(product.slug, product);
+      const primary = await queryProductsByCategory(category);
+      const bySlug = new Map(primary.map((product) => [product.slug, product]));
+      const partitions = (await categoryPartitions()).filter((slug) => slug !== category);
+      const others = await Promise.all(partitions.map((slug) => queryProductsByCategory(slug)));
+      for (const product of others.flat()) {
+        if (bySlug.has(product.slug)) continue;
+        if (!belongsOnCategoryPage(product, category)) continue;
+        bySlug.set(product.slug, product);
       }
       items = [...bySlug.values()];
     }
@@ -263,7 +460,7 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
     items = await scanAllProducts();
   }
 
-  items = await persistAndMergeBundledCatalog(items, category);
+  if (!componentSlugs) items = await persistAndMergeBundledCatalog(items, category);
 
   items = items.filter(
     (p) =>
@@ -272,6 +469,8 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
       isProductStorefrontVisible(p) &&
       !isGboHiddenFromStorefront(p)
   );
+  const unpublished = await slugsMarkedUnpublished(items.map((product) => product.slug));
+  if (unpublished.size > 0) items = items.filter((product) => !unpublished.has(product.slug));
   if (search) {
     items = items.filter(
       (p) =>
@@ -297,11 +496,14 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
   const deliverable = new Set(evals.filter((e) => e.deliverable).map((e) => e.slug));
   items = items.filter((p) => deliverable.has(p.slug));
   const products = items.map(forStorefront);
+  const cardView = wantsListingCardView(event);
+  const visible = cardView ? products.filter((product) => !isRakhiRelatedProduct(product)) : products;
+  const responseProducts = cardView ? visible.map(toListingCardProduct) : products;
   const listing =
     event.headers?.["x-blossompot-listing-groups"] === "1" ||
     event.headers?.["X-Blossompot-Listing-Groups"] === "1"
       ? {
-          listingGroups: listingGroupsForProducts(items, vendorRecords),
+          listingGroups: listingGroupsForProducts(cardView ? visible : items, vendorRecords),
           listingVendors: vendorRecords.map((vendor) => ({
             vendorSlug: vendor.vendorSlug,
             vendorName: vendor.vendorName,
@@ -310,7 +512,7 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
           })),
         }
       : {};
-  return ok({ products, location, filtered: true, ...listing });
+  return ok({ products: responseProducts, location, filtered: true, ...listing });
 }
 
 export async function getProduct(event: APIGatewayProxyEventV2) {
@@ -321,31 +523,40 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
   const nowMs = Date.now();
   const cached = productGetCache.get(slug);
   if (cached && nowMs - cached.at < PRODUCT_GET_CACHE_TTL_MS) {
-    if (isGboHiddenFromStorefront(cached.product)) return notFound("Product not found");
-    const location = await resolveShoppingLocation(parseLocationQuery(event));
-    if (!location) return notFound(NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE);
-    const visible = productVisibleForDeliveryCountry(cached.product, location.countryCode);
-    const shopping = await decideNewShopping(cached.product, location.countryCode);
-    if (vendorHiddenFromStorefront(shopping)) return notFound("Product not found");
-    if (!visible || !shopping.available) {
+    const publication = await readProductPublication(slug);
+    if (publication.found && publication.unpublished) {
+      productGetCache.delete(slug);
+      return notFound("Product not found");
+    }
+    if (!publication.found) {
+      productGetCache.delete(slug);
+    } else {
+      if (isGboHiddenFromStorefront(cached.product)) return notFound("Product not found");
+      const location = await resolveShoppingLocation(parseLocationQuery(event));
+      if (!location) return notFound(NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE);
+      const visible = productVisibleForDeliveryCountry(cached.product, location.countryCode);
+      const shopping = await decideNewShopping(cached.product, location.countryCode);
+      if (vendorHiddenFromStorefront(shopping)) return notFound("Product not found");
+      if (!visible || !shopping.available) {
+        return ok({
+          product: forStorefront(cached.product),
+          availability: {
+            deliverable: false,
+            reason: shopping.reason ?? "country_not_allowed",
+            location,
+          },
+        });
+      }
+      const [evalRow] = await evaluateProductsForLocation([cached.product], location);
       return ok({
         product: forStorefront(cached.product),
         availability: {
-          deliverable: false,
-          reason: shopping.reason ?? "country_not_allowed",
+          deliverable: Boolean(evalRow?.deliverable),
+          reason: evalRow?.reason,
           location,
         },
       });
     }
-    const [evalRow] = await evaluateProductsForLocation([cached.product], location);
-    return ok({
-      product: forStorefront(cached.product),
-      availability: {
-        deliverable: Boolean(evalRow?.deliverable),
-        reason: evalRow?.reason,
-        location,
-      },
-    });
   }
 
   const result = await docClient.send(
@@ -404,6 +615,23 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
   });
 }
 
+async function knownCategorySlugs(slugs: readonly string[]): Promise<Set<string>> {
+  const unique = [...new Set(slugs.map((slug) => slug.trim()).filter(Boolean))];
+  const found = new Set<string>();
+  await Promise.all(
+    unique.map(async (slug) => {
+      const result = await docClient.send(
+        new GetCommand({
+          TableName: PRODUCTS_TABLE,
+          Key: { PK: categoryKeys.pk(slug), SK: categoryKeys.sk() },
+        })
+      );
+      if (result.Item) found.add(slug);
+    })
+  );
+  return found;
+}
+
 export async function createProduct(event: APIGatewayProxyEventV2) {
   const auth = getAuth(event);
   if (!auth?.isAdmin) return forbidden();
@@ -412,23 +640,56 @@ export async function createProduct(event: APIGatewayProxyEventV2) {
   const parsed = createProductSchema.safeParse(body);
   if (!parsed.success) return badRequest(parsed.error.message);
 
+  const assignedCategories = assignProductCategories({
+    categorySlug: parsed.data.categorySlug,
+    additionalCategorySlugs: parsed.data.additionalCategorySlugs,
+    knownSlugs: await knownCategorySlugs([
+      parsed.data.categorySlug,
+      ...(parsed.data.additionalCategorySlugs ?? []),
+    ]),
+  });
+  if (!assignedCategories.ok) return badRequest(assignedCategories.error);
+
   const slug = slugify(parsed.data.name);
   const timestamp = now();
   const inventory = parsed.data.inventory ?? DEFAULT_PRODUCT_INVENTORY;
+  const existing = await docClient.send(
+    new GetCommand({
+      TableName: PRODUCTS_TABLE,
+      Key: { PK: productKeys.pk(slug), SK: productKeys.sk() },
+    })
+  );
   const item: Product & { PK: string; SK: string; GSI1PK: string; GSI1SK: string } = {
     ...parsed.data,
+    categorySlug: assignedCategories.categorySlug,
+    ...(assignedCategories.additionalCategorySlugs !== undefined
+      ? { additionalCategorySlugs: assignedCategories.additionalCategorySlugs }
+      : {}),
     vendorSlug: fulfillmentVendorSlug(parsed.data),
     inventory,
     slug,
     PK: productKeys.pk(slug),
     SK: productKeys.sk(),
-    GSI1PK: productKeys.gsi1pk(parsed.data.categorySlug),
+    GSI1PK: productKeys.gsi1pk(assignedCategories.categorySlug),
     GSI1SK: productKeys.gsi1sk(slug),
-    createdAt: timestamp,
+    createdAt: typeof existing.Item?.createdAt === "string" ? existing.Item.createdAt : timestamp,
     updatedAt: timestamp,
   };
 
-  await docClient.send(new PutCommand({ TableName: PRODUCTS_TABLE, Item: item }));
+  try {
+    if (existing.Item) {
+      await replaceCatalogProduct({
+        item,
+        previousSku: existing.Item.sku,
+        nextSku: typeof item.sku === "string" ? item.sku : undefined,
+      });
+    } else {
+      await insertCatalogProduct(item);
+    }
+  } catch (err) {
+    if (isTransactionConflict(err)) return json(409, { error: SKU_TAKEN_MESSAGE });
+    throw err;
+  }
   invalidateProductListCache();
   return created({ product: item });
 }
@@ -460,6 +721,26 @@ export async function updateProduct(event: APIGatewayProxyEventV2) {
   const parsed = updateProductSchema.safeParse(body);
   if (!parsed.success) return badRequest(parsed.error.message);
 
+  let categorySlug = parsed.data.categorySlug;
+  let additionalCategorySlugs = parsed.data.additionalCategorySlugs;
+  if (parsed.data.categorySlug !== undefined || parsed.data.additionalCategorySlugs !== undefined) {
+    const primary = parsed.data.categorySlug ?? previous.categorySlug ?? "";
+    const assigned = assignProductCategories({
+      categorySlug: primary,
+      additionalCategorySlugs: parsed.data.additionalCategorySlugs,
+      knownSlugs: await knownCategorySlugs([primary, ...(parsed.data.additionalCategorySlugs ?? [])]),
+    });
+    if (!assigned.ok) return badRequest(assigned.error);
+    categorySlug = assigned.categorySlug;
+    if (parsed.data.additionalCategorySlugs !== undefined) {
+      additionalCategorySlugs = assigned.additionalCategorySlugs ?? [];
+    } else if ((previous.additionalCategorySlugs ?? []).includes(assigned.categorySlug)) {
+      additionalCategorySlugs = (previous.additionalCategorySlugs ?? []).filter(
+        (slug) => slug !== assigned.categorySlug
+      );
+    }
+  }
+
   const allowShrinkImages = body?.replaceImages === true;
   const imageUpdate =
     parsed.data.images !== undefined
@@ -471,16 +752,27 @@ export async function updateProduct(event: APIGatewayProxyEventV2) {
   const updated = {
     ...previous,
     ...parsed.data,
+    ...(categorySlug !== undefined ? { categorySlug } : {}),
+    ...(additionalCategorySlugs !== undefined ? { additionalCategorySlugs } : {}),
     ...(imageUpdate ? { images: imageUpdate.images } : {}),
     updatedAt: now(),
   } as Product & { PK: string; SK: string; GSI1PK: string; GSI1SK: string };
 
-  if (parsed.data.categorySlug) {
-    updated.GSI1PK = productKeys.gsi1pk(parsed.data.categorySlug);
+  if (categorySlug) {
+    updated.GSI1PK = productKeys.gsi1pk(categorySlug);
     updated.GSI1SK = productKeys.gsi1sk(slug);
   }
 
-  await docClient.send(new PutCommand({ TableName: PRODUCTS_TABLE, Item: updated }));
+  try {
+    await replaceCatalogProduct({
+      item: updated,
+      previousSku: previous.sku,
+      nextSku: typeof updated.sku === "string" ? updated.sku : undefined,
+    });
+  } catch (err) {
+    if (isTransactionConflict(err)) return json(409, { error: SKU_TAKEN_MESSAGE });
+    throw err;
+  }
   invalidateProductListCache();
 
   if (parsed.data.inventory !== undefined) {
@@ -521,6 +813,20 @@ export async function listAdminProducts(event: APIGatewayProxyEventV2) {
   } else if (sampleFilter === "false" || sampleFilter === "real") {
     items = items.filter((p) => !isSampleCatalogProduct(p));
   }
+
+  // The scan cache can be five minutes old on another Lambda. Refresh only `published`.
+  const publishedNow = await storedPublishedBySlug([...dynamoSlugs]);
+  items = items.map((item) => {
+    if (!publishedNow.has(item.slug)) return item;
+    const published = publishedNow.get(item.slug);
+    if (published === undefined) {
+      const next = { ...item };
+      delete (next as { published?: boolean }).published;
+      return next;
+    }
+    if (item.published === published) return item;
+    return { ...item, published };
+  });
 
   return ok({
     products: items.map(withResolvedProductImages),
@@ -676,14 +982,23 @@ export async function deleteAllSampleProducts(event: APIGatewayProxyEventV2) {
       sampleSlugs.has(slug) &&
       (item.isSampleReview === true || String(item.reviewId ?? "").startsWith("sample-"));
     if (!isSampleMeta && !isSampleReview) continue;
-    await docClient.send(
-      new DeleteCommand({
-        TableName: PRODUCTS_TABLE,
-        Key: { PK: pk, SK: sk },
-      })
-    );
-    if (isSampleMeta) deletedProducts++;
-    else deletedReviews++;
+    if (isSampleMeta) {
+      try {
+        await deleteCatalogProduct(slug, item.sku);
+      } catch (err) {
+        if (!isTransactionConflict(err)) throw err;
+        continue;
+      }
+      deletedProducts++;
+    } else {
+      await docClient.send(
+        new DeleteCommand({
+          TableName: PRODUCTS_TABLE,
+          Key: { PK: pk, SK: sk },
+        })
+      );
+      deletedReviews++;
+    }
   }
 
   const vendors = await deleteSampleMarketplaceVendors();
@@ -718,10 +1033,9 @@ export async function convertSampleProductToReal(event: APIGatewayProxyEventV2) 
     vendorSlug?: string;
     fulfilledByName?: string;
   };
-  await docClient.send(
-    new PutCommand({
-      TableName: PRODUCTS_TABLE,
-      Item: {
+  try {
+    await replaceCatalogProduct({
+      item: {
         ...product,
         isSampleProduct: false,
         tags,
@@ -729,8 +1043,13 @@ export async function convertSampleProductToReal(event: APIGatewayProxyEventV2) 
         fulfilledByName: body.fulfilledByName ?? product.fulfilledByName,
         updatedAt: now(),
       },
-    })
-  );
+      previousSku: product.sku,
+      nextSku: typeof product.sku === "string" ? product.sku : undefined,
+    });
+  } catch (err) {
+    if (isTransactionConflict(err)) return json(409, { error: SKU_TAKEN_MESSAGE });
+    throw err;
+  }
   invalidateProductListCache();
   return ok({ slug, isSampleProduct: false });
 }
@@ -742,12 +1061,19 @@ export async function deleteProduct(event: APIGatewayProxyEventV2) {
   const slug = event.pathParameters?.slug;
   if (!slug) return badRequest("Slug required");
 
-  await docClient.send(
-    new DeleteCommand({
+  const existing = await docClient.send(
+    new GetCommand({
       TableName: PRODUCTS_TABLE,
       Key: { PK: productKeys.pk(slug), SK: productKeys.sk() },
     })
   );
+  if (!existing.Item) return notFound("Product not found");
+  try {
+    await deleteCatalogProduct(slug, existing.Item.sku);
+  } catch (err) {
+    if (isTransactionConflict(err)) return json(409, { error: SKU_TAKEN_MESSAGE });
+    throw err;
+  }
   invalidateProductListCache();
   return ok({ deleted: true });
 }
@@ -767,6 +1093,15 @@ export async function bulkUploadProducts(event: APIGatewayProxyEventV2) {
     const parsed = bulkProductRowSchema.safeParse(rows[i]);
     if (!parsed.success) {
       errors.push({ row: i + 1, error: parsed.error.message });
+      continue;
+    }
+
+    const assignedCategories = assignProductCategories({
+      categorySlug: parsed.data.categorySlug,
+      knownSlugs: await knownCategorySlugs([parsed.data.categorySlug]),
+    });
+    if (!assignedCategories.ok) {
+      errors.push({ row: i + 1, error: assignedCategories.error });
       continue;
     }
 
@@ -794,19 +1129,28 @@ export async function bulkUploadProducts(event: APIGatewayProxyEventV2) {
 
     const item = {
       ...parsed.data,
+      categorySlug: assignedCategories.categorySlug,
       slug,
       tags,
       vendorSlug,
       images: [],
       PK: productKeys.pk(slug),
       SK: productKeys.sk(),
-      GSI1PK: productKeys.gsi1pk(parsed.data.categorySlug),
+      GSI1PK: productKeys.gsi1pk(assignedCategories.categorySlug),
       GSI1SK: productKeys.gsi1sk(slug),
       createdAt: timestamp,
       updatedAt: timestamp,
     };
 
-    await docClient.send(new PutCommand({ TableName: PRODUCTS_TABLE, Item: item }));
+    try {
+      await insertCatalogProduct(item);
+    } catch (err) {
+      if (isTransactionConflict(err)) {
+        errors.push({ row: i + 1, error: `SKU or slug is already reserved (slug=${slug}). Nothing for this row was saved.` });
+        continue;
+      }
+      throw err;
+    }
     createdProducts.push(item as Product);
   }
 

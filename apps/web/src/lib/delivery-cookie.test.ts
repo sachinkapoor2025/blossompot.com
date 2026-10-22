@@ -66,6 +66,10 @@ describe("shopping country options", () => {
     assert.equal(disabledCountryFallback("RS", [{ countryCode: "US" }]), "US");
     assert.equal(disabledCountryFallback("GB", [{ countryCode: "US" }, { countryCode: "GB" }]), null);
     assert.equal(disabledCountryFallback("US", [{ countryCode: "GB" }]), "GB");
+    assert.equal(
+      disabledCountryFallback("RS", [{ countryCode: "US" }, { countryCode: "GB" }], "GB"),
+      "GB"
+    );
   });
 
   it("does not write the delivery cookie when the display currency changes", () => {

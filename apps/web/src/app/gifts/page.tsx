@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
+import { marketingPageInlineLinks } from "@/lib/content/page-inline-links";
 import { giftGuidePages } from "@/lib/content/recipients";
+import { applyInlineLinks } from "@/lib/inline-links";
 import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
@@ -30,8 +32,11 @@ export default function GiftsIndexPage() {
       <Breadcrumbs items={crumbs} />
       <h1 className="text-3xl font-bold text-primary mb-3">Gift guides</h1>
       <p className="text-slate-600 max-w-3xl mb-8 leading-relaxed">
-        Start with who you are shopping for or a budget band, then open a guide for curated flowers,
-        cakes, and hampers with worldwide delivery guidance.
+        {applyInlineLinks(
+          "Start with who you are shopping for or a budget band, then open a guide for curated flowers, cakes, and hampers with worldwide delivery guidance.",
+          marketingPageInlineLinks.gifts,
+          { currentPath: path }
+        )}
       </p>
 
       <h2 className="text-xl font-bold text-primary mb-3">By recipient</h2>

@@ -238,14 +238,6 @@ export default function TermsPage() {
           </Link>{" "}
           policy, which forms part of these Terms.
         </p>
-        <p>
-          How we collect and use personal information is described in our{" "}
-          <Link href="/privacy" className="text-nav underline">
-            Privacy Policy
-          </Link>
-          . By using the site, you also acknowledge that policy.
-        </p>
-
         <h2 className="text-xl font-bold text-primary">17. Contact</h2>
         <p>
           For order changes, cancellations, delivery issues, or questions about these Terms, contact us at{" "}
@@ -261,18 +253,9 @@ export default function TermsPage() {
           >
             {whatsappLinkLabel()}
           </a>
-          . You can also use our{" "}
-          <Link href="/contact" className="text-nav underline">
-            contact form
-          </Link>
-          .
+          . You can also use our contact form.
         </p>
         <p className="text-slate-500 text-sm">Last updated: September 2026</p>
-        <p>
-          <Link href="/" className="text-nav font-semibold hover:underline">
-            ← Back to home
-          </Link>
-        </p>
       </div>
     </div>
   );

@@ -7,6 +7,8 @@ import { useSessionId } from "@/lib/session";
 import { api } from "@/lib/api";
 import { PhoneInput, buildPhoneValue } from "@/components/PhoneInput";
 import { DEFAULT_COUNTRY_ISO } from "@/lib/country-codes";
+import { marketingPageInlineLinks } from "@/lib/content/page-inline-links";
+import { applyInlineLinks } from "@/lib/inline-links";
 import { countryDisplayName, localizeCopyForCountry } from "@/lib/location-seo-urls";
 import { useStorefrontCountryIso } from "@/lib/use-storefront-country";
 
@@ -64,11 +66,16 @@ export function ContactForm() {
     }
   };
 
+  const contactLinks = marketingPageInlineLinks.contact;
+  const usedHrefs = new Set<string>();
+  const usedPhrases = new Set<string>();
+  const linkOpts = { usedHrefs, usedPhrases, currentPath: "/contact" };
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
       <h1 className="text-3xl font-bold text-primary mb-6">Contact Us</h1>
       <p className="text-slate-600 mb-8">
-        Have questions about your order or delivery to {deliveryName}? Our team is here to help before, during, and after checkout.
+        Have questions about your {applyInlineLinks("order or delivery", contactLinks, linkOpts)} to {deliveryName}? Our team is here to help before, during, and after checkout.
       </p>
       <div className="grid md:grid-cols-3 gap-6 mb-10">
         <div className="border border-slate-200 rounded-xl p-6">
@@ -91,7 +98,14 @@ export function ContactForm() {
         <div className="border border-slate-200 rounded-xl p-6">
           <h2 className="font-bold text-primary mb-2">Delivery</h2>
           <p className="text-slate-600 text-sm">
-            {localizeCopyForCountry("Worldwide delivery. Timing depends on the recipient country. Same-day options in select cities.", deliveryIso)}
+            {applyInlineLinks(
+              localizeCopyForCountry(
+                "Worldwide delivery. Timing depends on the recipient country. Same-day options in select cities.",
+                deliveryIso
+              ),
+              contactLinks,
+              linkOpts
+            )}
           </p>
         </div>
       </div>

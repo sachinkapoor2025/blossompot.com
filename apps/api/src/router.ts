@@ -2,7 +2,9 @@ import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda
 import { ok, notFound, corsPreflight, json } from "./lib/response";
 import { allowRequest, clientIp, limitForPath } from "./lib/rate-limit";
 import * as products from "./handlers/products";
+import * as combos from "./handlers/combos";
 import * as fnpImport from "./handlers/fnp-import";
+import * as productImport from "./handlers/product-import";
 import * as categories from "./handlers/categories";
 import * as cart from "./handlers/cart";
 import * as orders from "./handlers/orders";
@@ -58,6 +60,7 @@ interface Route {
 const routes: Route[] = [
   { method: "GET", pattern: /^\/health$/, handler: async () => ok({ status: "ok" }) },
   { method: "GET", pattern: /^\/products$/, handler: products.listProducts },
+  { method: "GET", pattern: /^\/combos$/, handler: combos.listCombos },
   { method: "GET", pattern: /^\/products\/([^/]+)$/, handler: products.getProduct, params: ["slug"] },
   {
     method: "GET",
@@ -83,6 +86,8 @@ const routes: Route[] = [
     params: ["slug"],
   },
   { method: "POST", pattern: /^\/products\/bulk$/, handler: products.bulkUploadProducts },
+  { method: "POST", pattern: /^\/admin\/imports\/products\/preview$/, handler: productImport.previewProductImport },
+  { method: "POST", pattern: /^\/admin\/imports\/products\/commit$/, handler: productImport.commitProductImport },
   { method: "POST", pattern: /^\/admin\/imports\/fnp\/preview$/, handler: fnpImport.previewFnpImport },
   { method: "POST", pattern: /^\/admin\/imports\/fnp\/commit$/, handler: fnpImport.commitFnpImport },
   { method: "POST", pattern: /^\/admin\/imports\/fnp\/retry$/, handler: fnpImport.retryFnpImport },

@@ -16,6 +16,8 @@ import { mergeProductsForCountry } from "@/lib/catalog-fallback";
 import { loadProducts } from "@/lib/product-loader";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, pageMetadata } from "@/lib/seo";
+import { marketingPageInlineLinks } from "@/lib/content/page-inline-links";
+import { applyInlineLinks } from "@/lib/inline-links";
 import { site } from "@/lib/site";
 import { isProductStorefrontVisible, type Product } from "@blossompot/shared";
 
@@ -99,7 +101,9 @@ export default async function GiftSlugPage({ params }: Props) {
       />
       <Breadcrumbs items={crumbs} />
       <h1 className="text-3xl font-bold text-primary mb-3">{page.h1}</h1>
-      <p className="text-slate-600 mb-6 max-w-3xl leading-relaxed">{page.intro}</p>
+      <p className="text-slate-600 mb-6 max-w-3xl leading-relaxed">
+        {applyInlineLinks(page.intro, marketingPageInlineLinks.gifts, { currentPath: path })}
+      </p>
 
       {page.kind === "price" && (
         <p className="text-sm text-slate-500 mb-4">
@@ -121,18 +125,6 @@ export default async function GiftSlugPage({ params }: Props) {
           </Link>
         </p>
       )}
-
-      <p className="mt-6 text-sm text-slate-600">
-        Explore more in our{" "}
-        <Link href={categoryHref} className="text-nav hover:underline">
-          related collection
-        </Link>{" "}
-        or{" "}
-        <Link href="/products" className="text-nav hover:underline">
-          shop all gifts
-        </Link>
-        .
-      </p>
 
       <section className="mt-12">
         <h2 className="text-xl font-bold text-primary mb-4">Frequently asked questions</h2>

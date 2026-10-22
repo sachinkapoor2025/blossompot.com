@@ -40,6 +40,18 @@ before(async () => {
   orderKeys = keys.orderKeys;
   cartKeys = keys.cartKeys;
   productKeys = keys.productKeys;
+  await docClient.send(
+    new PutCommand({
+      TableName: db.PRODUCTS_TABLE,
+      Item: {
+        PK: keys.categoryKeys.pk("flowers"),
+        SK: keys.categoryKeys.sk(),
+        slug: "flowers",
+        name: "Flowers",
+        published: true,
+      },
+    })
+  );
   const products = await import("./products");
   listProducts = products.listProducts;
   getProduct = products.getProduct;
@@ -300,6 +312,15 @@ describe("catalog vendor availability for new shopping", { concurrency: false },
     const listed = resultOf(await listProducts(shopperEvent({ queryStringParameters: { country: "US" } })));
     assert.equal(slugsOf(listed.body).includes("phase4-owned"), true);
     assert.equal(slugsOf(listed.body).includes("phase4-fnp"), true);
+    const stocked = resultOf(
+      await addToCart(
+        shopperEvent({
+          body: JSON.stringify({ productSlug: "phase4-fnp-tag", quantity: 1 }),
+          requestContext: { http: { method: "POST", path: "/cart/items" } },
+        })
+      )
+    );
+    assert.equal(stocked.statusCode, 200);
 
     await setVendor("fnp", false);
     const fnpOff = resultOf(await listProducts(shopperEvent({ queryStringParameters: { country: "US" } })));

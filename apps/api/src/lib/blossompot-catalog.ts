@@ -12,6 +12,7 @@ import {
   fulfillmentVendorSlug,
   isSampleCatalogProduct,
 } from "@blossompot/shared";
+import { insertCatalogProduct, isTransactionConflict } from "./catalog-sku-write";
 import { docClient, PRODUCTS_TABLE, now } from "./db";
 import catalogJson from "../data/blossompot-catalog.json";
 
@@ -183,7 +184,13 @@ export async function ensureUsarakhiCatalogProductInDb(
   if (existing.Item) return existing.Item as Record<string, unknown>;
 
   const item = catalogProductToDbItem(bundled, now());
-  await docClient.send(new PutCommand({ TableName: PRODUCTS_TABLE, Item: item }));
+  try {
+    await insertCatalogProduct(item);
+  } catch (err) {
+    if (!isTransactionConflict(err)) throw err;
+    const raced = await docClient.send(new GetCommand({ TableName: PRODUCTS_TABLE, Key: key }));
+    return (raced.Item as Record<string, unknown> | undefined) ?? null;
+  }
   console.log(`upserted blossompot catalog product ${slug}`);
   return item;
 }
@@ -209,13 +216,7 @@ export async function persistMissingBundledCatalogProducts(
     missing.map(async (bundled) => {
       const item = catalogProductToDbItem(bundled, ts);
       try {
-        await docClient.send(
-          new PutCommand({
-            TableName: PRODUCTS_TABLE,
-            Item: item,
-            ConditionExpression: "attribute_not_exists(PK)",
-          })
-        );
+        await insertCatalogProduct(item);
         console.log(`upserted blossompot catalog product ${bundled.slug}`);
         return item as Record<string, unknown>;
       } catch {

@@ -8,6 +8,7 @@ import {
   type FlowerGuideCardsData,
 } from "@blossompot/shared";
 import { CONFIG_TABLE, docClient, now } from "../lib/db";
+import { slugsMarkedUnpublished } from "../lib/product-publication";
 import { badRequest, notFound, ok } from "../lib/response";
 
 const TTL_MS = FLOWER_GUIDE_CARDS_TTL_SECONDS * 1000;
@@ -64,7 +65,14 @@ export async function getFlowerGuideCardsCache(
     return notFound("Flower guide card cache miss");
   }
 
-  return ok(parsed.data);
+  const hidden = await slugsMarkedUnpublished(parsed.data.products.map((product) => product.slug));
+  const products =
+    hidden.size === 0
+      ? parsed.data.products
+      : parsed.data.products.filter((product) => !hidden.has(product.slug));
+  if (products.length === 0) return notFound("Flower guide card cache miss");
+
+  return ok({ ...parsed.data, products });
 }
 
 /**

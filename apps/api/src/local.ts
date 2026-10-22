@@ -6,18 +6,31 @@ import http from "http";
 import type { APIGatewayProxyEventV2 } from "aws-lambda";
 import { handler } from "./index";
 import { readLocalUpload, saveLocalUpload, getContentType } from "./handlers/uploads";
+import { publishSeededMemoryCombos } from "./lib/combo-memory-init";
 import { seedIfEmpty } from "./lib/seed";
 
 const PORT = process.env.PORT ?? 3001;
 
-seedIfEmpty().then(() => {
-  server.listen(PORT, () => {
-    console.log(`API running at http://localhost:${PORT}`);
-    if (process.env.USE_MEMORY_DB === "true") {
-      console.log("Using in-memory database (demo data auto-seeded)");
+seedIfEmpty()
+  .then(() => publishSeededMemoryCombos())
+  .then((result) => {
+    if (result.ran) {
+      console.log(
+        `In-memory combos: generated ${result.generated}, inserted ${result.inserted}, skipped ${result.skipped}`
+      );
     }
+  })
+  .catch((err) => {
+    console.error("In-memory combo publish failed:", err);
+  })
+  .finally(() => {
+    server.listen(PORT, () => {
+      console.log(`API running at http://localhost:${PORT}`);
+      if (process.env.USE_MEMORY_DB === "true") {
+        console.log("Using in-memory database (demo data auto-seeded)");
+      }
+    });
   });
-});
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", `http://localhost:${PORT}`);

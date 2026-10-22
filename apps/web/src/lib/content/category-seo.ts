@@ -4,76 +4,76 @@ export const categoryPageSeo: Record<
   { title: string; description: string; h1: string }
 > = {
   flowers: {
-    title: "Send Flowers Online Worldwide | Fresh Arrangements | BlossomPot",
+    title: "Shop Flowers | BlossomPot",
     description:
-      "Order fresh flowers for worldwide delivery. Birthdays, anniversaries, thank-yous, and everyday celebrations with premium packaging and clear shipping.",
-    h1: "Send Flowers Online — Worldwide Delivery",
+      "Shop roses, mixed bouquets, and birthday flowers on BlossomPot. Choose a design and check delivery availability for the recipient’s address at checkout.",
+    h1: "Flowers",
   },
   "flower-bouquets": {
-    title: "Flower Bouquets Worldwide Delivery | Signature Arrangements | BlossomPot",
+    title: "Shop Flower Bouquets | BlossomPot",
     description:
-      "Shop signature flower bouquets for doorstep surprises worldwide. Elegant presentation and gift-message options.",
-    h1: "Flower Bouquets for Worldwide Delivery",
+      "Shop signature flower bouquets on BlossomPot. Choose a design and check delivery availability for the recipient’s address at checkout.",
+    h1: "Flower Bouquets",
   },
   cakes: {
-    title: "Order Cakes Online Worldwide | Birthday & Celebration Cakes | BlossomPot",
+    title: "Shop Cakes | BlossomPot",
     description:
-      "Order cakes online worldwide for birthdays, anniversaries and special celebrations. Shop chocolate, red velvet, designer and specialty cakes with global delivery.",
-    h1: "Celebration Cakes — Worldwide Delivery",
+      "Shop chocolate, red velvet, and celebration cakes on BlossomPot. Choose a cake and check delivery availability for the recipient’s address at checkout.",
+    h1: "Cakes",
   },
   "birthday-gifts": {
-    title: "Birthday Gifts Worldwide | Flowers, Cakes & Combos | BlossomPot",
+    title: "Shop Birthday Gifts | BlossomPot",
     description:
-      "Send birthday gifts worldwide with BlossomPot. Shop fresh flowers, delicious cakes, gift hampers and combos for joyful birthday celebrations.",
-    h1: "Birthday Gifts for Worldwide Delivery",
+      "Shop birthday flowers, cakes, and gift hampers on BlossomPot. Choose a gift and check delivery availability for the recipient’s address at checkout.",
+    h1: "Birthday Gifts",
   },
   "anniversary-gifts": {
-    title: "Anniversary Gifts Worldwide | Roses, Cakes & More | BlossomPot",
+    title: "Shop Anniversary Gifts | BlossomPot",
     description:
-      "Send romantic anniversary gifts worldwide with BlossomPot. Discover roses, flowers, cakes and thoughtful gift boxes perfect for celebrating love.",
-    h1: "Anniversary Gifts — Worldwide Delivery",
+      "Shop anniversary flowers, cakes, and gift boxes on BlossomPot. Choose a gift and check delivery availability for the recipient’s address at checkout.",
+    h1: "Anniversary Gifts",
   },
   "valentines-day-gifts": {
-    title: "Valentine’s Day Gifts Worldwide | Flowers & Chocolates | BlossomPot",
+    title: "Shop Valentine’s Day Gifts | BlossomPot",
     description:
-      "Send Valentine’s Day gifts worldwide with BlossomPot. Shop fresh flowers, chocolates and romantic gift sets for memorable celebrations.",
-    h1: "Valentine's Day Gifts — Worldwide Delivery",
+      "Shop Valentine’s Day flowers and gifts on BlossomPot. Choose a gift and check delivery availability for the recipient’s address at checkout.",
+    h1: "Valentine's Day Gifts",
   },
   "mothers-day-gifts": {
-    title: "Mother's Day Gifts Worldwide | Flowers & Plants | BlossomPot",
+    title: "Shop Mother's Day Gifts | BlossomPot",
     description:
-      "Mother's Day flowers, plants, and thoughtful gifts to show appreciation with elegance and warmth.",
-    h1: "Mother's Day Gifts — Worldwide Delivery",
+      "Shop Mother's Day flowers, plants, and gifts on BlossomPot. Choose a gift and check delivery availability for the recipient’s address at checkout.",
+    h1: "Mother's Day Gifts",
   },
   "wedding-gifts": {
-    title: "Wedding Gifts Worldwide | Florals, Cakes & Hampers | BlossomPot",
+    title: "Shop Wedding Gifts | BlossomPot",
     description:
-      "Wedding and engagement gifting — elegant florals, celebration cakes, and premium hampers for couples.",
-    h1: "Wedding Gifts — Worldwide Delivery",
+      "Shop wedding flowers, cakes, and hampers on BlossomPot. Choose a gift and check delivery availability for the recipient’s address at checkout.",
+    h1: "Wedding Gifts",
   },
   "gift-hampers": {
-    title: "Gift Hampers Worldwide Delivery | Curated Boxes | BlossomPot",
+    title: "Shop Gift Hampers | BlossomPot",
     description:
-      "Shop gift hampers with worldwide delivery from BlossomPot. Discover curated gift boxes filled with thoughtful treats, perfect for every occasion.",
-    h1: "Gift Hampers — Worldwide Delivery",
+      "Shop curated gift hampers on BlossomPot. Choose a hamper and check delivery availability for the recipient’s address at checkout.",
+    h1: "Gift Hampers",
   },
   "personalized-gifts": {
-    title: "Personalized Gifts Worldwide | Custom Messages | BlossomPot",
+    title: "Shop Personalized Gifts | BlossomPot",
     description:
-      "Personalized gifts with custom messages for birthdays, anniversaries, and thank-yous — delivered worldwide.",
-    h1: "Personalized Gifts — Worldwide Delivery",
+      "Shop gifts with a personal message on BlossomPot. Choose a gift and check delivery availability for the recipient’s address at checkout.",
+    h1: "Personalized Gifts",
   },
   plants: {
-    title: "Plants Delivery Worldwide | Green Gifts | BlossomPot",
+    title: "Shop Plants | BlossomPot",
     description:
-      "Send plants as thoughtful green gifts worldwide — perfect for thank-yous, housewarmings, and Mother's Day.",
-    h1: "Plants for Worldwide Delivery",
+      "Shop plants on BlossomPot. Choose a plant and check delivery availability for the recipient’s address at checkout.",
+    h1: "Plants",
   },
   "celebration-gifts": {
-    title: "Celebration Gifts Worldwide | Congrats & Thank You | BlossomPot",
+    title: "Shop Celebration Gifts | BlossomPot",
     description:
-      "Celebration gifts for promotions, housewarmings, congratulations, and every reason to send something special.",
-    h1: "Celebration Gifts — Worldwide Delivery",
+      "Shop celebration gifts on BlossomPot. Choose a gift and check delivery availability for the recipient’s address at checkout.",
+    h1: "Celebration Gifts",
   },
 };
 

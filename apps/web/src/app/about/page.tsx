@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { JsonLd } from "@/components/JsonLd";
-import { categoryHref } from "@/lib/category-urls";
 import { marketingPageInlineLinks } from "@/lib/content/page-inline-links";
 import { applyInlineLinks } from "@/lib/inline-links";
-import { site, categoryOrder, whatsappChatUrl } from "@/lib/site";
+import { site, whatsappChatUrl } from "@/lib/site";
 import { aboutPageJsonLd, pageMetadata } from "@/lib/seo";
 import { BackToHome } from "@/components/BackToHome";
 
@@ -18,6 +16,8 @@ export const metadata: Metadata = pageMetadata({
 export default function AboutPage() {
   const inlineLinks = marketingPageInlineLinks.about;
   const usedHrefs = new Set<string>();
+  const usedPhrases = new Set<string>();
+  const linkOpts = { usedHrefs, usedPhrases, currentPath: "/about" };
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
@@ -28,14 +28,14 @@ export default function AboutPage() {
           {applyInlineLinks(
             `At ${site.name}, we believe that a thoughtful gift has the power to transform an ordinary moment into something special. We make it easy to send something meaningful to the people you care about, from fresh flowers and stylish bouquets to celebration cakes, gift hampers and personalized gifts.`,
             inlineLinks,
-            { usedHrefs, currentPath: "/about", max: 4 }
+            linkOpts
           )}
         </p>
         <p>
           {applyInlineLinks(
             `${site.name} is a leading online gifting destination with worldwide delivery. Whether it's a birthday, anniversary, Valentine's Day, Mother's Day, a wedding, a new beginning or just to say thank you, we have a selection of gifts for all occasions and relationships.`,
             inlineLinks,
-            { usedHrefs, currentPath: "/about", max: 4 }
+            linkOpts
           )}
         </p>
 
@@ -150,22 +150,10 @@ export default function AboutPage() {
           <a href={`mailto:${site.supportEmail}`} className="text-nav hover:underline">
             {site.supportEmail}
           </a>
-          , or visit our <Link href="/contact" className="text-nav hover:underline">contact page</Link>.
-          Media inquiries: <Link href="/press" className="text-nav hover:underline">Press kit</Link>.
+          , or visit our {applyInlineLinks("contact page", inlineLinks, linkOpts)}. Media inquiries: Press kit.
         </p>
       </div>
       <BackToHome className="mt-10" />
-      <div className="mt-6 flex flex-wrap gap-3">
-        {categoryOrder.map((slug) => (
-          <Link
-            key={slug}
-            href={categoryHref(slug)}
-            className="px-4 py-2 rounded-full border border-slate-200 text-sm hover:border-nav capitalize"
-          >
-            {slug.replace(/-/g, " ")}
-          </Link>
-        ))}
-      </div>
     </div>
   );
 }

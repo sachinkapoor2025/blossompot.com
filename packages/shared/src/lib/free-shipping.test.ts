@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  applicableCatalogLineShippingCharge,
   BELOW_THRESHOLD_SHIPPING_USD,
   FREE_SHIPPING_MIN_SUBTOTAL_USD,
   REDUCED_SHIPPING_MIN_SUBTOTAL_USD,
@@ -230,5 +231,124 @@ describe("quoteAddressShipmentShipping", () => {
       usdInrRate: 96,
     });
     assert.equal(mixedCart.totalCharge, BELOW_THRESHOLD_SHIPPING_USD);
+  });
+});
+
+describe("applicableCatalogLineShippingCharge", () => {
+  it("shows the $5 sheet fee when the catalog subtotal is under $14", () => {
+    const items = [{ price: 10, quantity: 1, shippingFee: 5, productSlug: "small-tf-sku" }];
+    const quote = quoteAddressShipmentShipping({
+      items,
+      currency: "USD",
+      usdInrRate: 96,
+    });
+    assert.equal(quote.totalCharge, 5);
+    assert.equal(applicableCatalogLineShippingCharge(quote, items[0]), 5);
+  });
+
+  it("shows free shipping for a qualifying catalog line with a $5 sheet fee", () => {
+    const items = [
+      { price: 89.99, quantity: 1, shippingFee: 5, productSlug: "sweet-moments-bouquet" },
+    ];
+    const quote = quoteAddressShipmentShipping({
+      items,
+      currency: "USD",
+      usdInrRate: 96,
+    });
+    assert.equal(quote.totalCharge, 0);
+    assert.equal(quote.perVendor[0]?.policy, "catalog");
+    assert.equal(applicableCatalogLineShippingCharge(quote, items[0]), 0);
+  });
+
+  it("multiplies the sheet fee by quantity only while the bucket is still charged", () => {
+    const charged = [{ price: 6, quantity: 2, shippingFee: 5, productSlug: "small-tf-sku" }];
+    const chargedQuote = quoteAddressShipmentShipping({
+      items: charged,
+      currency: "USD",
+      usdInrRate: 96,
+    });
+    assert.equal(chargedQuote.totalCharge, 10);
+    assert.equal(applicableCatalogLineShippingCharge(chargedQuote, charged[0]), 10);
+
+    const waived = [{ price: 8, quantity: 2, shippingFee: 5, productSlug: "small-tf-sku" }];
+    const waivedQuote = quoteAddressShipmentShipping({
+      items: waived,
+      currency: "USD",
+      usdInrRate: 96,
+    });
+    assert.equal(waivedQuote.totalCharge, 0);
+    assert.equal(applicableCatalogLineShippingCharge(waivedQuote, waived[0]), 0);
+  });
+
+  it("waives every catalog line together once the combined subtotal qualifies", () => {
+    const qualifying = [
+      { price: 10, quantity: 1, shippingFee: 5, productSlug: "roses" },
+      { price: 5, quantity: 1, shippingFee: 5, productSlug: "tulips" },
+    ];
+    const qualifyingQuote = quoteAddressShipmentShipping({
+      items: qualifying,
+      currency: "USD",
+      usdInrRate: 96,
+    });
+    assert.equal(qualifyingQuote.totalCharge, 0);
+    assert.equal(applicableCatalogLineShippingCharge(qualifyingQuote, qualifying[0]), 0);
+    assert.equal(applicableCatalogLineShippingCharge(qualifyingQuote, qualifying[1]), 0);
+
+    const under = [
+      { price: 10, quantity: 1, shippingFee: 5, productSlug: "roses" },
+      { price: 3, quantity: 1, shippingFee: 5, productSlug: "tulips" },
+    ];
+    const underQuote = quoteAddressShipmentShipping({
+      items: under,
+      currency: "USD",
+      usdInrRate: 96,
+    });
+    assert.equal(underQuote.totalCharge, 10);
+    assert.equal(applicableCatalogLineShippingCharge(underQuote, under[0]), 5);
+    assert.equal(applicableCatalogLineShippingCharge(underQuote, under[1]), 5);
+  });
+
+  it("leaves GBO and flash-combo charges off the line", () => {
+    const gbo = [
+      {
+        price: 80,
+        quantity: 1,
+        vendorSlug: "gift-baskets-overseas",
+        productSlug: "gbo-am-3-peak",
+      },
+    ];
+    const gboQuote = quoteAddressShipmentShipping({
+      items: gbo,
+      currency: "USD",
+      usdInrRate: 96,
+    });
+    assert.equal(gboQuote.totalCharge, GBO_FLAT_SHIPPING_USD);
+    assert.equal(applicableCatalogLineShippingCharge(gboQuote, gbo[0]), null);
+
+    const flash = [
+      { price: 12.97, quantity: 1, productSlug: "blue-beads-om-pista-flash-combo" },
+    ];
+    const flashQuote = quoteAddressShipmentShipping({
+      items: flash,
+      currency: "USD",
+      usdInrRate: 96,
+    });
+    assert.equal(flashQuote.totalCharge, 0.99);
+    assert.equal(applicableCatalogLineShippingCharge(flashQuote, flash[0]), null);
+  });
+
+  it("keeps a non-catalog seller fee in the total when a catalog line is waived", () => {
+    const items = [
+      { price: 89.99, quantity: 1, shippingFee: 5, productSlug: "sweet-moments-bouquet" },
+      { price: 3.99, quantity: 1, productSlug: "classic-red-rose-bouquet" },
+    ];
+    const quote = quoteAddressShipmentShipping({
+      items,
+      currency: "USD",
+      usdInrRate: 96,
+    });
+    assert.equal(quote.totalCharge, BELOW_THRESHOLD_SHIPPING_USD);
+    assert.equal(applicableCatalogLineShippingCharge(quote, items[0]), 0);
+    assert.equal(applicableCatalogLineShippingCharge(quote, items[1]), null);
   });
 });

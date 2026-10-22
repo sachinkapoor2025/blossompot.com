@@ -225,6 +225,19 @@ export function fulfillmentVendorSlug(product: {
   return resolveCatalogVendorSlug(product);
 }
 
+/** Shopping and vendor publication compare this form. It does not rewrite a stored vendorSlug. */
+export function normalizedFulfillmentVendorSlug(product: {
+  vendorSlug?: string | null;
+  listingVendorSlug?: string | null;
+  internationalDelivery?: boolean | null;
+  slug?: string | null;
+  productSlug?: string | null;
+  sku?: string | null;
+  tags?: readonly string[] | null;
+}): string {
+  return fulfillmentVendorSlug(product).trim().toLowerCase();
+}
+
 export function isProductDeliverableToLocation(
   product: {
     vendorSlug?: string | null;
@@ -241,7 +254,7 @@ export function isProductDeliverableToLocation(
   location: DeliveryLocationInput,
   activeVendorSlugs: Set<string>
 ): ServiceabilityMatch {
-  const vendorSlug = fulfillmentVendorSlug(product);
+  const vendorSlug = normalizedFulfillmentVendorSlug(product);
   if (product.published === false || (product.inventory ?? 1) <= 0) {
     return { serviceable: false, reason: "inactive_vendor", vendorSlug };
   }
@@ -275,7 +288,8 @@ export function productKeptForServiceableVendors(
     if (iso && iso !== "US") return false;
     return true;
   }
-  return vendorSlugs.includes(fulfillmentVendorSlug(product));
+  const normalized = vendorSlugs.map((slug) => slug.trim().toLowerCase());
+  return normalized.includes(normalizedFulfillmentVendorSlug(product));
 }
 
 function nationwideUsArea(vendorSlug: string, areaId: string): VendorServiceArea {

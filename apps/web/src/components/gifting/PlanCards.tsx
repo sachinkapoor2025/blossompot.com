@@ -48,7 +48,7 @@ export function PlanCards({
                   Most Popular
                 </p>
               )}
-              <h3 className="text-lg font-bold text-primary pr-4">{plan.isCustom ? "Custom Plan" : plan.name}</h3>
+              <h3 className="font-display text-lg font-bold text-primary pr-4">{plan.isCustom ? "Custom Plan" : plan.name}</h3>
               <p className="text-sm text-slate-500 mt-1">{planLength(plan)}</p>
               <p className="mt-3 text-3xl font-bold text-slate-900">
                 {plan.isCustom ? (
@@ -109,7 +109,7 @@ export function PlanCards({
             className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 id="plan-benefits-title" className="text-xl font-bold text-primary">
+            <h3 id="plan-benefits-title" className="font-display text-xl font-bold text-primary">
               {benefitsPlan.isCustom ? "Custom Plan" : benefitsPlan.name}
             </h3>
             <p className="text-sm text-slate-500 mt-1">{planLength(benefitsPlan)}</p>

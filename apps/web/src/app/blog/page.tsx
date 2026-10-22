@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BlogShowMoreProducts } from "@/components/BlogShowMoreProducts";
+import { marketingPageInlineLinks } from "@/lib/content/page-inline-links";
 import { loadBlogPostsWithImages } from "@/lib/blog-images";
+import { applyInlineLinks } from "@/lib/inline-links";
 import { pageMetadata } from "@/lib/seo";
 
 /** Keep blog list fresh when admin updates hero images. */
@@ -20,12 +22,11 @@ export default async function BlogPage() {
     <div className="max-w-5xl mx-auto px-4 py-12 overflow-x-hidden">
       <h1 className="text-3xl font-bold text-primary mb-2">Gifting Guides & Blog</h1>
       <p className="text-slate-600 mb-8">
-        Ideas and tips for sending flowers, cakes, and thoughtful gifts across the USA — for birthdays,
-        anniversaries, and everyday celebrations. For deeper flower meanings, seasons and care, visit the{" "}
-        <Link href="/flower-guide" className="text-nav font-semibold hover:underline">
-          Flower Knowledge Centre
-        </Link>
-        .
+        {applyInlineLinks(
+          "Ideas and tips for sending flowers, cakes, and thoughtful gifts across the USA — for birthdays, anniversaries, and everyday celebrations. For deeper flower meanings, seasons and care, visit the Flower Knowledge Centre.",
+          marketingPageInlineLinks.blog,
+          { currentPath: "/blog" }
+        )}
       </p>
       <div className="grid gap-6 sm:grid-cols-2">
         {posts.map((post) => (

@@ -153,6 +153,102 @@ describe("catalog countries API", { concurrency: false }, () => {
     assert.match(String(none.body.error), /At least one country must be enabled/);
   });
 
+  it("stores an explicit default and rejects a disabled one", async () => {
+    const { invalidateCatalogCountryCache } = await import("../lib/catalog-country-store");
+    const saved = resultOf(
+      await updateCatalogCountriesAdmin(
+        event({
+          method: "PUT",
+          body: {
+            countries: [
+              { countryCode: "US", enabled: true },
+              { countryCode: "GB", enabled: true },
+            ],
+            defaultCountry: "GB",
+          },
+        })
+      )
+    );
+    assert.equal(saved.statusCode, 200);
+    assert.equal(saved.body.defaultCountry, "GB");
+    assert.deepEqual(
+      codes(saved.body).map((country) => country.countryCode),
+      ["US", "GB"]
+    );
+
+    const disabled = resultOf(
+      await updateCatalogCountriesAdmin(
+        event({
+          method: "PUT",
+          body: {
+            countries: [
+              { countryCode: "US", enabled: false },
+              { countryCode: "GB", enabled: true },
+            ],
+            defaultCountry: "US",
+          },
+        })
+      )
+    );
+    assert.equal(disabled.statusCode, 400);
+    assert.match(String(disabled.body.error), /not an enabled country/);
+
+    const ukOnly = resultOf(
+      await updateCatalogCountriesAdmin(
+        event({
+          method: "PUT",
+          body: {
+            countries: [
+              { countryCode: "US", enabled: false },
+              { countryCode: "GB", enabled: true },
+            ],
+          },
+        })
+      )
+    );
+    assert.equal(ukOnly.statusCode, 200);
+    assert.equal(ukOnly.body.defaultCountry, "GB");
+    const pub = resultOf(await listCatalogCountriesPublic(event({ token: null })));
+    assert.equal(pub.body.defaultCountry, "GB");
+    assert.deepEqual(codes(pub.body).map((country) => country.countryCode), ["GB"]);
+    assert.equal("enabled" in (codes(pub.body)[0] ?? {}), false);
+
+    invalidateCatalogCountryCache();
+    await docClient.send(
+      new PutCommand({
+        TableName: process.env.CONFIG_TABLE,
+        Item: {
+          PK: "CONFIG#CATALOG_COUNTRIES",
+          SK: "META",
+          countries: [
+            { countryCode: "US", enabled: true },
+            { countryCode: "GB", enabled: true },
+          ],
+          updatedAt: "2026-10-05T00:00:00.000Z",
+        },
+      })
+    );
+    const legacy = resultOf(await listCatalogCountriesAdmin(event()));
+    assert.equal(legacy.body.defaultCountry, "US");
+    assert.equal(legacy.body.source, "config");
+
+    const restored = resultOf(
+      await updateCatalogCountriesAdmin(
+        event({
+          method: "PUT",
+          body: {
+            countries: [
+              { countryCode: "US", enabled: true },
+              { countryCode: "GB", enabled: false },
+            ],
+          },
+        })
+      )
+    );
+    assert.equal(restored.statusCode, 200);
+    assert.equal(restored.body.defaultCountry, "US");
+  });
+
   it("keeps the public response cached until PUT replaces the config", async () => {
     const { invalidateCatalogCountryCache } = await import("../lib/catalog-country-store");
     invalidateCatalogCountryCache();

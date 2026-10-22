@@ -11,24 +11,32 @@ export { pickCountryProducts };
 
 export async function CountryFlowerProductSection({
   country,
+  centered = false,
 }: {
   country: CountryFlowerDeliverySlug;
+  centered?: boolean;
 }) {
   const page = getCountryFlowerDelivery(country);
   const featured = await getFlowerGuideProducts(country);
   const productsFirst = country === "usa";
 
+  const productIntro = (
+    <>
+      <h2 className="text-xl font-bold text-primary mb-3">
+        {productsFirst ? `Flower gifts for ${page.countryName}` : `Featured gifts for ${page.countryName}`}
+      </h2>
+      <p className="text-slate-700 mb-4 max-w-3xl leading-relaxed">
+        {productsFirst
+          ? `Shop flowers available for ${page.countryName} delivery. Open any product for current price, inventory, and delivery timing.`
+          : `A rotating selection from the live ${site.name} catalog — flowers first, then cakes and hampers. Open any product for current price, inventory, and delivery timing.`}
+      </p>
+    </>
+  );
+
   const productSection =
     featured.length > 0 ? (
       <section className="mb-10">
-        <h2 className="text-xl font-bold text-primary mb-3">
-          {productsFirst ? `Flower gifts for ${page.countryName}` : `Featured gifts for ${page.countryName}`}
-        </h2>
-        <p className="text-slate-700 mb-4 max-w-3xl leading-relaxed">
-          {productsFirst
-            ? `Shop flowers available for ${page.countryName} delivery. Open any product for current price, inventory, and delivery timing.`
-            : `A rotating selection from the live ${site.name} catalog — flowers first, then cakes and hampers. Open any product for current price, inventory, and delivery timing.`}
-        </p>
+        {centered ? <div className="max-w-3xl mx-auto">{productIntro}</div> : productIntro}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {toListingCardProducts(featured).map((product) => (
             <HomeProductCard key={product.slug} product={product} />

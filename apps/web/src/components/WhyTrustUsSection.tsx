@@ -1,7 +1,6 @@
 "use client";
 
 import { trustFacts, trustHighlights } from "@/lib/trust";
-import { TrustBadges } from "@/components/TrustBadges";
 import { localizeCopyForCountry } from "@/lib/location-seo-urls";
 import { useStorefrontCountryIso } from "@/lib/use-storefront-country";
 
@@ -18,12 +17,11 @@ export function WhyTrustUsSection() {
             Why customers trust BlossomPot
           </h2>
           <p className="text-slate-600 text-sm md:text-base leading-relaxed">
-            BlossomPot delivers {copy(trustFacts.catalog.toLowerCase())}. {copy(trustFacts.fulfillment)}.{" "}
-            {copy(trustFacts.support)}.
+            BlossomPot delivers curated flowers, cakes and gift hampers for birthdays, anniversaries, and other special occasions across the USA. Choose from a beautiful range of gifts to make every celebration memorable. Our customer support team is available via WhatsApp and email to assist you with your orders.
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {trustHighlights.map((item) => {
             const inner = (
               <>
@@ -50,10 +48,6 @@ export function WhyTrustUsSection() {
               </div>
             );
           })}
-        </div>
-
-        <div className="max-w-3xl mx-auto">
-          <TrustBadges />
         </div>
       </div>
     </section>

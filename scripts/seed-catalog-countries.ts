@@ -28,6 +28,7 @@ async function main() {
     PK: catalogCountryKeys.pk,
     SK: catalogCountryKeys.sk,
     countries: defaultCatalogCountries(),
+    defaultCountry: "US",
     updatedAt: now,
     updatedBy: "seed:catalog-countries",
   };

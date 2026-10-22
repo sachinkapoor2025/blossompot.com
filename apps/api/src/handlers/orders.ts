@@ -61,6 +61,7 @@ import {
   notifyCustomerOrderStatusChange,
 } from "../lib/email";
 import { decrementInventoryForOrder, validateOrderInventory } from "../lib/inventory";
+import { slugsMarkedUnpublished, unpublishedProductMessage } from "../lib/product-publication";
 import { applyDeliveryReviewSchedule } from "./review-emails";
 import { markCartConverted } from "./abandoned-cart-emails";
 import { upsertSessionProfile } from "../lib/customer-profile";
@@ -239,6 +240,13 @@ export async function checkout(event: APIGatewayProxyEventV2) {
   const cart = cartBody.cart;
 
   if (!cart?.items?.length) return badRequest("Cart is empty");
+  const unpublished = await slugsMarkedUnpublished(
+    (cart.items as CartItem[]).map((item) => item.productSlug)
+  );
+  if (unpublished.size > 0) {
+    const blocked = (cart.items as CartItem[]).find((item) => unpublished.has(item.productSlug));
+    return badRequest(unpublishedProductMessage(blocked?.name ?? ""));
+  }
   if (!isGboStorefrontEnabled() && orderIncludesGboProduct({ items: cart.items })) {
     return badRequest(gboCartLineUnavailableMessage(cart.items ?? []));
   }

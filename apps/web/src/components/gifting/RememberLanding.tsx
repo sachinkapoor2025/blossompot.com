@@ -1,5 +1,7 @@
 import Link from "next/link";
 import type { SubscriptionPlan } from "@blossompot/shared";
+import { marketingPageInlineLinks } from "@/lib/content/page-inline-links";
+import { applyInlineLinks } from "@/lib/inline-links";
 import { PlanCards } from "./PlanCards";
 import { REMEMBER_FAQS } from "./remember-content";
 import { site } from "@/lib/site";
@@ -32,6 +34,11 @@ const BENEFITS = [
 ];
 
 export function RememberLanding({ plans }: { plans: SubscriptionPlan[] }) {
+  const inlineLinks = marketingPageInlineLinks.remember;
+  const usedHrefs = new Set<string>();
+  const usedPhrases = new Set<string>();
+  const linkOpts = { usedHrefs, usedPhrases, currentPath: "/remember" };
+
   return (
     <div className="bg-[#fbf7f4]">
       <section className="relative overflow-hidden bg-gradient-to-br from-primary via-[#9e2d55] to-accent text-white">
@@ -44,9 +51,11 @@ export function RememberLanding({ plans }: { plans: SubscriptionPlan[] }) {
             Never forget a birthday, anniversary, or special occasion again
           </h1>
           <p className="mt-5 text-white/90 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
-            BlossomPot Remember is a personal reminder membership for the people you love. Choose a plan,
-            pick the dates, and we send email or WhatsApp reminders before each occasion — in time to send
-            flowers, cake, or a gift across the USA.
+            {applyInlineLinks(
+              "BlossomPot Remember is a personal reminder membership for the people you love. Choose a plan, pick the dates, and we send email or WhatsApp reminders before each occasion — in time to send flowers, cake, or a gift across the USA.",
+              inlineLinks,
+              linkOpts
+            )}
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
             <Link
@@ -117,8 +126,11 @@ export function RememberLanding({ plans }: { plans: SubscriptionPlan[] }) {
             Why families use BlossomPot Remember
           </h2>
           <p className="mt-3 text-center text-slate-600 max-w-2xl mx-auto text-sm sm:text-base">
-            It is not a discount club. It is a never-forget service for birthdays, anniversaries, and festivals
-            — with gift ideas when you want them, and no surprise charges.
+            {applyInlineLinks(
+              "It is not a discount club. It is a never-forget service for birthdays, anniversaries, and festivals — with gift ideas when you want them, and no surprise charges.",
+              inlineLinks,
+              linkOpts
+            )}
           </p>
           <div className="mt-10 grid gap-4 sm:grid-cols-2">
             {BENEFITS.map((item) => (

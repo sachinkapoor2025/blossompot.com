@@ -182,6 +182,16 @@ describe("new shopping vendor gate", () => {
     const closed = productAllowedForNewShopping({ slug: "fnp-cake", vendorSlug: "fnp" }, "US", disabled);
     assert.equal(closed.available, false);
     assert.equal(closed.reason, "vendor_disabled");
+    const uppercase = productAllowedForNewShopping({ slug: "fnp-case", vendorSlug: "FNP" }, "US", disabled);
+    assert.equal(uppercase.available, false);
+    assert.equal(uppercase.vendorSlug, "fnp");
+    assert.equal(uppercase.reason, "vendor_disabled");
+    const tagged = productAllowedForNewShopping({ slug: "fnp-tagged", tags: ["fnp-usa-import"] }, "US", disabled);
+    assert.equal(tagged.available, false);
+    assert.equal(tagged.vendorSlug, "fnp");
+    const blank = productAllowedForNewShopping({ slug: "owned-blank", vendorSlug: "  " }, "US", disabled);
+    assert.equal(blank.available, true);
+    assert.equal(blank.vendorSlug, "blossompot");
   });
 
   it("hides GBO when the vendor is disabled, the country is not delivered, or the SKU country differs", () => {

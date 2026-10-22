@@ -8,31 +8,30 @@ import { getGoogleReviews } from "@/lib/google-reviews";
 import { TrustStrip } from "@/components/TrustStrip";
 import { WhyTrustUsSection } from "@/components/WhyTrustUsSection";
 import { HomeFlowerGuideCta } from "@/components/flower-guide/HomeFlowerGuideCta";
-import { HomeCategoryCarousel } from "@/components/HomeCategoryCarousel";
 import { HomeSeoSection } from "@/components/HomeSeoSection";
-import { FaqAccordion } from "@/components/FaqAccordion";
-import { buildHomeCategoryTiles } from "@/lib/home-category-carousel";
 import { JsonLd } from "@/components/JsonLd";
-import { homeBanners, countriesMenu } from "@/lib/site";
-import { faqsForCountry } from "@/lib/faqs-for-country";
-import { getHomepageCatalogData } from "@/lib/homepage-catalog";
+import { homeBanners } from "@/lib/site";
+import { loadHomepageCategoryCount } from "@/lib/homepage-category-count";
 import {
   HOME_PRODUCT_SECTIONS,
   HomeCategoryProductRow,
   HomeCategoryProductRowFallback,
 } from "@/components/HomeCategoryProductRow";
-import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
+import { getIndexableHomeCountry, getStorefrontDeliveryCountry } from "@/lib/storefront-country";
+import { countrySeoContent } from "@/lib/content/country-seo-registry";
 import { faqJsonLd, pageMetadata } from "@/lib/seo";
 import { resolveDeliveryCountry } from "@blossompot/shared";
-import { flowerDeliverySlugForIso } from "@/lib/content/country-flower-delivery";
 
-export const metadata: Metadata = pageMetadata({
-  title: "BlossomPot — Flowers, Cakes & Gifts, Delivered Worldwide",
-  description:
-    "Order fresh flowers, cakes, and gift hampers with worldwide delivery. Secure checkout and gifts for every celebration — shop online today.",
-  path: "/",
-  absoluteTitle: true,
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const country = await getIndexableHomeCountry();
+  const article = countrySeoContent(country, "home");
+  return pageMetadata({
+    title: article.title,
+    description: article.description,
+    path: "/",
+    absoluteTitle: true,
+  });
+}
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -55,7 +54,7 @@ export default function HomePage({
   );
 }
 
-/** Resolves the delivery country, then streams the carousel and category rows independently. */
+/** Resolves the delivery country, then streams the category product rows. */
 async function HomeBelowHero({
   searchParams,
   reviewsPromise,
@@ -65,18 +64,13 @@ async function HomeBelowHero({
 }) {
   const params = await searchParams;
   const deliveryCountry = await getStorefrontDeliveryCountry(params.country);
+  const indexableCountry = await getIndexableHomeCountry();
+  const indexableSeo = countrySeoContent(indexableCountry, "home");
   const destinationName = resolveDeliveryCountry(deliveryCountry).countryName;
-  const selectedFlowerSlug = flowerDeliverySlugForIso(deliveryCountry);
-  const countryPages = selectedFlowerSlug
-    ? countriesMenu.items.filter((item) => item.slug === selectedFlowerSlug)
-    : [];
 
   return (
     <>
-      <JsonLd data={[faqJsonLd(faqsForCountry(deliveryCountry))]} />
-      <Suspense fallback={<HomeBelowHeroFallback />}>
-        <HomeCategoryCarouselBlock country={deliveryCountry} />
-      </Suspense>
+      <JsonLd data={[faqJsonLd(indexableSeo.faqs)]} />
       <TrustStrip />
 
       <div className="max-w-7xl mx-auto px-4 pt-6 pb-2 flex flex-wrap justify-center gap-3">
@@ -87,30 +81,6 @@ async function HomeBelowHero({
           Remember occasions
         </Link>
       </div>
-
-      {countryPages.length > 0 ? (
-      <section className="max-w-7xl mx-auto px-4 pt-8 pb-2">
-        <div className="text-center mb-5">
-          <h2 className="text-2xl font-bold text-primary">Flower delivery in {destinationName}</h2>
-          <p className="text-sm text-slate-600 mt-1 max-w-2xl mx-auto">
-            Open the {destinationName} flower delivery page for local ordering notes, occasions, and
-            collections for this destination.
-          </p>
-        </div>
-        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-w-3xl mx-auto">
-          {countryPages.map((item) => (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                className="flex min-h-[4.5rem] items-center justify-center rounded-xl border border-primary/15 bg-white px-3 py-3 text-center text-sm font-semibold text-primary hover:border-primary/40 hover:bg-petal/70"
-              >
-                {item.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
-      ) : null}
 
       <section className="max-w-7xl mx-auto px-4 py-10">
         <p className="text-sm text-slate-600">
@@ -164,7 +134,7 @@ async function HomeBelowHero({
       </Suspense>
 
       <HomeFlowerGuideCta />
-      <HomeSeoSection countryIso={deliveryCountry} />
+      <HomeSeoSection countryIso={indexableCountry} />
 
       <section className="max-w-7xl mx-auto px-4 py-12">
         <div className="rounded-3xl bg-gradient-to-br from-primary via-[#9e2d55] to-accent text-white p-8 sm:p-12 text-center shadow-lg shadow-primary/20">
@@ -202,33 +172,20 @@ async function HomeBelowHero({
       </section>
 
       <section className="max-w-3xl mx-auto px-4 pb-16">
-        <h2 className="text-xl font-bold text-primary mb-4">Frequently asked questions</h2>
-        <FaqAccordion items={faqsForCountry(deliveryCountry)} />
         <Suspense fallback={null}>
-          <HomeCategoryCount country={deliveryCountry} />
+          <HomeCategoryCount />
         </Suspense>
       </section>
     </>
   );
 }
 
-async function HomeCategoryCarouselBlock({ country }: { country: string }) {
-  let categoryTiles = buildHomeCategoryTiles([], []);
+async function HomeCategoryCount() {
   try {
-    const catalog = await getHomepageCatalogData(country);
-    categoryTiles = catalog.tiles;
-  } catch {
-    categoryTiles = buildHomeCategoryTiles([], []);
-  }
-  return <HomeCategoryCarousel tiles={categoryTiles} />;
-}
-
-async function HomeCategoryCount({ country }: { country: string }) {
-  try {
-    const catalog = await getHomepageCatalogData(country);
-    if (catalog.categoryCount <= 0) return null;
+    const categoryCount = await loadHomepageCategoryCount();
+    if (categoryCount == null) return null;
     return (
-      <p className="text-xs text-slate-400 mt-8">{catalog.categoryCount} categories available in catalog</p>
+      <p className="text-xs text-slate-400 mt-8">{categoryCount} categories available in catalog</p>
     );
   } catch {
     return null;
@@ -259,20 +216,14 @@ function HomeReviewsFallback() {
   );
 }
 
-/** Reserves the category row under the hero so the banner does not jump when the catalog streams in. */
+/** Product-row placeholders while the delivery country and catalog resolve. */
 function HomeBelowHeroFallback() {
   return (
-    <section className="bg-[#f7f1ea] border-y border-[#eadfd8]" aria-hidden>
-      <div className="max-w-7xl mx-auto px-4 py-8 sm:py-10 animate-pulse">
-        <div className="mx-auto mb-5 h-8 w-64 max-w-full rounded bg-white/80" />
-        <div className="flex gap-4 sm:gap-5 overflow-hidden">
-          {Array.from({ length: 8 }, (_, i) => (
-            <div key={i} className="shrink-0 w-[112px] sm:w-[132px]">
-              <div className="aspect-square rounded-2xl bg-white ring-1 ring-[#eadfd8]" />
-              <div className="mx-auto mt-2 h-4 w-16 rounded bg-white/80" />
-            </div>
-          ))}
-        </div>
+    <section className="max-w-7xl mx-auto px-4 py-10" aria-hidden>
+      <div className="space-y-10">
+        {HOME_PRODUCT_SECTIONS.map((section) => (
+          <HomeCategoryProductRowFallback key={section.slug} title={section.title} />
+        ))}
       </div>
     </section>
   );

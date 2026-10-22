@@ -2,25 +2,44 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useApiClient, useAuth } from "@/lib/auth-context";
 import type { Product } from "@blossompot/shared";
 import {
+  CATALOG_VENDOR_SLUGS,
   DEFAULT_PRODUCT_INVENTORY,
-  fulfillmentVendorSlug,
+  assignProductCategories,
+  defaultCatalogVendor,
   LOW_STOCK_THRESHOLD,
   getUnitsSold,
   isFastSelling,
   productHasShippingDims,
 } from "@blossompot/shared";
-import { formatMoney, paginate, downloadCsv } from "@/lib/admin-utils";
+import { optionalShippingDims } from "@/lib/admin-product-dims";
+import { mergeSavedAdminProduct } from "@/lib/admin-product-row";
+import {
+  adminVendorFilterOptions,
+  filterAdminProducts,
+  type AdminVendorFilterOption,
+} from "@/lib/admin-product-vendor-filter";
+import { ProductCategoryFields } from "@/components/admin/ProductCategoryFields";
+import { formatMoney, paginate } from "@/lib/admin-utils";
 import { TableControls } from "@/components/admin/TableControls";
 
 export default function AdminProductsPage() {
   const apiClient = useApiClient();
   const { token } = useAuth();
-  const vendorFilter = useSearchParams().get("vendor") ?? "";
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const vendorFilter = (searchParams.get("vendor") ?? "").trim().toLowerCase();
   const [products, setProducts] = useState<Product[]>([]);
+  const [vendorOptions, setVendorOptions] = useState<AdminVendorFilterOption[]>(() =>
+    CATALOG_VENDOR_SLUGS.map((slug) => ({
+      vendorSlug: slug,
+      vendorName: defaultCatalogVendor(slug).vendorName,
+    }))
+  );
   const [categories, setCategories] = useState<{ slug: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -34,6 +53,7 @@ export default function AdminProductsPage() {
     description: "",
     price: "",
     categorySlug: "",
+    additionalCategorySlugs: [] as string[],
     inventory: String(DEFAULT_PRODUCT_INVENTORY),
     currency: "USD" as "USD" | "INR",
     sku: "",
@@ -45,9 +65,7 @@ export default function AdminProductsPage() {
     widthIn: "",
     heightIn: "",
   });
-  const [csv, setCsv] = useState("");
   const [message, setMessage] = useState("");
-  const [lastSlug, setLastSlug] = useState("");
   const [uploadingSlug, setUploadingSlug] = useState<string | null>(null);
   const [deletingImage, setDeletingImage] = useState<string | null>(null);
   const [tab, setTab] = useState<"list" | "create">("list");
@@ -57,7 +75,7 @@ export default function AdminProductsPage() {
     setLoading(true);
     const qs =
       sampleFilter === "all" ? "" : `?sample=${sampleFilter === "sample" ? "true" : "false"}`;
-    Promise.all([
+    return Promise.all([
       apiClient<{ products: Product[]; meta?: { sampleCount: number; realCount: number } }>(
         `/admin/products${qs}`
       ),
@@ -77,19 +95,39 @@ export default function AdminProductsPage() {
   }, [load]);
 
   useEffect(() => {
+    apiClient<{ vendors: Array<{ vendorSlug: string; vendorName: string }> }>("/admin/catalog-vendors")
+      .then((data) => setVendorOptions(adminVendorFilterOptions(data.vendors)))
+      .catch(() => {
+        /* Built-in names stay available when the vendor list cannot be loaded. */
+      });
+  }, [apiClient]);
+
+  useEffect(() => {
     apiClient<{ count: number }>("/admin/shipping/products-missing-dims")
       .then((d) => setMissingDimsCount(d.count))
       .catch(() => setMissingDimsCount(0));
   }, [apiClient, products]);
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return products.filter((p) => {
-      if (vendorFilter && fulfillmentVendorSlug(p) !== vendorFilter) return false;
-      if (!q) return true;
-      return p.name.toLowerCase().includes(q) || p.slug.includes(q) || p.sku?.toLowerCase().includes(q);
-    });
-  }, [products, search, vendorFilter]);
+  const filtered = useMemo(
+    () => filterAdminProducts(products, { vendor: vendorFilter, search }),
+    [products, search, vendorFilter]
+  );
+  const vendorChoices = useMemo(() => {
+    if (!vendorFilter || vendorFilter === "all" || vendorOptions.some((vendor) => vendor.vendorSlug === vendorFilter)) {
+      return vendorOptions;
+    }
+    return [...vendorOptions, { vendorSlug: vendorFilter, vendorName: vendorFilter }];
+  }, [vendorOptions, vendorFilter]);
+
+  const setVendorFilter = (slug: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    const next = slug.trim().toLowerCase();
+    if (!next || next === "all") params.delete("vendor");
+    else params.set("vendor", next);
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    setPage(1);
+  };
 
   const { items: pageItems, totalPages, total } = paginate(filtered, page, pageSize);
 
@@ -98,7 +136,8 @@ export default function AdminProductsPage() {
       name: "",
       description: "",
       price: "",
-      categorySlug: categories[0]?.slug ?? "",
+      categorySlug: "",
+      additionalCategorySlugs: [],
       inventory: String(DEFAULT_PRODUCT_INVENTORY),
       currency: "USD",
       sku: "",
@@ -113,69 +152,30 @@ export default function AdminProductsPage() {
     setEditing(null);
   };
 
-  const parseDim = (value: string, label: string): number | null => {
-    const n = parseFloat(value);
-    if (!Number.isFinite(n) || n <= 0) {
-      setMessage(`${label} is required and must be greater than 0.`);
-      return null;
-    }
-    return n;
-  };
-
-  const shippingDimsPayload = () => {
-    const weightOz = parseDim(form.weightOz, "Weight (oz)");
-    if (weightOz == null) return null;
-    const lengthIn = parseDim(form.lengthIn, "Length (in)");
-    if (lengthIn == null) return null;
-    const widthIn = parseDim(form.widthIn, "Width (in)");
-    if (widthIn == null) return null;
-    const heightIn = parseDim(form.heightIn, "Height (in)");
-    if (heightIn == null) return null;
-    return { weightOz, lengthIn, widthIn, heightIn };
-  };
-
-  const createProduct = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const dims = shippingDimsPayload();
-    if (!dims) return;
-    try {
-      const result = await apiClient<{ product: { slug: string } }>("/products", {
-        method: "POST",
-        body: JSON.stringify({
-          name: form.name,
-          description: form.description,
-          price: parseFloat(form.price),
-          compareAtPrice: form.compareAtPrice ? parseFloat(form.compareAtPrice) : undefined,
-          inventory: parseInt(form.inventory, 10),
-          categorySlug: form.categorySlug,
-          currency: form.currency,
-          sku: form.sku || undefined,
-          tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
-          vendorSlug: fulfillmentVendorSlug({
-            sku: form.sku || undefined,
-            tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
-          }),
-          published: form.published,
-          ...dims,
-        }),
-      });
-      setLastSlug(result.product.slug);
-      setMessage(`Product "${form.name}" created!`);
-      resetForm();
-      load();
-      setTab("list");
-    } catch (err) {
-      setMessage(err instanceof Error ? err.message : "Failed");
-    }
-  };
-
   const saveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editing) return;
-    const dims = shippingDimsPayload();
-    if (!dims) return;
+    const dims = optionalShippingDims({
+      weightOz: form.weightOz,
+      lengthIn: form.lengthIn,
+      widthIn: form.widthIn,
+      heightIn: form.heightIn,
+    });
+    if (!dims.ok) {
+      setMessage(dims.message);
+      return;
+    }
+    const categoriesAssigned = assignProductCategories({
+      categorySlug: form.categorySlug,
+      additionalCategorySlugs: form.additionalCategorySlugs,
+      knownSlugs: new Set(categories.map((category) => category.slug)),
+    });
+    if (!categoriesAssigned.ok) {
+      setMessage(categoriesAssigned.error);
+      return;
+    }
     try {
-      await apiClient(`/products/${editing.slug}`, {
+      const saved = await apiClient<{ product: Product }>(`/products/${editing.slug}`, {
         method: "PUT",
         body: JSON.stringify({
           name: form.name,
@@ -183,18 +183,22 @@ export default function AdminProductsPage() {
           price: parseFloat(form.price),
           compareAtPrice: form.compareAtPrice ? parseFloat(form.compareAtPrice) : undefined,
           inventory: parseInt(form.inventory, 10),
-          categorySlug: form.categorySlug,
+          categorySlug: categoriesAssigned.categorySlug,
+          additionalCategorySlugs: categoriesAssigned.additionalCategorySlugs ?? [],
           currency: form.currency,
           sku: form.sku || undefined,
           tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
           published: form.published,
-          ...dims,
+          ...dims.dims,
         }),
       });
       setMessage(`Product "${form.name}" updated.`);
       resetForm();
-      load();
       setTab("list");
+      setProducts((current) => mergeSavedAdminProduct(current, saved.product));
+      void load().finally(() => {
+        setProducts((current) => mergeSavedAdminProduct(current, saved.product));
+      });
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Update failed");
     }
@@ -207,6 +211,7 @@ export default function AdminProductsPage() {
       description: p.description,
       price: String(p.price),
       categorySlug: p.categorySlug,
+      additionalCategorySlugs: p.additionalCategorySlugs ?? [],
       inventory: String(p.inventory),
       currency: p.currency,
       sku: p.sku ?? "",
@@ -233,12 +238,15 @@ export default function AdminProductsPage() {
       return;
     }
     try {
-      await apiClient(`/products/${slug}`, {
+      const saved = await apiClient<{ product: Product }>(`/products/${slug}`, {
         method: "PUT",
         body: JSON.stringify({ inventory: Math.floor(inventory) }),
       });
       setMessage(`Stock updated for ${slug}.`);
-      load();
+      setProducts((current) => mergeSavedAdminProduct(current, saved.product));
+      void load().finally(() => {
+        setProducts((current) => mergeSavedAdminProduct(current, saved.product));
+      });
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Stock update failed");
     }
@@ -275,30 +283,6 @@ export default function AdminProductsPage() {
       });
     } catch {
       /* non-blocking */
-    }
-  };
-
-  const bulkUpload = async () => {
-    const lines = csv.trim().split("\n");
-    if (lines.length < 2) {
-      setMessage("CSV needs header + at least one row");
-      return;
-    }
-    const headers = lines[0].split(",").map((h) => h.trim());
-    const rows = lines.slice(1).map((line) => {
-      const values = line.split(",").map((v) => v.trim());
-      return Object.fromEntries(headers.map((h, i) => [h, values[i]]));
-    });
-
-    try {
-      const result = await apiClient<{ created: number; errors: unknown[] }>("/products/bulk", {
-        method: "POST",
-        body: JSON.stringify({ rows }),
-      });
-      setMessage(`Bulk upload: ${result.created} created, ${result.errors.length} errors`);
-      load();
-    } catch (err) {
-      setMessage(err instanceof Error ? err.message : "Bulk upload failed");
     }
   };
 
@@ -472,24 +456,17 @@ export default function AdminProductsPage() {
             className="w-full border rounded-lg px-3 py-2"
           />
         </label>
-        <label className="block">
-          <span className="block text-sm font-medium text-slate-700 mb-1">
-            Category <span className="text-red-600">*</span>
-          </span>
-          <select
-            value={form.categorySlug}
-            onChange={(e) => setForm({ ...form, categorySlug: e.target.value })}
-            className="w-full border rounded-lg px-3 py-2"
-            required
-          >
-            <option value="">Select category</option>
-            {categories.map((c) => (
-              <option key={c.slug} value={c.slug}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="space-y-3 sm:col-span-2">
+          <ProductCategoryFields
+            categories={categories}
+            categorySlug={form.categorySlug}
+            additionalCategorySlugs={form.additionalCategorySlugs}
+            onCategorySlug={(categorySlug) => setForm({ ...form, categorySlug })}
+            onAdditionalCategorySlugs={(additionalCategorySlugs) =>
+              setForm({ ...form, additionalCategorySlugs })
+            }
+          />
+        </div>
         <label className="block">
           <span className="block text-sm font-medium text-slate-700 mb-1">Currency</span>
           <select
@@ -503,47 +480,39 @@ export default function AdminProductsPage() {
         </label>
       </div>
       <div>
-        <p className="text-sm font-medium text-slate-700 mb-2">Shipping dimensions (required)</p>
+        <p className="text-sm font-medium text-slate-700 mb-2">Shipping dimensions</p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <input
-            placeholder="Weight (oz) *"
+            placeholder="Weight (oz)"
             type="number"
-            step="0.1"
-            min="0.1"
+            step="any"
             value={form.weightOz}
             onChange={(e) => setForm({ ...form, weightOz: e.target.value })}
             className="border rounded-lg px-3 py-2"
-            required
           />
           <input
-            placeholder="Length (in) *"
+            placeholder="Length (in)"
             type="number"
-            step="0.1"
-            min="0.1"
+            step="any"
             value={form.lengthIn}
             onChange={(e) => setForm({ ...form, lengthIn: e.target.value })}
             className="border rounded-lg px-3 py-2"
-            required
           />
           <input
-            placeholder="Width (in) *"
+            placeholder="Width (in)"
             type="number"
-            step="0.1"
-            min="0.1"
+            step="any"
             value={form.widthIn}
             onChange={(e) => setForm({ ...form, widthIn: e.target.value })}
             className="border rounded-lg px-3 py-2"
-            required
           />
           <input
-            placeholder="Height (in) *"
+            placeholder="Height (in)"
             type="number"
-            step="0.1"
-            min="0.1"
+            step="any"
             value={form.heightIn}
             onChange={(e) => setForm({ ...form, heightIn: e.target.value })}
             className="border rounded-lg px-3 py-2"
-            required
           />
         </div>
         <p className="text-xs text-slate-500 mt-1">Used for USPS rate quotes and label purchase.</p>
@@ -643,11 +612,32 @@ export default function AdminProductsPage() {
               Remove all sample products
             </button>
           </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="text-sm text-slate-600" htmlFor="admin-product-vendor">
+              Vendor
+            </label>
+            <select
+              id="admin-product-vendor"
+              value={vendorFilter && vendorFilter !== "all" ? vendorFilter : ""}
+              onChange={(event) => setVendorFilter(event.target.value)}
+              className="border rounded-lg bg-white px-3 py-2 text-sm"
+            >
+              <option value="">All vendors</option>
+              {vendorChoices.map((vendor) => (
+                <option key={vendor.vendorSlug} value={vendor.vendorSlug}>
+                  {vendor.vendorName}
+                </option>
+              ))}
+            </select>
+          </div>
           <input
             type="search"
             placeholder="Search by name, slug, SKU…"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             className="w-full border rounded-lg px-3 py-2 text-sm"
           />
           <TableControls
@@ -871,86 +861,16 @@ export default function AdminProductsPage() {
         </>
       )}
 
-      {tab === "create" && (
+      {tab === "create" && editing && (
         <div className="space-y-8">
-          <ProductForm
-            onSubmit={editing ? saveEdit : createProduct}
-            submitLabel={editing ? "Save changes" : "Create product"}
-          />
-          {!editing && lastSlug && (
-            <div className="p-4 border rounded-lg bg-white">
-              <p className="text-sm mb-2">
-                Upload images for <code>{lastSlug}</code>
-              </p>
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                disabled={uploadingSlug !== null}
-                onChange={(e) => {
-                  if (e.currentTarget.files?.length) {
-                    void uploadImages(e.currentTarget.files, lastSlug);
-                    e.currentTarget.value = "";
-                  }
-                }}
-              />
-            </div>
-          )}
-          <div>
-            <h2 className="text-xl font-bold mb-2">Bulk Upload (CSV)</h2>
-            <p className="text-sm text-slate-600 mb-3">
-              Download the sample template, fill in your products, then paste or upload the CSV below.
-              New catalog products are added from Add Product so the selected vendor owns the vendor slug.
-            </p>
-            <button
-              type="button"
-              onClick={() =>
-                downloadCsv("blossompot-product-import-template.csv", [
-                  [
-                    "name",
-                    "description",
-                    "price",
-                    "compareAtPrice",
-                    "currency",
-                    "categorySlug",
-                    "sku",
-                    "inventory",
-                    "tags",
-                    "seoTitle",
-                    "seoDescription",
-                    "published",
-                  ],
-                  [
-                    "Premium Mixed Bouquet",
-                    "Fresh seasonal flowers arranged for gifting",
-                    "12.99",
-                    "15.99",
-                    "USD",
-                    "mixed-bouquet-classic",
-                    "RAK-001",
-                    "50",
-                    "flowers,birthday",
-                    "Premium Mixed Bouquet | BlossomPot",
-                    "Shop premium flowers with worldwide delivery",
-                    "true",
-                  ],
-                ])
-              }
-              className="text-sm text-nav border border-nav px-4 py-2 rounded-lg hover:bg-nav/5 mb-4"
-            >
-              Download sample CSV template
-            </button>
-            <textarea
-              value={csv}
-              onChange={(e) => setCsv(e.target.value)}
-              rows={6}
-              className="w-full border rounded-lg px-3 py-2 font-mono text-sm"
-              placeholder={"name,description,price,categorySlug,inventory,currency,sku\n..."}
-            />
-            <button onClick={bulkUpload} className="mt-2 bg-slate-800 text-white px-6 py-2 rounded-lg">
-              Upload CSV
-            </button>
-          </div>
+          <ProductForm onSubmit={saveEdit} submitLabel="Save changes" />
+          <p className="text-sm text-slate-600">
+            New products are added from{" "}
+            <Link href="/admin/products/new" className="font-medium text-nav underline">
+              Add Product
+            </Link>
+            . That import previews the whole batch and does not overwrite existing products.
+          </p>
         </div>
       )}
     </div>

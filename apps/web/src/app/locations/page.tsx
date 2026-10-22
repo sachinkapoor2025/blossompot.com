@@ -33,6 +33,7 @@ const usaExamples = [
 export default function LocationsHubPage() {
   const inlineLinks = marketingPageInlineLinks.locations;
   const usedHrefs = new Set<string>();
+  const usedPhrases = new Set<string>();
   const markets = MARKET_SLUGS.map((slug) => getInternationalLocation(slug)).filter(
     (m): m is NonNullable<typeof m> => Boolean(m && isInternationalIndexable(m))
   );
@@ -57,7 +58,7 @@ export default function LocationsHubPage() {
         {applyInlineLinks(
           "BlossomPot’s live delivery destination is the United States — all 50 states, DC, and Puerto Rico. Shoppers in Canada, Australia, the United Kingdom, and other European countries can order on this site and send flowers, cakes, and hampers to a US address. We do not invent local florist shops abroad. Country and city guides below explain how ordering works from those places, with unique time-zone and checkout notes. Thin or unfinished markets stay unpublished.",
           inlineLinks,
-          { usedHrefs, currentPath: "/locations", max: 4 }
+          { usedHrefs, usedPhrases, currentPath: "/locations" }
         )}
       </p>
 
@@ -66,7 +67,7 @@ export default function LocationsHubPage() {
         <ul className="grid gap-4 sm:grid-cols-2">
           {markets.map((market) => (
             <li key={market.slug} className="rounded-xl border border-slate-200 bg-white p-4">
-              <h3 className="font-semibold text-primary mb-1">
+              <h3 className="font-display font-semibold text-primary mb-1">
                 <Link href={internationalPath(market)} className="hover:underline">
                   {market.label}
                 </Link>
@@ -112,42 +113,6 @@ export default function LocationsHubPage() {
               </Link>
             </li>
           ))}
-        </ul>
-      </section>
-
-      <section className="mb-10">
-        <h2 className="text-xl font-bold text-primary mb-3">Products and help</h2>
-        <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
-          <li>
-            <Link href="/flowers" className="text-nav hover:underline">
-              Flowers
-            </Link>
-          </li>
-          <li>
-            <Link href="/cakes" className="text-nav hover:underline">
-              Cakes
-            </Link>
-          </li>
-          <li>
-            <Link href="/gift-hampers" className="text-nav hover:underline">
-              Hampers
-            </Link>
-          </li>
-          <li>
-            <Link href="/shipping" className="text-nav hover:underline">
-              Shipping
-            </Link>
-          </li>
-          <li>
-            <Link href="/faq" className="text-nav hover:underline">
-              FAQ
-            </Link>
-          </li>
-          <li>
-            <Link href="/contact" className="text-nav hover:underline">
-              Contact
-            </Link>
-          </li>
         </ul>
       </section>
 

@@ -6,6 +6,7 @@
  */
 import { PutCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { productKeys, categoryKeys, DEFAULT_PRODUCT_INVENTORY } from "@blossompot/shared";
+import { insertCatalogProduct } from "./catalog-sku-write";
 import { docClient, PRODUCTS_TABLE, now } from "./db";
 import catalogJson from "../data/blossompot-catalog.json";
 
@@ -159,7 +160,7 @@ export async function ensureUsarakhiCatalogProductInDb(
     updatedAt: ts,
   };
 
-  await docClient.send(new PutCommand({ TableName: PRODUCTS_TABLE, Item: item }));
+  await insertCatalogProduct(item);
   console.log(`upserted blossompot catalog product ${slug}`);
   return item;
 }

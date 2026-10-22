@@ -9,8 +9,10 @@ import {
   enabledCatalogCountries,
   isCatalogCountryEnabled,
   normalizeCatalogCountries,
+  normalizeDefaultCountry,
   readStoredCatalogCountries,
   noProductsForDeliveryCountryMessage,
+  resolveDefaultShoppingCountry,
   resolveEnabledShoppingCountry,
   shoppingCountryRejection,
   catalogCountriesForStorefront,
@@ -370,6 +372,76 @@ describe("customer country resolution", () => {
       vendorCoversShoppingCountryWithoutArea(vendor, "GB", "denied"),
       false
     );
+  });
+
+  it("uses an explicit enabled default country", () => {
+    const stored = [
+      { countryCode: "US", enabled: true },
+      { countryCode: "GB", enabled: true },
+    ];
+    assert.equal(resolveDefaultShoppingCountry(stored, "GB"), "GB");
+    assert.deepEqual(normalizeDefaultCountry("gb", stored), { defaultCountry: "GB" });
+  });
+
+  it("falls back to USA when an older row has no default country", () => {
+    const stored = readStoredCatalogCountries({
+      countries: [
+        { countryCode: "US", enabled: true },
+        { countryCode: "GB", enabled: true },
+      ],
+      updatedAt: "2026-10-05T00:00:00.000Z",
+    });
+    assert.equal(stored.source, "config");
+    assert.equal(stored.defaultCountry, "US");
+    assert.equal(resolveDefaultShoppingCountry(stored.countries, null), "US");
+  });
+
+  it("uses the UK when it is the only enabled country and no default is stored", () => {
+    const stored = [
+      { countryCode: "US", enabled: false },
+      { countryCode: "GB", enabled: true },
+    ];
+    assert.equal(resolveDefaultShoppingCountry(stored, undefined), "GB");
+    assert.deepEqual(normalizeDefaultCountry("", stored), { defaultCountry: "GB" });
+    const read = readStoredCatalogCountries({
+      countries: stored,
+      updatedAt: "2026-10-05T00:00:00.000Z",
+    });
+    assert.equal(read.defaultCountry, "GB");
+    assert.equal(isCatalogCountryEnabled(read.countries, "US"), false);
+  });
+
+  it("does not return a disabled default country", () => {
+    const stored = [
+      { countryCode: "US", enabled: false },
+      { countryCode: "GB", enabled: true },
+    ];
+    assert.equal(resolveDefaultShoppingCountry(stored, "US"), "GB");
+    assert.deepEqual(normalizeDefaultCountry("US", stored), { error: '"US" is not an enabled country.' });
+    const read = readStoredCatalogCountries({
+      countries: stored,
+      defaultCountry: "US",
+      updatedAt: "2026-10-05T00:00:00.000Z",
+    });
+    assert.equal(read.defaultCountry, "GB");
+  });
+
+  it("keeps the USA-only default when the stored config is missing or invalid", () => {
+    assert.equal(readStoredCatalogCountries(null).defaultCountry, "US");
+    assert.equal(readStoredCatalogCountries({ countries: "nope" }).defaultCountry, "US");
+    assert.equal(
+      resolveDefaultShoppingCountry(
+        [
+          { countryCode: "US", enabled: false },
+          { countryCode: "GB", enabled: false },
+        ],
+        "US"
+      ),
+      null
+    );
+    assert.deepEqual(normalizeDefaultCountry("US", [{ countryCode: "US", enabled: false }]), {
+      error: "At least one country must be enabled.",
+    });
   });
 
   it("shows nothing for Serbia until a vendor delivers there", () => {

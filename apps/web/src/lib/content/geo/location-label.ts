@@ -112,11 +112,7 @@ export function geoPageDescription(geo: GeoLocation): string {
 }
 
 export function geoPageTitle(geo: GeoLocation): string {
-  const place = locationLabel(geo);
-  if (geo.type === "state" || geo.region === "state") {
-    return `Send Flowers, Cakes & Gifts to ${place} | Same-Day Delivery | BlossomPot`;
-  }
-  return `Send Flowers, Cakes & Gifts to ${place} | Same-Day | BlossomPot`;
+  return `Send Flowers, Cakes & Gifts to ${locationLabel(geo)} | BlossomPot`;
 }
 
 export function geoPageH1(geo: GeoLocation): string {

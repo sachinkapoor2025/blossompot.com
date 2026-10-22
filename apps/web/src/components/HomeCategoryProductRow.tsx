@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { categoryHref } from "@/lib/category-urls";
-import { loadProductsByCategory, toListingCardProducts } from "@/lib/product-loader";
-import { getCatalogProductsByCategory } from "@/lib/catalog-fallback";
-import { productVisibleForDeliveryCountry, type Product } from "@blossompot/shared";
+import { loadHomeCategoryProducts } from "@/lib/product-loader";
+import { CatalogLoadError } from "@/components/CatalogLoadError";
 import { HomeCategoryProductScroller } from "@/components/HomeCategoryProductScroller";
-import { isRakhiRelatedProduct } from "@/lib/rakhi-filter";
+import {
+  HOME_PRODUCT_ROW_LIMIT,
+  productsForHomepageRow,
+  toHomepageRowCards,
+} from "@/lib/homepage-row";
 
-export const HOME_PRODUCT_ROW_LIMIT = 8;
+export { HOME_PRODUCT_ROW_LIMIT };
 
 export const HOME_PRODUCT_SECTIONS = [
   { slug: "flowers", title: "Flowers" },
@@ -16,16 +19,6 @@ export const HOME_PRODUCT_SECTIONS = [
 ] as const;
 
 const CARD_WIDTH = "w-[10.75rem] sm:w-[13rem] lg:w-[15rem]";
-
-function productsForHomeSection(slug: string, products: Product[]): Product[] {
-  const withoutRakhi = products.filter(
-    (product) => product.categorySlug !== "rakhi-hampers" && !isRakhiRelatedProduct(product)
-  );
-  if (slug === "gift-hampers") {
-    return withoutRakhi.filter((product) => product.categorySlug === "gift-hampers");
-  }
-  return withoutRakhi;
-}
 
 export function HomeCategoryProductRowFallback({ title }: { title: string }) {
   return (
@@ -56,35 +49,16 @@ export async function HomeCategoryProductRow({
 }) {
   const headingId = `home-category-${slug}`;
   const showMoreHref = categoryHref(slug);
-  let error = "";
-  let products: Awaited<ReturnType<typeof loadProductsByCategory>> = [];
-
-  try {
-    products = await loadProductsByCategory(slug, country);
-  } catch (err) {
-    error = err instanceof Error ? err.message : "This category is temporarily unavailable.";
-  }
-  if (products.length === 0 && !error) {
-    products = getCatalogProductsByCategory(slug).filter((product) =>
-      productVisibleForDeliveryCountry(product, country)
-    );
-  }
-  products = productsForHomeSection(slug, products);
-
-  const cards = toListingCardProducts(products.slice(0, HOME_PRODUCT_ROW_LIMIT));
+  const loaded = await loadHomeCategoryProducts(slug, country);
+  const cards = toHomepageRowCards(productsForHomepageRow(slug, loaded));
 
   return (
     <section aria-labelledby={headingId}>
       <h2 id={headingId} className="mb-4 text-2xl font-bold text-primary">
         {title}
       </h2>
-      {error ? (
-        <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-          {error}{" "}
-          <Link href={showMoreHref} className="font-semibold text-nav hover:underline">
-            Show more
-          </Link>
-        </p>
+      {loaded.state === "error" ? (
+        <CatalogLoadError message="We couldn't load this category right now. Please try again." />
       ) : cards.length === 0 ? (
         <p className="text-sm text-slate-600">
           No gifts in this category for this delivery country.{" "}

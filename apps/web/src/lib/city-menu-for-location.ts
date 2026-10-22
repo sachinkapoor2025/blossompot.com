@@ -74,6 +74,29 @@ export function cityMenuForCountry(countryCode: string | null | undefined): City
   };
 }
 
+const US_FOOTER_PRIORITY = ["california", "florida", "new-york", "texas", "chicago", "dallas"] as const;
+
+function citySortLabel(link: CityNavLink): string {
+  return link.menuLabel ?? link.label;
+}
+
+/** Collapsed footer shows a short priority list. Expanded shows every current link once, A–Z. */
+export function footerCityColumns(links: readonly CityNavLink[], countryIso: string): {
+  preview: CityNavLink[];
+  all: CityNavLink[];
+} {
+  const all = [...links].sort((a, b) => citySortLabel(a).localeCompare(citySortLabel(b)));
+  const iso = countryIso.trim().toUpperCase();
+  if (iso === "US") {
+    const preview = US_FOOTER_PRIORITY.flatMap((slug) => {
+      const match = links.find((link) => link.slug === slug);
+      return match ? [match] : [];
+    });
+    return { preview, all };
+  }
+  return { preview: links.slice(0, 6), all };
+}
+
 export function filterCityMenuLinks(links: readonly CityNavLink[], query: string): CityNavLink[] {
   const q = query.trim().toLowerCase();
   if (!q) return [...links];

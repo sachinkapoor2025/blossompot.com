@@ -112,7 +112,6 @@ ${categories.join("\n")}
 - **Flower delivery Canada:** ${siteUrl}/flower-delivery-canada
 - **Flower delivery Australia:** ${siteUrl}/flower-delivery-australia
 - **Flower delivery UAE:** ${siteUrl}/flower-delivery-uae
-- **Same-day delivery:** ${siteUrl}/same-day-delivery
 - **Shipping & delivery:** ${siteUrl}/shipping
 - **FAQ:** ${siteUrl}/faq
 - **Blog:** ${siteUrl}/blog

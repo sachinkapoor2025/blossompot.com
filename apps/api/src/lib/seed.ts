@@ -2,6 +2,7 @@ import { readFileSync, existsSync } from "fs";
 import { join } from "path";
 import { PutCommand } from "@aws-sdk/lib-dynamodb";
 import { productKeys, categoryKeys, configKeys, defaultPaymentConfig } from "@blossompot/shared";
+import { insertCatalogProduct } from "./catalog-sku-write";
 import { docClient, PRODUCTS_TABLE, CONFIG_TABLE, now } from "./db";
 import { getMemoryStoreSize } from "./memory-store";
 
@@ -62,21 +63,16 @@ export async function seedIfEmpty() {
   }
 
   for (const p of catalog.products) {
-    await docClient.send(
-      new PutCommand({
-        TableName: PRODUCTS_TABLE,
-        Item: {
-          ...p,
-          published: true,
-          PK: productKeys.pk(p.slug),
-          SK: productKeys.sk(),
-          GSI1PK: productKeys.gsi1pk(p.categorySlug),
-          GSI1SK: productKeys.gsi1sk(p.slug),
-          createdAt: timestamp,
-          updatedAt: timestamp,
-        },
-      })
-    );
+    await insertCatalogProduct({
+      ...p,
+      published: true,
+      PK: productKeys.pk(p.slug),
+      SK: productKeys.sk(),
+      GSI1PK: productKeys.gsi1pk(p.categorySlug),
+      GSI1SK: productKeys.gsi1sk(p.slug),
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
   }
 
   await docClient.send(

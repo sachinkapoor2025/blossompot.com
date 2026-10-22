@@ -8,7 +8,7 @@ export function FaqAccordion({ items }: { items: readonly FaqItem[] }) {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <div className="space-y-3">
+    <div className="faq-accordion space-y-3">
       {items.map((faq, index) => {
         const expanded = open === index;
         const panelId = `faq-panel-${index}`;

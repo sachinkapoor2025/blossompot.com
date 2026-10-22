@@ -224,6 +224,54 @@ const FLOWER_DELIVERY_PATH_ISO: Record<string, string> = {
   "/flower-delivery-uae": "AE",
 };
 
+const FLOWER_DELIVERY_ISO_PATH: Record<string, string> = Object.fromEntries(
+  Object.entries(FLOWER_DELIVERY_PATH_ISO).map(([path, iso]) => [iso, path])
+);
+
+/** Existing flower-delivery page for an ISO, or null when that country has no such page. */
+export function flowerDeliveryPathForIso(countryIso: string): string | null {
+  return FLOWER_DELIVERY_ISO_PATH[countryIso.trim().toUpperCase()] ?? null;
+}
+
+/**
+ * Country named by a shopping SEO URL (`/flowers-to-uk`, `/gifts-to-uk`, `/flower-delivery-uk`).
+ * International ordering guides and USA city/state pages are not shopping URLs.
+ */
+export function explicitShoppingSeoCountry(pathname: string): string | null {
+  const path = normalizePathname(pathname);
+  if (FLOWER_DELIVERY_PATH_ISO[path]) return FLOWER_DELIVERY_PATH_ISO[path];
+  return parseLocationShopPath(path)?.countryIso ?? null;
+}
+
+/** A shopping SEO URL is available only when its country is globally enabled. */
+export function shoppingSeoCountryStatus(
+  pathname: string,
+  enabledCodes: readonly string[] | null
+): "not-shopping" | "enabled" | "unavailable" {
+  const iso = explicitShoppingSeoCountry(pathname);
+  if (!iso) return "not-shopping";
+  const enabled = new Set((enabledCodes ?? []).map((code) => code.trim().toUpperCase()));
+  return enabled.has(iso) ? "enabled" : "unavailable";
+}
+
+/** Category, catalog, and flower-delivery paths for countries that are enabled now. */
+export function shoppingCountrySitemapPaths(
+  enabledIsos: readonly string[],
+  categorySlugs: readonly string[]
+): string[] {
+  const enabled = [
+    ...new Set(enabledIsos.map((iso) => iso.trim().toUpperCase()).filter((iso) => /^[A-Z]{2}$/.test(iso))),
+  ];
+  const paths: string[] = [];
+  for (const iso of enabled) {
+    for (const slug of categorySlugs) paths.push(categoryLocationHref(slug, iso));
+    paths.push(giftsCatalogLocationHref(iso));
+    const flower = flowerDeliveryPathForIso(iso);
+    if (flower) paths.push(flower);
+  }
+  return paths;
+}
+
 /** Country of a country landing, location hub, or shop URL. */
 export function countryIsoFromPathname(pathname: string, searchCountry?: string | null): string | null {
   const path = normalizePathname(pathname);
@@ -424,6 +472,10 @@ export function isLocationUrlExemptPath(pathname: string): boolean {
 /** Map the current shop path to the location-aware (or plain) equivalent. */
 export function shopPathForLocation(pathname: string, countryIso: string | null): string {
   const p = normalizePathname(pathname);
+  if (FLOWER_DELIVERY_PATH_ISO[p]) {
+    if (!countryIso) return p;
+    return flowerDeliveryPathForIso(countryIso) ?? p;
+  }
   if (isLocationUrlExemptPath(p)) return p;
 
   const parsed = parseLocationShopPath(p);
@@ -454,6 +506,9 @@ export function preserveShopQuery(path: string, search: string): string {
 }
 
 export const PRIMARY_LOCATION_SITEMAP_ISOS = ["US", "GB", "CA", "AU", "AE"] as const;
+
+/** Request header middleware sets after reading enabled countries. Not trusted from the client. */
+export const ENABLED_SHOPPING_COUNTRIES_HEADER = "x-bp-enabled-countries";
 
 /** Country ISO if `/gifts-to-{slug}` is a shop catalog URL, not a city/state SEO page. */
 export function giftsCatalogCountryIso(locationSlug: string): string | null {

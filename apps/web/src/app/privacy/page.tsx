@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { site } from "@/lib/site";
+import { marketingPageInlineLinks } from "@/lib/content/page-inline-links";
+import { applyInlineLinks } from "@/lib/inline-links";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
@@ -10,6 +11,11 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default function PrivacyPage() {
+  const inlineLinks = marketingPageInlineLinks.privacy;
+  const usedHrefs = new Set<string>();
+  const usedPhrases = new Set<string>();
+  const linkOpts = { usedHrefs, usedPhrases, currentPath: "/privacy" };
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
       <h1 className="text-3xl font-bold text-primary mb-6">Privacy Policy</h1>
@@ -20,7 +26,7 @@ export default function PrivacyPage() {
         </p>
         <h2 className="text-xl font-bold text-primary">Information we collect</h2>
         <p>
-          When you shop or contact us, we may collect your name, email, phone number, shipping address, order details,
+          When you {applyInlineLinks("shop or contact us", inlineLinks, linkOpts)}, we may collect your name, email, phone number, {applyInlineLinks("shipping", inlineLinks, linkOpts)} address, order details,
           and payment status from our payment partners (Stripe or Razorpay). We do not store full card numbers.
         </p>
         <h2 className="text-xl font-bold text-primary">How we use information</h2>
@@ -44,11 +50,6 @@ export default function PrivacyPage() {
           .
         </p>
         <p className="text-slate-500 text-sm">Last updated: October 2026</p>
-        <p>
-          <Link href="/" className="text-nav font-semibold hover:underline">
-            ← Back to home
-          </Link>
-        </p>
       </div>
     </div>
   );

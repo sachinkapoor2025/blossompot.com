@@ -3,7 +3,7 @@
  * Each domain has its own table; builders below are grouped per table.
  */
 
-// ---- products table (products + categories) ----
+// ---- products table (products + categories + combos) ----
 export const productKeys = {
   pk: (slug: string) => `PRODUCT#${slug}`,
   sk: () => "META" as const,
@@ -20,6 +20,16 @@ export const categoryKeys = {
     `${String(Math.max(0, sortOrder || 0)).padStart(6, "0")}#${slug}`,
 };
 
+export const comboKeys = {
+  pk: (slug: string) => `COMBO#${slug}`,
+  sk: () => "META" as const,
+  /** GSI1: list combos without a table Scan. Same partition style as categories. */
+  gsi1pk: () => "ENTITY#COMBO" as const,
+  /** Same zero-padded sort order as categoryKeys.gsi1sk. */
+  gsi1sk: (sortOrder: number, slug: string) =>
+    `${String(Math.max(0, sortOrder || 0)).padStart(6, "0")}#${slug}`,
+};
+
 /** FNP USA import history in the products table. One META item plus one item per row. */
 export const importBatchKeys = {
   pk: (batchId: string) => `IMPORTBATCH#${batchId}`,
@@ -27,6 +37,15 @@ export const importBatchKeys = {
   rowSk: (row: number) => `ROW#${String(Math.max(0, row)).padStart(6, "0")}`,
   gsi1pk: () => "ENTITY#FNP_IMPORT" as const,
   gsi1sk: (createdAt: string, batchId: string) => `${createdAt}#${batchId}`,
+};
+
+/**
+ * Reservation for one catalog SKU. Written with the product in the same transaction.
+ * Legacy products do not have this row until a later import reserves that SKU.
+ */
+export const productSkuKeys = {
+  pk: (sku: string) => `SKU#${sku.trim().toLowerCase()}`,
+  sk: () => "META" as const,
 };
 
 /** Idempotency pointer for one FNP product URL. */
