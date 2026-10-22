@@ -64,9 +64,6 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
-    // Floor for /_next/image only. Next dev still sends max-age=0; production uses this value.
-    // A file replaced at the same source URL can stay cached for up to a day.
-    minimumCacheTTL: 60 * 60 * 24,
     remotePatterns: [{ protocol: "https", hostname: "**" }],
   },
   async headers() {

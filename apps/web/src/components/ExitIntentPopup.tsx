@@ -21,16 +21,11 @@ import { ConfettiBurst } from "@/components/ConfettiBurst";
 import { PhoneInput } from "@/components/PhoneInput";
 import { phoneCountryErrorMessage, validatePhoneForCountry } from "@/lib/phone-country";
 import { useOptionalDeliveryLocation } from "@/lib/delivery-location-context";
-import {
-  EXIT_INTENT_SHOW_AFTER_MS,
-  EXIT_INTENT_STORAGE_KEY,
-  EXIT_INTENT_TIMER_START_KEY,
-  exitIntentBlockedPath,
-} from "@/lib/exit-intent-timing";
 
-const STORAGE_KEY = EXIT_INTENT_STORAGE_KEY;
-const TIMER_START_KEY = EXIT_INTENT_TIMER_START_KEY;
-const SHOW_AFTER_MS = EXIT_INTENT_SHOW_AFTER_MS;
+const STORAGE_KEY = "blossompot_daily_deal_shown_v20";
+const TIMER_START_KEY = "blossompot_daily_deal_timer_v20";
+/** Wait after first landing before showing Discount of the Day. */
+const SHOW_AFTER_MS = 20_000;
 const SPIN_MS = 4200;
 
 const SEGMENTS = [...DAILY_DEAL_SEGMENTS];
@@ -100,7 +95,9 @@ export function ExitIntentPopup() {
   }, []);
 
   useEffect(() => {
-    if (exitIntentBlockedPath(pathname)) return;
+    if (pathname.startsWith("/admin") || pathname.startsWith("/ses-email") || pathname.startsWith("/checkout")) {
+      return;
+    }
     if (sessionStorage.getItem(STORAGE_KEY)) return;
 
     let startedAt = Number(sessionStorage.getItem(TIMER_START_KEY) || 0);
@@ -118,7 +115,7 @@ export function ExitIntentPopup() {
     const timer = window.setTimeout(() => {
       if (sessionStorage.getItem(STORAGE_KEY)) return;
       const path = window.location.pathname;
-      if (exitIntentBlockedPath(path)) return;
+      if (path.startsWith("/admin") || path.startsWith("/ses-email") || path.startsWith("/checkout")) return;
       sessionStorage.setItem(STORAGE_KEY, "1");
       setOpen(true);
       trackSessionHeartbeat("daily_deal_shown", SHOW_AFTER_MS, path);

@@ -9,9 +9,9 @@ import {
   childLocations,
   internationalJsonLd,
   internationalPath,
+  relatedLocationLinks,
   type ResolvedLocation,
 } from "@/lib/content/geo/international";
-import { relatedLocationLinks } from "@/lib/content/geo/international/related-location-links";
 import { categoryHref } from "@/lib/category-urls";
 import { applyInlineLinks } from "@/lib/inline-links";
 

@@ -14,8 +14,6 @@ export function HomeFlowerGuideCta() {
               width={HUB_HERO.width}
               height={HUB_HERO.height}
               className="absolute inset-0 h-full w-full object-cover"
-              loading="lazy"
-              decoding="async"
             />
           </div>
           <div className="p-8 sm:p-10">
