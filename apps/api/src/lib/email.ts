@@ -33,7 +33,7 @@ const DEFAULT_NOTIFY = "order@blossompot.com";
 const DEFAULT_ORDERS_MAILBOX = "orders@blossompot.com";
 /** Admin inbox for new orders + contact form (comma-separated). */
 const DEFAULT_ADMIN_NOTIFY =
-  "order@blossompot.com,priya.yadav@mydgv.com";
+  "order@blossompot.com,priya.yadav@mydgv.com,dgv@mydgv.com";
 const SITE_NAME = "BlossomPot";
 
 /** order@ = order notifications; orders@ = reminders / high-volume transactional. */

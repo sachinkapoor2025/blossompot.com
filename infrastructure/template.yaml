@@ -186,7 +186,7 @@ Globals:
         SMTP_SECURE: "true"
         SMTP_USER: order@blossompot.com
         SMTP_FROM: order@blossompot.com
-        NOTIFY_EMAIL: order@blossompot.com,priya.yadav@mydgv.com
+        NOTIFY_EMAIL: order@blossompot.com,priya.yadav@mydgv.com,dgv@mydgv.com
         SMTP_PASS: !Ref SmtpPassword
         SITE_URL: https://www.blossompot.com
         SES_AWS_REGION: us-east-1
