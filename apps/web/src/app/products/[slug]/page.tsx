@@ -14,6 +14,7 @@ import { categoryHref } from "@/lib/category-urls";
 import { getCategoryPageSeo } from "@/lib/content/category-seo";
 import {
   productAvailabilityNotice,
+  productPageShowsDetail,
   UNAVAILABLE_PAGE_ALLOWS_PURCHASE,
 } from "@/lib/product-availability-copy";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
@@ -70,7 +71,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const country = await getStorefrontDeliveryCountry();
   const loaded = await loadProductForCountry(slug, country);
-  const p = loaded?.deliverable ? loaded.product : null;
+  const p =
+    loaded &&
+    productPageShowsDetail({
+      deliverable: loaded.deliverable,
+      reason: loaded.reason,
+      visibleForCountry: productVisibleForDeliveryCountry(loaded.product, country),
+    })
+      ? loaded.product
+      : null;
   if (!p) return { title: "Product", robots: { index: false, follow: false } };
   if (!isProductSearchIndexable(p)) {
     return { title: p.name, robots: { index: false, follow: false } };
@@ -111,13 +120,20 @@ async function ProductPageContent({ params }: Props) {
   const product = loaded.product;
   if (!isProductStorefrontVisible(product)) notFound();
 
-  if (!loaded.deliverable || !productVisibleForDeliveryCountry(product, countryIso)) {
+  const visibleForCountry = productVisibleForDeliveryCountry(product, countryIso);
+  if (
+    !productPageShowsDetail({
+      deliverable: loaded.deliverable,
+      reason: loaded.reason,
+      visibleForCountry,
+    })
+  ) {
     const countryName = resolveDeliveryCountry(countryIso).countryName;
     const notice = productAvailabilityNotice({
       productName: product.name,
       countryName,
       reason: loaded.reason,
-      visibleForCountry: productVisibleForDeliveryCountry(product, countryIso),
+      visibleForCountry,
     });
     const available = await loadProducts({ country: countryIso });
     return (
@@ -166,6 +182,7 @@ async function ProductPageContent({ params }: Props) {
         product={product}
         relatedProducts={toListingCardProducts(relatedProducts)}
         deliveryCountryIso={countryIso}
+        purchaseAllowed={loaded.deliverable}
       />
     </>
   );

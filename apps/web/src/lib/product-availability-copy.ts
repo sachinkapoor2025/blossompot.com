@@ -47,6 +47,22 @@ export function availabilityAllowsPurchase(availability?: {
   return !reason || !BLOCKING_AVAILABILITY_REASONS.has(reason);
 }
 
+/**
+ * The product page stays open when the catalog returned the gift and did not
+ * give a blocking reason. A missing availability object is not a block: purchase
+ * stays disabled until the API confirms delivery.
+ */
+export function productPageShowsDetail(input: {
+  deliverable: boolean;
+  reason?: string | null;
+  visibleForCountry: boolean;
+}): boolean {
+  if (!input.visibleForCountry) return false;
+  if (input.deliverable) return true;
+  const reason = input.reason?.trim() ?? "";
+  return !reason || !BLOCKING_AVAILABILITY_REASONS.has(reason);
+}
+
 export function productAvailabilityNotice(input: {
   productName: string;
   countryName: string;

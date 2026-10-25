@@ -107,11 +107,14 @@ export function ProductDetailClient({
   product,
   relatedProducts = [],
   deliveryCountryIso = "US",
+  purchaseAllowed = true,
 }: {
   product: Product;
   relatedProducts?: Product[];
   /** Server-resolved delivery country, same cookie/header source as the header. */
   deliveryCountryIso?: string;
+  /** False when the product API did not confirm delivery. The page still opens. */
+  purchaseAllowed?: boolean;
 }) {
   const flowerGuide = flowerGuideForProduct(product);
   const delivery = useDeliveryLocation();
@@ -141,10 +144,11 @@ export function ProductDetailClient({
   const vendorKey = product.internationalDelivery
     ? VENDOR_GBO
     : fulfillmentVendorSlug(product);
-  const deliverable =
+  const locationDeliverable =
     !locationSet ||
     delivery.checking ||
     delivery.vendorSlugs.includes(vendorKey);
+  const deliverable = purchaseAllowed && locationDeliverable;
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -345,7 +349,9 @@ export function ProductDetailClient({
           <EstimatedDeliveryNote variant="banner" prefix="Estimated delivery:" className="mb-4" />
 
           <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm">
-            {delivery.location ? (
+            {!purchaseAllowed ? (
+              <p className="text-slate-700">Delivery could not be confirmed for this gift yet.</p>
+            ) : delivery.location ? (
               deliverable ? null : (
                 <p className="text-amber-900">
                   This product is currently not available for delivery to {delivery.location.postalDisplay}.

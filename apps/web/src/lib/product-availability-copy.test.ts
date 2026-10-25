@@ -8,6 +8,7 @@ import {
   availabilityAllowsPurchase,
   PRODUCT_AVAILABILITY_REASONS,
   productAvailabilityNotice,
+  productPageShowsDetail,
   UNAVAILABLE_PAGE_ALLOWS_PURCHASE,
 } from "./product-availability-copy";
 
@@ -63,6 +64,36 @@ describe("product detail availability reasons", () => {
 
   it("hides purchase controls on the unavailable product page", () => {
     assert.equal(UNAVAILABLE_PAGE_ALLOWS_PURCHASE, false);
+  });
+
+  it("opens the product page when the API omits availability", () => {
+    assert.equal(
+      productPageShowsDetail({ deliverable: false, reason: undefined, visibleForCountry: true }),
+      true
+    );
+    assert.equal(availabilityAllowsPurchase(null), false);
+  });
+
+  it("keeps a ZIP miss on the unavailable page", () => {
+    assert.equal(
+      productPageShowsDetail({
+        deliverable: false,
+        reason: "no_matching_service_area",
+        visibleForCountry: true,
+      }),
+      false
+    );
+  });
+
+  it("keeps a country mismatch off the product detail", () => {
+    assert.equal(
+      productPageShowsDetail({
+        deliverable: true,
+        reason: "matched",
+        visibleForCountry: false,
+      }),
+      false
+    );
   });
 
   it("rejects a deliverable flag that carries a blocking reason", () => {
