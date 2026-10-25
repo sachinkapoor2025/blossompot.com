@@ -478,10 +478,10 @@ export function Footer() {
               <Link href="/press" className="hover:text-primary underline underline-offset-2">
                 Press
               </Link>
-              <Link href="/llms" className="hover:text-primary underline underline-offset-2">
+              <Link href="/llms" className="hidden">
                 LLMs.txt
               </Link>
-              <Link href="/humans" className="hover:text-primary underline underline-offset-2">
+              <Link href="/humans" className="hidden">
                 Humans.txt
               </Link>
             </p>
