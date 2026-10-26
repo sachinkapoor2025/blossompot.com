@@ -4,7 +4,6 @@ import {
   VENDOR_BLOSSOMPOT,
   VENDOR_ORANGE_COUNTY,
   VENDOR_FNP,
-  CATALOG_VENDOR_SLUGS,
   catalogVendorShoppingStatus,
   defaultBlossompotAreas,
   defaultFnpAreas,
@@ -112,9 +111,12 @@ export async function loadCoverageBundle(): Promise<{
   const marketplace = await listMarketplaceVendors();
   const activeMarket = marketplace.filter((v) => v.status === "active" || v.status === "approved");
   const registry = await loadCatalogVendorRegistry();
-  const catalogActive = CATALOG_VENDOR_SLUGS.filter((slug) =>
-    catalogVendorShoppingStatus(registry.get(slug)!).shoppingAvailable
-  );
+  // Registry rows include admin-created catalog vendors. shoppingAvailable is false
+  // for a disabled or trashed vendor, and for Gift Baskets Overseas when its storefront flag is off.
+  const catalogActive = [...registry.values()]
+    .filter((vendor) => catalogVendorShoppingStatus(vendor).shoppingAvailable)
+    .map((vendor) => vendor.vendorSlug.trim().toLowerCase())
+    .filter((slug) => slug.length > 0);
   const slugs = [...new Set([...catalogActive, ...activeMarket.map((v) => v.vendorSlug)])];
 
   const perVendor = await Promise.all(slugs.map((slug) => listVendorAreas(slug)));
@@ -122,6 +124,8 @@ export async function loadCoverageBundle(): Promise<{
   const storedByVendor = new Set(stored.map((a) => a.vendorSlug));
 
   const areas = [...stored];
+  // Nationwide defaults stay limited to the built-in vendors that already had them.
+  // A custom catalog vendor keeps only the areas stored above.
   if (catalogActive.includes(VENDOR_BLOSSOMPOT) && !storedByVendor.has(VENDOR_BLOSSOMPOT)) {
     areas.push(...defaultBlossompotAreas());
   }
