@@ -44,9 +44,10 @@ function memoryEnv(overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
 function remoteEnv(overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
   return {
     USE_MEMORY_DB: "false",
-    PRODUCTS_TABLE: "configured-products",
-    CONFIG_TABLE: "configured-config",
-    AWS_REGION: "configured-region",
+    ENVIRONMENT: "dev",
+    PRODUCTS_TABLE: "blossompot-products-dev",
+    CONFIG_TABLE: "blossompot-config-dev",
+    AWS_REGION: "us-east-1",
     ...overrides,
   };
 }
@@ -74,12 +75,17 @@ async function putProduct(item: Record<string, unknown>) {
   await docClient.send(new PutCommand({ TableName: productsTable, Item: item }));
 }
 
+const publishArgs = ["node", "publish-combos", "--publish", "--country", "US"];
+
 describe("explicit combo publishing", { concurrency: false }, () => {
-  it("refuses a missing confirmation, table, region, or ambiguous database target", () => {
+  it("refuses a missing country, table, region, or ambiguous database target", () => {
     assert.throws(
-      () => resolveComboPublishConfig(memoryEnv(), ["node", "publish-combos"]),
+      () => resolveComboPublishConfig(memoryEnv(), ["node", "publish-combos", "--publish"]),
       ComboPublishConfigError
     );
+    const dryRun = resolveComboPublishConfig(memoryEnv(), ["node", "publish-combos", "--country", "US"]);
+    assert.equal(dryRun.publish, false);
+    assert.equal(dryRun.country, "US");
     assert.throws(
       () => resolveComboPublishConfig(memoryEnv({ PRODUCTS_TABLE: "  " }), ["node", "publish-combos", "--publish"]),
       ComboPublishConfigError
@@ -102,21 +108,32 @@ describe("explicit combo publishing", { concurrency: false }, () => {
       ComboPublishConfigError
     );
     assert.throws(
-      () => resolveComboPublishConfig(remoteEnv({ AWS_REGION: "" }), ["node", "publish-combos", "--publish"]),
+      () => resolveComboPublishConfig(remoteEnv({ AWS_REGION: "" }), publishArgs),
       ComboPublishConfigError
     );
-    const remote = resolveComboPublishConfig(remoteEnv(), ["node", "publish-combos", "--publish"]);
-    assert.equal(remote.productsTable, "configured-products");
-    assert.equal(remote.configTable, "configured-config");
-    assert.equal(remote.region, "configured-region");
+    assert.throws(
+      () =>
+        resolveComboPublishConfig(
+          remoteEnv({ PRODUCTS_TABLE: "blossompot-products-prod", CONFIG_TABLE: "blossompot-config-prod" }),
+          publishArgs
+        ),
+      ComboPublishConfigError
+    );
+    const remote = resolveComboPublishConfig(remoteEnv(), publishArgs);
+    assert.equal(remote.productsTable, "blossompot-products-dev");
+    assert.equal(remote.configTable, "blossompot-config-dev");
+    assert.equal(remote.region, "us-east-1");
     assert.equal(remote.memory, false);
+    assert.equal(remote.publish, true);
   });
 
   it("does not publish when the confirmation flag is missing", async () => {
-    await assert.rejects(
-      () => runExplicitComboPublish({ env: memoryEnv(), argv: ["node", "publish-combos"] }),
-      ComboPublishConfigError
-    );
+    const report = await runExplicitComboPublish({
+      env: memoryEnv(),
+      argv: ["node", "publish-combos", "--country", "US"],
+    });
+    assert.equal(report.mode, "dry-run");
+    assert.equal(report.inserted, undefined);
     assert.equal((await store.queryCombos()).length, 0);
   });
 
@@ -125,7 +142,7 @@ describe("explicit combo publishing", { concurrency: false }, () => {
       () =>
         runExplicitComboPublish({
           env: memoryEnv({ PRODUCTS_TABLE: "some-other-products-table" }),
-          argv: ["node", "publish-combos", "--publish"],
+          argv: publishArgs,
         }),
       ComboPublishConfigError
     );
@@ -148,7 +165,7 @@ describe("explicit combo publishing", { concurrency: false }, () => {
   it("inserts same-vendor pairs from different primary categories", async () => {
     const result = await runExplicitComboPublish({
       env: memoryEnv(),
-      argv: ["node", "publish-combos", "--publish"],
+      argv: publishArgs,
     });
     assert.equal(result.inserted, 2);
     assert.equal(result.skipped, 0);
@@ -166,7 +183,7 @@ describe("explicit combo publishing", { concurrency: false }, () => {
 
     const again = await runExplicitComboPublish({
       env: memoryEnv(),
-      argv: ["node", "publish-combos", "--publish"],
+      argv: publishArgs,
     });
     assert.equal(again.inserted, 0);
     assert.equal(again.skipped, 2);
@@ -193,7 +210,7 @@ describe("explicit combo publishing", { concurrency: false }, () => {
 
     const result = await runExplicitComboPublish({
       env: memoryEnv(),
-      argv: ["node", "publish-combos", "--publish"],
+      argv: publishArgs,
     });
     assert.equal(result.skips.some((skip) => skip.slug === "admin-roses-admin-cake" && skip.reason === "existing-combo"), true);
     const saved = (await store.queryCombos()).find((combo) => combo.slug === "admin-roses-admin-cake");
@@ -213,7 +230,7 @@ describe("explicit combo publishing", { concurrency: false }, () => {
 
     const result = await runExplicitComboPublish({
       env: memoryEnv(),
-      argv: ["node", "publish-combos", "--publish"],
+      argv: publishArgs,
     });
     assert.equal(result.skips.some((skip) => skip.slug === slug && skip.reason === "product-slug"), true);
     const combo = await docClient.send(

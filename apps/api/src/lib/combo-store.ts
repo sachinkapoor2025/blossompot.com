@@ -38,6 +38,18 @@ function productSlugAssigned(slug: string): boolean {
   );
 }
 
+/** The same product-slug collision insertCombo enforces, without writing a combo row. */
+export async function comboSlugTakenByProduct(slug: string): Promise<boolean> {
+  if (productSlugAssigned(slug)) return true;
+  const existing = await docClient.send(
+    new GetCommand({
+      TableName: PRODUCTS_TABLE,
+      Key: { PK: productKeys.pk(slug), SK: productKeys.sk() },
+    })
+  );
+  return existing.Item != null;
+}
+
 /** Insert a combo. An existing COMBO#{slug} row is left unchanged. */
 export async function insertCombo(input: unknown, timestamp = now()): Promise<StoredCombo> {
   const parsed = comboSchema.parse(input);

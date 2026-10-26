@@ -5,6 +5,7 @@ import { productKeys } from "@blossompot/shared";
 
 process.env.USE_MEMORY_DB = "true";
 process.env.ENVIRONMENT = "local";
+process.env.COMBO_COUNTRY = "US";
 process.env.PRODUCTS_TABLE = "blossompot-products-combo-memory-init";
 process.env.CONFIG_TABLE = "blossompot-config-combo-memory-init";
 

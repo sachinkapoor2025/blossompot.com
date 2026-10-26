@@ -18,6 +18,8 @@ seedIfEmpty()
       console.log(
         `In-memory combos: generated ${result.generated}, inserted ${result.inserted}, skipped ${result.skipped}`
       );
+    } else if (result.reason === "country-not-set") {
+      console.log("In-memory combos skipped: set COMBO_COUNTRY to a known delivery country.");
     }
   })
   .catch((err) => {
