@@ -21,11 +21,16 @@ import { ConfettiBurst } from "@/components/ConfettiBurst";
 import { PhoneInput } from "@/components/PhoneInput";
 import { phoneCountryErrorMessage, validatePhoneForCountry } from "@/lib/phone-country";
 import { useOptionalDeliveryLocation } from "@/lib/delivery-location-context";
+import {
+  DAILY_DEAL_SHOW_AFTER_MS,
+  DAILY_DEAL_SHOWN_KEY,
+  DAILY_DEAL_TIMER_KEY,
+} from "@/lib/daily-deal-popup";
 
-const STORAGE_KEY = "blossompot_daily_deal_shown_v20";
-const TIMER_START_KEY = "blossompot_daily_deal_timer_v20";
-/** Wait after first landing before showing Discount of the Day. */
-const SHOW_AFTER_MS = 1_500;
+const STORAGE_KEY = DAILY_DEAL_SHOWN_KEY;
+const TIMER_START_KEY = DAILY_DEAL_TIMER_KEY;
+/** Wait after first eligible page parse. The boot script may start this clock early. */
+const SHOW_AFTER_MS = DAILY_DEAL_SHOW_AFTER_MS;
 const SPIN_MS = 4200;
 
 const SEGMENTS = [...DAILY_DEAL_SEGMENTS];

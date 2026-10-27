@@ -19,6 +19,7 @@ import { LocationCategoryUrlSync } from "@/components/LocationCategoryUrlSync";
 import { GiftCatalogHashRedirect } from "@/components/GiftCatalogHashRedirect";
 import { AnalyticsScripts, GoogleAnalytics } from "@/components/AnalyticsScripts";
 import { MetaPixel } from "@/components/MetaPixel";
+import { DAILY_DEAL_TIMER_BOOT_SCRIPT } from "@/lib/daily-deal-popup";
 import { site } from "@/lib/site";
 import { getSiteVerification } from "@/lib/analytics-config";
 import {
@@ -127,6 +128,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {bingSiteVerification ? <meta name="msvalidate.01" content={bingSiteVerification} /> : null}
       </head>
       <body className="min-h-screen antialiased flex flex-col font-sans">
+        <script id="daily-deal-timer" dangerouslySetInnerHTML={{ __html: DAILY_DEAL_TIMER_BOOT_SCRIPT }} />
         <GoogleAnalytics />
         <MetaPixel />
         <AnalyticsScripts />
