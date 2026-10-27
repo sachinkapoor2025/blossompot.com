@@ -47,7 +47,7 @@ export function OverseasGiftGrid({
 
       {unique.length === 0 ? (
         <p className="rounded-xl border border-slate-200 bg-white px-4 py-8 text-center text-slate-600">
-          No gifts are available right now. Try again shortly.
+          No flower & cake combos are available right now. Try again shortly.
         </p>
       ) : (
         <ul className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 list-none p-0 m-0">

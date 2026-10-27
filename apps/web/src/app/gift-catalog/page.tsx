@@ -41,16 +41,16 @@ async function GiftCatalogContent({
   try {
     products = await loadProducts({ country: deliveryCountry });
   } catch (err) {
-    catalogError = err instanceof Error ? err.message : "Gift catalog is temporarily unavailable.";
+    catalogError = err instanceof Error ? err.message : "Flower & Cake Combo is temporarily unavailable.";
   }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
-      <h1 className="text-3xl font-bold text-primary mb-2">Gift Catalog</h1>
+      <h1 className="text-3xl font-bold text-primary mb-2">Flower & Cake Combo</h1>
       <p className="text-sm text-slate-600 mb-8">
         {products.length
-          ? `${products.length} gifts for ${destinationName}. Scroll for more.`
-          : `Gifts for ${destinationName}.`}
+          ? `${products.length} flower & cake combos for ${destinationName}. Scroll for more.`
+          : `Flower & cake combos for ${destinationName}.`}
       </p>
       {catalogError ? (
         <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
