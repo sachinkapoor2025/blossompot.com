@@ -141,7 +141,7 @@ export const countriesMenu = {
 
 export const homeBanners = [
   {
-    src: "/banners/home-banner-birthday.jpg",
+    src: "/banners/home-banner-birthday-extra-special.jpg",
     alt: "Birthday gifts from blossompot.com — flowers, cakes, plushies and more",
     href: "/birthday-gifts",
     layout: "full" as const,
@@ -154,7 +154,7 @@ export const homeBanners = [
     pill: "Thoughtful gifts · Fresh flowers · Delicious cakes",
   },
   {
-    src: "/banners/home-banner-gourmet.jpg",
+    src: "/banners/home-banner-gourmet-gifts.jpg",
     alt: "Gourmet gifts from blossompot.com — chocolates, cookies, and premium baskets",
     href: "/gift-hampers",
     layout: "full" as const,
@@ -167,7 +167,7 @@ export const homeBanners = [
     pill: "Premium selection · Irresistible flavors · Thoughtful delivery",
   },
   {
-    src: "/banners/home-banner-flowers.jpg",
+    src: "/banners/home-banner-fresh-flowers.jpg",
     alt: "Fresh flowers from blossompot.com — roses, mixed bouquets, and worldwide delivery",
     href: "/flowers",
     layout: "full" as const,

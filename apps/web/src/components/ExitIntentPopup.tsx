@@ -25,7 +25,7 @@ import { useOptionalDeliveryLocation } from "@/lib/delivery-location-context";
 const STORAGE_KEY = "blossompot_daily_deal_shown_v20";
 const TIMER_START_KEY = "blossompot_daily_deal_timer_v20";
 /** Wait after first landing before showing Discount of the Day. */
-const SHOW_AFTER_MS = 20_000;
+const SHOW_AFTER_MS = 1_500;
 const SPIN_MS = 4200;
 
 const SEGMENTS = [...DAILY_DEAL_SEGMENTS];
