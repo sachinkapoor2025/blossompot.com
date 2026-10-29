@@ -782,6 +782,25 @@ export async function updateProduct(event: APIGatewayProxyEventV2) {
   return ok({ product: updated });
 }
 
+/** A malformed gallery or tag field must not reject the whole admin catalog. */
+function adminSampleFlag(product: Product): boolean {
+  try {
+    return isSampleCatalogProduct(product);
+  } catch (err) {
+    console.error("admin sample check failed", product.slug, err);
+    return false;
+  }
+}
+
+function adminListRow(product: Product): Product {
+  try {
+    return withResolvedProductImages(product);
+  } catch (err) {
+    console.error("admin image resolve failed", product.slug, err);
+    return product;
+  }
+}
+
 /** Admin: list all products including unpublished. Query `?sample=all|true|false`. */
 export async function listAdminProducts(event: APIGatewayProxyEventV2) {
   const auth = getAuth(event);
@@ -791,7 +810,11 @@ export async function listAdminProducts(event: APIGatewayProxyEventV2) {
 
   let items = await scanAllProducts();
   const dynamoSlugs = new Set(items.map((p) => p.slug));
-  items = mergeBundledCatalogProducts(items);
+  try {
+    items = mergeBundledCatalogProducts(items);
+  } catch (err) {
+    console.error("mergeBundledCatalogProducts failed", err);
+  }
   try {
     const persisted = await persistMissingBundledCatalogProducts(
       dynamoSlugs,
@@ -805,17 +828,22 @@ export async function listAdminProducts(event: APIGatewayProxyEventV2) {
   }
   items.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
-  const sampleCount = items.filter((p) => isSampleCatalogProduct(p)).length;
+  const sampleCount = items.filter((p) => adminSampleFlag(p)).length;
   const realCount = items.length - sampleCount;
 
   if (sampleFilter === "true" || sampleFilter === "sample") {
-    items = items.filter((p) => isSampleCatalogProduct(p));
+    items = items.filter((p) => adminSampleFlag(p));
   } else if (sampleFilter === "false" || sampleFilter === "real") {
-    items = items.filter((p) => !isSampleCatalogProduct(p));
+    items = items.filter((p) => !adminSampleFlag(p));
   }
 
   // The scan cache can be five minutes old on another Lambda. Refresh only `published`.
-  const publishedNow = await storedPublishedBySlug([...dynamoSlugs]);
+  let publishedNow = new Map<string, boolean | undefined>();
+  try {
+    publishedNow = await storedPublishedBySlug([...dynamoSlugs]);
+  } catch (err) {
+    console.error("storedPublishedBySlug failed", err);
+  }
   items = items.map((item) => {
     if (!publishedNow.has(item.slug)) return item;
     const published = publishedNow.get(item.slug);
@@ -829,7 +857,7 @@ export async function listAdminProducts(event: APIGatewayProxyEventV2) {
   });
 
   return ok({
-    products: items.map(withResolvedProductImages),
+    products: items.map(adminListRow),
     meta: {
       totalScanned: items.length,
       returned: items.length,

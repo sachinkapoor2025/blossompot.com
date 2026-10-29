@@ -168,4 +168,21 @@ describe("admin publication status follows the stored row", { concurrency: false
     assert.equal(rejected.statusCode, 400);
     assert.equal(listed(resultOf(await adminList()).body, "admin-status-reject")?.published, false);
   });
+
+  it("keeps a row with a non-array gallery and tag set in the admin list", async () => {
+    invalidateProductListCache();
+    await putProduct(
+      row("admin-malformed-gallery", {
+        name: "Malformed gallery",
+        published: false,
+        inventory: 0,
+        images: "https://cdn.example.com/not-an-array.jpg",
+        tags: new Set(["sample-product"]),
+        vendorSlug: 12,
+      })
+    );
+    const listedAdmin = resultOf(await adminList());
+    assert.equal(listedAdmin.statusCode, 200);
+    assert.ok(listed(listedAdmin.body, "admin-malformed-gallery"));
+  });
 });
