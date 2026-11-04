@@ -26,15 +26,14 @@ describe("storefront catalog countries request", () => {
       defaultCountry: "US",
     };
     let calls = 0;
+    const seen: Array<{ url: string; cache?: RequestCache; method?: string }> = [];
     let release: () => void = () => undefined;
     const gate = new Promise<void>((resolve) => {
       release = resolve;
     });
     globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
-      assert.equal(String(input), `${getApiUrl()}/catalog-countries`);
-      assert.equal(init?.cache, "no-store");
-      assert.equal(init?.method, undefined);
       calls += 1;
+      seen.push({ url: String(input), cache: init?.cache, method: init?.method });
       await gate;
       return jsonResponse(body);
     }) as typeof fetch;
@@ -44,17 +43,44 @@ describe("storefront catalog countries request", () => {
       loadStorefrontCatalogCountries(),
       loadStorefrontCatalogCountries(),
     ]);
-    await new Promise((resolve) => setTimeout(resolve, 20));
-    assert.equal(calls, 1);
-    release();
-    const [first, second, third] = await pending;
-    assert.deepEqual(first, body);
-    assert.deepEqual(second, body);
-    assert.deepEqual(third, body);
+    let settled:
+      | { ok: true; rows: Awaited<typeof pending> }
+      | { ok: false; error: unknown }
+      | undefined;
+    // Handle the shared promise immediately so a slow import cannot reject after the test ends.
+    const captured = pending.then(
+      (rows) => {
+        settled = { ok: true, rows };
+      },
+      (error: unknown) => {
+        settled = { ok: false, error };
+      }
+    );
+    try {
+      // The shared request starts after a dynamic import. CI can take longer than a fixed delay.
+      const started = Date.now();
+      while (calls < 1 && !settled && Date.now() - started < 5000) {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+      if (calls < 1 && settled?.ok === false) throw settled.error;
+      assert.equal(calls, 1);
+      assert.equal(seen[0]?.url, `${getApiUrl()}/catalog-countries`);
+      assert.equal(seen[0]?.cache, "no-store");
+      assert.equal(seen[0]?.method, undefined);
+      release();
+      const [first, second, third] = await pending;
+      assert.deepEqual(first, body);
+      assert.deepEqual(second, body);
+      assert.deepEqual(third, body);
 
-    const again = await loadStorefrontCatalogCountries();
-    assert.equal(calls, 2);
-    assert.deepEqual(again, body);
+      const again = await loadStorefrontCatalogCountries();
+      assert.equal(calls, 2);
+      assert.equal(seen[1]?.url, `${getApiUrl()}/catalog-countries`);
+      assert.deepEqual(again, body);
+    } finally {
+      release();
+      await captured;
+    }
   });
 
   it("shares one failed request, then fetches again on the next call", async () => {
