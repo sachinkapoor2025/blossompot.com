@@ -67,6 +67,33 @@ export function isListedShoppingCountry(
   return countries.some((country) => country.countryCode === code);
 }
 
+type StorefrontCatalogCountries = {
+  countries?: { countryCode?: string }[];
+  defaultCountry?: string;
+};
+
+/**
+ * One in-flight GET /catalog-countries shared by overlapping hook mounts.
+ * Cleared when the promise settles, so a later mount still fetches again.
+ */
+let inFlightCatalogCountries: Promise<StorefrontCatalogCountries> | null = null;
+
+async function requestStorefrontCatalogCountries(): Promise<StorefrontCatalogCountries> {
+  const { api } = await import("./api");
+  return api<StorefrontCatalogCountries>("/catalog-countries", {
+    revalidate: false,
+  });
+}
+
+export function loadStorefrontCatalogCountries(): Promise<StorefrontCatalogCountries> {
+  if (!inFlightCatalogCountries) {
+    inFlightCatalogCountries = requestStorefrontCatalogCountries().finally(() => {
+      inFlightCatalogCountries = null;
+    });
+  }
+  return inFlightCatalogCountries;
+}
+
 export function useGboDeliveryCountries() {
   const [countries, setCountries] = useState<DeliveryCountryConfig[]>(() => shoppingCountryOptions());
   const [defaultCountry, setDefaultCountry] = useState<string | null>("US");
@@ -75,12 +102,7 @@ export function useGboDeliveryCountries() {
 
   useEffect(() => {
     let cancelled = false;
-    void import("./api")
-      .then(({ api }) =>
-        api<{ countries?: { countryCode?: string }[]; defaultCountry?: string }>("/catalog-countries", {
-          revalidate: false,
-        })
-      )
+    void loadStorefrontCatalogCountries()
       .then((data) => {
         if (cancelled) return;
         setCountries(shoppingCountriesFromGlobal(data.countries ?? []));

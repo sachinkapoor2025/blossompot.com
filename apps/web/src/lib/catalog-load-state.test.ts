@@ -12,6 +12,7 @@ import {
   loadCategoryPageProducts,
   loadHomeCategoryProducts,
   loadProducts,
+  loadRelatedProducts,
   loadStorefrontCatalog,
 } from "./product-loader";
 
@@ -250,5 +251,12 @@ describe("catalog request status", () => {
       assert.equal(calls.length > 0, true);
       assert.equal(calls.every((call) => call.view === "card"), true);
     }
+
+    seen.length = 0;
+    await loadRelatedProducts("flowers", "current-product", "US");
+    const relatedCalls = seen.filter((call) => call.url.includes("/products"));
+    assert.equal(relatedCalls.length > 0, true);
+    assert.equal(relatedCalls.every((call) => call.view === "card"), true);
+    assert.equal(relatedCalls.some((call) => call.url.includes("category=flowers")), true);
   });
 });

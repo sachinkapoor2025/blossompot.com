@@ -77,12 +77,10 @@ async function CategoryPageContent({ params, searchParams }: Props) {
   if (!isKnownCategorySlug(slug)) notFound();
   const deliveryCountry = await getStorefrontDeliveryCountry(query.country);
 
-  const [categoryData, categoryLoad] = await Promise.all([
-    api<{ category?: Category }>(`/categories/${slug}`, { revalidate: 45 }).catch(() => null),
-    loadCategoryPageProducts(slug, deliveryCountry),
-  ]);
+  const categoryData = await api<{ category?: Category }>(`/categories/${slug}`, { revalidate: 45 }).catch(
+    () => null
+  );
   const category = categoryData?.category ?? null;
-  const products = categoryLoad.state === "products" ? categoryLoad.products : [];
 
   const name = category?.name ?? slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   const headingName: Record<string, string> = {
@@ -117,28 +115,22 @@ async function CategoryPageContent({ params, searchParams }: Props) {
       <JsonLd
         data={[
           breadcrumbJsonLd(crumbs.map((c) => ({ name: c.label, path: c.href ?? categoryHref(slug) }))),
-          itemListJsonLd(
-            `${name} — BlossomPot`,
-            products.map((p) => ({ name: p.name, path: `/products/${p.slug}` }))
-          ),
           ...(pageSeo.article ? [faqJsonLd(pageSeo.article.faqs)] : rich ? [faqJsonLd(rich.faqs)] : []),
         ]}
       />
       <Breadcrumbs items={crumbs} />
       <h1 className="text-3xl font-bold text-primary mb-8">{h1}</h1>
 
-      {categoryLoad.state === "error" ? (
-        <CatalogLoadError />
-      ) : products.length > 0 ? (
-        <ProductGrid products={toListingCardProducts(products)} sort={sort} />
-      ) : (
-        <p className="text-slate-500">
-          No gifts in this collection for {deliveryCountryName} yet.{" "}
-          <Link href={shopHref} className="text-nav hover:underline">
-            Browse all gifts
-          </Link>
-        </p>
-      )}
+      <Suspense fallback={null}>
+        <CategoryProductListing
+          slug={slug}
+          deliveryCountry={deliveryCountry}
+          deliveryCountryName={deliveryCountryName}
+          sort={sort}
+          listName={name}
+          shopHref={shopHref}
+        />
+      </Suspense>
 
       {pageSeo.article ? (
         <CountrySeoArticle
@@ -208,5 +200,47 @@ async function CategoryPageContent({ params, searchParams }: Props) {
         </>
       )}
     </div>
+  );
+}
+
+async function CategoryProductListing({
+  slug,
+  deliveryCountry,
+  deliveryCountryName,
+  sort,
+  listName,
+  shopHref,
+}: {
+  slug: string;
+  deliveryCountry: string;
+  deliveryCountryName: string;
+  sort: ProductSort;
+  listName: string;
+  shopHref: string;
+}) {
+  const categoryLoad = await loadCategoryPageProducts(slug, deliveryCountry);
+  const products = categoryLoad.state === "products" ? categoryLoad.products : [];
+
+  return (
+    <>
+      <JsonLd
+        data={itemListJsonLd(
+          `${listName} — BlossomPot`,
+          products.map((product) => ({ name: product.name, path: `/products/${product.slug}` }))
+        )}
+      />
+      {categoryLoad.state === "error" ? (
+        <CatalogLoadError />
+      ) : products.length > 0 ? (
+        <ProductGrid products={toListingCardProducts(products)} sort={sort} />
+      ) : (
+        <p className="text-slate-500">
+          No gifts in this collection for {deliveryCountryName} yet.{" "}
+          <Link href={shopHref} className="text-nav hover:underline">
+            Browse all gifts
+          </Link>
+        </p>
+      )}
+    </>
   );
 }

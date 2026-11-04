@@ -150,12 +150,19 @@ describe("category country SEO", () => {
       join(dirname(fileURLToPath(import.meta.url)), "../../app/categories/[slug]/page.tsx"),
       "utf8"
     );
-    const grid = page.indexOf("<ProductGrid");
-    const article = page.indexOf("<CountrySeoArticle");
-    const listingHeading = page.indexOf('<h1 className="text-3xl font-bold text-primary mb-8">{h1}</h1>');
+    const content = page.slice(
+      page.indexOf("async function CategoryPageContent"),
+      page.indexOf("async function CategoryProductListing")
+    );
+    const grid = content.indexOf("<CategoryProductListing");
+    const article = content.indexOf("<CountrySeoArticle");
+    const listingHeading = content.indexOf('<h1 className="text-3xl font-bold text-primary mb-8">{h1}</h1>');
     assert.ok(listingHeading >= 0);
     assert.ok(grid > listingHeading);
     assert.ok(article > grid);
+    assert.equal(content.includes("loadCategoryPageProducts"), false);
+    assert.match(page.slice(page.indexOf("async function CategoryProductListing")), /await loadCategoryPageProducts/);
+    assert.match(page, /<ProductGrid /);
     assert.equal(page.includes("pageSeo.article ? null : <h1"), false);
   });
 

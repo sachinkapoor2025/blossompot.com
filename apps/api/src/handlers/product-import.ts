@@ -17,6 +17,7 @@ import {
   type ProductImportImageResult,
 } from "@blossompot/shared";
 import { requireAdmin } from "../lib/auth";
+import { invalidateProductListCache } from "./products";
 import { probeSafeImageUrl } from "../lib/safe-image-probe";
 import { invalidateCatalogCountryCache, loadCatalogCountries } from "../lib/catalog-country-store";
 import { invalidateCatalogVendorCache, loadCatalogVendorRegistry } from "../lib/catalog-vendor-store";
@@ -273,6 +274,7 @@ export async function commitProductImport(event: APIGatewayProxyEventV2) {
     }
     throw err;
   }
+  invalidateProductListCache();
   return json(201, {
     writes: true,
     ok: true,

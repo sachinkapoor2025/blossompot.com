@@ -31,8 +31,8 @@ export function ProductImageRotator({
   /** First image eager only for above-the-fold cards; listing grids should stay lazy. */
   priority = false,
   /**
-   * Homepage rows pass true so off-screen cards keep a single lazy frame
-   * until they intersect. Listing grids omit this and keep the current gallery.
+   * Homepage rows and listing grids pass true so off-screen cards keep a
+   * single lazy frame until they intersect. The first frame stays in place.
    */
   loadWhenVisible = false,
 }: {

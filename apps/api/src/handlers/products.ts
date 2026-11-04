@@ -44,7 +44,11 @@ import { getAuth, requireAdmin } from "../lib/auth";
 import { withResolvedProductImages, resolveProductImageUrl } from "../lib/images";
 import { syncInventoryAlertState } from "../lib/inventory";
 import { ensureProductInDb } from "../lib/ensure-product";
-import { readProductPublication, slugsMarkedUnpublished, storedPublishedBySlug } from "../lib/product-publication";
+import {
+  storedListingCommerceBySlug,
+  storedPublishedBySlug,
+  type StoredListingCommerce,
+} from "../lib/product-publication";
 import { getBundledUsarakhiProduct, listBundledCatalogProducts, persistMissingBundledCatalogProducts } from "../lib/blossompot-catalog";
 import { getBundledOrangeCountyProduct } from "../lib/orange-county-catalog";
 
@@ -414,6 +418,31 @@ export function invalidateProductListCache(categorySlug?: string) {
   else categoryProductCache.clear();
 }
 
+/**
+ * Correct publication, price, and stock on a cached body without writing back into that cache.
+ * A missing stored `published` flag is removed so the schema default stays eligible.
+ */
+function applyListingCommerce(product: Product, commerce: StoredListingCommerce): Product {
+  const next: Product = { ...product };
+  if (commerce.published === undefined) {
+    delete (next as { published?: boolean }).published;
+  } else {
+    next.published = commerce.published;
+  }
+  if (commerce.price !== undefined) next.price = commerce.price;
+  if (commerce.inventory !== undefined) next.inventory = commerce.inventory;
+  return next;
+}
+
+async function withFreshListingCommerce(items: Product[]): Promise<Product[]> {
+  if (items.length === 0) return items;
+  const commerce = await storedListingCommerceBySlug(items.map((product) => product.slug));
+  return items.map((product) => {
+    const fresh = commerce.get(product.slug);
+    return fresh ? applyListingCommerce(product, fresh) : product;
+  });
+}
+
 export async function listProducts(event: APIGatewayProxyEventV2) {
   const category = event.queryStringParameters?.category;
   const search = event.queryStringParameters?.search?.toLowerCase();
@@ -460,7 +489,10 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
     items = await scanAllProducts();
   }
 
-  if (!componentSlugs) items = await persistAndMergeBundledCatalog(items, category);
+  if (!componentSlugs) {
+    items = await withFreshListingCommerce(items);
+    items = await persistAndMergeBundledCatalog(items, category);
+  }
 
   items = items.filter(
     (p) =>
@@ -469,8 +501,6 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
       isProductStorefrontVisible(p) &&
       !isGboHiddenFromStorefront(p)
   );
-  const unpublished = await slugsMarkedUnpublished(items.map((product) => product.slug));
-  if (unpublished.size > 0) items = items.filter((product) => !unpublished.has(product.slug));
   if (search) {
     items = items.filter(
       (p) =>
@@ -523,23 +553,24 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
   const nowMs = Date.now();
   const cached = productGetCache.get(slug);
   if (cached && nowMs - cached.at < PRODUCT_GET_CACHE_TTL_MS) {
-    const publication = await readProductPublication(slug);
-    if (publication.found && publication.unpublished) {
+    const commerce = await storedListingCommerceBySlug([slug]);
+    const fresh = commerce.get(slug);
+    if (!fresh) {
+      productGetCache.delete(slug);
+    } else if (fresh.published === false) {
       productGetCache.delete(slug);
       return notFound("Product not found");
-    }
-    if (!publication.found) {
-      productGetCache.delete(slug);
     } else {
-      if (isGboHiddenFromStorefront(cached.product)) return notFound("Product not found");
+      const product = applyListingCommerce(cached.product, fresh);
+      if (isGboHiddenFromStorefront(product)) return notFound("Product not found");
       const location = await resolveShoppingLocation(parseLocationQuery(event));
       if (!location) return notFound(NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE);
-      const visible = productVisibleForDeliveryCountry(cached.product, location.countryCode);
-      const shopping = await decideNewShopping(cached.product, location.countryCode);
+      const visible = productVisibleForDeliveryCountry(product, location.countryCode);
+      const shopping = await decideNewShopping(product, location.countryCode);
       if (vendorHiddenFromStorefront(shopping)) return notFound("Product not found");
       if (!visible || !shopping.available) {
         return ok({
-          product: forStorefront(cached.product),
+          product: forStorefront(product),
           availability: {
             deliverable: false,
             reason: shopping.reason ?? "country_not_allowed",
@@ -547,9 +578,9 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
           },
         });
       }
-      const [evalRow] = await evaluateProductsForLocation([cached.product], location);
+      const [evalRow] = await evaluateProductsForLocation([product], location);
       return ok({
-        product: forStorefront(cached.product),
+        product: forStorefront(product),
         availability: {
           deliverable: Boolean(evalRow?.deliverable),
           reason: evalRow?.reason,

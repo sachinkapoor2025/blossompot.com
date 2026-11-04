@@ -27,6 +27,7 @@ import {
   type Product,
 } from "@blossompot/shared";
 import Link from "next/link";
+import { HomeProductCard } from "@/components/HomeProductCard";
 import { HomeProductList } from "@/components/HomeProductList";
 
 function categoryBreadcrumbLabel(categorySlug: string): string {
@@ -155,7 +156,6 @@ async function ProductPageContent({ params }: Props) {
     );
   }
 
-  const relatedProducts = await loadRelatedProducts(product.categorySlug, product.slug, countryIso);
   const faqs = productFaqsForCategory(product.categorySlug, deliveryDestinationName(countryIso));
 
   const categoryLabel = categoryBreadcrumbLabel(product.categorySlug);
@@ -180,10 +180,42 @@ async function ProductPageContent({ params }: Props) {
       </div>
       <ProductDetailClient
         product={product}
-        relatedProducts={toListingCardProducts(relatedProducts)}
+        relatedProducts={
+          <Suspense fallback={null}>
+            <RelatedProducts
+              categorySlug={product.categorySlug}
+              excludeSlug={product.slug}
+              countryIso={countryIso}
+            />
+          </Suspense>
+        }
         deliveryCountryIso={countryIso}
         purchaseAllowed={loaded.deliverable}
       />
     </>
+  );
+}
+
+async function RelatedProducts({
+  categorySlug,
+  excludeSlug,
+  countryIso,
+}: {
+  categorySlug: string;
+  excludeSlug: string;
+  countryIso: string;
+}) {
+  const relatedProducts = await loadRelatedProducts(categorySlug, excludeSlug, countryIso);
+  const cards = toListingCardProducts(relatedProducts);
+  if (cards.length === 0) return null;
+  return (
+    <section className="mt-10 pt-8 border-t border-slate-200">
+      <h2 className="text-lg font-bold text-primary mb-4">You might also like</h2>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-stretch">
+        {cards.map((product) => (
+          <HomeProductCard key={product.slug} product={product} loadGalleryWhenVisible />
+        ))}
+      </div>
+    </section>
   );
 }

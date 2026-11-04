@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { AddToCartControl } from "@/components/AddToCartControl";
 import { ProductImageGallery } from "@/components/ProductImageGallery";
@@ -14,7 +14,6 @@ import { useCurrency } from "@/lib/currency-context";
 import { getDiscountPercent } from "@/lib/pricing";
 import { LeadCaptureInput } from "@/components/LeadCaptureInput";
 import { ExploreMoreSection } from "@/components/ExploreMoreSection";
-import { HomeProductCard } from "@/components/HomeProductCard";
 import { useCart } from "@/lib/cart-context";
 import { productFaqsForCategory } from "@/lib/content/product-faqs";
 import { useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
@@ -105,12 +104,13 @@ function ShareButton({ title, url }: { title: string; url: string }) {
 
 export function ProductDetailClient({
   product,
-  relatedProducts = [],
+  relatedProducts = null,
   deliveryCountryIso = "US",
   purchaseAllowed = true,
 }: {
   product: Product;
-  relatedProducts?: Product[];
+  /** Streamed after the main product. Empty results render nothing. */
+  relatedProducts?: ReactNode;
   /** Server-resolved delivery country, same cookie/header source as the header. */
   deliveryCountryIso?: string;
   /** False when the product API did not confirm delivery. The page still opens. */
@@ -612,16 +612,7 @@ export function ProductDetailClient({
         ) : null}
       </section>
 
-      {relatedProducts.length > 0 && (
-        <section className="mt-10 pt-8 border-t border-slate-200">
-          <h2 className="text-lg font-bold text-primary mb-4">You might also like</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-stretch">
-            {relatedProducts.map((p) => (
-              <HomeProductCard key={p.slug} product={p} />
-            ))}
-          </div>
-        </section>
-      )}
+      {relatedProducts}
 
       <section className="mt-10 pt-8 border-t border-slate-200">
         <h2 className="text-lg font-bold text-primary mb-4">Common questions</h2>

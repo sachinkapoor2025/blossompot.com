@@ -441,10 +441,20 @@ async function readStorefrontCatalog(params?: {
 export { toListingCardProducts };
 
 /** Category grids from the live products API. Bundled JSON is not a fallback catalog. */
-export async function loadProductsByCategory(categorySlug: string, country?: string): Promise<Product[]> {
+export async function loadProductsByCategory(
+  categorySlug: string,
+  country?: string,
+  listingView?: "card"
+): Promise<Product[]> {
   let products: Product[] = [];
   try {
-    products = await loadProducts({ category: categorySlug, country });
+    products = (
+      await readStorefrontCatalog({
+        category: categorySlug,
+        country,
+        ...(listingView ? { listingView } : {}),
+      })
+    ).products;
   } catch {
     products = [];
   }
@@ -461,7 +471,7 @@ export async function loadRelatedProducts(
   excludeSlug: string,
   country?: string
 ): Promise<Product[]> {
-  const products = await loadProductsByCategory(categorySlug, country);
+  const products = await loadProductsByCategory(categorySlug, country, "card");
   return products.filter((p) => p.slug !== excludeSlug).slice(0, 5);
 }
 

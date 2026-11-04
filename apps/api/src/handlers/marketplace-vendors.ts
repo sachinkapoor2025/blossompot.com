@@ -27,6 +27,7 @@ import {
   type Product,
 } from "@blossompot/shared";
 import { requireAdmin, requireSuperAdmin } from "../lib/auth";
+import { invalidateProductListCache } from "./products";
 import { docClient, CONFIG_TABLE, PRODUCTS_TABLE, ORDERS_TABLE, now } from "../lib/db";
 import { ok, created, badRequest, forbidden, unauthorized, notFound, json } from "../lib/response";
 import { insertCatalogProduct, isTransactionConflict, replaceCatalogProduct } from "../lib/catalog-sku-write";
@@ -593,6 +594,7 @@ export async function vendorUpsertProduct(event: APIGatewayProxyEventV2) {
     }
     throw err;
   }
+  invalidateProductListCache();
 
   if (approvalStatus === "pending_approval") {
     await notifyAdminVendors(
@@ -668,6 +670,7 @@ export async function adminApproveVendorProduct(event: APIGatewayProxyEventV2) {
       },
     })
   );
+  invalidateProductListCache();
 
   const vendor = product.vendorSlug ? await getVendorBySlug(product.vendorSlug) : null;
   if (vendor) {

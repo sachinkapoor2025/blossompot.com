@@ -80,7 +80,7 @@ export function ProductGrid({
       {visible.emptyBecauseLocation ? <LocationEmptyHint /> : null}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-stretch">
         {pageItems.map((p) => (
-          <HomeProductCard key={p.slug} product={p} />
+          <HomeProductCard key={p.slug} product={p} loadGalleryWhenVisible />
         ))}
       </div>
       <Pagination page={safePage} pages={pages} />

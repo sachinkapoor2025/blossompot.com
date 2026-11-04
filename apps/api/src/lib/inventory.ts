@@ -76,6 +76,7 @@ export async function maybeSendLowStockAlert(product: Product, inventory: number
 export async function decrementInventoryForOrder(order: Order): Promise<void> {
   const qtyBySlug = aggregateQuantities(order.items);
   const timestamp = now();
+  let changed = false;
 
   for (const [slug, { qty, name }] of qtyBySlug) {
     try {
@@ -91,10 +92,16 @@ export async function decrementInventoryForOrder(order: Order): Promise<void> {
         })
       );
       const updated = result.Attributes as Product;
+      changed = true;
       await maybeSendLowStockAlert(updated, updated.inventory);
     } catch (err) {
       console.error(`Inventory decrement failed for ${slug} (${name}):`, err);
     }
+  }
+
+  if (changed) {
+    const { invalidateProductListCache } = await import("../handlers/products");
+    invalidateProductListCache();
   }
 }
 
