@@ -1,72 +1,40 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState, useEffect, type ReactNode } from "react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useCart } from "@/lib/cart-context";
 import { wishlistEntryHref } from "@/lib/wishlist-href";
 import { categoryHref } from "@/lib/category-urls";
-import { categoryLocationHref, parseLocationShopPath } from "@/lib/location-seo-urls";
-import {
-  navItems,
-  cityNavHref,
-  cityNavMenuLabel,
-} from "@/lib/site";
-import { cityMenuForCountry, countryIsoFromPathname, filterCityMenuLinks } from "@/lib/city-menu-for-location";
+import { categoryLocationHref, countryIsoFromPathname, parseLocationShopPath } from "@/lib/location-seo-urls";
+import { navItems } from "@/lib/site";
 import { SearchBar } from "@/components/SearchBar";
 import { SiteLogoLink } from "@/components/SiteLogo";
 import { DeliveryLocationChip } from "@/components/DeliveryLocationChip";
 import { DeliveryLocationBanner } from "@/components/DeliveryLocationBanner";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
-import { deliverToDestination, navigateAfterLocationCommit } from "@/lib/country-switch";
-import { useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
 
-function CitiesCountryField({
-  id,
-  value,
-  onChange,
-}: {
-  id: string;
-  value: string;
-  onChange: (countryCode: string) => void;
-}) {
-  const { countries } = useGboDeliveryCountries();
-  return (
-    <div className="px-3 pb-2">
-      <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-400" htmlFor={id}>
-        Country
-      </label>
-      <select
-        id={id}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm"
-      >
-        {countries.some((c) => c.countryCode === value) ? null : (
-          <option value={value}>{value}</option>
-        )}
-        {countries.map((c) => (
-          <option key={c.countryCode} value={c.countryCode}>
-            {c.countryName}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
+const CitiesMenuPanel = dynamic(
+  () => import("@/components/header/HeaderCityMenus").then((m) => m.CitiesMenuPanel),
+  { ssr: false }
+);
+
+const MobileNavDrawer = dynamic(
+  () => import("@/components/header/MobileNavDrawer").then((m) => m.MobileNavDrawer),
+  { ssr: false }
+);
 
 function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const { openSelector, location, setLocation } = useDeliveryLocation();
+  const { location } = useDeliveryLocation();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const pathIso =
     countryIsoFromPathname(pathname, searchParams.get("country")) ?? location?.countryCode ?? "US";
   const [menuIso, setMenuIso] = useState(pathIso);
-  const menu = cityMenuForCountry(menuIso);
-  const visible = filterCityMenuLinks(menu.links, query);
 
   useEffect(() => {
     setMenuIso(pathIso);
@@ -74,18 +42,7 @@ function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
 
   useEffect(() => {
     setQuery("");
-  }, [menu.heading]);
-
-  const router = useRouter();
-  const chooseMenuCountry = (countryCode: string) => {
-    const iso = countryCode.trim().toUpperCase();
-    setMenuIso(iso);
-    navigateAfterLocationCommit({
-      href: deliverToDestination(pathname, iso, searchParams.toString()),
-      commit: () => setLocation({ countryCode: iso, postalCode: "", postalDisplay: iso }),
-      navigate: (url) => router.push(url),
-    });
-  };
+  }, [menuIso]);
 
   return (
     <div
@@ -103,61 +60,16 @@ function CitiesMenu({ onNavigate }: { onNavigate?: () => void }) {
         Cities
         <span className={`text-xs transition-transform ${open ? "rotate-180" : ""}`}>▼</span>
       </button>
-      {open && (
-        <div className="absolute top-full right-0 pt-1.5 z-[100]">
-          <div className="min-w-[260px] max-h-[min(70vh,420px)] overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-xl">
-            <p className="px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-              {menu.heading}
-            </p>
-            <CitiesCountryField id="cities-country" value={menuIso} onChange={chooseMenuCountry} />
-            <div className="px-3 pb-2">
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={menu.searchPlaceholder}
-                className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm"
-              />
-            </div>
-            <Link
-              href={menu.allHref}
-              className="block px-4 py-2.5 text-sm font-semibold text-nav hover:bg-blue-50 whitespace-nowrap"
-              onClick={() => {
-                setOpen(false);
-                onNavigate?.();
-              }}
-            >
-              {menu.allLabel}
-            </Link>
-            {visible.length === 0 ? (
-              <p className="px-4 py-2.5 text-sm text-slate-500">No city pages for this location yet.</p>
-            ) : (
-              visible.map((c) => (
-                <Link
-                  key={c.slug}
-                  href={cityNavHref(c)}
-                  className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-nav whitespace-nowrap"
-                  onClick={() => {
-                    setOpen(false);
-                    onNavigate?.();
-                  }}
-                >
-                  {cityNavMenuLabel(c)}
-                </Link>
-              ))
-            )}
-            <button
-              type="button"
-              className="mt-1 w-full border-t border-slate-100 px-4 py-2.5 text-left text-sm font-semibold text-nav hover:bg-blue-50"
-              onClick={() => {
-                setOpen(false);
-                openSelector();
-              }}
-            >
-              United States — enter ZIP code
-            </button>
-          </div>
-        </div>
-      )}
+      {open ? (
+        <CitiesMenuPanel
+          menuIso={menuIso}
+          setMenuIso={setMenuIso}
+          query={query}
+          setQuery={setQuery}
+          onClose={() => setOpen(false)}
+          onNavigate={onNavigate}
+        />
+      ) : null}
     </div>
   );
 }
@@ -208,19 +120,6 @@ function AccountLink() {
           d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
         />
       </svg>
-    </Link>
-  );
-}
-
-function WishlistMenuLink({ onNavigate }: { onNavigate?: () => void }) {
-  const { user } = useAuth();
-  return (
-    <Link
-      href={wishlistEntryHref(Boolean(user))}
-      onClick={onNavigate}
-      className="flex flex-col items-center gap-1 px-2 py-3 text-xs font-semibold text-primary hover:bg-slate-50"
-    >
-      Wishlist
     </Link>
   );
 }
@@ -335,18 +234,15 @@ function DesktopCartAction() {
 
 export function Header() {
   const pathname = usePathname();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const activeCategory = searchParams.get("category");
   const [menuOpen, setMenuOpen] = useState(false);
   const [citiesOpen, setCitiesOpen] = useState(false);
   const [cityQuery, setCityQuery] = useState("");
-  const { openSelector, setLocation, location: deliveryLocation } = useDeliveryLocation();
+  const { location: deliveryLocation } = useDeliveryLocation();
   const cityCountryIso =
     countryIsoFromPathname(pathname, searchParams.get("country")) ?? deliveryLocation?.countryCode ?? "US";
   const [cityMenuIso, setCityMenuIso] = useState(cityCountryIso);
-  const cityMenu = cityMenuForCountry(cityMenuIso);
-  const cityVisible = filterCityMenuLinks(cityMenu.links, cityQuery);
 
   useEffect(() => {
     setCityMenuIso(cityCountryIso);
@@ -429,7 +325,7 @@ export function Header() {
 
       {/* Desktop top bar */}
       <div className="hidden md:grid max-w-7xl mx-auto px-4 py-2.5 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-6">
-        <SiteLogoLink size="desktop" priority />
+        <SiteLogoLink size="desktop" loading="eager" />
 
         <div className="w-full max-w-2xl mx-auto">
           <SearchBar />
@@ -474,151 +370,19 @@ export function Header() {
         </div>
       </nav>
 
-      {/* Mobile slide-out menu */}
-      {menuOpen && (
-        <aside
-          className="md:hidden fixed inset-0 z-[70] flex h-[100dvh] w-full max-w-full flex-col overflow-hidden bg-white"
-          style={{ height: "100svh" }}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Menu"
-        >
-          <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
-            <span className="font-semibold text-primary">Menu</span>
-            <button
-              type="button"
-              className="flex h-11 w-11 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-nav"
-              aria-label="Close menu"
-              onClick={closeMenu}
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
-              </svg>
-            </button>
-          </div>
-
-          <nav className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-3 py-3 space-y-1">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={navHref(item)}
-                  onClick={closeMenu}
-                  className={`block rounded-lg px-4 py-3 text-sm font-semibold ${
-                    isActive(item.href, "category" in item ? item.category : undefined)
-                      ? "bg-nav text-white"
-                      : "text-primary hover:bg-blue-50 hover:text-nav"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
-
-              <div>
-                <button
-                  type="button"
-                  onClick={() => setCitiesOpen((v) => !v)}
-                  className={`w-full flex items-center justify-between rounded-lg px-4 py-3 text-sm font-semibold ${
-                    citiesOpen ? "bg-nav text-white" : "text-primary hover:bg-blue-50 hover:text-nav"
-                  }`}
-                >
-                  Cities
-                  <span className={`text-xs transition-transform ${citiesOpen ? "rotate-180" : ""}`}>▼</span>
-                </button>
-                {citiesOpen && (
-                  <div className="mt-1 ml-2 border-l-2 border-slate-100 pl-2 space-y-1">
-                    <p className="px-4 pt-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                      {cityMenu.heading}
-                    </p>
-                    <CitiesCountryField
-                      id="cities-country-mobile"
-                      value={cityMenuIso}
-                      onChange={(iso) => {
-                        setCityMenuIso(iso);
-                        closeMenu();
-                        navigateAfterLocationCommit({
-                          href: deliverToDestination(pathname, iso, searchParams.toString()),
-                          commit: () =>
-                            setLocation({ countryCode: iso, postalCode: "", postalDisplay: iso }),
-                          navigate: (url) => router.push(url),
-                        });
-                      }}
-                    />
-                    <input
-                      value={cityQuery}
-                      onChange={(e) => setCityQuery(e.target.value)}
-                      placeholder={cityMenu.searchPlaceholder}
-                      className="mx-2 mb-1 w-[calc(100%-1rem)] rounded-md border border-slate-200 px-2 py-1.5 text-sm"
-                    />
-                    <Link
-                      href={cityMenu.allHref}
-                      onClick={closeMenu}
-                      className="block rounded-lg px-4 py-2.5 text-sm font-semibold text-nav hover:bg-blue-50"
-                    >
-                      {cityMenu.allLabel}
-                    </Link>
-                    {cityVisible.length === 0 ? (
-                      <p className="px-4 py-2.5 text-sm text-slate-500">No city pages for this location yet.</p>
-                    ) : (
-                      cityVisible.map((c) => (
-                        <Link
-                          key={c.slug}
-                          href={cityNavHref(c)}
-                          onClick={closeMenu}
-                          className="block rounded-lg px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-nav"
-                        >
-                          {cityNavMenuLabel(c)}
-                        </Link>
-                      ))
-                    )}
-                    <button
-                      type="button"
-                      className="block w-full rounded-lg px-4 py-2.5 text-left text-sm font-semibold text-nav hover:bg-blue-50"
-                      onClick={() => {
-                        closeMenu();
-                        openSelector();
-                      }}
-                    >
-                      United States — enter ZIP code
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <Link
-                href="/vendor"
-                onClick={closeMenu}
-                className="block rounded-lg px-4 py-3 text-sm font-semibold text-primary hover:bg-rose-50"
-              >
-                Vendor Account
-              </Link>
-              <Link
-                href="/become-a-vendor"
-                onClick={closeMenu}
-                className="block rounded-lg px-4 py-3 text-sm font-semibold text-primary hover:bg-rose-50"
-              >
-                Become a Vendor
-              </Link>
-            </nav>
-
-            <div className="grid shrink-0 grid-cols-3 border-t border-slate-100 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
-              <Link
-                href="/account"
-                onClick={closeMenu}
-                className="flex flex-col items-center gap-1 px-2 py-3 text-xs font-semibold text-primary hover:bg-slate-50"
-              >
-                Account
-              </Link>
-              <WishlistMenuLink onNavigate={closeMenu} />
-              <Link
-                href="/cart"
-                onClick={closeMenu}
-                className="flex flex-col items-center gap-1 px-2 py-3 text-xs font-semibold text-primary hover:bg-slate-50"
-              >
-                Cart
-              </Link>
-            </div>
-          </aside>
-      )}
+      {menuOpen ? (
+        <MobileNavDrawer
+          onClose={closeMenu}
+          navHref={navHref}
+          isActive={isActive}
+          citiesOpen={citiesOpen}
+          setCitiesOpen={setCitiesOpen}
+          cityQuery={cityQuery}
+          setCityQuery={setCityQuery}
+          cityMenuIso={cityMenuIso}
+          setCityMenuIso={setCityMenuIso}
+        />
+      ) : null}
     </header>
   );
 }
