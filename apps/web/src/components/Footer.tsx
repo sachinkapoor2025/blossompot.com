@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type CSSProperties, type ReactNode } from "react";
+import { useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { Suspense } from "react";
 import Link from "next/link";
 import { site, navItems, whatsappChatUrl, whatsappLinkLabel } from "@/lib/site";
@@ -339,10 +339,22 @@ function ChevronIcon({ open }: { open: boolean }) {
   );
 }
 
+function subscribeDesktopFooter(onStoreChange: () => void) {
+  const media = window.matchMedia("(min-width: 768px)");
+  media.addEventListener("change", onStoreChange);
+  return () => media.removeEventListener("change", onStoreChange);
+}
+
+/** Matches the footer’s `md` breakpoint. Server and hydration stay false so a hidden desktop column does not fetch cities. */
+function useDesktopFooter() {
+  return useSyncExternalStore(subscribeDesktopFooter, () => window.matchMedia("(min-width: 768px)").matches, () => false);
+}
+
 export function Footer() {
   const { user } = useAuth();
   const signedIn = Boolean(user);
   const [openSection, setOpenSection] = useState<string | null>(null);
+  const desktopFooter = useDesktopFooter();
   const toggleSection = (id: string) => setOpenSection((current) => (current === id ? null : id));
 
   return (
@@ -366,7 +378,7 @@ export function Footer() {
           </div>
           <div className={`min-w-0 md:col-span-2 lg:col-span-1 xl:col-span-1 xl:px-6 ${columnRule}`}>
             <Suspense fallback={<FooterDeliverToFallback />}>
-              <FooterDeliverTo idPrefix="footer-cities-wide" />
+              <FooterDeliverTo idPrefix="footer-cities-wide" loadInternationalCities={desktopFooter} />
             </Suspense>
           </div>
           <div className={`min-w-0 xl:px-6 ${columnRule}`}>
@@ -407,7 +419,11 @@ export function Footer() {
             onToggle={() => toggleSection("deliver")}
           >
             <Suspense fallback={<FooterDeliverToFallback />}>
-              <FooterDeliverTo idPrefix="footer-cities-mobile" showHeading={false} />
+              <FooterDeliverTo
+                idPrefix="footer-cities-mobile"
+                showHeading={false}
+                loadInternationalCities={openSection === "deliver"}
+              />
             </Suspense>
           </FooterAccordion>
           <FooterAccordion

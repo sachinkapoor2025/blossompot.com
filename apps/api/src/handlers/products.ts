@@ -235,6 +235,20 @@ function wantsListingCardView(event: APIGatewayProxyEventV2): boolean {
 }
 
 /**
+ * Homepage rows only. Sent by `loadHomeCategoryProducts`.
+ * Category pages, search, sitemap, and product detail omit this header and keep
+ * the full partition merge plus bundled-catalog writes.
+ * A homepage row reads the requested primary partition, refreshes price and stock,
+ * then applies the same country, vendor, publication, and serviceability rules.
+ * It does not query other category partitions and does not write catalog rows.
+ */
+function wantsHomepageCategoryRow(event: APIGatewayProxyEventV2): boolean {
+  const headers = event.headers ?? {};
+  const value = headers["x-blossompot-home-row"] ?? headers["X-Blossompot-Home-Row"];
+  return value?.trim() === "1";
+}
+
+/**
  * Storefront list projection. Rakhi text is removed first, while description and seoTitle
  * are still present. A long description then becomes the 81-character dedupe stub.
  */
@@ -449,6 +463,7 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
   const componentSlugs = parseComponentSlugLookup(event.queryStringParameters?.slugs);
 
   let items: Product[] = [];
+  let homepageCategoryRow = false;
 
   if (componentSlugs) {
     if (componentSlugs.length > COMPONENT_SLUG_LOOKUP_LIMIT) {
@@ -473,6 +488,9 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
       items = [...bySlug.values()];
     } else if (category === "rakhi-hampers") {
       items = await queryProductsByCategory(category);
+    } else if (wantsHomepageCategoryRow(event) && !search) {
+      homepageCategoryRow = true;
+      items = await queryProductsByCategory(category);
     } else {
       const primary = await queryProductsByCategory(category);
       const bySlug = new Map(primary.map((product) => [product.slug, product]));
@@ -491,7 +509,9 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
 
   if (!componentSlugs) {
     items = await withFreshListingCommerce(items);
-    items = await persistAndMergeBundledCatalog(items, category);
+    if (!homepageCategoryRow) {
+      items = await persistAndMergeBundledCatalog(items, category);
+    }
   }
 
   items = items.filter(

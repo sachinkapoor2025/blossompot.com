@@ -322,7 +322,7 @@ export async function loadHomeCategoryProducts(
   categorySlug: string,
   country?: string
 ): Promise<CatalogView> {
-  return loadVisibleCategory(categorySlug, country, presentHomeCategoryRow);
+  return loadVisibleCategory(categorySlug, country, presentHomeCategoryRow, { homepageRow: true });
 }
 
 /** Category page. A successful empty API list is not filled from bundled JSON. */
@@ -336,10 +336,16 @@ export async function loadCategoryPageProducts(
 async function loadVisibleCategory(
   categorySlug: string,
   country: string | undefined,
-  present: typeof presentHomeCategoryRow
+  present: typeof presentHomeCategoryRow,
+  options?: { homepageRow?: boolean }
 ): Promise<CatalogView> {
   try {
-    const loaded = await readStorefrontCatalog({ category: categorySlug, country, listingView: "card" });
+    const loaded = await readStorefrontCatalog({
+      category: categorySlug,
+      country,
+      listingView: "card",
+      homepageRow: options?.homepageRow,
+    });
     const visible = dedupeStorefrontProducts(loaded.products.filter(isStorefrontVisible));
     return present(
       loaded.ok
@@ -358,6 +364,11 @@ async function readStorefrontCatalog(params?: {
   slugs?: readonly string[];
   /** Shop, search, category, and homepage rows. Other loaders keep the full list body. */
   listingView?: "card";
+  /**
+   * Homepage rows only. The products API then reads that category partition
+   * and skips other partitions and bundled-catalog writes. Category pages omit it.
+   */
+  homepageRow?: boolean;
 }): Promise<CatalogRead> {
   if (params?.category && storefrontSkipsRakhiCategory(params.category)) {
     return { ok: true, products: [], apiProductCount: 0 };
@@ -384,6 +395,7 @@ async function readStorefrontCatalog(params?: {
         headers: {
           "x-blossompot-listing-groups": "1",
           ...(params?.listingView === "card" ? { "x-blossompot-listing-view": "card" } : {}),
+          ...(params?.homepageRow ? { "x-blossompot-home-row": "1" } : {}),
         },
       }
     )

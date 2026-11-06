@@ -31,11 +31,15 @@ describe("listing gallery probes", () => {
     assert.match(page, /You might also like/);
   });
 
-  it("keeps the homepage intersection gate and the measured-image fallback", () => {
+  it("keeps extra gallery frames behind shopper intent and the measured-image fallback", () => {
     const rotator = source("components/ProductImageRotator.tsx");
-    assert.match(rotator, /if \(!seen \|\| resolved\.length === 0\) return/);
+    const card = source("components/HomeProductCard.tsx");
+    assert.match(rotator, /if \(!galleryReady \|\| resolved\.length === 0\) return/);
     assert.match(rotator, /rootMargin: "80px", threshold: 0\.15/);
     assert.match(rotator, /picked\.length > 0 \? picked : resolved\.slice\(0, MAX_FRAMES\)/);
-    assert.match(rotator, /loadWhenVisible && !seen/);
+    assert.match(rotator, /loadWhenVisible && !galleryReady/);
+    assert.doesNotMatch(rotator, /setSeen\(true\)/);
+    assert.match(card, /onPointerDown=\{\(\) => setGalleryEngaged\(true\)\}/);
+    assert.match(card, /galleryEngaged=\{galleryEngaged\}/);
   });
 });

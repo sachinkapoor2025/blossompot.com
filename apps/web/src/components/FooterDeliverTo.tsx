@@ -1,9 +1,15 @@
 "use client";
 
-import { useId, useState } from "react";
+import { Suspense, use, useId, useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { cityMenuForCountry, footerCityColumns } from "@/lib/city-menu-for-location";
+import {
+  COUNTRY_HUB,
+  footerCityColumns,
+  isLocalFooterCityMenu,
+  localCityMenu,
+  type CityMenuContent,
+} from "@/lib/city-menu-core";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
 import { footerUsaTopicHeading } from "@/lib/footer-usa-topic";
 import { COUNTRY_GUIDE_HREF } from "@/lib/gbo-delivery-countries";
@@ -23,39 +29,96 @@ export function FooterDeliverToFallback() {
   );
 }
 
-/** Delivery column. Country follows the header selection, the page URL, or the saved location. */
+const internationalMenuCache = new Map<string, Promise<CityMenuContent>>();
+
+function internationalMenu(iso: string): Promise<CityMenuContent> {
+  const key = iso.trim().toUpperCase();
+  let pending = internationalMenuCache.get(key);
+  if (!pending) {
+    pending = import("@/lib/city-menu-international").then((mod) => mod.internationalCityMenu(key));
+    internationalMenuCache.set(key, pending);
+  }
+  return pending;
+}
+
+/**
+ * Delivery column. Country follows the header selection, the page URL, or the saved location.
+ * US and UAE menus are local. The international registry loads only once `loadInternationalCities` is true.
+ */
 export function FooterDeliverTo({
   idPrefix = "footer-cities",
   showHeading = true,
+  loadInternationalCities = false,
 }: {
   idPrefix?: string;
   showHeading?: boolean;
+  loadInternationalCities?: boolean;
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { location, ready, pendingCountry } = useDeliveryLocation();
   const pathIso = countryIsoFromPathname(pathname, searchParams.get("country"));
   const iso = (pendingCountry ?? pathIso ?? (ready ? location?.countryCode : null) ?? "US").trim().toUpperCase();
+  if (isLocalFooterCityMenu(iso)) {
+    return <FooterCityColumn idPrefix={idPrefix} showHeading={showHeading} iso={iso} menu={localCityMenu(iso)} />;
+  }
+  if (!loadInternationalCities) {
+    return <FooterCityColumn idPrefix={idPrefix} showHeading={showHeading} iso={iso} menu={null} />;
+  }
+  return (
+    <Suspense fallback={<FooterCityColumn idPrefix={idPrefix} showHeading={showHeading} iso={iso} menu={null} />}>
+      <InternationalFooterCities idPrefix={idPrefix} showHeading={showHeading} iso={iso} />
+    </Suspense>
+  );
+}
+
+function InternationalFooterCities({
+  idPrefix,
+  showHeading,
+  iso,
+}: {
+  idPrefix: string;
+  showHeading: boolean;
+  iso: string;
+}) {
+  const menu = use(internationalMenu(iso));
+  return <FooterCityColumn idPrefix={idPrefix} showHeading={showHeading} iso={iso} menu={menu} />;
+}
+
+function FooterCityColumn({
+  idPrefix,
+  showHeading,
+  iso,
+  menu,
+}: {
+  idPrefix: string;
+  showHeading: boolean;
+  iso: string;
+  menu: CityMenuContent | null;
+}) {
+  const pathname = usePathname();
   const country = countryDisplayName(iso);
-  const menu = cityMenuForCountry(iso);
   const guideHref = COUNTRY_GUIDE_HREF[iso];
   const guide = guideHref ? countriesMenu.items.find((item) => item.href === guideHref) : undefined;
   const topicLabel =
     guide?.href === "/flower-delivery-usa" ? (footerUsaTopicHeading(pathname) ?? guide.label) : guide?.label;
-  const cityLinks = menu.links.map((city) => ({
+  const hub = COUNTRY_HUB[iso];
+  const cityLinks = (menu?.links ?? []).map((city) => ({
     label: city.menuLabel ?? city.label,
     href: city.href ?? cityNavHref(city),
     slug: city.slug,
     menuLabel: city.menuLabel,
   }));
-  const columns = footerCityColumns(cityLinks, iso);
+  const columns = menu ? footerCityColumns(cityLinks, iso) : null;
   const [expanded, setExpanded] = useState(false);
   const listId = useId();
-  const visible = expanded ? columns.all : columns.preview;
-  const canToggle = columns.all.length > columns.preview.length;
+  const visible = columns ? (expanded ? columns.all : columns.preview) : [];
+  const canToggle = columns ? columns.all.length > columns.preview.length : false;
+  const allLabel = menu?.allLabel ?? hub?.label ?? "All locations";
+  const allHref = menu?.allHref ?? hub?.href ?? "/locations";
 
   return (
-    <div className="min-w-0">
+    <div className="min-w-0" aria-busy={menu ? undefined : true}>
       {showHeading ? (
         <h2 className="flex items-center gap-1.5 text-sm font-semibold text-primary">
           <PinIcon />
@@ -96,13 +159,13 @@ export function FooterDeliverTo({
             aria-controls={`${idPrefix}-${listId}`}
             onClick={() => setExpanded((open) => !open)}
           >
-            {expanded ? "Show fewer locations ↑" : `${menu.allLabel} →`}
+            {expanded ? "Show fewer locations ↑" : `${allLabel} →`}
           </button>
         </p>
-      ) : menu.allHref ? (
+      ) : allHref ? (
         <p className="mt-3 text-center">
-          <Link href={menu.allHref} className="font-medium text-primary hover:underline">
-            {menu.allLabel} →
+          <Link href={allHref} className="font-medium text-primary hover:underline">
+            {allLabel} →
           </Link>
         </p>
       ) : null}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import type { Product } from "@blossompot/shared";
 import { isFastSelling } from "@blossompot/shared";
@@ -16,7 +17,7 @@ import { useOptionalDeliveryLocation } from "@/lib/delivery-location-context";
 
 type HomeProductCardProps = {
   showFastSellingBadge?: boolean;
-  /** Homepage rows defer extra gallery frames until the card is on screen. */
+  /** Homepage and listing grids defer extra gallery frames until the shopper shows intent. */
   loadGalleryWhenVisible?: boolean;
   /** When false, the card links to the product page and does not offer add-to-cart. */
   showPurchaseControls?: boolean;
@@ -69,6 +70,7 @@ export function HomeProductCard({
   const currency = combo ? combo.currency : (product?.currency ?? "USD");
   const name = combo ? combo.name : (product?.name ?? "");
   const discount = getDiscountPercent(price, compareAtPrice);
+  const [galleryEngaged, setGalleryEngaged] = useState(false);
   const fastSelling = product != null && (showFastSellingBadge || isFastSelling(product));
   const [first, second] = combo?.components ?? [];
   const details = (
@@ -100,7 +102,12 @@ export function HomeProductCard({
   );
 
   return (
-    <div className="border border-slate-200 rounded-xl overflow-hidden bg-white hover:shadow-md transition-shadow relative flex h-full flex-col">
+    <div
+      className="border border-slate-200 rounded-xl overflow-hidden bg-white hover:shadow-md transition-shadow relative flex h-full flex-col"
+      onMouseEnter={() => setGalleryEngaged(true)}
+      onFocusCapture={() => setGalleryEngaged(true)}
+      onPointerDown={() => setGalleryEngaged(true)}
+    >
       <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-slate-50">
         {/* Badges stacked top-left; wishlist alone top-right — no overlap on mobile */}
         <div className="absolute top-2 left-2 z-10 flex flex-col items-start gap-1 max-w-[70%] pointer-events-none">
@@ -141,6 +148,7 @@ export function HomeProductCard({
               staggerKey={product.slug}
               className="pointer-events-none absolute inset-0 h-full w-full"
               loadWhenVisible={loadGalleryWhenVisible}
+              galleryEngaged={galleryEngaged}
             />
           </Link>
         ) : null}

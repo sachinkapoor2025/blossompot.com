@@ -31,10 +31,12 @@ export function ProductImageRotator({
   /** First image eager only for above-the-fold cards; listing grids should stay lazy. */
   priority = false,
   /**
-   * Homepage rows and listing grids pass true so off-screen cards keep a
-   * single lazy frame until they intersect. The first frame stays in place.
+   * Homepage rows and listing grids pass true so extra gallery frames stay
+   * unloaded until the shopper shows intent. The first frame stays in place.
    */
   loadWhenVisible = false,
+  /** Set when the shopper hovers, focuses, or presses the card. */
+  galleryEngaged = false,
 }: {
   images: string[];
   alt: string;
@@ -42,6 +44,7 @@ export function ProductImageRotator({
   staggerKey?: string;
   priority?: boolean;
   loadWhenVisible?: boolean;
+  galleryEngaged?: boolean;
 }) {
   const resolved = useMemo(
     () => [...new Set(images.map(resolveImageUrl).filter(Boolean))].slice(0, MAX_FRAMES),
@@ -51,13 +54,13 @@ export function ProductImageRotator({
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [visible, setVisible] = useState(!loadWhenVisible);
-  const [seen, setSeen] = useState(!loadWhenVisible);
   const [root, setRoot] = useState<HTMLDivElement | null>(null);
+  const galleryReady = !loadWhenVisible || galleryEngaged;
 
   useEffect(() => {
     setUrls([]);
     setIndex(0);
-    if (!seen || resolved.length === 0) return;
+    if (!galleryReady || resolved.length === 0) return;
 
     let cancelled = false;
     const measured: SizedProductImage[] = [];
@@ -88,15 +91,13 @@ export function ProductImageRotator({
     return () => {
       cancelled = true;
     };
-  }, [resolved, seen]);
+  }, [resolved, galleryReady]);
 
   useEffect(() => {
     if (!root || typeof IntersectionObserver === "undefined") return;
     const io = new IntersectionObserver(
       ([entry]) => {
-        const onScreen = Boolean(entry?.isIntersecting);
-        setVisible(onScreen);
-        if (onScreen) setSeen(true);
+        setVisible(Boolean(entry?.isIntersecting));
       },
       { rootMargin: "80px", threshold: 0.15 }
     );
@@ -122,10 +123,7 @@ export function ProductImageRotator({
   }, [urls, paused, visible, staggerKey]);
 
   const gallery = urls.length > 0 ? urls : resolved;
-  const frames =
-    loadWhenVisible && !seen
-      ? gallery.slice(0, 1)
-      : gallery;
+  const frames = loadWhenVisible && !galleryReady ? gallery.slice(0, 1) : gallery;
 
   if (resolved.length === 0) {
     return (
