@@ -228,6 +228,31 @@ function PartnerLinks() {
   );
 }
 
+function SocialFollow() {
+  return (
+    <div className="mt-4">
+      <p className="mb-2 text-sm text-slate-600">Follow Us</p>
+      <ul className="flex flex-nowrap items-center gap-0.5" aria-label="Social media">
+        {SOCIAL_LINKS.map((social) => (
+          <li key={social.name} className="shrink-0">
+            <a
+              href={social.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={social.label}
+              title={social.label}
+              style={social.style}
+              className={`flex h-6 w-6 shrink-0 items-center justify-center transition-transform hover:scale-105 ${social.className}`}
+            >
+              {social.icon}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function FooterAccordion({
   id,
   title,
@@ -290,26 +315,6 @@ function BrandColumn() {
             {whatsappLinkLabel()}
           </a>
         </p>
-      </div>
-      <div className="mt-4">
-        <p className="mb-2 text-sm text-slate-600">Follow Us</p>
-        <ul className="flex flex-wrap items-center gap-1" aria-label="Social media">
-          {SOCIAL_LINKS.map((social) => (
-            <li key={social.name}>
-              <a
-                href={social.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={social.label}
-                title={social.label}
-                style={social.style}
-                className={`flex h-7 w-7 shrink-0 items-center justify-center transition-transform hover:scale-105 ${social.className}`}
-              >
-                {social.icon}
-              </a>
-            </li>
-          ))}
-        </ul>
       </div>
     </div>
   );
@@ -388,6 +393,7 @@ export function Footer() {
           <div className="min-w-0 xl:pl-6">
             <ColumnHeading icon={<PartnersIcon />}>For Partners</ColumnHeading>
             <PartnerLinks />
+            <SocialFollow />
           </div>
         </div>
 
@@ -443,6 +449,7 @@ export function Footer() {
             onToggle={() => toggleSection("partners")}
           >
             <PartnerLinks />
+            <SocialFollow />
           </FooterAccordion>
         </div>
 
