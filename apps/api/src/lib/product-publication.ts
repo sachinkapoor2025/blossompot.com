@@ -37,22 +37,64 @@ async function readStoredPublication(slug: string): Promise<StoredPublication> {
 
 const PUBLICATION_READ_CHUNK = 25;
 
-async function readPublishedFlag(slug: string): Promise<{ slug: string; published?: boolean } | null> {
+/**
+ * Consistent catalog fields used to correct a warm product-body cache.
+ * `published` stays `undefined` when the attribute is missing so the schema default still applies.
+ * Price and inventory are present only when the stored attribute is a usable number.
+ */
+export type StoredListingCommerce = {
+  slug: string;
+  published?: boolean;
+  price?: number;
+  inventory?: number;
+};
+
+function finitePrice(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function storedInventory(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : undefined;
+}
+
+async function readStoredCommerce(slug: string): Promise<StoredListingCommerce | null> {
   const result = await docClient.send(
     new GetCommand({
       TableName: PRODUCTS_TABLE,
       Key: { PK: productKeys.pk(slug), SK: productKeys.sk() },
-      ProjectionExpression: "published, slug",
+      ProjectionExpression: "published, slug, price, inventory",
       ConsistentRead: true,
     })
   );
-  const item = result.Item as { published?: boolean; slug?: string } | undefined;
+  const item = result.Item as {
+    published?: boolean;
+    slug?: string;
+    price?: unknown;
+    inventory?: unknown;
+  } | undefined;
   if (!item) return null;
-  const published = typeof item.published === "boolean" ? item.published : undefined;
+  const price = finitePrice(item.price);
+  const inventory = storedInventory(item.inventory);
   return {
     slug: typeof item.slug === "string" && item.slug ? item.slug : slug,
-    ...(published === undefined ? {} : { published }),
+    ...(typeof item.published === "boolean" ? { published: item.published } : {}),
+    ...(price !== undefined ? { price } : {}),
+    ...(inventory !== undefined ? { inventory } : {}),
   };
+}
+
+async function readCommerceBySlug(slugs: readonly string[]): Promise<Map<string, StoredListingCommerce>> {
+  const unique = [...new Set(slugs.map((slug) => slug.trim()).filter(Boolean))];
+  const rows = new Map<string, StoredListingCommerce>();
+  for (let index = 0; index < unique.length; index += PUBLICATION_READ_CHUNK) {
+    const slice = unique.slice(index, index + PUBLICATION_READ_CHUNK);
+    const found = await Promise.all(slice.map((slug) => readStoredCommerce(slug)));
+    for (const row of found) {
+      if (!row) continue;
+      rows.set(row.slug, row);
+    }
+  }
+  return rows;
 }
 
 /**
@@ -61,17 +103,17 @@ async function readPublishedFlag(slug: string): Promise<{ slug: string; publishe
  * Rows that are not in the table are omitted.
  */
 export async function storedPublishedBySlug(slugs: readonly string[]): Promise<Map<string, boolean | undefined>> {
-  const unique = [...new Set(slugs.map((slug) => slug.trim()).filter(Boolean))];
+  const commerce = await readCommerceBySlug(slugs);
   const flags = new Map<string, boolean | undefined>();
-  for (let index = 0; index < unique.length; index += PUBLICATION_READ_CHUNK) {
-    const slice = unique.slice(index, index + PUBLICATION_READ_CHUNK);
-    const rows = await Promise.all(slice.map((slug) => readPublishedFlag(slug)));
-    for (const row of rows) {
-      if (!row) continue;
-      flags.set(row.slug, row.published);
-    }
-  }
+  for (const [slug, row] of commerce) flags.set(slug, row.published);
   return flags;
+}
+
+/** Consistent `published`, `price`, and `inventory` for cached catalog rows. Missing rows are omitted. */
+export async function storedListingCommerceBySlug(
+  slugs: readonly string[]
+): Promise<Map<string, StoredListingCommerce>> {
+  return readCommerceBySlug(slugs);
 }
 
 /** Slugs whose current catalog row is unpublished. Missing rows are not included. */

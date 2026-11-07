@@ -13,7 +13,7 @@ describe("USA footer topic heading", () => {
     assert.equal(footerUsaTopicHeading("/valentines-day-gifts-to-usa"), "Valentine's Gifts Deliver in USA");
     assert.equal(footerUsaTopicHeading("/hampers-to-usa"), "Hampers Deliver in USA");
     assert.equal(footerUsaTopicHeading("/combos"), "Combos Deliver in USA");
-    assert.equal(footerUsaTopicHeading("/gift-catalog"), "Gifts Catalog Deliver in USA");
+    assert.equal(footerUsaTopicHeading("/gift-catalog"), "Flower & Cake Combo Deliver in USA");
   });
 
   it("keeps the existing label on unrelated routes", () => {

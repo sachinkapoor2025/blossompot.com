@@ -15,8 +15,7 @@ describe("main navigation", () => {
       "Valentine's",
       "Hampers",
       "Combos",
-      "Gift Catalog",
-      "Remember",
+      "Flower & Cake Combo",
     ]);
 
     const combos = navItems.find((item) => item.label === "Combos");

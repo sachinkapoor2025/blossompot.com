@@ -44,7 +44,11 @@ import { getAuth, requireAdmin } from "../lib/auth";
 import { withResolvedProductImages, resolveProductImageUrl } from "../lib/images";
 import { syncInventoryAlertState } from "../lib/inventory";
 import { ensureProductInDb } from "../lib/ensure-product";
-import { readProductPublication, slugsMarkedUnpublished, storedPublishedBySlug } from "../lib/product-publication";
+import {
+  storedListingCommerceBySlug,
+  storedPublishedBySlug,
+  type StoredListingCommerce,
+} from "../lib/product-publication";
 import { getBundledUsarakhiProduct, listBundledCatalogProducts, persistMissingBundledCatalogProducts } from "../lib/blossompot-catalog";
 import { getBundledOrangeCountyProduct } from "../lib/orange-county-catalog";
 
@@ -231,6 +235,20 @@ function wantsListingCardView(event: APIGatewayProxyEventV2): boolean {
 }
 
 /**
+ * Homepage rows only. Sent by `loadHomeCategoryProducts`.
+ * Category pages, search, sitemap, and product detail omit this header and keep
+ * the full partition merge plus bundled-catalog writes.
+ * A homepage row reads the requested primary partition, refreshes price and stock,
+ * then applies the same country, vendor, publication, and serviceability rules.
+ * It does not query other category partitions and does not write catalog rows.
+ */
+function wantsHomepageCategoryRow(event: APIGatewayProxyEventV2): boolean {
+  const headers = event.headers ?? {};
+  const value = headers["x-blossompot-home-row"] ?? headers["X-Blossompot-Home-Row"];
+  return value?.trim() === "1";
+}
+
+/**
  * Storefront list projection. Rakhi text is removed first, while description and seoTitle
  * are still present. A long description then becomes the 81-character dedupe stub.
  */
@@ -414,12 +432,38 @@ export function invalidateProductListCache(categorySlug?: string) {
   else categoryProductCache.clear();
 }
 
+/**
+ * Correct publication, price, and stock on a cached body without writing back into that cache.
+ * A missing stored `published` flag is removed so the schema default stays eligible.
+ */
+function applyListingCommerce(product: Product, commerce: StoredListingCommerce): Product {
+  const next: Product = { ...product };
+  if (commerce.published === undefined) {
+    delete (next as { published?: boolean }).published;
+  } else {
+    next.published = commerce.published;
+  }
+  if (commerce.price !== undefined) next.price = commerce.price;
+  if (commerce.inventory !== undefined) next.inventory = commerce.inventory;
+  return next;
+}
+
+async function withFreshListingCommerce(items: Product[]): Promise<Product[]> {
+  if (items.length === 0) return items;
+  const commerce = await storedListingCommerceBySlug(items.map((product) => product.slug));
+  return items.map((product) => {
+    const fresh = commerce.get(product.slug);
+    return fresh ? applyListingCommerce(product, fresh) : product;
+  });
+}
+
 export async function listProducts(event: APIGatewayProxyEventV2) {
   const category = event.queryStringParameters?.category;
   const search = event.queryStringParameters?.search?.toLowerCase();
   const componentSlugs = parseComponentSlugLookup(event.queryStringParameters?.slugs);
 
   let items: Product[] = [];
+  let homepageCategoryRow = false;
 
   if (componentSlugs) {
     if (componentSlugs.length > COMPONENT_SLUG_LOOKUP_LIMIT) {
@@ -444,6 +488,9 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
       items = [...bySlug.values()];
     } else if (category === "rakhi-hampers") {
       items = await queryProductsByCategory(category);
+    } else if (wantsHomepageCategoryRow(event) && !search) {
+      homepageCategoryRow = true;
+      items = await queryProductsByCategory(category);
     } else {
       const primary = await queryProductsByCategory(category);
       const bySlug = new Map(primary.map((product) => [product.slug, product]));
@@ -460,7 +507,12 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
     items = await scanAllProducts();
   }
 
-  if (!componentSlugs) items = await persistAndMergeBundledCatalog(items, category);
+  if (!componentSlugs) {
+    items = await withFreshListingCommerce(items);
+    if (!homepageCategoryRow) {
+      items = await persistAndMergeBundledCatalog(items, category);
+    }
+  }
 
   items = items.filter(
     (p) =>
@@ -469,8 +521,6 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
       isProductStorefrontVisible(p) &&
       !isGboHiddenFromStorefront(p)
   );
-  const unpublished = await slugsMarkedUnpublished(items.map((product) => product.slug));
-  if (unpublished.size > 0) items = items.filter((product) => !unpublished.has(product.slug));
   if (search) {
     items = items.filter(
       (p) =>
@@ -523,23 +573,24 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
   const nowMs = Date.now();
   const cached = productGetCache.get(slug);
   if (cached && nowMs - cached.at < PRODUCT_GET_CACHE_TTL_MS) {
-    const publication = await readProductPublication(slug);
-    if (publication.found && publication.unpublished) {
+    const commerce = await storedListingCommerceBySlug([slug]);
+    const fresh = commerce.get(slug);
+    if (!fresh) {
+      productGetCache.delete(slug);
+    } else if (fresh.published === false) {
       productGetCache.delete(slug);
       return notFound("Product not found");
-    }
-    if (!publication.found) {
-      productGetCache.delete(slug);
     } else {
-      if (isGboHiddenFromStorefront(cached.product)) return notFound("Product not found");
+      const product = applyListingCommerce(cached.product, fresh);
+      if (isGboHiddenFromStorefront(product)) return notFound("Product not found");
       const location = await resolveShoppingLocation(parseLocationQuery(event));
       if (!location) return notFound(NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE);
-      const visible = productVisibleForDeliveryCountry(cached.product, location.countryCode);
-      const shopping = await decideNewShopping(cached.product, location.countryCode);
+      const visible = productVisibleForDeliveryCountry(product, location.countryCode);
+      const shopping = await decideNewShopping(product, location.countryCode);
       if (vendorHiddenFromStorefront(shopping)) return notFound("Product not found");
       if (!visible || !shopping.available) {
         return ok({
-          product: forStorefront(cached.product),
+          product: forStorefront(product),
           availability: {
             deliverable: false,
             reason: shopping.reason ?? "country_not_allowed",
@@ -547,9 +598,9 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
           },
         });
       }
-      const [evalRow] = await evaluateProductsForLocation([cached.product], location);
+      const [evalRow] = await evaluateProductsForLocation([product], location);
       return ok({
-        product: forStorefront(cached.product),
+        product: forStorefront(product),
         availability: {
           deliverable: Boolean(evalRow?.deliverable),
           reason: evalRow?.reason,
@@ -782,6 +833,25 @@ export async function updateProduct(event: APIGatewayProxyEventV2) {
   return ok({ product: updated });
 }
 
+/** A malformed gallery or tag field must not reject the whole admin catalog. */
+function adminSampleFlag(product: Product): boolean {
+  try {
+    return isSampleCatalogProduct(product);
+  } catch (err) {
+    console.error("admin sample check failed", product.slug, err);
+    return false;
+  }
+}
+
+function adminListRow(product: Product): Product {
+  try {
+    return withResolvedProductImages(product);
+  } catch (err) {
+    console.error("admin image resolve failed", product.slug, err);
+    return product;
+  }
+}
+
 /** Admin: list all products including unpublished. Query `?sample=all|true|false`. */
 export async function listAdminProducts(event: APIGatewayProxyEventV2) {
   const auth = getAuth(event);
@@ -791,7 +861,11 @@ export async function listAdminProducts(event: APIGatewayProxyEventV2) {
 
   let items = await scanAllProducts();
   const dynamoSlugs = new Set(items.map((p) => p.slug));
-  items = mergeBundledCatalogProducts(items);
+  try {
+    items = mergeBundledCatalogProducts(items);
+  } catch (err) {
+    console.error("mergeBundledCatalogProducts failed", err);
+  }
   try {
     const persisted = await persistMissingBundledCatalogProducts(
       dynamoSlugs,
@@ -805,17 +879,22 @@ export async function listAdminProducts(event: APIGatewayProxyEventV2) {
   }
   items.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
-  const sampleCount = items.filter((p) => isSampleCatalogProduct(p)).length;
+  const sampleCount = items.filter((p) => adminSampleFlag(p)).length;
   const realCount = items.length - sampleCount;
 
   if (sampleFilter === "true" || sampleFilter === "sample") {
-    items = items.filter((p) => isSampleCatalogProduct(p));
+    items = items.filter((p) => adminSampleFlag(p));
   } else if (sampleFilter === "false" || sampleFilter === "real") {
-    items = items.filter((p) => !isSampleCatalogProduct(p));
+    items = items.filter((p) => !adminSampleFlag(p));
   }
 
   // The scan cache can be five minutes old on another Lambda. Refresh only `published`.
-  const publishedNow = await storedPublishedBySlug([...dynamoSlugs]);
+  let publishedNow = new Map<string, boolean | undefined>();
+  try {
+    publishedNow = await storedPublishedBySlug([...dynamoSlugs]);
+  } catch (err) {
+    console.error("storedPublishedBySlug failed", err);
+  }
   items = items.map((item) => {
     if (!publishedNow.has(item.slug)) return item;
     const published = publishedNow.get(item.slug);
@@ -829,7 +908,7 @@ export async function listAdminProducts(event: APIGatewayProxyEventV2) {
   });
 
   return ok({
-    products: items.map(withResolvedProductImages),
+    products: items.map(adminListRow),
     meta: {
       totalScanned: items.length,
       returned: items.length,

@@ -27,11 +27,13 @@ const LOGO = {
 type SiteLogoProps = {
   size?: keyof typeof LOGO;
   priority?: boolean;
+  /** Used when `priority` is false. Eager keeps a visible logo from waiting on lazy loading. */
+  loading?: "eager" | "lazy";
   className?: string;
 };
 
 /** Same logo rendering in header and footer — no blend modes. */
-export function SiteLogo({ size = "desktop", priority = false, className = "" }: SiteLogoProps) {
+export function SiteLogo({ size = "desktop", priority = false, loading, className = "" }: SiteLogoProps) {
   const { width, height, className: sizeClass } = LOGO[size];
   return (
     <Image
@@ -41,6 +43,7 @@ export function SiteLogo({ size = "desktop", priority = false, className = "" }:
       height={height}
       className={`${sizeClass} ${className}`.trim()}
       priority={priority}
+      {...(!priority && loading ? { loading } : {})}
       sizes="(max-width: 768px) 210px, 280px"
     />
   );
@@ -49,12 +52,13 @@ export function SiteLogo({ size = "desktop", priority = false, className = "" }:
 export function SiteLogoLink({
   size = "desktop",
   priority = false,
+  loading,
   className = "",
   onClick,
 }: SiteLogoProps & { onClick?: () => void }) {
   return (
     <Link href="/" className={`inline-block shrink-0 ${className}`.trim()} onClick={onClick}>
-      <SiteLogo size={size} priority={priority} />
+      <SiteLogo size={size} priority={priority} loading={loading} />
     </Link>
   );
 }

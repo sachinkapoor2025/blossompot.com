@@ -15,7 +15,7 @@ export function footerUsaTopicHeading(pathname: string): string | null {
   const path = normalizePathname(pathname.split("?")[0] ?? pathname);
   if (path === "/") return "Deliver in USA";
   if (path === "/combos") return "Combos Deliver in USA";
-  if (path === "/gift-catalog") return "Gifts Catalog Deliver in USA";
+  if (path === "/gift-catalog") return "Flower & Cake Combo Deliver in USA";
 
   const parsed = parseLocationShopPath(path);
   if (!parsed || parsed.kind !== "category" || parsed.countryIso !== "US") return null;

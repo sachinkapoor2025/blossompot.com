@@ -102,7 +102,7 @@ When admin (or Orange County vendor tracking) changes order status (accepted, pr
 
 | Method | Path | Purpose |
 |--------|------|---------|
-| GET | `/products` | List/search products. Optional `country` + `postalCode` filters to vendors that can fulfill that location. Omit for full catalog (SEO). |
+| GET | `/products` | List/search products. Optional `country` + `postalCode` filters to vendors that can fulfill that location. Omit for full catalog (SEO). Homepage rows send `x-blossompot-home-row: 1` with a category and no search: the API reads only that primary partition and does not write bundled catalog rows. Category pages omit the header and still merge every other partition. |
 | GET | `/combos` | Published combo records (`slug`, `name`, `productSlugs`). Does not store or return a combo price. |
 | GET | `/products/{slug}` | Product detail. Optional `country` + `postalCode` adds `availability`. |
 | GET/POST | `/location/check-serviceability` | Guest: country + postal → serviceable vendors |

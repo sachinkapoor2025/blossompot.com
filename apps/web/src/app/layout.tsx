@@ -19,6 +19,7 @@ import { LocationCategoryUrlSync } from "@/components/LocationCategoryUrlSync";
 import { GiftCatalogHashRedirect } from "@/components/GiftCatalogHashRedirect";
 import { AnalyticsScripts, GoogleAnalytics } from "@/components/AnalyticsScripts";
 import { MetaPixel } from "@/components/MetaPixel";
+import { DAILY_DEAL_TIMER_BOOT_SCRIPT } from "@/lib/daily-deal-popup";
 import { site } from "@/lib/site";
 import { getSiteVerification } from "@/lib/analytics-config";
 import {
@@ -28,18 +29,25 @@ import {
   canonical,
 } from "@/lib/seo";
 
-/** Self-hosted — CI must not fetch Google Fonts at build time (fonts.gstatic.com flakes). */
+/**
+ * Self-hosted — CI must not fetch Google Fonts at build time (fonts.gstatic.com flakes).
+ * Cormorant 600 is the first-viewport heading weight and is preloaded.
+ * Weights 500 and 700 stay on the same family and load when a heading uses them.
+ */
 const display = localFont({
-  src: [
-    { path: "../fonts/cormorant-garamond-latin-500-normal.woff2", weight: "500", style: "normal" },
-    { path: "../fonts/cormorant-garamond-latin-600-normal.woff2", weight: "600", style: "normal" },
-    { path: "../fonts/cormorant-garamond-latin-700-normal.woff2", weight: "700", style: "normal" },
-  ],
+  src: [{ path: "../fonts/cormorant-garamond-latin-600-normal.woff2", weight: "600", style: "normal" }],
   variable: "--font-display",
   display: "swap",
   adjustFontFallback: "Times New Roman",
   fallback: ["ui-serif", "Georgia", "serif"],
 });
+
+function primaryFontFamily(font: { style: { fontFamily: string } }): string {
+  return font.style.fontFamily.split(",")[0]?.trim().replace(/['"]/g, "") ?? "";
+}
+
+const displayFamily = primaryFontFamily(display);
+const extraDisplayFaces = `@font-face{font-family:"${displayFamily}";font-style:normal;font-weight:500;font-display:swap;src:url("/fonts/cormorant-garamond-latin-500-normal.woff2") format("woff2");}@font-face{font-family:"${displayFamily}";font-style:normal;font-weight:700;font-display:swap;src:url("/fonts/cormorant-garamond-latin-700-normal.woff2") format("woff2");}`;
 
 const sans = localFont({
   src: [
@@ -114,6 +122,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${display.variable} ${sans.variable}`}>
       <head>
+        <style dangerouslySetInnerHTML={{ __html: extraDisplayFaces }} />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
@@ -127,6 +136,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {bingSiteVerification ? <meta name="msvalidate.01" content={bingSiteVerification} /> : null}
       </head>
       <body className="min-h-screen antialiased flex flex-col font-sans">
+        <script id="daily-deal-timer" dangerouslySetInnerHTML={{ __html: DAILY_DEAL_TIMER_BOOT_SCRIPT }} />
         <GoogleAnalytics />
         <MetaPixel />
         <AnalyticsScripts />

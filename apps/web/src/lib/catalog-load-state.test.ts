@@ -12,6 +12,7 @@ import {
   loadCategoryPageProducts,
   loadHomeCategoryProducts,
   loadProducts,
+  loadRelatedProducts,
   loadStorefrontCatalog,
 } from "./product-loader";
 
@@ -223,10 +224,14 @@ describe("catalog request status", () => {
   });
 
   it("asks the products list for the card view and does not send that header to other paths", async () => {
-    const seen: Array<{ url: string; view: string | null }> = [];
+    const seen: Array<{ url: string; view: string | null; home: string | null }> = [];
     globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
       const headers = new Headers(init?.headers);
-      seen.push({ url: String(input), view: headers.get("x-blossompot-listing-view") });
+      seen.push({
+        url: String(input),
+        view: headers.get("x-blossompot-listing-view"),
+        home: headers.get("x-blossompot-home-row"),
+      });
       return jsonResponse({ products: [flower("api-rose")] });
     }) as typeof fetch;
 
@@ -235,6 +240,7 @@ describe("catalog request status", () => {
     const productCalls = seen.filter((call) => call.url.includes("/products"));
     assert.equal(productCalls.length > 0, true);
     assert.equal(productCalls.every((call) => call.view === "card"), true);
+    assert.equal(productCalls.every((call) => call.home == null), true);
     assert.equal(productCalls.some((call) => /\/products\/[^?]+/.test(call.url)), false);
 
     seen.length = 0;
@@ -242,13 +248,28 @@ describe("catalog request status", () => {
     const fullListCalls = seen.filter((call) => call.url.includes("/products"));
     assert.equal(fullListCalls.length > 0, true);
     assert.equal(fullListCalls.every((call) => call.view == null), true);
+    assert.equal(fullListCalls.every((call) => call.home == null), true);
 
-    for (const load of [loadCategoryPageProducts, loadHomeCategoryProducts]) {
-      seen.length = 0;
-      await load("flowers", "US");
-      const calls = seen.filter((call) => call.url.includes("/products"));
-      assert.equal(calls.length > 0, true);
-      assert.equal(calls.every((call) => call.view === "card"), true);
-    }
+    seen.length = 0;
+    await loadCategoryPageProducts("flowers", "US");
+    const categoryCalls = seen.filter((call) => call.url.includes("/products"));
+    assert.equal(categoryCalls.length > 0, true);
+    assert.equal(categoryCalls.every((call) => call.view === "card"), true);
+    assert.equal(categoryCalls.every((call) => call.home == null), true);
+
+    seen.length = 0;
+    await loadHomeCategoryProducts("flowers", "US");
+    const homeCalls = seen.filter((call) => call.url.includes("/products"));
+    assert.equal(homeCalls.length > 0, true);
+    assert.equal(homeCalls.every((call) => call.view === "card"), true);
+    assert.equal(homeCalls.every((call) => call.home === "1"), true);
+
+    seen.length = 0;
+    await loadRelatedProducts("flowers", "current-product", "US");
+    const relatedCalls = seen.filter((call) => call.url.includes("/products"));
+    assert.equal(relatedCalls.length > 0, true);
+    assert.equal(relatedCalls.every((call) => call.view === "card"), true);
+    assert.equal(relatedCalls.every((call) => call.home == null), true);
+    assert.equal(relatedCalls.some((call) => call.url.includes("category=flowers")), true);
   });
 });

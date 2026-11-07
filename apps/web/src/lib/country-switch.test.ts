@@ -199,10 +199,15 @@ describe("country switch navigation", () => {
 
   it("does not offer a countries menu in the header", () => {
     const header = readFileSync(path.join(__dirname, "../components/Header.tsx"), "utf8");
+    const citiesPanel = readFileSync(
+      path.join(__dirname, "../components/header/HeaderCityMenus.tsx"),
+      "utf8"
+    );
     assert.equal(header.includes("COUNTRY_GUIDE_HREF"), false);
     assert.equal(header.includes("function CountriesMenu"), false);
     assert.equal(header.includes("countriesMenu"), false);
     assert.equal(header.includes("countryMenuDestination"), false);
-    assert.match(header, /useGboDeliveryCountries/);
+    assert.equal(citiesPanel.includes("function CountriesMenu"), false);
+    assert.match(citiesPanel, /useGboDeliveryCountries/);
   });
 });

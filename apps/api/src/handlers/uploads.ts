@@ -1,6 +1,7 @@
 import { DeleteObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { APIGatewayProxyEventV2 } from "aws-lambda";
+import { invalidateProductListCache } from "./products";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
 import path from "path";
@@ -182,6 +183,7 @@ export async function attachImageToProduct(event: APIGatewayProxyEventV2) {
     if (isTransactionConflict(err)) return json(409, { error: SKU_TAKEN_MESSAGE });
     throw err;
   }
+  invalidateProductListCache();
   await recordUploadRegistry(slug, imageUrl, keyFromPublicUrl(imageUrl));
   const { withResolvedProductImages } = await import("../lib/images");
   return ok({ product: withResolvedProductImages(updated) });
@@ -236,6 +238,7 @@ export async function deleteImageFromProduct(event: APIGatewayProxyEventV2) {
     if (isTransactionConflict(err)) return json(409, { error: SKU_TAKEN_MESSAGE });
     throw err;
   }
+  invalidateProductListCache();
 
   let storageDeleted = false;
   try {

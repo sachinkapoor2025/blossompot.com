@@ -41,36 +41,13 @@ export default function HomePage({
 }: {
   searchParams: Promise<{ country?: string }>;
 }) {
-  // Start reviews immediately so they overlap the catalog fetch instead of following it.
+  // Start reviews and the indexable country immediately so they overlap the shopper-country lookup.
   const reviewsPromise = getGoogleReviews();
+  const indexableCountryPromise = getIndexableHomeCountry();
   return (
     <div>
       <HomeHero banners={[...homeBanners]} />
       <HomeBrandTaglines />
-      <Suspense fallback={<HomeBelowHeroFallback />}>
-        <HomeBelowHero searchParams={searchParams} reviewsPromise={reviewsPromise} />
-      </Suspense>
-    </div>
-  );
-}
-
-/** Resolves the delivery country, then streams the category product rows. */
-async function HomeBelowHero({
-  searchParams,
-  reviewsPromise,
-}: {
-  searchParams: Promise<{ country?: string }>;
-  reviewsPromise: ReturnType<typeof getGoogleReviews>;
-}) {
-  const params = await searchParams;
-  const deliveryCountry = await getStorefrontDeliveryCountry(params.country);
-  const indexableCountry = await getIndexableHomeCountry();
-  const indexableSeo = countrySeoContent(indexableCountry, "home");
-  const destinationName = resolveDeliveryCountry(deliveryCountry).countryName;
-
-  return (
-    <>
-      <JsonLd data={[faqJsonLd(indexableSeo.faqs)]} />
       <TrustStrip />
 
       <div className="max-w-7xl mx-auto px-4 pt-6 pb-2 flex flex-wrap justify-center gap-3">
@@ -82,25 +59,9 @@ async function HomeBelowHero({
         </Link>
       </div>
 
-      <section className="max-w-7xl mx-auto px-4 py-10">
-        <p className="text-sm text-slate-600">
-          Flowers, bouquets, cakes, and hampers for {destinationName}.
-        </p>
-        <div className="mt-8 space-y-10">
-          {HOME_PRODUCT_SECTIONS.map((section) => (
-            <Suspense
-              key={section.slug}
-              fallback={<HomeCategoryProductRowFallback title={section.title} />}
-            >
-              <HomeCategoryProductRow
-                slug={section.slug}
-                title={section.title}
-                country={deliveryCountry}
-              />
-            </Suspense>
-          ))}
-        </div>
-      </section>
+      <Suspense fallback={<HomeBelowHeroFallback />}>
+        <HomeProductSection searchParams={searchParams} />
+      </Suspense>
 
       <section className="max-w-7xl mx-auto px-4 py-12">
         <div className="rounded-3xl border border-primary/15 bg-gradient-to-br from-rose-50 via-white to-orange-50 p-8 sm:p-12">
@@ -134,30 +95,12 @@ async function HomeBelowHero({
       </Suspense>
 
       <HomeFlowerGuideCta />
-      <HomeSeoSection countryIso={indexableCountry} />
-
-      <section className="max-w-7xl mx-auto px-4 py-12">
-        <div className="rounded-3xl bg-gradient-to-br from-primary via-[#9e2d55] to-accent text-white p-8 sm:p-12 text-center shadow-lg shadow-primary/20">
-          <h2 className="text-2xl sm:text-3xl font-bold">Send a gift that feels personal</h2>
-          <p className="mt-3 text-white/90 max-w-2xl mx-auto">
-            From birthday bouquets to anniversary hampers, BlossomPot helps you celebrate with delivery to {destinationName}.
-          </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Link
-              href="/anniversary-gifts"
-              className="inline-flex rounded-full bg-white text-primary font-semibold text-sm px-5 py-2.5 hover:bg-orange-50"
-            >
-              Shop Anniversary Gifts
-            </Link>
-            <Link
-              href="/birthday-gifts"
-              className="inline-flex rounded-full border border-white/70 text-white font-semibold text-sm px-5 py-2.5 hover:bg-white/10"
-            >
-              Shop Birthday Gifts
-            </Link>
-          </div>
-        </div>
-      </section>
+      <Suspense fallback={null}>
+        <HomeIndexableSeo countryPromise={indexableCountryPromise} />
+      </Suspense>
+      <Suspense fallback={null}>
+        <HomeDeliveryCta searchParams={searchParams} />
+      </Suspense>
 
       <section className="max-w-7xl mx-auto px-4 py-12 border-t border-[#eadfd8]">
         <div className="max-w-xl mx-auto text-center">
@@ -176,6 +119,91 @@ async function HomeBelowHero({
           <HomeCategoryCount />
         </Suspense>
       </section>
+    </div>
+  );
+}
+
+/** Shopper delivery country for the product rows. Does not choose the indexable SEO country. */
+async function HomeProductSection({
+  searchParams,
+}: {
+  searchParams: Promise<{ country?: string }>;
+}) {
+  const params = await searchParams;
+  const deliveryCountry = await getStorefrontDeliveryCountry(params.country);
+  const destinationName = resolveDeliveryCountry(deliveryCountry).countryName;
+
+  return (
+    <section className="max-w-7xl mx-auto px-4 py-10">
+      <p className="text-sm text-slate-600">
+        Flowers, bouquets, cakes, and hampers for {destinationName}.
+      </p>
+      <div className="mt-8 space-y-10">
+        {HOME_PRODUCT_SECTIONS.map((section) => (
+          <Suspense
+            key={section.slug}
+            fallback={<HomeCategoryProductRowFallback title={section.title} />}
+          >
+            <HomeCategoryProductRow
+              slug={section.slug}
+              title={section.title}
+              country={deliveryCountry}
+            />
+          </Suspense>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** Same delivery-country sentence as before. Kept separate so static sections above it do not wait. */
+async function HomeDeliveryCta({
+  searchParams,
+}: {
+  searchParams: Promise<{ country?: string }>;
+}) {
+  const params = await searchParams;
+  const deliveryCountry = await getStorefrontDeliveryCountry(params.country);
+  const destinationName = resolveDeliveryCountry(deliveryCountry).countryName;
+
+  return (
+    <section className="max-w-7xl mx-auto px-4 py-12">
+      <div className="rounded-3xl bg-gradient-to-br from-primary via-[#9e2d55] to-accent text-white p-8 sm:p-12 text-center shadow-lg shadow-primary/20">
+        <h2 className="text-2xl sm:text-3xl font-bold">Send a gift that feels personal</h2>
+        <p className="mt-3 text-white/90 max-w-2xl mx-auto">
+          From birthday bouquets to anniversary hampers, BlossomPot helps you celebrate with delivery to {destinationName}.
+        </p>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Link
+            href="/anniversary-gifts"
+            className="inline-flex rounded-full bg-white text-primary font-semibold text-sm px-5 py-2.5 hover:bg-orange-50"
+          >
+            Shop Anniversary Gifts
+          </Link>
+          <Link
+            href="/birthday-gifts"
+            className="inline-flex rounded-full border border-white/70 text-white font-semibold text-sm px-5 py-2.5 hover:bg-white/10"
+          >
+            Shop Birthday Gifts
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** Indexable homepage article and FAQ schema. Uses the admin default country, not the shopper cookie. */
+async function HomeIndexableSeo({
+  countryPromise,
+}: {
+  countryPromise: ReturnType<typeof getIndexableHomeCountry>;
+}) {
+  const indexableCountry = await countryPromise;
+  const indexableSeo = countrySeoContent(indexableCountry, "home");
+  return (
+    <>
+      <JsonLd data={[faqJsonLd(indexableSeo.faqs)]} />
+      <HomeSeoSection countryIso={indexableCountry} />
     </>
   );
 }

@@ -21,11 +21,11 @@ describe("category country SEO", () => {
     const seo = resolveCategoryPageSeo("flowers", "/flowers-to-usa");
     assert.equal(seo.source, "approved");
     assert.equal(seo.title, "Send Flowers to USA Online | Flower Delivery – BlossomPot");
-    assert.equal(seo.h1, "Send Flowers to USA");
-    assert.equal(seo.article?.heading, "Send Flowers to USA");
+    assert.equal(seo.h1, "Send Flowers to USA Online");
+    assert.equal(seo.article?.heading, "Send Flowers to USA Online");
     assert.equal(
       seo.description,
-      "Send flowers to the USA with BlossomPot. Explore roses, lilies, orchids, and bouquets for birthdays, anniversaries, and special occasions. Check delivery options online."
+      "Send flowers to USA with BlossomPot. Explore flower bouquets, rose arrangements, and floral gifts for birthdays, anniversaries, Valentine's Day, and other special occasions."
     );
   });
 
@@ -46,54 +46,62 @@ describe("category country SEO", () => {
       {
         slug: "flower-bouquets",
         path: "/bouquets-to-usa",
-        title: "Flower Bouquets Delivery to USA | Order Bouquets Online | BlossomPot",
-        h1: "Send Bouquets to USA",
+        title: "Send Beautiful Flower Bouquets to USA Online | BlossomPot",
+        h1: "Send Beautiful Flower Bouquets to USA Online",
         sections: [
-          "Bouquet Delivery Across the USA",
-          "Bouquet Styles to Choose From",
-          "Bouquet Gifting Tips",
-          "Why Order Bouquets from BlossomPot",
+          "Explore Beautiful Flower Bouquets for USA Delivery",
+          "Send Flower Bouquets to USA for Every Special Occasion",
+          "Send Rose Bouquets and Mixed Flowers to USA",
+          "Send Flower Bouquets to USA from Worldwide",
+          "Pair Flower Bouquets with Cakes and Gifts",
+          "Why Choose BlossomPot to Send Bouquets to USA?",
         ],
-        faqHeading: "Frequently Asked Questions — Bouquets to USA",
+        faqHeading: "Frequently Asked Questions About Flower Bouquets to USA",
+        faqs: 6,
       },
       {
         slug: "cakes",
         path: "/cakes-to-usa",
-        title: "Order Cakes Online USA | Birthday & Anniversary Cake Delivery | BlossomPot",
-        h1: "Send Cakes to USA",
+        title: "Send Cakes to USA Online | BlossomPot",
+        h1: "Send Cakes to USA Online",
         sections: [
-          "Cake Delivery Across the USA",
-          "Cake Favourites",
-          "Sweet Moments, Shared from Far Away",
-          "Why Order Cakes from BlossomPot",
+          "Explore Our Collection of Cakes for USA Delivery",
+          "Send Birthday Cakes to USA for Special Celebrations",
+          "Send Chocolate Cakes and Other Cake Varieties to USA",
+          "Anniversary Cakes and Celebration Cakes in USA",
+          "Send Cakes to USA from Worldwide",
+          "Make Your Gift Special with Cakes, Flowers and Hampers",
+          "Why Choose BlossomPot to Send Cakes to USA?",
         ],
-        faqHeading: "Frequently Asked Questions — Cakes to USA",
+        faqHeading: "Frequently Asked Questions About Cakes to USA",
+        faqs: 7,
       },
       {
         slug: "birthday-gifts",
         path: "/birthday-gifts-to-usa",
-        title: "Birthday Gifts to USA | Send Birthday Flowers, Cakes & Combos | BlossomPot",
-        h1: "Send Birthday Gifts to USA",
+        title: "Send Birthday Gifts to USA | BlossomPot",
+        h1: "Send Birthday Gifts to USA to Make Every Celebration Special",
         sections: [
-          "Birthday Gift Delivery in the USA",
-          "Birthday Gift Ideas",
-          "Make the Birthday Feel Close",
-          "Why Order Birthday Gifts from BlossomPot",
+          "Explore the Best Birthday Gift Ideas for Your Loved Ones in USA",
+          "Send Birthday Gifts to Everyone Special in Your Life",
         ],
-        faqHeading: "Frequently Asked Questions — Birthday Gifts to USA",
+        faqHeading: "Frequently Asked Questions",
+        faqs: 4,
       },
       {
         slug: "anniversary-gifts",
         path: "/anniversary-gifts-to-usa",
-        title: "Anniversary Gifts to USA | Send Roses, Cakes & Gift Sets | BlossomPot",
-        h1: "Send Anniversary Gifts to USA",
+        title: "Send Anniversary Gifts to USA | BlossomPot",
+        h1: "Send Anniversary Gifts to USA to Celebrate Your Love",
         sections: [
-          "Anniversary Gift Delivery in the USA",
-          "Anniversary Gift Ideas",
-          'Gifts That Say More Than "Happy Anniversary"',
-          "Why Order Anniversary Gifts from BlossomPot",
+          "Explore Beautiful Anniversary Gifts for Your Loved Ones in USA",
+          "Find the Perfect Anniversary Gift for Your Partner",
+          "Celebrate Every Milestone with Thoughtful Anniversary Gifts",
+          "How to Order Anniversary Gifts Online for Delivery in USA",
+          "Why Choose BlossomPot to Send Anniversary Gifts to USA?",
         ],
-        faqHeading: "Frequently Asked Questions — Anniversary Gifts to USA",
+        faqHeading: "Frequently Asked Questions",
+        faqs: 6,
       },
       {
         slug: "valentines-day-gifts",
@@ -111,15 +119,19 @@ describe("category country SEO", () => {
       {
         slug: "gift-hampers",
         path: "/hampers-to-usa",
-        title: "Gift Hampers to USA | Gift Baskets & Curated Boxes | BlossomPot",
-        h1: "Send Hampers to USA",
+        title: "Send Gift Hampers to USA | BlossomPot",
+        h1: "Send Gift Hampers to USA",
         sections: [
-          "Gift Hamper Delivery in the USA",
-          "What You Can Find in Our Hampers",
-          "When a Hamper Is the Perfect Choice",
-          "Why Order Hampers from BlossomPot",
+          "Send Beautiful Gift Hampers for Every Occasion",
+          "Explore Different Types of Gift Hampers in the USA",
+          "Send Gift Hampers to the USA from India and Other Countries",
+          "Send Gift Hampers Across Major Cities in the USA",
+          "Why Choose BlossomPot for Gift Hampers to the USA?",
+          "How to Order Gift Hampers Online for Delivery in the USA",
+          "Make Every Celebration Memorable with BlossomPot",
         ],
-        faqHeading: "Frequently Asked Questions — Gift Hampers to USA",
+        faqHeading: "Frequently Asked Questions – Gift Hampers to USA",
+        faqs: 10,
       },
     ] as const;
 
@@ -136,7 +148,7 @@ describe("category country SEO", () => {
       assert.equal(JSON.stringify(seo.article).includes("amplifyapp.com"), false);
       assert.deepEqual(seo.article?.sections.map((section) => section.heading), [...page.sections]);
       assert.equal(seo.article?.faqHeading, page.faqHeading);
-      assert.equal(seo.article?.faqs.length, 6);
+      assert.equal(seo.article?.faqs.length, "faqs" in page ? page.faqs : 6);
       assert.equal(canonical(page.path).endsWith(page.path), true);
       titles.add(page.title);
       headings.add(page.h1);
@@ -150,12 +162,19 @@ describe("category country SEO", () => {
       join(dirname(fileURLToPath(import.meta.url)), "../../app/categories/[slug]/page.tsx"),
       "utf8"
     );
-    const grid = page.indexOf("<ProductGrid");
-    const article = page.indexOf("<CountrySeoArticle");
-    const listingHeading = page.indexOf('<h1 className="text-3xl font-bold text-primary mb-8">{h1}</h1>');
+    const content = page.slice(
+      page.indexOf("async function CategoryPageContent"),
+      page.indexOf("async function CategoryProductListing")
+    );
+    const grid = content.indexOf("<CategoryProductListing");
+    const article = content.indexOf("<CountrySeoArticle");
+    const listingHeading = content.indexOf('<h1 className="text-3xl font-bold text-primary mb-8">{h1}</h1>');
     assert.ok(listingHeading >= 0);
     assert.ok(grid > listingHeading);
     assert.ok(article > grid);
+    assert.equal(content.includes("loadCategoryPageProducts"), false);
+    assert.match(page.slice(page.indexOf("async function CategoryProductListing")), /await loadCategoryPageProducts/);
+    assert.match(page, /<ProductGrid /);
     assert.equal(page.includes("pageSeo.article ? null : <h1"), false);
   });
 

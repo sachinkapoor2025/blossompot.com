@@ -62,6 +62,10 @@ before(async () => {
       seoTitle: "Rakhi special",
     }),
     row("card-cake", "cakes", { description: "A small cake." }),
+    row("home-cross-cake", "cakes", {
+      description: "A cake also listed with flowers.",
+      additionalCategorySlugs: ["flowers"],
+    }),
     row("card-uk", "flowers", { description: "UK only roses.", deliveryCountries: ["GB"] }),
     row("card-hidden", "flowers", { description: "Unpublished roses.", published: false }),
     row("card-stock", "flowers", { description: "Out of stock roses.", inventory: 0 }),
@@ -155,6 +159,60 @@ function cardSlugsMatchStorefront(plain: Array<Record<string, unknown>>, card: s
 }
 
 describe("listing card response", { concurrency: false }, () => {
+  it("reads a homepage row from the primary partition without writing bundled rows", async () => {
+    invalidateProductListCache();
+    const original = docClient.send.bind(docClient);
+    const categoryKeys: string[] = [];
+    let writes = 0;
+    docClient.send = (async (command: { constructor?: { name?: string }; input?: { ExpressionAttributeValues?: Record<string, unknown> } }) => {
+      const name = command.constructor?.name ?? "";
+      if (name === "QueryCommand") {
+        const pk = command.input?.ExpressionAttributeValues?.[":pk"];
+        if (typeof pk === "string" && (pk.startsWith("CATEGORY#") || pk === "ENTITY#CATEGORY")) categoryKeys.push(pk);
+      }
+      if (name === "PutCommand" || name === "TransactWriteCommand") writes += 1;
+      return original(command);
+    }) as typeof docClient.send;
+
+    try {
+      const home = resultOf(
+        await listProducts(
+          shopperEvent({
+            queryStringParameters: { category: "flowers", country: "US" },
+            headers: { ...cardHeaders(), "x-blossompot-home-row": "1" },
+          })
+        )
+      );
+      assert.equal(home.statusCode, 200);
+      assert.equal(slugsOf(home.body).includes("card-rose"), true);
+      assert.equal(slugsOf(home.body).includes("home-cross-cake"), false);
+      const productPartitions = categoryKeys.filter((key) => key.startsWith("CATEGORY#"));
+      assert.equal(productPartitions.length > 0, true);
+      assert.equal(productPartitions.every((key) => key === "CATEGORY#flowers"), true);
+      assert.equal(categoryKeys.includes("ENTITY#CATEGORY"), false);
+      assert.equal(writes, 0);
+
+      categoryKeys.length = 0;
+      writes = 0;
+      invalidateProductListCache();
+      const categoryPage = resultOf(
+        await listProducts(
+          shopperEvent({
+            queryStringParameters: { category: "flowers", country: "US" },
+            headers: cardHeaders(),
+          })
+        )
+      );
+      assert.equal(categoryPage.statusCode, 200);
+      assert.equal(slugsOf(categoryPage.body).includes("card-rose"), true);
+      assert.equal(slugsOf(categoryPage.body).includes("home-cross-cake"), true);
+      assert.equal(categoryKeys.includes("CATEGORY#cakes"), true);
+      assert.equal(writes > 0, true);
+    } finally {
+      docClient.send = original;
+    }
+  });
+
   it("reads requested combo component slugs without returning the rest of the catalog", async () => {
     const view = await both({
       country: "US",

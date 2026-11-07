@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useApiClient, useAuth } from "@/lib/auth-context";
@@ -66,28 +66,47 @@ export default function AdminProductsPage() {
     heightIn: "",
   });
   const [message, setMessage] = useState("");
+  const [loadError, setLoadError] = useState("");
+  const loadRequest = useRef(0);
   const [uploadingSlug, setUploadingSlug] = useState<string | null>(null);
   const [deletingImage, setDeletingImage] = useState<string | null>(null);
   const [tab, setTab] = useState<"list" | "create">("list");
   const [missingDimsCount, setMissingDimsCount] = useState(0);
 
   const load = useCallback(() => {
+    const requestId = ++loadRequest.current;
     setLoading(true);
+    setLoadError("");
     const qs =
       sampleFilter === "all" ? "" : `?sample=${sampleFilter === "sample" ? "true" : "false"}`;
-    return Promise.all([
-      apiClient<{ products: Product[]; meta?: { sampleCount: number; realCount: number } }>(
-        `/admin/products${qs}`
-      ),
-      apiClient<{ categories: { slug: string; name: string }[] }>("/categories"),
-    ])
-      .then(([p, c]) => {
-        setProducts(p.products);
-        setCategories(c.categories);
+    const productsPromise = apiClient<{ products: Product[] }>(`/admin/products${qs}`)
+      .then((result) => {
+        if (requestId !== loadRequest.current) return;
+        if (!Array.isArray(result.products)) {
+          setProducts([]);
+          setLoadError("Product list response did not include products.");
+          return;
+        }
+        setProducts(result.products);
         setSelected(new Set());
       })
-      .catch(() => setProducts([]))
-      .finally(() => setLoading(false));
+      .catch((err: unknown) => {
+        if (requestId !== loadRequest.current) return;
+        setProducts([]);
+        setLoadError(err instanceof Error && err.message ? err.message : "Could not load products.");
+      });
+    const categoriesPromise = apiClient<{ categories: { slug: string; name: string }[] }>("/categories")
+      .then((result) => {
+        if (requestId !== loadRequest.current) return;
+        setCategories(Array.isArray(result.categories) ? result.categories : []);
+      })
+      .catch(() => {
+        if (requestId !== loadRequest.current) return;
+        setCategories([]);
+      });
+    return Promise.all([productsPromise, categoriesPromise]).finally(() => {
+      if (requestId === loadRequest.current) setLoading(false);
+    });
   }, [apiClient, sampleFilter]);
 
   useEffect(() => {
@@ -571,6 +590,12 @@ export default function AdminProductsPage() {
         </div>
       )}
 
+      {loadError && (
+        <p className="text-sm bg-red-50 border border-red-200 text-red-800 p-3 rounded-lg" role="alert">
+          {loadError}
+        </p>
+      )}
+
       {message && <p className="text-sm bg-slate-50 border p-3 rounded-lg">{message}</p>}
 
       {tab === "list" && (
@@ -684,7 +709,11 @@ export default function AdminProductsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {pageItems.map((p) => (
+                  {pageItems.map((p) => {
+                    const gallery = Array.isArray(p.images)
+                      ? p.images.filter((imageUrl) => typeof imageUrl === "string" && imageUrl.trim())
+                      : [];
+                    return (
                     <tr key={p.slug} className="border-t align-top">
                       <td className="py-3 px-3">
                         <input
@@ -720,12 +749,12 @@ export default function AdminProductsPage() {
                         <div className="text-xs text-slate-400">{p.slug}</div>
                         <div className="mt-3 space-y-2">
                           <div className="flex items-center gap-2 text-xs text-slate-500">
-                            <span>{p.images?.length ?? 0} image{(p.images?.length ?? 0) === 1 ? "" : "s"}</span>
+                            <span>{gallery.length} image{gallery.length === 1 ? "" : "s"}</span>
                             {uploadingSlug === p.slug && <span className="text-nav">Uploading...</span>}
                           </div>
-                          {p.images?.length ? (
+                          {gallery.length ? (
                             <div className="flex flex-wrap gap-2">
-                              {p.images.map((imageUrl, index) => {
+                              {gallery.map((imageUrl, index) => {
                                 const deleteKey = `${p.slug}:${imageUrl}`;
                                 return (
                                   <div
@@ -853,7 +882,8 @@ export default function AdminProductsPage() {
                         </button>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
