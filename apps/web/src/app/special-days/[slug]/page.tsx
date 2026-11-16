@@ -6,7 +6,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { CatalogLoadError } from "@/components/CatalogLoadError";
 import { ProductGrid } from "@/components/ProductGrid";
 import type { ProductSort } from "@/components/ProductSortBar";
-import { SpecialDayHero } from "@/components/special-days/SpecialDayHero";
+import { ListingPageSkeleton } from "@/components/route-skeletons";
 import { JsonLd } from "@/components/JsonLd";
 import { FaqAccordion } from "@/components/FaqAccordion";
 import { allSpecialDays, getSpecialDay, loadSpecialDayProducts, specialDayLocationHref } from "@/lib/special-days";
@@ -55,7 +55,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 
 export default function SpecialDayPage(props: Props) {
   return (
-    <Suspense fallback={<div className="min-h-[24rem]" />}>
+    <Suspense fallback={<ListingPageSkeleton />}>
       <SpecialDayContent {...props} />
     </Suspense>
   );
@@ -103,69 +103,65 @@ async function SpecialDayContent({ params, searchParams }: Props) {
   ];
 
   return (
-    <div>
-      <SpecialDayHero day={day} />
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:py-10">
-        <JsonLd
-          data={[
-            breadcrumbJsonLd(crumbs.map((crumb) => ({ name: crumb.label, path: crumb.href ?? seoPath }))),
-            itemListJsonLd(
-              `${day.h1} — BlossomPot`,
-              products.map((product) => ({ name: product.name, path: `/products/${product.slug}` }))
-            ),
-            faqJsonLd(day.faqs),
-          ]}
-        />
+    <div className="mx-auto max-w-7xl px-4 py-10">
+      <JsonLd
+        data={[
+          breadcrumbJsonLd(crumbs.map((crumb) => ({ name: crumb.label, path: crumb.href ?? seoPath }))),
+          itemListJsonLd(
+            `${day.h1} — BlossomPot`,
+            products.map((product) => ({ name: product.name, path: `/products/${product.slug}` }))
+          ),
+          faqJsonLd(day.faqs),
+        ]}
+      />
+      {failed ? (
+        <CatalogLoadError />
+      ) : products.length > 0 ? (
+        <ProductGrid products={products} sort={sort} />
+      ) : (
+        <p className="text-slate-500">
+          No {day.name} gifts are available for {countryName} yet.{" "}
+          <Link href={shopHref} className="text-nav hover:underline">
+            Browse all gifts
+          </Link>
+        </p>
+      )}
+
+      <div className="mt-12 border-t border-slate-200 pt-10">
         <Breadcrumbs items={crumbs} />
-        <article className="max-w-3xl space-y-8 text-base leading-7 text-slate-700">
-          <h1 className="font-display text-3xl leading-tight text-primary sm:text-4xl lg:text-5xl">{day.h1}</h1>
+        <h1 className="mb-8 text-3xl font-bold text-primary">{day.h1}</h1>
+        <article className="max-w-3xl space-y-8 leading-relaxed text-slate-700">
           {day.intro.map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>
           ))}
           <section>
-            <h2 className="mb-3 font-display text-2xl text-primary sm:text-3xl">{day.deliveryHeading}</h2>
+            <h2 className="mb-3 text-lg font-bold text-primary">{day.deliveryHeading}</h2>
             <p>{day.delivery}</p>
             <p className="mt-3 text-sm text-slate-500">Gifts shown for delivery in {countryName}.</p>
           </section>
           <section>
-            <h2 className="mb-3 font-display text-2xl text-primary sm:text-3xl">{day.ideasHeading}</h2>
-            <ul className="space-y-2 rounded-2xl border border-primary/15 bg-petal px-4 py-4 text-sm">
+            <h2 className="mb-3 text-lg font-bold text-primary">{day.ideasHeading}</h2>
+            <ul className="space-y-2 text-sm">
               {day.ideas.map((item) => (
                 <li key={item} className="flex gap-2">
-                  <span className="text-nav" aria-hidden>
-                    ✓
-                  </span>
+                  <span className="mt-1 shrink-0 text-nav">•</span>
                   <span>{item}</span>
                 </li>
               ))}
             </ul>
           </section>
-        </article>
-
-        <h2 className="mb-4 mt-10 font-display text-2xl text-primary sm:text-3xl">Shop {day.name}</h2>
-        {failed ? (
-          <CatalogLoadError />
-        ) : products.length > 0 ? (
-          <ProductGrid products={products} sort={sort} />
-        ) : (
-          <p className="text-slate-600">
-            No {day.name} gifts are available for {countryName} yet.{" "}
-            <Link href={shopHref} className="font-semibold text-nav hover:underline">
-              Browse all gifts
-            </Link>
-          </p>
-        )}
-
-        <article className="mt-12 max-w-3xl space-y-8 text-base leading-7 text-slate-700">
           <section>
-            <h2 className="mb-3 font-display text-2xl text-primary sm:text-3xl">{day.tipHeading}</h2>
+            <h2 className="mb-3 text-lg font-bold text-primary">{day.tipHeading}</h2>
             <p>{day.tip}</p>
           </section>
           <section>
-            <h2 className="mb-3 font-display text-2xl text-primary sm:text-3xl">{day.whyHeading}</h2>
-            <ul className="list-disc space-y-1 pl-5">
+            <h2 className="mb-3 text-lg font-bold text-primary">{day.whyHeading}</h2>
+            <ul className="space-y-2 text-sm">
               {day.why.map((item) => (
-                <li key={item}>{item}</li>
+                <li key={item} className="flex gap-2">
+                  <span className="shrink-0 text-nav">✓</span>
+                  <span>{item}</span>
+                </li>
               ))}
             </ul>
           </section>
@@ -174,14 +170,14 @@ async function SpecialDayContent({ params, searchParams }: Props) {
               <Link
                 key={link.href}
                 href={link.href}
-                className="rounded-full border border-primary/20 bg-white px-3 py-1.5 text-sm font-semibold text-primary hover:border-nav hover:text-nav"
+                className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-600 hover:border-nav hover:text-nav sm:text-sm"
               >
                 {link.label}
               </Link>
             ))}
           </nav>
-          <section>
-            <h2 className="mb-4 font-display text-2xl text-primary sm:text-3xl">{day.faqHeading}</h2>
+          <section className="border-t border-slate-200 pt-10">
+            <h2 className="mb-6 font-display text-xl font-semibold text-primary">{day.faqHeading}</h2>
             <FaqAccordion items={day.faqs} />
           </section>
         </article>
