@@ -35,7 +35,7 @@ const ARTICLES: Record<SpecialDayId, SpecialDayArticle> = {
     title: "Rose Day Gifts to USA | Send Red Roses Online | BlossomPot",
     description:
       "Start Valentine week with roses. Send Rose Day flowers and gifts to the USA with a personal love note. Free shipping on orders $14+.",
-    h1: "Rose Day Gifts to the USA — Begin the Week of Love with Roses",
+    h1: "Send Beautiful Rose Day Gifts to USA",
     intro: [
       "Valentine week begins with a rose, and it still says what words sometimes cannot. If someone special lives in the USA, BlossomPot can carry your Rose Day message across the miles.",
       "Pick a dozen classic red roses, a grand 50-rose bouquet or a soft pink and mixed arrangement. Add a note in your own words and we take care of the rest.",
@@ -81,7 +81,7 @@ const ARTICLES: Record<SpecialDayId, SpecialDayArticle> = {
     title: "Propose Day Gifts to USA | Roses & Romantic Gift Boxes | BlossomPot",
     description:
       "Make your proposal unforgettable. Send Propose Day roses and romantic gift boxes to the USA with a personal message. Free shipping on orders $14+.",
-    h1: "Propose Day Gifts to the USA — Say What You Have Been Meaning to Say",
+    h1: "Surprise Your Loved One with Propose Day Gifts",
     intro: [
       "Some moments need courage, and a good gift helps. Whether you are confessing feelings, proposing a future together or renewing a promise, a beautiful gift makes the moment feel real.",
       "BlossomPot has rose boxes, preserved rose gift boxes and romantic bouquets that are ready to carry your Propose Day message to the USA.",
@@ -133,7 +133,7 @@ const ARTICLES: Record<SpecialDayId, SpecialDayArticle> = {
     title: "Chocolate Day Gifts to USA | Chocolate Hampers & Cakes | BlossomPot",
     description:
       "Send sweet Chocolate Day gifts to the USA. Chocolate hampers, brownie cakes and cake pops with a love note. Free shipping on orders $14+.",
-    h1: "Chocolate Day Gifts to the USA — Sweeter Together",
+    h1: "Send Chocolate Day Gifts to USA",
     intro: [
       "Chocolate is the easiest way to make someone smile. On Chocolate Day, even a small box carries a big message: you are sweet to me.",
       "Explore chocolate hampers, rich brownie cakes, Belgian chocolate cake pops and chocolate gift combos, all ready for delivery in the USA.",
@@ -185,7 +185,7 @@ const ARTICLES: Record<SpecialDayId, SpecialDayArticle> = {
     title: "Teddy Day Gifts to USA | Teddy Bear Gift Sets | BlossomPot",
     description:
       "Send cuddly Teddy Day gifts to the USA. Teddy and flower combos, gift sets and treats with a personal message. Free shipping on orders $14+.",
-    h1: "Teddy Day Gifts to the USA — A Little Something to Cuddle",
+    h1: "Teddy Day Gifts for Someone Special",
     intro: [
       "A teddy bear says “I am always with you” without a word. For long-distance couples, it is something warm to hold when you cannot be there.",
       "Choose a teddy-themed gift set and pair it with roses, chocolates or a cake to make the surprise even bigger.",
@@ -237,7 +237,7 @@ const ARTICLES: Record<SpecialDayId, SpecialDayArticle> = {
     title: "Promise Day Gifts to USA | Personalised & Romantic Gifts | BlossomPot",
     description:
       "Send meaningful Promise Day gifts to the USA. Personalised gifts, keepsakes and flowers with your own promise. Free shipping on orders $14+.",
-    h1: "Promise Day Gifts to the USA — Gifts That Hold a Promise",
+    h1: "Promise Day Gifts to Celebrate Your Love",
     intro: [
       "Promises are easy to make and harder to keep, which is why a gift that lasts matters on Promise Day. A keepsake on a desk or a shelf quietly reminds someone every day.",
       "Explore personalised gifts, love frames and charm gifts that can be delivered in the USA, and pair them with flowers for the day itself.",
@@ -289,7 +289,7 @@ const ARTICLES: Record<SpecialDayId, SpecialDayArticle> = {
     title: "Hug Day Gifts to USA | Cozy Hampers & Comfort Gifts | BlossomPot",
     description:
       "Send a hug across the miles. Hug Day gift hampers, spa baskets and flowers delivered to the USA with a warm message. Free shipping on orders $14+.",
-    h1: "Hug Day Gifts to the USA — A Warm Hug, Delivered",
+    h1: "Send Hug Day Flowers and Gifts",
     intro: [
       "Sometimes the thing we miss most about someone is just a hug. When you cannot give one in person, a cosy gift is the next best thing.",
       "BlossomPot hampers, spa baskets and “hugs” themed gifts are made to feel like a warm embrace when they reach the USA.",
@@ -341,7 +341,7 @@ const ARTICLES: Record<SpecialDayId, SpecialDayArticle> = {
     title: "Kiss Day Gifts to USA | Sweet Treats & Romantic Gifts | BlossomPot",
     description:
       "Send romantic Kiss Day gifts to the USA. Sweet treats, cupcakes, roses and gift sets with a love note. Free shipping on orders $14+.",
-    h1: "Kiss Day Gifts to the USA — Sweet Gestures for the One You Love",
+    h1: "Kiss Day Red Rose Gifts",
     intro: [
       "Kiss Day is tender and a little playful. If you cannot give one in person, you can still make your partner smile with something sweet.",
       "Choose Valentine cupcakes, cake and rose combos, wine gift sets or a romantic hamper, then finish with a card full of kisses.",
@@ -393,7 +393,7 @@ const ARTICLES: Record<SpecialDayId, SpecialDayArticle> = {
     title: "Valentine's Day Gifts to USA | Flowers, Cakes & Hampers | BlossomPot",
     description:
       "Send Valentine’s Day flowers and gifts to the USA. Roses, cakes and romantic hampers with a personal note. Free shipping on orders $14+.",
-    h1: "Valentine's Day Gifts to the USA — The Heart of the Week",
+    h1: "Valentine's Day Gifts to the USA",
     intro: [
       "February 14 is the day the whole week has been building toward. A bouquet, a cake or a hamper can say what a long-distance call cannot.",
       "Choose romantic roses, Valentine arrangements, chocolate and flower combinations, or a celebration hamper, then add a note in your own words.",
@@ -456,10 +456,37 @@ function mapArticle(article: SpecialDayArticle, map: (value: string) => string):
   };
 }
 
+/** Visible listing heading. Country names that take “the” keep it; others do not. */
+export function specialDayListingHeading(id: string, countryIso = "US"): string {
+  const label = countryDisplayName(countryIso || "US");
+  const place = label === "USA" || label === "UK" || label === "UAE" ? `the ${label}` : label;
+  switch (id) {
+    case "rose-day":
+      return `Send Beautiful Rose Day Gifts to ${label}`;
+    case "propose-day":
+      return "Surprise Your Loved One with Propose Day Gifts";
+    case "chocolate-day":
+      return `Send Chocolate Day Gifts to ${label}`;
+    case "teddy-day":
+      return "Teddy Day Gifts for Someone Special";
+    case "promise-day":
+      return "Promise Day Gifts to Celebrate Your Love";
+    case "hug-day":
+      return "Send Hug Day Flowers and Gifts";
+    case "kiss-day":
+      return "Kiss Day Red Rose Gifts";
+    case "valentines-day":
+      return `Valentine's Day Gifts to ${place}`;
+    default:
+      return "";
+  }
+}
+
 export function specialDayArticle(id: string, countryIso = "US"): SpecialDayArticle | null {
   const article = ARTICLES[id as SpecialDayId];
   if (!article) return null;
   const label = countryDisplayName(countryIso || "US");
-  if (label === "USA") return article;
-  return mapArticle(article, (value) => value.replaceAll("USA", label));
+  const localized = label === "USA" ? article : mapArticle(article, (value) => value.replaceAll("USA", label));
+  const h1 = specialDayListingHeading(id, countryIso);
+  return h1 ? { ...localized, h1 } : localized;
 }

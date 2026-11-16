@@ -72,7 +72,11 @@ describe("February special day pages", () => {
     const rose = specialDayArticle("rose-day", "US");
     assert.ok(rose);
     assert.equal(rose.title, "Rose Day Gifts to USA | Send Red Roses Online | BlossomPot");
-    assert.equal(rose.h1, "Rose Day Gifts to the USA — Begin the Week of Love with Roses");
+    assert.equal(rose.h1, "Send Beautiful Rose Day Gifts to USA");
+    assert.equal(specialDayArticle("propose-day", "US")?.h1, "Surprise Your Loved One with Propose Day Gifts");
+    assert.equal(specialDayArticle("chocolate-day", "GB")?.h1, "Send Chocolate Day Gifts to UK");
+    assert.equal(specialDayArticle("valentines-day", "AU")?.h1, "Valentine's Day Gifts to Australia");
+    assert.equal(specialDayArticle("valentines-day", "US")?.h1, "Valentine's Day Gifts to the USA");
     assert.equal(rose.faqs.length, 5);
     assert.equal(JSON.stringify(rose).includes("$75"), false);
     assert.equal(rose.delivery.includes("$14"), true);

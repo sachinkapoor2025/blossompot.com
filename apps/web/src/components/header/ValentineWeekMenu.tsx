@@ -7,7 +7,9 @@ import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import {
   VALENTINE_WEEK_DAYS,
   VALENTINE_WEEK_IMAGE,
+  valentineWeekDayFromPath,
   valentineWeekHref,
+  valentineWeekNavLabel,
   valentineWeekShopHref,
 } from "@/lib/valentine-week";
 
@@ -23,31 +25,39 @@ function DayArrow() {
 
 function DayLinks({
   countryIso,
+  currentId,
   onNavigate,
 }: {
   countryIso: string;
+  currentId?: string;
   onNavigate?: () => void;
 }) {
   return (
     <ul className="space-y-0.5">
-      {VALENTINE_WEEK_DAYS.map((day) => (
+      {VALENTINE_WEEK_DAYS.map((day) => {
+        const selected = day.id === currentId;
+        return (
         <li key={day.id}>
           <Link
             href={valentineWeekHref(day, countryIso)}
             onClick={onNavigate}
-            className="group flex min-h-11 items-center gap-3 rounded-xl px-2.5 py-1.5 transition hover:bg-petal"
+            aria-current={selected ? "page" : undefined}
+            className={`group flex min-h-11 items-center gap-3 rounded-xl px-2.5 py-1.5 transition hover:bg-petal ${
+              selected ? "bg-petal" : ""
+            }`}
           >
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-petal text-lg leading-none" aria-hidden>
               {day.emoji}
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block text-sm font-semibold text-primary">{day.name}</span>
+              <span className={`block text-sm font-semibold ${selected ? "text-nav" : "text-primary"}`}>{day.name}</span>
               <span className="block text-xs text-slate-500">{day.date}</span>
             </span>
             <DayArrow />
           </Link>
         </li>
-      ))}
+        );
+      })}
     </ul>
   );
 }
@@ -95,6 +105,9 @@ export function ValentineWeekDesktop({
   const closeTimer = useRef<number | null>(null);
   const labelId = useId();
   const shopHref = valentineWeekShopHref(countryIso);
+  const currentDay = valentineWeekDayFromPath(pathname);
+  const navLabel = valentineWeekNavLabel(pathname);
+  const sectionActive = active || Boolean(currentDay);
 
   const clearClose = () => {
     if (closeTimer.current != null) {
@@ -175,7 +188,7 @@ export function ValentineWeekDesktop({
         ref={buttonRef}
         type="button"
         className={`btn-nav gap-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-          active || open ? "btn-nav-active" : ""
+          sectionActive || open ? "btn-nav-active" : ""
         }`}
         aria-expanded={open}
         aria-haspopup="true"
@@ -187,7 +200,7 @@ export function ValentineWeekDesktop({
           else setOpen(true);
         }}
       >
-        Valentine&apos;s
+        {navLabel}
         <span className={`text-[10px] transition-transform duration-200 ${open ? "rotate-180" : ""}`} aria-hidden>
           ▼
         </span>
@@ -209,7 +222,7 @@ export function ValentineWeekDesktop({
                 Celebrate Love, All Week Long
               </p>
               <div className="mt-3">
-                <DayLinks countryIso={countryIso} onNavigate={() => setOpen(false)} />
+                <DayLinks countryIso={countryIso} currentId={currentDay?.id} onNavigate={() => setOpen(false)} />
               </div>
             </div>
           </div>
@@ -228,9 +241,13 @@ export function ValentineWeekMobile({
   active: boolean;
   onNavigate: () => void;
 }) {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const shopHref = valentineWeekShopHref(countryIso);
+  const currentDay = valentineWeekDayFromPath(pathname);
+  const navLabel = valentineWeekNavLabel(pathname);
+  const sectionActive = active || Boolean(currentDay);
 
   return (
     <div>
@@ -240,10 +257,10 @@ export function ValentineWeekMobile({
         aria-controls={panelId}
         onClick={() => setOpen((value) => !value)}
         className={`flex w-full items-center justify-between rounded-lg px-4 py-3 text-left text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-          open || active ? "bg-nav text-white" : "text-primary hover:bg-blue-50 hover:text-nav"
+          open || sectionActive ? "bg-nav text-white" : "text-primary hover:bg-blue-50 hover:text-nav"
         }`}
       >
-        Valentine&apos;s
+        {navLabel}
         <span className={`text-xs transition-transform duration-200 ${open ? "rotate-180" : ""}`} aria-hidden>
           ▼
         </span>
@@ -255,7 +272,7 @@ export function ValentineWeekMobile({
             onNavigate={onNavigate}
             className="relative block h-28 overflow-hidden rounded-xl"
           />
-          <DayLinks countryIso={countryIso} onNavigate={onNavigate} />
+          <DayLinks countryIso={countryIso} currentId={currentDay?.id} onNavigate={onNavigate} />
         </div>
       ) : null}
     </div>

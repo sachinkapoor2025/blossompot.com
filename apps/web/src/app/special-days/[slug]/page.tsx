@@ -114,6 +114,8 @@ async function SpecialDayContent({ params, searchParams }: Props) {
           faqJsonLd(day.faqs),
         ]}
       />
+      <Breadcrumbs items={crumbs} />
+      <h1 className="mb-8 text-3xl font-bold text-primary">{day.h1}</h1>
       {failed ? (
         <CatalogLoadError />
       ) : products.length > 0 ? (
@@ -128,8 +130,6 @@ async function SpecialDayContent({ params, searchParams }: Props) {
       )}
 
       <div className="mt-12 border-t border-slate-200 pt-10">
-        <Breadcrumbs items={crumbs} />
-        <h1 className="mb-8 text-3xl font-bold text-primary">{day.h1}</h1>
         <article className="max-w-3xl space-y-8 leading-relaxed text-slate-700">
           {day.intro.map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>

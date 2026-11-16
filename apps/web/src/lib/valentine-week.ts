@@ -1,5 +1,5 @@
 import { countrySeoSlug } from "./location-seo-urls";
-import { specialDayPublicSlug } from "./special-day-slugs";
+import { specialDayIdFromPublicSlug, specialDayPublicSlug } from "./special-day-slugs";
 
 export type ValentineWeekDay = {
   id: string;
@@ -33,4 +33,20 @@ export function valentineWeekShopHref(countryIso: string): string {
     VALENTINE_WEEK_DAYS.find((day) => day.id === "valentines-day") ?? VALENTINE_WEEK_DAYS[7],
     countryIso
   );
+}
+
+/** The February occasion behind a public or country shop URL. Other pages return null. */
+export function valentineWeekDayFromPath(pathname: string): ValentineWeekDay | null {
+  const path = (pathname.split("?")[0] ?? "/").replace(/\/+$/, "") || "/";
+  const internal = path.match(/^\/special-days\/([a-z0-9-]+)$/);
+  const id = internal
+    ? internal[1]
+    : specialDayIdFromPublicSlug(path.replace(/^\//, "").replace(/-to-[a-z0-9-]+$/, ""));
+  if (!id) return null;
+  return VALENTINE_WEEK_DAYS.find((day) => day.id === id) ?? null;
+}
+
+/** Nav label for the current page. Occasion pages use that day’s name. */
+export function valentineWeekNavLabel(pathname: string): string {
+  return valentineWeekDayFromPath(pathname)?.name ?? "Valentine's";
 }

@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { VALENTINE_WEEK_DAYS, valentineWeekHref, valentineWeekShopHref } from "./valentine-week";
+import {
+  VALENTINE_WEEK_DAYS,
+  valentineWeekDayFromPath,
+  valentineWeekHref,
+  valentineWeekNavLabel,
+  valentineWeekShopHref,
+} from "./valentine-week";
 
 describe("Valentine week menu links", () => {
   it("lists the eight February special days in order", () => {
@@ -34,5 +40,16 @@ describe("Valentine week menu links", () => {
       ]
     );
     assert.equal(valentineWeekShopHref("US"), "/valentines-day-gifts-to-usa");
+  });
+
+  it("names the nav item after the open special day", () => {
+    assert.equal(valentineWeekNavLabel("/"), "Valentine's");
+    assert.equal(valentineWeekNavLabel("/flowers-to-usa"), "Valentine's");
+    assert.equal(valentineWeekNavLabel("/rose-day-gifts-to-usa"), "Rose Day");
+    assert.equal(valentineWeekNavLabel("/propose-day-gifts-to-uk"), "Propose Day");
+    assert.equal(valentineWeekNavLabel("/chocolate-day-gifts"), "Chocolate Day");
+    assert.equal(valentineWeekNavLabel("/valentines-day-gifts-to-usa"), "Valentine's Day");
+    assert.equal(valentineWeekDayFromPath("/kiss-day-gifts-to-australia")?.id, "kiss-day");
+    assert.equal(valentineWeekDayFromPath("/special-days/hug-day")?.id, "hug-day");
   });
 });
