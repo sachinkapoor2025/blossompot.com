@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { wishlistEntryHref } from "@/lib/wishlist-href";
 import { navItems } from "@/lib/site";
+import { ValentineWeekMobile } from "@/components/header/ValentineWeekMenu";
 
 const MobileCitiesPanel = dynamic(
   () => import("@/components/header/HeaderCityMenus").then((m) => m.MobileCitiesPanel),
@@ -68,20 +69,29 @@ export function MobileNavDrawer({
       </div>
 
       <nav className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-3 py-3 space-y-1">
-        {navItems.map((item) => (
-          <Link
-            key={item.href}
-            href={navHref(item)}
-            onClick={onClose}
-            className={`block rounded-lg px-4 py-3 text-sm font-semibold ${
-              isActive(item.href, "category" in item ? item.category : undefined)
-                ? "bg-nav text-white"
-                : "text-primary hover:bg-blue-50 hover:text-nav"
-            }`}
-          >
-            {item.label}
-          </Link>
-        ))}
+        {navItems.map((item) =>
+          "category" in item && item.category === "valentines-day-gifts" ? (
+            <ValentineWeekMobile
+              key={item.href}
+              countryIso={cityMenuIso}
+              active={isActive(item.href, item.category)}
+              onNavigate={onClose}
+            />
+          ) : (
+            <Link
+              key={item.href}
+              href={navHref(item)}
+              onClick={onClose}
+              className={`block rounded-lg px-4 py-3 text-sm font-semibold ${
+                isActive(item.href, "category" in item ? item.category : undefined)
+                  ? "bg-nav text-white"
+                  : "text-primary hover:bg-blue-50 hover:text-nav"
+              }`}
+            >
+              {item.label}
+            </Link>
+          )
+        )}
 
         <div>
           <button

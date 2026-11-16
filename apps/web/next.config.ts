@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { categoryRedirectRules, categoryRewriteRules } from "./src/lib/category-urls";
+import { specialDayRewriteRules } from "./src/lib/special-day-slugs";
 import { giftsCatalogCountryRewrites } from "./src/lib/location-seo-urls";
 import { legacyRedirectRules } from "./src/lib/legacy-urls";
 import { STOREFRONT_CSP, STOREFRONT_SECURITY_HEADERS } from "./src/lib/security-headers";
@@ -58,6 +59,7 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     return [
+      ...specialDayRewriteRules(),
       ...categoryRewriteRules(),
       ...giftsCatalogCountryRewrites(),
       { source: "/gifts-to-:slug", destination: "/locations/:slug" },

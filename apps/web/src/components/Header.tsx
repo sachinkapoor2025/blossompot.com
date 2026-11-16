@@ -15,6 +15,7 @@ import { SiteLogoLink } from "@/components/SiteLogo";
 import { DeliveryLocationChip } from "@/components/DeliveryLocationChip";
 import { DeliveryLocationBanner } from "@/components/DeliveryLocationBanner";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
+import { ValentineWeekDesktop } from "@/components/header/ValentineWeekMenu";
 
 const CitiesMenuPanel = dynamic(
   () => import("@/components/header/HeaderCityMenus").then((m) => m.CitiesMenuPanel),
@@ -356,15 +357,23 @@ export function Header() {
       <nav className="hidden md:block border-t border-slate-100 bg-white overflow-visible">
         <div className="max-w-7xl mx-auto px-3 py-2">
           <div className="flex flex-nowrap items-center justify-center gap-1 lg:gap-1.5 [&_.btn-nav]:shrink-0 [&_.btn-nav]:px-3 [&_.btn-nav]:py-1.5 [&_.btn-nav]:text-[13px]">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={navHref(item)}
-                className={`btn-nav ${isActive(item.href, "category" in item ? item.category : undefined) ? "btn-nav-active" : ""}`}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {navItems.map((item) =>
+              "category" in item && item.category === "valentines-day-gifts" ? (
+                <ValentineWeekDesktop
+                  key={item.href}
+                  countryIso={cityCountryIso}
+                  active={isActive(item.href, item.category)}
+                />
+              ) : (
+                <Link
+                  key={item.href}
+                  href={navHref(item)}
+                  className={`btn-nav ${isActive(item.href, "category" in item ? item.category : undefined) ? "btn-nav-active" : ""}`}
+                >
+                  {item.label}
+                </Link>
+              )
+            )}
             <CitiesMenu />
           </div>
         </div>
