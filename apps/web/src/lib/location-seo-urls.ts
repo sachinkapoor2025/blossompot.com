@@ -1,5 +1,6 @@
 import { getDeliveryCountry, SHOPPING_COUNTRY_ISO } from "@blossompot/shared";
 import { CATEGORY_PUBLIC_SLUG, categoryHref } from "./category-urls";
+import { specialDayIdFromPublicSlug } from "./special-day-slugs";
 
 /** Pretty country slugs for category URLs (`/flowers-to-usa`). ISO-2 lowercase is the fallback. */
 const ISO_TO_SLUG: Record<string, string> = {
@@ -240,6 +241,11 @@ export function flowerDeliveryPathForIso(countryIso: string): string | null {
 export function explicitShoppingSeoCountry(pathname: string): string | null {
   const path = normalizePathname(pathname);
   if (FLOWER_DELIVERY_PATH_ISO[path]) return FLOWER_DELIVERY_PATH_ISO[path];
+  const match = path.match(/^\/([a-z0-9-]+)-to-([a-z0-9-]+)$/);
+  if (match && specialDayIdFromPublicSlug(match[1])) {
+    const iso = isoFromCountrySeoSlug(match[2]);
+    if (iso) return iso;
+  }
   return parseLocationShopPath(path)?.countryIso ?? null;
 }
 

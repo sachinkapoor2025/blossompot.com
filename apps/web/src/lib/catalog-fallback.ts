@@ -79,6 +79,12 @@ function ingestCatalogProducts(
 }
 
 /** Read bundled catalog JSON — real BlossomPot SKUs only (never the sample marketplace dump). */
+/** Full bundled catalog, including SKUs hidden until a live vendor registry is known. */
+export function getBundledCatalogProducts(): Product[] {
+  if (!cached) getCatalogProducts();
+  return cached ?? [];
+}
+
 export function getCatalogProducts(): Product[] {
   if (cached) return withoutRememberedDisabledVendors(cached);
   const bySlug = new Map<string, Product>();

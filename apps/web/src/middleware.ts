@@ -8,11 +8,14 @@ import {
   parseDeliveryLocationToken,
 } from "@/lib/delivery-location";
 import { getApiUrl } from "@/lib/env";
+import { specialDayIdFromPublicSlug } from "@/lib/special-day-slugs";
 import {
   LOCATION_SEO_HEADER,
   STOREFRONT_COUNTRY_HEADER,
   explicitShoppingSeoCountry,
+  isoFromCountrySeoSlug,
   locationShopRewritePath,
+  normalizePathname,
   parseLocationShopPath,
   resolveStorefrontCountryIso,
   shoppingSeoCountryStatus,
@@ -79,6 +82,22 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  const specialDay = specialDayShopPath(request.nextUrl.pathname);
+  if (specialDay) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/special-days/${specialDay.id}`;
+    url.searchParams.set("country", specialDay.countryIso);
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.delete(ENABLED_SHOPPING_COUNTRIES_HEADER);
+    if (enabledForRequest) requestHeaders.set(ENABLED_SHOPPING_COUNTRIES_HEADER, enabledForRequest.join(","));
+    requestHeaders.set(LOCATION_SEO_HEADER, specialDay.seoPath);
+    requestHeaders.set(STOREFRONT_COUNTRY_HEADER, specialDay.countryIso);
+    const response = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
+    applyDeliveryCountryCookie(response, request, specialDay.countryIso);
+    stampBotHeaders(response, request);
+    return response;
+  }
+
   const locationShop = parseLocationShopPath(request.nextUrl.pathname);
   if (locationShop) {
     const countryIso = locationShop.countryIso;
@@ -114,6 +133,16 @@ export async function middleware(request: NextRequest) {
   if (country) applyDeliveryCountryCookie(response, request, country);
 
   return response;
+}
+
+function specialDayShopPath(pathname: string): { id: string; countryIso: string; seoPath: string } | null {
+  const path = normalizePathname(pathname);
+  const match = path.match(/^\/([a-z0-9-]+)-to-([a-z0-9-]+)$/);
+  if (!match) return null;
+  const id = specialDayIdFromPublicSlug(match[1]);
+  const countryIso = isoFromCountrySeoSlug(match[2]);
+  if (!id || !countryIso) return null;
+  return { id, countryIso, seoPath: path };
 }
 
 function stampBotHeaders(response: NextResponse, request: NextRequest) {
