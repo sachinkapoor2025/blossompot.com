@@ -5,6 +5,7 @@ import { describe, it } from "node:test";
 import { resolveDefaultShoppingCountry, resolveEnabledShoppingCountry } from "@blossompot/shared";
 import { deliverToDestination } from "./country-switch";
 import { disabledCountryFallback } from "./gbo-delivery-countries";
+import { legacyRedirectRules } from "./legacy-urls";
 import {
   explicitShoppingSeoCountry,
   shopPathForLocation,
@@ -109,6 +110,19 @@ describe("shopping country routes", () => {
     assert.match(promo, /Shop flowers, cakes & hampers/);
     assert.match(promo, /href="\/products"/);
     assert.equal(llms.includes("/same-day-delivery"), false);
+    assert.equal(llms.includes('href: "/flower-delivery-uk"'), false);
+    assert.equal(llms.includes('href: "/flower-delivery-uae"'), false);
+    assert.match(llms, /liveFlowerDeliveryLinks/);
     assert.match(redirects, /source: "\/same-day-delivery", destination: "\/products", statusCode: 301/);
   });
+
+  it("redirects the invented overseas-gifts country URL to the live category", () => {
+    const rule = legacyRedirectRules().find((item) => item.source === "/overseas-gifts-to-:country");
+    assert.deepEqual(rule, {
+      source: "/overseas-gifts-to-:country",
+      destination: "/categories/overseas-gifts",
+      statusCode: 301,
+    });
+  });
+
 });

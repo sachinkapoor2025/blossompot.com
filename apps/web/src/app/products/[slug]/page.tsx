@@ -8,7 +8,7 @@ import { ProductDetailClient } from "./ProductDetailClient";
 import { breadcrumbJsonLd, faqJsonLd, productJsonLd, productPageMetadata } from "@/lib/seo";
 import { productFaqsForCategory } from "@/lib/content/product-faqs";
 import { resolveImageUrl } from "@/lib/images";
-import { loadProductForCountry, loadRelatedProducts, loadProducts, getStaticProductSlugs, toListingCardProducts } from "@/lib/product-loader";
+import { loadProductForCountry, loadProducts, getStaticProductSlugs } from "@/lib/product-loader";
 import { api } from "@/lib/api";
 import { categoryHref } from "@/lib/category-urls";
 import { getCategoryPageSeo } from "@/lib/content/category-seo";
@@ -17,7 +17,7 @@ import {
   productPageShowsDetail,
   UNAVAILABLE_PAGE_ALLOWS_PURCHASE,
 } from "@/lib/product-availability-copy";
-import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
+import { getStorefrontDeliveryCountry, peekStorefrontCountryHint } from "@/lib/storefront-country";
 import { deliveryDestinationName } from "@/lib/location-seo-urls";
 import {
   isProductSearchIndexable,
@@ -27,8 +27,8 @@ import {
   type Product,
 } from "@blossompot/shared";
 import Link from "next/link";
-import { HomeProductCard } from "@/components/HomeProductCard";
 import { HomeProductList } from "@/components/HomeProductList";
+import { RelatedProducts } from "@/components/RelatedProducts";
 
 function categoryBreadcrumbLabel(categorySlug: string): string {
   const seo = getCategoryPageSeo(categorySlug);
@@ -68,10 +68,18 @@ export async function generateStaticParams() {
   }
 }
 
+async function loadProductForHint(slug: string) {
+  const hint = await peekStorefrontCountryHint();
+  const early = loadProductForCountry(slug, hint);
+  const country = await getStorefrontDeliveryCountry();
+  if (!country) return { country, loaded: null as Awaited<ReturnType<typeof loadProductForCountry>> };
+  const loaded = country === hint ? await early : await loadProductForCountry(slug, country);
+  return { country, loaded };
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const country = await getStorefrontDeliveryCountry();
-  const loaded = await loadProductForCountry(slug, country);
+  const { loaded, country } = await loadProductForHint(slug);
   const p =
     loaded &&
     productPageShowsDetail({
@@ -107,7 +115,8 @@ export default function ProductPage(props: Props) {
 
 async function ProductPageContent({ params }: Props) {
   const { slug } = await params;
-  const countryIso = await getStorefrontDeliveryCountry();
+  const hinted = await loadProductForHint(slug);
+  const countryIso = hinted.country;
   if (!countryIso) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-10">
@@ -116,7 +125,7 @@ async function ProductPageContent({ params }: Props) {
       </div>
     );
   }
-  const loaded = await loadProductForCountry(slug, countryIso);
+  const loaded = hinted.loaded;
   if (!loaded) notFound();
   const product = loaded.product;
   if (!isProductStorefrontVisible(product)) notFound();
@@ -181,41 +190,11 @@ async function ProductPageContent({ params }: Props) {
       <ProductDetailClient
         product={product}
         relatedProducts={
-          <Suspense fallback={null}>
-            <RelatedProducts
-              categorySlug={product.categorySlug}
-              excludeSlug={product.slug}
-              countryIso={countryIso}
-            />
-          </Suspense>
+          <RelatedProducts categorySlug={product.categorySlug} excludeSlug={product.slug} />
         }
         deliveryCountryIso={countryIso}
         purchaseAllowed={loaded.deliverable}
       />
     </>
-  );
-}
-
-async function RelatedProducts({
-  categorySlug,
-  excludeSlug,
-  countryIso,
-}: {
-  categorySlug: string;
-  excludeSlug: string;
-  countryIso: string;
-}) {
-  const relatedProducts = await loadRelatedProducts(categorySlug, excludeSlug, countryIso);
-  const cards = toListingCardProducts(relatedProducts);
-  if (cards.length === 0) return null;
-  return (
-    <section className="mt-10 pt-8 border-t border-slate-200">
-      <h2 className="text-lg font-bold text-primary mb-4">You might also like</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-stretch">
-        {cards.map((product) => (
-          <HomeProductCard key={product.slug} product={product} loadGalleryWhenVisible />
-        ))}
-      </div>
-    </section>
   );
 }

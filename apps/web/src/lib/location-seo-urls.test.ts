@@ -2,7 +2,9 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   categoryLocationHref,
+  disabledFlowerDeliveryRedirect,
   giftsCatalogLocationHref,
+  publicFlowerDeliveryHref,
   isExistingGiftsToSeoPage,
   isLocationUrlExemptPath,
   localizeCopyForCountry,
@@ -24,7 +26,23 @@ describe("location SEO shop URLs", () => {
     assert.equal(categoryLocationHref("flowers", "US"), "/flowers-to-usa");
     assert.equal(categoryLocationHref("gift-hampers", "US"), "/hampers-to-usa");
     assert.equal(categoryLocationHref("cakes", "GB"), "/cakes-to-uk");
+    assert.equal(categoryLocationHref("overseas-gifts", "US"), "/categories/overseas-gifts?country=US");
     assert.equal(giftsCatalogLocationHref("US"), "/gifts-to-usa");
+  });
+
+  it("sends disabled flower-delivery URLs to the published country guide", () => {
+    assert.equal(publicFlowerDeliveryHref("US", ["US"]), "/flower-delivery-usa");
+    assert.equal(publicFlowerDeliveryHref("GB", ["US", "GB"]), "/flower-delivery-uk");
+    assert.equal(publicFlowerDeliveryHref("GB", ["US"]), "/locations/europe/united-kingdom");
+    assert.equal(publicFlowerDeliveryHref("CA", ["US"]), "/locations/canada");
+    assert.equal(publicFlowerDeliveryHref("AU", ["US"]), "/locations/australia");
+    assert.equal(publicFlowerDeliveryHref("AE", ["US"]), null);
+    assert.equal(publicFlowerDeliveryHref("AE", ["US", "AE"]), "/flower-delivery-uae");
+    assert.equal(disabledFlowerDeliveryRedirect("/flower-delivery-uk"), "/locations/europe/united-kingdom");
+    assert.equal(disabledFlowerDeliveryRedirect("/flower-delivery-canada/"), "/locations/canada");
+    assert.equal(disabledFlowerDeliveryRedirect("/flower-delivery-australia"), "/locations/australia");
+    assert.equal(disabledFlowerDeliveryRedirect("/flower-delivery-uae"), null);
+    assert.equal(disabledFlowerDeliveryRedirect("/flower-delivery-usa"), null);
   });
 
   it("parses location shop paths and rewrites internally", () => {

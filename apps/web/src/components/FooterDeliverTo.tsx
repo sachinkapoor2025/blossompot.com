@@ -8,12 +8,13 @@ import {
   footerCityColumns,
   isLocalFooterCityMenu,
   localCityMenu,
+  shoppingSafeCityMenu,
   type CityMenuContent,
 } from "@/lib/city-menu-core";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
 import { footerUsaTopicHeading } from "@/lib/footer-usa-topic";
-import { COUNTRY_GUIDE_HREF } from "@/lib/gbo-delivery-countries";
-import { countryDisplayName, countryIsoFromPathname } from "@/lib/location-seo-urls";
+import { useGboDeliveryCountries } from "@/lib/gbo-delivery-countries";
+import { countryDisplayName, countryIsoFromPathname, publicFlowerDeliveryHref } from "@/lib/location-seo-urls";
 import { countriesMenu, cityNavHref } from "@/lib/site";
 
 const linkClass = "text-slate-700 hover:text-primary hover:underline";
@@ -97,25 +98,31 @@ function FooterCityColumn({
   menu: CityMenuContent | null;
 }) {
   const pathname = usePathname();
+  const { countries } = useGboDeliveryCountries();
+  const enabledCodes = countries.map((country) => country.countryCode);
+  const safeMenu = menu ? shoppingSafeCityMenu(menu, iso, enabledCodes) : null;
   const country = countryDisplayName(iso);
-  const guideHref = COUNTRY_GUIDE_HREF[iso];
-  const guide = guideHref ? countriesMenu.items.find((item) => item.href === guideHref) : undefined;
+  const guideHref = publicFlowerDeliveryHref(iso, enabledCodes);
+  const guide =
+    guideHref && guideHref.startsWith("/flower-delivery-")
+      ? countriesMenu.items.find((item) => item.href === guideHref)
+      : undefined;
   const topicLabel =
     guide?.href === "/flower-delivery-usa" ? (footerUsaTopicHeading(pathname) ?? guide.label) : guide?.label;
   const hub = COUNTRY_HUB[iso];
-  const cityLinks = (menu?.links ?? []).map((city) => ({
+  const cityLinks = (safeMenu?.links ?? []).map((city) => ({
     label: city.menuLabel ?? city.label,
     href: city.href ?? cityNavHref(city),
     slug: city.slug,
     menuLabel: city.menuLabel,
   }));
-  const columns = menu ? footerCityColumns(cityLinks, iso) : null;
+  const columns = safeMenu ? footerCityColumns(cityLinks, iso) : null;
   const [expanded, setExpanded] = useState(false);
   const listId = useId();
   const visible = columns ? (expanded ? columns.all : columns.preview) : [];
   const canToggle = columns ? columns.all.length > columns.preview.length : false;
-  const allLabel = menu?.allLabel ?? hub?.label ?? "All locations";
-  const allHref = menu?.allHref ?? hub?.href ?? "/locations";
+  const allLabel = safeMenu?.allLabel ?? hub?.label ?? "All locations";
+  const allHref = safeMenu?.allHref ?? hub?.href ?? "/locations";
 
   return (
     <div className="min-w-0" aria-busy={menu ? undefined : true}>

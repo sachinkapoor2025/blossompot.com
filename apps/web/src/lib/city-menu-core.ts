@@ -1,4 +1,5 @@
 import { getDeliveryCountry } from "@blossompot/shared";
+import { flowerDeliveryPathForIso, publicFlowerDeliveryHref } from "./location-seo-urls";
 import { cityLinks, type CityNavLink } from "./site";
 
 export type CityMenuContent = {
@@ -36,6 +37,25 @@ export function countryName(iso: string): string {
 export function isLocalFooterCityMenu(countryCode: string | null | undefined): boolean {
   const iso = (countryCode ?? "US").trim().toUpperCase() || "US";
   return iso === "US" || iso === "AE";
+}
+
+/**
+ * Drop city links that target a flower-delivery URL the shop cannot serve.
+ * Enabled countries keep their menu. UAE has no other city pages, so those links
+ * are omitted and the menu index falls back to /locations.
+ */
+export function shoppingSafeCityMenu(
+  menu: CityMenuContent,
+  countryIso: string,
+  enabledCodes: readonly string[] | null
+): CityMenuContent {
+  const iso = countryIso.trim().toUpperCase();
+  const flower = flowerDeliveryPathForIso(iso);
+  const live = publicFlowerDeliveryHref(iso, enabledCodes);
+  if (!flower || live === flower) return menu;
+  const links = menu.links.filter((link) => link.href !== flower);
+  if (menu.allHref !== flower) return { ...menu, links };
+  return { ...menu, links, allHref: "/locations", allLabel: "All locations" };
 }
 
 export function localCityMenu(countryCode: string | null | undefined): CityMenuContent {

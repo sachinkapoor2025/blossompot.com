@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SafeStoreImage } from "@/components/SafeStoreImage";
 import type { FlowerDirectoryEntry, FlowerGuide } from "@/lib/content/flower-guide";
+import { listingCardImage } from "@/lib/storefront-image";
 
 type CardFlower = Pick<
   FlowerDirectoryEntry,
@@ -26,7 +27,8 @@ export function FlowerCard({
       <div className="relative aspect-[4/3] bg-petal overflow-hidden">
         {image ? (
           <SafeStoreImage
-            src={image.src}
+            {...listingCardImage(image.src)}
+            fallbackSrc={image.src}
             alt={image.alt}
             width={image.width}
             height={image.height}

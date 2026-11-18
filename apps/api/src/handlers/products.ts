@@ -186,6 +186,10 @@ async function persistAndMergeBundledCatalog(items: Product[], category?: string
   const merged = dedupeStorefrontProducts(mergeBundledCatalogProducts(items, category));
   try {
     const alreadyStored = new Set(items.map((product) => product.slug));
+    if (category) {
+      await persistBundledProductsForCategory(alreadyStored, category);
+      return merged;
+    }
     const registry = await loadCatalogVendorRegistry();
     for (const bundled of listBundledCatalogProducts()) {
       if (alreadyStored.has(bundled.slug)) continue;
@@ -205,6 +209,49 @@ async function persistAndMergeBundledCatalog(items: Product[], category?: string
     console.error("persistMissingBundledCatalogProducts failed", err);
   }
   return merged;
+}
+
+/**
+ * Category pages only backfill bundled rows that belong on the requested category
+ * and are absent from the table. A gift listed under another partition is not inserted
+ * again. The response still comes from `mergeBundledCatalogProducts`.
+ */
+async function persistBundledProductsForCategory(alreadyStored: Set<string>, category: string): Promise<void> {
+  const pending = listBundledCatalogProducts().filter(
+    (bundled) => !alreadyStored.has(bundled.slug) && productInStorefrontCategory(bundled, category)
+  );
+  if (pending.length === 0) return;
+
+  const registry = await loadCatalogVendorRegistry();
+  for (const bundled of pending) {
+    const decision = productAllowedForNewShopping(productForShoppingDecision(bundled), "US", registry);
+    if (decision.reason === "vendor_disabled" || decision.reason === "gbo_storefront_disabled") {
+      alreadyStored.add(bundled.slug);
+    }
+  }
+  const probe = pending
+    .filter((bundled) => !alreadyStored.has(bundled.slug))
+    .slice(0, BUNDLED_CATALOG_PERSIST_BATCH);
+  const found = new Set<string>();
+  await Promise.all(
+    probe.map(async (bundled) => {
+      const result = await docClient.send(
+        new GetCommand({
+          TableName: PRODUCTS_TABLE,
+          Key: { PK: productKeys.pk(bundled.slug), SK: productKeys.sk() },
+          ProjectionExpression: "slug",
+        })
+      );
+      if (result.Item) found.add(bundled.slug);
+    })
+  );
+  const absent = probe.filter((bundled) => !found.has(bundled.slug));
+  if (absent.length === 0) return;
+  const absentSlugs = new Set(absent.map((bundled) => bundled.slug));
+  for (const bundled of listBundledCatalogProducts()) {
+    if (!absentSlugs.has(bundled.slug)) alreadyStored.add(bundled.slug);
+  }
+  await persistMissingBundledCatalogProducts(alreadyStored, absent.length);
 }
 
 function vendorHiddenFromStorefront(decision: { available: boolean; reason?: string }): boolean {
@@ -241,6 +288,7 @@ function wantsListingCardView(event: APIGatewayProxyEventV2): boolean {
  * A homepage row reads the requested primary partition, refreshes price and stock,
  * then applies the same country, vendor, publication, and serviceability rules.
  * It does not query other category partitions and does not write catalog rows.
+ * `x-blossompot-related-limit` stops that row after the same filters once enough products pass.
  */
 function wantsHomepageCategoryRow(event: APIGatewayProxyEventV2): boolean {
   const headers = event.headers ?? {};
@@ -311,7 +359,14 @@ const PRODUCT_LIST_CACHE_TTL_MS = 5 * 60_000; // 5 minutes
 const PRODUCT_GET_CACHE_TTL_MS = 5 * 60_000; // 5 minutes
 let productListCache: { at: number; items: Product[] } | null = null;
 const categoryProductCache = new Map<string, { at: number; items: Product[] }>();
+const categoryMembershipCache = new Map<string, { at: number; rows: CategoryMembership[] }>();
 const productGetCache = new Map<string, { at: number; product: Product }>();
+
+type CategoryMembership = {
+  slug: string;
+  categorySlug?: string;
+  additionalCategorySlugs?: string[];
+};
 
 /**
  * Primary-category partitions already stored on GSI1.
@@ -368,11 +423,6 @@ async function categoryPartitions(): Promise<string[]> {
   return [...new Set<string>([...CATEGORY_PARTITIONS, ...stored])];
 }
 
-function belongsOnCategoryPage(product: Product, category: string): boolean {
-  if (product.categorySlug === category) return true;
-  return productInStorefrontCategory(product, category);
-}
-
 async function queryProductsByCategory(categorySlug: string): Promise<Product[]> {
   const nowMs = Date.now();
   const hit = categoryProductCache.get(categorySlug);
@@ -396,6 +446,76 @@ async function queryProductsByCategory(categorySlug: string): Promise<Product[]>
 
   categoryProductCache.set(categorySlug, { at: nowMs, items });
   return items;
+}
+
+function membershipFromItem(item: {
+  slug?: string;
+  categorySlug?: string;
+  additionalCategorySlugs?: string[] | null;
+}): CategoryMembership | null {
+  if (!item.slug) return null;
+  return {
+    slug: item.slug,
+    ...(item.categorySlug ? { categorySlug: item.categorySlug } : {}),
+    ...(item.additionalCategorySlugs?.length
+      ? { additionalCategorySlugs: item.additionalCategorySlugs }
+      : {}),
+  };
+}
+
+/**
+ * Other category partitions are read for cross-listed slugs only.
+ * The primary partition stays a full product query. Matches are loaded with GetItem.
+ */
+async function queryCategoryMembership(categorySlug: string): Promise<CategoryMembership[]> {
+  const nowMs = Date.now();
+  const full = categoryProductCache.get(categorySlug);
+  if (full && nowMs - full.at < PRODUCT_LIST_CACHE_TTL_MS) {
+    return full.items.flatMap((product) => {
+      const row = membershipFromItem(product);
+      return row ? [row] : [];
+    });
+  }
+  const hit = categoryMembershipCache.get(categorySlug);
+  if (hit && nowMs - hit.at < PRODUCT_LIST_CACHE_TTL_MS) return hit.rows;
+
+  const rows: CategoryMembership[] = [];
+  let ExclusiveStartKey: Record<string, unknown> | undefined;
+  do {
+    const result = await docClient.send(
+      new QueryCommand({
+        TableName: PRODUCTS_TABLE,
+        IndexName: "GSI1",
+        KeyConditionExpression: "GSI1PK = :pk",
+        ExpressionAttributeValues: { ":pk": productKeys.gsi1pk(categorySlug) },
+        ProjectionExpression: "slug, categorySlug, additionalCategorySlugs",
+        ExclusiveStartKey,
+      })
+    );
+    for (const item of result.Items ?? []) {
+      const row = membershipFromItem(item as CategoryMembership);
+      if (row) rows.push(row);
+    }
+    ExclusiveStartKey = result.LastEvaluatedKey as Record<string, unknown> | undefined;
+  } while (ExclusiveStartKey);
+
+  categoryMembershipCache.set(categorySlug, { at: nowMs, rows });
+  return rows;
+}
+
+async function crossListedProducts(category: string, known: Set<string>): Promise<Product[]> {
+  const partitions = (await categoryPartitions()).filter((slug) => slug !== category);
+  const memberships = await Promise.all(partitions.map((slug) => queryCategoryMembership(slug)));
+  const wanted: string[] = [];
+  const seen = new Set<string>();
+  for (const row of memberships.flat()) {
+    if (known.has(row.slug) || seen.has(row.slug)) continue;
+    if (!productInStorefrontCategory(row, category)) continue;
+    seen.add(row.slug);
+    wanted.push(row.slug);
+  }
+  if (wanted.length === 0) return [];
+  return getProductsBySlugs(wanted);
 }
 
 async function scanAllProducts(): Promise<Product[]> {
@@ -428,8 +548,13 @@ export function invalidateProductListCache(categorySlug?: string) {
   productListCache = null;
   productGetCache.clear();
   categorySlugCache = null;
-  if (categorySlug) categoryProductCache.delete(categorySlug);
-  else categoryProductCache.clear();
+  if (categorySlug) {
+    categoryProductCache.delete(categorySlug);
+    categoryMembershipCache.delete(categorySlug);
+  } else {
+    categoryProductCache.clear();
+    categoryMembershipCache.clear();
+  }
 }
 
 /**
@@ -455,6 +580,108 @@ async function withFreshListingCommerce(items: Product[]): Promise<Product[]> {
     const fresh = commerce.get(product.slug);
     return fresh ? applyListingCommerce(product, fresh) : product;
   });
+}
+
+const RELATED_READ_WINDOW = 8;
+
+function headerValue(event: APIGatewayProxyEventV2, name: string): string | undefined {
+  const wanted = name.toLowerCase();
+  for (const [key, value] of Object.entries(event.headers ?? {})) {
+    if (key.toLowerCase() === wanted && value?.trim()) return value.trim();
+  }
+  return undefined;
+}
+
+function readRelatedLimit(event: APIGatewayProxyEventV2): number | null {
+  const raw = headerValue(event, "x-blossompot-related-limit");
+  if (!raw || !/^[0-9]+$/.test(raw)) return null;
+  const limit = Number(raw);
+  if (!Number.isInteger(limit) || limit < 1 || limit > 12) return null;
+  return limit;
+}
+
+function readRelatedExclude(event: APIGatewayProxyEventV2): string {
+  const raw = headerValue(event, "x-blossompot-related-exclude") ?? "";
+  return /^[a-z0-9-]{1,160}$/.test(raw) ? raw : "";
+}
+
+function wantsListingGroups(event: APIGatewayProxyEventV2): boolean {
+  return (
+    event.headers?.["x-blossompot-listing-groups"] === "1" ||
+    event.headers?.["X-Blossompot-Listing-Groups"] === "1"
+  );
+}
+
+function storefrontListingVendors<T extends Parameters<typeof catalogVendorShoppingStatus>[0] & { vendorName: string; displayOrder?: number }>(
+  vendorRecords: readonly T[]
+): Array<{
+  vendorSlug: string;
+  vendorName: string;
+  displayOrder?: number;
+  shoppingAvailable: boolean;
+}> {
+  return vendorRecords.map((vendor) => ({
+    vendorSlug: vendor.vendorSlug,
+    vendorName: vendor.vendorName,
+    ...(vendor.displayOrder != null ? { displayOrder: vendor.displayOrder } : {}),
+    shoppingAvailable: catalogVendorShoppingStatus(vendor).shoppingAvailable,
+  }));
+}
+
+/**
+ * Related rail. Walks the same vendor order and the same publication, stock,
+ * country, and deliverability rules, and stops once enough products pass.
+ */
+async function respondRelatedProducts(
+  items: Product[],
+  event: APIGatewayProxyEventV2,
+  limit: number
+) {
+  const exclude = readRelatedExclude(event);
+  const cardView = wantsListingCardView(event);
+  const location = await resolveShoppingLocation(parseLocationQuery(event));
+  if (!location) {
+    return ok({ products: [], countryUnavailable: true, message: NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE });
+  }
+  const shoppingCountry = location.countryCode;
+  const vendorRegistry = await loadCatalogVendorRegistry();
+  const vendorRecords = sortVendorsForDisplay([...vendorRegistry.values()]);
+  let pool = exclude ? items.filter((product) => product.slug !== exclude) : items.slice();
+  pool = pool.filter(
+    (product) =>
+      !isGboHiddenFromStorefront(product) &&
+      productVisibleForDeliveryCountry(product, shoppingCountry) &&
+      productAllowedForNewShopping(productForShoppingDecision(product), shoppingCountry, vendorRegistry).available
+  );
+  const ordered = orderProductsByVendor(pool, vendorRecords);
+  const selected: Product[] = [];
+  for (let index = 0; index < ordered.length && selected.length < limit; index += RELATED_READ_WINDOW) {
+    const fresh = await withFreshListingCommerce(ordered.slice(index, index + RELATED_READ_WINDOW));
+    const eligible = fresh.filter(
+      (product) =>
+        product.published !== false &&
+        (product.inventory ?? 0) > 0 &&
+        isProductStorefrontVisible(product)
+    );
+    if (eligible.length === 0) continue;
+    const evals = await evaluateProductsForLocation(eligible, location);
+    const deliverable = new Set(evals.filter((row) => row.deliverable).map((row) => row.slug));
+    for (const product of eligible) {
+      if (!deliverable.has(product.slug)) continue;
+      if (cardView && isRakhiRelatedProduct(forStorefront(product))) continue;
+      selected.push(product);
+      if (selected.length >= limit) break;
+    }
+  }
+  const products = selected.map(forStorefront);
+  const responseProducts = cardView ? products.map(toListingCardProduct) : products;
+  const listing = wantsListingGroups(event)
+    ? {
+        listingGroups: listingGroupsForProducts(products, vendorRecords),
+        listingVendors: storefrontListingVendors(vendorRecords),
+      }
+    : {};
+  return ok({ products: responseProducts, location, filtered: true, ...listing });
 }
 
 export async function listProducts(event: APIGatewayProxyEventV2) {
@@ -494,17 +721,19 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
     } else {
       const primary = await queryProductsByCategory(category);
       const bySlug = new Map(primary.map((product) => [product.slug, product]));
-      const partitions = (await categoryPartitions()).filter((slug) => slug !== category);
-      const others = await Promise.all(partitions.map((slug) => queryProductsByCategory(slug)));
-      for (const product of others.flat()) {
-        if (bySlug.has(product.slug)) continue;
-        if (!belongsOnCategoryPage(product, category)) continue;
-        bySlug.set(product.slug, product);
+      const crossListed = await crossListedProducts(category, new Set(bySlug.keys()));
+      for (const product of crossListed) {
+        if (!bySlug.has(product.slug)) bySlug.set(product.slug, product);
       }
       items = [...bySlug.values()];
     }
   } else {
     items = await scanAllProducts();
+  }
+
+  if (homepageCategoryRow && category && !search && !componentSlugs) {
+    const relatedLimit = readRelatedLimit(event);
+    if (relatedLimit) return respondRelatedProducts(items, event, relatedLimit);
   }
 
   if (!componentSlugs) {
@@ -528,6 +757,22 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
         p.description.toLowerCase().includes(search) ||
         p.tags?.some((t) => t.toLowerCase().includes(search))
     );
+  }
+
+  if (items.length === 0) {
+    const emptyLocation = await resolveShoppingLocation(parseLocationQuery(event));
+    if (!emptyLocation) {
+      return ok({ products: [], countryUnavailable: true, message: NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE });
+    }
+    if (!wantsListingGroups(event)) return ok({ products: [], location: emptyLocation, filtered: true });
+    const emptyVendors = sortVendorsForDisplay([...(await loadCatalogVendorRegistry()).values()]);
+    return ok({
+      products: [],
+      location: emptyLocation,
+      filtered: true,
+      listingGroups: [],
+      listingVendors: storefrontListingVendors(emptyVendors),
+    });
   }
 
   const location = await resolveShoppingLocation(parseLocationQuery(event));
@@ -554,12 +799,7 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
     event.headers?.["X-Blossompot-Listing-Groups"] === "1"
       ? {
           listingGroups: listingGroupsForProducts(cardView ? visible : items, vendorRecords),
-          listingVendors: vendorRecords.map((vendor) => ({
-            vendorSlug: vendor.vendorSlug,
-            vendorName: vendor.vendorName,
-            ...(vendor.displayOrder != null ? { displayOrder: vendor.displayOrder } : {}),
-            shoppingAvailable: catalogVendorShoppingStatus(vendor).shoppingAvailable,
-          })),
+          listingVendors: storefrontListingVendors(vendorRecords),
         }
       : {};
   return ok({ products: responseProducts, location, filtered: true, ...listing });

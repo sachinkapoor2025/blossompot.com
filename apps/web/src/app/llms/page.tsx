@@ -2,6 +2,7 @@ import { ReadableSummary } from "@/components/ReadableSummary";
 import { llmsReadable } from "@/lib/llms-document";
 import { pageMetadata } from "@/lib/seo";
 import { site } from "@/lib/site";
+import { loadEnabledShoppingCountryCodes } from "@/lib/storefront-country";
 
 export const metadata = pageMetadata({
   title: "Site summary",
@@ -9,10 +10,11 @@ export const metadata = pageMetadata({
   path: "/llms",
 });
 
-export default function LlmsPage() {
+export default async function LlmsPage() {
+  const enabledCountries = await loadEnabledShoppingCountryCodes();
   return (
     <ReadableSummary
-      doc={llmsReadable()}
+      doc={llmsReadable(enabledCountries)}
       plainHref="/llms.txt?format=plain"
       plainLabel="Plain text for AI assistants"
     />
