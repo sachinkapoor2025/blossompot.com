@@ -172,8 +172,11 @@ describe("category country SEO", () => {
     assert.ok(listingHeading >= 0);
     assert.ok(grid > listingHeading);
     assert.ok(article > grid);
-    assert.equal(content.includes("loadCategoryPageProducts"), false);
-    assert.match(page.slice(page.indexOf("async function CategoryProductListing")), /await loadCategoryPageProducts/);
+    assert.equal(content.includes("await loadCategoryPageProducts"), false);
+    assert.match(
+      page.slice(page.indexOf("async function CategoryProductListing")),
+      /await \(earlyProducts \?\? loadCategoryPageProducts/
+    );
     assert.match(page, /<ProductGrid /);
     assert.equal(page.includes("pageSeo.article ? null : <h1"), false);
   });

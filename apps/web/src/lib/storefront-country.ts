@@ -115,30 +115,6 @@ export async function getIndexableHomeCountry(): Promise<string> {
   return (await loadStorefrontCountryConfig()).defaultCountry;
 }
 
-/**
- * Country named by the URL, middleware, or cookie before the enabled-country list returns.
- * Callers can start a catalog read with this hint while `getStorefrontDeliveryCountry` validates it.
- */
-export async function peekStorefrontCountryHint(preferred?: string | string[] | null): Promise<string> {
-  const preferredIso = normalizeStorefrontCountry(preferred);
-  if (preferredIso) return preferredIso;
-  try {
-    const headerIso = normalizeStorefrontCountry((await headers()).get(STOREFRONT_COUNTRY_HEADER));
-    if (headerIso) return headerIso;
-  } catch {
-    /* headers() unavailable outside a request */
-  }
-  try {
-    const cookie = (await cookies()).get(DELIVERY_LOCATION_COOKIE)?.value;
-    const fromCookie = parseDeliveryLocationToken(cookie ? decodeCookieValue(cookie) : "")?.countryCode ?? null;
-    const cookieIso = normalizeStorefrontCountry(fromCookie);
-    if (cookieIso) return cookieIso;
-  } catch {
-    /* cookies() unavailable outside a request */
-  }
-  return SHOPPING_COUNTRY_ISO;
-}
-
 /** ISO-2 country from ?country=, middleware header, or the delivery-location cookie, validated against the global list. */
 export async function getStorefrontDeliveryCountry(
   preferred?: string | string[] | null
@@ -163,6 +139,30 @@ export async function getStorefrontDeliveryCountry(
   if (!config.codes || config.codes.length === 0 || !config.defaultCountry) return "";
   if (raw && config.codes.includes(raw)) return raw;
   return config.defaultCountry;
+}
+
+/**
+ * Country named by the URL, middleware, or cookie before the enabled-country list returns.
+ * Callers can start a catalog read with this hint while `getStorefrontDeliveryCountry` validates it.
+ */
+export async function peekStorefrontCountryHint(preferred?: string | string[] | null): Promise<string> {
+  const preferredIso = normalizeStorefrontCountry(preferred);
+  if (preferredIso) return preferredIso;
+  try {
+    const headerIso = normalizeStorefrontCountry((await headers()).get(STOREFRONT_COUNTRY_HEADER));
+    if (headerIso) return headerIso;
+  } catch {
+    /* headers() unavailable outside a request */
+  }
+  try {
+    const cookie = (await cookies()).get(DELIVERY_LOCATION_COOKIE)?.value;
+    const fromCookie = parseDeliveryLocationToken(cookie ? decodeCookieValue(cookie) : "")?.countryCode ?? null;
+    const cookieIso = normalizeStorefrontCountry(fromCookie);
+    if (cookieIso) return cookieIso;
+  } catch {
+    /* cookies() unavailable outside a request */
+  }
+  return SHOPPING_COUNTRY_ISO;
 }
 
 /** Postal/ZIP from the delivery-location cookie, when the shopper has entered one. */
