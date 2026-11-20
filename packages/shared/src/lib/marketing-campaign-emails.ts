@@ -41,6 +41,11 @@ export type CampaignCard = {
   buttonText: string;
   badge?: string;
   priceLabel?: string;
+  /**
+   * Display height at width 260. Set only when the intrinsic ratio is known.
+   * Outlook uses this attribute; other clients keep height:auto.
+   */
+  imageHeight?: number;
 };
 
 export type CampaignBenefit = {
@@ -57,6 +62,12 @@ export type OfferStyleEmailConfig = {
   heroImageUrl: string;
   heroImageHref: string;
   heroImageAlt: string;
+  /** Display height at width 600. Outlook uses the attribute; others keep height:auto. */
+  heroImageHeight?: number;
+  /** Fallback behind the hero while the image loads. */
+  heroImageBg?: string;
+  /** Display height of the header logo at width 168. */
+  logoDisplayHeight?: number;
   offerEyebrow: string;
   offerHeadline: string;
   offerSubhead: string;
@@ -167,9 +178,13 @@ export const ANNIVERSARY_EMAIL_CONFIG = {
     "Romantic roses, celebration cakes, and gift hampers delivered across the USA. Make this anniversary unforgettable.",
   logoUrl: LOGO,
   logoHref: SITE,
-  heroImageUrl: cdnUploadUrl("catalog/roses-pink-1.jpg"),
+  logoDisplayHeight: 120,
+  heroImageUrl: cdnUploadUrl("editorial/tile-anniversary.jpg"),
   heroImageHref: `${SITE}/anniversary-gifts`,
   heroImageAlt: "Anniversary roses and gifts from BlossomPot",
+  /** 1800×1671 editorial JPEG, displayed at 600px wide. */
+  heroImageHeight: 557,
+  heroImageBg: CREAM,
   offerEyebrow: "ANNIVERSARY COLLECTION",
   offerHeadline: "Celebrate Your Love Story",
   offerSubhead: "Flowers, cakes & gifts made for anniversaries",
@@ -190,28 +205,32 @@ export const ANNIVERSARY_EMAIL_CONFIG = {
     {
       name: "Anniversary Gifts",
       description: "Curated roses, combos, and keepsakes for the date that matters.",
-      imageUrl: cdnUploadUrl("catalog/roses-pink-1.jpg"),
+      imageUrl: cdnUploadUrl("editorial/tile-anniversary.jpg"),
+      imageHeight: 241,
       href: `${SITE}/anniversary-gifts`,
       buttonText: "Shop Now",
     },
     {
       name: "Flower Bouquets",
       description: "Hand-tied bouquets that arrive fresh and gift-ready.",
-      imageUrl: cdnUploadUrl("catalog/mixed-bouquet-1.jpg"),
+      imageUrl: cdnUploadUrl("editorial/tile-bouquets.jpg"),
+      imageHeight: 184,
       href: `${SITE}/bouquets`,
       buttonText: "Shop Now",
     },
     {
       name: "Cakes",
       description: "Celebration cakes to share after the bouquet is opened.",
-      imageUrl: cdnUploadUrl("catalog/cake-chocolate-1.jpg"),
+      imageUrl: cdnUploadUrl("editorial/tile-cakes.jpg"),
+      imageHeight: 202,
       href: `${SITE}/cakes`,
       buttonText: "Shop Now",
     },
     {
       name: "Gift Hampers",
       description: "Gourmet hampers for a fuller, more memorable gift.",
-      imageUrl: cdnUploadUrl("catalog/hamper-1.jpg"),
+      imageUrl: cdnUploadUrl("editorial/tile-hampers.jpg"),
+      imageHeight: 195,
       href: `${SITE}/gift-hampers`,
       buttonText: "Shop Now",
     },
@@ -837,6 +856,7 @@ function productCard(card: CampaignCard, opts?: { showBadge?: boolean }): string
   const href = escAttr(card.href);
   const img = escAttr(card.imageUrl);
   const name = escapeHtml(card.name);
+  const heightAttr = card.imageHeight ? ` height="${card.imageHeight}" border="0"` : "";
   const desc = escapeHtml(card.description);
   const btn = escapeHtml(card.buttonText);
   const badge = card.badge ? escapeHtml(card.badge) : "";
@@ -846,7 +866,7 @@ function productCard(card: CampaignCard, opts?: { showBadge?: boolean }): string
                       <tr>
                         <td align="center" style="padding:0;line-height:0;font-size:0;background-color:${CREAM};position:relative;">
                           <a href="${href}" target="_blank" style="text-decoration:none;">
-                            <img class="card-img fluid" src="${img}" width="260" alt="${name}" style="display:block;width:100%;max-width:260px;height:auto;border:0;margin:0 auto;" />
+                            <img class="card-img fluid" src="${img}" width="260"${heightAttr} alt="${name}" style="display:block;width:100%;max-width:260px;height:auto;border:0;margin:0 auto;" />
                           </a>
                         </td>
                       </tr>
@@ -965,6 +985,8 @@ function emailShell(opts: {
   preheader: string;
   logoUrl: string;
   logoHref: string;
+  /** Display height at width 168. Omitted unless the caller knows the ratio. */
+  logoDisplayHeight?: number;
   /** Optional brand tagline under the header logo. */
   logoTagline?: string;
   /** Outer page background (default festive cream). */
@@ -1056,7 +1078,7 @@ function emailShell(opts: {
           <tr>
             <td align="center" bgcolor="${headerBg}" style="padding:20px 24px 14px 24px;background-color:${headerBg};">
               <a href="${escAttr(opts.logoHref)}" target="_blank" style="text-decoration:none;">
-                <img src="${escAttr(opts.logoUrl)}" width="168" alt="BlossomPot — Connecting Hearts Across Borders" style="display:block;width:168px;max-width:70%;height:auto;border:0;margin:0 auto;" />
+                <img src="${escAttr(opts.logoUrl)}" width="168"${opts.logoDisplayHeight ? ` height="${opts.logoDisplayHeight}" border="0"` : ""} alt="BlossomPot — Connecting Hearts Across Borders" style="display:block;width:168px;max-width:70%;height:auto;border:0;margin:0 auto;${opts.logoDisplayHeight ? `background-color:${headerBg};` : ""}" />
               </a>
               ${logoTagline}
             </td>
@@ -1170,12 +1192,16 @@ function footerFrom(cfg: {
 export function buildFreeShippingEmailHtml(
   cfg: OfferStyleEmailConfig = FREE_SHIPPING_EMAIL_CONFIG
 ): string {
+  const heroHeight = cfg.heroImageHeight ? ` height="${cfg.heroImageHeight}" border="0"` : "";
+  const heroCell = cfg.heroImageBg
+    ? ` align="center" bgcolor="${cfg.heroImageBg}" style="padding:0;line-height:0;font-size:0;background-color:${cfg.heroImageBg};"`
+    : ` align="center" style="padding:0;line-height:0;font-size:0;"`;
   const bodyRows = `
           <!-- Hero image -->
           <tr>
-            <td align="center" style="padding:0;line-height:0;font-size:0;">
+            <td${heroCell}>
               <a href="${escAttr(cfg.heroImageHref)}" target="_blank" style="text-decoration:none;">
-                <img class="fluid" src="${escAttr(cfg.heroImageUrl)}" width="600" alt="${escAttr(cfg.heroImageAlt)}" style="display:block;width:100%;max-width:600px;height:auto;border:0;" />
+                <img class="fluid" src="${escAttr(cfg.heroImageUrl)}" width="600"${heroHeight} alt="${escAttr(cfg.heroImageAlt)}" style="display:block;width:100%;max-width:600px;height:auto;border:0;" />
               </a>
             </td>
           </tr>
@@ -1243,6 +1269,7 @@ export function buildFreeShippingEmailHtml(
     preheader: cfg.preheader,
     logoUrl: cfg.logoUrl,
     logoHref: cfg.logoHref,
+    logoDisplayHeight: cfg.logoDisplayHeight,
     bodyRows,
     footer: footerFrom(cfg),
   });

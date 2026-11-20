@@ -84,6 +84,8 @@ export const STARTER_EMAIL_TEMPLATES: StarterEmailTemplateMeta[] = [
     templateId: ANNIVERSARY_TEMPLATE_ID,
     name: ANNIVERSARY_EMAIL_CONFIG.name,
     subject: ANNIVERSARY_EMAIL_CONFIG.subject,
+    // Installer uses buildHtml(), not the public file. The file is a published copy
+    // of that HTML so the two cannot drift. Saved campaigns are not rewritten here.
     buildHtml: () => buildAnniversaryEmailHtml(),
     htmlPath: "/email-templates/anniversary-gifts.html",
   },
