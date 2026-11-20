@@ -3,8 +3,12 @@
  *
  * Storefront product photos still go through `cdnUploadUrl()` and
  * `resolveProductImageUrl()`. This module is the allowlist those email
- * builders may use. Every URL here was fetched without credentials and
- * returned image bytes (see the validation report for the live check).
+ * builders may use. Every URL here is a JPEG or PNG that loads without
+ * credentials. Email clients such as Outlook do not render WebP, so
+ * `.jpg` URLs that actually return `image/webp` are not allowed.
+ *
+ * Orange County hamper photos are served from the site origin. The same
+ * paths on the product CDN return 403, so email HTML must not use them.
  *
  * Display height is the intrinsic ratio at the layout width, so Outlook
  * can reserve the right box while other clients keep `height:auto`.
@@ -41,10 +45,6 @@ function cdnImage(uploadsPath: string, intrinsicWidth: number, intrinsicHeight: 
   };
 }
 
-function remoteImage(url: string, intrinsicWidth: number, intrinsicHeight: number): EmailImageAsset {
-  return { url, intrinsicWidth, intrinsicHeight };
-}
-
 /** Live assets. Intrinsic pixels were measured from the files themselves. */
 export const EMAIL_IMAGES = {
   logo: siteImage("logo.png", 863, 615),
@@ -62,26 +62,13 @@ export const EMAIL_IMAGES = {
   anniversary: cdnImage("editorial/tile-anniversary.jpg", 1800, 1671),
   bouquets: cdnImage("editorial/tile-bouquets.jpg", 1920, 1357),
   hampersEditorial: cdnImage("editorial/tile-hampers.jpg", 2560, 1920),
-  fnpGarden: remoteImage(
-    "https://static-assets-prod.fnp.com/images/pr/usa/m/v20260530113728/garden-romance-premium.jpg",
-    428,
-    428
-  ),
-  fnpBouquet: remoteImage(
-    "https://static-assets-prod.fnp.com/images/pr/usa/m/v20260611145721/meant-to-be-bouquet-deluxe.jpg",
-    428,
-    428
-  ),
-  fnpCake: remoteImage(
-    "https://static-assets-prod.fnp.com/images/pr/usa/m/v20250929214212/the-congrats-cake.jpg",
-    428,
-    428
-  ),
-  fnpHamper: remoteImage(
-    "https://static-assets-prod.fnp.com/images/pr/usa/m/v20260421165231/luxe-gold-collectible-sweet-treats-gift-hamper.jpg",
-    428,
-    428
-  ),
+  /** Same-origin JPEGs. The CDN copies of these files return 403. */
+  hamperNutsLove: siteImage("uploads/orange-county/TFUSA003/TFUSA003.jpg", 1400, 1400),
+  hamperDryFruit: siteImage("uploads/orange-county/TFUSRH2026-3/TFUSRH2026-3.jpg", 1500, 1500),
+  hamperGrand: siteImage("uploads/orange-county/TFUSRH2026-8/TFUSRH2026-8b.jpg", 1024, 859),
+  hamperFestive: siteImage("uploads/orange-county/TFUSRH2026-24/TFUSRH2026-24.jpg", 1500, 1500),
+  hamperKaju: siteImage("uploads/orange-county/TFUSRH2026-38/TFUSRH2026-38.jpg", 1500, 1500),
+  hamperThinkOfMe: siteImage("uploads/orange-county/TFCOM009/TFCOM009.jpg", 1400, 1400),
 } as const satisfies Record<string, EmailImageAsset>;
 
 export const EMAIL_IMAGE_ALLOWLIST: readonly string[] = Object.values(EMAIL_IMAGES).map((image) => image.url);

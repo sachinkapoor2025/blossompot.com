@@ -12,7 +12,7 @@ import {
   HOME_PAGE_INDEPENDENCE_DAY_BANNER_URL,
 } from "./home-page-banners";
 import { EMAIL_IMAGES, emailCardImage, emailDisplayHeight, emailImgAttributes } from "./email-images";
-import { cdnUploadUrl, resolveProductImageUrl } from "./image-url";
+import { cdnUploadUrl } from "./image-url";
 
 const SITE = "https://www.blossompot.com";
 const SITE_SHORT = "https://blossompot.com";
@@ -357,7 +357,7 @@ export const STARTING_PRICE_EMAIL_CONFIG = {
         {
           name: "Pink Multi-Stone gift",
           description: "Elegant festive favorite for brother.",
-          imageUrl: cdnUploadUrl("catalog/roses-red-1.jpg"),
+          ...emailCardImage(EMAIL_IMAGES.flowers),
           href: `${SITE}/flowers`,
           buttonText: "Shop Now",
           badge: "BEST SELLER",
@@ -366,7 +366,7 @@ export const STARTING_PRICE_EMAIL_CONFIG = {
         {
           name: "Om Designer gift",
           description: "Spiritual motif with premium finish.",
-          imageUrl: cdnUploadUrl("2026/03/Om-Single-gift-1-e1779466859856.png"),
+          ...emailCardImage(EMAIL_IMAGES.freshFlowers),
           href: `${SITE}/flowers`,
           buttonText: "Shop Now",
           badge: "HOT",
@@ -381,7 +381,7 @@ export const STARTING_PRICE_EMAIL_CONFIG = {
         {
           name: "Set of 2 gifts",
           description: "Coordinated twin packs — one delivery.",
-          imageUrl: cdnUploadUrl("catalog/roses-red-1.jpg"),
+          ...emailCardImage(EMAIL_IMAGES.gourmet),
           href: `${SITE}/products`,
           buttonText: "Shop Sets",
           badge: "SET",
@@ -390,7 +390,7 @@ export const STARTING_PRICE_EMAIL_CONFIG = {
         {
           name: "Set of 3 gifts",
           description: "Perfect for multi-brother households.",
-          imageUrl: cdnUploadUrl("catalog/hamper-1.jpg"),
+          ...emailCardImage(EMAIL_IMAGES.gourmetGifts),
           href: `${SITE}/products`,
           buttonText: "Shop Sets",
           badge: "SET",
@@ -405,7 +405,7 @@ export const STARTING_PRICE_EMAIL_CONFIG = {
         {
           name: "BRO Kids gift",
           description: "Soft, playful, child-friendly threads.",
-          imageUrl: cdnUploadUrl("catalog/cake-sprinkle-1.jpg"),
+          ...emailCardImage(EMAIL_IMAGES.cakes),
           href: `${SITE}/cakes`,
           buttonText: "Shop Kids",
           badge: "KIDS",
@@ -414,7 +414,7 @@ export const STARTING_PRICE_EMAIL_CONFIG = {
         {
           name: "Chhota Bheem Kids",
           description: "Fun character designs kids adore.",
-          imageUrl: cdnUploadUrl("2026/04/Chhota-Bheem-Kids-gift-with-Assorted-Chocolates-e1775565435556.jpg"),
+          ...emailCardImage(EMAIL_IMAGES.birthdayExtra),
           href: `${SITE}/cakes`,
           buttonText: "Shop Kids",
           badge: "KIDS",
@@ -429,7 +429,7 @@ export const STARTING_PRICE_EMAIL_CONFIG = {
         {
           name: "Bhaiya Bhabhi Set",
           description: "Coordinated designs for brother & bhabhi.",
-          imageUrl: cdnUploadUrl("catalog/roses-pink-1.jpg"),
+          ...emailCardImage(EMAIL_IMAGES.anniversary),
           href: `${SITE}/anniversary-gifts`,
           buttonText: "Shop Sets",
           badge: "SET",
@@ -438,7 +438,7 @@ export const STARTING_PRICE_EMAIL_CONFIG = {
         {
           name: "Lumba gift",
           description: "Bracelet-style elegance for bhabhi.",
-          imageUrl: cdnUploadUrl("2026/04/Unique-pink-Lumba-gift-e1779468035922.jpg"),
+          ...emailCardImage(EMAIL_IMAGES.bouquets),
           href: `${SITE}/products`,
           buttonText: "Shop Lumba",
           badge: "NEW",
@@ -638,7 +638,7 @@ export const RAKHI_HAMPERS_USA_EMAIL_CONFIG = {
     {
       name: "Nuts & Love gift Hamper",
       description: "Designer rakhi with almonds, cashews & Ferrero.",
-      imageUrl: resolveProductImageUrl("/uploads/orange-county/TFUSA003/TFUSA003.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.hamperNutsLove),
       href: `${SITE}/products/nuts-love-rakhi-hamper`,
       buttonText: "Shop Now",
       priceLabel: "$41.00",
@@ -647,7 +647,7 @@ export const RAKHI_HAMPERS_USA_EMAIL_CONFIG = {
     {
       name: "gift Dry Fruit Celebration Combo",
       description: "gift, Kaju Katli, cashews, pistachios & tikka set.",
-      imageUrl: resolveProductImageUrl("/uploads/orange-county/TFUSRH2026-3/TFUSRH2026-3.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.hamperDryFruit),
       href: `${SITE}/products/rakhi-dry-fruit-celebration-combo`,
       buttonText: "Shop Now",
       priceLabel: "$59.90",
@@ -656,7 +656,7 @@ export const RAKHI_HAMPERS_USA_EMAIL_CONFIG = {
     {
       name: "Grand gift Dry Fruit Indulgence Box",
       description: "gift with Kaju Katli, almonds, cashews & pistachios.",
-      imageUrl: resolveProductImageUrl("/uploads/orange-county/TFUSRH2026-8/TFUSRH2026-8b.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.hamperGrand),
       href: `${SITE}/products/grand-rakhi-dry-fruit-indulgence-box`,
       buttonText: "Shop Now",
       priceLabel: "$63.90",
@@ -665,7 +665,7 @@ export const RAKHI_HAMPERS_USA_EMAIL_CONFIG = {
     {
       name: "gift 3-in-1 Festive Hamper",
       description: "Set of 3 rakhis, Kaju Katli, cashews & Ferrero.",
-      imageUrl: resolveProductImageUrl("/uploads/orange-county/TFUSRH2026-24/TFUSRH2026-24.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.hamperFestive),
       href: `${SITE}/products/rakhi-3-in-1-festive-hamper`,
       buttonText: "Shop Now",
       priceLabel: "$65.00",
@@ -674,7 +674,7 @@ export const RAKHI_HAMPERS_USA_EMAIL_CONFIG = {
     {
       name: "Kaju Katli Elegance Hamper",
       description: "Set of 2 designer rakhis, mithai & dry fruits.",
-      imageUrl: resolveProductImageUrl("/uploads/orange-county/TFUSRH2026-38/TFUSRH2026-38.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.hamperKaju),
       href: `${SITE}/products/kaju-katli-elegance-hamper`,
       buttonText: "Shop Now",
       priceLabel: "$69.00",
@@ -683,7 +683,7 @@ export const RAKHI_HAMPERS_USA_EMAIL_CONFIG = {
     {
       name: "Think of me gift Hamper",
       description: "Set of 2 rakhis with cashews, pistachios & almonds.",
-      imageUrl: resolveProductImageUrl("/uploads/orange-county/TFCOM009/TFCOM009.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.hamperThinkOfMe),
       href: `${SITE}/products/think-of-me-rakhi-hamper`,
       buttonText: "Shop Now",
       priceLabel: "$69.00",
@@ -754,42 +754,42 @@ export const INDEPENDENCE_DAY_EMAIL_CONFIG = {
     {
       name: "Single gift",
       description: "Classic & designer gift for Brother.",
-      imageUrl: cdnUploadUrl("catalog/roses-red-1.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.flowers),
       href: `${SITE}/flowers`,
       buttonText: "Shop Now",
     },
     {
       name: "Bhaiya Bhabhi gift",
       description: "Matching sets for brother & bhabhi.",
-      imageUrl: cdnUploadUrl("catalog/roses-pink-1.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.freshFlowers),
       href: `${SITE}/anniversary-gifts`,
       buttonText: "Shop Now",
     },
     {
       name: "Kids gift",
       description: "Fun designs little brothers love.",
-      imageUrl: cdnUploadUrl("catalog/cake-sprinkle-1.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.cakes),
       href: `${SITE}/cakes`,
       buttonText: "Shop Now",
     },
     {
       name: "Lumba gift",
       description: "Elegant bracelet styles for bhabhi.",
-      imageUrl: cdnUploadUrl("2026/04/Unique-pink-Lumba-gift-e1779468035922.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.birthdayExtra),
       href: `${SITE}/products`,
       buttonText: "Shop Now",
     },
     {
       name: "gift Combo",
       description: "gift with chocolates & festive treats.",
-      imageUrl: cdnUploadUrl("catalog/hamper-1.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.gourmet),
       href: `${SITE}/gift-hampers`,
       buttonText: "Shop Now",
     },
     {
       name: "gift Hamper",
       description: "Premium gift boxes with sweets & dry fruits.",
-      imageUrl: cdnUploadUrl("2026/03/Om-Single-gift-1-e1779466859856.png"),
+      ...emailCardImage(EMAIL_IMAGES.gourmetGifts),
       href: `${SITE}/gift-hampers`,
       buttonText: "Shop Now",
     },
@@ -1331,7 +1331,7 @@ export function buildStartingPriceEmailHtml(
           <tr>
             <td align="center" style="padding:0;line-height:0;font-size:0;">
               <a href="${escAttr(cfg.heroImageHref)}" target="_blank" style="text-decoration:none;">
-                <img class="fluid" src="${escAttr(cfg.heroImageUrl)}" width="600" alt="${escAttr(cfg.heroImageAlt)}" style="display:block;width:100%;max-width:600px;height:auto;border:0;" />
+                <img class="fluid" src="${escAttr(cfg.heroImageUrl)}" ${emailImgAttributes(cfg.heroImageUrl, 600)} alt="${escAttr(cfg.heroImageAlt)}" style="display:block;width:100%;max-width:600px;height:auto;border:0;" />
               </a>
             </td>
           </tr>
@@ -1381,6 +1381,7 @@ export function buildStartingPriceEmailHtml(
     preheader: cfg.preheader,
     logoUrl: cfg.logoUrl,
     logoHref: cfg.logoHref,
+    logoDisplayHeight: emailDisplayHeight(EMAIL_IMAGES.logo, 168),
     bodyRows,
     footer: footerFrom(cfg),
   });
@@ -1581,11 +1582,12 @@ export function buildRakhiHampersUsaEmailHtml(
     logoUrl: cfg.logoUrl,
     logoHref: cfg.logoHref,
     logoTagline: cfg.logoTagline,
+    logoDisplayHeight: emailDisplayHeight(EMAIL_IMAGES.logo, 168),
     pageBg: WHITE,
     headerBg: WHITE,
     containerBorder: "1px solid #efe6d6",
     bodyRows,
-    footer: footerFrom(cfg),
+    footer: { ...footerFrom(cfg), logoHeight: emailDisplayHeight(EMAIL_IMAGES.logo, 140) },
   });
 }
 
@@ -1604,7 +1606,7 @@ export function buildIndependenceDayEmailHtml(
           <tr>
             <td align="center" style="padding:0;line-height:0;font-size:0;">
               <a href="${escAttr(cfg.heroImageHref)}" target="_blank" style="text-decoration:none;">
-                <img class="fluid" src="${escAttr(cfg.heroImageUrl)}" width="600" alt="${escAttr(cfg.heroImageAlt)}" style="display:block;width:100%;max-width:600px;height:auto;border:0;" />
+                <img class="fluid" src="${escAttr(cfg.heroImageUrl)}" ${emailImgAttributes(cfg.heroImageUrl, 600)} alt="${escAttr(cfg.heroImageAlt)}" style="display:block;width:100%;max-width:600px;height:auto;border:0;" />
               </a>
             </td>
           </tr>
@@ -1691,7 +1693,8 @@ export function buildIndependenceDayEmailHtml(
     logoUrl: cfg.logoUrl,
     logoHref: cfg.logoHref,
     logoTagline: cfg.logoTagline,
+    logoDisplayHeight: emailDisplayHeight(EMAIL_IMAGES.logo, 168),
     bodyRows,
-    footer: footerFrom(cfg),
+    footer: { ...footerFrom(cfg), logoHeight: emailDisplayHeight(EMAIL_IMAGES.logo, 140) },
   });
 }

@@ -10,7 +10,10 @@ import {
   buildAnniversaryEmailHtml,
   buildBirthdayEmailHtml,
   buildFreeShippingEmailHtml,
+  buildIndependenceDayEmailHtml,
+  buildRakhiHampersUsaEmailHtml,
   buildShopMoreSaveMoreEmailHtml,
+  buildStartingPriceEmailHtml,
 } from "./marketing-campaign-emails";
 import {
   DEFAULT_PREMIUM_MARKETING_EMAIL_CONTENT,
@@ -21,6 +24,7 @@ const PUBLIC_DIR = join(dirname(fileURLToPath(import.meta.url)), "../../../../ap
 
 function assertInstalledEmail(html: string, links: RegExp[]) {
   assert.doesNotMatch(html, /uploads\/catalog\//);
+  assert.doesNotMatch(html, /fnp\.com|\.webp(?:\?|")/i);
   assert.doesNotMatch(html, /placehold\.co|via\.placeholder|placeholder\.com|dummyimage\.com/i);
   const images = [...html.matchAll(/<img\b[^>]*>/gi)];
   assert.ok(images.length > 0);
@@ -111,5 +115,20 @@ describe("installed marketing email images", () => {
       /https:\/\/www\.blossompot\.com\/cakes/,
       /https:\/\/www\.blossompot\.com\/gift-hampers/,
     ]);
+  });
+
+  it("keeps starting-price images on the verified allowlist", () => {
+    assertInstalledEmail(buildStartingPriceEmailHtml(), [/https:\/\/www\.blossompot\.com\/products/]);
+  });
+
+  it("keeps independence-day images on the verified allowlist", () => {
+    assertInstalledEmail(buildIndependenceDayEmailHtml(), [/https:\/\/www\.blossompot\.com\/products/]);
+  });
+
+  it("keeps hamper images on the site origin, not the blocked CDN paths", () => {
+    const html = buildRakhiHampersUsaEmailHtml();
+    assertInstalledEmail(html, [/https:\/\/www\.blossompot\.com\/gift-hampers/]);
+    assert.match(html, /https:\/\/www\.blossompot\.com\/uploads\/orange-county\/TFUSA003\/TFUSA003\.jpg/);
+    assert.doesNotMatch(html, /cloudfront\.net\/uploads\/orange-county\//);
   });
 });
