@@ -48,6 +48,7 @@ export * from "./lib/currency-display";
 export * from "./lib/competitive-pricing";
 export * from "./lib/vendor-pricing";
 export * from "./lib/image-url";
+export * from "./lib/email-images";
 export * from "./lib/product-images";
 export * from "./lib/storefront-dedupe";
 export * from "./lib/storefront-rakhi";

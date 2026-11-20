@@ -3,7 +3,7 @@
  * Content is driven by MarketingEmailContent — edit fields in Admin, not the HTML.
  */
 
-import { cdnUploadUrl } from "./image-url";
+import { EMAIL_IMAGES, emailImgAttributes } from "./email-images";
 
 export type MarketingEmailCategory = {
   name: string;
@@ -81,28 +81,28 @@ export const DEFAULT_PREMIUM_MARKETING_EMAIL_CONTENT: MarketingEmailContent = {
     {
       name: "Flowers",
       description: "Fresh arrangements for birthdays and thank-yous.",
-      imageUrl: cdnUploadUrl("catalog/roses-red-1.jpg"),
+      imageUrl: EMAIL_IMAGES.flowers.url,
       href: `${SITE}/flowers`,
       buttonText: "Shop Now",
     },
     {
       name: "Bhaiya Bhabhi",
       description: "Matching sets for brother and bhabhi.",
-      imageUrl: cdnUploadUrl("catalog/roses-pink-1.jpg"),
+      imageUrl: EMAIL_IMAGES.freshFlowers.url,
       href: `${SITE}/anniversary-gifts`,
       buttonText: "Shop Now",
     },
     {
       name: "Cakes",
       description: "Playful designs little brothers adore.",
-      imageUrl: cdnUploadUrl("catalog/cake-chocolate-1.jpg"),
+      imageUrl: EMAIL_IMAGES.cakes.url,
       href: `${SITE}/cakes`,
       buttonText: "Shop Now",
     },
     {
       name: "Gift Hampers",
       description: "Curated hampers for celebrations.",
-      imageUrl: cdnUploadUrl("catalog/hamper-1.jpg"),
+      imageUrl: EMAIL_IMAGES.gourmet.url,
       href: `${SITE}/gift-hampers`,
       buttonText: "Shop Now",
     },
@@ -189,7 +189,7 @@ function categoryCard(cat: MarketingEmailCategory): string {
                       <tr>
                         <td align="center" style="padding:0;line-height:0;font-size:0;background-color:#fffaf2;">
                           <a href="${href}" target="_blank" style="text-decoration:none;">
-                            <img class="category-img fluid" src="${img}" width="140" alt="${name}" style="display:block;width:100%;max-width:140px;height:auto;border:0;margin:0 auto;" />
+                            <img class="category-img fluid" src="${img}" ${emailImgAttributes(cat.imageUrl, 140)} alt="${name}" style="display:block;width:100%;max-width:140px;height:auto;border:0;margin:0 auto;" />
                           </a>
                         </td>
                       </tr>
@@ -344,7 +344,7 @@ export function buildPremiumMarketingEmailHtml(content: MarketingEmailContent): 
           <tr>
             <td align="center" bgcolor="#fffdf8" style="padding:22px 24px 16px 24px;background-color:#fffdf8;">
               <a href="${escAttr(c.logoHref)}" target="_blank" style="text-decoration:none;">
-                <img src="${escAttr(c.logoUrl)}" width="168" alt="${escAttr(c.logoAlt)}" style="display:block;width:168px;max-width:70%;height:auto;border:0;margin:0 auto;" />
+                <img src="${escAttr(c.logoUrl)}" ${emailImgAttributes(c.logoUrl, 168)} alt="${escAttr(c.logoAlt)}" style="display:block;width:168px;max-width:70%;height:auto;border:0;margin:0 auto;" />
               </a>
             </td>
           </tr>
@@ -365,7 +365,7 @@ export function buildPremiumMarketingEmailHtml(content: MarketingEmailContent): 
           <tr>
             <td align="center" style="padding:0;line-height:0;font-size:0;">
               <a href="${escAttr(c.heroImageHref)}" target="_blank" style="text-decoration:none;">
-                <img class="fluid" src="${escAttr(c.heroImageUrl)}" width="600" alt="${escAttr(c.heroImageAlt)}" style="display:block;width:100%;max-width:600px;height:auto;border:0;" />
+                <img class="fluid" src="${escAttr(c.heroImageUrl)}" ${emailImgAttributes(c.heroImageUrl, 600)} alt="${escAttr(c.heroImageAlt)}" style="display:block;width:100%;max-width:600px;height:auto;border:0;" />
               </a>
             </td>
           </tr>

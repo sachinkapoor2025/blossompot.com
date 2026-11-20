@@ -6,6 +6,8 @@
  * (FNP USA listings published on blossompot.com).
  */
 
+import { emailImgAttributes } from "./email-images";
+
 const SITE = "https://www.blossompot.com";
 const LOGO = `${SITE}/logo.png`;
 const FB = `${SITE}/email-templates/icons/facebook.png`;
@@ -176,7 +178,7 @@ function pillButton(href: string, label: string, opts?: { fill?: string; text?: 
 function heroGrid(tiles: readonly Collection2026HeroTile[]): string {
   const cell = (tile: Collection2026HeroTile) => `
                         <a href="${escAttr(tile.href)}" target="_blank" style="text-decoration:none;">
-                          <img class="fluid" src="${escAttr(tile.imageUrl)}" width="300" alt="${escAttr(tile.imageAlt)}" style="display:block;width:100%;max-width:300px;height:auto;border:0;" />
+                          <img class="fluid" src="${escAttr(tile.imageUrl)}" ${emailImgAttributes(tile.imageUrl, 300)} alt="${escAttr(tile.imageAlt)}" style="display:block;width:100%;max-width:300px;height:auto;border:0;" />
                         </a>`;
   const row = (a: Collection2026HeroTile, b: Collection2026HeroTile) => `
               <tr>
@@ -225,7 +227,7 @@ function productCard(product: Collection2026Product): string {
                       <tr>
                         <td align="center" style="padding:0;line-height:0;font-size:0;background-color:${PETAL};border-radius:14px 14px 0 0;">
                           <a href="${href}" target="_blank" style="text-decoration:none;">
-                            <img class="card-img fluid" src="${escAttr(product.imageUrl)}" width="268" alt="${escAttr(product.imageAlt)}" style="display:block;width:100%;max-width:268px;height:auto;border:0;margin:0 auto;" />
+                            <img class="card-img fluid" src="${escAttr(product.imageUrl)}" ${emailImgAttributes(product.imageUrl, 268)} alt="${escAttr(product.imageAlt)}" style="display:block;width:100%;max-width:268px;height:auto;border:0;margin:0 auto;" />
                           </a>
                         </td>
                       </tr>
@@ -309,7 +311,7 @@ export function buildCollection2026EmailHtml(): string {
           <tr>
             <td align="center" bgcolor="${CREAM}" style="padding:18px 24px 14px 24px;background-color:${CREAM};">
               <a href="${escAttr(cfg.logoHref)}" target="_blank" style="text-decoration:none;">
-                <img src="${escAttr(cfg.logoUrl)}" width="156" alt="BlossomPot" style="display:block;width:156px;max-width:62%;height:auto;border:0;margin:0 auto;" />
+                <img src="${escAttr(cfg.logoUrl)}" ${emailImgAttributes(cfg.logoUrl, 156)} alt="BlossomPot" style="display:block;width:156px;max-width:62%;height:auto;border:0;margin:0 auto;" />
               </a>
             </td>
           </tr>

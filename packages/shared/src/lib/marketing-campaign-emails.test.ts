@@ -14,6 +14,10 @@ const PUBLIC_ANNIVERSARY_HTML = join(
   dirname(fileURLToPath(import.meta.url)),
   "../../../../apps/web/public/email-templates/anniversary-gifts.html"
 );
+const PUBLIC_BIRTHDAY_HTML = join(
+  dirname(fileURLToPath(import.meta.url)),
+  "../../../../apps/web/public/email-templates/birthday-gifts.html"
+);
 
 describe("anniversary marketing email", () => {
   it("includes subject-aligned headline, CTA, and anniversary collection links", () => {
@@ -48,7 +52,13 @@ describe("birthday marketing email", () => {
     assert.match(html, /Shop Birthday Gifts/);
     assert.match(html, /https:\/\/www\.blossompot\.com\/birthday-gifts/);
     assert.match(html, /{{unsubscribe}}/);
+    assert.match(html, /https:\/\/www\.blossompot\.com\/logo\.png/);
+    assert.match(html, /banners\/home-banner-birthday\.jpg/);
+    assert.match(html, /email-templates\/icons\/facebook\.png/);
+    assert.match(html, /email-templates\/icons\/instagram\.png/);
+    assert.doesNotMatch(html, /uploads\/catalog\//);
     assert.doesNotMatch(html, /16692603819/);
     assert.doesNotMatch(html, /\+1 \(669\) 260-3819/);
+    assert.equal(readFileSync(PUBLIC_BIRTHDAY_HTML, "utf8").replace(/\r\n/g, "\n"), html);
   });
 });

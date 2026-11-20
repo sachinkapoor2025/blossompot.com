@@ -11,6 +11,7 @@ import {
   HOME_PAGE_INDEPENDENCE_DAY_BANNER_ALT,
   HOME_PAGE_INDEPENDENCE_DAY_BANNER_URL,
 } from "./home-page-banners";
+import { EMAIL_IMAGES, emailCardImage, emailDisplayHeight, emailImgAttributes } from "./email-images";
 import { cdnUploadUrl, resolveProductImageUrl } from "./image-url";
 
 const SITE = "https://www.blossompot.com";
@@ -107,6 +108,8 @@ export const FREE_SHIPPING_EMAIL_CONFIG = {
   heroImageUrl: HERO,
   heroImageHref: SHOP,
   heroImageAlt: "BlossomPot — Free shipping on gift orders above $7",
+  logoDisplayHeight: emailDisplayHeight(EMAIL_IMAGES.logo, 168),
+  heroImageHeight: emailDisplayHeight(EMAIL_IMAGES.independenceHero, 600),
   offerEyebrow: "RAKSHA BANDHAN OFFER",
   offerHeadline: "FREE SHIPPING",
   offerSubhead: "On Orders Above $7 (₹667.73)",
@@ -127,28 +130,28 @@ export const FREE_SHIPPING_EMAIL_CONFIG = {
     {
       name: "Single gift",
       description: "Classic & designer threads for brother.",
-      imageUrl: cdnUploadUrl("catalog/roses-red-1.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.flowers),
       href: `${SITE}/flowers`,
       buttonText: "Shop Now",
     },
     {
       name: "gift Combo",
       description: "gift with chocolates & festive treats.",
-      imageUrl: cdnUploadUrl("catalog/hamper-1.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.gourmetGifts),
       href: `${SITE}/gift-hampers`,
       buttonText: "Shop Now",
     },
     {
       name: "Kids gift",
       description: "Fun designs little brothers love.",
-      imageUrl: cdnUploadUrl("catalog/cake-sprinkle-1.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.cakes),
       href: `${SITE}/cakes`,
       buttonText: "Shop Now",
     },
     {
       name: "Bhaiya Bhabhi",
       description: "Matching sets for brother & bhabhi.",
-      imageUrl: cdnUploadUrl("catalog/roses-pink-1.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.freshFlowers),
       href: `${SITE}/anniversary-gifts`,
       buttonText: "Shop Now",
     },
@@ -263,6 +266,8 @@ export const BIRTHDAY_EMAIL_CONFIG = {
   heroImageUrl: `${SITE}/banners/home-banner-birthday.jpg`,
   heroImageHref: `${SITE}/birthday-gifts`,
   heroImageAlt: "Birthday cakes and gifts from BlossomPot",
+  logoDisplayHeight: emailDisplayHeight(EMAIL_IMAGES.logo, 168),
+  heroImageHeight: emailDisplayHeight(EMAIL_IMAGES.birthdayBanner, 600),
   offerEyebrow: "BIRTHDAY COLLECTION",
   offerHeadline: "Make Their Birthday Bloom",
   offerSubhead: "Cakes, flowers & gifts delivered on the day they celebrate",
@@ -283,28 +288,28 @@ export const BIRTHDAY_EMAIL_CONFIG = {
     {
       name: "Birthday Gifts",
       description: "Occasion-ready picks for friends, family, and colleagues.",
-      imageUrl: cdnUploadUrl("catalog/cake-birthday-1.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.birthdayExtra),
       href: `${SITE}/birthday-gifts`,
       buttonText: "Shop Now",
     },
     {
       name: "Cakes",
       description: "The centerpiece of any birthday table.",
-      imageUrl: cdnUploadUrl("catalog/cake-chocolate-1.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.cakes),
       href: `${SITE}/cakes`,
       buttonText: "Shop Now",
     },
     {
       name: "Flowers",
       description: "Fresh stems and mixed bouquets for a colorful hello.",
-      imageUrl: cdnUploadUrl("catalog/roses-red-1.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.freshFlowers),
       href: `${SITE}/flowers`,
       buttonText: "Shop Now",
     },
     {
       name: "Gift Hampers",
       description: "Treats and extras when you want to go bigger.",
-      imageUrl: cdnUploadUrl("catalog/hamper-1.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.gourmet),
       href: `${SITE}/gift-hampers`,
       buttonText: "Shop Now",
     },
@@ -485,53 +490,55 @@ export const SHOP_MORE_SAVE_MORE_EMAIL_CONFIG = {
     {
       name: "Single gift",
       description: "Classic & designer threads for brother.",
-      imageUrl: cdnUploadUrl("catalog/roses-red-1.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.flowers),
       href: `${SITE}/flowers`,
       buttonText: "Shop Now",
     },
     {
       name: "Bhaiya Bhabhi gift",
       description: "Matching sets for brother & bhabhi.",
-      imageUrl: cdnUploadUrl("catalog/roses-pink-1.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.freshFlowers),
       href: `${SITE}/anniversary-gifts`,
       buttonText: "Shop Now",
     },
     {
       name: "Kids gift",
       description: "Fun designs little brothers love.",
-      imageUrl: cdnUploadUrl("catalog/cake-sprinkle-1.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.cakes),
       href: `${SITE}/cakes`,
       buttonText: "Shop Now",
     },
     {
       name: "Lumba gift",
       description: "Elegant bracelet styles for bhabhi.",
-      imageUrl: cdnUploadUrl("2026/04/Unique-pink-Lumba-gift-e1779468035922.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.birthdayExtra),
       href: `${SITE}/products`,
       buttonText: "Shop Now",
     },
     {
       name: "gift Sets",
       description: "Multi-piece packs & chocolate combos.",
-      imageUrl: cdnUploadUrl("catalog/hamper-1.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.gourmet),
       href: `${SITE}/gift-hampers`,
       buttonText: "Shop Now",
     },
     {
       name: "gift Hampers",
       description: "Premium gift boxes with sweets & dry fruits.",
-      imageUrl: cdnUploadUrl("2026/03/Om-Single-gift-1-e1779466859856.png"),
+      ...emailCardImage(EMAIL_IMAGES.gourmetGifts),
       href: `${SITE}/gift-hampers`,
       buttonText: "Shop Now",
     },
   ] satisfies CampaignCard[],
   productsHeading: "Featured gifts",
   productsSubheading: "Handpicked bestsellers — tap Shop Now to order for USA delivery.",
+  // The original product files are not on the CDN. These cards use verified
+  // banners so the email renders; product names and links are unchanged.
   products: [
     {
       name: "Blue Sapphire Pearl Single gift",
       description: "Royal blue stone & pearl elegance.",
-      imageUrl: cdnUploadUrl("2026/03/eecdbc61-da5a-4470-b8d8-5333b07a3f55-e1775488275697.webp"),
+      ...emailCardImage(EMAIL_IMAGES.flowers),
       href: `${SITE}/products/blue-sapphire-pearl-single-rakhi`,
       buttonText: "Shop Now",
       priceLabel: "$28.00",
@@ -540,7 +547,7 @@ export const SHOP_MORE_SAVE_MORE_EMAIL_CONFIG = {
     {
       name: "Pearl Single gift",
       description: "Timeless pearl design with roli chawal.",
-      imageUrl: cdnUploadUrl("2026/03/pearl-single-rakhi-e1779467005952.webp"),
+      ...emailCardImage(EMAIL_IMAGES.freshFlowers),
       href: `${SITE}/products/pearl-single-rakhi`,
       buttonText: "Shop Now",
       priceLabel: "$17.00",
@@ -549,7 +556,7 @@ export const SHOP_MORE_SAVE_MORE_EMAIL_CONFIG = {
     {
       name: "Bhai & Bhabhi Lumba Set",
       description: "Coordinated set with chocolates.",
-      imageUrl: cdnUploadUrl("2026/04/Bhai-Bhabhi-Lumba-gift-Set-e1776082926101.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.birthdayExtra),
       href: `${SITE}/products/bhai-bhabhi-lumba-rakhi-set`,
       buttonText: "Shop Now",
       priceLabel: "$39.00",
@@ -558,7 +565,7 @@ export const SHOP_MORE_SAVE_MORE_EMAIL_CONFIG = {
     {
       name: "BRO Kids gift",
       description: "Playful design for little brother.",
-      imageUrl: cdnUploadUrl("catalog/cake-sprinkle-1.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.cakes),
       href: `${SITE}/products/bro-kids-rakhi-for-little-brother`,
       buttonText: "Shop Now",
       priceLabel: "$25.00",
@@ -567,7 +574,7 @@ export const SHOP_MORE_SAVE_MORE_EMAIL_CONFIG = {
     {
       name: "Designer Peach Lumba",
       description: "Soft pastel elegance for bhabhi.",
-      imageUrl: cdnUploadUrl("2026/04/Designer-Peach-Lumba-gift-for-Bhabhi-1-e1775832500515.jpg"),
+      ...emailCardImage(EMAIL_IMAGES.gourmet),
       href: `${SITE}/products/designer-peach-lumba-rakhi-for-bhabhi`,
       buttonText: "Shop Now",
       priceLabel: "From $2.99",
@@ -576,7 +583,7 @@ export const SHOP_MORE_SAVE_MORE_EMAIL_CONFIG = {
     {
       name: "Festive Om Shree Gift Set",
       description: "Spiritual rakhi with chocolate treats.",
-      imageUrl: cdnUploadUrl("2026/03/Om-Single-gift-1-e1779466859856.png"),
+      ...emailCardImage(EMAIL_IMAGES.gourmetGifts),
       href: `${SITE}/products/festive-om-shree-rakhi-chocolate-gift-set`,
       buttonText: "Shop Now",
       priceLabel: "Combo deal",
@@ -1008,6 +1015,8 @@ function emailShell(opts: {
     copyrightText: string;
     unsubscribeLabel: string;
     logoUrl?: string;
+    /** Display height at width 140. Omitted unless the caller knows the ratio. */
+    logoHeight?: number;
   };
 }): string {
   const f = opts.footer;
@@ -1020,12 +1029,13 @@ function emailShell(opts: {
                 ${escapeHtml(opts.logoTagline)}
               </div>`
     : "";
+  const footerLogoHeight = f.logoHeight ? ` height="${f.logoHeight}" border="0"` : "";
   const footerLogo = f.logoUrl
     ? `
                 <tr>
                   <td align="center" style="padding:0 0 14px 0;">
                     <a href="${escAttr(f.websiteUrl)}" target="_blank" style="text-decoration:none;">
-                      <img src="${escAttr(f.logoUrl)}" width="140" alt="BlossomPot" style="display:block;width:140px;max-width:55%;height:auto;border:0;margin:0 auto;background-color:#ffffff;border-radius:8px;padding:8px;" />
+                      <img src="${escAttr(f.logoUrl)}" width="140"${footerLogoHeight} alt="BlossomPot" style="display:block;width:140px;max-width:55%;height:auto;border:0;margin:0 auto;background-color:#ffffff;border-radius:8px;padding:8px;" />
                     </a>
                   </td>
                 </tr>`
@@ -1397,7 +1407,7 @@ export function buildShopMoreSaveMoreEmailHtml(
           <tr>
             <td align="center" style="padding:0;line-height:0;font-size:0;">
               <a href="${escAttr(cfg.heroImageHref)}" target="_blank" style="text-decoration:none;">
-                <img class="fluid" src="${escAttr(cfg.heroImageUrl)}" width="600" alt="${escAttr(cfg.heroImageAlt)}" style="display:block;width:100%;max-width:600px;height:auto;border:0;" />
+                <img class="fluid" src="${escAttr(cfg.heroImageUrl)}" ${emailImgAttributes(cfg.heroImageUrl, 600)} alt="${escAttr(cfg.heroImageAlt)}" style="display:block;width:100%;max-width:600px;height:auto;border:0;" />
               </a>
             </td>
           </tr>
@@ -1486,8 +1496,9 @@ export function buildShopMoreSaveMoreEmailHtml(
     logoUrl: cfg.logoUrl,
     logoHref: cfg.logoHref,
     logoTagline: cfg.logoTagline,
+    logoDisplayHeight: emailDisplayHeight(EMAIL_IMAGES.logo, 168),
     bodyRows,
-    footer: footerFrom(cfg),
+    footer: { ...footerFrom(cfg), logoHeight: emailDisplayHeight(EMAIL_IMAGES.logo, 140) },
   });
 }
 

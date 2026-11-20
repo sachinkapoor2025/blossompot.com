@@ -1,4 +1,9 @@
-/** Starter marketing templates installed into Admin → Marketing Emails → Templates. */
+/**
+ * Starter marketing templates installed into Admin → Marketing Emails → Templates.
+ * When a starter has buildHtml(), that HTML is what gets installed. htmlPath is only
+ * a published copy. Saved campaign rows are not rewritten here — reselect the template
+ * in Compose to copy the corrected HTML. Premium Gifts USA keeps stored content fields.
+ */
 
 import {
   DEFAULT_PREMIUM_MARKETING_EMAIL_CONTENT,
