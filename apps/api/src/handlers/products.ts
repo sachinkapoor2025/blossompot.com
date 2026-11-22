@@ -203,7 +203,14 @@ async function persistAndMergeBundledCatalog(items: Product[], category?: string
       BUNDLED_CATALOG_PERSIST_BATCH
     );
     if (persisted.length > 0) {
-      invalidateProductListCache(category);
+      // Clear derived caches, but keep this merged order in the list cache.
+      // Reloading via GSI after a backfill reorders vs merge-append and breaks
+      // plain/card listing parity within the same warm instance.
+      productGetCache.clear();
+      categoryProductCache.clear();
+      categoryMembershipCache.clear();
+      categorySlugCache = null;
+      productListCache = { at: Date.now(), items: merged };
     }
   } catch (err) {
     console.error("persistMissingBundledCatalogProducts failed", err);
@@ -427,10 +434,14 @@ async function categoryPartitions(): Promise<string[]> {
   return [...new Set<string>([...CATEGORY_PARTITIONS, ...stored])];
 }
 
-async function queryProductsByCategory(categorySlug: string): Promise<Product[]> {
+async function queryProductsByCategory(
+  categorySlug: string
+): Promise<{ items: Product[]; fromMemoryCache: boolean }> {
   const nowMs = Date.now();
   const hit = categoryProductCache.get(categorySlug);
-  if (hit && nowMs - hit.at < PRODUCT_LIST_CACHE_TTL_MS) return hit.items;
+  if (hit && nowMs - hit.at < PRODUCT_LIST_CACHE_TTL_MS) {
+    return { items: hit.items, fromMemoryCache: true };
+  }
 
   const items: Product[] = [];
   let ExclusiveStartKey: Record<string, unknown> | undefined;
@@ -449,7 +460,7 @@ async function queryProductsByCategory(categorySlug: string): Promise<Product[]>
   } while (ExclusiveStartKey);
 
   categoryProductCache.set(categorySlug, { at: nowMs, items });
-  return items;
+  return { items, fromMemoryCache: false };
 }
 
 function membershipFromItem(item: {
@@ -526,18 +537,20 @@ async function crossListedProducts(category: string, known: Set<string>): Promis
  * Load every PRODUCT# META via per-category GSI1 queries.
  * A table Scan with FilterExpression still bills for every item read (reviews included).
  */
-async function loadAllProducts(): Promise<Product[]> {
+async function loadAllProducts(): Promise<{ items: Product[]; fromMemoryCache: boolean }> {
   const nowMs = Date.now();
   if (productListCache && nowMs - productListCache.at < PRODUCT_LIST_CACHE_TTL_MS) {
-    return productListCache.items;
+    return { items: productListCache.items, fromMemoryCache: true };
   }
 
   const partitions = await categoryPartitions();
   const bySlug = new Map<string, Product>();
+  let fromMemoryCache = false;
   if (partitions.length > 0) {
     const lists = await Promise.all(partitions.map((slug) => queryProductsByCategory(slug)));
     for (const list of lists) {
-      for (const product of list) {
+      if (list.fromMemoryCache) fromMemoryCache = true;
+      for (const product of list.items) {
         if (product.slug) bySlug.set(product.slug, product);
       }
     }
@@ -562,7 +575,7 @@ async function loadAllProducts(): Promise<Product[]> {
 
   const items = [...bySlug.values()];
   productListCache = { at: nowMs, items };
-  return items;
+  return { items, fromMemoryCache };
 }
 
 /** Call after product create/update/delete so storefront list stays fresh. */
@@ -688,7 +701,7 @@ async function respondRelatedProducts(
   const selected: Product[] = [];
   for (let index = 0; index < ordered.length && selected.length < limit; index += RELATED_READ_WINDOW) {
     const fresh = await withFreshListingCommerce(ordered.slice(index, index + RELATED_READ_WINDOW), {
-      fromMemoryCache: false,
+      fromMemoryCache: true,
     });
     const eligible = fresh.filter(
       (product) =>
@@ -724,6 +737,7 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
 
   let items: Product[] = [];
   let homepageCategoryRow = false;
+  let fromMemoryCache = false;
 
   if (componentSlugs) {
     if (componentSlugs.length > COMPONENT_SLUG_LOOKUP_LIMIT) {
@@ -733,27 +747,34 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
   } else if (category) {
     if (isRakhiSetSizeCategory(category)) {
       const all = await loadAllProducts();
-      items = all.filter((product) => productMatchesRakhiSetCategory(product, category));
+      fromMemoryCache = all.fromMemoryCache;
+      items = all.items.filter((product) => productMatchesRakhiSetCategory(product, category));
     } else if (category === "rakhi-combo") {
       const [combo, kids, hampers] = await Promise.all([
         queryProductsByCategory("rakhi-combo"),
         queryProductsByCategory("kids-rakhi"),
         queryProductsByCategory("rakhi-hampers"),
       ]);
-      const bySlug = new Map(combo.map((p) => [p.slug, p]));
-      for (const product of kids.filter(isKidsComboProduct)) bySlug.set(product.slug, product);
-      for (const product of hampers) {
+      fromMemoryCache = combo.fromMemoryCache || kids.fromMemoryCache || hampers.fromMemoryCache;
+      const bySlug = new Map(combo.items.map((p) => [p.slug, p]));
+      for (const product of kids.items.filter(isKidsComboProduct)) bySlug.set(product.slug, product);
+      for (const product of hampers.items) {
         if (product.additionalCategorySlugs?.includes("rakhi-combo")) bySlug.set(product.slug, product);
       }
       items = [...bySlug.values()];
     } else if (category === "rakhi-hampers") {
-      items = await queryProductsByCategory(category);
+      const loaded = await queryProductsByCategory(category);
+      fromMemoryCache = loaded.fromMemoryCache;
+      items = loaded.items;
     } else if (wantsHomepageCategoryRow(event) && !search) {
       homepageCategoryRow = true;
-      items = await queryProductsByCategory(category);
+      const loaded = await queryProductsByCategory(category);
+      fromMemoryCache = loaded.fromMemoryCache;
+      items = loaded.items;
     } else {
       const primary = await queryProductsByCategory(category);
-      const bySlug = new Map(primary.map((product) => [product.slug, product]));
+      fromMemoryCache = primary.fromMemoryCache;
+      const bySlug = new Map(primary.items.map((product) => [product.slug, product]));
       const crossListed = await crossListedProducts(category, new Set(bySlug.keys()));
       for (const product of crossListed) {
         if (!bySlug.has(product.slug)) bySlug.set(product.slug, product);
@@ -761,7 +782,9 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
       items = [...bySlug.values()];
     }
   } else {
-    items = await loadAllProducts();
+    const loaded = await loadAllProducts();
+    fromMemoryCache = loaded.fromMemoryCache;
+    items = loaded.items;
   }
 
   if (homepageCategoryRow && category && !search && !componentSlugs) {
@@ -770,9 +793,9 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
   }
 
   if (!componentSlugs) {
-    // Live GSI/Get results already carry published/price/inventory. Skip the
-    // per-slug consistent GetItem refresh (was the main products-table cost).
-    items = await withFreshListingCommerce(items, { fromMemoryCache: false });
+    // Live GSI/Get bodies already carry commerce fields. Only re-GetItem when
+    // serving a warm in-memory body that may be up to PRODUCT_LIST_CACHE_TTL_MS old.
+    items = await withFreshListingCommerce(items, { fromMemoryCache });
     if (!homepageCategoryRow) {
       items = await persistAndMergeBundledCatalog(items, category);
     }
@@ -848,37 +871,42 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
   const nowMs = Date.now();
   const cached = productGetCache.get(slug);
   if (cached && nowMs - cached.at < PRODUCT_GET_CACHE_TTL_MS) {
-    // Trust the warm body for the short TTL — do not re-GetItem commerce on every PDP hit.
-    const product = cached.product;
-    if (product.published === false) {
+    // Keep the warm body, but overlay live published/price/inventory.
+    const commerce = await storedListingCommerceBySlug([slug]);
+    const fresh = commerce.get(slug);
+    if (!fresh) {
+      productGetCache.delete(slug);
+    } else if (fresh.published === false) {
       productGetCache.delete(slug);
       return notFound("Product not found");
-    }
-    if (isGboHiddenFromStorefront(product)) return notFound("Product not found");
-    const location = await resolveShoppingLocation(parseLocationQuery(event));
-    if (!location) return notFound(NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE);
-    const visible = productVisibleForDeliveryCountry(product, location.countryCode);
-    const shopping = await decideNewShopping(product, location.countryCode);
-    if (vendorHiddenFromStorefront(shopping)) return notFound("Product not found");
-    if (!visible || !shopping.available) {
+    } else {
+      const product = applyListingCommerce(cached.product, fresh);
+      if (isGboHiddenFromStorefront(product)) return notFound("Product not found");
+      const location = await resolveShoppingLocation(parseLocationQuery(event));
+      if (!location) return notFound(NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE);
+      const visible = productVisibleForDeliveryCountry(product, location.countryCode);
+      const shopping = await decideNewShopping(product, location.countryCode);
+      if (vendorHiddenFromStorefront(shopping)) return notFound("Product not found");
+      if (!visible || !shopping.available) {
+        return ok({
+          product: forStorefront(product),
+          availability: {
+            deliverable: false,
+            reason: shopping.reason ?? "country_not_allowed",
+            location,
+          },
+        });
+      }
+      const [evalRow] = await evaluateProductsForLocation([product], location);
       return ok({
         product: forStorefront(product),
         availability: {
-          deliverable: false,
-          reason: shopping.reason ?? "country_not_allowed",
+          deliverable: Boolean(evalRow?.deliverable),
+          reason: evalRow?.reason,
           location,
         },
       });
     }
-    const [evalRow] = await evaluateProductsForLocation([product], location);
-    return ok({
-      product: forStorefront(product),
-      availability: {
-        deliverable: Boolean(evalRow?.deliverable),
-        reason: evalRow?.reason,
-        location,
-      },
-    });
   }
 
   const result = await docClient.send(
@@ -1131,7 +1159,7 @@ export async function listAdminProducts(event: APIGatewayProxyEventV2) {
   const sampleFilter = (event.queryStringParameters?.sample ?? "all").toLowerCase();
 
   productListCache = null;
-  let items = await loadAllProducts();
+  let items = (await loadAllProducts()).items;
   const dynamoSlugs = new Set(items.map((p) => p.slug));
   try {
     items = mergeBundledCatalogProducts(items);
