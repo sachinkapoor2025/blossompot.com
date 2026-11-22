@@ -122,7 +122,6 @@ const helpPrimary = [
 
 const helpMore = [
   { href: "/about", label: "About Us" },
-  { href: "/vendor", label: "Vendor Account" },
   { href: "/become-a-vendor", label: "Become a Vendor" },
   { href: "/returns", label: "Returns & Guarantee" },
   { href: "/contact", label: "Contact Us" },
@@ -222,7 +221,6 @@ function AccountLinks({ signedIn }: { signedIn: boolean }) {
 function PartnerLinks() {
   return (
     <ul className={listClass}>
-      <li><Link href="/vendor" className={linkClass}>Vendor Account</Link></li>
       <li><Link href="/become-a-vendor" className={linkClass}>Become a Vendor</Link></li>
     </ul>
   );

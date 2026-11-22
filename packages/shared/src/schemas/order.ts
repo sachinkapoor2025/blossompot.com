@@ -55,7 +55,7 @@ export const checkoutShippingAddressSchema = shippingAddressSchema.extend({
   senderMessage: z
     .string()
     .trim()
-    .min(10, "Please write a short message for your brother")
+    .min(10, "Please write a short message for your loved ones")
     .max(500, "Message is too long (max 500 characters)"),
 });
 

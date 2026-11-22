@@ -9,6 +9,8 @@ import type { ProductSort } from "@/components/ProductSortBar";
 import { ListingPageSkeleton } from "@/components/route-skeletons";
 import { JsonLd } from "@/components/JsonLd";
 import { FaqAccordion } from "@/components/FaqAccordion";
+import { CountrySeoArticle } from "@/components/CountrySeoArticle";
+import { countrySeoContent, hasApprovedCountrySeo, type CountrySeoContent } from "@/lib/content/country-seo-registry";
 import { allSpecialDays, getSpecialDay, loadSpecialDayProducts, specialDayLocationHref } from "@/lib/special-days";
 import { adjacentSpecialDays } from "@/lib/special-day-slugs";
 import { categoryLocationHref, countryDisplayName, giftsCatalogLocationHref } from "@/lib/location-seo-urls";
@@ -28,6 +30,12 @@ function resolveSort(raw?: string): ProductSort {
   return SORT_VALUES.includes(raw as ProductSort) ? (raw as ProductSort) : "featured";
 }
 
+/** /valentines-day-gifts-to-usa is this special-day route, so the approved USA article has to be applied here. */
+function approvedValentineArticle(slug: string, country: string): CountrySeoContent | null {
+  if (slug !== "valentines-day" || !hasApprovedCountrySeo(country, "valentines-day-gifts")) return null;
+  return countrySeoContent(country, "valentines-day-gifts");
+}
+
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
@@ -44,9 +52,10 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   await notFoundIfShoppingCountryDisabled(path);
   const country = await getStorefrontDeliveryCountry(query.country);
   const day = getSpecialDay(slug, country) ?? stub;
+  const approved = approvedValentineArticle(slug, country);
   return pageMetadata({
-    title: day.title,
-    description: day.description,
+    title: approved?.title ?? day.title,
+    description: approved?.description ?? day.description,
     path,
     absoluteTitle: true,
     ogImage: day.heroSrc,
@@ -71,6 +80,9 @@ async function SpecialDayContent({ params, searchParams }: Props) {
   await notFoundIfShoppingCountryDisabled(seoPath);
   const country = await getStorefrontDeliveryCountry(query.country);
   const day = getSpecialDay(slug, country) ?? stub;
+  const approved = approvedValentineArticle(slug, country);
+  const heading = approved?.heading ?? day.h1;
+  const faqs = approved?.faqs ?? day.faqs;
   const countryName = countryDisplayName(country);
   const shopHref = giftsCatalogLocationHref(country);
   const sort = resolveSort(query.sort);
@@ -108,14 +120,14 @@ async function SpecialDayContent({ params, searchParams }: Props) {
         data={[
           breadcrumbJsonLd(crumbs.map((crumb) => ({ name: crumb.label, path: crumb.href ?? seoPath }))),
           itemListJsonLd(
-            `${day.h1} — BlossomPot`,
+            `${heading} — BlossomPot`,
             products.map((product) => ({ name: product.name, path: `/products/${product.slug}` }))
           ),
-          faqJsonLd(day.faqs),
+          faqJsonLd(faqs),
         ]}
       />
       <Breadcrumbs items={crumbs} />
-      <h1 className="mb-8 text-3xl font-bold text-primary">{day.h1}</h1>
+      <h1 className="mb-8 text-3xl font-bold text-primary">{heading}</h1>
       {failed ? (
         <CatalogLoadError />
       ) : products.length > 0 ? (
@@ -129,59 +141,63 @@ async function SpecialDayContent({ params, searchParams }: Props) {
         </p>
       )}
 
-      <div className="mt-12 border-t border-slate-200 pt-10">
-        <article className="max-w-3xl space-y-8 leading-relaxed text-slate-700">
-          {day.intro.map((paragraph) => (
-            <p key={paragraph}>{paragraph}</p>
-          ))}
-          <section>
-            <h2 className="mb-3 text-lg font-bold text-primary">{day.deliveryHeading}</h2>
-            <p>{day.delivery}</p>
-            <p className="mt-3 text-sm text-slate-500">Gifts shown for delivery in {countryName}.</p>
-          </section>
-          <section>
-            <h2 className="mb-3 text-lg font-bold text-primary">{day.ideasHeading}</h2>
-            <ul className="space-y-2 text-sm">
-              {day.ideas.map((item) => (
-                <li key={item} className="flex gap-2">
-                  <span className="mt-1 shrink-0 text-nav">•</span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
-          <section>
-            <h2 className="mb-3 text-lg font-bold text-primary">{day.tipHeading}</h2>
-            <p>{day.tip}</p>
-          </section>
-          <section>
-            <h2 className="mb-3 text-lg font-bold text-primary">{day.whyHeading}</h2>
-            <ul className="space-y-2 text-sm">
-              {day.why.map((item) => (
-                <li key={item} className="flex gap-2">
-                  <span className="shrink-0 text-nav">✓</span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
-          <nav aria-label="More Valentine week gifts" className="flex flex-wrap gap-2">
-            {moreLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-600 hover:border-nav hover:text-nav sm:text-sm"
-              >
-                {link.label}
-              </Link>
+      {approved ? (
+        <CountrySeoArticle article={approved} omitHeading headingClassName="text-3xl font-bold text-primary mb-4" />
+      ) : (
+        <div className="mt-12 border-t border-slate-200 pt-10">
+          <article className="max-w-3xl space-y-8 leading-relaxed text-slate-700">
+            {day.intro.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
             ))}
-          </nav>
-          <section className="border-t border-slate-200 pt-10">
-            <h2 className="mb-6 font-display text-xl font-semibold text-primary">{day.faqHeading}</h2>
-            <FaqAccordion items={day.faqs} />
-          </section>
-        </article>
-      </div>
+            <section>
+              <h2 className="mb-3 text-lg font-bold text-primary">{day.deliveryHeading}</h2>
+              <p>{day.delivery}</p>
+              <p className="mt-3 text-sm text-slate-500">Gifts shown for delivery in {countryName}.</p>
+            </section>
+            <section>
+              <h2 className="mb-3 text-lg font-bold text-primary">{day.ideasHeading}</h2>
+              <ul className="space-y-2 text-sm">
+                {day.ideas.map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <span className="mt-1 shrink-0 text-nav">•</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+            <section>
+              <h2 className="mb-3 text-lg font-bold text-primary">{day.tipHeading}</h2>
+              <p>{day.tip}</p>
+            </section>
+            <section>
+              <h2 className="mb-3 text-lg font-bold text-primary">{day.whyHeading}</h2>
+              <ul className="space-y-2 text-sm">
+                {day.why.map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <span className="shrink-0 text-nav">✓</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+            <section className="border-t border-slate-200 pt-10">
+              <h2 className="mb-6 font-display text-xl font-semibold text-primary">{day.faqHeading}</h2>
+              <FaqAccordion items={day.faqs} />
+            </section>
+          </article>
+        </div>
+      )}
+      <nav aria-label="More Valentine week gifts" className="mt-10 flex max-w-3xl flex-wrap gap-2">
+        {moreLinks.map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-600 hover:border-nav hover:text-nav sm:text-sm"
+          >
+            {link.label}
+          </Link>
+        ))}
+      </nav>
     </div>
   );
 }

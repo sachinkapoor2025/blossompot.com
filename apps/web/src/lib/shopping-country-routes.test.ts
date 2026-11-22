@@ -107,7 +107,7 @@ describe("shopping country routes", () => {
     assert.equal(promo.includes("$75"), false);
     assert.equal(promo.includes("same-day"), false);
     assert.equal(promo.includes("/same-day-delivery"), false);
-    assert.match(promo, /Shop flowers, cakes & hampers/);
+    assert.match(promo, /Send Flowers, Cakes & Gifts to the USA/);
     assert.match(promo, /href="\/products"/);
     assert.equal(llms.includes("/same-day-delivery"), false);
     assert.equal(llms.includes('href: "/flower-delivery-uk"'), false);

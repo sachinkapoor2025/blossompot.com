@@ -12,10 +12,10 @@ import {
 export { HOME_PRODUCT_ROW_LIMIT };
 
 export const HOME_PRODUCT_SECTIONS = [
-  { slug: "flowers", title: "Flowers" },
-  { slug: "flower-bouquets", title: "Bouquets" },
-  { slug: "cakes", title: "Cakes" },
-  { slug: "gift-hampers", title: "Gift Hampers" },
+  { slug: "flowers", title: "Flowers to USA" },
+  { slug: "flower-bouquets", title: "Bouquets to USA" },
+  { slug: "cakes", title: "Cakes to USA" },
+  { slug: "gift-hampers", title: "Gift Hampers to USA" },
 ] as const;
 
 const CARD_WIDTH = "w-[10.75rem] sm:w-[13rem] lg:w-[15rem]";

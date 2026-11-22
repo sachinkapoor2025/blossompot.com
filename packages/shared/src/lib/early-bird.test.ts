@@ -5,6 +5,7 @@ import {
   EARLY_BIRD_ENDS_DATE,
   SCHEDULE_DELIVERY_HORIZON_DAYS,
   isEarlyBirdPromoActive,
+  isScheduleDeliveryClosedDay,
   isValidScheduleDeliveryDate,
   preferredDeliveryDateToIso,
   scheduleDeliveryMaxDate,
@@ -26,7 +27,12 @@ describe("early bird promo", () => {
     assert.equal(min, "2026-09-12");
     assert.equal(SCHEDULE_DELIVERY_HORIZON_DAYS, 90);
     assert.equal(max, "2026-12-10");
-    assert.equal(isValidScheduleDeliveryDate(min, now), true);
+    assert.equal(isScheduleDeliveryClosedDay(min), true);
+    assert.equal(isScheduleDeliveryClosedDay("2026-09-13"), true);
+    assert.equal(isScheduleDeliveryClosedDay("2026-09-14"), false);
+    assert.equal(isValidScheduleDeliveryDate(min, now), false);
+    assert.equal(isValidScheduleDeliveryDate("2026-09-13", now), false);
+    assert.equal(isValidScheduleDeliveryDate("2026-09-14", now), true);
     assert.equal(isValidScheduleDeliveryDate(max, now), true);
     assert.equal(isValidScheduleDeliveryDate("2026-09-11", now), false);
     assert.equal(isValidScheduleDeliveryDate("2026-09-10", now), false);

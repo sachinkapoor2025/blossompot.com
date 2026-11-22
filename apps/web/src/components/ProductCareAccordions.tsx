@@ -17,7 +17,7 @@ const SHIPPING_DELIVERY_POINTS = [
   "Courier partners handle these gifts, so the arrival window is an estimate rather than a guaranteed clock time.",
   "Your package may reach a little earlier or later than the preferred delivery date you selected.",
   "Courier parcels travel on their own route and are not combined with any hand-delivered gifts.",
-  "Deliveries are paused on Sundays and U.S. national holidays.",
+  "Deliveries are paused on Saturdays, Sundays, and U.S. national holidays.",
   "Carriers usually do not call before drop-off — please share an address where someone can receive the package.",
   "After dispatch, the delivery address cannot be redirected to a different location.",
   "Every order is carefully packed and shipped from our USA warehouse.",
