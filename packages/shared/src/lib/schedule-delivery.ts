@@ -5,6 +5,7 @@ export {
   calendarDayKeyAmericaNy,
   scheduleDeliveryMinDate,
   scheduleDeliveryMaxDate,
+  isScheduleDeliveryClosedDay,
   isValidScheduleDeliveryDate,
   preferredDeliveryDateToIso,
 } from "./early-bird";

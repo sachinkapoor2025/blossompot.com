@@ -254,7 +254,7 @@ export function ShippingAddressForm({
           />
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
-              Message for your brother
+              Message For Your Loved Ones
             </label>
             <textarea
               value={value.senderMessage ?? ""}

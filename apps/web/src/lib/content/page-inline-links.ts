@@ -255,6 +255,7 @@ export const seoArticleInlineLinks: Record<string, readonly { phrase: string; hr
   ],
   "birthday-gifts": [
     { phrase: "birthday flowers", href: categoryHref("flowers") },
+    { phrase: "flowers", href: categoryHref("flowers") },
     { phrase: "flower", href: categoryHref("flowers") },
     { phrase: "hampers", href: categoryHref("gift-hampers") },
     { phrase: "cakes", href: categoryHref("cakes") },
@@ -262,6 +263,7 @@ export const seoArticleInlineLinks: Record<string, readonly { phrase: string; hr
   "anniversary-gifts": [
     { phrase: "gift hampers", href: categoryHref("gift-hampers") },
     { phrase: "gift hamper", href: categoryHref("gift-hampers") },
+    { phrase: "hampers", href: categoryHref("gift-hampers") },
     { phrase: "flowers", href: categoryHref("flowers") },
     { phrase: "cakes", href: categoryHref("cakes") },
     { phrase: "roses", href: categoryHref("flower-bouquets") },
@@ -269,6 +271,7 @@ export const seoArticleInlineLinks: Record<string, readonly { phrase: string; hr
   ],
   "valentines-day-gifts": [
     { phrase: "Same-day", href: categoryHref("same-day-gifts") },
+    { phrase: "chocolates", href: categoryHref("gift-hampers") },
     { phrase: "roses", href: categoryHref("flower-bouquets") },
     { phrase: "cake", href: categoryHref("cakes") },
     { phrase: "flowers", href: categoryHref("flowers") },
@@ -277,7 +280,9 @@ export const seoArticleInlineLinks: Record<string, readonly { phrase: string; hr
   hampers: [
     { phrase: "gift hamper", href: categoryHref("gift-hampers") },
     { phrase: "anniversaries", href: categoryHref("anniversary-gifts") },
+    { phrase: "anniversary", href: categoryHref("anniversary-gifts") },
     { phrase: "birthdays", href: categoryHref("birthday-gifts") },
+    { phrase: "birthday", href: categoryHref("birthday-gifts") },
     { phrase: "flowers", href: categoryHref("flowers") },
     { phrase: "cake", href: categoryHref("cakes") },
   ],

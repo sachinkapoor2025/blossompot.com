@@ -52,11 +52,20 @@ export function scheduleDeliveryMaxDate(date = new Date()): string {
   return addIsoDays(calendarDayKeyAmericaNy(date), SCHEDULE_DELIVERY_HORIZON_DAYS);
 }
 
+/** Saturday and Sunday are closed. Weekday is taken from the calendar date itself. */
+export function isScheduleDeliveryClosedDay(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [y, m, d] = value.split("-").map(Number);
+  const weekday = new Date(Date.UTC(y!, m! - 1, d!)).getUTCDay();
+  return weekday === 0 || weekday === 6;
+}
+
 export function isValidScheduleDeliveryDate(
   value: string,
   now = new Date()
 ): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  if (isScheduleDeliveryClosedDay(value)) return false;
   const min = scheduleDeliveryMinDate(now);
   const max = scheduleDeliveryMaxDate(now);
   return value >= min && value <= max;

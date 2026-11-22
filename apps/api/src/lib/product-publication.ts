@@ -63,7 +63,8 @@ async function readStoredCommerce(slug: string): Promise<StoredListingCommerce |
       TableName: PRODUCTS_TABLE,
       Key: { PK: productKeys.pk(slug), SK: productKeys.sk() },
       ProjectionExpression: "published, slug, price, inventory",
-      ConsistentRead: true,
+      // Eventual reads are enough for catalog overlays and cost half of consistent GetItem.
+      ConsistentRead: false,
     })
   );
   const item = result.Item as {

@@ -146,11 +146,6 @@ export function organizationJsonLd() {
       },
     ],
     areaServed: [{ "@type": "Country", name: "United States" }],
-    audience: {
-      "@type": "Audience",
-      audienceType:
-        "Customers in the United States and worldwide ordering flowers, cakes, bouquets, and gifts for delivery across the United States",
-    },
     knowsAbout: [
       "Flower delivery USA",
       "Birthday cake delivery",
@@ -186,18 +181,6 @@ export function onlineStoreJsonLd() {
       { "@type": "Country", name: "Australia" },
       { "@type": "Country", name: "United Arab Emirates" },
     ],
-    priceRange: "$$",
-    currenciesAccepted: "USD",
-    paymentAccepted: "Credit Card, Debit Card, Stripe",
-    shippingDetails: {
-      "@type": "OfferShippingDetails",
-      shippingDestination: { "@type": "DefinedRegion", addressCountry: "US" },
-      deliveryTime: {
-        "@type": "ShippingDeliveryTime",
-        handlingTime: { "@type": "QuantitativeValue", minValue: 0, maxValue: 1, unitCode: "DAY" },
-        transitTime: { "@type": "QuantitativeValue", minValue: 2, maxValue: 7, unitCode: "DAY" },
-      },
-    },
     parentOrganization: { "@id": `${siteUrl}/#organization` },
   };
 }
@@ -390,6 +373,7 @@ export function articleJsonLd(article: {
 }
 
 export function itemListJsonLd(name: string, items: { name: string; path: string }[]) {
+  if (items.length === 0) return null;
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",

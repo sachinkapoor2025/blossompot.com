@@ -22,7 +22,6 @@ import {
   LOW_STOCK_THRESHOLD,
   isFastSelling,
   getUnitsSold,
-  estimatedDeliveryLabel,
   isFlashComboProduct,
   isFlashComboSaleActive,
   flashComboSaleEndsAt,
@@ -31,7 +30,6 @@ import {
   applicableCatalogLineShippingCharge,
   quoteAddressShipmentShipping,
 } from "@blossompot/shared";
-import { EstimatedDeliveryNote } from "@/components/EstimatedDeliveryNote";
 import { ProductCareAccordions } from "@/components/ProductCareAccordions";
 import { LearnAboutFlower } from "@/components/flower-guide/LearnAboutFlower";
 import { flowerGuideForProduct } from "@/lib/content/flower-guide/products";
@@ -346,7 +344,7 @@ export function ProductDetailClient({
             </p>
           )}
 
-          <EstimatedDeliveryNote variant="banner" prefix="Estimated delivery:" className="mb-4" />
+          <ScheduleDeliveryPicker className="mb-4" productNoun={productNoun} />
 
           <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm">
             {!purchaseAllowed ? (
@@ -455,8 +453,6 @@ export function ProductDetailClient({
               </div>
             </div>
           )}
-
-          <ScheduleDeliveryPicker className="mb-5" productNoun={productNoun} />
 
         </div>
       </div>

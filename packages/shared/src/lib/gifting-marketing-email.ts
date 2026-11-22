@@ -6,9 +6,8 @@
  * pass overrides into buildGiftingMarketingEmailHtml().
  */
 
-import { catalogImagesForProduct } from "./catalog-images";
+import { EMAIL_IMAGES, emailImgAttributes } from "./email-images";
 import { homePageBannerUrl } from "./home-page-banners";
-import { cdnUploadUrl } from "./image-url";
 import { BLOSSOMPOT_SOCIAL_LINKS } from "./order-confirmed-email";
 
 const SITE = "https://www.blossompot.com";
@@ -28,16 +27,6 @@ const WHITE = "#ffffff";
 const FOOTER_BG = "#1A3D34";
 const GOLD = "#E8C9A0";
 const SAGE = "#2F8F6B";
-
-const IMG_ROSES = cdnUploadUrl("catalog/roses-red-1.jpg");
-const IMG_CAKE = cdnUploadUrl("catalog/cake-chocolate-1.jpg");
-const IMG_HAMPER = cdnUploadUrl("catalog/hamper-1.jpg");
-
-const FEATURED_ROSES = catalogImagesForProduct({
-  name: "Classic Red Rose Bouquet",
-  slug: "classic-red-rose-bouquet",
-  categorySlug: "flowers",
-});
 
 export type GiftingEmailCategory = {
   name: string;
@@ -126,7 +115,7 @@ export const GIFTING_MARKETING_EMAIL_CONFIG: GiftingMarketingEmailConfig = {
     {
       name: "Flowers",
       description: "Fresh bouquets for every occasion.",
-      imageUrl: IMG_ROSES,
+      imageUrl: EMAIL_IMAGES.flowers.url,
       imageAlt: "Shop flowers",
       href: `${SITE}/flowers`,
       buttonText: "Shop Flowers",
@@ -134,7 +123,7 @@ export const GIFTING_MARKETING_EMAIL_CONFIG: GiftingMarketingEmailConfig = {
     {
       name: "Cakes",
       description: "Celebration cakes delivered fresh.",
-      imageUrl: IMG_CAKE,
+      imageUrl: EMAIL_IMAGES.cakes.url,
       imageAlt: "Shop cakes",
       href: `${SITE}/cakes`,
       buttonText: "Shop Cakes",
@@ -142,7 +131,7 @@ export const GIFTING_MARKETING_EMAIL_CONFIG: GiftingMarketingEmailConfig = {
     {
       name: "Gift Hampers",
       description: "Curated treats in one beautiful gift.",
-      imageUrl: IMG_HAMPER,
+      imageUrl: EMAIL_IMAGES.gourmet.url,
       imageAlt: "Shop gift hampers",
       href: `${SITE}/gift-hampers`,
       buttonText: "Shop Hampers",
@@ -156,8 +145,8 @@ export const GIFTING_MARKETING_EMAIL_CONFIG: GiftingMarketingEmailConfig = {
     ctaHref: `${SITE}/gift-catalog`,
   },
   featured: {
-    imageUrl: FEATURED_ROSES[0] ?? IMG_ROSES,
-    imageAlt: "Classic Red Rose Bouquet",
+    imageUrl: EMAIL_IMAGES.freshFlowers.url,
+    imageAlt: "Fresh flowers from BlossomPot",
     name: "Classic Red Rose Bouquet",
     description:
       "A timeless dozen of premium red roses arranged with fresh greens and elegant wrapping — perfect for anniversaries and I-love-you moments.",
@@ -240,7 +229,7 @@ function categoryCard(cat: GiftingEmailCategory): string {
                       <tr>
                         <td align="center" style="padding:0;line-height:0;font-size:0;background-color:${PETAL};">
                           <a href="${href}" target="_blank" style="text-decoration:none;">
-                            <img class="fluid" src="${escAttr(cat.imageUrl)}" width="188" alt="${escAttr(cat.imageAlt)}" style="display:block;width:100%;max-width:188px;height:auto;border:0;margin:0 auto;" />
+                            <img class="fluid" src="${escAttr(cat.imageUrl)}" ${emailImgAttributes(cat.imageUrl, 188)} alt="${escAttr(cat.imageAlt)}" style="display:block;width:100%;max-width:188px;height:auto;border:0;margin:0 auto;" />
                           </a>
                         </td>
                       </tr>
@@ -381,7 +370,7 @@ export function buildGiftingMarketingEmailHtml(
           <tr>
             <td align="center" bgcolor="${WHITE}" style="padding:22px 28px 12px 28px;background-color:${WHITE};">
               <a href="${escAttr(cfg.logoHref)}" target="_blank" style="text-decoration:none;">
-                <img src="${escAttr(cfg.logoUrl)}" width="176" alt="${escAttr(cfg.logoAlt)}" style="display:block;width:176px;max-width:72%;height:auto;border:0;margin:0 auto;" />
+                <img src="${escAttr(cfg.logoUrl)}" ${emailImgAttributes(cfg.logoUrl, 176)} alt="${escAttr(cfg.logoAlt)}" style="display:block;width:176px;max-width:72%;height:auto;border:0;margin:0 auto;" />
               </a>
               <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:16px;letter-spacing:2.2px;text-transform:uppercase;color:${SAGE};padding-top:10px;">
                 Flowers · Cakes · Gifts
@@ -404,7 +393,7 @@ export function buildGiftingMarketingEmailHtml(
           <tr>
             <td align="center" style="padding:0;line-height:0;font-size:0;">
               <a href="${escAttr(hero.imageHref)}" target="_blank" style="text-decoration:none;">
-                <img class="fluid" src="${escAttr(hero.imageUrl)}" width="600" alt="${escAttr(hero.imageAlt)}" style="display:block;width:100%;max-width:600px;height:auto;border:0;" />
+                <img class="fluid" src="${escAttr(hero.imageUrl)}" ${emailImgAttributes(hero.imageUrl, 600)} alt="${escAttr(hero.imageAlt)}" style="display:block;width:100%;max-width:600px;height:auto;border:0;" />
               </a>
             </td>
           </tr>
@@ -458,7 +447,7 @@ export function buildGiftingMarketingEmailHtml(
                 <tr>
                   <td class="stack-col" width="48%" valign="middle" style="width:48%;padding:16px 12px 16px 16px;">
                     <a href="${escAttr(featured.href)}" target="_blank" style="text-decoration:none;">
-                      <img class="fluid" src="${escAttr(featured.imageUrl)}" width="260" alt="${escAttr(featured.imageAlt)}" style="display:block;width:100%;max-width:260px;height:auto;border:0;border-radius:14px;margin:0 auto;" />
+                      <img class="fluid" src="${escAttr(featured.imageUrl)}" ${emailImgAttributes(featured.imageUrl, 260)} alt="${escAttr(featured.imageAlt)}" style="display:block;width:100%;max-width:260px;height:auto;border:0;border-radius:14px;margin:0 auto;" />
                     </a>
                   </td>
                   <td class="stack-col featured-pad" width="52%" valign="middle" style="width:52%;padding:20px 20px 20px 8px;text-align:left;">
@@ -483,7 +472,7 @@ export function buildGiftingMarketingEmailHtml(
                 <tr>
                   <td align="center" style="padding:0 0 14px 0;">
                     <a href="${escAttr(footer.websiteUrl)}" target="_blank" style="text-decoration:none;">
-                      <img src="${escAttr(cfg.logoUrl)}" width="140" alt="${escAttr(cfg.logoAlt)}" style="display:block;width:140px;max-width:55%;height:auto;border:0;margin:0 auto;background-color:#ffffff;border-radius:8px;padding:8px;" />
+                      <img src="${escAttr(cfg.logoUrl)}" ${emailImgAttributes(cfg.logoUrl, 140)} alt="${escAttr(cfg.logoAlt)}" style="display:block;width:140px;max-width:55%;height:auto;border:0;margin:0 auto;background-color:#ffffff;border-radius:8px;padding:8px;" />
                     </a>
                   </td>
                 </tr>

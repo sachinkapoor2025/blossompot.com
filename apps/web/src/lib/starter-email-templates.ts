@@ -1,4 +1,9 @@
-/** Starter marketing templates installed into Admin → Marketing Emails → Templates. */
+/**
+ * Starter marketing templates installed into Admin → Marketing Emails → Templates.
+ * When a starter has buildHtml(), that HTML is what gets installed. htmlPath is only
+ * a published copy. Saved campaign rows are not rewritten here — reselect the template
+ * in Compose to copy the corrected HTML. Premium Gifts USA keeps stored content fields.
+ */
 
 import {
   DEFAULT_PREMIUM_MARKETING_EMAIL_CONTENT,
@@ -84,6 +89,8 @@ export const STARTER_EMAIL_TEMPLATES: StarterEmailTemplateMeta[] = [
     templateId: ANNIVERSARY_TEMPLATE_ID,
     name: ANNIVERSARY_EMAIL_CONFIG.name,
     subject: ANNIVERSARY_EMAIL_CONFIG.subject,
+    // Installer uses buildHtml(), not the public file. The file is a published copy
+    // of that HTML so the two cannot drift. Saved campaigns are not rewritten here.
     buildHtml: () => buildAnniversaryEmailHtml(),
     htmlPath: "/email-templates/anniversary-gifts.html",
   },

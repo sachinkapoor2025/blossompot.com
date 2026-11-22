@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { chatRequestSchema, type ChatMessage } from "@blossompot/shared";
 import { buildChatSystemPrompt } from "@/lib/chat/prompt";
+import { loadEnabledShoppingCountryCodes } from "@/lib/storefront-country";
 import { fallbackChatReply, isOnTopicGiftQuestion, productRecommendations } from "@/lib/chat/fallback";
 import { loadProducts } from "@/lib/product-loader";
 
@@ -78,7 +79,8 @@ export async function POST(req: Request) {
     await loadProducts().catch(() => undefined);
 
     if (getApiKey()) {
-      const systemPrompt = buildChatSystemPrompt(page);
+      const enabledCountries = await loadEnabledShoppingCountryCodes();
+      const systemPrompt = buildChatSystemPrompt(page, enabledCountries);
       reply = await callOpenAI(systemPrompt, history);
       const wantsProducts = /flower|bouquet|rose|cake|hamper|gift|product|recommend|suggest/i.test(userText);
       if (wantsProducts && !/\/products\//.test(reply)) {

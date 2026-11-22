@@ -10,10 +10,13 @@ import {
   isInternationalIndexable,
   MARKET_SLUGS,
 } from "@/lib/content/geo/international";
+import { flowerDeliveryCountryIso } from "@/lib/content/country-flower-delivery";
 import { marketingPageInlineLinks } from "@/lib/content/page-inline-links";
 import { applyInlineLinks } from "@/lib/inline-links";
+import { publicFlowerDeliveryHref } from "@/lib/location-seo-urls";
 import { locationPublicPath } from "@/lib/content/seo-data";
 import { countriesMenu } from "@/lib/site";
+import { loadEnabledShoppingCountryCodes } from "@/lib/storefront-country";
 
 export const metadata: Metadata = pageMetadata({
   title: "Where BlossomPot Operates — USA Delivery & International Ordering",
@@ -30,7 +33,11 @@ const usaExamples = [
   { label: "Los Angeles", slug: "los-angeles" },
 ];
 
-export default function LocationsHubPage() {
+export default async function LocationsHubPage() {
+  const enabledCountries = await loadEnabledShoppingCountryCodes();
+  const flowerLinks = countriesMenu.items.filter(
+    (item) => publicFlowerDeliveryHref(flowerDeliveryCountryIso(item.slug), enabledCountries) === item.href
+  );
   const inlineLinks = marketingPageInlineLinks.locations;
   const usedHrefs = new Set<string>();
   const usedPhrases = new Set<string>();
@@ -96,21 +103,23 @@ export default function LocationsHubPage() {
         </ul>
       </section>
 
-      <section className="mb-10">
-        <h2 className="text-xl font-bold text-primary mb-3">Flower delivery by country</h2>
-        <p className="text-slate-700 mb-3 max-w-3xl leading-relaxed">
-          Dedicated flower-delivery landing pages for the USA, UK, Canada, Australia, and the UAE.
-        </p>
-        <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
-          {countriesMenu.items.map((item) => (
-            <li key={item.href}>
-              <Link href={item.href} className="text-nav hover:underline">
-                {item.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {flowerLinks.length > 0 ? (
+        <section className="mb-10">
+          <h2 className="text-xl font-bold text-primary mb-3">Flower delivery by country</h2>
+          <p className="text-slate-700 mb-3 max-w-3xl leading-relaxed">
+            Flower delivery landing pages for countries where delivery is live. Other country hubs above explain how to order gifts to a US address.
+          </p>
+          <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+            {flowerLinks.map((item) => (
+              <li key={item.href}>
+                <Link href={item.href} className="text-nav hover:underline">
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <LocationSelector />
     </div>

@@ -35,6 +35,15 @@ export interface RegisterResult {
 
 const STORAGE_KEY = "hr_ecom_auth";
 
+/**
+ * Cognito email usernames are stored lowercase. USER_SRP_AUTH treats the
+ * typed string as part of the password proof, so "Name@Email.com" fails
+ * with "Incorrect username or password" even when the password is right.
+ */
+export function cognitoUsername(email: string): string {
+  return email.trim().toLowerCase();
+}
+
 export function loadStoredAuth(): AuthUser | null {
   if (typeof window === "undefined") return null;
   try {
@@ -125,11 +134,12 @@ export function storeAuth(user: AuthUser | null) {
 }
 
 export function login(email: string, password: string): Promise<AuthUser> {
+  const username = cognitoUsername(email);
   if (!userPool && devAuth) {
-    const isSuperAdmin = email.toLowerCase().includes("superadmin");
-    const isAdmin = isSuperAdmin || email.toLowerCase().includes("admin");
+    const isSuperAdmin = username.includes("superadmin");
+    const isAdmin = isSuperAdmin || username.includes("admin");
     const isEmailMarketer =
-      isSuperAdmin || email.toLowerCase().includes("email") || email.toLowerCase().includes("ses");
+      isSuperAdmin || username.includes("email") || username.includes("ses");
     const role = isSuperAdmin
       ? "super-admin"
       : isEmailMarketer && !isAdmin
@@ -138,8 +148,8 @@ export function login(email: string, password: string): Promise<AuthUser> {
           ? "admin"
           : "customer";
     const user: AuthUser = {
-      email,
-      token: `dev:${email}:${role}`,
+      email: username,
+      token: `dev:${username}:${role}`,
       isAdmin,
       isSuperAdmin,
       isEmailMarketer,
@@ -153,12 +163,15 @@ export function login(email: string, password: string): Promise<AuthUser> {
   }
 
   return new Promise((resolve, reject) => {
-    const user = new CognitoUser({ Username: email, Pool: userPool });
-    const details = new AuthenticationDetails({ Username: email, Password: password });
+    const user = new CognitoUser({ Username: username, Pool: userPool });
+    // Password auth lets Cognito compare the email case-insensitively.
+    // The default SRP flow rejects a correct password when the typed case differs.
+    user.setAuthenticationFlowType("USER_PASSWORD_AUTH");
+    const details = new AuthenticationDetails({ Username: username, Password: password });
 
     user.authenticateUser(details, {
       onSuccess: (session) => {
-        const authUser = authUserFromSession(email, session);
+        const authUser = authUserFromSession(username, session);
         storeAuth(authUser);
         resolve(authUser);
       },
@@ -180,13 +193,14 @@ export function register(
     return Promise.reject(new Error("Auth not configured."));
   }
 
+  const username = cognitoUsername(email);
   const attrs: CognitoUserAttribute[] = [
-    new CognitoUserAttribute({ Name: "email", Value: email }),
+    new CognitoUserAttribute({ Name: "email", Value: username }),
   ];
   if (name) attrs.push(new CognitoUserAttribute({ Name: "name", Value: name }));
 
   return new Promise((resolve, reject) => {
-    userPool.signUp(email, password, attrs, [], (err, result) => {
+    userPool.signUp(username, password, attrs, [], (err, result) => {
       if (err) reject(err);
       else {
         const delivery = result?.codeDeliveryDetails;
@@ -250,6 +264,12 @@ export function formatAuthError(err: unknown): string {
   if (code === "CodeMismatchException" || code === "ExpiredCodeException") {
     return "That reset code is invalid or expired. Request a new code and try again.";
   }
+  if (code === "NotAuthorizedException") {
+    if (process.env.NEXT_PUBLIC_APP_ENV === "dev") {
+      return "Incorrect username or password. This dev site keeps its own accounts, separate from www.blossompot.com. Being signed in on the live site does not sign you in here. Create an account on this site, or use Forgot password here.";
+    }
+    return "Incorrect username or password.";
+  }
   if (code === "UserNotFoundException") {
     return "If an account exists for that email, a reset code has been sent.";
   }
@@ -265,7 +285,7 @@ export function confirmSignUp(email: string, code: string): Promise<void> {
   if (!userPool) return Promise.reject(new Error("Auth not configured."));
 
   return new Promise((resolve, reject) => {
-    const user = new CognitoUser({ Username: email, Pool: userPool });
+    const user = new CognitoUser({ Username: cognitoUsername(email), Pool: userPool });
     user.confirmRegistration(code.trim(), true, (err) => {
       if (err) reject(err);
       else resolve();
@@ -278,7 +298,7 @@ export function resendConfirmationCode(email: string): Promise<void> {
   if (!userPool) return Promise.reject(new Error("Auth not configured."));
 
   return new Promise((resolve, reject) => {
-    const user = new CognitoUser({ Username: email, Pool: userPool });
+    const user = new CognitoUser({ Username: cognitoUsername(email), Pool: userPool });
     user.resendConfirmationCode((err) => {
       if (err) reject(err);
       else resolve();
@@ -299,7 +319,7 @@ export function forgotPassword(email: string): Promise<ForgotPasswordDelivery> {
   if (!userPool) return Promise.reject(new Error("Auth not configured."));
 
   return new Promise((resolve, reject) => {
-    const user = new CognitoUser({ Username: email.trim().toLowerCase(), Pool: userPool });
+    const user = new CognitoUser({ Username: cognitoUsername(email), Pool: userPool });
     user.forgotPassword({
       onSuccess: () => resolve({}),
       onFailure: (err) => reject(err),
@@ -323,7 +343,7 @@ export function confirmForgotPassword(
   if (!userPool) return Promise.reject(new Error("Auth not configured."));
 
   return new Promise((resolve, reject) => {
-    const user = new CognitoUser({ Username: email.trim().toLowerCase(), Pool: userPool });
+    const user = new CognitoUser({ Username: cognitoUsername(email), Pool: userPool });
     user.confirmPassword(code.trim(), newPassword, {
       onSuccess: () => resolve(),
       onFailure: (err) => reject(err),

@@ -116,13 +116,6 @@ export function MobileNavDrawer({
         </div>
 
         <Link
-          href="/vendor"
-          onClick={onClose}
-          className="block rounded-lg px-4 py-3 text-sm font-semibold text-primary hover:bg-rose-50"
-        >
-          Vendor Account
-        </Link>
-        <Link
           href="/become-a-vendor"
           onClick={onClose}
           className="block rounded-lg px-4 py-3 text-sm font-semibold text-primary hover:bg-rose-50"

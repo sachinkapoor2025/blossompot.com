@@ -235,6 +235,41 @@ export function flowerDeliveryPathForIso(countryIso: string): string | null {
 }
 
 /**
+ * Published location guide for a country whose flower-delivery page is not a live
+ * shopping destination. UAE has no separate guide, so that URL stays unavailable.
+ */
+const FLOWER_DELIVERY_ORIGIN_GUIDE: Record<string, string> = {
+  GB: "/locations/europe/united-kingdom",
+  CA: "/locations/canada",
+  AU: "/locations/australia",
+};
+
+/**
+ * Href to publish for a country flower page.
+ * Enabled shopping countries keep `/flower-delivery-*`.
+ * Disabled countries use the location guide when one exists.
+ * Returns null when the only page would be a 404 (UAE while AE is disabled).
+ */
+export function publicFlowerDeliveryHref(
+  countryIso: string,
+  enabledCodes: readonly string[] | null
+): string | null {
+  const iso = countryIso.trim().toUpperCase();
+  const flower = flowerDeliveryPathForIso(iso);
+  if (!flower) return null;
+  const enabled = new Set((enabledCodes ?? []).map((code) => code.trim().toUpperCase()));
+  if (enabled.has(iso)) return flower;
+  return FLOWER_DELIVERY_ORIGIN_GUIDE[iso] ?? null;
+}
+
+/** Permanent replacement for a disabled flower-delivery URL, or null when none exists. */
+export function disabledFlowerDeliveryRedirect(pathname: string): string | null {
+  const iso = FLOWER_DELIVERY_PATH_ISO[normalizePathname(pathname)];
+  if (!iso) return null;
+  return FLOWER_DELIVERY_ORIGIN_GUIDE[iso] ?? null;
+}
+
+/**
  * Country named by a shopping SEO URL (`/flowers-to-uk`, `/gifts-to-uk`, `/flower-delivery-uk`).
  * International ordering guides and USA city/state pages are not shopping URLs.
  */
@@ -338,7 +373,8 @@ export function locationShopRewritePath(parsed: ParsedLocationShopPath): string 
 }
 
 export function categoryLocationHref(internalSlug: string, countryIso: string): string {
-  const stem = CATEGORY_LOCATION_STEM[internalSlug] ?? CATEGORY_PUBLIC_SLUG[internalSlug] ?? internalSlug;
+  const stem = CATEGORY_LOCATION_STEM[internalSlug] ?? CATEGORY_PUBLIC_SLUG[internalSlug];
+  if (!stem) return withCountryQuery(categoryHref(internalSlug), countryIso);
   return `/${stem}-to-${countrySeoSlug(countryIso)}`;
 }
 

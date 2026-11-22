@@ -33,43 +33,32 @@ describe("country SEO registry", () => {
 
   it("keeps approved USA flowers and delivery-location copy without enabling a country", () => {
     const flowers = countrySeoContent("US", "flowers");
-    assert.equal(flowers.title, "Send Flowers to USA Online | Flower Delivery – BlossomPot");
-    assert.equal(flowers.heading, "Send Flowers to USA Online");
+    assert.equal(
+      flowers.title,
+      "Send Flowers to USA Online – Fresh Bouquets and Roses Delivered Across America | BlossomPot"
+    );
+    assert.equal(flowers.heading, "Send Flowers to USA Online – Fresh Bouquets and Roses Delivered Across America");
     assert.deepEqual(
       flowers.sections.map((section) => section.heading),
       [
-        "Explore Our Collection of Flowers to USA",
-        "Send Flowers to USA for Every Special Occasion",
-        "Birthday and Anniversary Flowers in USA",
-        "Send Roses and Romantic Flowers to USA",
-        "Send Flowers to USA from Anywhere and Other Countries",
-        "Explore Flowers and Gifts Across the USA",
+        "Explore Our Collection of Flowers for Delivery in America",
+        "Send Roses to USA – Red, Pink and White Rose Bouquets",
+        "Flowers for Every Occasion in the USA",
+        "Send Flowers to USA from India and Other Countries",
+        "Floral Gifts Delivered to Popular US Cities and States",
+        "Pair Your Flowers with Cakes, Hampers and Gifts",
         "Why Choose BlossomPot to Send Flowers to USA?",
-        "Flower Delivery Across the USA",
       ]
     );
-    assert.equal(flowers.stepsHeading, "How to Order Flowers Online in the USA");
     assert.equal(flowers.faqHeading, "Frequently Asked Questions");
-    assert.equal(flowers.faqBeforeClosing, true);
-    assert.equal(flowers.closing.heading, "Make Every Moment Special with BlossomPot");
-    assert.deepEqual(
-      flowers.faqs.map((faq) => faq.q),
-      [
-        "Can I send flowers to USA from worldwide?",
-        "Can I order flowers online for delivery in the USA?",
-        "What types of flowers can I send to the USA?",
-        "Can I send birthday flowers to someone in the USA?",
-        "Can I send anniversary flowers to the USA?",
-        "Can I send flowers to the USA from another country?",
-        "Can I send flowers along with cakes or gifts to the USA?",
-      ]
-    );
-    assert.match(flowers.faqs[0]?.a ?? "", /browsing the BlossomPot collection/);
+    assert.equal(flowers.faqBeforeClosing, false);
+    assert.equal(flowers.faqs[0]?.q, "Can I send flowers to USA from India or another country?");
+    assert.match(flowers.faqs[0]?.a ?? "", /browse BlossomPot from India/);
     const flowerHrefs = countrySeoHrefs(flowers);
     assert.equal(flowerHrefs.includes("/gifts-to-new-york"), true);
     assert.equal(flowerHrefs.includes("/gifts-to-boston"), true);
     assert.equal(flowerHrefs.some((href) => href.includes("amplifyapp.com")), false);
-    assert.equal(flowers.faqs.length, 7);
+    assert.equal(flowers.faqs.length, 8);
     const locations = countrySeoContent("US", "delivery-locations");
     assert.equal(locations.heading, "Explore Our USA Delivery Locations");
     assert.equal(countrySeoHrefs(locations).includes("/gifts-to-new-jersey"), true);

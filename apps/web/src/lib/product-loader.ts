@@ -369,6 +369,9 @@ async function readStorefrontCatalog(params?: {
    * and skips other partitions and bundled-catalog writes. Category pages omit it.
    */
   homepageRow?: boolean;
+  /** Related rail. The products API keeps vendor order and stops after this many matches. */
+  relatedLimit?: number;
+  relatedExclude?: string;
 }): Promise<CatalogRead> {
   if (params?.category && storefrontSkipsRakhiCategory(params.category)) {
     return { ok: true, products: [], apiProductCount: 0 };
@@ -396,6 +399,8 @@ async function readStorefrontCatalog(params?: {
           "x-blossompot-listing-groups": "1",
           ...(params?.listingView === "card" ? { "x-blossompot-listing-view": "card" } : {}),
           ...(params?.homepageRow ? { "x-blossompot-home-row": "1" } : {}),
+          ...(params?.relatedLimit ? { "x-blossompot-related-limit": String(params.relatedLimit) } : {}),
+          ...(params?.relatedExclude ? { "x-blossompot-related-exclude": params.relatedExclude } : {}),
         },
       }
     )
@@ -456,7 +461,8 @@ export { toListingCardProducts };
 export async function loadProductsByCategory(
   categorySlug: string,
   country?: string,
-  listingView?: "card"
+  listingView?: "card",
+  options?: { homepageRow?: boolean; relatedLimit?: number; relatedExclude?: string }
 ): Promise<Product[]> {
   let products: Product[] = [];
   try {
@@ -465,6 +471,9 @@ export async function loadProductsByCategory(
         category: categorySlug,
         country,
         ...(listingView ? { listingView } : {}),
+        ...(options?.homepageRow ? { homepageRow: true } : {}),
+        ...(options?.relatedLimit ? { relatedLimit: options.relatedLimit } : {}),
+        ...(options?.relatedExclude ? { relatedExclude: options.relatedExclude } : {}),
       })
     ).products;
   } catch {
@@ -483,7 +492,11 @@ export async function loadRelatedProducts(
   excludeSlug: string,
   country?: string
 ): Promise<Product[]> {
-  const products = await loadProductsByCategory(categorySlug, country, "card");
+  const products = await loadProductsByCategory(categorySlug, country, "card", {
+    homepageRow: true,
+    relatedLimit: 5,
+    relatedExclude: excludeSlug,
+  });
   return products.filter((p) => p.slug !== excludeSlug).slice(0, 5);
 }
 

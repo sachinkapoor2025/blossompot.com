@@ -12,6 +12,7 @@ import { specialDayIdFromPublicSlug } from "@/lib/special-day-slugs";
 import {
   LOCATION_SEO_HEADER,
   STOREFRONT_COUNTRY_HEADER,
+  disabledFlowerDeliveryRedirect,
   explicitShoppingSeoCountry,
   isoFromCountrySeoSlug,
   locationShopRewritePath,
@@ -73,6 +74,8 @@ export async function middleware(request: NextRequest) {
   if (explicitCountry) {
     enabledForRequest = await loadEdgeEnabledShoppingCountries();
     if (shoppingSeoCountryStatus(request.nextUrl.pathname, enabledForRequest) === "unavailable") {
+      const guide = disabledFlowerDeliveryRedirect(request.nextUrl.pathname);
+      if (guide) return redirectToPublicPath(request, guide);
       const url = request.nextUrl.clone();
       url.pathname = "/shopping-country-unavailable";
       url.search = "";
@@ -132,6 +135,23 @@ export async function middleware(request: NextRequest) {
   stampBotHeaders(response, request);
   if (country) applyDeliveryCountryCookie(response, request, country);
 
+  return response;
+}
+
+/**
+ * Absolute 301. Cloning nextUrl on Amplify can keep the internal :3000 port,
+ * so production hosts are built from the public www origin.
+ */
+function redirectToPublicPath(request: NextRequest, pathname: string): NextResponse {
+  const hostHeader = request.headers.get("host") ?? "www.blossompot.com";
+  const hostname = hostHeader.split(":")[0]?.toLowerCase();
+  const origin =
+    hostname === "blossompot.com" || hostname === "www.blossompot.com"
+      ? "https://www.blossompot.com"
+      : `${request.nextUrl.protocol}//${hostHeader}`;
+  const dest = new URL(`${pathname}${request.nextUrl.search}`, origin);
+  const response = NextResponse.redirect(dest, 301);
+  stampBotHeaders(response, request);
   return response;
 }
 

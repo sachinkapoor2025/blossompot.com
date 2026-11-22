@@ -224,13 +224,15 @@ describe("catalog request status", () => {
   });
 
   it("asks the products list for the card view and does not send that header to other paths", async () => {
-    const seen: Array<{ url: string; view: string | null; home: string | null }> = [];
+    const seen: Array<{ url: string; view: string | null; home: string | null; related: string | null; exclude: string | null }> = [];
     globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
       const headers = new Headers(init?.headers);
       seen.push({
         url: String(input),
         view: headers.get("x-blossompot-listing-view"),
         home: headers.get("x-blossompot-home-row"),
+        related: headers.get("x-blossompot-related-limit"),
+        exclude: headers.get("x-blossompot-related-exclude"),
       });
       return jsonResponse({ products: [flower("api-rose")] });
     }) as typeof fetch;
@@ -269,7 +271,9 @@ describe("catalog request status", () => {
     const relatedCalls = seen.filter((call) => call.url.includes("/products"));
     assert.equal(relatedCalls.length > 0, true);
     assert.equal(relatedCalls.every((call) => call.view === "card"), true);
-    assert.equal(relatedCalls.every((call) => call.home == null), true);
+    assert.equal(relatedCalls.every((call) => call.home === "1"), true);
+    assert.equal(relatedCalls.every((call) => call.related === "5"), true);
+    assert.equal(relatedCalls.every((call) => call.exclude === "current-product"), true);
     assert.equal(relatedCalls.some((call) => call.url.includes("category=flowers")), true);
   });
 });

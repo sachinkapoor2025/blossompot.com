@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { shoppingSafeCityMenu } from "@/lib/city-menu-core";
 import { cityNavHref, cityNavMenuLabel } from "@/lib/site";
 import { cityMenuForCountry, filterCityMenuLinks } from "@/lib/city-menu-for-location";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
@@ -59,10 +60,15 @@ export function CitiesMenuPanel({
   onNavigate?: () => void;
 }) {
   const { openSelector, setLocation } = useDeliveryLocation();
+  const { countries } = useGboDeliveryCountries();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const menu = cityMenuForCountry(menuIso);
+  const menu = shoppingSafeCityMenu(
+    cityMenuForCountry(menuIso),
+    menuIso,
+    countries.map((country) => country.countryCode)
+  );
   const visible = filterCityMenuLinks(menu.links, query);
 
   const chooseMenuCountry = (countryCode: string) => {
@@ -147,10 +153,15 @@ export function MobileCitiesPanel({
   onCloseMenu: () => void;
 }) {
   const { openSelector, setLocation } = useDeliveryLocation();
+  const { countries } = useGboDeliveryCountries();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const menu = cityMenuForCountry(cityMenuIso);
+  const menu = shoppingSafeCityMenu(
+    cityMenuForCountry(cityMenuIso),
+    cityMenuIso,
+    countries.map((country) => country.countryCode)
+  );
   const visible = filterCityMenuLinks(menu.links, cityQuery);
 
   return (

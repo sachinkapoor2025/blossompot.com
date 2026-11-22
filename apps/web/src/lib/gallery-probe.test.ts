@@ -12,7 +12,7 @@ describe("listing gallery probes", () => {
     const grids = [
       "components/ProductGrid.tsx",
       "components/LocationFilteredProducts.tsx",
-      "app/products/[slug]/page.tsx",
+      "components/RelatedProducts.tsx",
     ];
     for (const file of grids) {
       assert.match(source(file), /loadGalleryWhenVisible/, file);
@@ -21,14 +21,12 @@ describe("listing gallery probes", () => {
 
   it("renders the product page before related products resolve", () => {
     const page = source("app/products/[slug]/page.tsx");
-    const content = page.slice(
-      page.indexOf("async function ProductPageContent"),
-      page.indexOf("async function RelatedProducts")
-    );
-    assert.equal(content.includes("await loadRelatedProducts"), false);
-    assert.match(page.slice(page.indexOf("async function RelatedProducts")), /await loadRelatedProducts/);
-    assert.match(page, /<Suspense fallback=\{null\}>\s*<RelatedProducts/);
-    assert.match(page, /You might also like/);
+    const related = source("components/RelatedProducts.tsx");
+    assert.equal(page.includes("await loadRelatedProducts"), false);
+    assert.match(page, /<RelatedProducts /);
+    assert.match(related, /\/api\/related-products/);
+    assert.match(related, /You might also like/);
+    assert.match(related, /loadGalleryWhenVisible/);
   });
 
   it("keeps extra gallery frames behind shopper intent and the measured-image fallback", () => {

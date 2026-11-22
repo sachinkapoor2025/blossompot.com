@@ -2,10 +2,12 @@ import { site, navItems, cityNavHref, cityLinks, faqs, giftSetsMenu, countriesMe
 import { categoryHref } from "@/lib/category-urls";
 import { siteUrl } from "@/lib/env";
 import { blogPosts } from "@/lib/content/blog-posts";
+import { flowerDeliveryCountryIso } from "@/lib/content/country-flower-delivery";
 import { catalogChatSnippet } from "@/lib/chat/fallback";
+import { publicFlowerDeliveryHref } from "@/lib/location-seo-urls";
 
 /** Compact site knowledge injected into the chatbot system prompt. */
-export function buildChatKnowledge(): string {
+export function buildChatKnowledge(enabledCountryCodes: readonly string[] | null = ["US"]): string {
   const setCategories = giftSetsMenu.items.map((n) => `- ${n.label}: ${siteUrl}${n.href}`);
   const categories = [
     ...setCategories,
@@ -18,7 +20,12 @@ export function buildChatKnowledge(): string {
     .filter((n) => !("category" in n))
     .map((n) => `- ${n.label}: ${siteUrl}${n.href === "/" ? "" : n.href}`);
 
-  const countries = countriesMenu.items.map((c) => `- ${c.label}: ${siteUrl}${c.href}`);
+  const countries = countriesMenu.items.flatMap((item) => {
+    const href = publicFlowerDeliveryHref(flowerDeliveryCountryIso(item.slug), enabledCountryCodes);
+    if (!href) return [];
+    const label = href === item.href ? item.label : `${item.label.replace("Flower Delivery in ", "")} — order gifts to the USA`;
+    return [`- ${label}: ${siteUrl}${href}`];
+  });
   const cities = cityLinks.map((c) => `- ${c.menuLabel ?? c.label}: ${siteUrl}${cityNavHref(c)}`);
 
   const faqBlock = faqs.map((f) => `Q: ${f.q}\nA: ${f.a}`).join("\n\n");
@@ -49,7 +56,7 @@ ${pages.join("\n")}
 
 ## Flower delivery by country
 ${countries.join("\n")}
-The storefront serves shoppers worldwide. Select the recipient country to browse gifts for that destination. Featured country guides: USA, UK, Canada, Australia, and the UAE. Shipping is worldwide — not USA-only.
+Use only the country links listed above. Do not invent a flower-delivery URL for a country that is not listed.
 
 ## USA delivery cities
 ${cities.join("\n")}
@@ -72,8 +79,11 @@ ${faqBlock}
 `.trim();
 }
 
-export function buildChatSystemPrompt(page?: string): string {
-  const knowledge = buildChatKnowledge();
+export function buildChatSystemPrompt(
+  page?: string,
+  enabledCountryCodes: readonly string[] | null = ["US"]
+): string {
+  const knowledge = buildChatKnowledge(enabledCountryCodes);
   const pageHint = page ? `\nThe visitor is currently on: ${page}` : "";
 
   return `You are the BlossomPot Shopping Assistant — a warm, helpful sales guide for ${site.name} (${siteUrl}).

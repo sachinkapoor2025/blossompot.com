@@ -235,7 +235,9 @@ export async function checkout(event: APIGatewayProxyEventV2) {
 
   const preferredDeliveryDate = parsed.data.preferredDeliveryDate?.trim();
   if (preferredDeliveryDate && !isValidScheduleDeliveryDate(preferredDeliveryDate)) {
-    return badRequest("Scheduled delivery must be a future date within the next 90 days");
+    return badRequest(
+      "Scheduled delivery must be a weekday within the next 90 days. Saturday and Sunday are unavailable."
+    );
   }
 
   const cartResponse = await getCartHandler(event);

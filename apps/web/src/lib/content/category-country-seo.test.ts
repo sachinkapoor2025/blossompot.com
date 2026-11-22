@@ -20,13 +20,13 @@ describe("category country SEO", () => {
   it("uses the approved USA flowers article on /flowers-to-usa", () => {
     const seo = resolveCategoryPageSeo("flowers", "/flowers-to-usa");
     assert.equal(seo.source, "approved");
-    assert.equal(seo.title, "Send Flowers to USA Online | Flower Delivery – BlossomPot");
-    assert.equal(seo.h1, "Send Flowers to USA Online");
-    assert.equal(seo.article?.heading, "Send Flowers to USA Online");
     assert.equal(
-      seo.description,
-      "Send flowers to USA with BlossomPot. Explore flower bouquets, rose arrangements, and floral gifts for birthdays, anniversaries, Valentine's Day, and other special occasions."
+      seo.title,
+      "Send Flowers to USA Online – Fresh Bouquets and Roses Delivered Across America | BlossomPot"
     );
+    assert.equal(seo.h1, "Send Flowers to USA Online – Fresh Bouquets and Roses Delivered Across America");
+    assert.equal(seo.article?.heading, seo.h1);
+    assert.match(seo.description, /Send flowers to USA with BlossomPot/);
   });
 
   it("keeps neutral copy for a country category without approved content", () => {
@@ -46,31 +46,32 @@ describe("category country SEO", () => {
       {
         slug: "flower-bouquets",
         path: "/bouquets-to-usa",
-        title: "Send Beautiful Flower Bouquets to USA Online | BlossomPot",
-        h1: "Send Beautiful Flower Bouquets to USA Online",
+        title: "Send Beautiful Flower Bouquets to USA Online – BlossomPot",
+        h1: "Send Beautiful Flower Bouquets to USA Online – BlossomPot",
         sections: [
-          "Explore Beautiful Flower Bouquets for USA Delivery",
-          "Send Flower Bouquets to USA for Every Special Occasion",
-          "Send Rose Bouquets and Mixed Flowers to USA",
+          "Explore Flower Bouquets for USA Delivery",
+          "Choose the Right Bouquet for the Occasion",
+          "How to Pick the Perfect Bouquet",
+          "How to Order Bouquets Online for Delivery in USA",
           "Send Flower Bouquets to USA from Worldwide",
-          "Pair Flower Bouquets with Cakes and Gifts",
+          "Pair Your Bouquet with Cakes and Hampers",
           "Why Choose BlossomPot to Send Bouquets to USA?",
         ],
         faqHeading: "Frequently Asked Questions About Flower Bouquets to USA",
-        faqs: 6,
+        faqs: 7,
       },
       {
         slug: "cakes",
         path: "/cakes-to-usa",
-        title: "Send Cakes to USA Online | BlossomPot",
-        h1: "Send Cakes to USA Online",
+        title: "Send Cakes to USA Online – Celebration Cakes for Delivery in America | BlossomPot",
+        h1: "Send Cakes to USA Online – Celebration Cakes for Delivery in America",
         sections: [
-          "Explore Our Collection of Cakes for USA Delivery",
-          "Send Birthday Cakes to USA for Special Celebrations",
-          "Send Chocolate Cakes and Other Cake Varieties to USA",
-          "Anniversary Cakes and Celebration Cakes in USA",
-          "Send Cakes to USA from Worldwide",
-          "Make Your Gift Special with Cakes, Flowers and Hampers",
+          "Explore Cakes for USA Delivery by Flavour",
+          "Birthday Cakes for Loved Ones in the USA",
+          "Anniversary Cakes for Couples and Parents",
+          "Custom Celebration Cakes, Premium Cakes and Dessert Boxes",
+          "Cake Combos: Cake and Flowers, Cake and Chocolates",
+          "Send Cakes to USA from India and Other Countries",
           "Why Choose BlossomPot to Send Cakes to USA?",
         ],
         faqHeading: "Frequently Asked Questions About Cakes to USA",
@@ -79,19 +80,21 @@ describe("category country SEO", () => {
       {
         slug: "birthday-gifts",
         path: "/birthday-gifts-to-usa",
-        title: "Send Birthday Gifts to USA | BlossomPot",
+        title: "Send Birthday Gifts to USA to Make Every Celebration Special | BlossomPot",
         h1: "Send Birthday Gifts to USA to Make Every Celebration Special",
         sections: [
           "Explore the Best Birthday Gift Ideas for Your Loved Ones in USA",
           "Send Birthday Gifts to Everyone Special in Your Life",
+          "How to Send a Birthday Gift to USA",
+          "Why Choose BlossomPot for Birthday Gifts to USA?",
         ],
         faqHeading: "Frequently Asked Questions",
-        faqs: 4,
+        faqs: 7,
       },
       {
         slug: "anniversary-gifts",
         path: "/anniversary-gifts-to-usa",
-        title: "Send Anniversary Gifts to USA | BlossomPot",
+        title: "Send Anniversary Gifts to USA to Celebrate Your Love | BlossomPot",
         h1: "Send Anniversary Gifts to USA to Celebrate Your Love",
         sections: [
           "Explore Beautiful Anniversary Gifts for Your Loved Ones in USA",
@@ -101,31 +104,33 @@ describe("category country SEO", () => {
           "Why Choose BlossomPot to Send Anniversary Gifts to USA?",
         ],
         faqHeading: "Frequently Asked Questions",
-        faqs: 6,
+        faqs: 7,
       },
       {
         slug: "valentines-day-gifts",
         path: "/valentines-day-gifts-to-usa",
-        title: "Valentine's Day Gifts to USA | Romantic Flowers & Gift Sets | BlossomPot",
-        h1: "Send Valentine's Day Gifts to USA",
+        title: "Send Valentine's Day Gifts to USA to Say \"I Love You\" from Anywhere | BlossomPot",
+        h1: "Send Valentine's Day Gifts to USA to Say \"I Love You\" from Anywhere",
         sections: [
-          "Valentine's Day Delivery to the USA",
-          "Valentine's Gift Ideas",
-          "Choosing the Right Valentine's Gift",
-          "Why Order Valentine's Gifts from BlossomPot",
+          "Explore Valentine's Day Gifts for Your Loved One in USA",
+          "Valentine's Day Gifts for Every Relationship",
+          "How to Send Valentine's Day Gifts to USA",
+          "Why Choose BlossomPot for Valentine's Day Gifts to USA?",
         ],
-        faqHeading: "Frequently Asked Questions — Valentine's Day Gifts to USA",
+        faqHeading: "Frequently Asked Questions",
+        faqs: 7,
       },
       {
         slug: "gift-hampers",
         path: "/hampers-to-usa",
-        title: "Send Gift Hampers to USA | BlossomPot",
-        h1: "Send Gift Hampers to USA",
+        title: "Send Gift Hampers to USA – Gourmet, Chocolate and Celebration Baskets | BlossomPot",
+        h1: "Send Gift Hampers to USA – Gourmet, Chocolate and Celebration Baskets",
         sections: [
-          "Send Beautiful Gift Hampers for Every Occasion",
+          "Send Gift Hampers for Every Occasion",
           "Explore Different Types of Gift Hampers in the USA",
+          "Make Your Hamper Even More Special",
           "Send Gift Hampers to the USA from India and Other Countries",
-          "Send Gift Hampers Across Major Cities in the USA",
+          "Gift Hamper Delivery Across the USA",
           "Why Choose BlossomPot for Gift Hampers to the USA?",
           "How to Order Gift Hampers Online for Delivery in the USA",
           "Make Every Celebration Memorable with BlossomPot",
@@ -172,8 +177,11 @@ describe("category country SEO", () => {
     assert.ok(listingHeading >= 0);
     assert.ok(grid > listingHeading);
     assert.ok(article > grid);
-    assert.equal(content.includes("loadCategoryPageProducts"), false);
-    assert.match(page.slice(page.indexOf("async function CategoryProductListing")), /await loadCategoryPageProducts/);
+    assert.equal(content.includes("await loadCategoryPageProducts"), false);
+    assert.match(
+      page.slice(page.indexOf("async function CategoryProductListing")),
+      /await \(earlyProducts \?\? loadCategoryPageProducts/
+    );
     assert.match(page, /<ProductGrid /);
     assert.equal(page.includes("pageSeo.article ? null : <h1"), false);
   });

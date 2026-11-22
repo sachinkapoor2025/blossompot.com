@@ -1,8 +1,51 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { FaqAccordion } from "@/components/FaqAccordion";
-import { countrySeoHrefs, type CountrySeoContent } from "@/lib/content/country-seo-registry";
+import { ReadMore } from "@/components/ReadMore";
+import { countrySeoHrefs, type CountrySeoContent, type SeoSection } from "@/lib/content/country-seo-registry";
 import { seoArticleInlineLinks } from "@/lib/content/page-inline-links";
 import { applyInlineLinks, normalizeInternalPath } from "@/lib/inline-links";
+import type { SeoLink } from "@/lib/content/country-seo-registry";
+
+function ArticleRemainder({
+  readMore,
+  extraIntro,
+  callsToAction,
+  linked,
+  children,
+}: {
+  readMore: boolean;
+  extraIntro: string[];
+  callsToAction: SeoLink[];
+  linked: (paragraph: string) => ReactNode;
+  children: ReactNode;
+}) {
+  const content = (
+    <>
+      {extraIntro.map((paragraph) => (
+        <p key={paragraph} className="mb-4">
+          {linked(paragraph)}
+        </p>
+      ))}
+      {callsToAction.length > 0 ? (
+        <div className="flex flex-wrap gap-3 pt-2">
+          {callsToAction.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="inline-flex min-h-11 items-center rounded-full bg-primary px-5 text-sm font-semibold text-white"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+      ) : null}
+      {children}
+    </>
+  );
+  if (!readMore) return content;
+  return <ReadMore>{content}</ReadMore>;
+}
 
 export function CountrySeoArticle({
   article,
@@ -11,6 +54,7 @@ export function CountrySeoArticle({
   centerFaq = false,
   headingClassName = "font-display text-3xl font-bold text-primary mb-4",
   currentPath,
+  readMore = false,
 }: {
   article: CountrySeoContent;
   headingLevel?: "h1" | "h2";
@@ -22,6 +66,8 @@ export function CountrySeoArticle({
   headingClassName?: string;
   /** Skip links that point at this page. */
   currentPath?: string;
+  /** Show the first three paragraphs, and put the rest behind Read more. */
+  readMore?: boolean;
 }) {
   const Heading = headingLevel;
   const inlineLinks = seoArticleInlineLinks[article.page] ?? [];
@@ -31,6 +77,80 @@ export function CountrySeoArticle({
   const linkOpts = { usedHrefs, usedPhrases, blockedHrefs, currentPath };
   const linked = (paragraph: string) => applyInlineLinks(paragraph, inlineLinks, linkOpts);
   const stepSeparator = article.stepSeparator ?? " — ";
+  const previewParagraphCount = 3;
+  const visibleIntro = readMore ? article.intro.slice(0, previewParagraphCount) : article.intro;
+  const extraIntro = readMore ? article.intro.slice(previewParagraphCount) : [];
+  const sectionBudget = readMore ? Math.max(0, previewParagraphCount - visibleIntro.length) : 0;
+  const firstSection = article.sections[0];
+  const leadParagraphs =
+    sectionBudget > 0 && firstSection ? firstSection.paragraphs.slice(0, sectionBudget) : [];
+  const leadSection =
+    leadParagraphs.length > 0 && firstSection
+      ? { ...firstSection, paragraphs: leadParagraphs, items: undefined, links: undefined, paragraphsAfter: undefined }
+      : null;
+  const remainingSections = leadSection
+    ? [
+        {
+          ...firstSection,
+          paragraphs: firstSection.paragraphs.slice(leadParagraphs.length),
+        },
+        ...article.sections.slice(1),
+      ].filter(
+        (section) =>
+          section.paragraphs.length > 0 ||
+          (section.items?.length ?? 0) > 0 ||
+          (section.links?.length ?? 0) > 0 ||
+          (section.paragraphsAfter?.length ?? 0) > 0
+      )
+    : article.sections;
+  const renderSection = (section: SeoSection, omitHeading = false) => (
+    <section key={section.heading}>
+      {omitHeading ? null : (
+        <h2 className="font-display text-xl font-semibold text-primary mb-3">{section.heading}</h2>
+      )}
+      {section.paragraphs.map((paragraph) => (
+        <p key={paragraph} className="mb-4">
+          {linked(paragraph)}
+        </p>
+      ))}
+      {section.items && section.items.length > 0 ? (
+        <div className="space-y-4">
+          {section.items.map((item) => (
+            <div key={item.title}>
+              <h3 className="font-display font-semibold text-primary">
+                {item.href ? (
+                  <Link href={item.href} className="hover:underline">
+                    {item.title}
+                  </Link>
+                ) : (
+                  item.title
+                )}
+              </h3>
+              {item.text ? <p>{item.text}</p> : null}
+            </div>
+          ))}
+        </div>
+      ) : null}
+      {section.links && section.links.length > 0 ? (
+        <div className="flex flex-wrap gap-2 mt-4">
+          {section.links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-xs sm:text-sm px-2.5 py-1 rounded-full border border-slate-200 bg-white text-slate-600 hover:border-nav hover:text-nav"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+      ) : null}
+      {section.paragraphsAfter?.map((paragraph) => (
+        <p key={paragraph} className="mt-4">
+          {linked(paragraph)}
+        </p>
+      ))}
+    </section>
+  );
   const faq =
     article.faqs.length > 0 ? (
       <section className={`mt-12 pt-10 border-t border-slate-200 max-w-3xl${centerFaq ? " mx-auto" : ""}`}>
@@ -54,12 +174,12 @@ export function CountrySeoArticle({
                 {article.heading}
               </Heading>
             )}
-            {article.intro.map((paragraph) => (
+            {visibleIntro.map((paragraph) => (
               <p key={paragraph} className="mb-4">
                 {linked(paragraph)}
               </p>
             ))}
-            {article.callsToAction.length > 0 ? (
+            {!readMore && article.callsToAction.length > 0 ? (
               <div className="flex flex-wrap gap-3 pt-2">
                 {article.callsToAction.map((link) => (
                   <Link
@@ -74,52 +194,17 @@ export function CountrySeoArticle({
             ) : null}
           </header>
 
-          {article.sections.map((section) => (
-            <section key={section.heading}>
-              <h2 className="font-display text-xl font-semibold text-primary mb-3">{section.heading}</h2>
-              {section.paragraphs.map((paragraph) => (
-                <p key={paragraph} className="mb-4">
-                  {linked(paragraph)}
-                </p>
-              ))}
-              {section.items && section.items.length > 0 ? (
-                <div className="space-y-4">
-                  {section.items.map((item) => (
-                    <div key={item.title}>
-                      <h3 className="font-display font-semibold text-primary">
-                        {item.href ? (
-                          <Link href={item.href} className="hover:underline">
-                            {item.title}
-                          </Link>
-                        ) : (
-                          item.title
-                        )}
-                      </h3>
-                      {item.text ? <p>{item.text}</p> : null}
-                    </div>
-                  ))}
-                </div>
-              ) : null}
-              {section.links && section.links.length > 0 ? (
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {section.links.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className="text-xs sm:text-sm px-2.5 py-1 rounded-full border border-slate-200 bg-white text-slate-600 hover:border-nav hover:text-nav"
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
-                </div>
-              ) : null}
-              {section.paragraphsAfter?.map((paragraph) => (
-                <p key={paragraph} className="mt-4">
-                  {linked(paragraph)}
-                </p>
-              ))}
-            </section>
-          ))}
+          {leadSection ? renderSection(leadSection) : null}
+
+          <ArticleRemainder
+            readMore={readMore}
+            extraIntro={extraIntro}
+            callsToAction={readMore ? article.callsToAction : []}
+            linked={linked}
+          >
+          {remainingSections.map((section, index) =>
+            renderSection(section, Boolean(leadSection) && index === 0)
+          )}
 
           {article.steps.length > 0 ? (
             <section>
@@ -152,9 +237,11 @@ export function CountrySeoArticle({
               ))}
             </section>
           ) : null}
+          {readMore && !article.faqBeforeClosing ? faq : null}
+          </ArticleRemainder>
         </article>
 
-        {article.faqBeforeClosing ? null : faq}
+        {readMore || article.faqBeforeClosing ? null : faq}
       </div>
     </section>
   );

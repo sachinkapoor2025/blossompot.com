@@ -26,7 +26,7 @@ export function HomeBrandTaglines() {
           </span>
         </p>
         <h1 className="mt-2 font-display text-xl sm:text-2xl font-semibold text-[#1A3D34]">
-          Delivering Smiles — Flowers, Cakes & Gifts for Every Celebration
+          Delivering Smiles Across the USA — Flowers, Cakes & Gifts for Every Celebration
         </h1>
       </div>
     </section>

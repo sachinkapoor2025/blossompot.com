@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { localCityMenu, shoppingSafeCityMenu } from "./city-menu-core";
 import { cityLinks, cityNavHref } from "./site";
 import { cityMenuForCountry, footerCityColumns } from "./city-menu-for-location";
 
@@ -36,6 +37,17 @@ describe("US city nav list", () => {
       ca.links.some((link) => link.slug === "los-angeles"),
       false
     );
+  });
+
+  it("drops UAE city links that would 404 while UAE shopping is disabled", () => {
+    const live = shoppingSafeCityMenu(localCityMenu("AE"), "AE", ["US", "AE"]);
+    assert.equal(live.allHref, "/flower-delivery-uae");
+    assert.equal(live.links.length, 3);
+
+    const hidden = shoppingSafeCityMenu(localCityMenu("AE"), "AE", ["US"]);
+    assert.equal(hidden.allHref, "/locations");
+    assert.equal(hidden.links.length, 0);
+    assert.equal(hidden.links.some((link) => link.href === "/flower-delivery-uae"), false);
   });
 
   it("previews six US footer cities and expands the rest alphabetically once", () => {

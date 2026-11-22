@@ -2,9 +2,12 @@
  * Short floral marketing email: Flowers, Cakes & Gifts Collection 2026.
  * Table layout + inline CSS for Gmail, Outlook, and Apple Mail.
  *
- * Products, prices, and image URLs match the live BlossomPot catalog
- * (FNP USA listings published on blossompot.com).
+ * Product names, prices, and links match the live catalog. Photos are
+ * owned JPEG assets. The catalog CDN files for these products are WebP
+ * with a `.jpg` name, and Outlook and other clients will not render them.
  */
+
+import { EMAIL_IMAGES, emailImgAttributes } from "./email-images";
 
 const SITE = "https://www.blossompot.com";
 const LOGO = `${SITE}/logo.png`;
@@ -59,25 +62,22 @@ export const COLLECTION_2026_EMAIL_CONFIG = {
   shopNowHref: `${SITE}/products`,
   hero: [
     {
-      imageUrl:
-        "https://static-assets-prod.fnp.com/images/pr/usa/m/v20260530113728/garden-romance-premium.jpg",
+      imageUrl: EMAIL_IMAGES.bouquets.url,
       imageAlt: "Garden Romance Premium fresh flowers",
       href: `${SITE}/flowers`,
     },
     {
-      imageUrl:
-        "https://static-assets-prod.fnp.com/images/pr/usa/m/v20260611145721/meant-to-be-bouquet-deluxe.jpg",
+      imageUrl: EMAIL_IMAGES.freshFlowers.url,
       imageAlt: "Meant To Be Bouquet Deluxe",
       href: `${SITE}/bouquets`,
     },
     {
-      imageUrl: "https://static-assets-prod.fnp.com/images/pr/usa/m/v20250929214212/the-congrats-cake.jpg",
+      imageUrl: EMAIL_IMAGES.cakes.url,
       imageAlt: "The CONGRATS Cake",
       href: `${SITE}/cakes`,
     },
     {
-      imageUrl:
-        "https://static-assets-prod.fnp.com/images/pr/usa/m/v20260421165231/luxe-gold-collectible-sweet-treats-gift-hamper.jpg",
+      imageUrl: EMAIL_IMAGES.gourmetGifts.url,
       imageAlt: "Luxe Gold Collectible Sweet Treats Gift Hamper",
       href: `${SITE}/gift-hampers`,
     },
@@ -93,8 +93,7 @@ export const COLLECTION_2026_EMAIL_CONFIG = {
       eyebrow: "Fresh Flowers",
       name: "Garden Romance Premium",
       priceLabel: "$89.49",
-      imageUrl:
-        "https://static-assets-prod.fnp.com/images/pr/usa/m/v20260530113728/garden-romance-premium.jpg",
+      imageUrl: EMAIL_IMAGES.bouquets.url,
       imageAlt: "Garden Romance Premium",
       href: `${SITE}/products/garden-romance-premium`,
     },
@@ -102,8 +101,7 @@ export const COLLECTION_2026_EMAIL_CONFIG = {
       eyebrow: "Beautiful Flower Bouquets",
       name: "Meant To Be Bouquet Deluxe",
       priceLabel: "$89.49",
-      imageUrl:
-        "https://static-assets-prod.fnp.com/images/pr/usa/m/v20260611145721/meant-to-be-bouquet-deluxe.jpg",
+      imageUrl: EMAIL_IMAGES.freshFlowers.url,
       imageAlt: "Meant To Be Bouquet Deluxe",
       href: `${SITE}/products/meant-to-be-bouquet-deluxe`,
     },
@@ -111,7 +109,7 @@ export const COLLECTION_2026_EMAIL_CONFIG = {
       eyebrow: "Celebration Cakes",
       name: "The CONGRATS Cake",
       priceLabel: "$68.49",
-      imageUrl: "https://static-assets-prod.fnp.com/images/pr/usa/m/v20250929214212/the-congrats-cake.jpg",
+      imageUrl: EMAIL_IMAGES.cakes.url,
       imageAlt: "The CONGRATS Cake",
       href: `${SITE}/products/the-congrats-cake`,
     },
@@ -119,8 +117,7 @@ export const COLLECTION_2026_EMAIL_CONFIG = {
       eyebrow: "Premium Gift Hampers",
       name: "Luxe Gold Collectible Sweet Treats Gift Hamper",
       priceLabel: "$97.49",
-      imageUrl:
-        "https://static-assets-prod.fnp.com/images/pr/usa/m/v20260421165231/luxe-gold-collectible-sweet-treats-gift-hamper.jpg",
+      imageUrl: EMAIL_IMAGES.gourmetGifts.url,
       imageAlt: "Luxe Gold Collectible Sweet Treats Gift Hamper",
       href: `${SITE}/products/luxe-gold-collectible-sweet-treats-gift-hamper`,
     },
@@ -176,7 +173,7 @@ function pillButton(href: string, label: string, opts?: { fill?: string; text?: 
 function heroGrid(tiles: readonly Collection2026HeroTile[]): string {
   const cell = (tile: Collection2026HeroTile) => `
                         <a href="${escAttr(tile.href)}" target="_blank" style="text-decoration:none;">
-                          <img class="fluid" src="${escAttr(tile.imageUrl)}" width="300" alt="${escAttr(tile.imageAlt)}" style="display:block;width:100%;max-width:300px;height:auto;border:0;" />
+                          <img class="fluid" src="${escAttr(tile.imageUrl)}" ${emailImgAttributes(tile.imageUrl, 300)} alt="${escAttr(tile.imageAlt)}" style="display:block;width:100%;max-width:300px;height:auto;border:0;" />
                         </a>`;
   const row = (a: Collection2026HeroTile, b: Collection2026HeroTile) => `
               <tr>
@@ -225,7 +222,7 @@ function productCard(product: Collection2026Product): string {
                       <tr>
                         <td align="center" style="padding:0;line-height:0;font-size:0;background-color:${PETAL};border-radius:14px 14px 0 0;">
                           <a href="${href}" target="_blank" style="text-decoration:none;">
-                            <img class="card-img fluid" src="${escAttr(product.imageUrl)}" width="268" alt="${escAttr(product.imageAlt)}" style="display:block;width:100%;max-width:268px;height:auto;border:0;margin:0 auto;" />
+                            <img class="card-img fluid" src="${escAttr(product.imageUrl)}" ${emailImgAttributes(product.imageUrl, 268)} alt="${escAttr(product.imageAlt)}" style="display:block;width:100%;max-width:268px;height:auto;border:0;margin:0 auto;" />
                           </a>
                         </td>
                       </tr>
@@ -309,7 +306,7 @@ export function buildCollection2026EmailHtml(): string {
           <tr>
             <td align="center" bgcolor="${CREAM}" style="padding:18px 24px 14px 24px;background-color:${CREAM};">
               <a href="${escAttr(cfg.logoHref)}" target="_blank" style="text-decoration:none;">
-                <img src="${escAttr(cfg.logoUrl)}" width="156" alt="BlossomPot" style="display:block;width:156px;max-width:62%;height:auto;border:0;margin:0 auto;" />
+                <img src="${escAttr(cfg.logoUrl)}" ${emailImgAttributes(cfg.logoUrl, 156)} alt="BlossomPot" style="display:block;width:156px;max-width:62%;height:auto;border:0;margin:0 auto;" />
               </a>
             </td>
           </tr>

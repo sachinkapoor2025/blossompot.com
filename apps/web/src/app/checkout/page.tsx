@@ -21,7 +21,6 @@ import { TrustBadges } from "@/components/TrustBadges";
 import { CouponInput } from "@/components/CouponInput";
 import { StripePaymentForm } from "@/components/StripePaymentForm";
 import { RazorpayQrPanel } from "@/components/RazorpayQrPanel";
-import { EstimatedDeliveryNote } from "@/components/EstimatedDeliveryNote";
 import { ScheduleDeliveryPicker } from "@/components/ScheduleDeliveryPicker";
 import { FreeShippingNotice } from "@/components/FreeShippingNotice";
 import { RecipientAddressFields } from "@/components/RecipientAddressFields";
@@ -856,7 +855,6 @@ function CheckoutPageInner() {
             Retrying payment for order <span className="font-mono">{retryOrder!.orderId.slice(0, 8)}…</span>
           </p>
         )}
-        <EstimatedDeliveryNote variant="banner" prefix="Estimated delivery:" className="mb-6" />
         {!isRetry && <ScheduleDeliveryPicker className="mb-6" />}
 
         <form

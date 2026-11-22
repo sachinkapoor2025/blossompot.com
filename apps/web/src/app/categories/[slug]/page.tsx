@@ -22,11 +22,11 @@ import { requestSeoPath } from "@/lib/request-seo-path";
 import { ListingPageSkeleton } from "@/components/route-skeletons";
 import { loadCategoryPageProducts, toListingCardProducts } from "@/lib/product-loader";
 import { CatalogLoadError } from "@/components/CatalogLoadError";
-import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
+import { getStorefrontDeliveryCountry, peekStorefrontCountryHint } from "@/lib/storefront-country";
 import { notFoundIfShoppingCountryDisabled } from "@/lib/shopping-country-gate";
 import { categoryOrder } from "@/lib/site";
 import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, pageMetadata } from "@/lib/seo";
-import { type Category } from "@blossompot/shared";
+import { GBO_CATEGORY_SLUG, type Category } from "@blossompot/shared";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -40,7 +40,11 @@ function resolveSort(raw?: string): ProductSort {
 }
 
 function isKnownCategorySlug(slug: string): boolean {
-  return (categoryOrder as readonly string[]).includes(slug) || slug === "rakhi-hampers";
+  return (
+    (categoryOrder as readonly string[]).includes(slug) ||
+    slug === "rakhi-hampers" ||
+    slug === GBO_CATEGORY_SLUG
+  );
 }
 
 /** Match PDP: always use live product prices (no stale ISR listing HTML). */
@@ -73,13 +77,13 @@ async function CategoryPageContent({ params, searchParams }: Props) {
   const query = await searchParams;
   const sort = resolveSort(query.sort);
   const seoPath = await requestSeoPath(categoryHref(slug));
-  await notFoundIfShoppingCountryDisabled(seoPath);
   if (!isKnownCategorySlug(slug)) notFound();
-  const deliveryCountry = await getStorefrontDeliveryCountry(query.country);
-
-  const categoryData = await api<{ category?: Category }>(`/categories/${slug}`, { revalidate: 45 }).catch(
-    () => null
-  );
+  const hintedCountry = await peekStorefrontCountryHint(query.country);
+  const earlyProducts = loadCategoryPageProducts(slug, hintedCountry);
+  const [deliveryCountry, categoryData] = await Promise.all([
+    notFoundIfShoppingCountryDisabled(seoPath).then(() => getStorefrontDeliveryCountry(query.country)),
+    api<{ category?: Category }>(`/categories/${slug}`, { revalidate: 45 }).catch(() => null),
+  ]);
   const category = categoryData?.category ?? null;
 
   const name = category?.name ?? slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -129,6 +133,7 @@ async function CategoryPageContent({ params, searchParams }: Props) {
           sort={sort}
           listName={name}
           shopHref={shopHref}
+          earlyProducts={deliveryCountry === hintedCountry ? earlyProducts : undefined}
         />
       </Suspense>
 
@@ -210,6 +215,7 @@ async function CategoryProductListing({
   sort,
   listName,
   shopHref,
+  earlyProducts,
 }: {
   slug: string;
   deliveryCountry: string;
@@ -217,8 +223,9 @@ async function CategoryProductListing({
   sort: ProductSort;
   listName: string;
   shopHref: string;
+  earlyProducts?: ReturnType<typeof loadCategoryPageProducts>;
 }) {
-  const categoryLoad = await loadCategoryPageProducts(slug, deliveryCountry);
+  const categoryLoad = await (earlyProducts ?? loadCategoryPageProducts(slug, deliveryCountry));
   const products = categoryLoad.state === "products" ? categoryLoad.products : [];
 
   return (
