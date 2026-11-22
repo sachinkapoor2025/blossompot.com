@@ -22,9 +22,8 @@ import { homeCategoryOrder, orderCategories } from "@/lib/site";
 import { ListingPageSkeleton } from "@/components/route-skeletons";
 import { isRakhiRelatedProduct, productsNotShownInSections, storefrontSkipsRakhiCategory } from "@/lib/rakhi-filter";
 
-/** Match PDP: no ISR HTML with stale product prices. */
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+/** Short ISR — matches PDP / product-loader to cut DynamoDB catalog reads. */
+export const revalidate = 60;
 
 interface Props {
   searchParams: Promise<{ search?: string; category?: string; sort?: string; country?: string }>;

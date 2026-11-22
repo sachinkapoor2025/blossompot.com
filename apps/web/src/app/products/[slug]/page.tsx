@@ -47,12 +47,10 @@ interface Props {
 }
 
 /**
- * Always SSR from the live products API. Static ISR + stale-while-revalidate (~1 year)
- * was serving prerendered catalog prices ($1.50) while the API returned $14.72 — flipping
- * product:price:amount and % OFF between requests / edge caches.
+ * Short ISR — avoids year-long stale catalog prices while cutting DynamoDB GetItem volume.
+ * Paired with product-loader `CATALOG_REVALIDATE_SECONDS` (45s).
  */
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
 /** Keep for discoverability; with force-dynamic these are not baked as static HTML. */
 export async function generateStaticParams() {

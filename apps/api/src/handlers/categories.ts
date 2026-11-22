@@ -86,15 +86,17 @@ async function loadCategories(): Promise<Category[]> {
   }
 
   let items = await queryAllCategories();
-  // Legacy imports wrote CATEGORY# rows without GSI1. If only indexed rows (e.g. Rakhi
-  // Hamper) exist, length > 0 and the old empty-only backfill never ran — repair once.
-  if (items.length === 0 || !categoryIndexRepaired) {
+  // Only Scan+backfill when the GSI list is empty. The previous
+  // `!categoryIndexRepaired` path full-table-scanned on every cold Lambda.
+  if (items.length === 0 && !categoryIndexRepaired) {
     const scanned = await scanAndBackfillCategories();
     await ensureUsarakhiCategoriesInDb();
     items = await queryAllCategories();
     if (items.length === 0 && scanned.length > 0) {
       items = scanned;
     }
+    categoryIndexRepaired = true;
+  } else {
     categoryIndexRepaired = true;
   }
 

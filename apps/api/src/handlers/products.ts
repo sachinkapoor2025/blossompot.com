@@ -354,9 +354,13 @@ function isKidsComboProduct(product: Product): boolean {
   ].some((term) => text.includes(term));
 }
 
-/** Warm-instance caches — cut DynamoDB under concurrent browse; keep prices stable. */
-const PRODUCT_LIST_CACHE_TTL_MS = 5 * 60_000; // 5 minutes
-const PRODUCT_GET_CACHE_TTL_MS = 5 * 60_000; // 5 minutes
+/**
+ * Warm-instance caches. Keep short so admin price/stock edits show up without
+ * a second consistent GetItem pass over every listed slug (that pattern burned
+ * most of the DynamoDB bill on blossompot-products-prod).
+ */
+const PRODUCT_LIST_CACHE_TTL_MS = 60_000; // 1 minute
+const PRODUCT_GET_CACHE_TTL_MS = 60_000; // 1 minute
 let productListCache: { at: number; items: Product[] } | null = null;
 const categoryProductCache = new Map<string, { at: number; items: Product[] }>();
 const categoryMembershipCache = new Map<string, { at: number; rows: CategoryMembership[] }>();
@@ -518,27 +522,45 @@ async function crossListedProducts(category: string, known: Set<string>): Promis
   return getProductsBySlugs(wanted);
 }
 
-async function scanAllProducts(): Promise<Product[]> {
+/**
+ * Load every PRODUCT# META via per-category GSI1 queries.
+ * A table Scan with FilterExpression still bills for every item read (reviews included).
+ */
+async function loadAllProducts(): Promise<Product[]> {
   const nowMs = Date.now();
   if (productListCache && nowMs - productListCache.at < PRODUCT_LIST_CACHE_TTL_MS) {
     return productListCache.items;
   }
 
-  const items: Product[] = [];
-  let ExclusiveStartKey: Record<string, unknown> | undefined;
-  do {
-    const result = await docClient.send(
-      new ScanCommand({
-        TableName: PRODUCTS_TABLE,
-        FilterExpression: "begins_with(PK, :prefix) AND SK = :sk",
-        ExpressionAttributeValues: { ":prefix": "PRODUCT#", ":sk": "META" },
-        ExclusiveStartKey,
-      })
-    );
-    if (result.Items?.length) items.push(...(result.Items as Product[]));
-    ExclusiveStartKey = result.LastEvaluatedKey as Record<string, unknown> | undefined;
-  } while (ExclusiveStartKey);
+  const partitions = await categoryPartitions();
+  const bySlug = new Map<string, Product>();
+  if (partitions.length > 0) {
+    const lists = await Promise.all(partitions.map((slug) => queryProductsByCategory(slug)));
+    for (const list of lists) {
+      for (const product of list) {
+        if (product.slug) bySlug.set(product.slug, product);
+      }
+    }
+  } else {
+    // Rare empty category index — one-shot Scan fallback.
+    let ExclusiveStartKey: Record<string, unknown> | undefined;
+    do {
+      const result = await docClient.send(
+        new ScanCommand({
+          TableName: PRODUCTS_TABLE,
+          FilterExpression: "begins_with(PK, :prefix) AND SK = :sk",
+          ExpressionAttributeValues: { ":prefix": "PRODUCT#", ":sk": "META" },
+          ExclusiveStartKey,
+        })
+      );
+      for (const item of (result.Items ?? []) as Product[]) {
+        if (item.slug) bySlug.set(item.slug, item);
+      }
+      ExclusiveStartKey = result.LastEvaluatedKey as Record<string, unknown> | undefined;
+    } while (ExclusiveStartKey);
+  }
 
+  const items = [...bySlug.values()];
   productListCache = { at: nowMs, items };
   return items;
 }
@@ -573,8 +595,17 @@ function applyListingCommerce(product: Product, commerce: StoredListingCommerce)
   return next;
 }
 
-async function withFreshListingCommerce(items: Product[]): Promise<Product[]> {
-  if (items.length === 0) return items;
+/**
+ * Only re-read commerce fields when the product body came from the warm in-memory
+ * cache (possibly up to PRODUCT_LIST_CACHE_TTL_MS old). Live Query/Get results
+ * already include published/price/inventory — re-GetItem-ing every slug was the
+ * dominant DynamoDB cost on storefront listing traffic.
+ */
+async function withFreshListingCommerce(
+  items: Product[],
+  opts: { fromMemoryCache: boolean }
+): Promise<Product[]> {
+  if (items.length === 0 || !opts.fromMemoryCache) return items;
   const commerce = await storedListingCommerceBySlug(items.map((product) => product.slug));
   return items.map((product) => {
     const fresh = commerce.get(product.slug);
@@ -656,7 +687,9 @@ async function respondRelatedProducts(
   const ordered = orderProductsByVendor(pool, vendorRecords);
   const selected: Product[] = [];
   for (let index = 0; index < ordered.length && selected.length < limit; index += RELATED_READ_WINDOW) {
-    const fresh = await withFreshListingCommerce(ordered.slice(index, index + RELATED_READ_WINDOW));
+    const fresh = await withFreshListingCommerce(ordered.slice(index, index + RELATED_READ_WINDOW), {
+      fromMemoryCache: false,
+    });
     const eligible = fresh.filter(
       (product) =>
         product.published !== false &&
@@ -699,7 +732,7 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
     items = componentSlugs.length > 0 ? await getProductsBySlugs(componentSlugs) : [];
   } else if (category) {
     if (isRakhiSetSizeCategory(category)) {
-      const all = await scanAllProducts();
+      const all = await loadAllProducts();
       items = all.filter((product) => productMatchesRakhiSetCategory(product, category));
     } else if (category === "rakhi-combo") {
       const [combo, kids, hampers] = await Promise.all([
@@ -728,7 +761,7 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
       items = [...bySlug.values()];
     }
   } else {
-    items = await scanAllProducts();
+    items = await loadAllProducts();
   }
 
   if (homepageCategoryRow && category && !search && !componentSlugs) {
@@ -737,7 +770,9 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
   }
 
   if (!componentSlugs) {
-    items = await withFreshListingCommerce(items);
+    // Live GSI/Get results already carry published/price/inventory. Skip the
+    // per-slug consistent GetItem refresh (was the main products-table cost).
+    items = await withFreshListingCommerce(items, { fromMemoryCache: false });
     if (!homepageCategoryRow) {
       items = await persistAndMergeBundledCatalog(items, category);
     }
@@ -813,41 +848,37 @@ export async function getProduct(event: APIGatewayProxyEventV2) {
   const nowMs = Date.now();
   const cached = productGetCache.get(slug);
   if (cached && nowMs - cached.at < PRODUCT_GET_CACHE_TTL_MS) {
-    const commerce = await storedListingCommerceBySlug([slug]);
-    const fresh = commerce.get(slug);
-    if (!fresh) {
-      productGetCache.delete(slug);
-    } else if (fresh.published === false) {
+    // Trust the warm body for the short TTL — do not re-GetItem commerce on every PDP hit.
+    const product = cached.product;
+    if (product.published === false) {
       productGetCache.delete(slug);
       return notFound("Product not found");
-    } else {
-      const product = applyListingCommerce(cached.product, fresh);
-      if (isGboHiddenFromStorefront(product)) return notFound("Product not found");
-      const location = await resolveShoppingLocation(parseLocationQuery(event));
-      if (!location) return notFound(NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE);
-      const visible = productVisibleForDeliveryCountry(product, location.countryCode);
-      const shopping = await decideNewShopping(product, location.countryCode);
-      if (vendorHiddenFromStorefront(shopping)) return notFound("Product not found");
-      if (!visible || !shopping.available) {
-        return ok({
-          product: forStorefront(product),
-          availability: {
-            deliverable: false,
-            reason: shopping.reason ?? "country_not_allowed",
-            location,
-          },
-        });
-      }
-      const [evalRow] = await evaluateProductsForLocation([product], location);
+    }
+    if (isGboHiddenFromStorefront(product)) return notFound("Product not found");
+    const location = await resolveShoppingLocation(parseLocationQuery(event));
+    if (!location) return notFound(NO_ENABLED_SHOPPING_COUNTRIES_MESSAGE);
+    const visible = productVisibleForDeliveryCountry(product, location.countryCode);
+    const shopping = await decideNewShopping(product, location.countryCode);
+    if (vendorHiddenFromStorefront(shopping)) return notFound("Product not found");
+    if (!visible || !shopping.available) {
       return ok({
         product: forStorefront(product),
         availability: {
-          deliverable: Boolean(evalRow?.deliverable),
-          reason: evalRow?.reason,
+          deliverable: false,
+          reason: shopping.reason ?? "country_not_allowed",
           location,
         },
       });
     }
+    const [evalRow] = await evaluateProductsForLocation([product], location);
+    return ok({
+      product: forStorefront(product),
+      availability: {
+        deliverable: Boolean(evalRow?.deliverable),
+        reason: evalRow?.reason,
+        location,
+      },
+    });
   }
 
   const result = await docClient.send(
@@ -1099,7 +1130,8 @@ export async function listAdminProducts(event: APIGatewayProxyEventV2) {
 
   const sampleFilter = (event.queryStringParameters?.sample ?? "all").toLowerCase();
 
-  let items = await scanAllProducts();
+  productListCache = null;
+  let items = await loadAllProducts();
   const dynamoSlugs = new Set(items.map((p) => p.slug));
   try {
     items = mergeBundledCatalogProducts(items);
