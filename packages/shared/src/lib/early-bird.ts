@@ -40,11 +40,11 @@ function addIsoDays(ymd: string, days: number): string {
 }
 
 /**
- * First selectable delivery date = tomorrow in America/New_York.
- * Today is same-day delivery and stays disabled.
+ * First selectable delivery date = today in America/New_York.
+ * Saturday and Sunday stay closed, so a weekend start moves to Monday.
  */
 export function scheduleDeliveryMinDate(date = new Date()): string {
-  return addIsoDays(calendarDayKeyAmericaNy(date), 1);
+  return calendarDayKeyAmericaNy(date);
 }
 
 /** Latest selectable delivery date (inclusive) = today in America/New_York + horizon. */

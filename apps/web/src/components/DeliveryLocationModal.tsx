@@ -50,9 +50,9 @@ function DeliveryLocationModalInner() {
     closeSelector();
   };
 
-  const submit = () => {
+  const submit = (nextCountry = countryCode) => {
     setError("");
-    const selected = countryCode.trim().toUpperCase();
+    const selected = nextCountry.trim().toUpperCase();
     if (!isListedShoppingCountry(selected, countries)) {
       setError(countries.length === 0
         ? "Delivery is not available right now. No countries are enabled for shopping."
@@ -125,8 +125,13 @@ function DeliveryLocationModalInner() {
               Country
               <select
                 value={countryCode}
-                onChange={(e) => setCountryCode(e.target.value)}
-                className="mt-1 w-full max-w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm"
+                disabled={busy}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  setCountryCode(next);
+                  void submit(next);
+                }}
+                className="mt-1 w-full max-w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm disabled:opacity-50"
               >
                 {countries.map((c) => (
                   <option key={c.countryCode} value={c.countryCode}>
@@ -137,22 +142,6 @@ function DeliveryLocationModalInner() {
               <span className="mt-1 block text-xs text-slate-500">{countries.length} countries</span>
             </label>
             {error ? <p className="text-sm text-red-600">{error}</p> : null}
-            <div className="flex gap-2">
-              <button
-                type="submit"
-                disabled={busy}
-                className="flex-1 rounded-lg bg-primary text-white font-semibold py-2.5 text-sm disabled:opacity-50"
-              >
-                {busy ? "Checking…" : "See gifts"}
-              </button>
-              <button
-                type="button"
-                onClick={close}
-                className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700"
-              >
-                Not now
-              </button>
-            </div>
           </div>
         </form>
       </div>

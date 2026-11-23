@@ -6,6 +6,8 @@ import type {
 } from "../schemas/order";
 import { cartSubtotal } from "../currency";
 import type { ShopCurrency } from "../currency";
+import { roundDisplayAmount } from "./currency-display";
+import { quoteCartDeliveryDateShipping } from "./delivery-date-shipping";
 import { quoteAddressShipmentShipping } from "./free-shipping";
 
 export function addressFingerprint(address: ShippingAddress): string {
@@ -72,6 +74,13 @@ export function buildOrderShipments(input: {
   usdInrRate: number;
   /** When customerShippingMode is pass_through, skip threshold and use this single charge. */
   passThroughShipping?: number;
+  /**
+   * When set, every unit is charged from this delivery date instead of the
+   * subtotal shipping table. Same-day $16, next-day $18, within 3 days $20,
+   * within 5 days and later free.
+   */
+  scheduledDeliveryDate?: string;
+  now?: Date;
 }): { shipments: OrderShipment[]; shippingTotal: number } | { error: string } {
   const partitionError = validateShipmentsPartitionCart(
     input.cartItems,
@@ -107,6 +116,31 @@ export function buildOrderShipments(input: {
             : Math.round(per * 100) / 100,
       })),
     };
+  }
+
+  if (input.scheduledDeliveryDate) {
+    const quote = quoteCartDeliveryDateShipping({
+      items: built.flatMap((shipment) => shipment.items.map((item) => ({ quantity: item.quantity }))),
+      deliveryDate: input.scheduledDeliveryDate,
+      currency: input.currency,
+      usdInrRate: input.usdInrRate,
+      now: input.now,
+    });
+    const totalUnits = built.reduce(
+      (sum, shipment) => sum + shipment.items.reduce((units, item) => units + item.quantity, 0),
+      0
+    );
+    let assigned = 0;
+    const shipments = built.map((shipment, index) => {
+      const units = shipment.items.reduce((sum, item) => sum + item.quantity, 0);
+      const shipping =
+        index === built.length - 1 || totalUnits === 0
+          ? roundDisplayAmount(quote.totalCharge - assigned, input.currency)
+          : roundDisplayAmount((quote.totalCharge * units) / totalUnits, input.currency);
+      assigned += shipping;
+      return { ...shipment, shipping };
+    });
+    return { shippingTotal: quote.totalCharge, shipments };
   }
 
   /** Per address × vendor: under $8 → $6.99; $8–$13.99 → $3.99; above $13.99 ($14+) → free. */

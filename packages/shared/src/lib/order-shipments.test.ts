@@ -87,6 +87,34 @@ describe("buildOrderShipments", () => {
     assert.ok(err);
   });
 
+  it("charges every unit from the selected delivery date", () => {
+    const cart: CartItem[] = [
+      { productSlug: "a", name: "A", price: 40, currency: "USD", quantity: 1 },
+      { productSlug: "b", name: "B", price: 25, currency: "USD", quantity: 2 },
+    ];
+    const built = buildOrderShipments({
+      cartItems: cart,
+      checkoutShipments: [
+        {
+          shippingAddress: addr("One"),
+          items: [
+            { productSlug: "a", quantity: 1 },
+            { productSlug: "b", quantity: 2 },
+          ],
+        },
+      ],
+      currency: "USD",
+      usdInrRate: 96,
+      scheduledDeliveryDate: "2026-11-24",
+      now: new Date("2026-11-23T18:00:00Z"),
+    });
+    assert.ok(!("error" in built));
+    if ("error" in built) return;
+    assert.equal(built.shippingTotal, 54);
+    assert.equal(built.shipments[0].shipping, 54);
+    assert.equal(built.shipments[0].subtotal, 90);
+  });
+
   it("charges flat $19 shipping for GBO-only shipments", () => {
     const cart: CartItem[] = [
       {
