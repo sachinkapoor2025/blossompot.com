@@ -11,11 +11,11 @@ import {
 } from "./early-bird";
 
 /** Same calendar day as today in America/New_York. */
-export const SAME_DAY_SHIPPING_USD = 16;
+export const SAME_DAY_SHIPPING_USD = 20;
 /** Tomorrow in America/New_York. */
 export const NEXT_DAY_SHIPPING_USD = 18;
 /** 2 or 3 calendar days from today. */
-export const WITHIN_3_DAYS_SHIPPING_USD = 20;
+export const WITHIN_3_DAYS_SHIPPING_USD = 16;
 /** 4 or 5 calendar days from today, and any later scheduled date. */
 export const WITHIN_5_DAYS_SHIPPING_USD = 0;
 

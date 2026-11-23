@@ -20,11 +20,12 @@ describe("quoteCartDeliveryDateShipping", () => {
       });
 
     assert.equal(quote("2026-11-23").tier, "same_day");
-    assert.equal(quote("2026-11-23").totalCharge, 16);
+    assert.equal(quote("2026-11-23").totalCharge, 20);
     assert.equal(quote("2026-11-24").tier, "next_day");
     assert.equal(quote("2026-11-24").totalCharge, 18);
     assert.equal(quote("2026-11-25").tier, "within_3_days");
-    assert.equal(quote("2026-11-26").totalCharge, 20);
+    assert.equal(quote("2026-11-25").totalCharge, 16);
+    assert.equal(quote("2026-11-26").totalCharge, 16);
     assert.equal(quote("2026-11-27").tier, "within_5_days");
     assert.equal(quote("2026-11-27").totalCharge, 0);
     assert.equal(quote("2026-11-30").tier, "later");
@@ -58,7 +59,7 @@ describe("quoteCartDeliveryDateShipping", () => {
     });
     assert.equal(sameDay.deliveryDate, "2026-11-27");
     assert.equal(sameDay.tier, "same_day");
-    assert.equal(sameDay.totalCharge, 16);
+    assert.equal(sameDay.totalCharge, 20);
 
     const saturday = new Date("2026-11-28T18:00:00Z");
     assert.equal(earliestOpenScheduleDeliveryDate(saturday), "2026-11-30");

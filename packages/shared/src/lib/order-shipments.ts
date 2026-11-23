@@ -76,7 +76,7 @@ export function buildOrderShipments(input: {
   passThroughShipping?: number;
   /**
    * When set, every unit is charged from this delivery date instead of the
-   * subtotal shipping table. Same-day $16, next-day $18, within 3 days $20,
+   * subtotal shipping table. Same-day $20, next-day $18, within 3 days $16,
    * within 5 days and later free.
    */
   scheduledDeliveryDate?: string;

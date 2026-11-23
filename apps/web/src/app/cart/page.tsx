@@ -12,7 +12,6 @@ import { PaymentMethodIcons } from "@/components/PaymentMethodIcons";
 import { CheckoutLegalNotice } from "@/components/CheckoutLegalNotice";
 import { TrustBadges } from "@/components/TrustBadges";
 import { resolveImageUrl } from "@/lib/images";
-import { EstimatedDeliveryNote } from "@/components/EstimatedDeliveryNote";
 import { cartLineUnitTotal, type CartItem } from "@blossompot/shared";
 import type { DisplayCurrency } from "@/lib/currency-context";
 
@@ -273,8 +272,6 @@ export default function CartPage() {
             </div>
 
             <TrustBadges variant="compact" className="mb-4" />
-
-            <EstimatedDeliveryNote variant="banner" prefix="Order today →" className="mb-5" />
 
             {blockedItems.length > 0 ? (
               <p className="text-sm text-amber-900 bg-amber-50 border border-amber-100 rounded-md px-3 py-2 mb-3">
