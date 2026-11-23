@@ -265,7 +265,7 @@ export function ExitIntentPopup() {
       role="dialog"
       aria-label="Discount of the Day"
     >
-      <div className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5">
+      <div className="relative w-full max-w-[25rem] overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5">
         <ConfettiBurst active={celebrating} burstKey={burstKey} />
 
         <div className="relative overflow-hidden bg-gradient-to-br from-primary via-[#9e2d55] to-nav px-5 pt-4 pb-5 text-white">
@@ -280,7 +280,7 @@ export function ExitIntentPopup() {
             </svg>
           </button>
           <div className="flex items-center gap-3 pr-8">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white shadow-md ring-2 ring-white/40 overflow-hidden p-1.5">
+            <div className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full bg-white shadow-md ring-2 ring-white/40 overflow-hidden p-1.5">
               <Image
                 src={site.logoMarkSrc}
                 alt={site.name}
@@ -362,7 +362,7 @@ export function ExitIntentPopup() {
             </div>
           ) : showWheel ? (
             <>
-              <div className="relative mx-auto mb-4 w-[260px] h-[260px] sm:w-[300px] sm:h-[300px]">
+              <div className="relative mx-auto mb-4 w-[203px] h-[203px] sm:w-[234px] sm:h-[234px]">
                 <div
                   className="absolute -inset-1 rounded-full opacity-90"
                   style={{
@@ -374,11 +374,11 @@ export function ExitIntentPopup() {
                 <div className="absolute inset-0 rounded-full bg-white" aria-hidden />
 
                 <div className="absolute left-1/2 -top-0.5 z-30 -translate-x-1/2 drop-shadow-md" aria-hidden>
-                  <div className="h-0 w-0 border-l-[12px] border-r-[12px] border-t-[22px] border-l-transparent border-r-transparent border-t-accent" />
+                  <div className="h-0 w-0 border-l-[9px] border-r-[9px] border-t-[17px] border-l-transparent border-r-transparent border-t-accent" />
                 </div>
 
                 <div
-                  className="absolute inset-[6px] rounded-full shadow-[inset_0_0_24px_rgba(0,0,0,0.25)] border-[3px] border-amber-200/80"
+                  className="absolute inset-[5px] rounded-full shadow-[inset_0_0_24px_rgba(0,0,0,0.25)] border-[3px] border-amber-200/80"
                   style={{
                     background: wheelGradient,
                     transform: `rotate(${rotation}deg)`,
@@ -398,7 +398,7 @@ export function ExitIntentPopup() {
                         style={{ transform: `rotate(${angle}deg)` }}
                       >
                         <span
-                          className="absolute left-1/2 top-[16%] whitespace-nowrap text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wide text-white"
+                          className="absolute left-1/2 top-[16%] whitespace-nowrap text-[8px] sm:text-[9px] font-extrabold uppercase tracking-wide text-white"
                           style={{
                             transform: `translateX(-50%) rotate(${slice / 2 - angle}deg)`,
                             textShadow: "0 1px 2px rgba(0,0,0,0.5)",
@@ -412,15 +412,15 @@ export function ExitIntentPopup() {
                 </div>
 
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-                  <div className="flex h-[84px] w-[84px] sm:h-24 sm:w-24 flex-col items-center justify-center rounded-full bg-white border-[3px] border-primary shadow-lg ring-2 ring-amber-300/70 overflow-hidden px-2 py-1.5">
+                  <div className="flex h-[66px] w-[66px] sm:h-[75px] sm:w-[75px] flex-col items-center justify-center rounded-full bg-white border-[3px] border-primary shadow-lg ring-2 ring-amber-300/70 overflow-hidden px-2 py-1.5">
                     <Image
                       src={site.logoMarkSrc}
                       alt={site.name}
                       width={64}
                       height={64}
-                      className="h-auto w-full max-w-[68px] object-contain"
+                      className="h-auto w-full max-w-[53px] object-contain"
                     />
-                    <span className="mt-0.5 text-[8px] sm:text-[9px] font-bold uppercase tracking-wide text-primary leading-none">
+                    <span className="mt-0.5 text-[7px] sm:text-[8px] font-bold uppercase tracking-wide text-primary leading-none">
                       BlossomPot
                     </span>
                   </div>

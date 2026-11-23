@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { estimatedDeliveryShort } from "@blossompot/shared";
 import type { ProductAddonSelection } from "@blossompot/shared";
 import { addComboComponentsToCart, comboComponentLine, comboQuantityChange } from "@/lib/combo-cart";
 import { useCart } from "@/lib/cart-context";
@@ -175,7 +174,7 @@ export function AddToCartControl({
             stop(e);
             void run(async () => {
               await addCurrent();
-              setAddedNote(`Added! Est. delivery ${estimatedDeliveryShort()}`);
+              setAddedNote("Added!");
               window.setTimeout(() => setAddedNote(""), 5000);
             });
           }}

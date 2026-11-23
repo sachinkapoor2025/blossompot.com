@@ -22,7 +22,6 @@ import { CouponInput } from "@/components/CouponInput";
 import { StripePaymentForm } from "@/components/StripePaymentForm";
 import { RazorpayQrPanel } from "@/components/RazorpayQrPanel";
 import { ScheduleDeliveryPicker } from "@/components/ScheduleDeliveryPicker";
-import { FreeShippingNotice } from "@/components/FreeShippingNotice";
 import { RecipientAddressFields } from "@/components/RecipientAddressFields";
 import { loadWelcomeCoupon } from "@/lib/welcome-coupon";
 import { loadPreferredDeliveryDate } from "@/lib/preferred-delivery";
@@ -35,7 +34,6 @@ import { chooseCheckoutAddressPrefill } from "@/lib/checkout-address";
 import {
   buildCheckoutShipmentsFromUnits,
   expandCartToDeliveryUnits,
-  quoteShippingFromDeliveryUnits,
   validateDeliveryUnits,
   type DeliveryUnit,
 } from "@/lib/checkout-shipments";
@@ -45,9 +43,9 @@ import {
   isValidShippingPhone,
   isValidPublicEmail,
   DEFAULT_SENDER_MESSAGE,
-  quoteFreeShippingThreshold,
-  shippingVendorKey,
   cartLineUnitTotal,
+  effectiveScheduleDeliveryDate,
+  quoteCartDeliveryDateShipping,
   cartHasCouponExcludedItems,
   isFlashComboProduct,
   checkoutCurrencyForDisplay,
@@ -122,6 +120,7 @@ function CheckoutPageInner() {
   const [address, setAddress] = useState<ShippingAddress>(emptyShippingAddress);
   const [saveForLater, setSaveForLater] = useState(true);
   const [deliveryUnits, setDeliveryUnits] = useState<DeliveryUnit[]>([]);
+  const [scheduledDeliveryDate, setScheduledDeliveryDate] = useState("");
   const addressPrefilled = useRef(false);
   const addressRef = useRef(address);
   addressRef.current = address;
@@ -685,8 +684,10 @@ function CheckoutPageInner() {
           attribution: getAttributionSnapshotForCheckout(),
           ...(appliedCouponCode ? { couponCode: appliedCouponCode } : {}),
           ...(() => {
-            const preferredDeliveryDate = loadPreferredDeliveryDate();
-            return preferredDeliveryDate ? { preferredDeliveryDate } : {};
+            const preferredDeliveryDate = effectiveScheduleDeliveryDate(
+              scheduledDeliveryDate || loadPreferredDeliveryDate()
+            );
+            return { preferredDeliveryDate };
           })(),
           ...(shippingQuote.selected
             ? {
@@ -778,62 +779,19 @@ function CheckoutPageInner() {
   const hasCouponExcludedLines =
     !isRetry && cartHasCouponExcludedItems(checkoutItems);
   const itemCount = checkoutItems.reduce((sum, i) => sum + i.quantity, 0);
-  const multiShippingQuote = isRetry
-    ? { totalCharge: retryOrder!.shipping, perShipment: [] as ReturnType<typeof quoteShippingFromDeliveryUnits>["perShipment"] }
-    : quoteShippingFromDeliveryUnits(
-        deliveryUnits.map((u) => ({
-          ...u,
-          price: convert(u.price, cartCurrency),
-          shippingFee:
-            u.shippingFee != null ? convert(u.shippingFee, cartCurrency) : undefined,
-        })),
-        address,
-        displayCurrency,
-        usdInrRate
-      );
-  const freeShippingQuote =
-    multiShippingQuote.perShipment.find((q) => !q.qualifiesForFreeShipping) ??
-    multiShippingQuote.perShipment[0] ??
-    quoteFreeShippingThreshold({
-      subtotal: displaySubtotal,
-      currency: displayCurrency,
-      usdInrRate,
-    });
-  /** Prefer per-delivery threshold for free mode so shipping shows before address rates load. */
-  const shippingCharge = isRetry
-    ? retryOrder!.shipping
-    : shippingQuote.settingsMode === "pass_through"
-      ? shippingQuote.customerCharge
-      : multiShippingQuote.totalCharge;
+  const deliveryShipping = quoteCartDeliveryDateShipping({
+    items: checkoutItems.map((item) => ({ quantity: item.quantity })),
+    deliveryDate: scheduledDeliveryDate,
+    currency: displayCurrency,
+    usdInrRate,
+  });
+  const shippingCharge = isRetry ? retryOrder!.shipping : deliveryShipping.totalCharge;
   const orderTotal = isRetry
     ? retryOrder!.total
     : Math.max(0, displaySubtotal - discount + shippingCharge);
   const showSplitDelivery = !isRetry && deliveryUnits.length > 1;
-  const chargedShipmentCount = multiShippingQuote.perShipment.filter((q) => q.charge > 0).length;
-  const mixedVendors =
-    !isRetry &&
-    new Set(checkoutItems.map((i) => shippingVendorKey(i))).size > 1;
-  const showMixedVendorShippingException =
-    mixedVendors && multiShippingQuote.perShipment.some((q) => q.charge > 0);
-  const showMultiGroupShippingNotice =
-    !showMixedVendorShippingException && multiShippingQuote.perShipment.length > 1;
-
-  const shippingDetailLine = isRetry
-    ? null
-    : (() => {
-        const selected = shippingQuote.selected;
-        const serviceName = selected?.serviceName ?? "Standard shipping";
-        const deliveryHint = selected?.estimatedDeliveryDate
-          ? ` · arrives by ${new Date(selected.estimatedDeliveryDate).toLocaleDateString(undefined, {
-              month: "short",
-              day: "numeric",
-            })}`
-          : "";
-        if (shippingCharge <= 0) {
-          return `${serviceName}${deliveryHint} (FREE)`;
-        }
-        return `${serviceName}${deliveryHint}`;
-      })();
+  const shippingDetailLine =
+    isRetry || deliveryShipping.tier === "later" ? null : deliveryShipping.label;
 
   return (
     <>
@@ -855,7 +813,9 @@ function CheckoutPageInner() {
             Retrying payment for order <span className="font-mono">{retryOrder!.orderId.slice(0, 8)}…</span>
           </p>
         )}
-        {!isRetry && <ScheduleDeliveryPicker className="mb-6" />}
+        {!isRetry && (
+          <ScheduleDeliveryPicker className="mb-6" onDateChange={setScheduledDeliveryDate} />
+        )}
 
         <form
           ref={setCheckoutForm}
@@ -878,8 +838,8 @@ function CheckoutPageInner() {
                   <h2 className="text-lg font-bold text-slate-900">Deliver each gift</h2>
                   <p className="text-sm text-slate-600 mt-1">
                     By default every gift ships to the address above. Uncheck “Same address” to send
-                    a gift to a different US location. Per address: under $8 is $6.99, $8–$13.99 is
-                    $3.99, and above $13.99 ships free.
+                    a gift to a different US location. Shipping follows the delivery date for every
+                    gift.
                   </p>
                 </div>
                 <ul className="space-y-4">
@@ -996,7 +956,7 @@ function CheckoutPageInner() {
 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between gap-4">
-                <span className="text-slate-700">Items ({itemCount})</span>
+                <span className="text-slate-700">Product price ({itemCount})</span>
                 <span className="font-medium">{formatDisplay(displaySubtotal)}</span>
               </div>
               {discount > 0 && (
@@ -1007,7 +967,7 @@ function CheckoutPageInner() {
               )}
               <div className="flex justify-between gap-4">
                 <span className="text-slate-700">
-                  Shipping
+                  Shipping charge
                   {shippingDetailLine && (
                     <span className="block text-xs text-slate-500 font-normal mt-0.5">
                       {shippingDetailLine}
@@ -1026,39 +986,6 @@ function CheckoutPageInner() {
                     : "FREE"}
                 </span>
               </div>
-              {!isRetry && shippingQuote.settingsMode !== "pass_through" && (
-                <>
-                  {showMixedVendorShippingException ? (
-                    <p className="text-xs text-amber-900 bg-amber-50 border border-amber-100 rounded-md px-3 py-2">
-                      Your items ship from different sellers, so shipping is checked separately for
-                      each — not on the order total. International partner gifts are a flat $19.
-                      Other sellers: under $8 is $6.99, $8–$13.99 is $3.99, and above $13.99 is free.
-                      Current shipping fee:{" "}
-                      {formatDisplay(shippingCharge)}.
-                    </p>
-                  ) : showMultiGroupShippingNotice ? (
-                    <p className="text-xs text-amber-900 bg-amber-50 border border-amber-100 rounded-md px-3 py-2">
-                      Shipping is calculated per delivery address. Under $8 is $6.99, $8–$13.99 is
-                      $3.99, and above $13.99 is free for that delivery.
-                      {chargedShipmentCount > 0 ? (
-                        <>
-                          {" "}
-                          {chargedShipmentCount} of {multiShippingQuote.perShipment.length} deliveries
-                          include shipping ({formatDisplay(shippingCharge)} total).
-                        </>
-                      ) : (
-                        <> All deliveries qualify for free shipping.</>
-                      )}
-                    </p>
-                  ) : (
-                    <FreeShippingNotice
-                      quote={freeShippingQuote}
-                      formatMoney={formatDisplay}
-                      currency={displayCurrency}
-                    />
-                  )}
-                </>
-              )}
               <div className="flex justify-between gap-4 pt-2 border-t border-slate-200">
                 <span className="font-bold text-slate-900">Total</span>
                 <span className="font-bold text-nav text-base">

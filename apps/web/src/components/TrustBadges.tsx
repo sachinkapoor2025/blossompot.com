@@ -6,7 +6,6 @@ export function TrustBadges({ variant = "full", className = "" }: { variant?: Va
   const items = [
     { icon: "🇺🇸", label: "Ships from USA" },
     { icon: "🔒", label: "SSL Secure Checkout" },
-    { icon: "🚚", label: "5–7 Day USA Delivery" },
     { icon: "✓", label: "Satisfaction Guarantee", href: "/returns" },
   ] as const;
 
@@ -38,7 +37,7 @@ export function TrustBadges({ variant = "full", className = "" }: { variant?: Va
   }
 
   return (
-    <div className={`grid grid-cols-2 gap-2 sm:grid-cols-4 ${className}`} aria-label="Trust and security badges">
+    <div className={`grid grid-cols-2 gap-2 sm:grid-cols-3 ${className}`} aria-label="Trust and security badges">
       {items.map((item) => {
         const inner = (
           <>

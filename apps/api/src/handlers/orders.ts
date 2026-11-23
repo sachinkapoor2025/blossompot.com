@@ -19,6 +19,7 @@ import {
   isTrialCouponKind,
   singleCheckoutShipment,
   isValidScheduleDeliveryDate,
+  earliestOpenScheduleDeliveryDate,
   preferredDeliveryDateToIso,
   buildInitialVendorFulfillments,
   ensureVendorFulfillments,
@@ -365,14 +366,16 @@ export async function checkout(event: APIGatewayProxyEventV2) {
     console.warn("Checkout shipping rate lookup:", shippingResult.warning);
   }
 
+  const scheduledDeliveryDate =
+    preferredDeliveryDate && isValidScheduleDeliveryDate(preferredDeliveryDate)
+      ? preferredDeliveryDate
+      : earliestOpenScheduleDeliveryDate();
   const built = buildOrderShipments({
     cartItems: orderItems,
     checkoutShipments,
     currency: checkoutCurrency as "USD" | "INR",
     usdInrRate,
-    ...(shippingSettings.customerShippingMode === "pass_through"
-      ? { passThroughShipping: shippingResult.customerShippingCharge }
-      : {}),
+    scheduledDeliveryDate,
   });
   if ("error" in built) return badRequest(built.error);
 
@@ -474,9 +477,7 @@ export async function checkout(event: APIGatewayProxyEventV2) {
       })),
     },
     shipments: orderShipments,
-    ...(preferredDeliveryDate
-      ? { estimatedDeliveryAt: preferredDeliveryDateToIso(preferredDeliveryDate) }
-      : {}),
+    estimatedDeliveryAt: preferredDeliveryDateToIso(scheduledDeliveryDate),
     ...(shippingResult.selected && {
       shippingServiceCode: shippingResult.selected.mailClass,
       shippingServiceName: shippingResult.selected.serviceName,

@@ -31,7 +31,7 @@ export const trustHighlights = [
   {
     icon: "🎁",
     title: "Occasion-ready catalog",
-    detail: "Birthday, anniversary, Valentine’s, Mother’s Day, wedding, and personalized gifts in one place.",
+    detail: "Birthday, anniversary, Valentine’s, Mother’s Day, and wedding in one place.",
   },
   {
     icon: "🔒",

@@ -1,12 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import {
-  applicableCatalogLineShippingCharge,
-  quoteAddressShipmentShipping,
-  quoteFreeShippingThreshold,
-} from "@blossompot/shared";
+import { useEffect, useState } from "react";
+import { quoteCartDeliveryDateShipping } from "@blossompot/shared";
+import { loadPreferredDeliveryDate } from "@/lib/preferred-delivery";
 import { useCart } from "@/lib/cart-context";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
 import { useCurrency } from "@/lib/currency-context";
@@ -15,8 +12,6 @@ import { PaymentMethodIcons } from "@/components/PaymentMethodIcons";
 import { CheckoutLegalNotice } from "@/components/CheckoutLegalNotice";
 import { TrustBadges } from "@/components/TrustBadges";
 import { resolveImageUrl } from "@/lib/images";
-import { EstimatedDeliveryNote } from "@/components/EstimatedDeliveryNote";
-import { FreeShippingNotice } from "@/components/FreeShippingNotice";
 import { cartLineUnitTotal, type CartItem } from "@blossompot/shared";
 import type { DisplayCurrency } from "@/lib/currency-context";
 
@@ -116,6 +111,11 @@ export default function CartPage() {
   const { cart, loading } = useCart();
   const { format, formatDisplay, convert, displayCurrency, usdInrRate } = useCurrency();
   const delivery = useDeliveryLocation();
+  const [scheduledDeliveryDate, setScheduledDeliveryDate] = useState("");
+
+  useEffect(() => {
+    setScheduledDeliveryDate(loadPreferredDeliveryDate());
+  }, []);
 
   if (loading) return <div className="p-10 text-center text-slate-600">Loading cart...</div>;
 
@@ -127,39 +127,14 @@ export default function CartPage() {
     const lineCurrency = (i.currency ?? cartCurrency) as DisplayCurrency;
     return sum + convert(cartLineUnitTotal(i) * i.quantity, lineCurrency);
   }, 0);
-  const currency = displayCurrency;
-  const quoteItems = items.map((i) => ({
-    price: convert(cartLineUnitTotal(i), (i.currency ?? cartCurrency) as DisplayCurrency),
-    quantity: i.quantity,
-    vendorSlug: i.vendorSlug,
-    productSlug: i.productSlug,
-    shippingFee:
-      i.shippingFee != null
-        ? convert(i.shippingFee, (i.currency ?? cartCurrency) as DisplayCurrency)
-        : undefined,
-  }));
-  const multiVendorShipping = quoteAddressShipmentShipping({
-    items: quoteItems,
-    currency,
+  const deliveryShipping = quoteCartDeliveryDateShipping({
+    items: items.map((item) => ({ quantity: item.quantity })),
+    deliveryDate: scheduledDeliveryDate,
+    currency: displayCurrency,
     usdInrRate,
   });
-  const catalogLineShipping = quoteItems.map((line) =>
-    applicableCatalogLineShippingCharge(multiVendorShipping, line)
-  );
-  const shippingQuote =
-    multiVendorShipping.perVendor.find((q) => !q.qualifiesForFreeShipping) ??
-    multiVendorShipping.perVendor[0] ??
-    quoteFreeShippingThreshold({
-      subtotal: total,
-      currency,
-      usdInrRate,
-    });
-  const shippingCharge = multiVendorShipping.totalCharge;
+  const shippingCharge = deliveryShipping.totalCharge;
   const estimatedTotal = total + shippingCharge;
-  const mixedVendors = new Set(items.map((i) => i.vendorSlug?.trim() || "blossompot")).size > 1;
-  /** Mixed sellers + at least one paid shipping bucket: fee applies to that seller only. */
-  const showMixedVendorShippingException =
-    mixedVendors && multiVendorShipping.perVendor.some((q) => q.charge > 0);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 sm:py-10">
@@ -179,12 +154,11 @@ export default function CartPage() {
             </h1>
 
             <ul className="space-y-6">
-              {items.map((item, index) => {
-                const lineCurrency = (item.currency ?? currency) as DisplayCurrency;
+              {items.map((item) => {
+                const lineCurrency = (item.currency ?? cartCurrency) as DisplayCurrency;
                 const unit = cartLineUnitTotal(item);
                 const lineTotal = unit * item.quantity;
                 const lineKey = item.lineId ?? item.productSlug;
-                const lineShipping = catalogLineShipping[index];
 
                 return (
                   <li
@@ -225,12 +199,6 @@ export default function CartPage() {
                           </p>
                         ) : null}
                         <AddonList item={item} format={format} />
-                        {lineShipping != null ? (
-                          <p className="text-xs text-slate-600">
-                            Shipping{item.shippingOptionLabel ? ` (${item.shippingOptionLabel})` : ""}:{" "}
-                            {lineShipping === 0 ? "Free" : formatDisplay(lineShipping)}
-                          </p>
-                        ) : null}
                         <CartQuantityControls
                           lineId={lineKey}
                           productSlug={item.productSlug}
@@ -266,7 +234,14 @@ export default function CartPage() {
                 <span className="font-medium text-slate-900">{formatDisplay(total)}</span>
               </div>
               <div className="flex items-center justify-between gap-4">
-                <span className="text-slate-700">Shipping fee</span>
+                <span className="text-slate-700">
+                  Shipping charge
+                  {deliveryShipping.tier !== "later" && (
+                    <span className="block text-xs text-slate-500 font-normal mt-0.5">
+                      {deliveryShipping.label}
+                    </span>
+                  )}
+                </span>
                 <span
                   className={
                     shippingCharge > 0
@@ -277,24 +252,10 @@ export default function CartPage() {
                   {shippingCharge > 0 ? formatDisplay(shippingCharge) : "FREE"}
                 </span>
               </div>
-              {showMixedVendorShippingException ? (
-                <p className="text-xs text-amber-900 bg-amber-50 border border-amber-100 rounded-md px-3 py-2">
-                  Your items ship from different sellers, so shipping is checked separately for each
-                  — not on the cart total. International partner gifts use a flat partner shipping
-                  fee. Other sellers use the free-shipping tiers shown below. Current shipping fee:{" "}
-                  {formatDisplay(shippingCharge)}.
-                </p>
-              ) : (
-                <FreeShippingNotice
-                  quote={shippingQuote}
-                  formatMoney={formatDisplay}
-                  currency={currency}
-                />
-              )}
               {itemCount > 1 && (
                 <p className="text-xs text-slate-500">
-                  At checkout you can ship each gift to a different address. Per address: under
-                  $8 is $6.99, $8–$13.99 is $3.99, and above $13.99 ships free.
+                  At checkout you can ship each gift to a different address. Shipping follows the
+                  delivery date for every gift.
                 </p>
               )}
               <div className="flex items-center justify-between gap-4 pt-2 border-t border-slate-100">
@@ -311,8 +272,6 @@ export default function CartPage() {
             </div>
 
             <TrustBadges variant="compact" className="mb-4" />
-
-            <EstimatedDeliveryNote variant="banner" prefix="Order today →" className="mb-5" />
 
             {blockedItems.length > 0 ? (
               <p className="text-sm text-amber-900 bg-amber-50 border border-amber-100 rounded-md px-3 py-2 mb-3">

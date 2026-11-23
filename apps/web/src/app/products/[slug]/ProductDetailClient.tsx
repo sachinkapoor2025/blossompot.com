@@ -346,26 +346,19 @@ export function ProductDetailClient({
 
           <ScheduleDeliveryPicker className="mb-4" productNoun={productNoun} />
 
-          <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm">
-            {!purchaseAllowed ? (
-              <p className="text-slate-700">Delivery could not be confirmed for this gift yet.</p>
-            ) : delivery.location ? (
-              deliverable ? null : (
-                <p className="text-amber-900">
-                  This product is currently not available for delivery to {delivery.location.postalDisplay}.
-                </p>
-              )
-            ) : (
-              <p className="text-slate-700">Select a delivery location to confirm availability.</p>
-            )}
-            <button
-              type="button"
-              onClick={() => delivery.openSelector()}
-              className="mt-1 font-semibold text-nav underline underline-offset-2"
-            >
-              {delivery.location ? "Change location" : "Choose location"}
-            </button>
-          </div>
+          {!purchaseAllowed ? (
+            <p className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700">
+              Delivery could not be confirmed for this gift yet.
+            </p>
+          ) : delivery.location && !deliverable ? (
+            <p className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-amber-900">
+              This product is currently not available for delivery to {delivery.location.postalDisplay}.
+            </p>
+          ) : !delivery.location ? (
+            <p className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700">
+              Select a delivery location to confirm availability.
+            </p>
+          ) : null}
 
           {isGboProduct ? (
             <p className="mb-5 text-xs text-slate-600">
