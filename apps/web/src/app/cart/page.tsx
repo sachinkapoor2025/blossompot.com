@@ -156,7 +156,7 @@ export default function CartPage() {
 
             <ul className="space-y-6">
               {items.map((item) => {
-                const lineCurrency = (item.currency ?? currency) as DisplayCurrency;
+                const lineCurrency = (item.currency ?? cartCurrency) as DisplayCurrency;
                 const unit = cartLineUnitTotal(item);
                 const lineTotal = unit * item.quantity;
                 const lineKey = item.lineId ?? item.productSlug;
