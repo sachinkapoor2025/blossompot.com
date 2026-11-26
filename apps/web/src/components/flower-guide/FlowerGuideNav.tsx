@@ -4,7 +4,7 @@ import { flowerGuideNav } from "@/lib/content/flower-guide";
 export function FlowerGuideNav({ current }: { current?: string }) {
   return (
     <nav aria-label="Flower Guide" className="border-b border-primary/10 bg-white/80 backdrop-blur-sm">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="site-container">
         <ul className="flex gap-1 overflow-x-auto py-3 text-sm">
           <li>
             <Link

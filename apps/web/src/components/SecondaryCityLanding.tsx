@@ -29,7 +29,7 @@ export function SecondaryCityLanding({ city }: { city: SecondaryCity }) {
   const faqs = buildSecondaryCityFaqs(city);
 
   return (
-    <div className="mt-12 pt-10 border-t border-slate-200 max-w-3xl space-y-8 text-slate-700 leading-relaxed">
+    <div className="mt-12 pt-10 border-t border-slate-200 space-y-8 text-slate-700 leading-relaxed">
       <section>
         <h2 className="text-2xl font-bold text-primary mb-4">
           Send gifts to {place} — USA delivery

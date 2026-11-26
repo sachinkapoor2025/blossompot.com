@@ -66,7 +66,8 @@ async function CombosPageContent({ searchParams }: Props) {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
+    <>
+    <div className="site-container py-10">
       <JsonLd
         data={[
           breadcrumbJsonLd(crumbs.map((crumb) => ({ name: crumb.label, path: crumb.href ?? COMBOS_PATH }))),
@@ -100,10 +101,11 @@ async function CombosPageContent({ searchParams }: Props) {
           </Link>
         </p>
       )}
-      <CountrySeoArticle
-        article={combosArticle}
-        headingClassName="text-3xl font-bold text-primary mb-4"
-      />
     </div>
+    <CountrySeoArticle
+      article={combosArticle}
+      headingClassName="text-3xl font-bold text-primary mb-4"
+    />
+    </>
   );
 }

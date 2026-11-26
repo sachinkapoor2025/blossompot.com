@@ -83,7 +83,7 @@ export default async function OccasionSlugPage({ params }: Props) {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
+    <div className="site-container py-10">
       <JsonLd
         data={[
           breadcrumbJsonLd(crumbs.map((c) => ({ name: c.label, path: c.href ?? path }))),
@@ -96,7 +96,7 @@ export default async function OccasionSlugPage({ params }: Props) {
       />
       <Breadcrumbs items={crumbs} />
       <h1 className="text-3xl font-bold text-primary mb-3">{occasion.h1}</h1>
-      <p className="text-slate-600 mb-6 max-w-3xl leading-relaxed">
+      <p className="text-slate-600 mb-6 leading-relaxed">
         {applyInlineLinks(occasion.intro, marketingPageInlineLinks.occasions, { currentPath: path })}
       </p>
 
@@ -114,14 +114,14 @@ export default async function OccasionSlugPage({ params }: Props) {
         </p>
       )}
 
-      <section className="mt-12 max-w-3xl">
+      <section className="mt-12">
         <h2 className="text-xl font-bold text-primary mb-3">Etiquette &amp; gifting tips</h2>
         <p className="text-slate-700 leading-relaxed">{occasion.etiquette}</p>
       </section>
 
       <section className="mt-12">
         <h2 className="text-xl font-bold text-primary mb-4">Frequently asked questions</h2>
-        <div className="space-y-4 max-w-3xl">
+        <div className="space-y-4">
           {occasion.faqs.map((f) => (
             <AnswerBlock key={f.q} question={f.q} answer={f.a} />
           ))}

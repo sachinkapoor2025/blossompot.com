@@ -139,6 +139,8 @@ export const CATEGORY_LOCATION_STEM: Record<string, string> = {
   cakes: "cakes",
   "birthday-gifts": "birthday-gifts",
   "anniversary-gifts": "anniversary-gifts",
+  christmas: "christmas-gifts",
+  "new-year": "new-year-gifts",
   "valentines-day-gifts": "valentines-day-gifts",
   "mothers-day-gifts": "mothers-day-gifts",
   "wedding-gifts": "wedding-gifts",
@@ -162,6 +164,9 @@ for (const [internal, pub] of Object.entries(CATEGORY_PUBLIC_SLUG)) {
   if (!STEM_TO_INTERNAL[pub]) STEM_TO_INTERNAL[pub] = internal;
   if (!STEM_TO_INTERNAL[internal]) STEM_TO_INTERNAL[internal] = internal;
 }
+// Retired stems. Live country URLs use the gift stems above.
+delete STEM_TO_INTERNAL["christmas"];
+delete STEM_TO_INTERNAL["new-year"];
 
 export const LOCATION_SEO_HEADER = "x-bp-seo-path";
 /** Forwarded by middleware so SSR listings match the selected delivery country. */

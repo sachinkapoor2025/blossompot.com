@@ -81,7 +81,7 @@ export function ReadableSummary({
   plainLabel: string;
 }) {
   return (
-    <article className="mx-auto max-w-3xl px-4 py-12 text-slate-700 leading-relaxed">
+    <article className="site-container py-12 text-slate-700 leading-relaxed">
       <p className="mb-6 text-sm">
         <a href={plainHref} className="text-primary underline underline-offset-2">
           {plainLabel}

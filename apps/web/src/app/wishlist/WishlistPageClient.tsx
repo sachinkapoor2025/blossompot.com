@@ -24,7 +24,7 @@ export function WishlistPageClient({ recommendedProducts }: Props) {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-16">
+      <div className="site-container py-16">
         <p className="text-center text-slate-500">Loading wish list…</p>
       </div>
     );
@@ -32,7 +32,7 @@ export function WishlistPageClient({ recommendedProducts }: Props) {
 
   if (!user) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-16">
+      <div className="site-container py-16">
         <div className="max-w-md mx-auto text-center rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
           <h1 className="text-3xl font-bold text-primary mb-3">Wish Lists</h1>
           <p className="text-slate-600 mb-6">
@@ -57,7 +57,7 @@ export function WishlistPageClient({ recommendedProducts }: Props) {
 
   if (items.length === 0) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-16">
+      <div className="site-container py-16">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <h1 className="text-3xl font-bold text-primary mb-3">Wish Lists</h1>
           <p className="text-slate-600 mb-6">Your saved gifts will appear here. Tap the heart on any product to save it.</p>
@@ -81,7 +81,7 @@ export function WishlistPageClient({ recommendedProducts }: Props) {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
+    <div className="site-container py-10">
       <h1 className="text-3xl font-bold text-primary mb-2">Wish Lists</h1>
       <p className="text-slate-600 mb-8">{items.length} saved {items.length === 1 ? "item" : "items"}</p>
 

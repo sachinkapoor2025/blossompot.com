@@ -72,7 +72,7 @@ export function ContactForm() {
   const linkOpts = { usedHrefs, usedPhrases, currentPath: "/contact" };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12">
+    <div className="site-container py-12">
       <h1 className="text-3xl font-bold text-primary mb-6">Contact Us</h1>
       <p className="text-slate-600 mb-8">
         Have questions about your {applyInlineLinks("order or delivery", contactLinks, linkOpts)} to {deliveryName}? Our team is here to help before, during, and after checkout.

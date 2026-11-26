@@ -117,7 +117,7 @@ async function ProductPageContent({ params }: Props) {
   const countryIso = hinted.country;
   if (!countryIso) {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-10">
+      <div className="site-container py-10">
         <h1 className="text-2xl font-bold text-primary mb-3">Delivery is not available right now</h1>
         <p className="text-slate-600 max-w-2xl">No countries are enabled for shopping.</p>
       </div>
@@ -145,7 +145,7 @@ async function ProductPageContent({ params }: Props) {
     });
     const available = await loadProducts({ country: countryIso });
     return (
-      <div className="max-w-6xl mx-auto px-4 py-10">
+      <div className="site-container py-10">
         <h1 className="text-2xl font-bold text-primary mb-3">{notice.heading}</h1>
         <p className="text-slate-600 mb-6 max-w-2xl">{notice.body}</p>
         <Link href="/gift-catalog" className="btn-nav bg-primary inline-flex mb-10">
@@ -182,7 +182,7 @@ async function ProductPageContent({ params }: Props) {
           faqJsonLd(faqs),
         ]}
       />
-      <div className="max-w-6xl mx-auto px-4 pt-6">
+      <div className="site-container pt-6">
         <Breadcrumbs items={crumbs} />
       </div>
       <ProductDetailClient

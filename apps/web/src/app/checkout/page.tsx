@@ -806,7 +806,7 @@ function CheckoutPageInner() {
           )
         }
       />
-      <div className="max-w-6xl mx-auto px-4 py-8 sm:py-10">
+      <div className="site-container py-8 sm:py-10">
         <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">Checkout</h1>
         {isRetry && (
           <p className="text-sm text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mb-4">

@@ -95,7 +95,7 @@ export default function BecomeAVendorPage() {
               "radial-gradient(ellipse at 20% 20%, rgba(194,58,107,0.18), transparent 50%), radial-gradient(ellipse at 80% 0%, rgba(47,143,107,0.12), transparent 45%)",
           }}
         />
-        <div className="relative max-w-5xl mx-auto px-4 pt-10 pb-16 sm:pt-14 sm:pb-20">
+        <div className="relative site-container pt-10 pb-16 sm:pt-14 sm:pb-20">
           <Breadcrumbs items={crumbs} />
           <p className="mt-6 font-display text-5xl sm:text-6xl font-semibold tracking-tight text-primary">
             {site.name}
@@ -127,7 +127,7 @@ export default function BecomeAVendorPage() {
         </div>
       </section>
 
-      <div className="max-w-5xl mx-auto px-4 py-14 space-y-16">
+      <div className="site-container py-14 space-y-16">
         <section>
           <h2 className="font-display text-3xl font-semibold text-primary mb-3">
             Why partner with BlossomPot?
@@ -176,7 +176,7 @@ export default function BecomeAVendorPage() {
 
         <section>
           <h2 className="font-display text-3xl font-semibold text-primary mb-3">How payments work</h2>
-          <p className="text-slate-600 leading-relaxed max-w-3xl">
+          <p className="text-slate-600 leading-relaxed">
             You set a partner/wholesale cost. BlossomPot sets the customer selling price and keeps the
             margin. After completion, your payable amount is recorded in the vendor ledger (Pending →
             Approved → Payable → Paid). Competitive partner pricing helps us promote your products more
@@ -186,7 +186,7 @@ export default function BecomeAVendorPage() {
 
         <section>
           <h2 className="font-display text-3xl font-semibold text-primary mb-3">Vendor success benefits</h2>
-          <p className="text-slate-600 leading-relaxed max-w-3xl">
+          <p className="text-slate-600 leading-relaxed">
             Access a dedicated portal for products, orders, payouts, and performance insights — plus
             recommendations to improve conversion. BlossomPot is a sales channel, not just an order
             form.

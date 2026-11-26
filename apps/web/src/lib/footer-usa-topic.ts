@@ -7,6 +7,8 @@ const CATEGORY_TOPIC: Record<string, string> = {
   cakes: "Cakes Deliver in USA",
   "birthday-gifts": "Birthday Gifts Deliver in USA",
   "anniversary-gifts": "Anniversary Gifts Deliver in USA",
+  christmas: "Christmas Deliver in USA",
+  "new-year": "New Year Deliver in USA",
   "valentines-day-gifts": "Valentine's Gifts Deliver in USA",
   "gift-hampers": "Hampers Deliver in USA",
 };

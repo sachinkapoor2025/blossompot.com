@@ -88,7 +88,7 @@ export default async function GiftSlugPage({ params }: Props) {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
+    <div className="site-container py-10">
       <JsonLd
         data={[
           breadcrumbJsonLd(crumbs.map((c) => ({ name: c.label, path: c.href ?? path }))),
@@ -101,7 +101,7 @@ export default async function GiftSlugPage({ params }: Props) {
       />
       <Breadcrumbs items={crumbs} />
       <h1 className="text-3xl font-bold text-primary mb-3">{page.h1}</h1>
-      <p className="text-slate-600 mb-6 max-w-3xl leading-relaxed">
+      <p className="text-slate-600 mb-6 leading-relaxed">
         {applyInlineLinks(page.intro, marketingPageInlineLinks.gifts, { currentPath: path })}
       </p>
 
@@ -128,7 +128,7 @@ export default async function GiftSlugPage({ params }: Props) {
 
       <section className="mt-12">
         <h2 className="text-xl font-bold text-primary mb-4">Frequently asked questions</h2>
-        <div className="space-y-4 max-w-3xl">
+        <div className="space-y-4">
           {page.faqs.map((f) => (
             <AnswerBlock key={f.q} question={f.q} answer={f.a} />
           ))}

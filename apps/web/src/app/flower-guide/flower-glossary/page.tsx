@@ -22,7 +22,7 @@ export default function GlossaryPage() {
           { name: "Glossary", path: "/flower-guide/flower-glossary" },
         ])}
       />
-      <div className="max-w-3xl mx-auto px-4 py-10">
+      <div className="site-container py-10">
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },

@@ -115,7 +115,7 @@ export default async function FlowerGuidePage({ params }: Props) {
             />
           ) : null}
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/75 via-slate-900/35 to-slate-900/10" />
-          <div className="relative max-w-5xl mx-auto px-4 py-16 text-white">
+          <div className="relative site-container py-16 text-white">
             <p className="text-xs uppercase tracking-[0.2em] text-white/75">Flower encyclopedia</p>
             <h1 className="font-display text-4xl sm:text-5xl mt-2 max-w-3xl">{guide.h1}</h1>
             <p className="mt-4 max-w-2xl text-white/90 text-lg">{guide.whatIs}</p>
@@ -132,7 +132,7 @@ export default async function FlowerGuidePage({ params }: Props) {
           </div>
         </div>
 
-        <div className="max-w-5xl mx-auto px-4 py-10">
+        <div className="site-container py-10">
           <Breadcrumbs
             items={[
               { label: "Home", href: "/" },

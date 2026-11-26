@@ -46,21 +46,21 @@ export const usaFlowers = article("flowers", {
   heading: "Send Flowers to USA Online – Fresh Bouquets and Roses Delivered Across America",
   intro: [
     "Distance should never stop you from being part of a celebration. With BlossomPot, you can send flowers to USA and surprise your family, friends or partner with a flower bouquet delivery in America that says everything you want to say. Whether it is a birthday, an anniversary, Valentine's Day or a simple \"thinking of you\", explore fresh bouquets, roses and floral gift boxes that can be sent across the United States.",
-    "If you have been looking for an easy way to order flowers online and send flowers online to someone living abroad, BlossomPot keeps the process simple. Choose an arrangement, enter the recipient's complete US address and review the delivery availability at checkout. It is a convenient option for international flower delivery, whether you are ordering from India, the UK, Canada, Australia or any other country.",
+    "If you have been looking for an easy way to order flowers online for someone living abroad, BlossomPot keeps the process simple. Choose an arrangement, enter the recipient's complete US address and review the delivery availability at checkout. It is a convenient option for international flower delivery, whether you are ordering from India, the UK, Canada, Australia or any other country.",
   ],
   sections: [
     {
       heading: "Explore Our Collection of Flowers for Delivery in America",
       paragraphs: [
-        "Whether you want a flower bouquet delivered in America or a flower bouquet for delivery in the United States, browse a wide selection of fresh flowers delivery in America options for different occasions, relationships and personal tastes. From classic roses to cheerful mixed blooms, every arrangement is a thoughtful way to show you care. You can also visit our dedicated page for flower bouquets to USA to compare more bouquet styles.",
+        "Whether you are choosing a flower bouquet for the USA or a bigger arrangement, there is a wide range of fresh flowers delivered in America for different occasions, relationships and personal tastes. From classic roses to cheerful mixed blooms, every arrangement is a thoughtful way to show you care.",
       ],
       items: points([
-        { title: "Rose bouquets", text: "Explore rose bouquet delivery in America for romantic moments, birthdays and anniversaries." },
-        { title: "Mixed flower bouquets", text: "Colourful mixed flowers delivered in America that suit friends, family members and colleagues." },
+        { title: "Rose bouquets", text: "A rose bouquet is a natural fit for romantic moments, birthdays and anniversaries." },
+        { title: "Mixed flower bouquets", text: "Colourful mixed blooms that suit friends, family members and colleagues." },
         { title: "Hand tied and luxury bouquets", text: "An elegant hand tied bouquet or a luxury bouquet for milestones and special surprises." },
-        { title: "Seasonal flowers", text: "Seasonal flowers for delivery in the United States that bring the freshness of the season to the recipient's home." },
+        { title: "Seasonal flowers", text: "Seasonal flowers that bring the freshness of the season to the recipient's home." },
         { title: "Floral gift boxes", text: "A floral gift box is a stylish way to present flowers as a complete gift." },
-        { title: "Floral arrangements", text: "A beautifully put-together floral arrangement or flower arrangement for tables, living rooms and celebration spaces." },
+        { title: "Floral arrangements", text: "A beautifully put-together floral arrangement for tables, living rooms and celebration spaces." },
       ]),
       links: [{ label: "Flower bouquets to USA", href: "/bouquets-to-usa" }],
       paragraphsAfter: [
@@ -71,22 +71,24 @@ export const usaFlowers = article("flowers", {
       heading: "Send Roses to USA – Red, Pink and White Rose Bouquets",
       paragraphs: [
         "Roses never go out of style. Whether you want to send roses internationally to a loved one or choose a dozen roses delivered in America, there is a shade for every message.",
-        "Planning something romantic? Our Valentine's Day gifts to USA page brings together roses, chocolates and surprise boxes for couples.",
       ],
       items: points([
-        { title: "Red roses", text: "The classic symbol of love. Explore red roses delivery in America for partners, anniversaries and Valentine's Day." },
-        { title: "Pink roses", text: "A gentle way to show gratitude, admiration and affection. Choose pink roses for delivery in the United States for friends, mothers and sisters." },
-        { title: "White roses", text: "Associated with peace, respect and fresh beginnings. White roses online delivery across America are a lovely choice for congratulations and new chapters." },
+        { title: "Red roses", text: "The classic symbol of love, ideal for partners, anniversaries and Valentine's Day." },
+        { title: "Pink roses", text: "A gentle way to show gratitude, admiration and affection, lovely for friends, mothers and sisters." },
+        { title: "White roses", text: "Associated with peace, respect and fresh beginnings, white roses suit congratulations and new chapters." },
         { title: "Long stem and premium roses", text: "For a grander gesture, look at long stem roses and premium roses in the collection." },
       ]),
+      paragraphsAfter: [
+        "Planning something romantic? Roses go especially well with chocolates and surprise boxes, and there are plenty of Valentine's Day gifts to USA that pair beautifully with a bouquet.",
+      ],
       links: [{ label: "Valentine's Day gifts to USA", href: "/valentines-day-gifts-to-usa" }],
     },
     {
       heading: "Flowers for Every Occasion in the USA",
       paragraphs: ["Flowers fit almost every moment in life. Here are some popular reasons to send a bouquet to someone in the United States:"],
       items: points([
-        { title: "Birthday", text: "Explore birthday flowers delivery in America and combine them with sweets for an extra-special surprise. See more ideas on our birthday gifts to USA page.", href: "/birthday-gifts-to-usa" },
-        { title: "Anniversary", text: "Choose anniversary flowers delivered in America to celebrate your partner, parents or a couple you love. Visit anniversary gifts to USA for more options.", href: "/anniversary-gifts-to-usa" },
+        { title: "Birthday", text: "Birthday flowers delivered in America feel even better with sweets alongside, and a few birthday gifts to USA can turn a bouquet into a full surprise.", href: "/birthday-gifts-to-usa" },
+        { title: "Anniversary", text: "Anniversary flowers are a lovely way to celebrate your partner, parents or a couple you love, especially when matched with anniversary gifts to USA.", href: "/anniversary-gifts-to-usa" },
         { title: "Romantic gestures", text: "A romantic bouquet is a lovely way to say \"I love you\" across the miles." },
         { title: "Thank you", text: "Thank you flowers show appreciation to a friend, relative or colleague." },
         { title: "Congratulations", text: "Congratulations flowers celebrate a new job, a graduation, a new home or any big achievement." },
@@ -111,16 +113,16 @@ export const usaFlowers = article("flowers", {
     {
       heading: "Floral Gifts Delivered to Popular US Cities and States",
       paragraphs: [
-        "Searching for floral gifts delivered to New York, bouquets for delivery in Los Angeles or flowers delivered to Chicago? BlossomPot lets you enter a recipient's address and check availability for many popular destinations, including Houston, Dallas, Miami, San Francisco, San Diego, Seattle, Boston, Atlanta, Austin, Phoenix, Philadelphia, Washington DC, Denver, Orlando, San Jose, Las Vegas and Portland.",
-        "You can also check floral gifts delivered to California, bouquets for delivery in Texas, floral gifts delivered to Florida, bouquets for delivery in New Jersey and other states such as Virginia, Arizona, Pennsylvania, Georgia, Washington and Massachusetts. Availability may vary by location, so enter the address at checkout to see what is offered.",
+        "Looking for floral gifts delivered to New York or bouquets for delivery in Los Angeles? BlossomPot lets you enter a recipient's address and check availability for many popular destinations, including Chicago, Houston, Dallas, Miami, San Francisco, San Diego, Seattle, Boston, Atlanta, Austin, Phoenix, Philadelphia, Washington DC, Denver, Orlando, San Jose, Las Vegas and Portland.",
+        "The same applies to states such as California, Texas, Florida and New Jersey, along with Virginia, Arizona, Pennsylvania, Georgia, Washington and Massachusetts. Availability may vary by location, so enter the address at checkout to see what is offered.",
       ],
       links: USA_PLACE_LINKS,
     },
     {
       heading: "Pair Your Flowers with Cakes, Hampers and Gifts",
       paragraphs: [
-        "Want to make the surprise even bigger? A bouquet looks wonderful alongside a delicious dessert or a curated basket. Explore cakes to USA for a sweet pairing, or browse gift hampers to USA for chocolates, snacks and gourmet treats. Whether you are searching for flower and gift delivery or gifting flowers with a cake, you will find plenty of ideas.",
-        "You can also explore our full range of online gifting for loved ones across the US to find presents for every relationship and occasion.",
+        "Want to make the surprise even bigger? A bouquet looks wonderful next to a cake sent to the USA or a basket of chocolates and snacks from a range of gift hampers to USA. If you are looking for flower and gift delivery in one order, or simply gifting flowers with something sweet, these pairings make it easy.",
+        "And if flowers are only the beginning, you can send gifts to loved ones across the US for every relationship and occasion.",
       ],
       links: [
         { label: "Cakes to USA", href: "/cakes-to-usa" },
@@ -168,26 +170,28 @@ export const usaBouquets = article("bouquets", {
       heading: "Explore Flower Bouquets for USA Delivery",
       paragraphs: [
         "Our collection includes different bouquet styles so you can find the right fit for every personality. Here is what you can explore:",
-        "Looking for a wider range of blooms and arrangements? Visit our flowers to USA page for roses, floral arrangements and city-wise delivery information.",
       ],
       items: points([
-        { title: "Rose bouquets", text: "Browse rose bouquet delivery in America for romance, appreciation and celebration." },
-        { title: "Mixed flower bouquets", text: "Bright mixed flowers for delivery in the United States that suit almost any occasion." },
+        { title: "Rose bouquets", text: "Rose bouquets for romance, appreciation and celebration." },
+        { title: "Mixed flower bouquets", text: "Bright mixed blooms that suit almost any occasion." },
         { title: "Hand tied bouquets", text: "A hand tied bouquet has a natural, freshly gathered look that many recipients love." },
         { title: "Luxury bouquets", text: "Choose a luxury bouquet when you want a statement gift for a milestone." },
         { title: "Romantic bouquets", text: "A romantic bouquet is ideal for partners, anniversaries and Valentine's Day." },
-        { title: "Seasonal bouquets", text: "Seasonal flowers delivery in America keeps your gift in tune with the time of year." },
+        { title: "Seasonal bouquets", text: "Seasonal flowers keep your gift in tune with the time of year." },
         { title: "Floral gift boxes", text: "A floral gift box presents the flowers in a stylish, ready-to-gift way." },
       ]),
+      paragraphsAfter: [
+        "If you want more than a classic bouquet, such as a dozen roses or a floral arrangement for the table, you can also send flowers to USA for a wider range of blooms and check delivery for cities across the country.",
+      ],
       links: [{ label: "Flowers to USA", href: "/flowers-to-usa" }],
     },
     {
       heading: "Choose the Right Bouquet for the Occasion",
       paragraphs: ["The best bouquet is the one that fits the moment. Use these ideas to decide:"],
       items: points([
-        { title: "Birthdays", text: "A cheerful mix of colours works well. Pair it with sweets or a cake from our birthday gifts to USA collection.", href: "/birthday-gifts-to-usa" },
-        { title: "Anniversaries", text: "Red or pink roses are a classic choice. Browse anniversary gifts to USA for matching gift ideas.", href: "/anniversary-gifts-to-usa" },
-        { title: "Valentine's Day", text: "Choose romantic roses and add chocolates from our Valentine's Day gifts to USA page.", href: "/valentines-day-gifts-to-usa" },
+        { title: "Birthdays", text: "A cheerful mix of colours works well, and it pairs nicely with sweets or a cake from a set of birthday gifts to USA.", href: "/birthday-gifts-to-usa" },
+        { title: "Anniversaries", text: "Red or pink roses are a classic choice and sit well beside other anniversary gifts to USA.", href: "/anniversary-gifts-to-usa" },
+        { title: "Valentine's Day", text: "Romantic roses with chocolates and other Valentine's Day gifts to USA make the day feel complete.", href: "/valentines-day-gifts-to-usa" },
         { title: "Thank you and get well", text: "Soft, bright flowers show care and appreciation." },
         { title: "Congratulations", text: "A vibrant bouquet celebrates promotions, graduations and new homes." },
         { title: "Just because", text: "An unexpected bouquet can brighten an ordinary day." },
@@ -205,7 +209,7 @@ export const usaBouquets = article("bouquets", {
     },
     {
       heading: "How to Order Bouquets Online for Delivery in USA",
-      paragraphs: ["Sending bouquets of flowers delivered to the United States takes only a few steps:"],
+      paragraphs: ["Sending a bouquet to the United States takes only a few steps:"],
       items: points([
         { title: "Browse the bouquets", text: "Explore the available flower bouquets and pick your favourite." },
         { title: "Enter the delivery address", text: "Add the recipient's complete US address, ZIP code and contact number." },
@@ -223,7 +227,7 @@ export const usaBouquets = article("bouquets", {
     {
       heading: "Pair Your Bouquet with Cakes and Hampers",
       paragraphs: [
-        "Turn a bouquet into a bigger celebration by adding a treat. A bouquet with a delicious cake from our cakes to USA range makes a lovely birthday surprise, while a bouquet with chocolates or gourmet snacks from gift hampers to USA adds a thoughtful touch to anniversaries and thank-you gifts. Check each product's details to see which combinations are offered.",
+        "Turn a bouquet into a bigger celebration by adding a treat. A bouquet with a delicious cake delivered to the USA makes a lovely birthday surprise, while chocolates or gourmet snacks from gift hampers to USA add a thoughtful touch to anniversaries and thank-you gifts. Check each product's details to see which combinations are offered.",
       ],
       links: [
         { label: "Cakes to USA", href: "/cakes-to-usa" },
@@ -272,12 +276,12 @@ export const usaCakes = article("cakes", {
         "Everyone has a favourite flavour, so we have grouped popular choices to help you decide. Explore what is available:",
       ],
       items: points([
-        { title: "Chocolate cake", text: "A rich favourite for chocolate cake gift delivery USA and chocolate cake delivery in America, ideal for birthdays and celebrations." },
-        { title: "Red velvet cake", text: "A striking choice for red velvet cake delivery in America, loved at anniversaries and romantic occasions." },
-        { title: "Vanilla cake", text: "A light, classic flavour for vanilla cake delivery in America that works for every age group." },
-        { title: "Buttercream cake", text: "Soft and creamy buttercream cake delivery USA options for festive gatherings." },
-        { title: "Cheesecake", text: "A creamy cheesecake gift delivery USA for dessert lovers." },
-        { title: "Cupcakes", text: "Easy-to-share cupcakes delivered to family in USA for small celebrations." },
+        { title: "Chocolate cake", text: "A rich favourite for birthdays and celebrations, and one of the easiest cakes to send to the USA." },
+        { title: "Red velvet cake", text: "A striking choice, loved at anniversaries and romantic occasions." },
+        { title: "Vanilla cake", text: "A light, classic flavour that works for every age group." },
+        { title: "Buttercream cake", text: "Soft and creamy, good for festive gatherings." },
+        { title: "Cheesecake", text: "A creamy gift for dessert lovers." },
+        { title: "Cupcakes", text: "Easy to share with family at small celebrations." },
         { title: "Black forest cake", text: "A timeless mix of chocolate and cream." },
         { title: "Carrot cake", text: "A comforting choice for people who prefer spiced, less sweet desserts." },
         { title: "Tiramisu cake", text: "A coffee-flavoured treat for those who love Italian-style desserts." },
@@ -291,14 +295,14 @@ export const usaCakes = article("cakes", {
     {
       heading: "Birthday Cakes for Loved Ones in the USA",
       paragraphs: [
-        "A birthday is not complete without cutting a cake. Choose a birthday cake delivery in America option that suits the person's taste, then add a note to make it personal. To build a bigger surprise, take a look at our birthday gifts to USA page for flowers, treats and keepsakes that go well with a cake.",
+        "A birthday is not complete without cutting a cake. Choose a birthday cake for delivery in America that suits the person's taste, then add a note to make it personal. Flowers, treats and keepsakes picked from the many birthday gifts to USA can round out the surprise.",
       ],
       links: [{ label: "Birthday gifts to USA", href: "/birthday-gifts-to-usa" }],
     },
     {
       heading: "Anniversary Cakes for Couples and Parents",
       paragraphs: [
-        "Celebrate years of togetherness with an anniversary cake gift delivery USA option. A red velvet, chocolate or cheesecake can add sweetness to a romantic dinner at home or a family celebration. Explore anniversary gifts to USA to find flowers and treats that suit the occasion.",
+        "Celebrate years of togetherness with an anniversary cake gift delivery in the USA. A red velvet, chocolate or cheesecake can add sweetness to a romantic dinner at home or a family celebration, and it looks lovely beside anniversary gifts to USA such as flowers and treats.",
       ],
       links: [{ label: "Anniversary gifts to USA", href: "/anniversary-gifts-to-usa" }],
     },
@@ -312,15 +316,15 @@ export const usaCakes = article("cakes", {
       heading: "Cake Combos: Cake and Flowers, Cake and Chocolates",
       paragraphs: ["A well-chosen combo is a simple way to upgrade a gift:"],
       items: points([
-        { title: "Cake and flowers", text: "A cake and flowers delivery in America is a popular choice for birthdays and anniversaries. Browse our flowers to USA collection to pick a matching bouquet.", href: "/flowers-to-usa" },
+        { title: "Cake and flowers", text: "A cake and flowers delivery in America is a popular choice for birthdays and anniversaries, especially when you add a matching bouquet from the range of flowers to USA.", href: "/flowers-to-usa" },
         { title: "Cake and chocolates", text: "A cake and chocolates gift suits sweet-lovers of every age." },
-        { title: "Cake with a hamper", text: "Add a basket of snacks and treats from gift hampers to USA for a full celebration pack.", href: "/hampers-to-usa" },
+        { title: "Cake with a hamper", text: "A basket of snacks and treats from gift hampers to USA turns a cake into a full celebration pack.", href: "/hampers-to-usa" },
       ]),
     },
     {
       heading: "Send Cakes to USA from India and Other Countries",
       paragraphs: [
-        "Whether you are in India, the UK, Canada or Australia, you can place an order for a loved one in the United States. Browse the cake collection, select your favourite and enter the complete delivery address during checkout. If you want cakes for celebrations in USA, check the delivery details for the recipient's address before confirming the order. For more ways to gift across borders, see our gifts for loved ones in America collection.",
+        "Whether you are in India, the UK, Canada or Australia, you can place an order for a loved one in the United States. Browse the cake collection, select your favourite and enter the complete delivery address during checkout. If you want cakes for celebrations in USA, check the delivery details for the recipient's address before confirming the order. The same goes for any other gifts for loved ones in America you add alongside the cake.",
       ],
       links: [{ label: "Gifts to USA", href: "/gifts-to-usa" }],
     },
@@ -363,10 +367,10 @@ export const usaBirthdayGifts = article("birthday-gifts", {
       heading: "Explore the Best Birthday Gift Ideas for Your Loved Ones in USA",
       paragraphs: ["The right gift reflects the person you are celebrating. Here are some birthday gift ideas for USA celebrations to get you started."],
       items: points([
-        { title: "Birthday flowers and sweets", text: "Flowers are a timeless way to share warm wishes. Choose elegant roses or a cheerful mixed bouquet, then add sweets for a complete surprise. Birthday flowers and sweets make a lovely pair, and you can explore more options on our flowers to USA page.", href: "/flowers-to-usa" },
-        { title: "Delicious birthday cakes", text: "A birthday cake makes the celebration feel complete. Whether the birthday person loves chocolate, vanilla, red velvet or fruit flavours, you can browse birthday cake delivery in USA options on our cakes to USA page.", href: "/cakes-to-usa" },
+        { title: "Birthday flowers and sweets", text: "Flowers are a timeless way to share warm wishes. Choose elegant roses or a cheerful mixed bouquet, then add sweets for a complete surprise. Birthday flowers and sweets make a lovely pair, and many people send flowers to USA alongside a small treat so the surprise feels complete.", href: "/flowers-to-usa" },
+        { title: "Delicious birthday cakes", text: "A birthday cake makes the celebration feel complete. Whether the birthday person loves chocolate, vanilla, red velvet or fruit flavours, there are plenty of cakes to USA to choose from, and a birthday cake delivery in USA can be arranged for the big day.", href: "/cakes-to-usa" },
         { title: "Birthday treats for loved ones", text: "Chocolates, cookies and sweet boxes are easy ways to add joy. Explore birthday treats for loved ones, from chocolate assortments to thoughtfully arranged sweet gifts, especially for friends who have a sweet tooth." },
-        { title: "Birthday gift boxes, present bundles and celebration packages", text: "Can't decide on one gift? Look at a birthday gift box, a birthday present bundle or a birthday celebration package that brings several items together. Our gift hampers to USA collection offers chocolate, gourmet and snack hampers that work well for birthdays.", href: "/hampers-to-usa" },
+        { title: "Birthday gift boxes, present bundles and celebration packages", text: "Can't decide on one gift? Look at a birthday gift box, a birthday present bundle or a birthday celebration package that brings several items together. Chocolate, gourmet and snack hampers for delivery in the USA also work well for birthdays.", href: "/hampers-to-usa" },
         { title: "Birthday keepsake gifts", text: "Some presents are meant to be treasured. Birthday keepsake gifts such as personalised items, where available, help the recipient remember the day for years." },
       ]),
     },
@@ -374,8 +378,8 @@ export const usaBirthdayGifts = article("birthday-gifts", {
       heading: "Send Birthday Gifts to Everyone Special in Your Life",
       paragraphs: ["Every relationship deserves a different kind of surprise. Use these ideas when you plan birthday gift delivery for the people you love."],
       items: points([
-        { title: "Birthday gifts for boyfriend and girlfriend", text: "Pick something that matches his or her personality. Chocolates, cakes and keepsakes suit a boyfriend, while roses, flower arrangements and sweet treats are lovely for a girlfriend. Add a heartfelt message to make it personal." },
-        { title: "Birthday gifts for husband and wife", text: "Make your spouse feel appreciated with a birthday surprise that shows you care. A husband may enjoy a cake and a gourmet hamper, while a wife may love romantic flowers with chocolates. Choose birthday gift delivery for partner options that reflect your shared memories." },
+        { title: "Birthday gifts for boyfriend and girlfriend", text: "Pick something that matches his or her personality. Chocolates, cakes and keepsakes suit a boyfriend, while roses, flower arrangements and sweet treats are lovely for a girlfriend. Whether you are shopping for gifts for him or gifts for her, add a heartfelt message in your own words to make it personal." },
+        { title: "Birthday gifts for husband and wife", text: "Make your spouse feel appreciated with a birthday surprise that shows you care. A husband may enjoy a cake and a gourmet hamper, while a wife may love romantic flowers with chocolates. Birthday gift delivery for a partner works best when the gift reflects your shared memories." },
         { title: "Birthday gifts for parents", text: "Your parents deserve a birthday filled with love. Send flowers, a cake or a hamper with a note of thanks. Birthday gift delivery for parents is especially meaningful when you cannot celebrate in person." },
         { title: "Birthday gifts for kids", text: "Make a child's birthday exciting with a colourful cake, bright flowers for mum or sweet treats for the party table. Choose age-appropriate gifts that match their interests." },
         { title: "Birthday gifts for friends", text: "Celebrate friendship with a present that brings back happy memories. Birthday gift delivery for friends can include flowers, cakes, treats or a curated hamper, depending on what they enjoy." },
@@ -387,10 +391,7 @@ export const usaBirthdayGifts = article("birthday-gifts", {
     },
     {
       heading: "How to Send a Birthday Gift to USA",
-      paragraphs: [
-        "Follow these simple steps to place your order with BlossomPot:",
-        "Delivery availability and timelines can vary by product and location, so it is a good idea to order a little early for important birthdays.",
-      ],
+      paragraphs: ["Follow these simple steps to place your order with BlossomPot:"],
       items: points([
         { title: "Browse the collection", text: "Explore birthday flowers, cakes, treats, boxes and hampers." },
         { title: "Select a gift", text: "Choose something that suits the person and the occasion." },
@@ -398,6 +399,9 @@ export const usaBirthdayGifts = article("birthday-gifts", {
         { title: "Add a birthday message", text: "Include a personal greeting where the option is available." },
         { title: "Review and pay", text: "Check the delivery information shown for your product and address, then complete the payment." },
       ]),
+      paragraphsAfter: [
+        "Delivery availability and timelines can vary by product and location, so it is a good idea to order a little early for important birthdays.",
+      ],
     },
     {
       heading: "Why Choose BlossomPot for Birthday Gifts to USA?",
@@ -438,11 +442,11 @@ export const usaAnniversaryGifts = article("anniversary-gifts", {
       heading: "Explore Beautiful Anniversary Gifts for Your Loved Ones in USA",
       paragraphs: ["Every relationship has its own story, and the best gift reflects it. Here are some ideas to explore."],
       items: points([
-        { title: "Anniversary flowers and floral surprises", text: "Flowers are a timeless way to express love. Choose elegant roses or a charming mixed bouquet for an anniversary floral surprise. Browse our flowers to USA collection for red roses, pink roses and romantic arrangements.", href: "/flowers-to-usa" },
+        { title: "Anniversary flowers and floral surprises", text: "Flowers are a timeless way to express love. Choose elegant roses or a charming mixed bouquet for an anniversary floral surprise. Red roses, pink roses and romantic arrangements are all popular when people send flowers to USA for an anniversary.", href: "/flowers-to-usa" },
         { title: "Anniversary roses and chocolates", text: "Anniversary roses and chocolates are a classic combination that never goes out of style. A bouquet of roses with a box of chocolates makes the day feel truly romantic." },
-        { title: "Delicious anniversary cakes", text: "No anniversary feels complete without something sweet. Explore anniversary cake delivery in USA options on our cakes to USA page and choose a flavour your loved one enjoys, such as red velvet or chocolate.", href: "/cakes-to-usa" },
+        { title: "Delicious anniversary cakes", text: "No anniversary feels complete without something sweet. For anniversary cake delivery in USA, pick a flavour your loved one enjoys, such as red velvet or chocolate, from the cakes to USA available.", href: "/cakes-to-usa" },
         { title: "Anniversary treats delivery", text: "If you prefer something smaller, anniversary treats delivery can bring sweets and snacks that make the day special without a big celebration." },
-        { title: "Anniversary gift hampers and bundles", text: "Gift hampers bring several treats together in one package. A hamper with chocolates, snacks and other favourites can become a charming anniversary gift bundle. See our gift hampers to USA page for more.", href: "/hampers-to-usa" },
+        { title: "Anniversary gift hampers and bundles", text: "Gift hampers bring several treats together in one package. A hamper with chocolates, snacks and other favourites can become a charming anniversary gift bundle, and there are many gift hampers to USA that suit couples and families.", href: "/hampers-to-usa" },
         { title: "Anniversary gift combos", text: "Combine flowers with cake, or chocolates with a keepsake, for a memorable gesture. Check the product details to see which combinations are available." },
       ]),
     },
@@ -492,10 +496,6 @@ export const usaAnniversaryGifts = article("anniversary-gifts", {
         { title: "Delivery to selected USA locations", text: "Check eligibility at checkout." },
         { title: "Gifts to suit different preferences", text: "Discover choices for different tastes and occasions." },
       ]),
-      paragraphsAfter: [
-        "Planning a romantic surprise? Our Valentine's Day gifts to USA page has more ideas for couples.",
-      ],
-      links: [{ label: "Valentine's Day gifts to USA", href: "/valentines-day-gifts-to-usa" }],
     },
   ],
   faqHeading: "Frequently Asked Questions",
@@ -524,12 +524,12 @@ export const usaValentinesGifts = article("valentines-day-gifts", {
       heading: "Explore Valentine's Day Gifts for Your Loved One in USA",
       paragraphs: ["Different people express love in different ways. Here are some popular ideas to explore."],
       items: points([
-        { title: "Valentine rose gifts", text: "Roses are the timeless language of love. Choose a valentine rose gift such as a bouquet of red roses, or pick pink or white roses for a softer message. Visit our flowers to USA page for rose bouquets, mixed flowers and romantic arrangements.", href: "/flowers-to-usa" },
+        { title: "Valentine rose gifts", text: "Roses are the timeless language of love. Choose a valentine rose gift such as a bouquet of red roses, or pick pink or white roses for a softer message. Most people send flowers to USA with a note, and roses, mixed flowers and romantic arrangements are all popular for Valentine's Day.", href: "/flowers-to-usa" },
         { title: "Valentine chocolate gifts", text: "A box of chocolates is a sweet, classic way to celebrate. Valentine chocolate gifts are a great pairing with roses, or a lovely present on their own." },
-        { title: "Valentine surprise boxes and gift bundles", text: "Looking for several gifts in one? A valentine surprise box or valentine gift bundle can bring together chocolates, treats and other favourites. Our gift hampers to USA collection has more combination ideas.", href: "/hampers-to-usa" },
+        { title: "Valentine surprise boxes and gift bundles", text: "Looking for several gifts in one? A valentine surprise box or valentine gift bundle can bring together chocolates, treats and other favourites, much like the gift hampers to USA that many couples choose.", href: "/hampers-to-usa" },
         { title: "Valentine floral gift boxes", text: "A valentine floral gift box presents flowers in a stylish, ready-to-gift format, ideal if you want something elegant without extra effort." },
         { title: "Romantic valentine packages and treats", text: "Romantic valentine packages can combine flowers, sweets and other items for a complete celebration. If you want something simple, valentine treats delivery with sweets and snacks is an easy way to say you care." },
-        { title: "Valentine cakes", text: "End the day on a sweet note. Browse our cakes to USA collection for chocolate, red velvet and other celebration cakes that can complement your gift.", href: "/cakes-to-usa" },
+        { title: "Valentine cakes", text: "End the day on a sweet note. A chocolate or red velvet cake from the cakes to USA available can complement your gift.", href: "/cakes-to-usa" },
       ]),
     },
     {
@@ -539,14 +539,12 @@ export const usaValentinesGifts = article("valentines-day-gifts", {
         { title: "Valentine gifts for her", text: "Roses, chocolates, a floral gift box or a sweet surprise box are popular valentine gifts for her. A handwritten-style message makes the present feel personal." },
         { title: "Valentine gifts for him", text: "Chocolates, a gourmet hamper, a cake or a surprise box make thoughtful valentine gifts for him. Choose something that matches his tastes." },
         { title: "Valentine gifts for couples", text: "Sending love to friends or relatives who are celebrating together? Valentine gifts for couples can include a cake, flowers and chocolates that they can enjoy side by side." },
-        { title: "Long-distance valentine surprises", text: "If you live in different countries, a well-timed delivery makes the day special. Explore more ways to surprise your partner through our gift delivery for loved ones in America collection.", href: "/gifts-to-usa" },
+        { title: "Long-distance valentine surprises", text: "If you live in different countries, a well-timed delivery makes the day special. A thoughtful package of gifts for loved ones in America shows your partner you planned ahead.", href: "/gifts-to-usa" },
       ]),
     },
     {
       heading: "How to Send Valentine's Day Gifts to USA",
-      paragraphs: [
-        "Valentine's Day is one of the busiest gifting times of the year. Ordering early gives you more time to choose and review delivery options. Delivery availability depends on the product and the address.",
-      ],
+      paragraphs: [],
       items: points([
         { title: "Browse the collection", text: "Explore roses, chocolates, surprise boxes and floral gift boxes." },
         { title: "Choose a gift", text: "Select what suits your partner or loved one." },
@@ -554,6 +552,9 @@ export const usaValentinesGifts = article("valentines-day-gifts", {
         { title: "Write a message", text: "Include a loving note where the option is available." },
         { title: "Review and pay", text: "Check the delivery details shown for your address, then complete the payment." },
       ]),
+      paragraphsAfter: [
+        "Valentine's Day is one of the busiest gifting times of the year. Ordering early gives you more time to choose and review delivery options. Delivery availability depends on the product and the address.",
+      ],
     },
     {
       heading: "Why Choose BlossomPot for Valentine's Day Gifts to USA?",
@@ -594,9 +595,9 @@ export const usaHampers = article("hampers", {
       heading: "Send Gift Hampers for Every Occasion",
       paragraphs: ["A hamper brings several treats and thoughtful items together in a single package. These are some of the occasions it suits best."],
       items: points([
-        { title: "Birthday hampers", text: "Make a birthday more exciting with a birthday hamper filled with chocolates, snacks and gourmet treats. For more ideas, see our birthday gifts to USA page.", href: "/birthday-gifts-to-usa" },
-        { title: "Anniversary hampers", text: "Celebrate love with an anniversary hamper that combines chocolates, sweets and carefully selected gifts. Visit anniversary gifts to USA to pair your hamper with flowers or a cake.", href: "/anniversary-gifts-to-usa" },
-        { title: "Thank you and care packages", text: "Show appreciation with a gift basket of chocolates, snacks, tea or coffee. Care packages delivery in USA also works well when you want to support a family member who lives far away." },
+        { title: "Birthday hampers", text: "Make a birthday more exciting with a birthday hamper filled with chocolates, snacks and gourmet treats, or add one to other birthday gifts to USA for a fuller surprise.", href: "/birthday-gifts-to-usa" },
+        { title: "Anniversary hampers", text: "Celebrate love with an anniversary hamper that combines chocolates, sweets and carefully selected gifts. It pairs nicely with flowers or a cake among other anniversary gifts to USA.", href: "/anniversary-gifts-to-usa" },
+        { title: "Thank you and care packages", text: "Show appreciation with a gift basket of chocolates, snacks, tea or coffee. A care package also works well when you want to support a family member who lives far away." },
         { title: "Congratulations and celebration hampers", text: "Celebrate new jobs, promotions, graduations and new beginnings with a celebration hamper." },
         { title: "Christmas and festive hampers", text: "Add cheer to the season with festive treats, chocolates, snacks and seasonal gift collections for family and friends." },
         { title: "Corporate gift hampers", text: "Show appreciation to employees, clients and business partners with a gourmet gift basket or a premium collection. Thoughtful corporate gifting helps build stronger relationships." },
@@ -607,23 +608,23 @@ export const usaHampers = article("hampers", {
       heading: "Explore Different Types of Gift Hampers in the USA",
       paragraphs: ["Find a hamper that matches your recipient's taste and preferences."],
       items: points([
-        { title: "Chocolate hampers and chocolate gift boxes", text: "Explore chocolate hampers for family in USA, ideal for birthdays, anniversaries and festivals." },
-        { title: "Gourmet hampers and gourmet gift baskets", text: "Choose gourmet hampers delivery USA for people who enjoy fine treats." },
-        { title: "Snack hampers", text: "Snack hampers delivered in America are perfect for friends, colleagues and anyone who enjoys a variety of tasty snacks." },
-        { title: "Sweet boxes and sweet gift baskets", text: "Sweet boxes delivery USA options are a lovely choice during festivals and celebrations." },
-        { title: "Fruit gift baskets", text: "Fruit gift baskets delivered in America suit people who prefer something fresh and wholesome." },
+        { title: "Chocolate hampers and chocolate gift boxes", text: "Ideal for birthdays, anniversaries and festivals, and easy to send to family in the USA." },
+        { title: "Gourmet hampers and gourmet gift baskets", text: "A good pick for people who enjoy fine treats." },
+        { title: "Snack hampers", text: "Perfect for friends, colleagues and anyone who enjoys a variety of tasty snacks." },
+        { title: "Sweet boxes and sweet gift baskets", text: "A lovely choice during festivals and celebrations." },
+        { title: "Fruit gift baskets", text: "Suit people who prefer something fresh and wholesome." },
         { title: "Dry fruit gift boxes", text: "A thoughtful assortment of dry fruits and nuts for festive gifting and family celebrations." },
-        { title: "Flower gift baskets", text: "Combine blooms with treats. Explore our flowers to USA page to add a bouquet.", href: "/flowers-to-usa" },
+        { title: "Flower gift baskets", text: "Combine blooms with treats, or add a bouquet when you send flowers to USA.", href: "/flowers-to-usa" },
         { title: "Tea gift boxes and coffee gift boxes", text: "A comforting present for tea and coffee lovers." },
-        { title: "Food gift boxes", text: "Food gift boxes online gifting USA are a good fit for families and colleagues." },
-        { title: "Premium and luxury hampers", text: "Choose premium hampers or luxury hampers for milestones, corporate gifting and special occasions." },
+        { title: "Food gift boxes", text: "A good fit for families and colleagues." },
+        { title: "Premium and luxury hampers", text: "For milestones, corporate gifting and special occasions." },
       ]),
       paragraphsAfter: ["Availability changes from time to time, so check each product page for the latest choices."],
     },
     {
       heading: "Make Your Hamper Even More Special",
       paragraphs: [
-        "Pair a hamper with a delicious cake from our cakes to USA collection or a bouquet from flowers to USA for a bigger surprise. Look at gift basket bundles that combine treats, flowers and a cake for a celebration nobody will forget.",
+        "Pair a hamper with a delicious cake delivered to the USA or a bouquet when you send flowers to USA for a bigger surprise. Look at gift basket bundles that combine treats, flowers and a cake for a celebration nobody will forget.",
       ],
       links: [
         { label: "Cakes to USA", href: "/cakes-to-usa" },
@@ -633,7 +634,7 @@ export const usaHampers = article("hampers", {
     {
       heading: "Send Gift Hampers to the USA from India and Other Countries",
       paragraphs: [
-        "Distance should never stop you from making someone feel special. Whether you are in India, the UK, Canada, Australia or elsewhere, you can browse BlossomPot, choose a hamper and order hampers online for gifting in the USA. Enter the recipient's complete delivery address and complete your order using an available payment method. For wider gifting ideas, explore our online gifting for loved ones across the US.",
+        "Distance should never stop you from making someone feel special. Whether you are in India, the UK, Canada, Australia or elsewhere, you can browse BlossomPot, choose a hamper and order hampers online for gifting in the USA. Enter the recipient's complete delivery address and complete your order using an available payment method. If you are also thinking of other presents, there is plenty of online gifting for loved ones across the US to go with it.",
       ],
       links: [{ label: "Gifts to USA", href: "/gifts-to-usa" }],
     },

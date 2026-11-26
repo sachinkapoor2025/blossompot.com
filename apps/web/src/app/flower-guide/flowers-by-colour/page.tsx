@@ -28,7 +28,7 @@ export default function ColoursIndexPage() {
           ),
         ]}
       />
-      <div className="max-w-5xl mx-auto px-4 py-10">
+      <div className="site-container py-10">
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },

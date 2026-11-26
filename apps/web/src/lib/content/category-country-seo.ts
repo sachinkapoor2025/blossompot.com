@@ -25,8 +25,18 @@ export type ResolvedCategorySeo = {
   article: CountrySeoContent | null;
 };
 
+/** Short label for country templates. USA pages for these slugs use the full heading. */
+const COUNTRY_LABEL: Record<string, string> = {
+  christmas: "Christmas Gifts",
+  "new-year": "New Year Gifts",
+};
+
 function categoryLabel(slug: string): string {
-  return getCategoryPageSeo(slug)?.h1 ?? slug.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+  return (
+    COUNTRY_LABEL[slug] ??
+    getCategoryPageSeo(slug)?.h1 ??
+    slug.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())
+  );
 }
 
 /**
@@ -55,6 +65,15 @@ export function resolveCategoryPageSeo(slug: string, seoPath: string): ResolvedC
 
   const base = getCategoryPageSeo(slug);
   const label = categoryLabel(slug);
+  if (parsed?.countryIso === "US" && base && COUNTRY_LABEL[slug]) {
+    return {
+      source: "neutral",
+      title: base.title,
+      description: base.description,
+      h1: base.h1,
+      article: null,
+    };
+  }
   if (parsed?.countryIso) {
     const country = countryDisplayName(parsed.countryIso);
     return {
@@ -72,7 +91,7 @@ export function resolveCategoryPageSeo(slug: string, seoPath: string): ResolvedC
     description:
       base?.description ??
       `Shop ${label.toLowerCase()} on BlossomPot. Choose a product and check delivery availability for the recipient’s address at checkout.`,
-    h1: label,
+    h1: base?.h1 ?? label,
     article: null,
   };
 }

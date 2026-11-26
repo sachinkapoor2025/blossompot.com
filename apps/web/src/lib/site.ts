@@ -80,9 +80,11 @@ export const navItems = [
   { label: "Cakes", href: categoryHref("cakes"), category: "cakes" },
   { label: "Birthday", href: categoryHref("birthday-gifts"), category: "birthday-gifts" },
   { label: "Anniversary", href: categoryHref("anniversary-gifts"), category: "anniversary-gifts" },
+  { label: "Christmas", href: categoryHref("christmas"), category: "christmas" },
+  { label: "New Year", href: categoryHref("new-year"), category: "new-year" },
   { label: "Valentine's", href: categoryHref("valentines-day-gifts"), category: "valentines-day-gifts" },
   { label: "Hampers", href: categoryHref("gift-hampers"), category: "gift-hampers" },
-  { label: "Combos", href: "/combos" },
+  { label: "Combos to USA", href: "/combos" },
   { label: "Flower & Cake Combo", href: "/gift-catalog" },
 ] as const;
 
@@ -195,6 +197,8 @@ export const setSizeCategoryOrder = [] as const;
 /** All public storefront category slugs (SEO routes + homepage sections). */
 export const categoryOrder = [
   ...homeCategoryOrder,
+  "christmas",
+  "new-year",
   "valentines-day-gifts",
   "mothers-day-gifts",
   "wedding-gifts",

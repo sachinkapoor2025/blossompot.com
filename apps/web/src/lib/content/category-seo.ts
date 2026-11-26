@@ -33,6 +33,18 @@ export const categoryPageSeo: Record<
       "Shop anniversary flowers, cakes, and gift boxes on BlossomPot. Choose a gift and check delivery availability for the recipient’s address at checkout.",
     h1: "Anniversary Gifts",
   },
+  christmas: {
+    title: "Send Christmas Gifts to USA | BlossomPot",
+    description:
+      "Send Christmas gifts to the USA with BlossomPot. Choose a gift and check delivery availability for the recipient’s address at checkout.",
+    h1: "Send Christmas Gifts to USA",
+  },
+  "new-year": {
+    title: "Send New Year Gifts to USA | BlossomPot",
+    description:
+      "Send New Year gifts to the USA with BlossomPot. Choose a gift and check delivery availability for the recipient’s address at checkout.",
+    h1: "Send New Year Gifts to USA",
+  },
   "valentines-day-gifts": {
     title: "Shop Valentine’s Day Gifts | BlossomPot",
     description:

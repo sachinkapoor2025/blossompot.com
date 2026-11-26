@@ -15,7 +15,7 @@ export const metadata: Metadata = pageMetadata({
 export default function PressPage() {
   const inlineLinks = marketingPageInlineLinks.press;
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12">
+    <div className="site-container py-12">
       <h1 className="text-3xl font-bold text-primary mb-6">Press & media</h1>
       <div className="prose prose-slate max-w-none space-y-6 text-slate-700 leading-relaxed">
         <section>

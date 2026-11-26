@@ -137,7 +137,7 @@ export default function CartPage() {
   const estimatedTotal = total + shippingCharge;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 sm:py-10">
+    <div className="site-container py-8 sm:py-10">
       {items.length === 0 ? (
         <div className="text-center py-16">
           <h1 className="text-2xl font-bold text-primary mb-4">Your Cart</h1>

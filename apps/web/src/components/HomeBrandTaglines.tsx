@@ -7,7 +7,7 @@ export function HomeBrandTaglines() {
       aria-label="BlossomPot brand"
       className="border-b border-[#eadfd8] bg-gradient-to-b from-[#fff8f5] to-white"
     >
-      <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8 text-center">
+      <div className="site-container py-6 sm:py-8 text-center">
         <p className="text-[11px] sm:text-xs font-semibold tracking-[0.22em] uppercase text-[#1A3D34]">
           <span className="text-[#E07A9A]" aria-hidden>
             —

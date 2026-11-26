@@ -19,7 +19,7 @@ export const metadata: Metadata = pageMetadata({
 export default async function BlogPage() {
   const posts = await loadBlogPostsWithImages();
   return (
-    <div className="max-w-5xl mx-auto px-4 py-12 overflow-x-hidden">
+    <div className="site-container overflow-x-hidden py-12">
       <h1 className="text-3xl font-bold text-primary mb-2">Gifting Guides & Blog</h1>
       <p className="text-slate-600 mb-8">
         {applyInlineLinks(

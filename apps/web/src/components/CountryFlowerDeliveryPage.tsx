@@ -19,26 +19,18 @@ import { cityNavHref } from "@/lib/site";
 import { cityMenuForCountry } from "@/lib/city-menu-for-location";
 import { siteUrl } from "@/lib/env";
 
-function FlowerGuideProducts({
-  country,
-  centered = false,
-}: {
-  country: CountryFlowerDeliverySlug;
-  centered?: boolean;
-}) {
+function FlowerGuideProducts({ country }: { country: CountryFlowerDeliverySlug }) {
   return (
     <Suspense fallback={<ListingPageSkeleton />}>
-      <CountryFlowerProductSection country={country} centered={centered} />
+      <CountryFlowerProductSection country={country} />
     </Suspense>
   );
 }
 
 export async function CountryFlowerDeliveryPage({
   country,
-  align,
 }: {
   country: CountryFlowerDeliverySlug;
-  align?: "center";
 }) {
   const countryIsoForGate = flowerDeliveryCountryIso(country);
   const flowerPath = flowerDeliveryPathForIso(countryIsoForGate);
@@ -51,7 +43,6 @@ export async function CountryFlowerDeliveryPage({
     href: cityNavHref(city),
   }));
   const productsFirst = country === "usa";
-  const centered = align === "center";
   const inlineLinks = countryPageInlineLinks[country] ?? [];
   const usedHrefs = new Set<string>();
   const usedPhrases = new Set<string>();
@@ -67,7 +58,7 @@ export async function CountryFlowerDeliveryPage({
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
+    <div className="site-container py-10">
       <JsonLd
         data={[
           breadcrumbJsonLd([
@@ -110,12 +101,12 @@ export async function CountryFlowerDeliveryPage({
         ]}
       />
       <Breadcrumbs items={crumbs} />
-      {productsFirst ? <FlowerGuideProducts country={country} centered={centered} /> : null}
-      <div className={centered ? "max-w-3xl mx-auto" : "contents"}>
-      <h1 className={`text-3xl font-bold text-primary mb-3${centered ? " text-center" : ""}`}>{page.h1}</h1>
+      {productsFirst ? <FlowerGuideProducts country={country} /> : null}
+      <div>
+      <h1 className="text-3xl font-bold text-primary mb-3">{page.h1}</h1>
       {productsFirst ? null : <FlowerGuideProducts country={country} />}
 
-      <p className="text-slate-600 mb-6 max-w-3xl leading-relaxed">
+      <p className="text-slate-600 mb-6 leading-relaxed">
         {applyInlineLinks(page.intro, inlineLinks, linkOpts)}
       </p>
 
@@ -125,14 +116,14 @@ export async function CountryFlowerDeliveryPage({
 
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-3">{page.howItWorksHeading}</h2>
-        <p className="text-slate-700 leading-relaxed max-w-3xl">
+        <p className="text-slate-700 leading-relaxed">
           {applyInlineLinks(page.howItWorks, inlineLinks, linkOpts)}
         </p>
       </section>
 
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-3">{page.categoriesHeading}</h2>
-        <p className="text-slate-700 mb-4 max-w-3xl leading-relaxed">
+        <p className="text-slate-700 mb-4 leading-relaxed">
           {applyInlineLinks(page.categoriesIntro, inlineLinks, linkOpts)}
         </p>
         <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -168,7 +159,7 @@ export async function CountryFlowerDeliveryPage({
 
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-3">{page.citiesHeading}</h2>
-        <p className="text-slate-700 mb-3 max-w-3xl leading-relaxed">
+        <p className="text-slate-700 mb-3 leading-relaxed">
           {applyInlineLinks(page.citiesIntro, inlineLinks, linkOpts)}
         </p>
         <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
@@ -184,7 +175,7 @@ export async function CountryFlowerDeliveryPage({
 
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-3">{page.whyHeading}</h2>
-        <ul className="list-disc pl-5 space-y-2 text-slate-700 max-w-3xl">
+        <ul className="list-disc pl-5 space-y-2 text-slate-700">
           {page.whyPoints.map((point) => (
             <li key={point}>{point}</li>
           ))}
@@ -192,9 +183,9 @@ export async function CountryFlowerDeliveryPage({
       </section>
 
       <section className="mb-10 rounded-3xl border border-primary/15 bg-gradient-to-br from-rose-50 via-white to-orange-50 p-6 sm:p-8">
-        <h2 className={`text-xl sm:text-2xl font-bold text-primary${centered ? " text-center" : ""}`}>{page.ctaHeading}</h2>
-        <p className={`mt-2 text-slate-600 max-w-2xl${centered ? " mx-auto" : ""}`}>{page.ctaText}</p>
-        <div className={`mt-5 flex flex-wrap gap-3${centered ? " justify-center" : ""}`}>
+        <h2 className="text-xl sm:text-2xl font-bold text-primary">{page.ctaHeading}</h2>
+        <p className="mt-2 text-slate-600">{page.ctaText}</p>
+        <div className="mt-5 flex flex-wrap gap-3">
           <Link
             href={page.primaryCta.href}
             className="inline-flex min-h-11 items-center rounded-full bg-nav px-5 text-sm font-semibold text-white hover:opacity-95"
@@ -212,7 +203,7 @@ export async function CountryFlowerDeliveryPage({
 
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-4">Frequently asked questions</h2>
-        <div className="grid gap-3 max-w-3xl">
+        <div className="grid gap-3">
           {page.faqs.map((faq) => (
             <AnswerBlock key={faq.q} question={faq.q} answer={faq.a} />
           ))}

@@ -20,7 +20,7 @@ export default function AboutPage() {
   const linkOpts = { usedHrefs, usedPhrases, currentPath: "/about" };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12">
+    <div className="site-container py-12">
       <JsonLd data={aboutPageJsonLd()} />
       <h1 className="text-3xl font-bold text-primary mb-6">About {site.name}</h1>
       <div className="space-y-6 text-slate-700 leading-relaxed">

@@ -29,7 +29,7 @@ export default async function FaqPage({
   const destination = countryDisplayName(country);
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12">
+    <div className="site-container py-12">
       <JsonLd data={faqJsonLd(items)} />
       <h1 className="text-3xl font-bold text-primary mb-2">Frequently Asked Questions</h1>
       <p className="text-slate-600 mb-8">

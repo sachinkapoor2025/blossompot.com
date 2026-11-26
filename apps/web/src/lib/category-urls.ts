@@ -7,6 +7,8 @@ export const CATEGORY_PUBLIC_SLUG: Record<string, string> = {
   cakes: "cakes",
   "birthday-gifts": "birthday-gifts",
   "anniversary-gifts": "anniversary-gifts",
+  christmas: "christmas-gifts",
+  "new-year": "new-year-gifts",
   "valentines-day-gifts": "valentines-day-gifts",
   "mothers-day-gifts": "mothers-day-gifts",
   "wedding-gifts": "wedding-gifts",

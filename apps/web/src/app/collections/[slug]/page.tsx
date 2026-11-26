@@ -58,7 +58,7 @@ export default async function CollectionPage({ params }: Props) {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-10 overflow-x-hidden">
+    <div className="site-container overflow-x-hidden py-10">
       <JsonLd
         data={[
           breadcrumbJsonLd(
@@ -72,7 +72,7 @@ export default async function CollectionPage({ params }: Props) {
       <Breadcrumbs items={crumbs} />
       <header className="mb-8">
         <h1 className="text-3xl font-bold text-primary mb-2">{collection.h1}</h1>
-        <p className="text-slate-600 max-w-3xl">{collection.intro}</p>
+        <p className="text-slate-600">{collection.intro}</p>
       </header>
 
       {filtered.length === 0 ? (

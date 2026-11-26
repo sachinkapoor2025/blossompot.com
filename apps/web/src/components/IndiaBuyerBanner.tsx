@@ -9,7 +9,7 @@ export function IndiaBuyerBanner() {
       className="border-b border-amber-200/80 bg-gradient-to-r from-amber-50 via-orange-50/80 to-amber-50"
       aria-label="Ordering from abroad"
     >
-      <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
+      <div className="site-container py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
         <p className="text-slate-800">
           <span className="font-semibold text-primary">Ordering from abroad?</span>{" "}
           Pay with <strong>UPI / INR</strong> or card — we deliver gifts to US addresses.

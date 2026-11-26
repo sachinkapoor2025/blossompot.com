@@ -94,6 +94,8 @@ async function CategoryPageContent({ params, searchParams }: Props) {
     "gift-hampers": "Gift Hampers",
     "birthday-gifts": "Birthday Gifts",
     "anniversary-gifts": "Anniversary Gifts",
+    christmas: "Christmas",
+    "new-year": "New Year",
     "valentines-day-gifts": "Valentine's Day Gifts",
   };
   const seoCategoryName = headingName[slug] ?? name;
@@ -115,7 +117,8 @@ async function CategoryPageContent({ params, searchParams }: Props) {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
+    <>
+    <div className="site-container py-10">
       <JsonLd
         data={[
           breadcrumbJsonLd(crumbs.map((c) => ({ name: c.label, path: c.href ?? categoryHref(slug) }))),
@@ -137,13 +140,7 @@ async function CategoryPageContent({ params, searchParams }: Props) {
         />
       </Suspense>
 
-      {pageSeo.article ? (
-        <CountrySeoArticle
-          article={pageSeo.article}
-          omitHeading
-          headingClassName="text-3xl font-bold text-primary mb-4"
-        />
-      ) : rich ? (
+      {pageSeo.article ? null : rich ? (
         <CategoryContentSection
           content={rich}
           categoryName={seoCategoryName}
@@ -205,6 +202,14 @@ async function CategoryPageContent({ params, searchParams }: Props) {
         </>
       )}
     </div>
+    {pageSeo.article ? (
+      <CountrySeoArticle
+        article={pageSeo.article}
+        omitHeading
+        headingClassName="text-3xl font-bold text-primary mb-4"
+      />
+    ) : null}
+    </>
   );
 }
 

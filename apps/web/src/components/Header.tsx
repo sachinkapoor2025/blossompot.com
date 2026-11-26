@@ -287,7 +287,7 @@ export function Header() {
           </div>
         </div>
 
-        <div className="flex min-w-0 items-center gap-2 border-t border-slate-100 bg-white px-3 py-2">
+        <div className="flex min-w-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-2">
           <DeliveryLocationChip compact />
           <div className="min-w-0 flex-1">
             <SearchBar />
@@ -296,7 +296,7 @@ export function Header() {
       </div>
 
       {/* Desktop top bar */}
-      <div className="hidden md:grid max-w-7xl mx-auto px-4 py-2.5 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-6">
+      <div className="site-container hidden md:grid py-2.5 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-6">
         <SiteLogoLink size="desktop" loading="eager" />
 
         <div className="w-full max-w-2xl mx-auto">
@@ -323,7 +323,7 @@ export function Header() {
 
       {/* Desktop nav */}
       <nav className="hidden md:block border-t border-slate-100 bg-white overflow-visible">
-        <div className="max-w-7xl mx-auto px-3 py-2">
+        <div className="mx-auto w-full max-w-7xl px-3 py-2">
           <div className="flex flex-nowrap items-center justify-center gap-1 lg:gap-1.5 [&_.btn-nav]:shrink-0 [&_.btn-nav]:px-3 [&_.btn-nav]:py-1.5 [&_.btn-nav]:text-[13px]">
             {navItems.map((item) =>
               "category" in item && item.category === "valentines-day-gifts" ? (
