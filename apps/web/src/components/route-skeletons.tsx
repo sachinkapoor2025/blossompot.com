@@ -7,10 +7,9 @@ function Bone({ className }: { className: string }) {
   return <div className={`rounded bg-slate-200/80 ${className}`} />;
 }
 
-export function ListingPageSkeleton({ width = "7xl" }: { width?: "6xl" | "7xl" }) {
-  const maxWidth = width === "6xl" ? "max-w-6xl" : "max-w-7xl";
+export function ListingPageSkeleton() {
   return (
-    <div className={`${maxWidth} mx-auto px-4 py-10 animate-pulse`} aria-busy="true" aria-live="polite">
+    <div className="site-container animate-pulse py-10" aria-busy="true" aria-live="polite">
       <p className="sr-only">Loading</p>
       <Bone className="h-4 w-40 mb-6" />
       <Bone className="h-9 w-72 max-w-full mb-4" />
@@ -38,7 +37,7 @@ export function ListingPageSkeleton({ width = "7xl" }: { width?: "6xl" | "7xl" }
 
 export function ProductPageSkeleton() {
   return (
-    <div className="max-w-6xl mx-auto px-4 pt-6 pb-16 animate-pulse" aria-busy="true" aria-live="polite">
+    <div className="site-container animate-pulse pt-6 pb-16" aria-busy="true" aria-live="polite">
       <p className="sr-only">Loading product</p>
       <Bone className="h-4 w-64 max-w-full mb-6" />
       <div className="grid md:grid-cols-2 gap-8 lg:gap-10 items-start">

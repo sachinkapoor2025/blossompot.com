@@ -48,7 +48,7 @@ export default async function BlogPostPage({ params }: Props) {
 
   return (
     <div className="overflow-x-hidden">
-      <article className="max-w-3xl mx-auto px-4 py-10 min-w-0 w-full">
+      <article className="site-container min-w-0 w-full py-10">
         <JsonLd
           data={[
             articleJsonLd(post),
@@ -100,7 +100,7 @@ export default async function BlogPostPage({ params }: Props) {
 
       </article>
 
-      <div className="max-w-5xl mx-auto px-4 pb-12">
+      <div className="site-container pb-12">
         <BlogShowMoreProducts />
       </div>
     </div>

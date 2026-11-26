@@ -36,7 +36,7 @@ export default function AboutTeamPage() {
   ];
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12">
+    <div className="site-container py-12">
       <JsonLd
         data={breadcrumbJsonLd(crumbs.map((c) => ({ name: c.label, path: c.href ?? path })))}
       />

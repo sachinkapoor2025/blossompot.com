@@ -3,7 +3,7 @@ import { HUB_HERO } from "@/lib/content/flower-guide/images";
 
 export function HomeFlowerGuideCta() {
   return (
-    <section className="max-w-7xl mx-auto px-4 py-12">
+    <section className="site-container py-12">
       <div className="relative overflow-hidden rounded-3xl border border-[#eadfd8] bg-white shadow-sm">
         <div className="grid md:grid-cols-2">
           <div className="relative min-h-[220px]">

@@ -43,7 +43,7 @@ export function RememberLanding({ plans }: { plans: SubscriptionPlan[] }) {
     <div className="bg-[#fbf7f4]">
       <section className="relative overflow-hidden bg-gradient-to-br from-primary via-[#9e2d55] to-accent text-white">
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_right,_#fff,_transparent_45%)]" aria-hidden />
-        <div className="relative max-w-5xl mx-auto px-4 py-16 sm:py-24 text-center">
+        <div className="relative site-container py-16 sm:py-24 text-center">
           <p className="text-xs uppercase tracking-[0.28em] text-white/75 font-semibold">
             Occasion reminder membership
           </p>
@@ -89,7 +89,7 @@ export function RememberLanding({ plans }: { plans: SubscriptionPlan[] }) {
       </section>
 
       <section className="border-y border-primary/10 bg-white" aria-label="Why members trust Remember">
-        <div className="max-w-5xl mx-auto px-4 py-3">
+        <div className="site-container py-3">
           <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs sm:text-sm text-slate-700 font-medium">
             <li>Secure Stripe & Razorpay checkout</li>
             <li>Operated by {site.legalName}</li>
@@ -99,7 +99,7 @@ export function RememberLanding({ plans }: { plans: SubscriptionPlan[] }) {
         </div>
       </section>
 
-      <section className="max-w-5xl mx-auto px-4 py-14" aria-labelledby="how-remember-works">
+      <section className="site-container py-14" aria-labelledby="how-remember-works">
         <h2 id="how-remember-works" className="text-2xl sm:text-3xl font-bold text-primary text-center">
           A simple 5-step reminder membership
         </h2>
@@ -121,7 +121,7 @@ export function RememberLanding({ plans }: { plans: SubscriptionPlan[] }) {
       </section>
 
       <section className="bg-white border-y border-slate-100" aria-labelledby="remember-benefits">
-        <div className="max-w-5xl mx-auto px-4 py-14">
+        <div className="site-container py-14">
           <h2 id="remember-benefits" className="text-2xl sm:text-3xl font-bold text-primary text-center">
             Why families use BlossomPot Remember
           </h2>
@@ -143,7 +143,7 @@ export function RememberLanding({ plans }: { plans: SubscriptionPlan[] }) {
         </div>
       </section>
 
-      <section id="membership-plans" className="max-w-5xl mx-auto px-4 py-14" aria-labelledby="choose-plan">
+      <section id="membership-plans" className="site-container py-14" aria-labelledby="choose-plan">
         <h2 id="choose-plan" className="text-2xl sm:text-3xl font-bold text-primary text-center">
           Choose how long we remember
         </h2>
@@ -156,7 +156,7 @@ export function RememberLanding({ plans }: { plans: SubscriptionPlan[] }) {
       </section>
 
       <section className="bg-white border-t border-slate-100" aria-labelledby="remember-faq">
-        <div className="max-w-3xl mx-auto px-4 py-14">
+        <div className="site-container py-14">
           <h2 id="remember-faq" className="text-2xl sm:text-3xl font-bold text-primary text-center">
             Occasion reminder membership FAQs
           </h2>

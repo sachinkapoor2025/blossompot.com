@@ -54,7 +54,7 @@ export default function FlowerGuideHubPage() {
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-slate-900/70 via-slate-900/45 to-slate-900/20" />
-        <div className="relative max-w-7xl mx-auto px-4 py-16 sm:py-24 text-white">
+        <div className="relative site-container py-16 sm:py-24 text-white">
           <p className="text-xs uppercase tracking-[0.25em] text-white/80">BlossomPot Flower Knowledge Centre</p>
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl mt-3 max-w-3xl leading-tight">
             Complete Flower Guide &amp; Flower Encyclopedia
@@ -70,7 +70,7 @@ export default function FlowerGuideHubPage() {
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 py-12">
+      <div className="site-container py-12">
         <Breadcrumbs items={crumbs} />
 
         <section className="mb-14">

@@ -23,7 +23,7 @@ export function ExploreMoreSection({
       <h2 id="explore-more-heading" className="text-lg sm:text-xl font-bold text-primary mb-2">
         Explore More
       </h2>
-      <p className="text-sm text-slate-600 mb-6 max-w-3xl">
+      <p className="text-sm text-slate-600 mb-6">
         Browse a few closely related pages for this product, including relevant collections, delivery help,
         and location coverage.
       </p>

@@ -54,7 +54,7 @@ export default async function ReviewsPage() {
       {hasLiveGoogle ? (
         <JsonLd data={reviewsPageJsonLd(googleReviews.rating!, googleReviews.totalCount!)} />
       ) : null}
-      <section className="max-w-3xl mx-auto px-4 pt-12 pb-6">
+      <section className="site-container pt-12 pb-6">
         <h1 className="text-3xl font-bold text-primary mb-3">Customer Reviews</h1>
         <p className="text-slate-600 leading-relaxed mb-2">
           {trustFacts.seasonLabel} — we&apos;re building trust one {applyInlineLinks("delivery", marketingPageInlineLinks.reviews, { currentPath: "/reviews", max: 1 })} at a time. Customers order from
@@ -88,7 +88,7 @@ export default async function ReviewsPage() {
       {hasLiveGoogle ? (
         <GoogleReviews data={googleReviews} />
       ) : (
-        <section className="max-w-3xl mx-auto px-4 pb-8">
+        <section className="site-container pb-8">
           <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
             Live Google reviews will appear here once Google Places credentials are configured. We do not
             show placeholder testimonials.
@@ -104,7 +104,7 @@ export default async function ReviewsPage() {
         <ReviewForm />
       </section>
 
-      <section className="max-w-3xl mx-auto px-4 pb-12 text-center text-sm text-slate-500">
+      <section className="site-container pb-12 text-center text-sm text-slate-500">
         <Link href="/products" className="text-nav font-semibold hover:underline">
           Continue shopping gifts
         </Link>

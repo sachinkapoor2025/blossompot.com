@@ -55,6 +55,10 @@ const nextConfig: NextConfig = {
       { source: "/same-day-gifts/", destination: "/products", statusCode: 301 },
       { source: "/collections/same-day-gifts", destination: "/products", statusCode: 301 },
       { source: "/collections/same-day-gifts/", destination: "/products", statusCode: 301 },
+      { source: "/christmas-to-:country", destination: "/christmas-gifts-to-:country", statusCode: 301 },
+      { source: "/christmas-to-:country/", destination: "/christmas-gifts-to-:country", statusCode: 301 },
+      { source: "/new-year-to-:country", destination: "/new-year-gifts-to-:country", statusCode: 301 },
+      { source: "/new-year-to-:country/", destination: "/new-year-gifts-to-:country", statusCode: 301 },
     ];
   },
   async rewrites() {

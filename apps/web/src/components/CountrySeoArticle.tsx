@@ -153,7 +153,7 @@ export function CountrySeoArticle({
   );
   const faq =
     article.faqs.length > 0 ? (
-      <section className={`mt-12 pt-10 border-t border-slate-200 max-w-3xl${centerFaq ? " mx-auto" : ""}`}>
+      <section className="mt-12 pt-10 border-t border-slate-200">
         <h2 className={`font-display text-xl font-semibold text-primary mb-6${centerFaq ? " text-center" : ""}`}>
           {article.faqHeading ?? "Frequently asked questions"}
         </h2>
@@ -166,8 +166,8 @@ export function CountrySeoArticle({
       className="bg-slate-50 border-y border-slate-200"
       aria-labelledby={omitHeading ? undefined : "country-seo-heading"}
     >
-      <div className="max-w-7xl mx-auto px-4 py-12 sm:py-16">
-        <article className={`max-w-3xl space-y-8 text-slate-700 leading-relaxed${centerFaq ? " mx-auto" : ""}`}>
+      <div className="site-container py-12 sm:py-16">
+        <article className="space-y-8 text-slate-700 leading-relaxed">
           <header>
             {omitHeading ? null : (
               <Heading id="country-seo-heading" className={headingClassName}>

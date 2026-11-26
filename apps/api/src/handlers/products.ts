@@ -389,6 +389,8 @@ const CATEGORY_PARTITIONS = [
   "cakes",
   "birthday-gifts",
   "anniversary-gifts",
+  "christmas",
+  "new-year",
   "valentines-day-gifts",
   "mothers-day-gifts",
   "wedding-gifts",

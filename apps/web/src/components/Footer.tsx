@@ -362,7 +362,7 @@ export function Footer() {
 
   return (
     <footer className="mt-auto border-t border-[#E8CCD7] bg-[#f8eef2] text-slate-700">
-      <div className="mx-auto max-w-7xl px-4 pb-8 pt-8 max-md:pr-[4.75rem]">
+      <div className="site-container pb-8 pt-8 max-md:pr-[4.75rem]">
         <div className="md:hidden">
           <BrandColumn />
         </div>
@@ -472,7 +472,7 @@ export function Footer() {
 
       {/* Bottom bar */}
       <div className="border-t border-primary/10 bg-[#f1dce4]">
-        <div className="max-w-7xl mx-auto px-4 py-4 max-md:pr-[4.75rem] max-md:pb-24 flex flex-col gap-2 text-xs text-slate-500">
+        <div className="site-container py-4 max-md:pr-[4.75rem] max-md:pb-24 flex flex-col gap-2 text-xs text-slate-500">
           <p className="text-center sm:text-left">
             Operated by {trustFacts.operator}.{" "}
             <Link href="/about" className="text-primary hover:underline underline-offset-2">

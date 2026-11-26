@@ -23,13 +23,13 @@ export default function OccasionsIndexPage() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
+    <div className="site-container py-10">
       <JsonLd
         data={breadcrumbJsonLd(crumbs.map((c) => ({ name: c.label, path: c.href ?? path })))}
       />
       <Breadcrumbs items={crumbs} />
       <h1 className="text-3xl font-bold text-primary mb-3">Shop by occasion</h1>
-      <p className="text-slate-600 max-w-3xl mb-8 leading-relaxed">
+      <p className="text-slate-600 mb-8 leading-relaxed">
         {applyInlineLinks(
           "Choose an occasion hub for gift ideas, etiquette notes, and curated flowers, cakes, and hampers with worldwide delivery guidance on every product.",
           marketingPageInlineLinks.occasions,

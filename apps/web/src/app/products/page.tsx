@@ -69,7 +69,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 
 export default function ProductsPage(props: Props) {
   return (
-    <Suspense fallback={<ListingPageSkeleton width="6xl" />}>
+    <Suspense fallback={<ListingPageSkeleton />}>
       <ProductsPageContent {...props} />
     </Suspense>
   );
@@ -123,7 +123,7 @@ async function ProductsPageContent({ searchParams }: Props) {
   const showGrouped = !search && !category;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-10">
+    <div className="site-container py-10">
       {search && shop.state !== "error" ? (
         <SearchTracker query={search} resultCount={products.length} />
       ) : null}

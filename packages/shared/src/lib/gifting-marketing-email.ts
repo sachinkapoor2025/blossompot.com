@@ -1,9 +1,10 @@
 /**
- * Reusable storefront gifting promo email (hero, 3 categories, worldwide CTA,
- * featured product, footer). Table + inline CSS for Gmail / Outlook / Apple Mail.
+ * Simple gifting promo for Gmail, Outlook, and Apple Mail.
+ * One site-hosted photo plus text buttons. Category photos on the CDN were
+ * the images that arrived blank.
  *
- * Change copy, images, links, and CTAs via GIFTING_MARKETING_EMAIL_CONFIG or
- * pass overrides into buildGiftingMarketingEmailHtml().
+ * Change copy, the hero image, links, and CTAs via GIFTING_MARKETING_EMAIL_CONFIG
+ * or pass overrides into buildGiftingMarketingEmailHtml().
  */
 
 import { EMAIL_IMAGES, emailImgAttributes } from "./email-images";
@@ -96,7 +97,7 @@ export type GiftingMarketingEmailConfig = {
 };
 
 export const GIFTING_MARKETING_EMAIL_CONFIG: GiftingMarketingEmailConfig = {
-  preheader: "Flowers, cakes & gift hampers — send a surprise to 200+ countries with BlossomPot.",
+  preheader: "Flowers, cakes and gift hampers. Send a surprise to 200+ countries with BlossomPot.",
   logoUrl: LOGO,
   logoHref: SITE,
   logoAlt: "BlossomPot",
@@ -105,7 +106,7 @@ export const GIFTING_MARKETING_EMAIL_CONFIG: GiftingMarketingEmailConfig = {
     imageAlt: "Fresh flowers and gifting from BlossomPot",
     imageHref: `${SITE}/flowers`,
     headline: "Send a Gift They'll Never Forget",
-    message: "Fresh flowers, celebration cakes, and curated hampers — delivered with care for birthdays, anniversaries, and every day in between.",
+    message: "Fresh flowers, celebration cakes, and curated hampers, delivered with care for birthdays, anniversaries, and every day in between.",
     ctaText: "Shop Now",
     ctaHref: `${SITE}/products`,
   },
@@ -123,7 +124,7 @@ export const GIFTING_MARKETING_EMAIL_CONFIG: GiftingMarketingEmailConfig = {
     {
       name: "Cakes",
       description: "Celebration cakes delivered fresh.",
-      imageUrl: EMAIL_IMAGES.cakes.url,
+      imageUrl: EMAIL_IMAGES.birthdayBanner.url,
       imageAlt: "Shop cakes",
       href: `${SITE}/cakes`,
       buttonText: "Shop Cakes",
@@ -149,13 +150,13 @@ export const GIFTING_MARKETING_EMAIL_CONFIG: GiftingMarketingEmailConfig = {
     imageAlt: "Fresh flowers from BlossomPot",
     name: "Classic Red Rose Bouquet",
     description:
-      "A timeless dozen of premium red roses arranged with fresh greens and elegant wrapping — perfect for anniversaries and I-love-you moments.",
+      "A timeless dozen of premium red roses arranged with fresh greens and elegant wrapping, perfect for anniversaries and I-love-you moments.",
     priceLabel: "$49.99",
     href: `${SITE}/products/classic-red-rose-bouquet`,
     ctaText: "Shop Now",
   },
   footer: {
-    tagline: "Flowers ♥ Cakes ♥ Gifts — Delivering Smiles",
+    tagline: "Flowers, Cakes and Gifts. Delivering Smiles.",
     websiteUrl: SITE,
     websiteLabel: "www.blossompot.com",
     contactEmail: "support@blossompot.com",
@@ -173,7 +174,7 @@ export const GIFTING_MARKETING_EMAIL_CONFIG: GiftingMarketingEmailConfig = {
       badge: s.name,
       iconUrl: s.label === "Facebook" ? FB_ICON : s.label === "Instagram" ? IG_ICON : undefined,
     })),
-    copyrightText: "© 2026 BlossomPot. All Rights Reserved.",
+    copyrightText: "Copyright 2026 BlossomPot. All Rights Reserved.",
     unsubscribeLabel: "Unsubscribe",
     unsubscribeHref: "{{unsubscribe}}",
   },
@@ -182,7 +183,7 @@ export const GIFTING_MARKETING_EMAIL_CONFIG: GiftingMarketingEmailConfig = {
 export const GIFTING_MARKETING_EMAIL_TEMPLATE_ID = "gifting-promo";
 export const GIFTING_MARKETING_EMAIL_NAME = "Gifting Promo (Worldwide)";
 export const GIFTING_MARKETING_EMAIL_SUBJECT =
-  "Send a surprise anywhere in the world — flowers, cakes & hampers";
+  "Send a surprise anywhere in the world: flowers, cakes and hampers";
 
 function escapeHtml(value: string): string {
   return value
@@ -270,7 +271,7 @@ function categoriesRow(categories: readonly GiftingEmailCategory[]): string {
 
 function navLinksRow(links: readonly GiftingEmailNavLink[]): string {
   const parts = links.map((link, i) => {
-    const sep = i < links.length - 1 ? `<span style="color:#8aa399;padding:0 6px;">·</span>` : "";
+    const sep = i < links.length - 1 ? `<span style="color:#8aa399;padding:0 6px;">|</span>` : "";
     return `<a href="${escAttr(link.href)}" target="_blank" style="color:${GOLD};text-decoration:none;">${escapeHtml(link.label)}</a>${sep}`;
   });
   return parts.join("");
@@ -312,214 +313,164 @@ function mergeConfig(overrides?: Partial<GiftingMarketingEmailConfig>): GiftingM
   };
 }
 
+
 export function buildGiftingMarketingEmailHtml(
   overrides?: Partial<GiftingMarketingEmailConfig>
 ): string {
   const cfg = mergeConfig(overrides);
-  const { hero, worldwide, featured, footer } = cfg;
-  const priceRow = featured.priceLabel
-    ? `
-              <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:30px;font-weight:bold;color:${PRIMARY};padding:4px 0 16px 0;">
-                ${escapeHtml(featured.priceLabel)}
-              </div>`
+  const { hero, featured, footer } = cfg;
+  const price = featured.priceLabel
+    ? `<div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;line-height:28px;font-weight:bold;color:${PRIMARY};padding-bottom:14px;">${escapeHtml(featured.priceLabel)}</div>`
     : "";
+  const buttons = cfg.categories
+    .slice(0, 3)
+    .map(
+      (cat) => `
+                        <td align="center" style="padding:6px;">
+                          <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+                            <tr>
+                              <td align="center" bgcolor="${PRIMARY}" style="background-color:${PRIMARY};border-radius:24px;">
+                                <a href="${escAttr(cat.href)}" target="_blank" style="display:inline-block;padding:12px 18px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:18px;font-weight:bold;color:#ffffff;text-decoration:none;border-radius:24px;">${escapeHtml(cat.buttonText)}</a>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>`
+    )
+    .join("");
 
   return `<!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="x-apple-disable-message-reformatting" />
-  <meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no" />
-  <title>${escapeHtml(hero.headline)}</title>
-  <!--[if mso]>
-  <noscript>
-    <xml>
-      <o:OfficeDocumentSettings>
-        <o:AllowPNG/>
-        <o:PixelsPerInch>96</o:PixelsPerInch>
-      </o:OfficeDocumentSettings>
-    </xml>
-  </noscript>
-  <style type="text/css">
-    table { border-collapse: collapse; }
-    td, th, div, p, a, h1, h2, h3, span { font-family: Arial, Helvetica, sans-serif !important; }
-  </style>
-  <![endif]-->
-  <style type="text/css">
-    @media only screen and (max-width: 620px) {
-      .email-container { width: 100% !important; max-width: 100% !important; }
-      .fluid { width: 100% !important; max-width: 100% !important; height: auto !important; }
-      .stack-col { display: block !important; width: 100% !important; max-width: 100% !important; padding-left: 0 !important; padding-right: 0 !important; padding-bottom: 16px !important; }
-      .mobile-pad { padding-left: 20px !important; padding-right: 20px !important; }
-      .hero-title { font-size: 26px !important; line-height: 32px !important; }
-      .section-title { font-size: 22px !important; line-height: 28px !important; }
-      .featured-pad { padding: 20px 4px 8px 4px !important; text-align: center !important; }
-    }
-  </style>
+  <title>${escapeHtml(hero.headline)} | BlossomPot</title>
 </head>
-<body style="margin:0;padding:0;background-color:${PAGE_BG};-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
-  <div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">
+<body style="margin:0;padding:0;background-color:${PAGE_BG};">
+  <div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
     ${escapeHtml(cfg.preheader)}
   </div>
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;background-color:${PAGE_BG};">
     <tr>
       <td align="center" style="padding:24px 12px;">
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="email-container" style="border-collapse:collapse;width:600px;max-width:600px;background-color:${WHITE};border-radius:20px;overflow:hidden;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="border-collapse:collapse;width:600px;max-width:600px;background-color:${WHITE};">
+
           <tr>
-            <td align="center" bgcolor="${WHITE}" style="padding:22px 28px 12px 28px;background-color:${WHITE};">
+            <td align="center" style="padding:28px 24px 16px 24px;">
               <a href="${escAttr(cfg.logoHref)}" target="_blank" style="text-decoration:none;">
-                <img src="${escAttr(cfg.logoUrl)}" ${emailImgAttributes(cfg.logoUrl, 176)} alt="${escAttr(cfg.logoAlt)}" style="display:block;width:176px;max-width:72%;height:auto;border:0;margin:0 auto;" />
+                <img src="${escAttr(cfg.logoUrl)}" ${emailImgAttributes(cfg.logoUrl, 160)} alt="${escAttr(cfg.logoAlt)}" style="display:block;width:160px;height:auto;border:0;margin:0 auto;" />
               </a>
-              <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:16px;letter-spacing:2.2px;text-transform:uppercase;color:${SAGE};padding-top:10px;">
-                Flowers · Cakes · Gifts
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td height="4" style="height:4px;line-height:4px;font-size:0;background-color:${PRIMARY};">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
-                <tr>
-                  <td width="62%" height="4" bgcolor="${PRIMARY}" style="background-color:${PRIMARY};font-size:0;line-height:4px;">&nbsp;</td>
-                  <td width="22%" height="4" bgcolor="${SAGE}" style="background-color:${SAGE};font-size:0;line-height:4px;">&nbsp;</td>
-                  <td width="16%" height="4" bgcolor="${PRIMARY_DARK}" style="background-color:${PRIMARY_DARK};font-size:0;line-height:4px;">&nbsp;</td>
-                </tr>
-              </table>
             </td>
           </tr>
 
-          <!-- Hero banner -->
           <tr>
             <td align="center" style="padding:0;line-height:0;font-size:0;">
               <a href="${escAttr(hero.imageHref)}" target="_blank" style="text-decoration:none;">
-                <img class="fluid" src="${escAttr(hero.imageUrl)}" ${emailImgAttributes(hero.imageUrl, 600)} alt="${escAttr(hero.imageAlt)}" style="display:block;width:100%;max-width:600px;height:auto;border:0;" />
+                <img src="${escAttr(hero.imageUrl)}" ${emailImgAttributes(hero.imageUrl, 600)} alt="${escAttr(hero.imageAlt)}" style="display:block;width:100%;max-width:600px;height:auto;border:0;" />
               </a>
             </td>
           </tr>
+
           <tr>
-            <td class="mobile-pad" align="center" bgcolor="${PETAL}" style="padding:36px 32px 34px 32px;background-color:${PETAL};">
-              <div class="hero-title" style="font-family:Georgia,'Times New Roman',serif;font-size:32px;line-height:38px;font-weight:bold;color:${INK};padding-bottom:12px;">
+            <td align="center" style="padding:32px 28px 8px 28px;">
+              <div style="font-family:Georgia,'Times New Roman',serif;font-size:30px;line-height:36px;font-weight:bold;color:${INK};padding-bottom:12px;">
                 ${escapeHtml(hero.headline)}
               </div>
-              <div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:${MUTED};padding:0 8px 22px 8px;max-width:480px;margin:0 auto;">
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:24px;color:${MUTED};padding-bottom:22px;">
                 ${escapeHtml(hero.message)}
               </div>
-              ${ctaButton(hero.ctaHref, hero.ctaText, { width: 180 })}
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:0 auto;">
+                <tr>
+                  <td align="center" bgcolor="${PRIMARY}" style="background-color:${PRIMARY};border-radius:24px;">
+                    <a href="${escAttr(hero.ctaHref)}" target="_blank" style="display:inline-block;padding:14px 32px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:20px;font-weight:bold;color:#ffffff;text-decoration:none;">${escapeHtml(hero.ctaText)}</a>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
 
-          <!-- Top categories -->
           <tr>
-            <td class="mobile-pad" style="padding:36px 20px 32px 20px;background-color:${WHITE};">
-              <div class="section-title" style="font-family:Georgia,'Times New Roman',serif;font-size:26px;line-height:32px;font-weight:bold;color:${INK};text-align:center;padding-bottom:8px;">
+            <td align="center" style="padding:28px 16px 8px 16px;">
+              <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;line-height:28px;font-weight:bold;color:${INK};padding-bottom:6px;">
                 ${escapeHtml(cfg.categoriesHeading)}
               </div>
-              <div style="width:48px;height:3px;background-color:${PRIMARY};margin:0 auto 12px auto;border-radius:2px;font-size:0;line-height:0;">&nbsp;</div>
-              <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:21px;color:${MUTED};text-align:center;padding-bottom:22px;">
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:22px;color:${MUTED};padding-bottom:16px;">
                 ${escapeHtml(cfg.categoriesSubheading)}
               </div>
-              ${categoriesRow(cfg.categories)}
-            </td>
-          </tr>
-
-          <!-- Worldwide delivery -->
-          <tr>
-            <td class="mobile-pad" align="center" bgcolor="${SAGE}" style="padding:40px 32px 38px 32px;background-color:${SAGE};">
-              <div class="section-title" style="font-family:Georgia,'Times New Roman',serif;font-size:26px;line-height:32px;font-weight:bold;color:#ffffff;padding-bottom:12px;">
-                ${escapeHtml(worldwide.heading)}
-              </div>
-              <div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#EAF6F0;padding:0 6px 22px 6px;">
-                ${escapeHtml(worldwide.message)}
-              </div>
-              ${ctaButton(worldwide.ctaHref, worldwide.ctaText, { fill: PRIMARY, width: 180 })}
-            </td>
-          </tr>
-
-          <!-- Featured product -->
-          <tr>
-            <td class="mobile-pad" style="padding:36px 24px 40px 24px;background-color:${CREAM};">
-              <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:16px;letter-spacing:2.4px;text-transform:uppercase;color:${PRIMARY};font-weight:bold;text-align:center;padding-bottom:8px;">
-                Featured Gift
-              </div>
-              <div style="width:48px;height:3px;background-color:${PRIMARY};margin:0 auto 20px auto;border-radius:2px;font-size:0;line-height:0;">&nbsp;</div>
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;background-color:${WHITE};border:1px solid ${LINE};border-radius:18px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:0 auto;">
                 <tr>
-                  <td class="stack-col" width="48%" valign="middle" style="width:48%;padding:16px 12px 16px 16px;">
-                    <a href="${escAttr(featured.href)}" target="_blank" style="text-decoration:none;">
-                      <img class="fluid" src="${escAttr(featured.imageUrl)}" ${emailImgAttributes(featured.imageUrl, 260)} alt="${escAttr(featured.imageAlt)}" style="display:block;width:100%;max-width:260px;height:auto;border:0;border-radius:14px;margin:0 auto;" />
-                    </a>
-                  </td>
-                  <td class="stack-col featured-pad" width="52%" valign="middle" style="width:52%;padding:20px 20px 20px 8px;text-align:left;">
-                    <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;line-height:28px;font-weight:bold;color:${INK};padding-bottom:10px;">
-                      ${escapeHtml(featured.name)}
-                    </div>
-                    <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:22px;color:${MUTED};padding-bottom:4px;">
-                      ${escapeHtml(featured.description)}
-                    </div>
-                    ${priceRow}
-                    ${ctaButton(featured.href, featured.ctaText, { width: 170 })}
+                  ${buttons}
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding:28px 28px 8px 28px;background-color:${PETAL};">
+              <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;line-height:28px;font-weight:bold;color:${INK};padding:8px 0 8px 0;">
+                ${escapeHtml(cfg.worldwide.heading)}
+              </div>
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:${MUTED};padding-bottom:18px;">
+                ${escapeHtml(cfg.worldwide.message)}
+              </div>
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:0 auto 8px auto;">
+                <tr>
+                  <td align="center" bgcolor="${SAGE}" style="background-color:${SAGE};border-radius:24px;">
+                    <a href="${escAttr(cfg.worldwide.ctaHref)}" target="_blank" style="display:inline-block;padding:12px 26px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:20px;font-weight:bold;color:#ffffff;text-decoration:none;">${escapeHtml(cfg.worldwide.ctaText)}</a>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
 
-          <!-- Footer -->
           <tr>
-            <td class="mobile-pad" style="padding:32px 24px 36px 24px;background-color:${FOOTER_BG};text-align:center;">
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
+            <td align="center" style="padding:28px 28px 32px 28px;">
+              <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;line-height:28px;font-weight:bold;color:${INK};padding-bottom:8px;">
+                <a href="${escAttr(featured.href)}" target="_blank" style="color:${INK};text-decoration:none;">${escapeHtml(featured.name)}</a>
+              </div>
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:${MUTED};padding-bottom:12px;">
+                ${escapeHtml(featured.description)}
+              </div>
+              ${price}
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:0 auto;">
                 <tr>
-                  <td align="center" style="padding:0 0 14px 0;">
-                    <a href="${escAttr(footer.websiteUrl)}" target="_blank" style="text-decoration:none;">
-                      <img src="${escAttr(cfg.logoUrl)}" ${emailImgAttributes(cfg.logoUrl, 140)} alt="${escAttr(cfg.logoAlt)}" style="display:block;width:140px;max-width:55%;height:auto;border:0;margin:0 auto;background-color:#ffffff;border-radius:8px;padding:8px;" />
-                    </a>
-                  </td>
-                </tr>
-                <tr>
-                  <td align="center" style="padding:0 0 14px 0;font-family:Georgia,'Times New Roman',serif;font-size:13px;line-height:20px;color:${GOLD};">
-                    ${escapeHtml(footer.tagline)}
-                  </td>
-                </tr>
-                <tr>
-                  <td align="center" style="padding:0 0 16px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:22px;color:#d5e4dc;">
-                    ${navLinksRow(footer.navLinks)}
-                  </td>
-                </tr>
-                <tr>
-                  <td align="center" style="padding:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:20px;color:#d5e4dc;">
-                    <a href="mailto:${escAttr(footer.contactEmail)}" style="color:${GOLD};text-decoration:underline;">${escapeHtml(footer.contactEmail)}</a>
-                  </td>
-                </tr>
-                <tr>
-                  <td align="center" style="padding:0 0 6px 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#8aa399;">
-                    Follow us
-                  </td>
-                </tr>
-                <tr>
-                  <td align="center" style="padding:0 0 16px 0;">
-                    ${socialRow(footer.socials)}
-                  </td>
-                </tr>
-                <tr>
-                  <td align="center" style="padding:0 0 6px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#8aa399;">
-                    Website:
-                    <a href="${escAttr(footer.websiteUrl)}" target="_blank" style="color:${GOLD};text-decoration:underline;">${escapeHtml(footer.websiteLabel)}</a>
-                  </td>
-                </tr>
-                <tr>
-                  <td align="center" style="padding:0 0 12px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#8aa399;">
-                    ${escapeHtml(footer.copyrightText)}
-                  </td>
-                </tr>
-                <tr>
-                  <td align="center" style="padding:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;">
-                    <a href="${escAttr(footer.unsubscribeHref)}" target="_blank" style="color:${GOLD};text-decoration:underline;">${escapeHtml(footer.unsubscribeLabel)}</a>
+                  <td align="center" bgcolor="${PRIMARY}" style="background-color:${PRIMARY};border-radius:24px;">
+                    <a href="${escAttr(featured.href)}" target="_blank" style="display:inline-block;padding:12px 26px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:20px;font-weight:bold;color:#ffffff;text-decoration:none;">${escapeHtml(featured.ctaText)}</a>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
+
+          <tr>
+            <td align="center" style="padding:28px 20px 32px 20px;background-color:${FOOTER_BG};">
+              <div style="font-family:Georgia,'Times New Roman',serif;font-size:14px;line-height:22px;color:${GOLD};padding-bottom:12px;">
+                ${escapeHtml(footer.tagline)}
+              </div>
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:24px;padding-bottom:10px;">
+                <a href="${escAttr(footer.websiteUrl)}" target="_blank" style="color:${GOLD};text-decoration:underline;">${escapeHtml(footer.websiteLabel)}</a>
+              </div>
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:24px;padding-bottom:14px;">
+                <a href="mailto:${escAttr(footer.contactEmail)}" style="color:${GOLD};text-decoration:underline;">${escapeHtml(footer.contactEmail)}</a>
+              </div>
+              <div style="padding-bottom:14px;">
+                <a href="${escAttr(footer.socials.find((s) => s.label === "Facebook")?.href ?? "https://www.facebook.com/profile.php?id=61594220485535")}" target="_blank" style="text-decoration:none;">
+                  <img src="${escAttr(FB_ICON)}" width="32" height="32" alt="Facebook" style="display:inline-block;border:0;width:32px;height:32px;" />
+                </a>
+                &nbsp;
+                <a href="${escAttr(footer.socials.find((s) => s.label === "Instagram")?.href ?? "https://www.instagram.com/blossompot_official/")}" target="_blank" style="text-decoration:none;">
+                  <img src="${escAttr(IG_ICON)}" width="32" height="32" alt="Instagram" style="display:inline-block;border:0;width:32px;height:32px;" />
+                </a>
+              </div>
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#c5d5cc;padding-bottom:8px;">
+                ${escapeHtml(footer.copyrightText)}
+              </div>
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;">
+                <a href="${escAttr(footer.unsubscribeHref)}" target="_blank" style="color:${GOLD};text-decoration:underline;">${escapeHtml(footer.unsubscribeLabel)}</a>
+              </div>
+            </td>
+          </tr>
+
         </table>
       </td>
     </tr>

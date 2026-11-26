@@ -46,7 +46,7 @@ export default async function LocationsHubPage() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
+    <div className="site-container py-10">
       <JsonLd
         data={[
           breadcrumbJsonLd([
@@ -61,7 +61,7 @@ export default async function LocationsHubPage() {
       />
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Locations" }]} />
       <h1 className="text-3xl font-bold text-primary mb-3">Where we operate</h1>
-      <p className="text-slate-600 max-w-3xl mb-6 leading-relaxed">
+      <p className="text-slate-600 mb-6 leading-relaxed">
         {applyInlineLinks(
           "BlossomPot’s live delivery destination is the United States — all 50 states, DC, and Puerto Rico. Shoppers in Canada, Australia, the United Kingdom, and other European countries can order on this site and send flowers, cakes, and hampers to a US address. We do not invent local florist shops abroad. Country and city guides below explain how ordering works from those places, with unique time-zone and checkout notes. Thin or unfinished markets stay unpublished.",
           inlineLinks,
@@ -106,7 +106,7 @@ export default async function LocationsHubPage() {
       {flowerLinks.length > 0 ? (
         <section className="mb-10">
           <h2 className="text-xl font-bold text-primary mb-3">Flower delivery by country</h2>
-          <p className="text-slate-700 mb-3 max-w-3xl leading-relaxed">
+          <p className="text-slate-700 mb-3 leading-relaxed">
             Flower delivery landing pages for countries where delivery is live. Other country hubs above explain how to order gifts to a US address.
           </p>
           <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">

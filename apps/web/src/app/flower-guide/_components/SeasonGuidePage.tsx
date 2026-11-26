@@ -34,7 +34,7 @@ export function SeasonGuidePage({ slug }: { slug: string }) {
           { name: page.name, path: `/flower-guide/${page.slug}` },
         ])}
       />
-      <div className="max-w-5xl mx-auto px-4 py-10">
+      <div className="site-container py-10">
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },

@@ -36,7 +36,7 @@ export function InternationalLocationPage({
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
+    <div className="site-container py-10">
       <JsonLd data={internationalJsonLd(loc)} />
       <Breadcrumbs items={crumbs} />
       <h1 className="text-3xl font-bold text-primary mb-3">{loc.h1}</h1>
@@ -52,7 +52,7 @@ export function InternationalLocationPage({
         </section>
       ) : null}
 
-      <p className="text-slate-600 mb-6 max-w-3xl leading-relaxed">{loc.intro}</p>
+      <p className="text-slate-600 mb-6 leading-relaxed">{loc.intro}</p>
 
       <div className="mb-8 rounded-xl border border-primary/15 bg-petal/80 px-4 py-3 text-sm text-slate-800">
         <p className="font-medium">{loc.availability}</p>
@@ -64,12 +64,12 @@ export function InternationalLocationPage({
 
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-3">How ordering works from {loc.label}</h2>
-        <p className="text-slate-700 leading-relaxed max-w-3xl">{loc.howItWorks}</p>
+        <p className="text-slate-700 leading-relaxed">{loc.howItWorks}</p>
       </section>
 
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-3">What you can send</h2>
-        <p className="text-slate-700 mb-3 max-w-3xl leading-relaxed">
+        <p className="text-slate-700 mb-3 leading-relaxed">
           {applyInlineLinks(
             "The live catalog is flowers, bouquets, cakes, and gift hampers for delivery to a United States address. Open a product page for inventory and timing — we do not invent local stock lists for cities where we are only an origin market.",
             catalogLinks,
@@ -81,7 +81,7 @@ export function InternationalLocationPage({
       {loc.serviceMode === "destination" ? (
         <section className="mb-10">
           <h2 className="text-xl font-bold text-primary mb-3">USA state and city pages</h2>
-          <p className="text-slate-700 mb-3 max-w-3xl leading-relaxed">
+          <p className="text-slate-700 mb-3 leading-relaxed">
             Canonical destination URLs remain <code className="text-xs">/gifts-to-{"{slug}"}</code>. Hierarchical
             paths under this hub redirect there so Google does not see two copies of California or Los Angeles.
           </p>
@@ -110,12 +110,12 @@ export function InternationalLocationPage({
 
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-3">Local notes</h2>
-        <p className="text-slate-700 leading-relaxed max-w-3xl">{loc.localNotes}</p>
+        <p className="text-slate-700 leading-relaxed">{loc.localNotes}</p>
       </section>
 
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-3">Why BlossomPot</h2>
-        <ul className="list-disc pl-5 space-y-2 text-slate-700 max-w-3xl">
+        <ul className="list-disc pl-5 space-y-2 text-slate-700">
           <li>Real US destination coverage with state and city pages that already exist.</li>
           <li>Honest origin-market guides — we do not invent foreign storefronts or fake reviews.</li>
           <li>Secure checkout (Stripe USD / Razorpay INR) and a personal gift message.</li>
@@ -125,7 +125,7 @@ export function InternationalLocationPage({
 
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-3">Frequently asked questions</h2>
-        <div className="grid gap-3 md:grid-cols-1 max-w-3xl">
+        <div className="grid gap-3 md:grid-cols-1">
           {loc.faqs.map((faq) => (
             <AnswerBlock key={faq.q} question={faq.q} answer={faq.a} />
           ))}

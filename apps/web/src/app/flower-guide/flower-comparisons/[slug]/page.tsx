@@ -42,7 +42,7 @@ export default async function ComparisonPage({ params }: Props) {
           { name: page.title, path: `/flower-guide/flower-comparisons/${page.slug}` },
         ])}
       />
-      <div className="max-w-4xl mx-auto px-4 py-10">
+      <div className="site-container py-10">
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },

@@ -65,7 +65,7 @@ async function HomeProductSection({
   const deliveryCountry = await getStorefrontDeliveryCountry(params.country);
 
   return (
-    <section className="max-w-7xl mx-auto px-4 py-10">
+    <section className="site-container py-10">
       <div className="space-y-10">
         {HOME_PRODUCT_SECTIONS.map((section) => (
           <Suspense
@@ -103,7 +103,7 @@ async function HomeIndexableSeo({
 /** Product-row placeholders while the delivery country and catalog resolve. */
 function HomeBelowHeroFallback() {
   return (
-    <section className="max-w-7xl mx-auto px-4 py-10" aria-hidden>
+    <section className="site-container py-10" aria-hidden>
       <div className="space-y-10">
         {HOME_PRODUCT_SECTIONS.map((section) => (
           <HomeCategoryProductRowFallback key={section.slug} title={section.title} />

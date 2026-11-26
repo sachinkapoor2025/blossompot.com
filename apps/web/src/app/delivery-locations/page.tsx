@@ -26,7 +26,7 @@ export default function DeliveryLocationsPage() {
 
   return (
     <>
-    <div className="max-w-7xl mx-auto px-4 pt-10">
+    <div className="site-container pt-10">
       <Breadcrumbs
         items={[
           { label: "Home", href: "/" },
@@ -36,8 +36,8 @@ export default function DeliveryLocationsPage() {
       />
     </div>
     <CountrySeoArticle article={usaDeliverySeo} />
-    <div className="max-w-7xl mx-auto px-4 py-10">
-      <p className="text-slate-600 max-w-3xl mb-8 leading-relaxed">
+    <div className="site-container py-10">
+      <p className="text-slate-600 mb-8 leading-relaxed">
         Ordering from Canada, Australia, the UK, or Europe? Start at the{" "}
         <Link href="/locations" className="text-nav hover:underline">
           international locations hub

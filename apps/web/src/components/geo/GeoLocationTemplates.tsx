@@ -94,7 +94,7 @@ export function StateGeoTemplate({
   const fallback = `Order by ${geo.cutoffTimeLocal} ${tzLabel} for same-day eligible ZIPs in ${place}`;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
+    <div className="site-container py-10">
       <JsonLd
         data={[
           breadcrumbJsonLd(crumbs.map((c) => ({ name: c.label, path: c.href ?? path }))),
@@ -118,7 +118,7 @@ export function StateGeoTemplate({
         ))}
       </div>
 
-      <p className="text-slate-600 mb-4 max-w-3xl leading-relaxed">
+      <p className="text-slate-600 mb-4 leading-relaxed">
         {applyInlineLinks(geo.introParagraph, statePageInlineLinks, { usedHrefs, usedPhrases, currentPath: path })}
       </p>
 
@@ -209,7 +209,7 @@ export function CityGeoTemplate({
   const fallback = `Order by ${geo.cutoffTimeLocal} ${tzLabel} for same-day eligible ZIPs in ${place}`;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
+    <div className="site-container py-10">
       <JsonLd
         data={[
           breadcrumbJsonLd(crumbs.map((c) => ({ name: c.label, path: c.href ?? path }))),
@@ -233,7 +233,7 @@ export function CityGeoTemplate({
         ))}
       </div>
 
-      <p className="text-slate-600 mb-4 max-w-3xl leading-relaxed">
+      <p className="text-slate-600 mb-4 leading-relaxed">
         {applyInlineLinks(geo.introParagraph, cityPageInlineLinks, { usedHrefs, usedPhrases, currentPath: path })}
       </p>
 

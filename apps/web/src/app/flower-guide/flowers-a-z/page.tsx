@@ -65,7 +65,7 @@ export default async function FlowersAZPage({ searchParams }: Props) {
           { name: "Flowers A–Z", path: "/flower-guide/flowers-a-z" },
         ])}
       />
-      <div className="max-w-7xl mx-auto px-4 py-10">
+      <div className="site-container py-10">
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },

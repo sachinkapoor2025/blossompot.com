@@ -27,7 +27,7 @@ export default function ForgotOccasionPage() {
   }, [category]);
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-10">
+    <div className="site-container py-10">
       <p className="text-sm font-semibold text-red-600">Forgot a special occasion?</p>
       <h1 className="text-3xl font-bold text-primary mt-2">Don&apos;t worry. We&apos;ve got you.</h1>
       <p className="text-slate-600 mt-3">

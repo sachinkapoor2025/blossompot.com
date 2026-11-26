@@ -115,7 +115,8 @@ async function SpecialDayContent({ params, searchParams }: Props) {
   ];
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10">
+    <>
+    <div className="site-container py-10">
       <JsonLd
         data={[
           breadcrumbJsonLd(crumbs.map((crumb) => ({ name: crumb.label, path: crumb.href ?? seoPath }))),
@@ -141,11 +142,9 @@ async function SpecialDayContent({ params, searchParams }: Props) {
         </p>
       )}
 
-      {approved ? (
-        <CountrySeoArticle article={approved} omitHeading headingClassName="text-3xl font-bold text-primary mb-4" />
-      ) : (
+      {approved ? null : (
         <div className="mt-12 border-t border-slate-200 pt-10">
-          <article className="max-w-3xl space-y-8 leading-relaxed text-slate-700">
+          <article className="space-y-8 leading-relaxed text-slate-700">
             {day.intro.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
             ))}
@@ -187,7 +186,12 @@ async function SpecialDayContent({ params, searchParams }: Props) {
           </article>
         </div>
       )}
-      <nav aria-label="More Valentine week gifts" className="mt-10 flex max-w-3xl flex-wrap gap-2">
+    </div>
+    {approved ? (
+      <CountrySeoArticle article={approved} omitHeading headingClassName="text-3xl font-bold text-primary mb-4" />
+    ) : null}
+    <div className="site-container pb-10">
+      <nav aria-label="More Valentine week gifts" className="mt-10 flex flex-wrap gap-2">
         {moreLinks.map((link) => (
           <Link
             key={link.href}
@@ -199,5 +203,6 @@ async function SpecialDayContent({ params, searchParams }: Props) {
         ))}
       </nav>
     </div>
+    </>
   );
 }

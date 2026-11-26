@@ -45,7 +45,7 @@ async function GiftCatalogContent({
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
+    <div className="site-container py-10">
       <h1 className="text-3xl font-bold text-primary mb-2">Flower & Cake Combo</h1>
       <p className="text-sm text-slate-600 mb-8">
         {products.length

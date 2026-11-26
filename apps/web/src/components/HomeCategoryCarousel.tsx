@@ -64,7 +64,7 @@ export function HomeCategoryCarousel({ tiles }: { tiles: HomeCategoryTile[] }) {
 
   return (
     <section className="bg-[#f7f1ea] border-y border-[#eadfd8]" aria-labelledby={labelId}>
-      <div className="max-w-7xl mx-auto px-4 py-8 sm:py-10">
+      <div className="site-container py-8 sm:py-10">
         <div className="text-center mb-5">
           <p id={labelId} className="font-display text-2xl sm:text-3xl text-primary">
             Shop BlossomPot gifts
