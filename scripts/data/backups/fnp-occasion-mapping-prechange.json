@@ -1,0 +1,1198 @@
+{
+  "exportedAt": "2026-11-27T09:39:02.861Z",
+  "source": "Production GET /products?country=US. Read only. No database write.",
+  "table": "blossompot-products-prod",
+  "field": "additionalCategorySlugs",
+  "rollback": "Restore additionalCategorySlugs to currentAdditionalCategorySlugs. Null or empty means the attribute is absent.",
+  "catalogProductsRead": 265,
+  "productCount": 87,
+  "associationCount": 131,
+  "counts": {
+    "new-year": 6,
+    "celebration-gifts": 7,
+    "birthday-gifts": 11,
+    "anniversary-gifts": 37,
+    "valentines-day-gifts": 45,
+    "mothers-day-gifts": 19,
+    "gift-hampers": 3,
+    "personalized-gifts": 3
+  },
+  "issues": [],
+  "records": [
+    {
+      "pk": "PRODUCT#festive-floral-garden-premium",
+      "sk": "META",
+      "slug": "festive-floral-garden-premium",
+      "name": "Festive Floral Garden Premium",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flowers",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "new-year",
+        "celebration-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#festive-floral-garden-with-birthday-balloon-regular",
+      "sk": "META",
+      "slug": "festive-floral-garden-with-birthday-balloon-regular",
+      "name": "Festive Floral Garden with Birthday Balloon Regular",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flowers",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "birthday-gifts",
+        "new-year",
+        "celebration-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#garden-romance-premium",
+      "sk": "META",
+      "slug": "garden-romance-premium",
+      "name": "Garden Romance Premium",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flowers",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#isnt-it-romantic-regular",
+      "sk": "META",
+      "slug": "isnt-it-romantic-regular",
+      "name": "Isnt It Romantic Regular",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flowers",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#just-for-your-love-premium",
+      "sk": "META",
+      "slug": "just-for-your-love-premium",
+      "name": "Just For Your Love Premium",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flowers",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#lavender-love",
+      "sk": "META",
+      "slug": "lavender-love",
+      "name": "Lavender Love",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flowers",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#love-is-in-the-air-premium",
+      "sk": "META",
+      "slug": "love-is-in-the-air-premium",
+      "name": "Love Is In The Air Premium",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flowers",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#pink-and-pretty-regular",
+      "sk": "META",
+      "slug": "pink-and-pretty-regular",
+      "name": "Pink and Pretty Regular",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flowers",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "mothers-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#pink-and-yellow-delight-premium",
+      "sk": "META",
+      "slug": "pink-and-yellow-delight-premium",
+      "name": "Pink and Yellow Delight Premium",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flowers",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "mothers-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#pink-splendor-premium",
+      "sk": "META",
+      "slug": "pink-splendor-premium",
+      "name": "Pink Splendor Premium",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flowers",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "mothers-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#precious-heart",
+      "sk": "META",
+      "slug": "precious-heart",
+      "name": "Precious Heart",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flowers",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#regal-romance-premium",
+      "sk": "META",
+      "slug": "regal-romance-premium",
+      "name": "Regal Romance Premium",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flowers",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#you-are-my-heart-premium",
+      "sk": "META",
+      "slug": "you-are-my-heart-premium",
+      "name": "You Are My Heart Premium",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flowers",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#50-red-roses",
+      "sk": "META",
+      "slug": "50-red-roses",
+      "name": "50 Red Roses",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#beautifully-tied-12-red-roses-bouquet",
+      "sk": "META",
+      "slug": "beautifully-tied-12-red-roses-bouquet",
+      "name": "Beautifully Tied 12 Red Roses Bouquet",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#blush-of-love-bouquet-regular",
+      "sk": "META",
+      "slug": "blush-of-love-bouquet-regular",
+      "name": "Blush Of Love Bouquet Regular",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#brilliant-birthday-blooms-bouquet-premium",
+      "sk": "META",
+      "slug": "brilliant-birthday-blooms-bouquet-premium",
+      "name": "Brilliant Birthday Blooms Bouquet Premium",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "birthday-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#brilliant-in-pink-bouquet-regular",
+      "sk": "META",
+      "slug": "brilliant-in-pink-bouquet-regular",
+      "name": "Brilliant in Pink Bouquet Regular",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "mothers-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#classic-red-rose-n-white-lily-bouquet-premium",
+      "sk": "META",
+      "slug": "classic-red-rose-n-white-lily-bouquet-premium",
+      "name": "Classic Red Rose N White Lily Bouquet Premium",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#classic-romance-red-roses",
+      "sk": "META",
+      "slug": "classic-romance-red-roses",
+      "name": "Classic Romance Red Roses",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#elegant-rose-indulgence-hamper",
+      "sk": "META",
+      "slug": "elegant-rose-indulgence-hamper",
+      "name": "Elegant Rose Indulgence Hamper",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "gift-hampers"
+      ]
+    },
+    {
+      "pk": "PRODUCT#fantasy-pink-orchids",
+      "sk": "META",
+      "slug": "fantasy-pink-orchids",
+      "name": "Fantasy Pink Orchids",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "mothers-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#ferrero-rocher-and-red-roses",
+      "sk": "META",
+      "slug": "ferrero-rocher-and-red-roses",
+      "name": "Ferrero Rocher And Red Roses",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#florist-designed-love-bouquet",
+      "sk": "META",
+      "slug": "florist-designed-love-bouquet",
+      "name": "Florist Designed Love Bouquet",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#glorious-pink-roses",
+      "sk": "META",
+      "slug": "glorious-pink-roses",
+      "name": "Glorious Pink Roses",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "mothers-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#grand-18-red-roses",
+      "sk": "META",
+      "slug": "grand-18-red-roses",
+      "name": "Grand 18 Red Roses",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#grand-red-roses",
+      "sk": "META",
+      "slug": "grand-red-roses",
+      "name": "Grand Red Roses",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#heart-eternal-rose-arrangement",
+      "sk": "META",
+      "slug": "heart-eternal-rose-arrangement",
+      "name": "Heart Eternal Rose Arrangement",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#hold-my-heart-bouquet-premium",
+      "sk": "META",
+      "slug": "hold-my-heart-bouquet-premium",
+      "name": "Hold My Heart Bouquet Premium",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#infinite-love-bouquet-regular",
+      "sk": "META",
+      "slug": "infinite-love-bouquet-regular",
+      "name": "Infinite Love Bouquet Regular",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#love-emoji-red-rose-bouquet",
+      "sk": "META",
+      "slug": "love-emoji-red-rose-bouquet",
+      "name": "Love Emoji Red Rose Bouquet",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#love-from-roses-bouquet",
+      "sk": "META",
+      "slug": "love-from-roses-bouquet",
+      "name": "Love From Roses Bouquet",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#love-in-bloom-bouquet-premium",
+      "sk": "META",
+      "slug": "love-in-bloom-bouquet-premium",
+      "name": "Love In Bloom Bouquet Premium",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#luxury-dozen-preserved-champagne-pink-roses",
+      "sk": "META",
+      "slug": "luxury-dozen-preserved-champagne-pink-roses",
+      "name": "Luxury Dozen Preserved Champagne Pink Roses",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "mothers-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#madly-in-love-bouquet-premium",
+      "sk": "META",
+      "slug": "madly-in-love-bouquet-premium",
+      "name": "Madly in Love Bouquet Premium",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#one-dozen-assorted-sweetheart-roses",
+      "sk": "META",
+      "slug": "one-dozen-assorted-sweetheart-roses",
+      "name": "One Dozen Assorted Sweetheart Roses",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#one-dozen-light-pink-roses",
+      "sk": "META",
+      "slug": "one-dozen-light-pink-roses",
+      "name": "One Dozen Light Pink Roses",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "mothers-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#one-dozen-long-stem-red-roses-with-chocolates-and-bear",
+      "sk": "META",
+      "slug": "one-dozen-long-stem-red-roses-with-chocolates-and-bear",
+      "name": "One Dozen Long Stem Red Roses with Chocolates and Bear",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#one-dozen-long-stemmed-red-roses",
+      "sk": "META",
+      "slug": "one-dozen-long-stemmed-red-roses",
+      "name": "One Dozen Long Stemmed Red Roses",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#one-dozen-pop-of-pink-roses",
+      "sk": "META",
+      "slug": "one-dozen-pop-of-pink-roses",
+      "name": "One Dozen Pop of Pink Roses",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "mothers-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#one-dozen-rainbow-roses-with-birthday-pick",
+      "sk": "META",
+      "slug": "one-dozen-rainbow-roses-with-birthday-pick",
+      "name": "One Dozen Rainbow Roses with Birthday Pick",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "birthday-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#one-dozen-red-and-pink-roses",
+      "sk": "META",
+      "slug": "one-dozen-red-and-pink-roses",
+      "name": "One Dozen Red and Pink Roses",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "mothers-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#one-dozen-red-and-pink-roses-with-chocolates-and-a-bear",
+      "sk": "META",
+      "slug": "one-dozen-red-and-pink-roses-with-chocolates-and-a-bear",
+      "name": "One Dozen Red and Pink Roses with Chocolates and a Bear",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "mothers-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#one-dozen-red-roses-with-birthday-pick",
+      "sk": "META",
+      "slug": "one-dozen-red-roses-with-birthday-pick",
+      "name": "One Dozen Red Roses with Birthday Pick",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "birthday-gifts",
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#one-dozen-red-roses-with-heart-balloon",
+      "sk": "META",
+      "slug": "one-dozen-red-roses-with-heart-balloon",
+      "name": "One Dozen Red Roses with Heart Balloon",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#one-dozen-red-roses-with-red-wine",
+      "sk": "META",
+      "slug": "one-dozen-red-roses-with-red-wine",
+      "name": "One Dozen Red Roses with Red Wine",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#one-dozen-red-roses-with-sterling-silver-heart-necklace",
+      "sk": "META",
+      "slug": "one-dozen-red-roses-with-sterling-silver-heart-necklace",
+      "name": "One Dozen Red Roses with Sterling Silver Heart Necklace",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#one-dozen-red-roses-with-white-wine",
+      "sk": "META",
+      "slug": "one-dozen-red-roses-with-white-wine",
+      "name": "One Dozen Red Roses with White Wine",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#one-dozen-wild-pink-roses",
+      "sk": "META",
+      "slug": "one-dozen-wild-pink-roses",
+      "name": "One Dozen Wild Pink Roses",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "mothers-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#pink-and-white-lilies-with-red-wine",
+      "sk": "META",
+      "slug": "pink-and-white-lilies-with-red-wine",
+      "name": "Pink and White Lilies with Red Wine",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "mothers-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#pink-and-white-lilies-with-white-wine",
+      "sk": "META",
+      "slug": "pink-and-white-lilies-with-white-wine",
+      "name": "Pink and White Lilies with White Wine",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "mothers-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#pink-hydrangea-bouquet",
+      "sk": "META",
+      "slug": "pink-hydrangea-bouquet",
+      "name": "Pink Hydrangea Bouquet",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "mothers-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#pink-lemonade-rose-n-lily-bouquet-regular",
+      "sk": "META",
+      "slug": "pink-lemonade-rose-n-lily-bouquet-regular",
+      "name": "Pink Lemonade Rose N Lily Bouquet Regular",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "mothers-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#pink-n-posh-bouquet-deluxe",
+      "sk": "META",
+      "slug": "pink-n-posh-bouquet-deluxe",
+      "name": "Pink N Posh Bouquet Deluxe",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "mothers-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#pink-surprise-bouquet-deluxe",
+      "sk": "META",
+      "slug": "pink-surprise-bouquet-deluxe",
+      "name": "Pink Surprise Bouquet Deluxe",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "mothers-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#pop-fizz-sparkling-rose-wine-and-women-fragrance-gift-hamper",
+      "sk": "META",
+      "slug": "pop-fizz-sparkling-rose-wine-and-women-fragrance-gift-hamper",
+      "name": "Pop Fizz Sparkling Rose Wine and Women Fragrance Gift Hamper",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "gift-hampers"
+      ]
+    },
+    {
+      "pk": "PRODUCT#premium-bright-n-sunny-birthday-bouquet-regular",
+      "sk": "META",
+      "slug": "premium-bright-n-sunny-birthday-bouquet-regular",
+      "name": "Premium Bright N Sunny Birthday Bouquet Regular",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "birthday-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#red-romance-bouquet-deluxe",
+      "sk": "META",
+      "slug": "red-romance-bouquet-deluxe",
+      "name": "Red Romance Bouquet Deluxe",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#red-roses-bouquet-and-lindt-truffles",
+      "sk": "META",
+      "slug": "red-roses-bouquet-and-lindt-truffles",
+      "name": "Red Roses Bouquet And Lindt Truffles",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#romantic-rose-masterpiece",
+      "sk": "META",
+      "slug": "romantic-rose-masterpiece",
+      "name": "Romantic Rose Masterpiece",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#romantic-starry-night-roses",
+      "sk": "META",
+      "slug": "romantic-starry-night-roses",
+      "name": "Romantic Starry Night Roses",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#rose-n-lily-celebration-premium",
+      "sk": "META",
+      "slug": "rose-n-lily-celebration-premium",
+      "name": "Rose N Lily Celebration Premium",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "new-year",
+        "celebration-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#rose-n-lily-celebration-with-birthday-balloon-deluxe",
+      "sk": "META",
+      "slug": "rose-n-lily-celebration-with-birthday-balloon-deluxe",
+      "name": "Rose N Lily Celebration with Birthday Balloon Deluxe",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "birthday-gifts",
+        "new-year",
+        "celebration-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#rose-n-lily-celebration-with-teddy-bear-regular",
+      "sk": "META",
+      "slug": "rose-n-lily-celebration-with-teddy-bear-regular",
+      "name": "Rose N Lily Celebration with Teddy Bear Regular",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "new-year",
+        "celebration-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#stunning-pink-and-white-lilies-regular",
+      "sk": "META",
+      "slug": "stunning-pink-and-white-lilies-regular",
+      "name": "Stunning Pink and White Lilies Regular",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "mothers-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#the-sweetest-hearts-bouquet",
+      "sk": "META",
+      "slug": "the-sweetest-hearts-bouquet",
+      "name": "The Sweetest Hearts Bouquet",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#valentines-day-candy-bouquet",
+      "sk": "META",
+      "slug": "valentines-day-candy-bouquet",
+      "name": "Valentines Day Candy Bouquet",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "flower-bouquets",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#anniversary-cookies-and-cream-brownie-cake",
+      "sk": "META",
+      "slug": "anniversary-cookies-and-cream-brownie-cake",
+      "name": "Anniversary Cookies And Cream Brownie Cake",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "cakes",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#anniversary-delectable-carrot-cake",
+      "sk": "META",
+      "slug": "anniversary-delectable-carrot-cake",
+      "name": "Anniversary Delectable Carrot Cake",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "cakes",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#anniversary-triple-chocolate-enrobed-brownie-cake",
+      "sk": "META",
+      "slug": "anniversary-triple-chocolate-enrobed-brownie-cake",
+      "name": "Anniversary Triple Chocolate Enrobed Brownie Cake",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "cakes",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#birthday-strawberry-funfetti-cake",
+      "sk": "META",
+      "slug": "birthday-strawberry-funfetti-cake",
+      "name": "Birthday Strawberry Funfetti Cake",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "cakes",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "birthday-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#birthday-tiramisu-classico-cake",
+      "sk": "META",
+      "slug": "birthday-tiramisu-classico-cake",
+      "name": "Birthday Tiramisu Classico Cake",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "cakes",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "birthday-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#chocolate-cake-and-red-roses",
+      "sk": "META",
+      "slug": "chocolate-cake-and-red-roses",
+      "name": "Chocolate Cake And Red Roses",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "cakes",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#delicious-valentines-day-cupcakes",
+      "sk": "META",
+      "slug": "delicious-valentines-day-cupcakes",
+      "name": "Delicious Valentines Day Cupcakes",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "cakes",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#double-chocolate-cake-with-personalization",
+      "sk": "META",
+      "slug": "double-chocolate-cake-with-personalization",
+      "name": "Double Chocolate Cake With Personalization",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "cakes",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "personalized-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#easter-special-assorted-cakes-and-chocolates-hamper",
+      "sk": "META",
+      "slug": "easter-special-assorted-cakes-and-chocolates-hamper",
+      "name": "Easter Special Assorted Cakes And Chocolates Hamper",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "cakes",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "gift-hampers"
+      ]
+    },
+    {
+      "pk": "PRODUCT#gourmet-brownie-valentine-assortment",
+      "sk": "META",
+      "slug": "gourmet-brownie-valentine-assortment",
+      "name": "Gourmet Brownie Valentine Assortment",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "cakes",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#happy-birthday-bakery-delights",
+      "sk": "META",
+      "slug": "happy-birthday-bakery-delights",
+      "name": "happy birthday bakery delights",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "cakes",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "birthday-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#happy-birthday-photo-cake",
+      "sk": "META",
+      "slug": "happy-birthday-photo-cake",
+      "name": "Happy Birthday Photo Cake",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "cakes",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "birthday-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#love-special-triple-chocolate-enrobed-brownie-cake",
+      "sk": "META",
+      "slug": "love-special-triple-chocolate-enrobed-brownie-cake",
+      "name": "Love Special Triple Chocolate Enrobed Brownie Cake",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "cakes",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#ny-cheesecake-and-red-roses",
+      "sk": "META",
+      "slug": "ny-cheesecake-and-red-roses",
+      "name": "NY Cheesecake And Red Roses",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "cakes",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "anniversary-gifts",
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#personalized-happy-birthday-cake",
+      "sk": "META",
+      "slug": "personalized-happy-birthday-cake",
+      "name": "Personalized Happy Birthday Cake",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "cakes",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "birthday-gifts",
+        "personalized-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#personalized-photo-cake",
+      "sk": "META",
+      "slug": "personalized-photo-cake",
+      "name": "Personalized Photo Cake",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "cakes",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "personalized-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#rasgulla-n-milk-cake-celebration-box",
+      "sk": "META",
+      "slug": "rasgulla-n-milk-cake-celebration-box",
+      "name": "Rasgulla N Milk Cake Celebration Box",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "cakes",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "new-year",
+        "celebration-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#red-heart-shaped-cookie-cake",
+      "sk": "META",
+      "slug": "red-heart-shaped-cookie-cake",
+      "name": "Red Heart Shaped Cookie Cake",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "cakes",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "valentines-day-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#the-congrats-cake",
+      "sk": "META",
+      "slug": "the-congrats-cake",
+      "name": "The CONGRATS Cake",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "cakes",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "celebration-gifts"
+      ]
+    },
+    {
+      "pk": "PRODUCT#valentine-special-jumbo-cupcakes-set",
+      "sk": "META",
+      "slug": "valentine-special-jumbo-cupcakes-set",
+      "name": "Valentine Special Jumbo Cupcakes Set",
+      "vendorSlug": "fnp",
+      "published": true,
+      "categorySlug": "cakes",
+      "currentAdditionalCategorySlugs": [],
+      "proposedAdditionalCategorySlugs": [
+        "valentines-day-gifts"
+      ]
+    }
+  ]
+}

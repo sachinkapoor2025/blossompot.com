@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { applyCampaignShopButtons } from "../lib/celebrate-moments-email";
 import {
   buildPremiumMarketingEmailHtml,
   DEFAULT_PREMIUM_MARKETING_EMAIL_CONTENT,
@@ -297,8 +298,9 @@ export function renderSesTemplate(
   html: string,
   vars: { name?: string; company?: string; email?: string }
 ): string {
-  return html
+  const rendered = html
     .replace(/\{\{\s*name\s*\}\}/gi, vars.name?.trim() || "there")
     .replace(/\{\{\s*company\s*\}\}/gi, vars.company?.trim() || "")
     .replace(/\{\{\s*email\s*\}\}/gi, vars.email?.trim() || "");
+  return applyCampaignShopButtons(rendered, vars.email);
 }

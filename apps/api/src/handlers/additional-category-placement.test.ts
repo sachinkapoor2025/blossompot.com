@@ -201,4 +201,44 @@ describe("category pages include additional category assignments", { concurrency
     assert.equal(valentines.filter((slug) => slug === "extra-valentine-bouquet").length, 1);
     assert.equal(valentines.includes("birthday-bouquet"), false);
   });
+
+  it("fills empty menu categories with relevant unassigned flowers, bouquets, and cakes", async () => {
+    await putProduct(row("menu-birthday-blooms", "flower-bouquets", { name: "Brilliant Birthday Blooms Bouquet Premium" }));
+    await putProduct(row("menu-red-roses", "flower-bouquets", { name: "Classic Romance Red Roses" }));
+    await putProduct(row("menu-eggnog", "cakes", { name: "Delicious Eggnog Cheesecake" }));
+    await putProduct(row("menu-champagne", "flower-bouquets", { name: "Champagne Rose Duo" }));
+    await putProduct(row("menu-valentine-cupcakes", "cakes", { name: "Delicious Valentines Day Cupcakes" }));
+    await putProduct(row("menu-hamper", "flower-bouquets", { name: "Elegant Rose Indulgence Hamper" }));
+    await putProduct(row("menu-plain-tulip", "flowers", { name: "Unrelated Tulip" }));
+    invalidateProductListCache();
+
+    const birthday = slugsOf(resultOf(await categoryList("birthday-gifts")).body);
+    assert.equal(birthday.includes("menu-birthday-blooms"), true);
+    assert.equal(birthday.includes("menu-plain-tulip"), false);
+    assert.equal(birthday.includes("menu-eggnog"), false);
+
+    const anniversary = slugsOf(resultOf(await categoryList("anniversary-gifts")).body);
+    assert.equal(anniversary.includes("menu-red-roses"), true);
+    assert.equal(anniversary.includes("menu-valentine-cupcakes"), false);
+    assert.equal(anniversary.includes("menu-plain-tulip"), false);
+
+    const christmas = slugsOf(resultOf(await categoryList("christmas")).body);
+    assert.equal(christmas.includes("menu-eggnog"), true);
+    assert.equal(christmas.includes("menu-red-roses"), true);
+    assert.equal(christmas.includes("menu-birthday-blooms"), false);
+
+    const newYear = slugsOf(resultOf(await categoryList("new-year")).body);
+    assert.equal(newYear.includes("menu-champagne"), true);
+    assert.equal(newYear.includes("menu-plain-tulip"), false);
+
+    const valentines = slugsOf(resultOf(await categoryList("valentines-day-gifts")).body);
+    assert.equal(valentines.includes("menu-valentine-cupcakes"), true);
+    assert.equal(valentines.includes("menu-red-roses"), true);
+    assert.equal(valentines.includes("menu-plain-tulip"), false);
+
+    const hampers = slugsOf(resultOf(await categoryList("gift-hampers")).body);
+    assert.equal(hampers.includes("menu-hamper"), true);
+    assert.equal(hampers.includes("menu-plain-tulip"), false);
+    assert.equal(hampers.filter((slug) => slug === "menu-hamper").length, 1);
+  });
 });

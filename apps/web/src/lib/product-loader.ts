@@ -5,6 +5,8 @@ import {
   isGboHiddenFromStorefront,
   isGboStorefrontEnabled,
   productInStorefrontCategory,
+  productFitsMenuCategory,
+  isMenuCategoryFillSlug,
   productMatchesSearchQuery,
   productVisibleForDeliveryCountry,
   annotateStorefrontListing,
@@ -316,13 +318,15 @@ export async function loadStorefrontCatalog(params?: {
 
 /**
  * Homepage category row. A successful empty API list is not filled from bundled JSON.
+ * Birthday, Anniversary, Christmas, New Year, Valentine's, and Hampers use matching
+ * flowers, bouquets, and cakes when that row is empty.
  * A failed request returns an error and no products.
  */
 export async function loadHomeCategoryProducts(
   categorySlug: string,
   country?: string
 ): Promise<CatalogView> {
-  return loadVisibleCategory(categorySlug, country, presentHomeCategoryRow, { homepageRow: true });
+  return loadMenuCategory(categorySlug, country, presentHomeCategoryRow, { homepageRow: true });
 }
 
 /** Category page. A successful empty API list is not filled from bundled JSON. */
@@ -330,7 +334,39 @@ export async function loadCategoryPageProducts(
   categorySlug: string,
   country?: string
 ): Promise<CatalogView> {
-  return loadVisibleCategory(categorySlug, country, presentCategoryPage);
+  return loadMenuCategory(categorySlug, country, presentCategoryPage);
+}
+
+const MENU_FILL_SOURCES = ["flowers", "flower-bouquets", "cakes"] as const;
+
+/**
+ * Birthday, Anniversary, Christmas, New Year, Valentine's, and Hampers have no
+ * products of their own. When that list is empty, show matching flowers, bouquets, and cakes.
+ */
+async function loadMenuCategory(
+  categorySlug: string,
+  country: string | undefined,
+  present: typeof presentHomeCategoryRow,
+  options?: { homepageRow?: boolean }
+): Promise<CatalogView> {
+  const direct = await loadVisibleCategory(categorySlug, country, present, options);
+  if (!isMenuCategoryFillSlug(categorySlug)) return direct;
+  if (direct.state === "products" && direct.products.length > 0) return direct;
+
+  const sources = await Promise.all(
+    MENU_FILL_SOURCES.map((slug) =>
+      loadVisibleCategory(slug, country, present, { homepageRow: true })
+    )
+  );
+  if (direct.state === "error" && sources.every((view) => view.state === "error")) {
+    return { state: "error", products: [] };
+  }
+  const products = dedupeStorefrontProducts(
+    sources
+      .flatMap((view) => (view.state === "products" ? view.products : []))
+      .filter((product) => productFitsMenuCategory(product, categorySlug))
+  );
+  return present({ ok: true, apiProductCount: products.length, products });
 }
 
 async function loadVisibleCategory(

@@ -181,6 +181,57 @@ describe("catalog request status", () => {
     assert.deepEqual(view.products, []);
   });
 
+  it("fills an empty birthday page from flowers, bouquets, and cakes", async () => {
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+      const category = new URL(String(input)).searchParams.get("category");
+      const products =
+        category === "flower-bouquets"
+          ? [
+              flower("birthday-blooms", {
+                name: "Brilliant Birthday Blooms Bouquet Premium",
+                categorySlug: "flower-bouquets",
+              }),
+              flower("plain-tulip", { name: "Unrelated Tulip", categorySlug: "flower-bouquets" }),
+            ]
+          : category === "cakes"
+            ? [
+                flower("funfetti", {
+                  name: "Birthday Strawberry Funfetti Cake",
+                  categorySlug: "cakes",
+                }),
+              ]
+            : [];
+      return jsonResponse({ products });
+    }) as typeof fetch;
+
+    const view = await loadCategoryPageProducts("birthday-gifts", "US");
+    assert.equal(view.state, "products");
+    assert.deepEqual(
+      view.products.map((product) => product.slug).sort(),
+      ["birthday-blooms", "funfetti"]
+    );
+  });
+
+  it("keeps birthday products already returned by the category API", async () => {
+    const seen: string[] = [];
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+      const category = new URL(String(input)).searchParams.get("category") ?? "";
+      seen.push(category);
+      const products =
+        category === "birthday-gifts"
+          ? [flower("assigned-birthday", { name: "Assigned Birthday Cake", categorySlug: "cakes" })]
+          : [flower("other", { name: "Other", categorySlug: category || "flowers" })];
+      return jsonResponse({ products });
+    }) as typeof fetch;
+
+    const view = await loadCategoryPageProducts("birthday-gifts", "US");
+    assert.deepEqual(
+      view.products.map((product) => product.slug),
+      ["assigned-birthday"]
+    );
+    assert.deepEqual(seen, ["birthday-gifts"]);
+  });
+
   it("returns a category page error when the products API fails", async () => {
     mockCatalog({ error: "unavailable" }, 500);
     const view = await loadCategoryPageProducts("flowers", "US");

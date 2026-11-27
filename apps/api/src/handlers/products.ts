@@ -18,6 +18,8 @@ import {
   isProductStorefrontVisible,
   isSampleCatalogProduct,
   productInStorefrontCategory,
+  productFitsMenuCategory,
+  isMenuCategoryFillSlug,
   productVisibleForDeliveryCountry,
   dedupeStorefrontProducts,
   isRakhiRelatedProduct,
@@ -294,7 +296,9 @@ function wantsListingCardView(event: APIGatewayProxyEventV2): boolean {
  * the full partition merge plus bundled-catalog writes.
  * A homepage row reads the requested primary partition, refreshes price and stock,
  * then applies the same country, vendor, publication, and serviceability rules.
- * It does not query other category partitions and does not write catalog rows.
+ * Birthday, Anniversary, Christmas, New Year, Valentine's, and Hampers also read
+ * the flower, bouquet, and cake partitions so those menus are not empty.
+ * It does not write catalog rows.
  * `x-blossompot-related-limit` stops that row after the same filters once enough products pass.
  */
 function wantsHomepageCategoryRow(event: APIGatewayProxyEventV2): boolean {
@@ -518,6 +522,31 @@ async function queryCategoryMembership(categorySlug: string): Promise<CategoryMe
 
   categoryMembershipCache.set(categorySlug, { at: nowMs, rows });
   return rows;
+}
+
+const STOCKED_MENU_SOURCES = ["flowers", "flower-bouquets", "cakes"] as const;
+
+/**
+ * Empty menu categories reuse relevant flowers, bouquets, and cakes.
+ * Primary category stays on the product. This only changes the category listing.
+ */
+async function withRelevantMenuProducts(
+  category: string,
+  items: Product[]
+): Promise<{ items: Product[]; fromMemoryCache: boolean }> {
+  if (!isMenuCategoryFillSlug(category)) return { items, fromMemoryCache: false };
+  const bySlug = new Map(items.map((product) => [product.slug, product]));
+  const sources = await Promise.all(STOCKED_MENU_SOURCES.map((slug) => queryProductsByCategory(slug)));
+  let fromMemoryCache = false;
+  for (const source of sources) {
+    if (source.fromMemoryCache) fromMemoryCache = true;
+    for (const product of source.items) {
+      if (!product.slug || bySlug.has(product.slug)) continue;
+      if (!productFitsMenuCategory(product, category)) continue;
+      bySlug.set(product.slug, product);
+    }
+  }
+  return { items: [...bySlug.values()], fromMemoryCache };
 }
 
 async function crossListedProducts(category: string, known: Set<string>): Promise<Product[]> {
@@ -771,17 +800,19 @@ export async function listProducts(event: APIGatewayProxyEventV2) {
     } else if (wantsHomepageCategoryRow(event) && !search) {
       homepageCategoryRow = true;
       const loaded = await queryProductsByCategory(category);
-      fromMemoryCache = loaded.fromMemoryCache;
-      items = loaded.items;
+      const filled = await withRelevantMenuProducts(category, loaded.items);
+      fromMemoryCache = loaded.fromMemoryCache || filled.fromMemoryCache;
+      items = filled.items;
     } else {
       const primary = await queryProductsByCategory(category);
-      fromMemoryCache = primary.fromMemoryCache;
       const bySlug = new Map(primary.items.map((product) => [product.slug, product]));
       const crossListed = await crossListedProducts(category, new Set(bySlug.keys()));
       for (const product of crossListed) {
         if (!bySlug.has(product.slug)) bySlug.set(product.slug, product);
       }
-      items = [...bySlug.values()];
+      const filled = await withRelevantMenuProducts(category, [...bySlug.values()]);
+      fromMemoryCache = primary.fromMemoryCache || filled.fromMemoryCache;
+      items = filled.items;
     }
   } else {
     const loaded = await loadAllProducts();

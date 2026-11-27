@@ -14,6 +14,7 @@ import {
   buildAnniversaryEmailHtml,
   buildBirthdayEmailHtml,
   buildCollection2026EmailHtml,
+  buildCelebrateMomentsEmailHtml,
   buildGiftingMarketingEmailHtml,
   GIFTING_MARKETING_EMAIL_TEMPLATE_ID,
   GIFTING_MARKETING_EMAIL_NAME,
@@ -25,6 +26,9 @@ import {
   COLLECTION_2026_EMAIL_TEMPLATE_ID,
   COLLECTION_2026_EMAIL_NAME,
   COLLECTION_2026_EMAIL_SUBJECT,
+  CELEBRATE_MOMENTS_EMAIL_TEMPLATE_ID,
+  CELEBRATE_MOMENTS_EMAIL_NAME,
+  CELEBRATE_MOMENTS_EMAIL_SUBJECT,
   type MarketingEmailContent,
 } from "@blossompot/shared";
 
@@ -49,6 +53,7 @@ export const SHOP_MORE_SAVE_MORE_TEMPLATE_ID = SHOP_MORE_SAVE_MORE_EMAIL_CONFIG.
 export const ANNIVERSARY_TEMPLATE_ID = ANNIVERSARY_EMAIL_CONFIG.templateId;
 export const BIRTHDAY_TEMPLATE_ID = BIRTHDAY_EMAIL_CONFIG.templateId;
 export const COLLECTION_2026_TEMPLATE_ID = COLLECTION_2026_EMAIL_TEMPLATE_ID;
+export const CELEBRATE_MOMENTS_TEMPLATE_ID = CELEBRATE_MOMENTS_EMAIL_TEMPLATE_ID;
 /** @deprecated removed Rakhi starters */
 export const STARTING_PRICE_TEMPLATE_ID = "gifts-starting-offer";
 /** @deprecated */
@@ -107,6 +112,12 @@ export const STARTER_EMAIL_TEMPLATES: StarterEmailTemplateMeta[] = [
     subject: COLLECTION_2026_EMAIL_SUBJECT,
     buildHtml: () => buildCollection2026EmailHtml(),
     htmlPath: "/email-templates/flowers-cakes-gifts-collection-2026.html",
+  },
+  {
+    templateId: CELEBRATE_MOMENTS_TEMPLATE_ID,
+    name: CELEBRATE_MOMENTS_EMAIL_NAME,
+    subject: CELEBRATE_MOMENTS_EMAIL_SUBJECT,
+    buildHtml: () => buildCelebrateMomentsEmailHtml(),
   },
 ];
 
