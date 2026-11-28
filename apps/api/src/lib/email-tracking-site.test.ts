@@ -4,7 +4,7 @@ import {
   CELEBRATE_MOMENTS_IMAGE_HREF,
   CELEBRATE_MOMENTS_IMAGE_VERSION,
   buildCelebrateMomentsImageEmailHtml,
-} from "../../../../packages/shared/src/lib/celebrate-moments-image-email.ts";
+} from "@blossompot/shared";
 import {
   DEVELOPMENT_TRACKING_SITE,
   LOCAL_TRACKING_SITE,
