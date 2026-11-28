@@ -14,6 +14,11 @@ import {
   buildAnniversaryEmailHtml,
   buildBirthdayEmailHtml,
   buildCollection2026EmailHtml,
+  buildCelebrateMomentsImageEmailHtml,
+  CELEBRATE_MOMENTS_IMAGE_TEMPLATE_ID,
+  CELEBRATE_MOMENTS_IMAGE_EMAIL_NAME,
+  CELEBRATE_MOMENTS_IMAGE_EMAIL_SUBJECT,
+  resolveCelebrateMomentsImageOrigin,
   buildGiftingMarketingEmailHtml,
   GIFTING_MARKETING_EMAIL_TEMPLATE_ID,
   GIFTING_MARKETING_EMAIL_NAME,
@@ -107,6 +112,18 @@ export const STARTER_EMAIL_TEMPLATES: StarterEmailTemplateMeta[] = [
     subject: COLLECTION_2026_EMAIL_SUBJECT,
     buildHtml: () => buildCollection2026EmailHtml(),
     htmlPath: "/email-templates/flowers-cakes-gifts-collection-2026.html",
+  },
+  {
+    templateId: CELEBRATE_MOMENTS_IMAGE_TEMPLATE_ID,
+    name: CELEBRATE_MOMENTS_IMAGE_EMAIL_NAME,
+    subject: CELEBRATE_MOMENTS_IMAGE_EMAIL_SUBJECT,
+    buildHtml: () =>
+      buildCelebrateMomentsImageEmailHtml(
+        resolveCelebrateMomentsImageOrigin({
+          windowOrigin: typeof window !== "undefined" ? window.location.origin : undefined,
+          siteUrl: process.env.NEXT_PUBLIC_SITE_URL,
+        })
+      ),
   },
 ];
 

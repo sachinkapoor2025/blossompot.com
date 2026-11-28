@@ -53,10 +53,10 @@ import {
   updateRecipientStatus,
   upsertSuppression,
 } from "../lib/marketing-bounces";
+import { applyEmailTracking, emailTrackingUrl, resolveEmailTrackingSiteUrl } from "../lib/email-tracking-site";
 
 const TABLE = process.env.EMAIL_CAMPAIGNS_TABLE ?? `blossompot-email-campaigns-${process.env.ENVIRONMENT ?? "dev"}`;
 const ORDERS_TABLE = process.env.ORDERS_TABLE ?? `blossompot-orders-${process.env.ENVIRONMENT ?? "dev"}`;
-const SITE_URL = (process.env.SITE_URL ?? "https://www.blossompot.com").replace(/\/$/, "");
 
 function defaultSettings(): SesSettings {
   const port = Number(process.env.MARKETING_SMTP_PORT || 587);
@@ -191,40 +191,16 @@ function finalizeEmailHtml(html: string, settings: SesSettings, unsubUrl: string
   return appendToHtml(html, buildFooter(settings, unsubUrl));
 }
 
-/** External social / app links should open directly (not via click-tracking redirect). */
-function shouldSkipClickTracking(url: string): boolean {
-  if (url.includes("/email/click/") || url.includes("/email/unsubscribe/")) return true;
-  try {
-    const host = new URL(url).hostname.toLowerCase().replace(/^www\./, "");
-    return (
-      host === "facebook.com" ||
-      host.endsWith(".facebook.com") ||
-      host === "fb.com" ||
-      host.endsWith(".fb.com") ||
-      host === "instagram.com" ||
-      host.endsWith(".instagram.com") ||
-      host === "wa.me" ||
-      host === "api.whatsapp.com"
-    );
-  } catch {
-    return false;
-  }
+function trackingSite(): string {
+  return resolveEmailTrackingSiteUrl();
 }
 
 function injectTracking(html: string, openToken: string, linkMap: Map<string, string>): string {
-  let out = html;
-  out = out.replace(/href=(["'])(https?:\/\/[^"']+)\1/gi, (_m, q, url) => {
-    if (shouldSkipClickTracking(url)) {
-      return `href=${q}${url}${q}`;
-    }
-    const token = randomUUID().replace(/-/g, "").slice(0, 24);
-    linkMap.set(token, url);
-    return `href=${q}${SITE_URL}/email/click/${token}${q}`;
+  return applyEmailTracking(html, {
+    siteUrl: trackingSite(),
+    openToken,
+    linkMap,
   });
-  const pixel = `<img src="${SITE_URL}/email/open/${openToken}" width="1" height="1" alt="" style="display:none" />`;
-  if (/<\/body>/i.test(out)) out = out.replace(/<\/body>/i, `${pixel}</body>`);
-  else out += pixel;
-  return out;
 }
 
 async function persistClickTokens(
@@ -1293,7 +1269,7 @@ export async function sendTest(event: APIGatewayProxyEventV2) {
       email: parsed.data.to,
     });
     html = injectTracking(html, openToken, linkMap);
-    html = finalizeEmailHtml(html, settings, `${SITE_URL}/email/unsubscribe/${unsubToken}`);
+    html = finalizeEmailHtml(html, settings, emailTrackingUrl(trackingSite(), "unsubscribe", unsubToken));
     await persistClickTokens(linkMap, {
       campaignId: campaign.campaignId,
       email: parsed.data.to,
@@ -1433,7 +1409,7 @@ export async function trackClick(event: APIGatewayProxyEventV2) {
       Key: { PK: sesEmailKeys.trackClickPk(token), SK: sesEmailKeys.trackSk() },
     })
   );
-  const target = (res.Item?.targetUrl as string) || SITE_URL;
+  const target = (res.Item?.targetUrl as string) || trackingSite();
   if (res.Item) {
     const clickedAt = now();
     await docClient.send(
@@ -1792,7 +1768,7 @@ async function sendQueuedEmail(
     email,
   });
   html = injectTracking(html, openToken, linkMap);
-  html = finalizeEmailHtml(html, settings, `${SITE_URL}/email/unsubscribe/${unsubToken}`);
+  html = finalizeEmailHtml(html, settings, emailTrackingUrl(trackingSite(), "unsubscribe", unsubToken));
 
   // Store open + unsub token (reuse open record for unsub lookup by storing email)
   await docClient.send(
