@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { categoryHref } from "@/lib/category-urls";
+import { applyInlineLinks } from "@/lib/inline-links";
 import type { SecondaryCity } from "@/lib/content/city-delivery-tiers";
 import { secondaryCityIntro } from "@/lib/content/city-delivery-tiers";
 import { locationPublicPath } from "@/lib/content/seo-data";
@@ -39,8 +40,11 @@ export function SecondaryCityLanding({ city }: { city: SecondaryCity }) {
           USA delivery so your recipient gets a smooth domestic experience.
         </p>
         <p>
-          Shop flowers, bouquets, cakes, gift hampers, and occasion collections. Most products support a
-          personal gift message. Checkout with Stripe (USD) or Razorpay (INR).
+          {applyInlineLinks(
+            "Shop flowers, bouquets, cakes, gift hampers, and occasion collections. Most products support a personal gift message. Checkout with Stripe (USD) or Razorpay (INR).",
+            [],
+            { currentPath: locationPublicPath(city.slug) }
+          )}
         </p>
       </section>
 

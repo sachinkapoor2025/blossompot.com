@@ -1,5 +1,50 @@
 ﻿import { categoryHref } from "@/lib/category-urls";
 
+/**
+ * Shop and occasion page names. Body copy on every page turns these words into links.
+ * Longer phrases are listed first so "New Year" is not left as plain text beside "Year".
+ */
+export const storefrontPageNameLinks = [
+  { phrase: "flower bouquets", href: categoryHref("flower-bouquets") },
+  { phrase: "flower bouquet", href: categoryHref("flower-bouquets") },
+  { phrase: "gift hampers", href: categoryHref("gift-hampers") },
+  { phrase: "gift hamper", href: categoryHref("gift-hampers") },
+  { phrase: "Valentine's Day", href: categoryHref("valentines-day-gifts") },
+  { phrase: "Valentine’s Day", href: categoryHref("valentines-day-gifts") },
+  { phrase: "Mother's Day", href: categoryHref("mothers-day-gifts") },
+  { phrase: "Mother’s Day", href: categoryHref("mothers-day-gifts") },
+  { phrase: "New Year's", href: categoryHref("new-year") },
+  { phrase: "New Year’s", href: categoryHref("new-year") },
+  { phrase: "New Year", href: categoryHref("new-year") },
+  { phrase: "same-day delivery", href: categoryHref("same-day-gifts") },
+  { phrase: "same day delivery", href: categoryHref("same-day-gifts") },
+  { phrase: "personalized gifts", href: categoryHref("personalized-gifts") },
+  { phrase: "personalised gifts", href: categoryHref("personalized-gifts") },
+  { phrase: "celebration gifts", href: categoryHref("celebration-gifts") },
+  { phrase: "anniversaries", href: categoryHref("anniversary-gifts") },
+  { phrase: "anniversary", href: categoryHref("anniversary-gifts") },
+  { phrase: "birthdays", href: categoryHref("birthday-gifts") },
+  { phrase: "birthday", href: categoryHref("birthday-gifts") },
+  { phrase: "Christmas", href: categoryHref("christmas") },
+  { phrase: "Valentine's", href: categoryHref("valentines-day-gifts") },
+  { phrase: "Valentine’s", href: categoryHref("valentines-day-gifts") },
+  { phrase: "bouquets", href: categoryHref("flower-bouquets") },
+  { phrase: "bouquet", href: categoryHref("flower-bouquets") },
+  { phrase: "hampers", href: categoryHref("gift-hampers") },
+  { phrase: "hamper", href: categoryHref("gift-hampers") },
+  { phrase: "flowers", href: categoryHref("flowers") },
+  { phrase: "flower", href: categoryHref("flowers") },
+  { phrase: "cakes", href: categoryHref("cakes") },
+  { phrase: "cake", href: categoryHref("cakes") },
+  { phrase: "plants", href: categoryHref("plants") },
+  { phrase: "plant", href: categoryHref("plants") },
+  { phrase: "weddings", href: categoryHref("wedding-gifts") },
+  { phrase: "wedding", href: categoryHref("wedding-gifts") },
+  { phrase: "combos", href: "/combos" },
+  { phrase: "combo", href: "/combos" },
+  { phrase: "gifts", href: "/gifts" },
+] as const;
+
 /** Homepage SEO inline links for BlossomPot gifting copy. */
 export const homepageInlineLinks = [
   { phrase: "flower bouquets", href: categoryHref("flower-bouquets") },

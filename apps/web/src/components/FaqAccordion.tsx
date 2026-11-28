@@ -1,11 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { applyInlineLinks } from "@/lib/inline-links";
 
 export type FaqItem = { q: string; a: string };
 
 export function FaqAccordion({ items }: { items: readonly FaqItem[] }) {
+  const pathname = usePathname();
   const [open, setOpen] = useState<number | null>(0);
+  const usedHrefs = new Set<string>();
+  const usedPhrases = new Set<string>();
 
   return (
     <div className="faq-accordion space-y-3">
@@ -32,7 +37,7 @@ export function FaqAccordion({ items }: { items: readonly FaqItem[] }) {
             </h3>
             {expanded ? (
               <p id={panelId} role="region" aria-labelledby={buttonId} className="px-5 pb-4 text-slate-600 leading-relaxed">
-                {faq.a}
+                {applyInlineLinks(faq.a, [], { usedHrefs, usedPhrases, currentPath: pathname })}
               </p>
             ) : null}
           </div>

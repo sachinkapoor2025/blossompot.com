@@ -17,6 +17,8 @@ export type InlineLinkOptions = {
   blockedHrefs?: Set<string>;
   currentPath?: string;
   max?: number;
+  /** Link every occurrence of each phrase, including repeated destinations. */
+  allOccurrences?: boolean;
 };
 
 export function normalizeInternalPath(href: string): string {
@@ -33,6 +35,58 @@ export function phraseKey(phrase: string): string {
   return phrase.trim().toLowerCase();
 }
 
+function eligibleLinks(links: readonly PhraseLink[]): PhraseLink[] {
+  return [...links]
+    .filter((link) => link.phrase.trim().length >= 3 && link.href)
+    .sort((a, b) => b.phrase.length - a.phrase.length);
+}
+
+/**
+ * Links every whole-word occurrence. Longer phrases claim their span first so
+ * "gift hampers" is not also linked as "hampers".
+ */
+function planEveryOccurrence(
+  text: string,
+  links: readonly PhraseLink[],
+  options?: InlineLinkOptions
+): PlannedInlineLink[] {
+  const max = options?.max;
+  const blocked = options?.blockedHrefs ?? new Set<string>();
+  const current = options?.currentPath ? normalizeInternalPath(options.currentPath) : "";
+  const matches: PlannedInlineLink[] = [];
+  const lowerText = text.toLowerCase();
+
+  for (const { phrase, href } of eligibleLinks(links)) {
+    if (max != null && matches.length >= max) break;
+    const normalized = normalizeInternalPath(href);
+    if (!normalized || normalized === current) continue;
+    if (blocked.has(normalized)) continue;
+    const needle = phrase.toLowerCase();
+    let searchFrom = 0;
+    while (searchFrom < text.length) {
+      if (max != null && matches.length >= max) break;
+      const index = lowerText.indexOf(needle, searchFrom);
+      if (index === -1) break;
+      const end = index + needle.length;
+      const leftOk = !isWordChar(text[index - 1]);
+      const rightOk = !isWordChar(text[end]);
+      const overlaps = matches.some((match) => index < match.end && end > match.start);
+      if (leftOk && rightOk && !overlaps) {
+        matches.push({
+          start: index,
+          end,
+          phrase: text.slice(index, end),
+          href: normalized,
+        });
+      }
+      searchFrom = index + 1;
+    }
+  }
+
+  matches.sort((a, b) => a.start - b.start);
+  return matches;
+}
+
 /**
  * Picks between {@link MIN_INLINE_LINKS} and {@link MAX_INLINE_LINKS} non-overlapping phrases when the copy contains them.
  * Longer phrases win first so "gift hampers" is not split into "hampers".
@@ -43,6 +97,7 @@ export function planInlineLinks(
   links: readonly PhraseLink[],
   options?: InlineLinkOptions
 ): PlannedInlineLink[] {
+  if (options?.allOccurrences) return planEveryOccurrence(text, links, options);
   const max = options?.max ?? MAX_INLINE_LINKS;
   const used = options?.usedHrefs ?? new Set<string>();
   const usedPhrases = options?.usedPhrases ?? new Set<string>();
@@ -50,9 +105,7 @@ export function planInlineLinks(
   const current = options?.currentPath ? normalizeInternalPath(options.currentPath) : "";
   if (used.size >= max) return [];
 
-  const candidates = [...links]
-    .filter((link) => link.phrase.trim().length >= 3 && link.href)
-    .sort((a, b) => b.phrase.length - a.phrase.length);
+  const candidates = eligibleLinks(links);
 
   const matches: PlannedInlineLink[] = [];
   const lowerText = text.toLowerCase();

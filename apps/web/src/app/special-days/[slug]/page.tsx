@@ -18,6 +18,7 @@ import { requestSeoPath } from "@/lib/request-seo-path";
 import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, pageMetadata } from "@/lib/seo";
 import { notFoundIfShoppingCountryDisabled } from "@/lib/shopping-country-gate";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
+import { applyInlineLinks } from "@/lib/inline-links";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -146,11 +147,11 @@ async function SpecialDayContent({ params, searchParams }: Props) {
         <div className="mt-12 border-t border-slate-200 pt-10">
           <article className="space-y-8 leading-relaxed text-slate-700">
             {day.intro.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
+              <p key={paragraph}>{applyInlineLinks(paragraph, [], { currentPath: seoPath })}</p>
             ))}
             <section>
               <h2 className="mb-3 text-lg font-bold text-primary">{day.deliveryHeading}</h2>
-              <p>{day.delivery}</p>
+              <p>{applyInlineLinks(day.delivery, [], { currentPath: seoPath })}</p>
               <p className="mt-3 text-sm text-slate-500">Gifts shown for delivery in {countryName}.</p>
             </section>
             <section>
@@ -159,14 +160,14 @@ async function SpecialDayContent({ params, searchParams }: Props) {
                 {day.ideas.map((item) => (
                   <li key={item} className="flex gap-2">
                     <span className="mt-1 shrink-0 text-nav">•</span>
-                    <span>{item}</span>
+                    <span>{applyInlineLinks(item, [], { currentPath: seoPath })}</span>
                   </li>
                 ))}
               </ul>
             </section>
             <section>
               <h2 className="mb-3 text-lg font-bold text-primary">{day.tipHeading}</h2>
-              <p>{day.tip}</p>
+              <p>{applyInlineLinks(day.tip, [], { currentPath: seoPath })}</p>
             </section>
             <section>
               <h2 className="mb-3 text-lg font-bold text-primary">{day.whyHeading}</h2>
@@ -174,7 +175,7 @@ async function SpecialDayContent({ params, searchParams }: Props) {
                 {day.why.map((item) => (
                   <li key={item} className="flex gap-2">
                     <span className="shrink-0 text-nav">✓</span>
-                    <span>{item}</span>
+                    <span>{applyInlineLinks(item, [], { currentPath: seoPath })}</span>
                   </li>
                 ))}
               </ul>

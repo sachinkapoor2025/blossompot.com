@@ -1,6 +1,7 @@
 "use client";
 
 import type { UpcomingOccasionView } from "@blossompot/shared";
+import { applyInlineLinks } from "@/lib/inline-links";
 
 const ICONS: Record<string, string> = {
   birthday: "🎂",
@@ -15,7 +16,11 @@ const ICONS: Record<string, string> = {
 
 export function OccasionCountdown({ occasions }: { occasions: UpcomingOccasionView[] }) {
   if (occasions.length === 0) {
-    return <p className="text-sm text-slate-500">No upcoming dates yet. Add a birthday or a day you never want to forget.</p>;
+    return (
+      <p className="text-sm text-slate-500">
+        {applyInlineLinks("No upcoming dates yet. Add a birthday or a day you never want to forget.", [])}
+      </p>
+    );
   }
 
   return (

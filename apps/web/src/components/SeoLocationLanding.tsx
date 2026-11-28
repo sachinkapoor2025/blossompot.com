@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { categoryHref } from "@/lib/category-urls";
+import { applyInlineLinks } from "@/lib/inline-links";
 import type { SeoLocation } from "@/lib/content/seo-data";
 import { locationPublicPath } from "@/lib/content/seo-data";
 import { site, whatsappChatUrl } from "@/lib/site";
@@ -80,8 +81,10 @@ export function SeoLocationLanding({ location, related }: Props) {
     <div className="mt-12 pt-10 border-t border-slate-200">
       {location.isCaliforniaWarehouse && (
         <div className="mb-8 rounded-xl bg-nav/5 border border-nav/20 px-5 py-4 text-sm text-slate-700">
-          <strong className="text-nav">California fulfillment advantage:</strong> Faster regional support for {place} —
-          flowers, cakes, and gifts packed carefully for USA delivery.
+          <strong className="text-nav">California fulfillment advantage:</strong> Faster regional support for {place} —{" "}
+          {applyInlineLinks("flowers, cakes, and gifts packed carefully for USA delivery.", [], {
+            currentPath: locationPublicPath(location.slug),
+          })}
         </div>
       )}
 
@@ -91,7 +94,7 @@ export function SeoLocationLanding({ location, related }: Props) {
             <h2 className="text-2xl font-bold text-primary mb-4">{content.headline}</h2>
             {content.intro.map((p, i) => (
               <p key={i} className="mb-4">
-                {p}
+                {applyInlineLinks(p, [], { currentPath: locationPublicPath(location.slug) })}
               </p>
             ))}
           </header>
@@ -100,7 +103,7 @@ export function SeoLocationLanding({ location, related }: Props) {
             <h3 className="font-display text-xl font-semibold text-primary mb-3">{content.delivery.heading}</h3>
             {content.delivery.paragraphs.map((p, i) => (
               <p key={i} className="mb-3">
-                {p}
+                {applyInlineLinks(p, [], { currentPath: locationPublicPath(location.slug) })}
               </p>
             ))}
           </section>
@@ -126,7 +129,9 @@ export function SeoLocationLanding({ location, related }: Props) {
                   <Link href={categoryHref(cat.slug)} className="font-medium text-nav hover:underline">
                     {cat.label}
                   </Link>
-                  <p className="text-slate-500 mt-0.5">{cat.text}</p>
+                  <p className="text-slate-500 mt-0.5">
+                    {applyInlineLinks(cat.text, [], { currentPath: locationPublicPath(location.slug) })}
+                  </p>
                 </li>
               ))}
             </ul>
@@ -153,7 +158,9 @@ export function SeoLocationLanding({ location, related }: Props) {
           {content.faqs.map((faq) => (
             <div key={faq.q} className="bg-white border border-slate-100 rounded-xl p-5">
               <h4 className="font-semibold text-primary text-sm mb-2">{faq.q}</h4>
-              <p className="text-sm text-slate-600 leading-relaxed">{faq.a}</p>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                {applyInlineLinks(faq.a, [], { currentPath: locationPublicPath(location.slug) })}
+              </p>
             </div>
           ))}
         </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { applyInlineLinks } from "@/lib/inline-links";
 import { trustFacts, trustHighlights } from "@/lib/trust";
 import { localizeCopyForCountry } from "@/lib/location-seo-urls";
 import { useStorefrontCountryIso } from "@/lib/use-storefront-country";
@@ -7,6 +8,7 @@ import { useStorefrontCountryIso } from "@/lib/use-storefront-country";
 export function WhyTrustUsSection() {
   const iso = useStorefrontCountryIso() ?? "US";
   const copy = (value: string) => localizeCopyForCountry(value, iso);
+  const linked = (value: string) => applyInlineLinks(copy(value), [], { currentPath: "/" });
 
   return (
     <section className="bg-white border-y border-slate-100" aria-labelledby="why-trust-heading">
@@ -17,7 +19,9 @@ export function WhyTrustUsSection() {
             Why customers trust BlossomPot
           </h2>
           <p className="text-slate-600 text-sm md:text-base leading-relaxed">
-            BlossomPot delivers curated flowers, cakes and gift hampers for birthdays, anniversaries, and other special occasions across the USA. Choose from a beautiful range of gifts to make every celebration memorable. Our customer support team is available via WhatsApp and email to assist you with your orders.
+            {linked(
+              "BlossomPot delivers curated flowers, cakes and gift hampers for birthdays, anniversaries, and other special occasions across the USA. Choose from a beautiful range of gifts to make every celebration memorable. Our customer support team is available via WhatsApp and email to assist you with your orders."
+            )}
           </p>
         </div>
 
@@ -29,7 +33,9 @@ export function WhyTrustUsSection() {
                   {item.icon}
                 </span>
                 <h3 className="font-bold text-primary text-sm mb-1.5">{copy(item.title)}</h3>
-                <p className="text-sm text-slate-600 leading-relaxed">{copy(item.detail)}</p>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  {"href" in item && item.href ? copy(item.detail) : linked(item.detail)}
+                </p>
               </>
             );
             return "href" in item && item.href ? (

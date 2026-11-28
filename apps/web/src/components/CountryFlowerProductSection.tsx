@@ -5,6 +5,7 @@ import { pickCountryProducts } from "@/lib/country-flower-selection";
 import { getFlowerGuideProducts } from "@/lib/flower-guide-cards";
 import { toListingCardProducts } from "@/lib/product-loader";
 import { itemListJsonLd } from "@/lib/seo";
+import { applyInlineLinks } from "@/lib/inline-links";
 import { site } from "@/lib/site";
 
 export { pickCountryProducts };
@@ -24,9 +25,12 @@ export async function CountryFlowerProductSection({
         {productsFirst ? `Flower gifts for ${page.countryName}` : `Featured gifts for ${page.countryName}`}
       </h2>
       <p className="mb-4 leading-relaxed text-slate-700">
-        {productsFirst
-          ? `Shop flowers available for ${page.countryName} delivery. Open any product for current price, inventory, and delivery timing.`
-          : `A rotating selection from the live ${site.name} catalog — flowers first, then cakes and hampers. Open any product for current price, inventory, and delivery timing.`}
+        {applyInlineLinks(
+          productsFirst
+            ? `Shop flowers available for ${page.countryName} delivery. Open any product for current price, inventory, and delivery timing.`
+            : `A rotating selection from the live ${site.name} catalog — flowers first, then cakes and hampers. Open any product for current price, inventory, and delivery timing.`,
+          []
+        )}
       </p>
     </>
   );

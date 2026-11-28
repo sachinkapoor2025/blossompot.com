@@ -26,8 +26,10 @@ export default function ShippingPage() {
       <h1 className="text-3xl font-bold text-primary mb-6">Shipping & Delivery</h1>
       <div className="space-y-6 text-slate-700 leading-relaxed">
         <p>
-          {site.name} delivers premium flowers, cakes, and gifts <strong>worldwide</strong>. Choose the
-          recipient country at checkout to see delivery windows for that destination.
+          {site.name} delivers premium{" "}
+          {applyInlineLinks("flowers, cakes, and gifts", [], { currentPath: "/shipping" })}{" "}
+          <strong>worldwide</strong>. Choose the recipient country at checkout to see delivery windows for that
+          destination.
         </p>
         <h2 className="text-xl font-bold text-primary">Delivery times</h2>
         <ul className="list-disc list-inside space-y-2">

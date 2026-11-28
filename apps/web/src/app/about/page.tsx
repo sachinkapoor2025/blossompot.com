@@ -41,14 +41,18 @@ export default function AboutPage() {
 
         <h2 className="text-xl font-bold text-primary pt-4">Making Gifting Simple</h2>
         <p>
-          Shopping for the perfect gift should be fun, not a task. Hence, {site.name} combines flowers,
-          cakes, curated gift hampers, personalized gifts and popular gift combinations under one roof in
-          an online store.
+          {applyInlineLinks(
+            `Shopping for the perfect gift should be fun, not a task. Hence, ${site.name} combines flowers, cakes, curated gift hampers, personalized gifts and popular gift combinations under one roof in an online store.`,
+            [],
+            { currentPath: "/about" }
+          )}
         </p>
         <p>
-          Whatever you&apos;re sending – a classic bouquet to someone special, flowers with chocolates or a
-          thoughtful teddy-and-flower combo – we have collections to suit a variety of celebrations,
-          preferences and budgets.
+          {applyInlineLinks(
+            "Whatever you're sending – a classic bouquet to someone special, flowers with chocolates or a thoughtful teddy-and-flower combo – we have collections to suit a variety of celebrations, preferences and budgets.",
+            [],
+            { currentPath: "/about" }
+          )}
         </p>
         <p>
           Our aim is to make the whole gifting experience easy – browsing, ordering, delivery and
@@ -58,15 +62,18 @@ export default function AboutPage() {
         <h2 className="text-xl font-bold text-primary pt-4">What You Can Find at {site.name}</h2>
         <p>In our collection you&apos;ll find a selection of gifts for everyday moments and special occasions, including:</p>
         <ul className="list-disc list-inside space-y-2">
-          <li>Fresh flower arrangements and signature bouquets</li>
-          <li>Celebration cakes and sweet gifts</li>
-          <li>Gift hampers and curated gift sets</li>
-          <li>Personalized gifts for special occasions</li>
-          <li>Flower-and-chocolate combinations</li>
-          <li>Teddy-and-flower gift combinations</li>
+          <li>{applyInlineLinks("Fresh flower arrangements and signature bouquets", [], { currentPath: "/about" })}</li>
+          <li>{applyInlineLinks("Celebration cakes and sweet gifts", [], { currentPath: "/about" })}</li>
+          <li>{applyInlineLinks("Gift hampers and curated gift sets", [], { currentPath: "/about" })}</li>
+          <li>{applyInlineLinks("Personalized gifts for special occasions", [], { currentPath: "/about" })}</li>
+          <li>{applyInlineLinks("Flower-and-chocolate combinations", [], { currentPath: "/about" })}</li>
+          <li>{applyInlineLinks("Teddy-and-flower gift combinations", [], { currentPath: "/about" })}</li>
           <li>
-            Occasion-based collections for birthdays, anniversaries, weddings, Valentine&apos;s Day,
-            Mother&apos;s Day, and more
+            {applyInlineLinks(
+              "Occasion-based collections for birthdays, anniversaries, weddings, Valentine's Day, Mother's Day, and more",
+              [],
+              { currentPath: "/about" }
+            )}
           </li>
         </ul>
         <p>
@@ -76,14 +83,18 @@ export default function AboutPage() {
 
         <h2 className="text-xl font-bold text-primary pt-4">Worldwide Delivery</h2>
         <p>
-          {site.name} delivers flowers, cakes, and gifts worldwide. Choose the recipient country in the
-          header or at checkout. We partner with fulfilment partners and delivery networks to help
-          ensure that orders arrive safely and within the expected delivery window.
+          {applyInlineLinks(
+            `${site.name} delivers flowers, cakes, and gifts worldwide. Choose the recipient country in the header or at checkout. We partner with fulfilment partners and delivery networks to help ensure that orders arrive safely and within the expected delivery window.`,
+            [],
+            { currentPath: "/about" }
+          )}
         </p>
         <p>
-          Availability and delivery times may vary according to product, destination, time of order and
-          local availability. Same day delivery may be available in select cities for orders placed before
-          the applicable local cut-off time.
+          {applyInlineLinks(
+            "Availability and delivery times may vary according to product, destination, time of order and local availability. Same day delivery may be available in select cities for orders placed before the applicable local cut-off time.",
+            [],
+            { currentPath: "/about" }
+          )}
         </p>
         <p>
           Clear delivery expectations are part of a good online shopping experience, and we want to
@@ -131,8 +142,11 @@ export default function AboutPage() {
           support and a straightforward shopping experience.
         </p>
         <p>
-          {site.name} helps you turn that thought into something they can receive and remember, whether
-          it&apos;s sending flowers across town or choosing a gift for someone in another country.
+          {applyInlineLinks(
+            `${site.name} helps you turn that thought into something they can receive and remember, whether it's sending flowers across town or choosing a gift for someone in another country.`,
+            [],
+            { currentPath: "/about" }
+          )}
         </p>
         <p className="font-semibold text-primary">{site.name} — Thoughtful gifts for meaningful moments.</p>
 

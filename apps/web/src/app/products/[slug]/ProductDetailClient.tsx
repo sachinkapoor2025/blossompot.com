@@ -37,6 +37,7 @@ import { ScheduleDeliveryPicker } from "@/components/ScheduleDeliveryPicker";
 import type { Product } from "@blossompot/shared";
 import { FastSellingBanner } from "@/components/FastSellingBadge";
 import { looksLikeHtml, plainDescriptionBlocks, sanitizeProductHtml, shortPlainDescription } from "@/lib/html-text";
+import { applyInlineLinks, linkPageNamesInHtml } from "@/lib/inline-links";
 import { getProductIncludes } from "@/lib/product-includes";
 import { fulfillmentVendorSlug, isGboVendor, parseGboSlug, VENDOR_GBO } from "@blossompot/shared";
 import { useDeliveryLocation } from "@/lib/delivery-location-context";
@@ -492,13 +493,13 @@ export function ProductDetailClient({
             {descriptionIsHtml ? (
               <article
                 className="product-html-description text-slate-700 max-w-4xl"
-                dangerouslySetInnerHTML={{ __html: sanitizeProductHtml(product.description) }}
+                dangerouslySetInnerHTML={{ __html: linkPageNamesInHtml(sanitizeProductHtml(product.description), `/products/${product.slug}`) }}
               />
             ) : (
               <article className="product-html-description text-slate-700 max-w-4xl">
                 {plainDescriptionBlocks(product.description).map((block, i) => (
                   <p key={i} className="whitespace-pre-line">
-                    {block}
+                    {applyInlineLinks(block, [], { currentPath: `/products/${product.slug}` })}
                   </p>
                 ))}
               </article>
@@ -585,7 +586,7 @@ export function ProductDetailClient({
             {pageFaqs.map((f) => (
               <div key={f.q}>
                 <dt className="font-semibold text-slate-900">{f.q}</dt>
-                <dd className="text-slate-600 mt-2 leading-relaxed">{f.a}</dd>
+                <dd className="text-slate-600 mt-2 leading-relaxed">{applyInlineLinks(f.a, [], { currentPath: `/products/${product.slug}` })}</dd>
               </div>
             ))}
           </dl>
@@ -609,7 +610,7 @@ export function ProductDetailClient({
           {pageFaqs.map((f) => (
             <div key={f.q}>
               <dt className="font-semibold text-slate-800 text-sm">{f.q}</dt>
-              <dd className="text-sm text-slate-600 mt-1 leading-relaxed">{f.a}</dd>
+              <dd className="text-sm text-slate-600 mt-1 leading-relaxed">{applyInlineLinks(f.a, [], { currentPath: `/products/${product.slug}` })}</dd>
             </div>
           ))}
         </dl>

@@ -26,6 +26,13 @@ test("local development stays on localhost", () => {
   assert.equal(getApiUrl(), "http://localhost:3001");
 });
 
+test("local development refuses a remote API", () => {
+  setEnv({ NODE_ENV: "development", NEXT_PUBLIC_API_URL: PROD_API_URL });
+  assert.throws(() => getApiUrl(), /refuses a remote API/);
+  setEnv({ NODE_ENV: "development", NEXT_PUBLIC_API_URL: "http://localhost:3001/" });
+  assert.equal(getApiUrl(), "http://localhost:3001");
+});
+
 test("production builds without an explicit URL keep the production API", () => {
   setEnv({ NODE_ENV: "production" });
   assert.equal(getApiUrl(), PROD_API_URL);

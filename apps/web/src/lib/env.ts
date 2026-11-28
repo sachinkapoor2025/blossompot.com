@@ -33,6 +33,15 @@ function readEnv(name: string, fallback: string): string {
   return value ? value : fallback;
 }
 
+function isLoopbackApiUrl(url: string): boolean {
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    return host === "localhost" || host === "127.0.0.1" || host === "[::1]" || host === "::1";
+  } catch {
+    return false;
+  }
+}
+
 export function getApiUrl(): string {
   const fromEnv = process.env.NEXT_PUBLIC_API_URL?.trim();
   if (isDevDeployment()) {
@@ -40,6 +49,15 @@ export function getApiUrl(): string {
     if (!DEV_API_URL.test(trimmed) || trimmed.includes("6y37e2a4j1.execute-api.")) {
       throw new Error(
         "Dev deployment requires NEXT_PUBLIC_API_URL to be the dev API stage (/dev). Refusing to use the production API."
+      );
+    }
+    return trimmed;
+  }
+  if (process.env.NODE_ENV === "development") {
+    const trimmed = (fromEnv || "http://localhost:3001").replace(/\/$/, "");
+    if (!isLoopbackApiUrl(trimmed)) {
+      throw new Error(
+        "Local development refuses a remote API. Set NEXT_PUBLIC_API_URL=http://localhost:3001 so Admin cannot write templates into production."
       );
     }
     return trimmed;

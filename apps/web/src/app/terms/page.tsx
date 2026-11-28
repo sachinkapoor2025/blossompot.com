@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { site, whatsappChatUrl, whatsappLinkLabel } from "@/lib/site";
 import { pageMetadata } from "@/lib/seo";
+import { applyInlineLinks } from "@/lib/inline-links";
 
 export const metadata: Metadata = pageMetadata({
   title: "Terms & Conditions",
@@ -34,10 +35,18 @@ export default function TermsPage() {
 
         <h2 className="text-xl font-bold text-primary">2. Products &amp; Descriptions</h2>
         <p>
-          We offer flowers, bouquets, cakes, gift hampers, plants, and other related gifts for delivery worldwide.
+          {applyInlineLinks(
+            "We offer flowers, bouquets, cakes, gift hampers, plants, and other related gifts for delivery worldwide.",
+            [],
+            { currentPath: "/terms" }
+          )}
         </p>
         <p>
-          Flowers, cakes, and other perishable products are naturally unique and may vary in appearance. Colors,
+          {applyInlineLinks(
+            "Flowers, cakes, and other perishable products are naturally unique and may vary in appearance. Colors,",
+            [],
+            { currentPath: "/terms" }
+          )}
           varieties, garnishes, and arrangement styles may vary depending on the season and local availability while
           remaining reasonably comparable in quality, value, and overall appearance. Product images are representative,
           and we do not guarantee an identical match to every product image displayed on the website.
@@ -176,10 +185,11 @@ export default function TermsPage() {
           the extent permitted by law.
         </p>
         <p>
-          Fresh flowers, cakes, plants, and other perishable products are naturally subject to variations in
-          appearance, availability, and condition. We address product-quality concerns through our applicable returns,
-          replacement, and customer-support processes rather than guaranteeing an identical appearance to product
-          images.
+          {applyInlineLinks(
+            "Fresh flowers, cakes, plants, and other perishable products are naturally subject to variations in appearance, availability, and condition. We address product-quality concerns through our applicable returns, replacement, and customer-support processes rather than guaranteeing an identical appearance to product images.",
+            [],
+            { currentPath: "/terms" }
+          )}
         </p>
         <p>
           To the fullest extent permitted by applicable law, {site.name} and {site.legalName} will not be liable for

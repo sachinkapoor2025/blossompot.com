@@ -52,7 +52,7 @@ export default function ReturnsPage() {
         <ul className="list-disc pl-5 space-y-2">
           <li>48-hour reporting window for damaged, defective, wilted, or incorrect items</li>
           <li>Free replacement or full refund for qualifying issues</li>
-          <li>Freshness commitment on flowers and cakes</li>
+          <li>{applyInlineLinks("Freshness commitment on flowers and cakes", [], { currentPath: "/returns" })}</li>
           <li>Real-time tracking support if your delivery is delayed</li>
           <li>Easy cancellations before your order ships</li>
           <li>Support available over WhatsApp and email, every day of the week</li>
@@ -60,16 +60,21 @@ export default function ReturnsPage() {
 
         <h2 className="text-xl font-bold text-primary">Damaged, Defective, or Incorrect Items</h2>
         <p>
-          We work with trusted local florists, bakers, and packers to get every order out in top condition —
-          but transit and weather can occasionally affect delicate items. If your flowers, cake, or hamper
-          arrives damaged, wilted, defective, or different from what you ordered, we&apos;ll fix it quickly.
+          {applyInlineLinks(
+            "We work with trusted local florists, bakers, and packers to get every order out in top condition — but transit and weather can occasionally affect delicate items. If your flowers, cake, or hamper arrives damaged, wilted, defective, or different from what you ordered, we'll fix it quickly.",
+            [],
+            { currentPath: "/returns" }
+          )}
         </p>
         <p className="font-semibold text-slate-800">What to do:</p>
         <ol className="list-decimal pl-5 space-y-2">
           <li>Contact us within 48 hours of delivery.</li>
           <li>
-            Share your order number and clear photos of the item (bouquet, cake, or hamper as received,
-            including any visible damage).
+            {applyInlineLinks(
+              "Share your order number and clear photos of the item (bouquet, cake, or hamper as received, including any visible damage).",
+              [],
+              { currentPath: "/returns" }
+            )}
           </li>
           <li>We&apos;ll review and confirm a resolution within 1–2 business days.</li>
         </ol>
@@ -78,23 +83,32 @@ export default function ReturnsPage() {
           a full refund to your original payment method.
         </p>
         <p>
-          This covers items that arrive wilted or crushed, cakes that are melted, damaged, or the wrong
-          flavor/design, missing items from a hamper, or anything that doesn&apos;t match your order
-          confirmation.
+          {applyInlineLinks(
+            "This covers items that arrive wilted or crushed, cakes that are melted, damaged, or the wrong flavor/design, missing items from a hamper, or anything that doesn't match your order confirmation.",
+            [],
+            { currentPath: "/returns" }
+          )}
         </p>
 
         <h2 className="text-xl font-bold text-primary">Our Freshness Promise</h2>
         <p>
-          Flowers and cakes are perishable, so freshness matters most in the first 24–48 hours after delivery.
+          {applyInlineLinks(
+            "Flowers and cakes are perishable, so freshness matters most in the first 24–48 hours after delivery.",
+            [],
+            { currentPath: "/returns" }
+          )}
         </p>
         <ul className="list-disc pl-5 space-y-2">
           <li>
-            <strong>Flowers:</strong> should look vibrant and hydrated on arrival. Minor bud closure or petal
-            settling during transit is normal and not a defect — but visibly wilted, broken stems, or dead
-            flowers on arrival are covered.
+            <strong>{applyInlineLinks("Flowers", [], { currentPath: "/returns" })}:</strong>{" "}
+            {applyInlineLinks(
+              "should look vibrant and hydrated on arrival. Minor bud closure or petal settling during transit is normal and not a defect — but visibly wilted, broken stems, or dead flowers on arrival are covered.",
+              [],
+              { currentPath: "/returns" }
+            )}
           </li>
           <li>
-            <strong>Cakes:</strong> should arrive intact and true to the flavor/design ordered. We recommend
+            <strong>{applyInlineLinks("Cakes", [], { currentPath: "/returns" })}:</strong> should arrive intact and true to the flavor/design ordered. We recommend
             refrigerating promptly and consuming within the timeframe noted on the product page.
           </li>
         </ul>
@@ -151,7 +165,7 @@ export default function ReturnsPage() {
           <li>
             If the shipment is lost or significantly delayed, we&apos;ll offer a replacement, expedited
             reshipment, or refund depending on the situation — especially important for time-sensitive
-            occasions like birthdays and anniversaries.
+            occasions like {applyInlineLinks("birthdays and anniversaries", [], { currentPath: "/returns" })}.
           </li>
         </ul>
         <p>
@@ -166,7 +180,10 @@ export default function ReturnsPage() {
           florist or baker begins preparation.
         </p>
         <p>
-          <strong>After dispatch:</strong> Once an order has shipped or a cake/bouquet has been prepared,
+          <strong>After dispatch:</strong>{" "}
+          {applyInlineLinks("Once an order has shipped or a cake/bouquet has been prepared,", [], {
+            currentPath: "/returns",
+          })}
           cancellation usually isn&apos;t possible. Contact us right away and we&apos;ll do everything we can,
           but we can&apos;t guarantee a stop once preparation has started.
         </p>
@@ -192,7 +209,7 @@ export default function ReturnsPage() {
               <h3 className="font-semibold text-slate-800">
                 {i + 1}. {f.q}
               </h3>
-              <p className="mt-1">{f.a}</p>
+              <p className="mt-1">{applyInlineLinks(f.a, [], { currentPath: "/returns" })}</p>
             </div>
           ))}
         </div>

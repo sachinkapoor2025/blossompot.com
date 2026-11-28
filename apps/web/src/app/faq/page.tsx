@@ -8,6 +8,7 @@ import { BackToHome } from "@/components/BackToHome";
 import { faqsForCountry } from "@/lib/faqs-for-country";
 import { getStorefrontDeliveryCountry } from "@/lib/storefront-country";
 import { countryDisplayName } from "@/lib/location-seo-urls";
+import { applyInlineLinks } from "@/lib/inline-links";
 
 export const metadata: Metadata = pageMetadata({
   title: "FAQ — Flowers, Cakes & Gifts Worldwide",
@@ -33,8 +34,9 @@ export default async function FaqPage({
       <JsonLd data={faqJsonLd(items)} />
       <h1 className="text-3xl font-bold text-primary mb-2">Frequently Asked Questions</h1>
       <p className="text-slate-600 mb-8">
-        Answers for sending flowers, cakes, and gifts to {destination} with {site.name}. Change the
-        country in the header to see destination-specific delivery notes.
+        Answers for sending {applyInlineLinks("flowers, cakes, and gifts", [], { currentPath: "/faq" })} to{" "}
+        {destination} with {site.name}. Change the country in the header to see destination-specific delivery
+        notes.
       </p>
       <FaqAccordion items={items} />
       <p className="mt-10 text-sm text-slate-500">

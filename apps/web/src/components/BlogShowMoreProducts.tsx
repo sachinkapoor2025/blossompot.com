@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { applyInlineLinks } from "@/lib/inline-links";
 import {
   loadBlogShowMoreProducts,
   type BlogShowMoreProduct,
@@ -19,7 +20,9 @@ function ShowMoreGrid({ products }: { products: BlogShowMoreProduct[] }) {
           Show More
         </h2>
         <p className="mt-1 text-sm text-slate-600">
-          Explore flowers, cakes, and curated gift hampers.
+          {applyInlineLinks("Explore flowers, cakes, and curated gift hampers.", [], {
+            currentPath: "/blog",
+          })}
         </p>
       </div>
 

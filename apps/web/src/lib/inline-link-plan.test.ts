@@ -17,6 +17,7 @@ import { publishedGeoLocations } from "@/lib/content/geo/locations";
 import { internationalPath, publishedInternationalLocations } from "@/lib/content/geo/international";
 import {
   blogPageInlineLinks,
+  storefrontPageNameLinks,
   categoryPageInlineLinks,
   cityPageInlineLinks,
   countryPageInlineLinks,
@@ -120,6 +121,27 @@ describe("planInlineLinks", () => {
     assert.equal(matches.length, 5);
   });
 
+  it("links every page-name occurrence to its shop page", () => {
+    const text = "Order a cake for an anniversary or New Year, then another cake. Skip cheesecake.";
+    const matches = planInlineLinks(text, storefrontPageNameLinks, { allOccurrences: true });
+    assert.deepEqual(
+      matches.map((match) => [match.phrase, match.href]),
+      [
+        ["cake", "/cakes"],
+        ["anniversary", "/anniversary-gifts"],
+        ["New Year", "/new-year-gifts"],
+        ["cake", "/cakes"],
+      ]
+    );
+    assert.equal(matches.some((match) => text.slice(match.start, match.end) === "cheesecake"), false);
+    const onCakes = planInlineLinks(text, storefrontPageNameLinks, {
+      allOccurrences: true,
+      currentPath: "/cakes",
+    });
+    assert.equal(onCakes.some((match) => match.href === "/cakes"), false);
+    assert.equal(onCakes.some((match) => match.href === "/anniversary-gifts"), true);
+  });
+
   it("does not repeat an anchor or destination across paragraphs", () => {
     const links: PhraseLink[] = [
       { phrase: "flowers", href: "/flowers" },
@@ -190,6 +212,16 @@ describe("configured contextual links", () => {
         ...article.sections.flatMap((section) => [...section.paragraphs, ...(section.paragraphsAfter ?? [])]),
         ...article.closing.paragraphs,
       ];
+      if (page === "home") {
+        const names = planInlineLinks(paragraphs.join(" "), storefrontPageNameLinks, { allOccurrences: true });
+        assert.ok(names.some((match) => match.href === "/cakes"), "homepage copy links cakes");
+        assert.ok(names.some((match) => match.href === "/anniversary-gifts"), "homepage copy links anniversary");
+        assert.ok(
+          names.some((match) => match.href === "/valentines-day-gifts"),
+          "homepage copy links Valentine’s Day"
+        );
+        continue;
+      }
       const blocked = new Set(countrySeoHrefs(article).map(normalizeInternalPath));
       const matches = planInlineLinksAcross(paragraphs, seoArticleInlineLinks[page] ?? [], { blockedHrefs: blocked });
       assertBudget(`seo:${page}`, matches, MIN_INLINE_LINKS);

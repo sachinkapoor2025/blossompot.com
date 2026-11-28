@@ -2,9 +2,9 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { FaqAccordion } from "@/components/FaqAccordion";
 import { ReadMore } from "@/components/ReadMore";
-import { countrySeoHrefs, type CountrySeoContent, type SeoSection } from "@/lib/content/country-seo-registry";
+import { type CountrySeoContent, type SeoSection } from "@/lib/content/country-seo-registry";
 import { seoArticleInlineLinks } from "@/lib/content/page-inline-links";
-import { applyInlineLinks, normalizeInternalPath } from "@/lib/inline-links";
+import { applyInlineLinks } from "@/lib/inline-links";
 import type { SeoLink } from "@/lib/content/country-seo-registry";
 
 function ArticleRemainder({
@@ -73,8 +73,7 @@ export function CountrySeoArticle({
   const inlineLinks = seoArticleInlineLinks[article.page] ?? [];
   const usedHrefs = new Set<string>();
   const usedPhrases = new Set<string>();
-  const blockedHrefs = new Set(countrySeoHrefs(article).map((href) => normalizeInternalPath(href)));
-  const linkOpts = { usedHrefs, usedPhrases, blockedHrefs, currentPath };
+  const linkOpts = { usedHrefs, usedPhrases, currentPath };
   const linked = (paragraph: string) => applyInlineLinks(paragraph, inlineLinks, linkOpts);
   const stepSeparator = article.stepSeparator ?? " — ";
   const previewParagraphCount = 3;
@@ -126,7 +125,7 @@ export function CountrySeoArticle({
                   item.title
                 )}
               </h3>
-              {item.text ? <p>{item.text}</p> : null}
+              {item.text ? <p>{linked(item.text)}</p> : null}
             </div>
           ))}
         </div>
@@ -218,7 +217,7 @@ export function CountrySeoArticle({
                         {stepSeparator}
                       </>
                     ) : null}
-                    {step.text}
+                    {linked(step.text)}
                   </li>
                 ))}
               </ol>

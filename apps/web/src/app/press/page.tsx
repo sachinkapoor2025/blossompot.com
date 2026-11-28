@@ -29,16 +29,32 @@ export default function PressPage() {
             . Orders fulfill domestically with clear delivery expectations on every product page.
           </p>
           <ul className="list-disc pl-5 space-y-1">
-            <li>Flowers, bouquets, cakes, and gift hampers for worldwide delivery</li>
-            <li>Occasion collections for birthdays, anniversaries, and celebrations</li>
+            <li>
+              {applyInlineLinks("Flowers, bouquets, cakes, and gift hampers for worldwide delivery", [], {
+                currentPath: "/press",
+              })}
+            </li>
+            <li>
+              {applyInlineLinks("Occasion collections for birthdays, anniversaries, and celebrations", [], {
+                currentPath: "/press",
+              })}
+            </li>
             <li>Secure checkout in USD (Stripe) and INR (Razorpay)</li>
           </ul>
         </section>
         <section>
           <h2 className="text-xl font-semibold text-primary">Story angles</h2>
           <ul className="list-disc pl-5 space-y-1">
-            <li>How long-distance families send celebration gifts across the USA</li>
-            <li>Modern flower and cake gifting with transparent shipping windows</li>
+            <li>
+              {applyInlineLinks("How long-distance families send celebration gifts across the USA", [], {
+                currentPath: "/press",
+              })}
+            </li>
+            <li>
+              {applyInlineLinks("Modern flower and cake gifting with transparent shipping windows", [], {
+                currentPath: "/press",
+              })}
+            </li>
             <li>California-based fulfillment for domestic US delivery</li>
           </ul>
         </section>

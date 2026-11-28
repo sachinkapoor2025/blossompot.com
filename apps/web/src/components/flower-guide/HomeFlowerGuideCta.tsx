@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { HUB_HERO } from "@/lib/content/flower-guide/images";
+import { applyInlineLinks } from "@/lib/inline-links";
 
 export function HomeFlowerGuideCta() {
   return (
@@ -22,8 +23,11 @@ export function HomeFlowerGuideCta() {
             <p className="text-xs uppercase tracking-[0.2em] text-nav font-semibold">Discover the world of flowers</p>
             <h2 className="font-display text-3xl text-primary mt-2">Flower Knowledge Centre</h2>
             <p className="mt-3 text-slate-600 leading-relaxed">
-              Not sure which flowers to choose? Explore our flower guides to discover meanings, colours,
-              seasons, care tips and the best flowers for every occasion.
+              {applyInlineLinks(
+                "Not sure which flowers to choose? Explore our flower guides to discover meanings, colours, seasons, care tips and the best flowers for every occasion.",
+                [],
+                { currentPath: "/" }
+              )}
             </p>
             <Link href="/flower-guide" className="btn-nav mt-6 inline-flex">
               Explore Flower Guide

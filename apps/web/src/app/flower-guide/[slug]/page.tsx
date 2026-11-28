@@ -12,6 +12,7 @@ import { HomeProductCard } from "@/components/HomeProductCard";
 import { SafeStoreImage } from "@/components/SafeStoreImage";
 import { articleJsonLd, breadcrumbJsonLd, faqJsonLd, pageMetadata } from "@/lib/seo";
 import { isFlowerGuideIndexable } from "@blossompot/shared";
+import { applyInlineLinks } from "@/lib/inline-links";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -67,6 +68,8 @@ export default async function FlowerGuidePage({ params }: Props) {
     products = [];
   }
   const relatedProducts = productsForFlower(products, guide, 4);
+  const pagePath = `/flower-guide/${guide.slug}`;
+  const linked = (text: string) => applyInlineLinks(text, [], { currentPath: pagePath });
   const locations = featuredFlowerLocations(6);
   const hero = guide.images[0];
   const path = `/flower-guide/${guide.slug}`;
@@ -118,7 +121,7 @@ export default async function FlowerGuidePage({ params }: Props) {
           <div className="relative site-container py-16 text-white">
             <p className="text-xs uppercase tracking-[0.2em] text-white/75">Flower encyclopedia</p>
             <h1 className="font-display text-4xl sm:text-5xl mt-2 max-w-3xl">{guide.h1}</h1>
-            <p className="mt-4 max-w-2xl text-white/90 text-lg">{guide.whatIs}</p>
+            <p className="mt-4 max-w-2xl text-white/90 text-lg">{linked(guide.whatIs)}</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href={`/products?search=${encodeURIComponent(guide.shopQuery)}`} className="rounded-full bg-white text-primary font-semibold px-5 py-2.5 text-sm">
                 Shop {guide.name.toLowerCase()}s
@@ -144,7 +147,7 @@ export default async function FlowerGuidePage({ params }: Props) {
 
           <section className="rounded-2xl border border-[#eadfd8] bg-white p-6 shadow-sm">
             <h2 className="font-display text-2xl text-primary">{guide.name} at a glance</h2>
-            <p className="mt-3 text-slate-800 leading-relaxed">{guide.glance}</p>
+            <p className="mt-3 text-slate-800 leading-relaxed">{linked(guide.glance)}</p>
             <dl className="mt-6 grid sm:grid-cols-2 gap-4 text-sm">
               <div><dt className="text-slate-500">Flower</dt><dd className="font-medium text-slate-800">{guide.name}</dd></div>
               <div><dt className="text-slate-500">Botanical name</dt><dd className="font-medium text-slate-800">{guide.botanicalName}</dd></div>
@@ -161,7 +164,7 @@ export default async function FlowerGuidePage({ params }: Props) {
             <h2 className="font-display text-3xl text-primary">What is a {guide.name.toLowerCase()}?</h2>
             <div className="mt-4 space-y-4 text-slate-700 leading-relaxed">
               {guide.about.map((p) => (
-                <p key={p.slice(0, 40)}>{p}</p>
+                <p key={p.slice(0, 40)}>{linked(p)}</p>
               ))}
             </div>
             <p className="mt-4 text-sm text-slate-500">Origin: {guide.origin} · Habitat: {guide.habitat}</p>
@@ -171,7 +174,7 @@ export default async function FlowerGuidePage({ params }: Props) {
             <h2 className="font-display text-3xl text-primary">What does a {guide.name.toLowerCase()} mean?</h2>
             <div className="mt-4 space-y-4 text-slate-700 leading-relaxed">
               {guide.meaning.map((p) => (
-                <p key={p.slice(0, 40)}>{p}</p>
+                <p key={p.slice(0, 40)}>{linked(p)}</p>
               ))}
             </div>
           </section>
@@ -200,7 +203,7 @@ export default async function FlowerGuidePage({ params }: Props) {
                 {guide.varieties.map((v) => (
                   <div key={v.name} className="rounded-2xl border border-[#eadfd8] bg-white p-4">
                     <h3 className="font-display font-semibold text-primary">{v.name}</h3>
-                    <p className="text-sm text-slate-600 mt-1">{v.summary}</p>
+                    <p className="text-sm text-slate-600 mt-1">{linked(v.summary)}</p>
                   </div>
                 ))}
               </div>
@@ -211,14 +214,14 @@ export default async function FlowerGuidePage({ params }: Props) {
             <h2 className="font-display text-3xl text-primary">When is {guide.name.toLowerCase()} in season?</h2>
             <div className="mt-4 space-y-4 text-slate-700 leading-relaxed">
               {guide.seasonDetail.map((p) => (
-                <p key={p.slice(0, 40)}>{p}</p>
+                <p key={p.slice(0, 40)}>{linked(p)}</p>
               ))}
             </div>
             <ul className="mt-5 grid sm:grid-cols-2 gap-3">
               {guide.marketNotes.map((n) => (
                 <li key={n.market} className="rounded-xl bg-white border border-[#eadfd8] p-4 text-sm">
                   <p className="font-semibold capitalize text-primary">{n.market === "uk" ? "UK" : n.market === "uae" ? "UAE" : n.market === "us" ? "USA" : n.market}</p>
-                  <p className="text-slate-600 mt-1">{n.summary}</p>
+                  <p className="text-slate-600 mt-1">{linked(n.summary)}</p>
                 </li>
               ))}
             </ul>
@@ -233,7 +236,7 @@ export default async function FlowerGuidePage({ params }: Props) {
             <h2 className="font-display text-3xl text-primary">How to care for {guide.name.toLowerCase()}s</h2>
             <ul className="mt-4 list-disc pl-5 space-y-2 text-slate-700">
               {guide.care.map((c) => (
-                <li key={c}>{c}</li>
+                <li key={c}>{linked(c)}</li>
               ))}
             </ul>
             <p className="mt-3 text-sm text-slate-600"><span className="font-medium">Pet safety:</span> {guide.petSafety}</p>
@@ -244,7 +247,7 @@ export default async function FlowerGuidePage({ params }: Props) {
             <h2 className="font-display text-3xl text-primary">{guide.name}s for different occasions</h2>
             <ul className="mt-4 space-y-2 text-slate-700">
               {guide.occasionNotes.map((n) => (
-                <li key={n}>{n}</li>
+                <li key={n}>{linked(n)}</li>
               ))}
             </ul>
             <div className="mt-4 flex flex-wrap gap-2">
@@ -269,7 +272,7 @@ export default async function FlowerGuidePage({ params }: Props) {
           ) : (
             <section className="mt-12 rounded-2xl bg-petal p-6">
               <h2 className="font-display text-2xl text-primary">Shop {guide.name.toLowerCase()} arrangements</h2>
-              <p className="mt-2 text-slate-700">Browse the live catalog for bouquets and gifts that include {guide.name.toLowerCase()}s.</p>
+              <p className="mt-2 text-slate-700">{linked(`Browse the live catalog for bouquets and gifts that include ${guide.name.toLowerCase()}s.`)}</p>
               <Link href={`/products?search=${encodeURIComponent(guide.shopQuery)}`} className="btn-nav mt-4 inline-flex">
                 View {guide.name.toLowerCase()} products
               </Link>
@@ -279,9 +282,9 @@ export default async function FlowerGuidePage({ params }: Props) {
           <section className="mt-12">
             <h2 className="font-display text-3xl text-primary">{guide.name} delivery</h2>
             <p className="mt-3 text-slate-700 leading-relaxed">
-              BlossomPot lists delivery destinations we actually publish. US city pages are gift-delivery
-              destinations. Canada, Australia and Europe city pages explain how to send gifts from those
-              cities to a US address — they are not local florist storefronts we do not operate.
+              {linked(
+                "BlossomPot lists delivery destinations we actually publish. US city pages are gift-delivery destinations. Canada, Australia and Europe city pages explain how to send gifts from those cities to a US address — they are not local florist storefronts we do not operate."
+              )}
             </p>
             <ul className="mt-4 grid sm:grid-cols-2 gap-2 text-sm">
               {locations.map((l) => (
@@ -311,7 +314,7 @@ export default async function FlowerGuidePage({ params }: Props) {
               {guide.faqs.map((f) => (
                 <div key={f.q}>
                   <h3 className="font-semibold text-primary">{f.q}</h3>
-                  <p className="text-slate-700 mt-1 leading-relaxed">{f.a}</p>
+                  <p className="text-slate-700 mt-1 leading-relaxed">{linked(f.a)}</p>
                 </div>
               ))}
             </div>

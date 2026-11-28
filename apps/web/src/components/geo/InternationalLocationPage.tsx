@@ -52,7 +52,9 @@ export function InternationalLocationPage({
         </section>
       ) : null}
 
-      <p className="text-slate-600 mb-6 leading-relaxed">{loc.intro}</p>
+      <p className="text-slate-600 mb-6 leading-relaxed">
+        {applyInlineLinks(loc.intro, [], { currentPath: loc.path })}
+      </p>
 
       <div className="mb-8 rounded-xl border border-primary/15 bg-petal/80 px-4 py-3 text-sm text-slate-800">
         <p className="font-medium">{loc.availability}</p>
@@ -64,7 +66,9 @@ export function InternationalLocationPage({
 
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-3">How ordering works from {loc.label}</h2>
-        <p className="text-slate-700 leading-relaxed">{loc.howItWorks}</p>
+        <p className="text-slate-700 leading-relaxed">
+          {applyInlineLinks(loc.howItWorks, [], { currentPath: loc.path })}
+        </p>
       </section>
 
       <section className="mb-10">
@@ -110,7 +114,9 @@ export function InternationalLocationPage({
 
       <section className="mb-10">
         <h2 className="text-xl font-bold text-primary mb-3">Local notes</h2>
-        <p className="text-slate-700 leading-relaxed">{loc.localNotes}</p>
+        <p className="text-slate-700 leading-relaxed">
+          {applyInlineLinks(loc.localNotes, [], { currentPath: loc.path })}
+        </p>
       </section>
 
       <section className="mb-10">

@@ -48,7 +48,7 @@ export function RememberLanding({ plans }: { plans: SubscriptionPlan[] }) {
             Occasion reminder membership
           </p>
           <h1 className="mt-4 text-3xl sm:text-5xl font-bold leading-tight max-w-3xl mx-auto">
-            Never forget a birthday, anniversary, or special occasion again
+            {applyInlineLinks("Never forget a birthday, anniversary, or special occasion again", inlineLinks, linkOpts)}
           </h1>
           <p className="mt-5 text-white/90 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
             {applyInlineLinks(
@@ -135,8 +135,10 @@ export function RememberLanding({ plans }: { plans: SubscriptionPlan[] }) {
           <div className="mt-10 grid gap-4 sm:grid-cols-2">
             {BENEFITS.map((item) => (
               <article key={item.title} className="rounded-2xl border border-slate-200 bg-[#fbf7f4] p-5">
-                <h3 className="font-bold text-primary">{item.title}</h3>
-                <p className="mt-2 text-sm text-slate-600 leading-relaxed">{item.text}</p>
+                <h3 className="font-bold text-primary">{applyInlineLinks(item.title, inlineLinks, linkOpts)}</h3>
+                <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+                  {applyInlineLinks(item.text, inlineLinks, linkOpts)}
+                </p>
               </article>
             ))}
           </div>

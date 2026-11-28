@@ -18,6 +18,7 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
   const inlineLinks = categoryPageInlineLinks[content.slug] ?? [];
   const usedHrefs = new Set<string>();
   const usedPhrases = new Set<string>();
+  const linkOpts = { usedHrefs, usedPhrases, currentPath: categoryHref(content.slug) };
 
   return (
     <div className="mt-12 pt-10 border-t border-slate-200">
@@ -27,7 +28,7 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
             <h2 className="text-2xl font-bold text-primary mb-4">{content.headline}</h2>
             {content.intro.map((p, i) => (
               <p key={i} className="mb-4">
-                {applyInlineLinks(p, inlineLinks, { usedHrefs, usedPhrases, currentPath: categoryHref(content.slug) })}
+                {applyInlineLinks(p, inlineLinks, linkOpts)}
               </p>
             ))}
           </header>
@@ -36,7 +37,7 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
             <h3 className="font-display text-xl font-semibold text-primary mb-3">{content.delivery.heading}</h3>
             {content.delivery.paragraphs.map((p, i) => (
               <p key={i} className="mb-3">
-                {applyInlineLinks(p, inlineLinks, { usedHrefs, usedPhrases })}
+                {applyInlineLinks(p, inlineLinks, linkOpts)}
               </p>
             ))}
           </section>
@@ -46,7 +47,7 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
             {content.highlights.paragraphs && content.highlights.paragraphs.length > 0 ? (
               <div className="space-y-3 text-slate-700 leading-relaxed">
                 {content.highlights.paragraphs.map((p, i) => (
-                  <p key={i}>{p}</p>
+                  <p key={i}>{applyInlineLinks(p, inlineLinks, linkOpts)}</p>
                 ))}
               </div>
             ) : (
@@ -54,7 +55,7 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
                 {content.highlights.items.map((item) => (
                   <li key={item} className="flex items-start gap-2">
                     <span className="text-nav mt-0.5 shrink-0">✓</span>
-                    {applyInlineLinks(item, inlineLinks, { usedHrefs, usedPhrases })}
+                    {applyInlineLinks(item, inlineLinks, linkOpts)}
                   </li>
                 ))}
               </ul>
@@ -66,7 +67,7 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
               <h3 className="font-display text-xl font-semibold text-primary mb-3">{content.tradition.heading}</h3>
               {content.tradition.paragraphs.map((p, i) => (
                 <p key={i} className="mb-3">
-                  {applyInlineLinks(p, inlineLinks, { usedHrefs, usedPhrases })}
+                  {applyInlineLinks(p, inlineLinks, linkOpts)}
                 </p>
               ))}
             </section>
@@ -79,7 +80,7 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
                 {content.whyUs.bullets.map((b) => (
                   <li key={b} className="flex items-start gap-2">
                     <span className="text-accent font-bold shrink-0">•</span>
-                    {b}
+                    {applyInlineLinks(b, inlineLinks, linkOpts)}
                   </li>
                 ))}
               </ul>
@@ -90,7 +91,7 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
               <ol className="space-y-3 text-sm list-decimal list-inside marker:font-semibold marker:text-nav">
                 {content.howTo.steps.map((step, i) => (
                   <li key={i} className="pl-1">
-                    {step}
+                    {applyInlineLinks(step, inlineLinks, linkOpts)}
                   </li>
                 ))}
               </ol>
@@ -162,7 +163,7 @@ export function CategoryContentSection({ content, categoryName, deliveryCountryI
           {content.faqs.map((faq) => (
             <div key={faq.q} className="bg-white border border-slate-100 rounded-xl p-5">
               <h4 className="font-semibold text-primary text-sm mb-2">{faq.q}</h4>
-              <p className="text-sm text-slate-600 leading-relaxed">{faq.a}</p>
+              <p className="text-sm text-slate-600 leading-relaxed">{applyInlineLinks(faq.a, inlineLinks, linkOpts)}</p>
             </div>
           ))}
         </div>

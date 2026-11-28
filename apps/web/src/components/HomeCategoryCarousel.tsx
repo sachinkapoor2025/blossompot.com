@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { ShopLocationLink } from "@/components/ShopLocationLink";
+import { applyInlineLinks } from "@/lib/inline-links";
 import { SafeStoreImage } from "@/components/SafeStoreImage";
 import type { HomeCategoryTile } from "@/lib/home-category-carousel";
 
@@ -69,7 +70,9 @@ export function HomeCategoryCarousel({ tiles }: { tiles: HomeCategoryTile[] }) {
           <p id={labelId} className="font-display text-2xl sm:text-3xl text-primary">
             Shop BlossomPot gifts
           </p>
-          <p className="mt-1 text-sm text-slate-600">Flowers, cakes, and gifts for every celebration</p>
+          <p className="mt-1 text-sm text-slate-600">
+            {applyInlineLinks("Flowers, cakes, and gifts for every celebration", [], { currentPath: "/" })}
+          </p>
         </div>
 
         {pageCount > 1 ? (

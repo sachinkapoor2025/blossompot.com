@@ -19,10 +19,16 @@ describe("country SEO registry", () => {
   it("uses the approved USA homepage wording", () => {
     const article = countrySeoContent("US", "home");
     assert.equal(article.availability, "approved");
-    assert.equal(article.title, "Send Flowers & Cakes to USA | Online Gift Delivery – BlossomPot");
-    assert.equal(article.heading, "Send Flowers, Cakes & Gifts Across the USA");
-    assert.equal(article.faqs.length, 10);
-    assert.match(article.faqs[4]?.a ?? "", /Same-day delivery may be available/);
+    assert.equal(
+      article.title,
+      "Send Flowers, Cakes & Gifts to USA | Online Gift Delivery to USA – BlossomPot"
+    );
+    assert.equal(
+      article.heading,
+      "Send Flowers, Cakes & Gifts to USA – Online Gift Delivery Across the United States"
+    );
+    assert.equal(article.faqs.length, 8);
+    assert.match(article.faqs[4]?.a ?? "", /check the delivery dates shown at checkout/);
     assert.match(articleText("US"), /support@blossompot\.com/);
     const hrefs = countrySeoHrefs(article);
     assert.equal(hrefs.includes("/gifts-to-los-angeles"), true);
