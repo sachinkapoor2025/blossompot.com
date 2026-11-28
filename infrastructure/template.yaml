@@ -152,6 +152,15 @@ Parameters:
 Conditions:
   IsProd: !Equals [!Ref Environment, prod]
 
+Mappings:
+  EmailTrackingSite:
+    dev:
+      Url: https://dev.dsjdlmcsa1pdc.amplifyapp.com
+    staging:
+      Url: https://dev.dsjdlmcsa1pdc.amplifyapp.com
+    prod:
+      Url: https://www.blossompot.com
+
 Globals:
   Function:
     Runtime: nodejs20.x
@@ -189,6 +198,8 @@ Globals:
         NOTIFY_EMAIL: order@blossompot.com,priya.yadav@mydgv.com,dgv@mydgv.com
         SMTP_PASS: !Ref SmtpPassword
         SITE_URL: https://www.blossompot.com
+        # Open, click, and unsubscribe links. Not the storefront SITE_URL above.
+        EMAIL_TRACKING_SITE_URL: !FindInMap [EmailTrackingSite, !Ref Environment, Url]
         SES_AWS_REGION: us-east-1
         # Legacy SES_* names used only as marketing From fallbacks — keep as verified Sender ID.
         SES_FROM_EMAIL: email@blossompot.com
@@ -947,6 +958,7 @@ Resources:
           CONFIG_TABLE: !Ref ConfigTable
           ENVIRONMENT: !Ref Environment
           SITE_URL: https://www.blossompot.com
+          EMAIL_TRACKING_SITE_URL: !FindInMap [EmailTrackingSite, !Ref Environment, Url]
           SES_AWS_REGION: us-east-1
           SES_FROM_EMAIL: email@blossompot.com
           SES_REPLY_TO: email@blossompot.com

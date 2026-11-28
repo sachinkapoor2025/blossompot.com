@@ -11,6 +11,7 @@ import {
   CELEBRATE_MOMENTS_IMAGE_HREF,
   CELEBRATE_MOMENTS_IMAGE_INTRINSIC,
   CELEBRATE_MOMENTS_IMAGE_PATH,
+  CELEBRATE_MOMENTS_IMAGE_VERSION,
   buildCelebrateMomentsImageEmailHtml,
   celebrateMomentsImageUrl,
   resolveCelebrateMomentsImageOrigin,
@@ -61,7 +62,7 @@ describe("celebrate moments image email", () => {
     ];
     for (const origin of cases) {
       const html = buildCelebrateMomentsImageEmailHtml(origin);
-      const src = `${origin}${CELEBRATE_MOMENTS_IMAGE_PATH}`;
+      const src = `${origin}${CELEBRATE_MOMENTS_IMAGE_PATH}?v=${CELEBRATE_MOMENTS_IMAGE_VERSION}`;
       assert.equal(celebrateMomentsImageUrl(origin), src);
       assert.match(html, new RegExp(`src="${src.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`));
       if (origin !== "https://www.blossompot.com") {
@@ -117,6 +118,7 @@ describe("celebrate moments image email", () => {
       )
     );
     assert.match(html, /width:100%;max-width:600px;height:auto/);
+    assert.match(html, new RegExp(`\\?v=${CELEBRATE_MOMENTS_IMAGE_VERSION}`));
     assert.match(html, /\{\{unsubscribe\}\}/);
     assert.equal(html.includes("data-shop-slot"), false);
     assert.equal(html.includes("base64,"), false);

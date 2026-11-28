@@ -13,6 +13,12 @@ export const CELEBRATE_MOMENTS_IMAGE_EMAIL_SUBJECT = "Celebrate Life's Special M
 /** Public file shipped with the Next.js app. Not a CDN or base64 payload. */
 export const CELEBRATE_MOMENTS_IMAGE_PATH = "/email-templates/celebrate-lifes-special-moments.jpg";
 
+/**
+ * Cache-buster for Gmail's image proxy. The JPEG bytes stay the same.
+ * Increase this when a new file is published at the same path.
+ */
+export const CELEBRATE_MOMENTS_IMAGE_VERSION = "2";
+
 /** Measured from the original JPEG. Do not crop or recompress that file. */
 export const CELEBRATE_MOMENTS_IMAGE_INTRINSIC = { width: 959, height: 1024 } as const;
 
@@ -50,7 +56,11 @@ export function celebrateMomentsImageUrl(assetOrigin: string): string {
   if (!origin) {
     throw new Error("Celebrate Moments image email requires an http(s) asset origin");
   }
-  return `${origin}${CELEBRATE_MOMENTS_IMAGE_PATH}`;
+  const version = CELEBRATE_MOMENTS_IMAGE_VERSION.trim();
+  if (!/^[A-Za-z0-9._-]+$/.test(version)) {
+    throw new Error("Celebrate Moments image version must be a simple token");
+  }
+  return `${origin}${CELEBRATE_MOMENTS_IMAGE_PATH}?v=${version}`;
 }
 
 export function buildCelebrateMomentsImageEmailHtml(assetOrigin: string): string {
